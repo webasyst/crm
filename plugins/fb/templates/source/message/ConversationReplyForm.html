@@ -1,0 +1,55 @@
+{$class = 'c-fb-conversation-sender-form'}
+{$id = uniqid($class)}
+<div class="{$class}" id="{$id}">
+    <form>
+        <div class="field">
+            <div class="line">
+                <div class="c-fb-textarea js-textarea-wrapper">
+                    {* File upload *}
+                    <div class="c-fb-drop-text js-drop-text" data-hover="{_wd('crm_fb', 'Drop file here')}" style="display: none;">{_wd('crm_fb', 'Drop file here')}</div>
+                    <div class="js-default-drop-area">
+                        <div class="c-drop-wrapper js-drop-area">
+                            <span class="c-fb-attachment js-message-attachment" style="background-image: url({$attachment_icon_url});"></span>
+                            <input class="c-drop-field js-drop-field" type="file">
+                        </div>
+                        {* Textarea *}
+                        <textarea class="c-fb-conversation-replyarea js-textarea" name="body" placeholder="[`Write a message`]..."></textarea>
+
+                        {* Send buttom *}
+                        <div class="c-fb-send-actions js-send-actions" style="display: none;">
+                            <div class="c-fb-char-count js-char-count" style="display: none;"></div>
+                            <span class="c-fb-send js-message-send" style="background-image: url({$send_icon_url});" title="[`Send`]"></span>
+                        </div>
+
+                        {* Error block *}
+                        <div class="c-fb-error-wrapper js-fb-error-wrapper" style="display: none; margin-top: 10px;"></div>
+                    </div>
+                </div>
+                <div class="c-upload-list js-upload-list">
+                    {capture assign="_file_template_html"}
+                        <div class="c-upload-item">
+                            <i class="icon16 image"></i>
+                            <span class="c-name js-name"></span>
+                            <a class="inline-link js-file-delete" href="javascript:void(0);" title="{_w('Delete')}"><i class="icon10 delete"></i></a>
+                            <span class="c-status js-status small"></span>
+                        </div>
+                    {/capture}
+                </div>
+                <input type="hidden" name="message_id" value="{$message.id}" />
+                <input type="hidden" name="source_id" value="{$source_id}" />
+                <input type="hidden" name="hash" value="{$hash}" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    (function ($) {
+        new CRMFbPluginConversationSenderForm({
+            $wrapper: $("#{$id}"),
+            file_template_html: {$_file_template_html|json_encode},
+            max_upload_size: {waRequest::getUploadMaxFilesize()},
+            hash: {$hash|json_encode}
+        });
+    })(jQuery);
+</script>

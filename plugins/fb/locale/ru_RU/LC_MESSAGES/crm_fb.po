@@ -1,0 +1,86 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm/plugin/fb\n"
+"POT-Creation-Date: 2016-11-14 16:26+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: crm/plugin/fb\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"Language: ru_RU\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "Name"
+msgstr "Название"
+
+msgid "Fill in the fields below:"
+msgstr "Заполните поля ниже:"
+
+msgid "Page access marker"
+msgstr "Маркер доступа Страницы"
+
+msgid "Callback URL"
+msgstr "URL обратного вызова"
+
+msgid "Verification marker"
+msgstr "Маркер подтверждения"
+
+msgid "You can not start a conversation with the user"
+msgstr "Вы не можете начинать разговор с пользователем"
+
+msgid "Deal source disabled"
+msgstr "Источник сделок отключен"
+
+msgid "Your message"
+msgstr "Ваше сообщение"
+
+msgid "The video tag is not supported by your browser."
+msgstr "Тег video не поддерживается вашим браузером."
+
+msgid "Audio file"
+msgstr "Аудио файл"
+
+msgid "File"
+msgstr "Файл"
+
+msgid "Image"
+msgstr "Изображение"
+
+msgid "Audio"
+msgstr "Аудио"
+
+msgid "Video"
+msgstr "Видео"
+
+msgid "Attachment"
+msgstr "Прикрепленный файл"
+
+msgid "Download"
+msgstr "Загрузить"
+
+msgid "Drop file here"
+msgstr "Перетащите файлы сюда"
+
+msgid "Add settlement for CRM"
+msgstr "Добавьте поселение для CRM"
+
+msgid "<a href=\"%s\" target=\"_blank\">Step-by-step manual on connecting with Facebook</a>"
+msgstr "<a href=\"%s\" target=\"_blank\">Инструкция по подключению к сервису «Фейсбук»</a>"
+
+msgid "Facebook"
+msgstr "Фейсбук"
+
+msgid "Provides integration with Facebook messages"
+msgstr "Обеспечивает интеграцию с сообщениями Фейсбук"
+
+msgid "Use Human Agent tag"
+msgstr "Использовать тег Human Agent"
+
+msgid "Enable only if you have received the permission from Facebook to use the Human Agent tag. This tag allows you to respond to user inquiries outside 24&nbsp;hours window. With this option enabled, your responses can be sent within 7&nbsp;days from last user message or action. To start using this option, log into Facebook, complete and submit the <a href=\"%s\">application form</a>, and wait until Facebook permits you to use the Human Agent Tag."
+msgstr "Включите, только если вы получили разрешение от Facebook использовать тег Human Agent. Этот тег позволяет отвечать на обращения пользователей позднее стандартного ограничения в 24&nbsp;часа. При включении этой настройки можно отправлять ответы в течение 7&nbsp;дней после последнего сообщения или действия пользователя. Чтобы начать использовать эту настройку, войдите в Facebook, заполните и отправьте <a href=\"%s\">форму заявления</a> и дождитесь разрешения от Facebook использовать тег Human Agent."

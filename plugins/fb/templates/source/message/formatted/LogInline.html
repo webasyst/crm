@@ -1,0 +1,19 @@
+<div class="c-fb-log-inline">
+    {if $message.direction == crmMessageModel::DIRECTION_IN}
+        <i class="icon16 message-in" title="[`incoming`]"></i>
+        [`to`]
+        <img src="/{$app_icon}" style="width: 16px; border-radius: 50%" class="c-contact-photo">
+        <span>CRM</span>
+    {else}
+        <i class="icon16 message-out" title="[`outgoing`]"></i>
+        [`to `]
+        {if !empty($contact)}
+            <a href="{$wa_app_url}contact/{$contact.id}/" target="_top" class="c-contact-link" title="{$contact.name|escape}">
+                <img src="{$contact->getPhoto(16)}" alt="{$contact.name|escape}" style="width: 16px; border-radius: 50%" class="c-contact-photo">
+                <span>{$contact.name|escape}</span>
+            </a>
+        {else}
+            <span style="color: #999;">Deleted contact #{$message.contact_id}</span>
+        {/if}
+    {/if}
+</div>

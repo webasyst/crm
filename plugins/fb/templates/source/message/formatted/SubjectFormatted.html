@@ -1,0 +1,17 @@
+{strip}
+    <div class='c-fb-message-subject'>
+        {if strlen($subject) > 0}
+            {$_subject|escape}
+        {elseif $image}
+            <span style="color: #999;"><i class="icon16 image"></i> {_wd('crm_fb', 'Image')}</span>
+        {elseif $audio}
+            <span style="color: #999;"><i class="icon16 play"></i> {_wd('crm_fb', 'Audio')}</span>
+        {elseif $video}
+            <span style="color: #999;"><i class="icon16 video"></i> {_wd('crm_fb', 'Video')}</span>
+        {elseif $attachment}
+            <span style="color: #999;"><i class="icon16 attachment"></i> {_wd('crm_fb', 'Attachment')}</span>
+        {else}
+            {strip_tags($body)|truncate:47:'...'}
+        {/if}
+    </div>
+{/strip}

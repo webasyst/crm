@@ -1,0 +1,98 @@
+{$block_class = 'c-source-settings-fb-block'}
+{$block_id = uniqid($block_class)}
+<div class="{$block_class} c-connection-settings-block" id="{$block_id}">
+    <div class="field">
+        <p class="large-hint">
+            {$_text = '<a href="%s" target="_blank">Step-by-step manual on connecting with Facebook</a>'}
+            {if $locale == 'ru_RU'}
+                {$_link = 'https://support.webasyst.ru/27139/crm-facebook-deal-source/'}
+            {else}
+                {$_link = 'https://support.webasyst.com/27140/crm-facebook-deal-source/'}
+            {/if}
+            {sprintf(_wd('crm_fb', $_text), $_link)}
+        </p>
+    </div>
+    <div class="field" style="margin-top: 20px">
+        <div class="value">
+
+            {* Source name *}
+            <div class="field">
+                <div class="name">
+                    {_wd('crm_fb', 'Name')}
+                </div>
+                <div class="value">
+                    <input class="js-name-input" type="text" name="source[name]" value="{$source.name|default:''|escape}">
+                </div>
+            </div>
+
+            {* Access marker *}
+            <div class="field top-padded" style="margin-bottom: 16px;">
+                <div class="name">
+                    {_wd('crm_fb', 'Page access marker')}
+                </div>
+                <div class="value">
+                    <input class="equal-width js-access-token-input" type="text" name="source[params][access_marker]" value="{$source.params.access_marker|default:''|escape}" autocomplete="off">
+                </div>
+            </div>
+
+            {if $source.id > 0}
+                {* Calback URL *}
+                <div class="field top-padded" style="margin-bottom: 16px;">
+                    <div class="name">
+                        {_wd('crm_fb', 'Callback URL')}
+                    </div>
+                    <div class="value">
+                        {if $callback_url}
+                            <input type="text" class="c-readonly-input js-url-input" readonly="" value="{$callback_url}">
+                        {else}
+                            <a href="{$wa_backend_url}site/#/routing/" target="_blank" style="color: red">{_wd('crm_fb', 'Add settlement for CRM')}</a>
+                        {/if}
+                    </div>
+                </div>
+
+                {* Verification marker *}
+                <div class="field top-padded" style="margin-bottom: 16px;">
+                    <div class="name">
+                        {_wd('crm_fb', 'Verification marker')}
+                    </div>
+                    <div class="value">
+                        <input type="text" class="c-readonly-input js-url-input" readonly="" value="{$source.params.verification_marker|default:''|escape}">
+                    </div>
+                </div>
+
+                <div class="field top-padded" style="margin-bottom: 16px;">
+                    <div class="name">
+                        <label for="c-human-agent-tag-checkbox">
+                            {_wd('crm_fb', 'Use Human Agent tag')}
+                        </label>
+                    </div>
+                    <div class="value">
+                        <input type="hidden" name="source[params][human_agent_tag]" value="0">
+                        <input type="checkbox" name="source[params][human_agent_tag]" value="1" id="c-human-agent-tag-checkbox"
+                            {if !empty($source.params.human_agent_tag)}checked="checked"{/if}>
+                        <div class="hint" style="margin-top: 10px;">
+                            {$_doc_page = 'https://www.facebook.com/help/contact/?id=2616212338594331'}
+                            {$_hint = 'Enable only if you have received the permission from Facebook to use the Human Agent tag. This tag allows you to respond to user inquiries outside 24&nbsp;hours window. With this option enabled, your responses can be sent within 7&nbsp;days from last user message or action. To start using this option, log into Facebook, complete and submit the <a href="%s">application form</a>, and wait until Facebook permits you to use the Human Agent Tag.'}
+                            {sprintf(_wd('crm_fb', $_hint), $_doc_page)}
+                        </div>
+                    </div>
+                </div>
+
+            {else}
+                <input name="source[params][verification_marker]" type="hidden" value="wa-crm-{md5(time())}" />
+            {/if}
+            <div class="field">
+                <div class="value">
+                    <div class="crm-common-errors-block"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function ($) {
+        new CRMFbPluginSourceSettingsBlock({
+            $wrapper: $("#{$block_id}")
+        });
+    })(jQuery);
+</script>

@@ -1,0 +1,205 @@
+/* Source settings page */
+.c-fb-plugin-settings-page {
+  margin: 80px auto;
+  text-align: center;
+  color: #aaa;
+}
+.c-source-settings-fb-block .c-readonly-input {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  padding: 2px;
+}
+/* Reply form in Conversation */
+.c-fb-conversation-sender-form .c-fb-textarea {
+  vertical-align: top;
+  width: 100%;
+  padding: 5px;
+  margin: 0;
+  border-radius: 2px;
+  box-sizing: border-box;
+  line-height: 18px;
+  resize: none;
+  outline: none;
+  overflow: hidden;
+  background-color: #fff;
+  border: 1px solid #f3f3f3;
+}
+.c-fb-conversation-sender-form .c-fb-textarea.is-disabled {
+  background-color: #eee;
+}
+.c-fb-conversation-sender-form .c-fb-textarea.is-disabled .c-fb-conversation-replyarea {
+  background-color: #eee;
+}
+.c-fb-conversation-sender-form .c-fb-textarea .c-fb-attachment,
+.c-fb-conversation-sender-form .c-fb-textarea .c-fb-send {
+  display: inline-block;
+  width: 20px;
+  height: 18px;
+  background-size: 20px 18px;
+  background-repeat: no-repeat;
+  vertical-align: bottom;
+  margin-bottom: 3px;
+  cursor: pointer;
+  transition: opacity 200ms linear;
+  opacity: 0.8;
+}
+.c-fb-conversation-sender-form .c-fb-textarea .c-fb-attachment:hover,
+.c-fb-conversation-sender-form .c-fb-textarea .c-fb-send:hover {
+  opacity: 1;
+}
+.c-fb-conversation-sender-form .c-fb-textarea .c-fb-conversation-replyarea {
+  border: none;
+  box-sizing: border-box;
+  line-height: 18px;
+  height: 18px;
+  resize: none;
+  outline: none;
+  overflow: hidden;
+  background-color: #fff;
+  margin-left: 4px;
+  vertical-align: top;
+}
+.c-fb-conversation-sender-form .c-fb-textarea .c-fb-send-actions {
+  display: inline-block;
+  text-align: center;
+}
+.c-fb-conversation-sender-form .c-fb-textarea .c-fb-send-actions .c-fb-char-count {
+  color: #f00;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.c-fb-conversation-sender-form .c-fb-textarea .c-drop-wrapper {
+  display: inline-block;
+}
+.c-fb-conversation-sender-form .c-fb-textarea .c-drop-wrapper .c-drop-field {
+  display: none;
+}
+.c-fb-conversation-sender-form .c-upload-list .c-upload-item {
+  margin: 8px 0 0 4px;
+}
+.c-fb-conversation-sender-form .c-fb-drop-text {
+  background: #fff;
+  padding: 16px 5px;
+  text-align: center;
+  font-size: 15px;
+  border: 1px dashed #7e97ba;
+  cursor: default;
+  color: #7e97ba;
+}
+/* Message in Conversation */
+.c-log-message-body .c-fb-message-body .c-fb-image,
+.crm-dialog-wrapper .c-fb-message-body .c-fb-image,
+.c-message-wrapper .c-fb-message-body .c-fb-image,
+.c-log-message-body .c-fb-message-body .c-fb-video,
+.crm-dialog-wrapper .c-fb-message-body .c-fb-video,
+.c-message-wrapper .c-fb-message-body .c-fb-video {
+  border-radius: 6px;
+}
+.c-log-message-body .c-fb-message-body .c-fb-audio .c-fb-audio-label,
+.crm-dialog-wrapper .c-fb-message-body .c-fb-audio .c-fb-audio-label,
+.c-message-wrapper .c-fb-message-body .c-fb-audio .c-fb-audio-label,
+.c-log-message-body .c-fb-message-body .c-fb-file .c-fb-audio-label,
+.crm-dialog-wrapper .c-fb-message-body .c-fb-file .c-fb-audio-label,
+.c-message-wrapper .c-fb-message-body .c-fb-file .c-fb-audio-label,
+.c-log-message-body .c-fb-message-body .c-fb-audio .c-fb-file-label,
+.crm-dialog-wrapper .c-fb-message-body .c-fb-audio .c-fb-file-label,
+.c-message-wrapper .c-fb-message-body .c-fb-audio .c-fb-file-label,
+.c-log-message-body .c-fb-message-body .c-fb-file .c-fb-file-label,
+.crm-dialog-wrapper .c-fb-message-body .c-fb-file .c-fb-file-label,
+.c-message-wrapper .c-fb-message-body .c-fb-file .c-fb-file-label {
+  color: #999;
+  margin-bottom: 6px;
+}
+.c-source-im-message-viewer-dialog .c-fb-message-subject,
+.c-source-im-message-sender-dialog .c-fb-message-subject {
+  display: inline-block;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-body {
+  margin-bottom: 16px;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form {
+  padding: 5px;
+  background-color: #f3f3f3;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-error-wrapper {
+  background-color: #ffd0d0;
+  padding: 6px 0;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea {
+  vertical-align: top;
+  width: 100%;
+  padding-left: 5px;
+  margin: 0;
+  border-radius: 2px;
+  box-sizing: border-box;
+  line-height: 18px;
+  resize: none;
+  outline: none;
+  overflow: hidden;
+  background-color: #fff;
+  border: 1px solid #f3f3f3;
+  cursor: text;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea.is-disabled {
+  background-color: #eee;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea.is-disabled .c-fb-conversation-replyarea {
+  background-color: #eee;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea .c-fb-attachment,
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea .c-fb-send {
+  display: inline-block;
+  width: 20px;
+  height: 18px;
+  background-size: 20px 18px;
+  background-repeat: no-repeat;
+  vertical-align: bottom;
+  margin-bottom: 3px;
+  cursor: pointer;
+  transition: opacity 200ms linear;
+  opacity: 0.8;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea .c-fb-attachment:hover,
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea .c-fb-send:hover {
+  opacity: 1;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea .c-fb-conversation-replyarea {
+  border: none;
+  box-sizing: border-box;
+  line-height: 18px;
+  height: 25px;
+  width: 640px;
+  resize: none;
+  outline: none;
+  overflow: hidden;
+  background-color: #fff;
+  margin-left: 4px;
+  padding-top: 8px;
+  display: inline-block;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea .c-fb-char-count {
+  color: #f00;
+  font-size: 12px;
+  float: right;
+  padding: 6px 6px 0 4px;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea .c-drop-wrapper {
+  display: inline-block;
+  margin-bottom: 5px;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-textarea .c-drop-wrapper .c-drop-field {
+  display: none;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-upload-list .c-upload-item {
+  margin: 8px 0 0 4px;
+}
+.c-fb-im-message-sender-dialog .c-fb-message-reply-form .c-fb-drop-text {
+  background: #fff;
+  padding: 16px 5px;
+  margin: 5px 5px 5px 0;
+  text-align: center;
+  font-size: 15px;
+  border: 1px dashed #7e97ba;
+  cursor: default;
+  color: #7e97ba;
+}

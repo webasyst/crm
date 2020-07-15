@@ -1,0 +1,54 @@
+{strip}
+<div class='c-fb-message-body'>
+    {if $body}
+        <p class="c-fb-message-text">
+            {$body|nl2br}
+        </p>
+    {/if}
+
+    {* Images (with gifs) *}
+    {if $images}
+        {foreach $images as $image_url}
+            <div>
+                <img class="c-fb-image" src="{$wa_app_url}?module=file&action=download&id={$image_url}" style="max-width: 400px; border-radius: 6px;">
+            </div>
+        {/foreach}
+    {/if}
+
+    {* Videos *}
+    {if $videos}
+        {foreach $videos as $video_url}
+            <div>
+                <video class="c-fb-video" width="300" controls preload="metadata">
+                    <source src="{$wa_app_url}?module=file&action=download&id={$video_url}" type="video/mp4">
+                    {_wd('crm_fb', 'The video tag is not supported by your browser.')}
+                </video>
+            </div>
+        {/foreach}
+    {/if}
+
+    {* Audios *}
+    {if $audios}
+        {foreach $audios as $audio_url}
+            <div class="c-fb-audio">
+                <div class="c-fb-audio-label" style="color: #999; margin-bottom: 6px;">{_wd('crm_fb', 'Audio file')}</div>
+                <a href="{$wa_app_url}?module=file&action=download&id={$audio_url}" target="_blank" class="inline-link">
+                    <i class="icon16 download"></i> <b><i>{_wd('crm_fb', 'Download')}</i></b>
+                </a>
+            </div>
+        {/foreach}
+    {/if}
+
+    {* Files *}
+    {if !empty($files)}
+        {foreach $files as $file_url}
+            <div class="c-fb-file">
+                <div class="c-fb-file-label" style="color: #999; margin-bottom: 6px;">{_wd('crm_fb', 'File')}</div>
+                <a href="{$wa_app_url}?module=file&action=download&id={$file_url}" target="_blank" class="inline-link">
+                    <i class="icon16 download"></i> <b><i>{_wd('crm_fb', 'Download')}</i></b>
+                </a>
+            </div>
+        {/foreach}
+    {/if}
+</div>
+{/strip}
