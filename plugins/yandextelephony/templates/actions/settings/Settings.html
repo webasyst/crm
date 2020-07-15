@@ -1,0 +1,76 @@
+{$_class = 'crm-yandextelephony-wrapper'}
+{$_id = uniqid($_class)}
+<div class="{$_class}" id="{$_id}">
+    <h1>{_wd('crm_yandextelephony', 'Yandex.Telephony')}</h1>
+    <div class="fields form">
+        <form method="post">
+
+            <div class="field">
+                <div class="name">
+                    <label for=yandextelephony_crm_yandextelephony_api_key">{_wd('crm_yandextelephony', 'API Key')}</label>
+                </div>
+                <div class="value">
+                    <input id="yandextelephony_crm_yandextelephony_api_key" type="text" name="crm_yandextelephony[api_key]" class="input" title="{_wd('crm_yandextelephony', 'API Key')}" value="{$api_key|escape}" autocomplete="off">
+                </div>
+                <div class="value hint">
+                    {sprintf(_wd("crm_yandextelephony", "Create the API Key in the %ssettings%s %s of the Yandex.Telephony integration API."), '<a href="https://yandex.mightycall.ru/MightyCall/Api#/key" target="_blank">', '</a>', '<i class="icon10 new-window"></i>')}
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="name">
+                    <label for="yandextelephony_crm_yandextelephony_user_key">{_wd('crm_yandextelephony', 'User Key')}</label>
+                </div>
+                <div class="value">
+                    <input id="yandextelephony_crm_yandextelephony_user_key" type="text" name="crm_yandextelephony[user_key]" class="input" title="{_wd('crm_yandextelephony', 'User Key')}" value="{$user_key|escape}" autocomplete="off">
+                </div>
+                <div class="value hint">
+                    {sprintf(_wd("crm_yandextelephony", "Use the User Key of one of %syour users%s %s"), '<a href="https://yandex.mightycall.ru/MightyCall/Api#/key" target="_blank">', '</a>', '<i class="icon10 new-window"></i>')}
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="value">
+                    <div class="crm-yandextelephony-api-status js-api-status" data-ok="{_wd('crm_yandextelephony', 'API connection established')}" data-bad="{_wd('crm_yandextelephony', 'API connection not established')}"></div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="name">{_wd('crm_yandextelephony', 'Call notifications link')}</div>
+                <div class="value">
+                    {if !empty($callback_url)}
+                        <input type="text" readonly="" value="{$callback_url|escape}">
+                    {else}
+                        <span style="color: red;">{_wd('crm_yandextelephony', 'Add settlement for CRM')}</span>
+                    {/if}
+                </div>
+                {if !empty($callback_url)}
+                    <div class="value hint">
+                        {sprintf(_wd("crm_yandextelephony", "Specify this address for webhook %sin the settings%s %s of the integration API"), '<a href="https://yandex.mightycall.ru/MightyCall/Api#/webhooks" target="_blank">', '</a>', '<i class="icon10 new-window"></i>')}
+                    </div>
+                {/if}
+            </div>
+
+            <br><br>
+
+            <div class="field">
+                <div class="value submit">
+                    <input type="submit" class="js-save button green" value="[`Save`]">
+                    <span id="plugins-settings-form-status"></span>
+                </div>
+            </div>
+
+            {$wa->csrf()}
+
+        </form>
+    </div>
+
+    <div class="clear-left"></div>
+</div>
+<script>
+    (function ($) {
+        new YandextelephonySettings({
+            $wrapper: $("#{$_id}")
+        });
+    })(jQuery);
+</script>
