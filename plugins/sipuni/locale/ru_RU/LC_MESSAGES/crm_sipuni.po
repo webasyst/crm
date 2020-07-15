@@ -1,0 +1,62 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm/plugin/crm_sipuni\n"
+"POT-Creation-Date: 2016-11-14 16:26+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: crm/plugin/crm_sipuni\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"Language: ru_RU\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "Number in the system"
+msgstr "Номер в системе"
+
+msgid "Your number in %sthe basic settings%s %s of the PBX"
+msgstr "Ваш номер в %sосновных настройках%s %s АТС"
+
+msgid "Integration Key"
+msgstr "Ключ интеграции"
+
+msgid "Set the integration key in your PBX %ssettings%s %s"
+msgstr "Задайте ключ интеграции в %sнастройках%s %s своей АТС"
+
+msgid "URL of the host script"
+msgstr "URL принимающего скрипта"
+
+msgid "Enter the URL in your PBX %ssettings%s %s"
+msgstr "Укажите URL %sв настройках%s %s своей АТС"
+
+msgid "The checkbox «Use Web Socket Server» should be <b>turned off</b>"
+msgstr "Чекбокс «Использовать вебсокет-сервер» должен быть <b>выключен</b>"
+
+msgid "Short numbers of %semployees%s %s"
+msgstr "Короткие номера %sсотрудников%s %s"
+
+msgid "Delete short number"
+msgstr "Удалить короткий номер"
+
+msgid "Add short number"
+msgstr "Добавить короткий номер"
+
+msgid "E.g., 210"
+msgstr "Например, 210"
+
+msgid "200 to 999"
+msgstr "от 200 до 999"
+
+msgid "You can %ssubscribe%s %s to short numbers of employees to receive notifications on new calls."
+msgstr "На короткие номера сотрудников можно %sподписаться%s %s, чтобы получать уведомления о новых звонках."
+
+msgid "Save to add a user"
+msgstr "Сохраните, чтобы добавить пользователя"
+
+msgid "Add settlement for CRM"
+msgstr "Добавьте поселение для CRM"

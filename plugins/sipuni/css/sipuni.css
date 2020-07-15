@@ -1,0 +1,54 @@
+.c-sipuni-plugin-settings-page .js-pairs-table {
+  margin-top: 0;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-column-icon {
+  width: 16px;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-column-icon i {
+  margin: 0;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-column-number {
+  width: 25%;
+  white-space: nowrap;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-column-number .c-not-exist {
+  margin-top: 6px;
+  font-size: smaller;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-pair-wrapper .delete {
+  cursor: pointer;
+  opacity: 0;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-pair-wrapper:hover .delete {
+  opacity: 1;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-pair-wrapper .c-users-list .c-user-wrapper:hover .c-delete-link {
+  opacity: 1;
+  transition: opacity 200ms linear;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-pair-wrapper .c-users-list .c-user-wrapper a {
+  display: inline-block;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-pair-wrapper .c-users-list .c-user-wrapper .c-delete-link {
+  opacity: 0;
+  margin-left: 8px;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-pair-wrapper .c-user-add-wrapper {
+  margin: 16px 0 0;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-pair-wrapper .c-user-add-wrapper.is-shown .c-hidden {
+  display: block;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-pair-wrapper .c-user-add-wrapper.is-shown .c-visible {
+  display: none;
+}
+.c-sipuni-plugin-settings-page .js-pairs-table .c-pair-wrapper .c-user-add-wrapper .c-hidden {
+  display: none;
+}
+.c-sipuni-plugin-settings-page .js-template {
+  display: none;
+}
+.c-sipuni-plugin-settings-page .js-number {
+  width: 40px;
+  display: inline-block;
+}

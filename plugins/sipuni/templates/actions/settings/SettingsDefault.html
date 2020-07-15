@@ -1,0 +1,155 @@
+<div id="js-sipuni-settings" class="c-sipuni-plugin-settings-page">
+    <h1>Sipuni</h1>
+    <div class="fields form">
+        <form>
+            <div class="field">
+                <div class="name">{_wd('crm_sipuni', 'Number in the system')}</div>
+                <div class="value">
+                    <input type="text" name="user" class="input" style="max-width: 50px;" placeholder="{_wd('crm_sipuni', 'Number in the system')}" autocomplete="off"{if $user|default:""} value="{$user|default:""|escape}" {/if}>
+                    <br>
+                    <span class="hint">{sprintf(_wd('crm_sipuni', 'Your number in %sthe basic settings%s %s of the PBX'), '<a href="https://sipuni.com/ru_RU/settings/profile" target="_blank">', '</a>', '<i class="icon10 new-window"></i>')}</span>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">{_wd('crm_sipuni', 'Integration Key')}</div>
+                <div class="value">
+                    <input type="text" name="integration_key" class="input" style="max-width: 50px;" placeholder="{_wd('crm_sipuni', 'Integration Key')}" autocomplete="off"{if $integration_key|default:""} value="{$integration_key|default:""|escape}" {/if}>
+                    <br>
+                    <span class="hint">{sprintf(_wd('crm_sipuni', 'Set the integration key in your PBX %ssettings%s %s'), '<a href="https://sipuni.com/ru_RU/settings/integration" target="_blank">', '</a>', '<i class="icon10 new-window"></i>')}</span>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">{_wd('crm_sipuni', 'URL of the host script')}</div>
+                <div class="value">
+                    {if $callback_url}
+                        <input type="text" class="input" style="max-width: 50px;" readonly value="{$callback_url}" />
+                    {else}
+                        <a href="{$wa_backend_url}site/#/routing/" target="_blank" style="color: red">{_wd('crm_sipuni', 'Add settlement for CRM')}</a>
+                    {/if}
+                    <br>
+                    <span class="hint">
+                        {sprintf(_wd('crm_sipuni', 'Enter the URL in your PBX %ssettings%s %s'), '<a href="https://sipuni.com/ru_RU/settings/integration/crm_http_api" target="_blank">', '</a>', '<i class="icon10 new-window"></i>')}<br>
+                        {_wd('crm_sipuni', 'The checkbox «Use Web Socket Server» should be <b>turned off</b>')}
+                    </span>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">{sprintf(_wd('crm_sipuni', 'Short numbers of %semployees%s %s'), '<a href="https://sipuni.com/ru_RU/tree" target="_blank">', '</a>', '<i class="icon10 new-window"></i>')}</div>
+                <div class="value">
+                    <div class="js-nums">
+                        <table class="js-pairs-table light">
+
+                            {function name="_renderUser"}
+                            <li class="c-user-wrapper" data-id="{$_user.id|default:""}">
+                            <i class="icon16 userpic20" style="background-image: url({$_user.photo_url_16|default:""}); margin-right: 0;"></i>
+                            <span class="js-name">{$_user.name|escape|default:""}</span>
+                            {if !$not_exist}
+                                <a class="small inline-link c-delete-link js-user-delete" href="javascript:void(0);">
+                                    <i class="icon10 close"></i> <b><i>[`delete`]</i></b>
+                                </a>
+                            {/if}
+                            </li>
+                            {/function}
+
+                            {capture assign="_user_template_html"}{_renderUser _user=[] not_exist=false}{/capture}
+
+                            <tbody>
+                            {foreach $pairs as $_pair}
+                                <tr class="c-pair-wrapper" data-plugin-id="{$_pair.plugin_id|escape}" data-number="{$_pair.number|escape}" {if $_pair.not_exist}style="opacity: 0.5"{/if}>
+                                    <td class="c-column-icon">
+                                        <i class="icon16" title="{$_pair.plugin_name|escape}" style="background-image: url('{$_pair.plugin_icon}'); background-size: 16px 16px;"></i>
+                                    </td>
+                                    <td class="c-column-number">
+                                        <input type="hidden" name="employees_num[]" class="js-input" value="{$_pair.number|escape}">
+                                        <span class="js-number">{$_pair.number|escape}</span>
+                                        <i class="icon16 delete js-delete-num" title="{_wd('crm_sipuni', 'Delete short number')}"></i>
+                                        {if $_pair.not_exist}<br><div class="c-not-exist">[`Number does not exist`]</div>{/if}
+                                    </td>
+                                    <td class="c-column-users">
+                                        <ul class="menu-v c-users-list js-users-list">
+                                            {foreach $_pair.users as $_id => $_user}{_renderUser _user=$_user not_exist=$_pair.not_exist}{/foreach}
+                                        </ul>
+
+                                        {if !$_pair.not_exist}
+                                        <div class="c-user-add-wrapper js-user-add-wrapper">
+                                            <div class="c-visible">
+                                                <a href="javascript:void(0);" class="js-show-combobox inline-link"><i class="icon16 add"></i><b><i>[`Add user`]</i></b></a>
+                                            </div>
+                                            <div class="c-hidden">
+                                                <input class="js-autocomplete ui-autocomplete-input" autocomplete="off">
+                                                <span style="margin: 0 4px;">[`or`]</span>
+                                                <a href="javascript:void(0);" class="inline-link js-hide-combobox"><b><i>[`cancel`]</i></b></a>
+                                            </div>
+                                            <ul tabindex="0" class="ui-menu ui-widget ui-widget-content ui-autocomplete ui-front" style="display: none;"></ul>
+                                        </div>
+                                        {/if}
+                                    </td>
+                                </tr>
+                            {/foreach}
+                                <tr class="js-template" data-plugin-id="{$plugin.id|escape}" data-number="">
+                                    <td class="c-column-icon">
+                                        <i class="icon16" title="{$plugin.name|escape}" style="background-image: url('{$plugin.icon|escape}'); background-size: 16px 16px;"></i>
+                                    </td>
+                                    <td class="c-column-number">
+                                        <input type="hidden" name="employees_num[]" class="js-input">
+                                        <span class="js-number"></span>
+                                        <i class="icon16 delete js-delete-num" title="{_wd('crm_sipuni', 'Delete short number')}"></i>
+                                    </td>
+                                    <td class="c-column-users js-column-users">
+                                        <ul class="menu-v c-users-list js-users-list">
+                                        </ul>
+
+                                        <div class="c-user-add-wrapper js-user-add-wrapper">
+                                            <div class="c-visible">
+                                                <a href="javascript:void(0);" class="js-show-combobox inline-link"><i class="icon16 add"></i><b><i>[`Add user`]</i></b></a>
+                                            </div>
+                                            <div class="c-hidden">
+                                                <input class="js-autocomplete ui-autocomplete-input" autocomplete="off">
+                                                <span style="margin: 0 4px;">[`or`]</span>
+                                                <a href="javascript:void(0);" class="inline-link js-hide-combobox"><b><i>[`cancel`]</i></b></a>
+                                            </div>
+                                            <ul tabindex="0" class="ui-menu ui-widget ui-widget-content ui-autocomplete ui-front" style="display: none;"></ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                        <input type="text" name="employees_num[]" class="input js-empty" style="max-width: 50px;" placeholder="{_wd('crm_sipuni', 'E.g., 210')}" autocomplete="off">
+                        <i class="icon16 add js-add" style="cursor: pointer; vertical-align: baseline; margin: 0; position: relative; top: 2px;" title="{_wd('crm_sipuni', 'Add short number')}"></i>
+                    <span class="hint">
+                        <br>{_wd('crm_sipuni', '200 to 999')}
+                        <br><br>
+                        {sprintf(_wd('crm_sipuni', 'You can %ssubscribe%s %s to short numbers of employees to receive notifications on new calls.'), "<a href=\"{$wa_app_url}settings/pbx/\" target=\"_blank\">", '</a>', '<i class="icon10 new-window"></i>')}
+                        <br><br>
+                    </span>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="value submit">
+                    <input type="submit" class="js-save button green" value="[`Save`]">
+                    <span id="plugins-settings-form-status" style="display:none"><!-- message placeholder --></span>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="clear-left"></div>
+    {capture assign="_save_hint"}
+        <div class="hint" style="margin-top: -10px;">{_wd('crm_sipuni', 'Save to add a user')}</div>
+    {/capture}
+</div>
+<script>
+    (function ($) {
+        new SipuniAddEmployeesNum({
+            $wrapper: $("#js-sipuni-settings"),
+            user_template_html: {$_user_template_html|default:''|json_encode},
+            save_hint: {$_save_hint|json_encode},
+            locales: {
+                delete_confirm_title: '[`Remove "%name%" from recipients of %number%?`]',
+                delete_confirm_text: "[`Are you sure?`]",
+                delete_confirm_button: "[`Delete`]"
+            }
+        });
+    })(jQuery);
+</script>
