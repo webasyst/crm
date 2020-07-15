@@ -1,0 +1,83 @@
+{$_class = 'crm-gravitel-wrapper'}
+{$_id = uniqid($_class)}
+<div class="{$_class}" id="{$_id}">
+    <h1>Gravitel</h1>
+    <div class="fields form">
+        <form method="post">
+            <div class="gray">
+                {_wd('crm_gravitel', 'Find connection parameters in “Integration with CRM” section of your Gravitel account settings.')}
+                <br><br>
+            </div>
+
+            {* PBX URL *}
+            <div class="field">
+                <div class="name">
+                    <label for="gravitel_crm_gravitel_pbx_url">{_wd('crm_gravitel', 'Cloud service address')}</label>
+                </div>
+                <div class="value">
+                    <input id="gravitel_crm_gravitel_pbx_url" type="text" name="crm_gravitel[pbx_url]" class="input" title="{_wd('crm_gravitel', 'Cloud service address')}" value="{$pbx_url|escape}" autocomplete="off">
+                </div>
+            </div>
+
+            {* PBX KEY *}
+            <div class="field">
+                <div class="name">
+                    <label for="gravitel_crm_gravitel_pbx_key">{_wd('crm_gravitel', 'Authorization key')}</label>
+                </div>
+                <div class="value">
+                    <input id="gravitel_crm_gravitel_pbx_key" type="text" name="crm_gravitel[pbx_key]" class="input" title="{_wd('crm_gravitel', 'Authorization key')}" value="{$pbx_key|escape}" autocomplete="off">
+                </div>
+            </div>
+
+            {* Callback url *}
+            <div class="field">
+                <div class="name">{_wd('crm_gravitel', 'Call notifications link')}</div>
+                <div class="value">
+                    {if !empty($callback_url)}
+                        <input type="text" readonly="" value="{$callback_url|escape}">
+                    {else}
+                        <span style="color: red;">{_wd('crm_gravitel', 'Add settlement for CRM')}</span>
+                    {/if}
+                </div>
+            </div>
+
+            {* CRM KEY *}
+            <div class="field">
+                <div class="name">
+                    <label for="gravitel_crm_gravitel_crm_key">{_wd('crm_gravitel', 'CRM authorization key')}</label>
+                </div>
+                <div class="value">
+                    <input id="gravitel_crm_gravitel_crm_key" type="text" name="crm_gravitel[crm_key]" class="input" title="{_wd('crm_gravitel', 'CRM authorization key')}" value="{$crm_key|escape}" autocomplete="off">
+                </div>
+                <div class="value hint">
+                    <a href="javascript:void(0);" class="inline-link js-generate"><b><i>{_wd('crm_gravitel', 'generate')}</i></b></a>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="value">
+                    <div class="crm-gravitel-api-status js-api-status" data-ok="{_wd('crm_gravitel', 'API connection established')}" data-bad="{_wd('crm_gravitel', 'API connection not established')}"></div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="value submit">
+                    <input type="submit" class="js-save button green" value="[`Save`]">
+                    <span id="plugins-settings-form-status"></span>
+                </div>
+            </div>
+
+            {$wa->csrf()}
+
+        </form>
+    </div>
+
+    <div class="clear-left"></div>
+</div>
+<script>
+    (function ($) {
+        new GravitelSettings({
+            $wrapper: $("#{$_id}")
+        });
+    })(jQuery);
+</script>
