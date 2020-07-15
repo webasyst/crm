@@ -1,0 +1,29 @@
+Кассовый чек
+<br><br>
+ООО "Артикус" ИНН: {$config["`$company_id`:inn"]|default:''}<br>
+Номер смены: {$receipt.shift_number}<br>
+Номер чека за смену: {$receipt.fiscal_receipt_number}<br>
+{if $receipt.operation == 'sell'}{$_pr = 'Приход'}{else if $receipt.operation == 'sell_refund'}{$_pr = 'Возврат'}{else}{$_pr = ''}{/if}
+Признак расчета: {$_pr}<br>
+Адрес покупателя: {$receipt.customer_email}<br>
+Заводской номер фискального накопителя: {$receipt.fn_number}<br>
+Фискальный признак документа: {$receipt.fiscal_document_attribute}<br>
+Регистрационный номер ККТ: {$receipt.ecr_registration_number}<br>
+Порядковый номер фискального документа: {$receipt.fiscal_document_number}<br>
+Дата, время: {$receipt.receipt_datetime|wa_datetime}<br>
+Место расчетов: {$config["`$company_id`:payment_address"]|default:''}<br>
+Кассир: Системный администратор<br>
+<hr>
+{foreach $invoice.items as $_i}
+    {$_i.name} {$_i.quantity} x {$_i.price|wa_format} = {($_i.quantity * $_i.price)|wa_format_amount_currency:'RUB'}<br>
+    НДС {crmAtolonlinePlugin::getTaxPercent($_i.tax)}%:
+    {crmAtolonlinePlugin::getTaxAmount($_i.tax, $_i.quantity * $_i.price)|wa_format_amount_currency:'RUB'}
+{/foreach}
+<hr>
+ИТОГ: {$invoice.amount|wa_format_amount_currency:'RUB'}<br>
+Оплачено электронным средством платежа: {$invoice.amount|wa_format_amount_currency:'RUB'}<br>
+Применяемая система налогообложения: Упрощенная Доход минус Расход.<br>
+<hr>
+Чек сформирован в электронном виде и всегда доступен на сайте оператора фискальных данных:<br>
+{$_href = "https://lk.platformaofd.ru/web/noauth/cheque?fn=`$receipt.fn_number`&fp=`$receipt.fiscal_document_attribute`"}
+<a href="{$_href}">{$_href}</a>

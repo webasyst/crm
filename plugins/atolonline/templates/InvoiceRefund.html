@@ -1,0 +1,12 @@
+{if $receipts}
+
+    <p>[`Отменить также чеки, выписанные по данному счету:`]</p>
+
+    <ul class="menu-v">
+        {foreach $receipts as $_r}
+            <li>
+                <label><input type="checkbox" name="data[receipt_id][]" value="{$_r.id}" checked> {$_r.html}</label>
+            </li>
+        {/foreach}
+    </ul>
+{/if}

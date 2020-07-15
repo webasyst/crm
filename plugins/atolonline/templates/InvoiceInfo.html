@@ -1,0 +1,111 @@
+{if !empty($receipts)}
+    {$_count = $receipts|count}
+
+    <div class="field-group js-receipts-wrapper">
+        <h4 class="heading">{if $_count == 1}Кассовый чек{else}Кассовые чеки{/if}:</h4>
+        <table class="c-atol-receipts-table zebra">
+            {foreach $receipts as $_r}
+                {$_classes = ["c-atol-receipt"]}
+                {if ($_r.status === "done")}
+
+                    {if ($_r.operation === "sell")}
+                        {$_classes[] = "is-sell-done"}
+
+                    {elseif ($_r.operation === "sell_refund")}
+                        {$_classes[] = "is-refund-done"}
+                    {/if}
+
+                {elseif ($_r.status === "fail")}
+                    {$_classes[] = "is-fail"}
+
+                {elseif ($_r.status === "wait")}
+                    {$_classes[] = "is-wait"}
+                {/if}
+
+                {$_classes[] = "js-atol-receipt-details"}
+
+                <tr class="{$_classes|join:" "}" data-id="{$_r.id}" title="Показать кассовый чек">
+                    <td>
+                        <div class="c-single-line c-atol-receip-text">{$_r.html}</div>
+                    </td>
+                    <td class="c-action-column">
+                        {if $_r.operation == 'sell' && $_r.status == 'done' && !$_r.refund_id}
+                            <a class="c-atol-receipt-refund js-atol-receipt-refund inline-link small" href="javascript:void(0);" title="[`Refund`]" style="display: inline;" data-invoice_id="{$_r.invoice_id}" data-receipt_id="{$_r.id}"><b><i>[`Refund`]</i></b></a>
+                        {/if}
+                    </td>
+                </tr>
+            {/foreach}
+        </table>
+    </div>
+
+    <script>
+        ( function($) {
+            var $wrapper = $(".js-receipts-wrapper");
+
+            var xhr = false;
+
+            $wrapper.on('click', ".js-atol-receipt-refund", function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                refund( $(this) );
+            });
+
+            $wrapper.on('click', ".js-atol-receipt-details", function(event) {
+                event.preventDefault();
+                var $tr = $(this),
+                    $target = $(event.target),
+                    is_link = $target.hasClass("js-atol-receipt-refund");
+
+                if (!is_link) {
+                    details( $tr.data("id") );
+                }
+            });
+
+            function refund($link) {
+                var invoice_id = $link.data('invoice_id'),
+                    receipt_id = $link.data('receipt_id');
+
+                $.crm.confirm.show({
+                    title: '[`Refund receipt?`]',
+                    text: '<p>[`Reciept refund can not be undone.`]</p>',
+                    button: '[`Refund`]',
+                    onConfirm: function() {
+                        var href = "{$wa_app_url}?plugin=atolonline&module=receipt&operation=refund",
+                            data = {
+                                invoice: invoice_id,
+                                receipt: receipt_id
+                            };
+
+                        $.post(href, data, function(response) {
+                            $.crm.content.reload();
+                        });
+                    }
+                });
+            }
+
+            function details(id) {
+                if (xhr) { xhr.abort(); }
+
+                var href = "{$wa_app_url}?plugin=atolonline&module=receipt&action=details",
+                    data = {
+                        "id": id
+                    };
+
+                xhr = $.post(href, data, function(html) {
+                    new CRMDialog({
+                        html: html
+                    });
+                }).always( function() {
+                    xhr = false;
+                });
+            }
+        })(jQuery);
+    </script>
+{/if}
+
+{if $invalid_tax_percent}
+    <p class="error">[`Для выбранного варианта расчета НДС невозможно выписать чек при оплате.`]</p>
+{/if}
+{if $invalid_tax_type}
+    <p class="error">[`Регистрация чека возможна только для НДС, включенного в стоимость.`]</p>
+{/if}

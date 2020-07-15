@@ -1,0 +1,181 @@
+{$_is_done = false}
+{if $receipt.status === "done"}
+    {$_is_done = true}
+{/if}
+
+<div class="crm-dialog-wrapper c-atol-receipt-details-dialog" id="c-atol-receipt-details-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>[`Кассовый чек`]</h1>
+        </header>
+
+        <div class="crm-dialog-content">
+            <div class="c-receipt-wrapper">
+                <div class="field-group">
+
+                    {if $receipt.status === "wait"}
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Статус`]</div>
+                            <div class="c-column right">
+                                <span style="color: #ff8c00">[`Ожидание`]</span>
+                            </div>
+                        </div>
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`UUID`]</div>
+                            <div class="c-column right">{$receipt.atol_uuid}</div>
+                        </div>
+                    {/if}
+
+                    {if $receipt.status === "fail"}
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Ошибка`]</div>
+                            <div class="c-column right">
+                                <span style="color: #f20;">{$receipt.error_text}</span>
+                            </div>
+                        </div>
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Код ошибки`]</div>
+                            <div class="c-column right">{$receipt.error_code}</div>
+                        </div>
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Тип ошибки`]</div>
+                            <div class="c-column right">{$receipt.error_type}</div>
+                        </div>
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`UUID`]</div>
+                            <div class="c-column right">{$receipt.atol_uuid}</div>
+                        </div>
+                    {/if}
+
+                    {if !empty($_is_done)}
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Номер смены`]</div>
+                            <div class="c-column right">{$receipt.shift_number|escape}</div>
+                        </div>
+                    {/if}
+
+                    {if !empty($_is_done)}
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Номер чека за смену`]</div>
+                            <div class="c-column right">{$receipt.fiscal_receipt_number|escape}</div>
+                        </div>
+                    {/if}
+
+                    <div class="c-field-wrapper c-layout fixed">
+                        <div class="c-column">[`Признак расчета`]</div>
+                        <div class="c-column right">
+                            {if $receipt.operation == 'sell'}
+                                [`Приход`]
+                            {elseif $receipt.operation == 'sell_refund'}
+                                [`Возврат`]
+                            {/if}
+                        </div>
+                    </div>
+
+                    <div class="c-field-wrapper c-layout fixed">
+                        <div class="c-column">[`Адрес покупателя`]</div>
+                        <div class="c-column right">{$receipt.customer_email|escape}</div>
+                    </div>
+
+                    {if !empty($_is_done)}
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Заводской номер фискального накопителя`]</div>
+                            <div class="c-column right">{$receipt.fn_number|escape}</div>
+                        </div>
+                    {/if}
+
+                    {if !empty($_is_done)}
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Фискальный признак документа`]</div>
+                            <div class="c-column right">{$receipt.fiscal_document_attribute|escape}</div>
+                        </div>
+                    {/if}
+
+                    {if !empty($_is_done)}
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Регистрационный номер ККТ`]</div>
+                            <div class="c-column right">{$receipt.ecr_registration_number|escape}</div>
+                        </div>
+                    {/if}
+
+                    {if !empty($_is_done)}
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Порядковый номер фискального документа`]</div>
+                            <div class="c-column right">{$receipt.fiscal_document_number|escape}</div>
+                        </div>
+                    {/if}
+
+                    {if !empty($_is_done)}
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Дата, время`]</div>
+                            <div class="c-column right">{$receipt.receipt_datetime|wa_datetime|escape}</div>
+                        </div>
+                    {/if}
+
+                    {if !empty($_is_done)}
+                        <div class="c-field-wrapper c-layout fixed">
+                            <div class="c-column">[`Кассир`]</div>
+                            <div class="c-column right">[`Системный администратор`]</div>
+                        </div>
+                    {/if}
+                </div>
+
+                <div class="field-group">
+                    <ul class="c-items-list">
+                        {foreach $receipt.receipt_data.receipt.items as $_i}
+                            <li>
+                                <div class="line c-layout fixed">
+                                    <div class="c-column bold">{$_i.name|escape}</div>
+                                    <div class="c-column right">{$_i.quantity|escape} x {$_i.price|wa_format|escape}</div>
+                                </div>
+                                <div class="line c-layout fixed">
+                                    <div class="c-column">[`ИТОГ`]</div>
+                                    <div class="c-column right">{($_i.quantity * $_i.price)|wa_format_amount_currency:'RUB'}</div>
+                                </div>
+                                <div class="line c-layout fixed">
+                                    <div class="c-column">[`НДС`]</div>
+                                    <div class="c-column right">
+                                        {if $_i.tax|escape == 'none'}
+                                            не облагается
+                                        {else}
+                                            {crmAtolonlinePlugin::getTaxPercent($_i.tax)}%:
+                                            {crmAtolonlinePlugin::getTaxAmount($_i.tax, $_i.quantity * $_i.price)|wa_format_amount_currency:'RUB'}
+                                        {/if}
+                                    </div>
+                                </div>
+                            </li>
+                        {/foreach}
+                    </ul>
+                </div>
+
+                <div class="field-group">
+                    <div class="c-field-wrapper c-layout fixed" style="font-size: 1.5em;">
+                        <div class="c-column bold">[`ИТОГ`]</div>
+                        <div class="c-column bold right">{$receipt.receipt_data.receipt.total|escape|wa_format_amount_currency:'RUB'}</div>
+                    </div>
+
+                    <div class="c-field-wrapper c-layout fixed">
+                        <div class="c-column">[`Оплачено электронным средством платежа`]</div>
+                        <div class="c-column right">{$receipt.receipt_data.receipt.total|escape|wa_format_amount_currency:'RUB'}</div>
+                    </div>
+
+                    <div class="c-field-wrapper c-layout fixed">
+                        <div class="c-column">[`Применяемая система налогообложения`]</div>
+                        <div class="c-column right">{ifempty($sno[$receipt.receipt_data.receipt.attributes.sno|escape], $receipt.receipt_data.receipt.attributes.sno|escape)}</div>
+                    </div>
+                </div>
+
+                {if !empty($_is_done)}
+                    <div class="field-group">
+                        <div class="line">[`Чек сформирован в электронном виде и всегда доступен на сайте оператора фискальных данных`]</div>
+                    </div>
+                {/if}
+            </div>
+        </div>
+
+        <footer class="crm-dialog-footer">
+            <input class="button blue js-close-dialog" type="button" value="[`Close`]">
+        </footer>
+    </div>
+</div>

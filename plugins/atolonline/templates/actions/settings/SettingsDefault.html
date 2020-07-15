@@ -1,0 +1,163 @@
+<section class="c-atol-plugin-settings-page" id="c-atol-plugin-settings-page">
+
+    <h1 class="c-page-header">АТОЛ Онлайн</h1>
+
+    <div class="c-tabs-wrapper">
+        <div class="c-companies-wrapper">
+            <ul class="tabs c-companies-list">
+                {foreach $companies as $_company}
+                    {$_is_selected = ($company.id == $_company.id)}
+                    <li class="c-company {if $_is_selected}selected{/if}">
+                        <a class="c-link" href="{if !$_is_selected}{$wa_app_url}plugins/#/atolonline/company_id={$_company.id}{else}javascript:void(0);{/if}">
+                            <span class="c-name">{$_company.name|escape}</span>
+                        </a>
+                    </li>
+                {/foreach}
+            </ul>
+            <span class="c-action right" title="[`Next`]"></span>
+            <span class="c-action left" title="[`Before`]"></span>
+        </div>
+        {*<div class="c-add-wrapper">*}
+            {*<a href="{$wa_app_url}settings/companies/new/"><i class="icon16 add"></i> [`Add new company`]</a>*}
+        {*</div>*}
+    </div>
+
+    <section class="c-company-section">
+        <form>
+            <div class="field-group">
+                <label class="gray" for="js-ibutton-2">[`Disabled`]</label>
+                <input class="js-ibutton" id="js-ibutton-2" type="checkbox" name="crm_atolonline[crm_company_on]" {if !empty($settings.crm_company[$company.id])}checked{/if}>
+                <label for="js-ibutton-2">[`Enabled`]</label>
+            </div>
+            <div class="field-group js-toggle-fields" style="{if empty($settings.crm_company[$company.id])}display: none;{/if}">
+                <div class="field">
+                    <div class="name">Версия протокола API</div>
+                    <div class="value">
+                        <label>
+                            <input type="radio" name="crm_atolonline[api_version]" value="3"
+                                {if !empty($settings["`$company.id`:api_version"]) && $settings["`$company.id`:api_version"] == 3}checked{/if}>
+                            3 <span class="hint">(ФФД 1.0)</span>
+                        </label>
+                        &nbsp;
+                        <label>
+                            <input type="radio" name="crm_atolonline[api_version]" value="4"
+                                {if empty($settings["`$company.id`:api_version"]) || $settings["`$company.id`:api_version"] == 4}checked{/if}>
+                            4 <span class="hint">(ФФД 1.05)</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">Режим отладки</div>
+                    <div class="value">
+                        {$_debug_mode = $settings["`$company.id`:debug_mode"]|default:''}
+                        <input type="checkbox" name="crm_atolonline[debug_mode]" {if $_debug_mode && $_debug_mode !== 'off'} checked{/if}>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">Логин</div>
+                    <div class="value">
+                        <input type="text" name="crm_atolonline[login]" class="input" value="{ifset($settings["`$company.id`:login"])|escape}" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">Пароль</div>
+                    <div class="value">
+                        <input type="password" name="crm_atolonline[pass]" class="input" value="{ifset($settings["`$company.id`:pass"])|escape}" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name"></div>
+                    <div class="value">
+                        <button class="button gray js-atol-pass-button" style="margin-right: 8px;">[`Test connection`]</button>
+                    </div>
+                </div>
+            </div>
+            <div class="field-group js-toggle-fields" style="{if empty($settings.crm_company[$company.id])}display: none;{/if}">
+                <div class="field">
+                    <div class="name">ИНН</div>
+                    <div class="value">
+                        <input type="text" name="crm_atolonline[inn]" class="input" value="{ifset($settings["`$company.id`:inn"])|escape}" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">Адрес расчетов</div>
+                    <div class="value">
+                        <input type="text" name="crm_atolonline[payment_address]" class="input" value="{ifset($settings["`$company.id`:payment_address"])|escape}" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">Код группы</div>
+                    <div class="value">
+                        <input type="text" name="crm_atolonline[group_code]" class="input" value="{ifset($settings["`$company.id`:group_code"])|escape}" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">Префикс внутреннего идентификатора</div>
+                    <div class="value">
+                        <input type="text" name="crm_atolonline[external_id_prefix]" class="input" value="{$settings["`$company.id`:external_id_prefix"]|default:'WACRM-'|escape}" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">СНО</div>
+                    <div class="value">
+                        <select name="crm_atolonline[sno]" autocomplete="off" class="select" required>
+                            {foreach $sno as $_s}
+                                <option value="{$_s.value}"{if !empty($settings["`$company.id`:sno"]) && $_s.value == $settings["`$company.id`:sno"]} selected{/if}>{$_s.title|escape}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">Email отправителя чека</div>
+                    <div class="value">
+                        <input type="text" name="crm_atolonline[email]" class="input" value="{ifset($settings["`$company.id`:email"])|escape}" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">Признак предмета расчёта для товаров в чеке</div>
+                    <div class="value">
+                        <select name="crm_atolonline[payment_object]" autocomplete="off" class="select" required>
+                            {foreach $payment_object as $_o}
+                                <option value="{$_o.value}"{if !empty($settings["`$company.id`:payment_object"]) && $_o.value == $settings["`$company.id`:payment_object"]} selected{/if}>{$_o.title|escape}</option>
+                            {/foreach}
+                        </select>
+                        <div class="hint">Категория всех позиций в чеке для налоговой</div>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">Признак способа расчёта в чеках</div>
+                    <div class="value">
+                        <select name="crm_atolonline[payment_method]" autocomplete="off" class="select" required>
+                            {foreach $payment_method as $_m}
+                                <option value="{$_m.value}"{if !empty($settings["`$company.id`:payment_method"]) && $_m.value == $settings["`$company.id`:payment_method"]} selected{/if}>{$_m.title|escape}</option>
+                            {/foreach}
+                        </select>
+                        <div class="hint">Категория способа оплаты всех позиций в чеке для налоговой</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="js-errors-place" style="clear:both;"></div>
+
+            <footer class="c-footer-actions js-footer-actions">
+                <input type="submit" class="button green js-submit-form" value="Сохранить">
+            </footer>
+
+            {$wa->csrf()}
+            <input type="hidden" name="crm_atolonline[crm_company_id]" value="{$company.id}">
+        </form>
+    </section>
+
+    <script>
+        ( function($) {
+            new CRMAtolPluginSettings({
+                $wrapper: $("#c-atol-plugin-settings-page"),
+                company_id: "{$company.id|escape}",
+                locales: {
+                    connection_done: "Успешное подключение",
+                    connection_fail: "Подключение не удалось"
+                }
+            })
+        })(jQuery);
+    </script>
+</section>

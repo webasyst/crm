@@ -1,0 +1,28 @@
+<div class="c-atol-invoice-action" style="display: inline-block;">
+    <a href="javascript:void(0);" class="inline-link js-show-atol-receipt-dialog"><b><i>[`Выписать чек`]</i></b></a>
+
+    <script>
+        ( function($) {
+            var is_locked = false;
+
+            $(".js-show-atol-receipt-dialog").on('click', function(event) {
+                event.preventDefault();
+
+                if (!is_locked) {
+                    is_locked = true;
+
+                    var href = $.crm.app_url + "?plugin=atolonline&module=receipt&action=add",
+                        data = { invoice_id: {$invoice.id|default:""|json_encode} };
+
+                    $.post(href, data, function(html) {
+                        new CRMDialog({
+                            html: html
+                        });
+                    }).always( function() {
+                        is_locked = false;
+                    });
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

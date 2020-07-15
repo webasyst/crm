@@ -1,0 +1,111 @@
+table.c-atol-receipts-table {
+  margin: 4px 0 0 -5px;
+  table-layout: fixed;
+}
+table.c-atol-receipts-table td.c-action-column {
+  text-align: right;
+  width: 100px;
+}
+table.c-atol-receipts-table .c-atol-receipt {
+  cursor: pointer;
+}
+table.c-atol-receipts-table .c-atol-receipt.is-sell-done {
+  color: #7ac33c;
+}
+table.c-atol-receipts-table .c-atol-receipt.is-refund-done {
+  color: #b22222;
+}
+table.c-atol-receipts-table .c-atol-receipt.is-fail {
+  color: #f20;
+}
+table.c-atol-receipts-table .c-atol-receipt.is-wait {
+  color: #808080;
+}
+table.c-atol-receipts-table .c-atol-receipt .c-atol-receip-text .c-text {
+  margin-right: 1em;
+}
+table.c-atol-receipts-table .c-atol-receipt .c-atol-receip-text .c-text:last-child {
+  margin-right: 0;
+}
+table.c-atol-receipts-table .c-atol-receipt .c-atol-receip-text .c-text-group {
+  margin-right: 2.5em;
+}
+table.c-atol-receipts-table .c-atol-receipt .c-atol-receip-text .c-text-group:last-child {
+  margin-right: 0;
+}
+table.c-atol-receipts-table .c-atol-receipt .c-atol-receip-text .c-label {
+  color: #808080;
+}
+table.c-atol-receipts-table .c-atol-receipt .c-atol-receipt-refund {
+  visibility: hidden;
+  opacity: 0;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+  -webkit-transition: 200ms linear;
+  -moz-transition: 200ms linear;
+  -o-transition: 200ms linear;
+  -ms-transition: 200ms linear;
+  transition: 200ms linear;
+}
+table.c-atol-receipts-table .c-atol-receipt:hover .c-atol-receipt-refund {
+  visibility: visible;
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+}
+.c-atol-receipt-details-dialog {
+  padding: 0;
+  font-family: Courier, Arial, sans-serif;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper {
+  word-wrap: break-word;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .field-group {
+  margin: 2em 0 0;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .field-group:first-child {
+  margin-top: 0;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .upper {
+  text-transform: uppercase;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .bold {
+  font-weight: bold;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .right {
+  text-align: right;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .c-field-wrapper {
+  margin: 1em 0 0;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .c-field-wrapper:first-child {
+  margin-top: 0;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .c-items-list {
+  margin: 0;
+  padding: 0;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .c-items-list > li {
+  margin: 2em 0 0;
+  padding: 0;
+  list-style: none;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .c-items-list > li:first-child {
+  margin-top: 0;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .c-items-list > li > .line {
+  margin-top: 6px;
+}
+.c-atol-receipt-details-dialog .c-receipt-wrapper .c-items-list > li > .line:first-child {
+  margin-top: 0;
+}
+.c-atol-plugin-settings-page .c-tabs-wrapper {
+  margin: 0 0 -1px;
+}
+.c-atol-plugin-settings-page .c-company-section {
+  border-top: 1px solid #ddd;
+  padding: 20px 0 0;
+}
+.c-atol-plugin-settings-page .c-company-section .c-footer-actions {
+  margin: 48px 0 0;
+}

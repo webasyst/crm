@@ -1,0 +1,96 @@
+<div class="crm-dialog-wrapper c-atol-receipt-add-dialog" id="c-atol-receipt-add-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>[`Выписать чек`]</h1>
+        </header>
+
+        <div class="crm-dialog-content">
+            <form id="js-receipt-form">
+
+                <p>{sprintf_wp('Чек на сумму %s будет создан и отправлен оператору фискальных данных', $invoice.amount|wa_format_amount_currency:$invoice.currency_id)}</p>
+
+                {if !empty($receipt)}
+                    <p>[`По данному счету уже выписан чек.`]</p>
+                    <p><label><input type="checkbox" name="repeat" class="js-enable-receipt"> [`Подтверждаю повторное создание чека`]</label></p>
+                {/if}
+
+                {if !$tax_available}
+                    <p>Размер налога, заданный в счете, не соответствует допустимым вариантам НДС.</p>
+                    <p>Укажите вариант, который необходимо использовать в чеке:</p>
+                    <p>
+                        <label><input type="radio" name="tax_percent" value="none" class="js-enable-receipt"> Без НДС</label><br>
+                        <label><input type="radio" name="tax_percent" value="0" class="js-enable-receipt"> НДС 0%</label><br>
+                        <label><input type="radio" name="tax_percent" value="10" class="js-enable-receipt"> НДС 10%</label><br>
+                        <label><input type="radio" name="tax_percent" value="18" class="js-enable-receipt"> НДС 18%</label>
+                        <label><input type="radio" name="tax_percent" value="20" class="js-enable-receipt"> НДС 20%</label>
+                    </p>
+                {/if}
+
+                <input type="hidden" name="invoice" value="{$invoice.id|default:''}">
+            </form>
+        </div>
+
+        <footer class="crm-dialog-footer">
+            <input class="button red js-atol-receipt-submit-button" type="button" value="[`Выписать чек`]" {if !empty($receipt)}disabled{/if}>
+            <span style="margin: 0 4px;">[`or`]</span>
+            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+        </footer>
+
+        <script>
+            ( function($) {
+                // DOM
+                var $wrapper = $("#c-atol-receipt-add-dialog"),
+                    $button = $wrapper.find(".js-atol-receipt-submit-button");
+
+                // VARS
+                var is_locked = false;
+
+                // EVENTS
+                $wrapper.on("change", ".js-enable-receipt", function() {
+                    var is_enabled = true;
+                    {if !empty($receipt)}
+                        is_enabled = $('input[name="repeat"]:checked').length;
+                    {/if}
+                    {if !$tax_available}
+                        if (is_enabled) {
+                            is_enabled = $('input[name="tax_percent"]:checked').length;
+                        }
+                    {/if}
+                    $button.attr("disabled", !is_enabled);
+                });
+
+                $button.on("click", function(event) {
+                    event.preventDefault();
+                    submit();
+                });
+
+                // Functions
+
+                function submit() {
+                    if (!is_locked) {
+                        is_locked = true;
+
+                        var href = $.crm.app_url + "?plugin=atolonline&module=receipt",
+                            data = $('#js-receipt-form').serializeArray();
+
+                        $.post(href, data, function(response) {
+                            if (response.status === "ok") {
+                                var $invoicePage = $("#c-invoice-page");
+
+                                if ($invoicePage.length && $invoicePage.data("page")) {
+                                    var page = $invoicePage.data("page");
+                                    page.reload();
+                                } else {
+                                    $.crm.content.reload();
+                                }
+                            }
+                        }).always( function() {
+                            is_locked = false;
+                        });
+                    }
+                }
+            })(jQuery);
+        </script>
+    </div>
+</div>
