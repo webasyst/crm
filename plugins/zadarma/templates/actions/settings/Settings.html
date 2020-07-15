@@ -1,0 +1,68 @@
+{$_class = 'crm-zadarma-wrapper'}
+{$_id = uniqid($_class)}
+<div class="{$_class}" id="{$_id}">
+    <h1>Zadarma</h1>
+    <div class="fields form">
+        <form method="post">
+            <div>
+                <h2 style="color: #000;">{_wd('crm_zadarma', 'Authorization key')}</h2>
+                <span class="hint">
+                {sprintf(_wd("crm_zadarma", "Find this data in %sZadarma personal account%s %s on API Interface Settings page."), '<a href="https://my.zadarma.com/api/" target="_blank">', '</a>', '<i class="icon10 new-window"></i>')}
+            </span>
+                <br><br>
+            </div>
+            <div class="field">
+                <div class="name"><label for="zadarma_crm_zadarma_key">{_wd('crm_zadarma', 'Key')}</label></div>
+                <div class="value"><input id="zadarma_crm_zadarma_key" type="text" name="crm_zadarma[key]" class="input" title="{_wd('crm_zadarma', 'Key')}" value="{$key|escape}" autocomplete="off">
+                </div>
+            </div>
+            <div class="field">
+                <div class="name"><label for="zadarma_crm_zadarma_secret">{_wd('crm_zadarma', 'Secret')}</label></div>
+                <div class="value"><input id="zadarma_crm_zadarma_secret" type="text" name="crm_zadarma[secret]" class="input" title="{_wd('crm_zadarma', 'Secret')}" value="{$secret|escape}" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="value">
+                    <div class="crm-zadarma-api-status js-api-status" data-ok="{_wd('crm_zadarma', 'API connection established')}" data-bad="{_wd('crm_zadarma', 'API connection not established')}"></div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="name">{_wd('crm_zadarma', 'Call notifications link')}</div>
+                <div class="value">
+                    {if !empty($callback_url)}
+                        <input type="text" readonly="" value="{$callback_url|escape}">
+                    {else}
+                        <span style="color: red;">{_wd('crm_zadarma', 'Add settlement for CRM')}</span>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="field js-zadarma-instruction" style="display: none;">
+                <div class="value" style="background-color: #f7f7f7;display: inline-block;padding: 12px;border-radius: 4px;border: 1px solid red;color: #2d2d2d;margin: 12px 0;">
+                    <i class="icon16 exclamation" style="margin-top: -6px;"></i>{_wd('crm_zadarma', 'To view call-related information in CRM, <a href="https://my.zadarma.com/mypbx/master/" target="_blank">set up a virtual PBX</a> and <a href="https://my.zadarma.com/mypbx/int_lines/" target="_blank">add extension numbers</a> for your staff.')}
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="value submit">
+                    <input type="submit" class="js-save button green" value="[`Save`]">
+                    <span id="plugins-settings-form-status"></span>
+                </div>
+            </div>
+
+            {$wa->csrf()}
+
+        </form>
+    </div>
+
+    <div class="clear-left"></div>
+</div>
+<script>
+    (function ($) {
+        new ZadarmaSettings({
+            $wrapper: $("#{$_id}")
+        });
+    })(jQuery);
+</script>
