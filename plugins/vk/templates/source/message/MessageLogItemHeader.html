@@ -1,0 +1,36 @@
+{function render_icon src='' title='' class='' alt=''}
+    <img src="{$src}"
+         {if $title}title="{$title}"{/if}
+            {if $class}class="{$class}"{/if}
+            {if $alt}alt="{$alt}"{/if}
+         style="width: 16px; border-radius: 50%">
+{/function}
+
+<div class="c-vk-plugin-message-log-item-header">
+
+    {if $message.direction == crmMessageModel::DIRECTION_IN}
+        <i class="icon16 message-in" title="[`incoming`]"></i>
+        [`from`]
+    {else}
+        <i class="icon16 message-out" title="[`outgoing`]"></i>
+        [`to `]
+    {/if}
+
+    {$contact = $message.contact}
+    {if $contact}
+        <a href="{$wa_app_url}contact/{$contact.id}/" target="_top" class="c-contact-link">
+            {render_icon src="{$contact.photo_url_16}" alt="{$contact.name|escape}" class="c-contact-photo"}
+            <span>{$contact.name|escape}</span>
+        </a>
+    {else}
+        <span>deleted contact_id={$message.contact_id}</span>
+    {/if}
+
+    {$domain = $message.participant.domain|default:$message.to|default:''|escape}
+    {if $domain}
+        <a href="https://vk.com/{$domain}" target="_blank" class="c-contact-link">
+            {render_icon src="{$source_icon_url}"}
+        </a>
+    {/if}
+
+</div>

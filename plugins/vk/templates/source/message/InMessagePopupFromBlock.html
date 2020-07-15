@@ -1,0 +1,12 @@
+{strip}
+{$domain = $message.participant.domain|default:$message.from|default:''|escape}
+{if $domain}
+    <a href="https://vk.com/{$domain}" target="_blank" style="display: inline-block;">
+        {if $message.participant}
+            <span>{$message.participant.full_name|escape}</span>
+        {else}
+            <span>[`vk.com`]</span>
+        {/if}
+    </a>
+{/if}
+{/strip}

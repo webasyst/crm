@@ -1,0 +1,11 @@
+<div class="c-vk-plugin-settings-page">
+    <p><b>{sprintf('[`Plugin %s is installed and working.`]', 'VK')}</b></p>
+    <p>{sprintf('[`Save configuration parameters in the <a href="%s">deal source settings</a>.`]', {$source_settings_url})}</p>
+
+    {if $need_show_review_widget}
+        <div>
+            {$wa->installer->reviewWidget("plugin/crm/vk", ['is_inline' => true])}
+        </div>
+    {/if}
+</div>
+

@@ -1,0 +1,161 @@
+<script src="{$plugin_static_url}js/source.settings.vk.block.js"></script>
+
+{$block_id = uniqid('c-source-settings-vk-block')}
+
+{$group_url = ''}
+{if $group_info && $group_info.domain}
+    {$group_url = "https://vk.com/{$group_info.domain}"}
+{/if}
+
+<div class="c-source-settings-vk-block c-connection-settings-block" id="{$block_id}">
+
+    <div class="field">
+        <p class="large-hint">
+            {$_text = '<a href="%s" target="_blank">Step-by-step manual on connecting with a VK</a>'}
+            {if $locale == 'ru_RU'}
+                {$_link = 'https://support.webasyst.ru/25166/crm-vk-deal-source/'}
+            {else}
+                {$_link = 'https://support.webasyst.com/25218/crm-vk-deal-source/'}
+            {/if}
+            {sprintf(_wd('crm_vk', $_text), $_link)}
+        </p>
+    </div>
+    <div class="field" style="margin-top: 20px">
+        <div class="value">
+            <div class="field">
+                <div class="name">
+                    {_wd('crm_vk', 'Name')}
+                </div>
+                <div class="value">
+                    <input required="required" type="text" name="source[name]" value="{$source.name|default:''|escape}">
+                </div>
+            </div>
+
+            <div class="field-group">
+
+                <div class="field" style="margin-bottom: 10px;">
+                    <div>
+                        <div>{_wd('crm_vk', 'Group settings')}</div>
+                        <div class="hint" style="margin-top: 10px;">{_wd('crm_vk', 'Create <a href="https://vk.com/groups" target="_blank">new Community on VK</a>')}</div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="name">{_wd('crm_vk', 'Group ID')}</div>
+                    <div class="value">
+                        <input required="required" type="text" class="c-vk-plugin-group-param" name="source[params][group_id]" value="{$source.params.group_id|default:''|escape}" class="equal-width">
+
+                        {if $group_info}
+                            <a href="{$group_url}" target="_blank" class="c-contact-link">
+                                <img src="{$group_info.photo_url}" class="c-vk-plugin-contact-photo">
+                                {$group_info.name|escape}
+                            </a>
+                        {/if}
+
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="name">{_wd('crm_vk', 'Access token')}</div>
+                    <div class="value">
+                        <input required="required" type="text" class="c-vk-plugin-group-param" name="source[params][access_token]" value="{$source.params.access_token|default:''|escape}" class="equal-width">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="name">
+                        {_wd('crm_vk', 'Callback API URL')}
+                    </div>
+                    <div class="value">
+                        {if $source.id > 0}
+                            <input type="text" class="c-readonly-input c-callback-url js-url-input" readonly value="{$callback_url}">
+                            {if !$callback_url}
+                                <div class="hint" style="margin-top: 2px;">
+                                    {sprintf(_wd('crm_vk', 'Set settlement for CRM app <a target="_blank" href="%s">here</a>'), $site_app_url)}
+                                </div>
+                            {/if}
+                        {else}
+                            <p class="hint bold" style="margin-top: -2px;">{_wd('crm_vk', 'Will be shown after source creation')}</p>
+                        {/if}
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="name">
+                        {_wd('crm_vk', 'API Version')}
+                    </div>
+                    <div class="value">
+                        <select readonly class="c-readonly-input">
+                            <option>{crmVkPluginApi::getVersion()}</option>
+                        </select>
+                    </div>
+                </div>
+
+                {if $source.id > 0}
+                    <div class="field">
+                        <div class="name">{_wd('crm_vk', 'Verify code')}</div>
+                        <div class="value c-verify-server-block">
+                            {$_verify_code = $source.params.verify_code|default:''|escape}
+                            <input required="required" type="text" name="source[params][verify_code]" value="{$_verify_code}">
+                            <p class="hint">
+                                {$_url = ''}
+                                {if $group_info}
+                                    {$_url = $group_url|cat:'?act=api'}
+                                {/if}
+                                {$_hint = _wd('crm_vk', 'Copy here <b>string to be returned</b> from <a target="_blank" href="%s">Callback API settings</a>')}
+                                {sprintf($_hint, $_url)}
+                            </p>
+                        </div>
+                    </div>
+                {/if}
+
+                <div class="field">
+                    <div class="name">{_wd('crm_vk', 'Secret key')}</div>
+                    <div class="value">
+                        <input required="required" type="text" class="c-vk-plugin-group-param" name="source[params][secret_key]" value="{$source.params.secret_key|default:''|escape}" class="equal-width">
+                    </div>
+                </div>
+            </div>
+
+            <div class="field" style="margin-bottom: 10px;">
+                <div>
+                    <div>{_wd('crm_vk', 'Application settings')}</div>
+                    <div class="hint" style="margin-top: 10px;">{_wd('crm_vk', 'Create <a target="_blank" href="https://vk.com/editapp?act=create">an Application on VK</a>')}</div>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">{_wd('crm_vk', 'Application ID')}</div>
+                <div class="value">
+                    <input required="required" type="text" name="source[params][app_id]" value="{$source.params.app_id|default:''|escape}" class="equal-width">
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">{_wd('crm_vk', 'Secure key')}</div>
+                <div class="value">
+                    <input required="required" type="text" name="source[params][app_secret]" value="{$source.params.app_secret|default:''|escape}" class="equal-width">
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">{_wd('crm_vk', 'Service token')}</div>
+                <div class="value">
+                    <input required="required" type="text" name="source[params][service_token]" value="{$source.params.service_token|default:''|escape}" class="equal-width">
+                </div>
+            </div>
+            
+            <div class="field">
+                <div class="value">
+                    <div class="crm-common-errors-block"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        (function ($) {
+            new CRMImSourceSettingsVkBlock({
+                $wrapper: $('#{$block_id}'),
+                source: {$source|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

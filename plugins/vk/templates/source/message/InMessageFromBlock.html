@@ -1,0 +1,25 @@
+<style>
+    .c-vk-plugin-contact-info .c-contact-photo { width: 16px; }
+</style>
+
+<div class="c-vk-plugin-contact-info">
+    {$contact = $message.participant.contact}
+    {if !$contact}
+        {$contact = $message.contact}
+    {/if}
+    {if $contact}
+        <a href="{$wa_app_url}contact/{$contact.id}/" target="_top" class="c-contact-link">
+            <img src="{$contact.photo_url_16}" alt="{$contact.name|escape}" class="c-contact-photo">
+            <span>{$contact.name|escape}</span>
+        </a>
+    {else}
+        <span>deleted contact_id={$message.contact_id}</span>
+    {/if}
+
+    {$domain = $message.participant.domain|default:$message.from|default:''|escape}
+    {if $domain}
+        <a href="https://vk.com/{$domain}" target="_blank" class="c-contact-link">
+            <img src="{$source_icon_url}" style="width: 16px;">
+        </a>
+    {/if}
+</div>

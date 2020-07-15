@@ -1,0 +1,77 @@
+<div class='crm-vk-plugin-message-body'>
+
+    <p class="crm-vk-plugin-message-body-text">
+        {$body}
+    </p>
+
+    {if $sticker}
+        <img class='crm-vk-plugin-sticker' src='{$sticker.photo_url}' style='width: {$sticker.width}px; {$sticker.height}px;'>
+    {/if}
+
+    {if $geo}
+        <div class="crm-vk-plugin-location" style="color: #999;">{$geo.html}</div>
+    {/if}
+
+    {if $fwd_messages}
+        <div class="crm-vk-plugin-fwd-messages">
+            {foreach $fwd_messages as $fwd_message}
+                <div class="crm-vk-plugin-fwd-message">
+                    <blockquote>{$fwd_message.body|escape|nl2br}</blockquote>
+                </div>
+            {/foreach}
+        </div>
+    {/if}
+
+    {if $inline_attachments}
+        <div class="crm-vk-plugin-inline-attachments">
+            {foreach $inline_attachments as $attachment}
+                <div class="crm-vk-plugin-inline-attachment">
+                    {if $attachment.type === 'photo'}
+                        <img class='crm-vk-plugin-image' src='{$attachment.photo_url}' style='{$attachment.width}px; {$attachment.height}px;'>
+                    {elseif $attachment.type == 'wall'}
+                        <blockquote>{$attachment.text|escape|nl2br}</blockquote>
+                    {/if}
+                </div>
+            {/foreach}
+        </div>
+    {/if}
+
+    {if $link_attachments}
+        <div class="crm-vk-plugin-link-attachments">
+            {foreach $link_attachments as $link}
+                <div class="crm-vk-plugin-link-attachment">
+                    <a target="_blank" href="{$link.url}" class="crm-vk-plugin-image-link">
+                        {$_photo = $link.photo}
+                        {if $_photo}
+                            <img class="crm-vk-plugin-image" src="{$_photo.photo_url}" style="width: {$_photo.width}px; height: {$_photo.height}px;">
+                        {/if}
+                    </a>
+                    <a class="crm-vk-plugin-link-title" target="_blank" href="{$link.url}">{$link.title|escape}</a>
+                    <a class="crm-vk-plugin-link-caption" target="_blank" href="{$link.url}">{$link.caption|escape}</a>
+                    <a class="crm-vk-plugin-link-description" target="_blank" href="{$link.url}">{$link.description|escape}</a>
+                </div>
+            {/foreach}
+        </div>
+    {/if}
+
+    {if $doc_attachments}
+        <div class="crm-vk-plugin-doc-attachments">
+            {foreach $doc_attachments as $attachment}
+                <div class="crm-vk-plugin-doc-attachment">
+                    {if $attachment.type == 3}
+                        <video class="crm-vk-plugin-doc-gif" autoplay="autoplay" loop="loop" preload="metadata"><source src="{$attachment.preview.video.src}" type="video/mp4"></video>
+                    {elseif $attachment.type == 4}
+                        {$_preview = $attachment.preview}
+                        <img class='crm-vk-plugin-image' src='{$_preview.src}' style='{$_preview.width}px; {$_preview.height}px;'>
+                    {elseif $attachment.type == 5}
+                        <audio class="crm-vk-plugin-doc-audio" controls><source src="{$attachment.preview.audio_msg.link_mp3}" type="audio/mp3"></audio>
+                    {/if}
+                    <a class="crm-vk-plugin-doc-link" target="_blank" href="{$attachment.url}">
+                        {$attachment.title|escape} <i class="icon16 new-window"></i>
+                    </a>
+                </div>
+            {/foreach}
+        </div>
+    {/if}
+
+</div>

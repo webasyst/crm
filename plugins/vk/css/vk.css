@@ -1,0 +1,233 @@
+.c-vk-plugin-contact-photo {
+  position: relative;
+  vertical-align: top;
+  border-radius: 50%;
+  width: 16px;
+  margin-top: -1px;
+}
+.crm-vk-plugin-message-body .crm-vk-plugin-image,
+.crm-vk-plugin-message-body .crm-vk-plugin-sticker,
+.crm-vk-plugin-message-body .crm-vk-plugin-doc-link {
+  display: block;
+}
+.crm-vk-plugin-message-body .crm-vk-plugin-doc-gif {
+  max-width: 250px;
+}
+.crm-vk-plugin-message-subject .crm-vk-plugin-subject-meta-title {
+  color: #999;
+}
+.c-vk-plugin-settings-page {
+  margin: 80px auto;
+  text-align: center;
+  color: #aaa;
+}
+.c-vk-im-message-sender-dialog,
+.c-vk-conversation-sender-form {
+  padding: 0;
+}
+.c-vk-im-message-sender-dialog .redactor-box .redactor-layer.disable,
+.c-vk-conversation-sender-form .redactor-box .redactor-layer.disable {
+  background-color: #eee;
+}
+.c-vk-im-message-sender-dialog .c-wysiwyg-wrapper .redactor-box,
+.c-vk-conversation-sender-form .c-wysiwyg-wrapper .redactor-box {
+  margin: 0;
+}
+.c-vk-im-message-sender-dialog .c-wysiwyg-wrapper .redactor-box textarea,
+.c-vk-conversation-sender-form .c-wysiwyg-wrapper .redactor-box textarea {
+  display: block !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-drop-wrapper:hover,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-drop-wrapper:hover,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-drop-wrapper:hover,
+.c-vk-conversation-sender-form .c-files-wrapper .c-drop-wrapper:hover,
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-drop-wrapper.is-hover,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-drop-wrapper.is-hover,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-drop-wrapper.is-hover,
+.c-vk-conversation-sender-form .c-files-wrapper .c-drop-wrapper.is-hover {
+  background: #ffc;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-drop-wrapper.disable,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-drop-wrapper.disable,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-drop-wrapper.disable,
+.c-vk-conversation-sender-form .c-files-wrapper .c-drop-wrapper.disable {
+  background: #eee;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-drop-wrapper .c-drop-field,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-drop-wrapper .c-drop-field,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-drop-wrapper .c-drop-field,
+.c-vk-conversation-sender-form .c-files-wrapper .c-drop-wrapper .c-drop-field {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list {
+  padding: 0;
+  margin: 1em 0 0;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item {
+  margin: 4px 0 0;
+  line-height: 1.25em;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item.is-upload .c-progress-wrapper,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item.is-upload .c-progress-wrapper,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item.is-upload .c-progress-wrapper,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item.is-upload .c-progress-wrapper {
+  display: inline-block;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item.is-upload .inline-link,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item.is-upload .inline-link,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item.is-upload .inline-link,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item.is-upload .inline-link {
+  display: none;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item:first-child,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item:first-child,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item:first-child,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item:first-child {
+  margin-top: 0;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item.is-template,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item.is-template,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item.is-template,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item.is-template {
+  display: none;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item .c-name,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item .c-name,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item .c-name,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item .c-name {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item .c-status,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item .c-status,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item .c-status,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item .c-status {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 0 0 8px;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper {
+  display: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  height: 12px;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress {
+  display: inline-block;
+  vertical-align: top;
+  background: #f0f0f0;
+  width: 200px;
+  height: 100%;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress .c-bar,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress .c-bar,
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress .c-bar,
+.c-vk-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress .c-bar {
+  display: inline-block;
+  vertical-align: top;
+  background: #cba;
+  height: 100%;
+  transition: background 100ms linear;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-sizing: border-box;
+}
+.c-vk-im-message-sender-dialog .c-photos-wrapper .c-drop-wrapper,
+.c-vk-conversation-sender-form .c-photos-wrapper .c-drop-wrapper {
+  position: relative;
+  padding: 16px;
+  border: 1px dashed #ddd;
+  border-top: 0;
+  border-radius: 0 0 0 3px;
+  text-align: center;
+  background: #f3f3f3;
+  color: #aaa;
+  transition: background 200ms linear;
+  box-sizing: border-box;
+}
+.c-vk-im-message-sender-dialog .c-files-wrapper .c-drop-wrapper,
+.c-vk-conversation-sender-form .c-files-wrapper .c-drop-wrapper {
+  position: relative;
+  padding: 16px;
+  border: 1px dashed #ddd;
+  border-left: 0;
+  border-top: 0;
+  border-radius: 0 0 3px 0;
+  text-align: center;
+  background: #f3f3f3;
+  color: #aaa;
+  transition: background 200ms linear;
+  box-sizing: border-box;
+}
+.c-vk-im-message-sender-dialog .c-attach-existed-files-wrapper,
+.c-vk-conversation-sender-form .c-attach-existed-files-wrapper {
+  max-height: 200px;
+  overflow: auto;
+}
+.c-vk-im-message-sender-dialog .c-attach-existed-files-wrapper > li,
+.c-vk-conversation-sender-form .c-attach-existed-files-wrapper > li {
+  margin-left: 0;
+  margin-right: 0;
+}
+.crm-vk-plugin-link-attachments .crm-vk-plugin-link-attachment {
+  cursor: pointer;
+}
+.crm-vk-plugin-link-attachments .crm-vk-plugin-link-attachment .crm-vk-plugin-link-title {
+  display: block;
+  margin-bottom: 7px;
+  color: #000;
+  font-size: 18px;
+  line-height: 21px;
+  font-weight: 400;
+  overflow: hidden;
+  max-heigh: 2.6em;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+.crm-vk-plugin-link-attachments .crm-vk-plugin-link-attachment:hover {
+  text-decoration: none;
+  color: #000;
+}
+.crm-vk-plugin-link-attachments .crm-vk-plugin-link-attachment .crm-vk-plugin-link-caption,
+.crm-vk-plugin-link-attachments .crm-vk-plugin-link-attachment .crm-vk-plugin-link-description {
+  display: block;
+  max-width: 300px;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  color: #939393;
+  line-height: 12px;
+  padding-bottom: 7px;
+  text-decoration: none;
+}
+.crm-vk-plugin-link-attachments .crm-vk-plugin-link-attachment:hover {
+  text-decoration: none;
+  color: #939393;
+}

@@ -1,0 +1,44 @@
+{strip}
+<span class='crm-vk-plugin-message-subject'>
+    {if strlen($subject) > 0}
+        {$subject|escape}
+    {elseif strlen($body) > 0}
+        <span>{strip_tags($body)|truncate:50:'...'}</span>
+    {elseif $sticker}
+        <img class='crm-vk-plugin-sticker' src='{$sticker.photo_url}' style='width: {$sticker.width}px; {$sticker.height}px;'>
+    {elseif $links}
+        {$link = reset($links)}
+        <span class="crm-vk-plugin-subject-meta-title">{$link.caption|escape}</span>
+    {elseif $attachments}
+        {$attachment = reset($attachments)}
+        {if $attachment.type == 'photo'}
+            <span class="crm-vk-plugin-subject-meta-title"><i class="icon16 image"></i>{_wd('crm_vk', 'Photo')}</span>
+        {elseif $attachment.type == 'video'}
+            <span class="crm-vk-plugin-subject-meta-title"><i class="icon16 video"></i>{_wd('crm_vk', 'Video')}</span>
+        {elseif $attachment.type == 'audio'}
+            <span class="crm-vk-plugin-subject-meta-title"><i class="icon16 play"></i>{_wd('crm_vk', 'Audio')}</span>
+        {elseif $attachment.type == 'wall'}
+            <span class="crm-vk-plugin-subject-meta-title"><i class="icon16 book-open"></i>{_wd('crm_vk', 'Wall report')}</span>
+        {elseif $attachment.type == 'link'}
+            <span class="crm-vk-plugin-subject-meta-title"><i class="icon16 link"></i>{$attachment.link.caption|escape}</span>
+        {elseif $attachment.type == 'doc'}
+            {if $attachment.doc.type == 3}
+                <span class="crm-vk-plugin-subject-meta-title"><i class="icon16 attachment"></i>{_wd('crm_vk', 'GIF')} {$attachment.title|default:''|escape}</span>
+            {elseif $attachment.doc.type == 4}
+                <span class="crm-vk-plugin-subject-meta-title"><i class="icon16 attachment"></i>{_wd('crm_vk', 'Image')}</span>
+            {elseif $attachment.doc.type == 5}
+                <span class="crm-vk-plugin-subject-meta-title"><i class="icon16 attachment"></i>{_wd('crm_vk', 'Audio Message')}</span>
+            {else}
+                <span class="crm-vk-plugin-subject-meta-title"><i class="icon16 attachment"></i>{_wd('crm_vk', 'Attachment')}</span>
+            {/if}
+        {/if}
+    {elseif $geo}
+        <span class="crm-vk-plugin-subject-meta-title"><i class="icon16 map"></i>{_wd('crm_vk', 'Location')}</span>
+    {elseif $fwd_messages}
+        {$fwd_message = reset($fwd_messages)}
+        <span><i class="icon16 comments"></i>{strip_tags($fwd_message.body)|truncate:50:'...'}</span>
+    {else}
+        <span>{_wd('crm_vk', 'no subject')}</span>
+    {/if}
+</span>
+{/strip}

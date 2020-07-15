@@ -1,0 +1,170 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm/plugins/vk\n"
+"POT-Creation-Date: 2018-03-02 16:41+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: crm/plugins/vk\n"
+"Language-Team: crm/plugins/vk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"Language: ru_RU\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "view vk.com profile"
+msgstr "профиль ВКонтакте"
+
+msgid "vk.com"
+msgstr ""
+
+msgid "view vk.com group"
+msgstr "группа ВКонтакте"
+
+msgid "Deal between %s and %s"
+msgstr "Сделка между %s и %s"
+
+msgid "Chat between %s and %s"
+msgstr "Чат между %s и %s"
+
+msgid "Sorry, couldn't send reply message"
+msgstr "К сожалению, отправить ответ не удалось"
+
+msgid "Chat #%s"
+msgstr "Чат #%s"
+
+msgid "<a href=\"%s\" target=\"_blank\">Step-by-step manual on connecting with a VK</a>"
+msgstr "<a href=\"%s\" target=\"_blank\">Инструкция по подключению к сервису «ВКонтакте»</a>"
+
+msgid "Name"
+msgstr "Название"
+
+msgid "Group settings"
+msgstr "Настройки группы"
+
+msgid "Create <a href=\"https://vk.com/groups\" target=\"_blank\">new Community on VK</a>"
+msgstr "Создайте <a href=\"https://vk.com/groups\" target=\"_blank\">сообщество ВКонтакте</a>"
+
+msgid "Group ID"
+msgstr "ID группы"
+
+msgid "Access token"
+msgstr "Ключ доступа"
+
+msgid "Callback API URL"
+msgstr "Адрес Callback API"
+
+msgid "Verify code"
+msgstr "Строка ответа"
+
+msgid "Will be shown after source creation"
+msgstr "Будет доступен после сохранения источника"
+
+msgid "Copy here <b>string to be returned</b> from <a target=\"_blank\" href=\"%s\">Callback API settings</a>"
+msgstr "Скопируйте сюда <b>строку, которую должен вернуть сервер</b> из <a target=\"_blank\" href=\"%s\">настроек Callback API</a>"
+
+msgid "Secret key"
+msgstr "Секретный ключ"
+
+msgid "Application settings"
+msgstr "Настройки приложения"
+
+msgid "Create <a target=\"_blank\" href=\"https://vk.com/editapp?act=create\">an Application on VK</a>"
+msgstr "Создайте <a target=\"_blank\" href=\"https://vk.com/editapp?act=create\">приложение ВКонтакте</a>"
+
+msgid "Application ID"
+msgstr "ID приложения"
+
+msgid "Secure key"
+msgstr "Защищенный ключ"
+
+msgid "Service token"
+msgstr "Сервисный ключ доступа"
+
+msgid "VK"
+msgstr "ВКонтакте"
+
+msgid "Provides integration with VK.com messages"
+msgstr "Обеспечивает интеграцию с сообщениями ВКонтакте"
+
+msgid "Attach photo"
+msgstr "Прикрепить фото"
+
+msgid "(no subject)"
+msgstr "(без темы)"
+
+msgid "API Version"
+msgstr "Версия API"
+
+msgid "incoming"
+msgstr "входящее"
+
+msgid "from"
+msgstr "от"
+
+msgid "outgoing"
+msgstr "исходящее"
+
+msgid "to "
+msgstr "кому"
+
+msgid "Write a message"
+msgstr "Написать сообщение"
+
+msgid "File has been added."
+msgstr "Файл добавлен."
+
+msgid "delete"
+msgstr "удалить"
+
+msgid "Attach file"
+msgstr "Прикрепить файл"
+
+msgid "Drop file here"
+msgstr "Перетащите файл сюда"
+
+msgid "open conversation"
+msgstr "открыть переписку"
+
+msgid "From"
+msgstr "От"
+
+msgid "To"
+msgstr "Кому"
+
+msgid "Stage deleted"
+msgstr "Этап удалён"
+
+msgid "Funnel deleted"
+msgstr "Воронка удалена"
+
+msgid "Deal"
+msgstr "Сделка"
+
+msgid "Send"
+msgstr "Отправить"
+
+msgid "or"
+msgstr "или"
+
+msgid "cancel"
+msgstr "отмена"
+
+msgid "Message has been sent."
+msgstr "Сообщение отправлено."
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "Unknown source"
+msgstr "Неизвестный источник"
+
+msgid "Plugin %s is installed and working."
+msgstr "Плагин «%s» установлен и работает."
+
+msgid "Save configuration parameters in the <a href=\"%s\">deal source settings</a>."
+msgstr "Сохраните параметры конфигурации в <a href=\"%s\">настройках источника сделок</a>."
