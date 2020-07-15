@@ -1,0 +1,11 @@
+<div class="c-twitter-plugin-settings-page">
+    <p><b>{sprintf('[`Plugin %s is installed and working.`]', 'Twitter')}</b></p>
+    <p>{sprintf('[`Save configuration parameters in <a href="%s">deal source settings</a>.`]', {$source_settings_url})}</p>
+
+
+    {if $need_show_review_widget}
+        <div>
+            {$wa->installer->reviewWidget("plugin/crm/twitter", ['is_inline' => true])}
+        </div>
+    {/if}
+</div>

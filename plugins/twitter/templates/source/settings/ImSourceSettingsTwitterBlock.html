@@ -1,0 +1,108 @@
+{$block_class = 'c-source-settings-twitter-block'}
+{$block_id = uniqid($block_class)}
+
+<div class="{$block_class} c-connection-settings-block" id="{$block_id}">
+    <div class="field">
+        <p class="large-hint">
+            {$_text = '<a href="%s" target="_blank">Step-by-step manual on connecting with Twitter</a>'}
+            {if $locale == 'ru_RU'}
+                {$_link = 'https://support.webasyst.ru/27200/crm-twitter-deal-source/'}
+            {else}
+                {$_link = 'https://support.webasyst.com/27201/crm-twitter-deal-source/'}
+            {/if}
+            {sprintf(_wd('crm_twitter', $_text), $_link)}
+        </p>
+    </div>
+    <div class="field" style="margin-top: 20px">
+        <div class="value">
+            <div class="field">
+                <div class="name big">
+                    [`Name`]
+                </div>
+                <div class="value big">
+                    <input class="js-name-input" type="text" name="source[name]" value="{$source.name|default:''|escape}" required>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name big">
+                    [`Consumer Key (API Key)`]
+                </div>
+                <div class="value big">
+                    <input class="js-consumer-key-input" type="text" name="source[params][consumer_key]" value="{$source.params.consumer_key|default:''|escape}" required>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name big">
+                    [`Consumer Secret (API Secret)`]
+                </div>
+                <div class="value big">
+                    <input class="js-consumer-secret-input" type="text" name="source[params][consumer_secret]" value="{$source.params.consumer_secret|default:''|escape}" required>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name big">
+                    [`Access Token`]
+                </div>
+                <div class="value big">
+                    <input class="js-access-token-input" type="text" name="source[params][access_token]" value="{$source.params.access_token|default:''|escape}" required>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name big">
+                    [`Access Token Secret`]
+                </div>
+                <div class="value big">
+                    <input class="js-access-token-secret-input" type="text" name="source[params][access_token_secret]" value="{$source.params.access_token_secret|default:''|escape}" required>
+                    <br>
+                    <span class="hint">
+                            {sprintf(_wd('crm_twitter', 'You can get this data by creating <a href="%s" target="_blank">an application on Twitter</a>,<br>in the «Keys and Access Tokens» tab.'), 'https://apps.twitter.com/')}
+                    </span>
+                </div>
+            </div>
+            <div class="field"><hr></div>
+            <div class="field c-checkbox">
+                <div class="name crm-section">
+                    {_wd('crm_twitter', 'Collect the mentions')}
+                </div>
+                <div class="value">
+                    <input type="hidden" name="source[params][mentions]" value="0">
+                    <p>
+                        <label class="gray" for="js-ibutton-mentions">[`Disabled`]</label>
+                        <input type="checkbox" class="js-crm-block-toggle js-ibutton" id="js-ibutton-mentions" name="source[params][mentions]" value="1"{if isset($source.params.mentions) && $source.params.mentions > 0} checked{/if}>
+                        <label for="js-ibutton-mentions">[`Enabled`]</label>
+                        <br>
+                        <span class="hint">{_wd('crm_twitter', 'By default, only direct messages.')}</span>
+                    </p>
+                </div>
+            </div>
+
+            <input class="js-account-name-input" type="hidden" name="source[params][account_name]" value="{$source.params.account_name|default:''|escape}">
+            <input class="js-username-input" type="hidden" name="source[params][username]" value="{$source.params.username|default:''|escape}">
+            <input class="js-userid-input" type="hidden" name="source[params][userid]" value="{$source.params.userid|default:''|escape}">
+
+            {if $source.id <= 0}
+                <input class="js-last-direct-id-input" type="hidden" name="source[params][last_direct_id]" />
+                <input class="js-last-mention-id-input" type="hidden" name="source[params][last_mention_id]" />
+            {/if}
+
+            <div class="field">
+                <div class="value">
+                    <div class="crm-common-errors-block"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function ($) {
+        new CRMTwitterPluginSettings({
+            $wrapper: $("#{$block_id}"),
+            action: {if $source.id <= 0}'create'{else}'edit'{/if},
+            locales: {
+                alert_title: "{_wd('crm_twitter', 'Validation error')}",
+                alert_body: '{sprintf(_wd('crm_twitter', 'You can not change the twitter user within the same source.<br><br>If you want to change the user — <a href=\"%ssettings/sources/twitter\">create a new source</a> for it.'), {$wa_app_url})}',
+                alert_close: "[`Close`]"
+            }
+        });
+    })(jQuery);
+</script>

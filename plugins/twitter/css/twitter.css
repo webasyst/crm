@@ -1,0 +1,83 @@
+.c-twitter-plugin-settings-page {
+  margin: 80px auto;
+  text-align: center;
+  color: #aaa;
+}
+.c-source-settings-twitter-block .field .name.big {
+  width: 200px;
+}
+.c-source-settings-twitter-block .field .value.big {
+  margin-left: 200px;
+}
+.c-source-settings-twitter-block .field.c-checkbox .value {
+  margin-left: 0;
+  margin-bottom: -5px;
+}
+.c-im-conversation-section img.crm-twitter-plugin-icon {
+  width: 12px;
+  margin: 0 2px -1px 2px;
+}
+.c-im-conversation-section .c-twitter-plugin-tweet-link {
+  margin-left: 2px;
+  font-size: smaller;
+}
+.c-twitter-conversation-sender-form .c-twitter-error-wrapper {
+  background-color: #ffd0d0;
+  padding: 6px 0;
+}
+.c-twitter-conversation-sender-form .c-twitter-conversation-replyarea {
+  vertical-align: top;
+  width: 100%;
+  height: 28px;
+  padding: 5px;
+  margin: 0;
+  border-radius: 2px;
+  border: none;
+  box-sizing: border-box;
+  line-height: 18px;
+  resize: none;
+  outline: none;
+  overflow: hidden;
+  background-color: #f3f3f3;
+  transition: background 200ms linear;
+}
+.c-twitter-conversation-sender-form .c-twitter-conversation-replyarea:hover {
+  background-color: #fff;
+}
+.c-twitter-conversation-sender-form .c-twitter-conversation-replyarea:focus {
+  background-color: #fff;
+  height: 62px;
+}
+.c-source-im-message-viewer-dialog .c-twitter-plugin-contact-info img.crm-twitter-plugin-icon,
+.c-source-im-message-sender-dialog .c-twitter-plugin-contact-info img.crm-twitter-plugin-icon {
+  width: 12px;
+  margin: 0 5px -1px 0;
+}
+.c-twitter-im-message-sender-dialog .crm-twitter-plugin-message-body {
+  margin-bottom: 16px;
+}
+.c-twitter-im-message-sender-dialog .c-twitter-error-wrapper {
+  background-color: #ffd0d0;
+  padding: 6px 0;
+}
+.c-twitter-im-message-sender-dialog .c-twitter-replyarea {
+  width: 100%;
+  height: 28px;
+  padding: 5px;
+  border-radius: 2px;
+  border: none;
+  box-sizing: border-box;
+  line-height: 18px;
+  resize: none;
+  outline: none;
+  overflow: hidden;
+  background-color: #fff;
+  transition: background 200ms linear;
+}
+.c-twitter-im-message-sender-dialog .c-twitter-replyarea:hover {
+  background-color: #f3f3f3;
+}
+.c-twitter-im-message-sender-dialog .c-twitter-replyarea:focus {
+  background-color: #f3f3f3;
+  height: 62px;
+}

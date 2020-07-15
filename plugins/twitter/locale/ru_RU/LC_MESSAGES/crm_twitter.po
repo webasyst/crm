@@ -1,0 +1,155 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm/plugin/twitter\n"
+"POT-Creation-Date: 2016-11-14 16:26+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: crm/plugin/twitter\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"Language: ru_RU\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "Fill in the all fields below"
+msgstr "Заполните все поля ниже"
+
+msgid "You can get this data by creating <a href=\"%s\" target=\"_blank\">an application on Twitter</a>,<br>in the «Keys and Access Tokens» tab."
+msgstr "Вы можете получить эти данные, <a href=\"%s\" target=\"_blank\">создав приложение в Твиттере</a>,<br>во вкладке «Ключи и токены доступа»."
+
+msgid "Collect the mentions"
+msgstr "Собирать упоминания"
+
+msgid "By default, only direct messages."
+msgstr "По умолчанию собираются только прямые сообщения."
+
+msgid "Make sure that the entered data is correct and try again now or try again in 15 minutes."
+msgstr "Убедитесь, что введенные данные верны и попробуйте ещё раз или повторите попытку через 15 минут."
+
+msgid "Field is required"
+msgstr "Поле, обязательное для заполнения"
+
+msgid "Write reply tweet"
+msgstr "Напишите ответный твит"
+
+msgid "Write direct message"
+msgstr "Напишите ответное сообщение"
+
+msgid "open in Twitter"
+msgstr "открыть в Твиттере"
+
+msgid "open tweet"
+msgstr "открыть твит"
+
+msgid "Tweet"
+msgstr "Твит"
+
+msgid "Direct message"
+msgstr "Личное сообщение"
+
+msgid "Validation error"
+msgstr "Ошибка валидации"
+
+msgid "You can not change the twitter user within the same source.<br><br>If you want to change the user — <a href=\"%ssettings/sources/twitter\">create a new source</a> for it."
+msgstr "Нельзя изменять пользователя Твиттера в рамках одного источника.<br><br>Если вы хотите изменить пользователя — <a href=\"%ssettings/sources/twitter\">создайте новый источник</a> для него."
+
+msgid "<a href=\"%s\" target=\"_blank\">Step-by-step manual on connecting with Twitter</a>"
+msgstr "<a href=\"%s\" target=\"_blank\">Инструкция по подключению к сервису «Твиттер»</a>"
+
+msgid "Twitter"
+msgstr "Твиттер"
+
+msgid "Provides integration with Twitter messages"
+msgstr "Обеспечивает интеграцию с сообщениями Твиттера"
+
+msgid "Name"
+msgstr "Имя"
+
+msgid "Consumer Key (API Key)"
+msgstr ""
+
+msgid "Consumer Secret (API Secret)"
+msgstr ""
+
+msgid "Access Token"
+msgstr ""
+
+msgid "Access Token Secret"
+msgstr ""
+
+msgid "Disabled"
+msgstr "Отключено"
+
+msgid "Enabled"
+msgstr "Включено"
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "incoming"
+msgstr "входящее"
+
+msgid "from"
+msgstr "от"
+
+msgid "outgoing"
+msgstr "исходящее"
+
+msgid "to"
+msgstr "кому"
+
+msgid "(no subject)"
+msgstr "(нет темы)"
+
+msgid "From"
+msgstr "От"
+
+msgid "To"
+msgstr "Кому"
+
+msgid "Stage deleted"
+msgstr "Сделка удалена"
+
+msgid "Funnel deleted"
+msgstr "Воронка удалена"
+
+msgid "Deal"
+msgstr "Сделка"
+
+msgid "Send"
+msgstr "Отправить"
+
+msgid "or"
+msgstr "или"
+
+msgid "cancel"
+msgstr "отмена"
+
+msgid "Message has been sent."
+msgstr "Сообщение отправлено."
+
+msgid "Unknown source"
+msgstr "Неизвестный источник"
+
+msgid "Reply"
+msgstr "Ответить"
+
+msgid "Delete message"
+msgstr "Удалить сообщение"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Delete message from %s"
+msgstr "Удалить сообщение от %s"
+
+msgid "Plugin %s is installed and working."
+msgstr "Плагин «%s» установлен и работает."
+
+msgid "Save configuration parameters in <a href=\"%s\">deal source settings</a>."
+msgstr "Сохраните параметры конфигурации в <a href=\"%s\">настройках источника сделок</a>."

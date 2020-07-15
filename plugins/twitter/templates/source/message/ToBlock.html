@@ -1,0 +1,26 @@
+{strip}
+{$contact = ifset($message.contact)}
+<div class="c-twitter-plugin-contact-info">
+    {if $message.direction == crmMessageModel::DIRECTION_OUT}
+        {if $contact}
+            <a href="{$wa_app_url}contact/{$contact.id}/" target="_top" class="c-contact-link">
+                <img src="{$contact.photo_url_16}" alt="{$contact.name|escape}" class="c-contact-photo"> <span>{$contact.name|escape}</span>
+            </a>
+            <a href="https://twitter.com/{$message.to|escape}" target="_blank" title="@{$message.to}">
+                <img class="crm-twitter-plugin-icon" src="{$plugin_icon}" />
+            </a>
+        {else}
+            deleted user #{$message.contact_id}
+            <a href="https://twitter.com/{$message.from|escape}" target="_blank">
+                <img class="crm-twitter-plugin-icon" src="{$plugin_icon}" />
+                @{$message.from|escape}
+            </a>
+        {/if}
+    {else}
+        <a href="https://twitter.com/{$message.to|escape}" target="_blank">
+            <img class="crm-twitter-plugin-icon" src="{$plugin_icon}" />
+            @{$message.to|escape}
+        </a>
+    {/if}
+</div>
+{/strip}

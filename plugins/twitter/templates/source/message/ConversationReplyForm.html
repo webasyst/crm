@@ -1,0 +1,23 @@
+{$class = 'c-twitter-conversation-sender-form'}
+{$dialog_id = uniqid($class)}
+
+<div class="{$class}" id="{$dialog_id}">
+    <form>
+        <div class="line">
+            <textarea class="c-twitter-conversation-replyarea js-textarea" name="body" placeholder="{if $message.params.message_type == 'tweet'}{_wd('crm_twitter', 'Write reply tweet')}{else}{_wd('crm_twitter', 'Write direct message')}{/if}"></textarea>
+        </div>
+
+        <div class="c-twitter-error-wrapper js-twitter-error-wrapper" style="display: none;"></div>
+
+        <input type="hidden" name="message_id" value="{$message.id}" />
+        <input type="hidden" name="source_id" value="{$source_id}" />
+    </form>
+</div>
+
+<script>
+    (function ($) {
+        new CRMTwitterPluginConversationSenderForm({
+            $wrapper: $("#{$dialog_id}")
+        });
+    })(jQuery);
+</script>

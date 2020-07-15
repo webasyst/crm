@@ -1,0 +1,28 @@
+{$contact = ifset($message.creator_contact)}
+
+<div class="c-twitter-plugin-contact-info">
+    {if $message.creator_contact_id == 0}
+        <a href="https://twitter.com/{$message.from|escape}" target="_blank">
+            <img class="crm-twitter-plugin-icon" src="{$plugin_icon}" />
+            @{$message.from|escape}
+        </a>
+    {elseif $contact}
+        <a href="{$wa_app_url}contact/{$contact.id}/" target="_top" class="c-contact-link">
+            <img src="{$contact.photo_url_16}" alt="{$contact.name|escape}" class="c-contact-photo">
+            <span>{$contact.name|escape}</span>
+        </a>
+        <a href="https://twitter.com/{$message.from|escape}" target="_blank" title="@{$message.from}">
+            <img class="crm-twitter-plugin-icon" src="{$plugin_icon}" />
+        </a>
+    {else}
+        <a href="https://twitter.com/{$message.from|escape}" target="_blank">
+            <img class="crm-twitter-plugin-icon" src="{$plugin_icon}" />
+            @{$message.from|escape}
+        </a>
+    {/if}
+    {if ifset($message.params.message_type) == 'tweet'}
+        <a href="https://twitter.com/{$message.from|escape}/status/{$message.params.twitter_tweet_id|escape|default:0}" class="c-twitter-plugin-tweet-link" target="_blank" >
+            {_wd('crm_twitter', 'open tweet')}<i class="icon16 new-window"></i>
+        </a>
+    {/if}
+</div>

@@ -1,0 +1,34 @@
+<div class="c-twitter-plugin-log-inline">
+    {if $message.direction == crmMessageModel::DIRECTION_IN}
+        <i class="icon16 message-in" title="[`incoming`]"></i>
+        [`from`]
+        <a href="https://twitter.com/{$message.from|escape}" target="_blank" title="{_wd('crm_twitter', 'open in Twitter')}">
+            <img src="{$plugin_icon}" style="width: 12px;" />
+            @{$message.from|escape}
+        </a>
+        {if ifset($message.params.message_type) == 'tweet'}
+            <a href="https://twitter.com/{$message.from|escape}/status/{$message.params.twitter_tweet_id}" target="_blank" style="font-size: smaller;">
+                {_wd('crm_twitter', 'open tweet')}
+            </a>
+        {/if}
+    {else}
+        <i class="icon16 message-out" title="[`outgoing`]"></i>
+        [`to`]
+        {if !empty($contact)}
+            <a href="{$wa_app_url}contact/{$contact.id}/" target="_top" class="c-contact-link" title="{$contact.name|escape}">
+                <img src="{$contact->getPhoto(16)}" alt="{$contact.name|escape}" style="width: 16px; border-radius: 50%" class="c-contact-photo">
+                <span>{$contact.name|escape}</span>
+            </a>
+        {else}
+            <span style="color: #999;">Deleted contact #{$message.contact_id}</span>
+        {/if}
+        <a href="https://twitter.com/{$message.to|escape}" target="_blank" title="{_wd('crm_twitter', 'open in Twitter')}">
+            <img src="{$plugin_icon}" style="width: 12px;" />
+        </a>
+        {if ifset($message.params.message_type) == 'tweet'}
+            <a href="https://twitter.com/{$message.from|escape}/status/{$message.params.twitter_tweet_id}" target="_blank" style="font-size: smaller;">
+                {_wd('crm_twitter', 'open tweet')}
+            </a>
+        {/if}
+    {/if}
+</div>
