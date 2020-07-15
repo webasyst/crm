@@ -1,2 +1,2 @@
 # crm
-Application managing your clients database and sales.
+A Webasyst app for managing customer relationships and sales.
