@@ -1,0 +1,53 @@
+{$wrapper_id = uniqid('crm-delete-field-confirm-dialog-wrapper-')}
+
+<style>
+    .crm-delete-field-confirm-dialog-wrapper .error-text { color: red; font-weight: bold; }
+    .crm-delete-field-confirm-dialog-wrapper .crm-dialog-block { min-width: 600px; }
+</style>
+
+<div class="crm-dialog-wrapper crm-delete-field-confirm-dialog-wrapper" id="{$wrapper_id}">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>[`Delete field`]</h1>
+        </header>
+
+        <form method="post" action="{$wa_app_url}?module=settings&action=fieldDelete">
+            <div class="crm-dialog-content">
+                {if !$count}
+                    <p>[`No data in the field`] {$name}.</p>
+                    <p>[`Deleting this field will not cause a loss of any contact information.`]</p>
+                {else}
+                    <p class="error-text">{_w(
+                            '%d contact have data in the field',
+                            '%d contacts have data in the field',
+                            $count
+                        )} {$name}.</p>
+                    <p class="error-text">{_w(
+                            'Deleting the field will cause a loss of this contact information.',
+                            'Deleting the field will cause a loss of these contacts information.',
+                            $count, false)}</p>
+                {/if}
+                <em class="errormsg"></em>
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <div class="crm-actions">
+                    <input class="button red crm-button" type="submit" value="[`Delete field`]">
+                    <span style="margin: 0 4px;">[`or`]</span>
+                    <a class="crm-cancel" href="javascript:void(0);">[`cancel`]</a>
+                    <input type="hidden" name="id" value="{$id}">
+                    {$wa->csrf()}
+                </div>
+            </footer>
+        </form>
+
+        <script>
+            $(function () {
+                new crmSettingsFieldDeleteConfirm({
+                    '$wrapper': $('#{$wrapper_id}')
+                });
+            });
+        </script>
+    </div>
+</div>

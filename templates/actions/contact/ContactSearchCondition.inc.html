@@ -1,0 +1,236 @@
+{function render_combobox_field item=[] conds=[] id="" need_strip=false extra=[]}{if $need_strip}{strip}{/if}
+
+    {if !empty($item.items) && count($item.items) == 1 && key($item.items) === ':period'}
+        <div class="c-choose-period" data-id="{$id}.period" data-op="{if !empty($conds['period']['op'])}{$conds['period']['op']}{else}={/if}" data-value="{if !empty($conds['period']['val'])}{$conds['period']['val']}{else if !empty($conds['val'])}{$conds['val']}{/if}"></div>
+    {else}
+        {$is_readonly = !empty($item['readonly'])}
+        {$is_compbobox = true}
+        {if $is_readonly && is_array($item['readonly']) && isset($item['readonly']['combobox'])}
+            {$is_compbobox = $item['readonly']['combobox']}
+        {/if}
+        <select name="{$id}" {if $is_compbobox}class="combobox"{/if} data-id="{$id}"
+                {if !empty($item['autocomplete'])}data-autocomplete="1"{/if}
+                {if $is_readonly}data-readonly="1"{/if}
+                {if isset($item['count'])}data-count="{$item.count}"{/if}
+                {if isset($item['limit'])}data-limit="{$item.limit}"{/if}>
+
+            {if $is_readonly && empty($item.skip_first_space)}
+                <option value=""></option>
+            {/if}
+
+            {if !empty($item.items)}
+
+                {if $is_compbobox}
+                    {if isset($conds) && isset($conds['val'])}
+                        <option class="value cond"
+                                        value="{$conds['val']|escape}"
+                                        selected="selected"
+                                        data-op="{$conds['op']}"
+                                        data-icon="{$item['extra']['icon']|default:""|escape}">
+
+                            {if !empty($item['extra']['name'])}
+                                {$item['extra']['name']|escape}
+                            {else}
+                                {$conds['val']}
+                            {/if}
+
+                        </option>
+                    {else}
+                        <option class="cond"></option>
+                    {/if}
+                {/if}
+
+                {foreach $item.items as $k => $it}
+                    {if $k !== 'values' && substr($k, 0, 1) !== ':'}
+                        {$val = $it.value|default:$k}
+                        <option {if isset($it.value)}class="value"{/if} value="{$val}"
+                                            {if (isset($conds['val']) && $val === $conds['val']) || isset($conds[$val]['val'])}
+                                                selected="selected"
+                                            {/if}>
+                            {_wp($it.name)|escape}
+                        </option>
+                    {else if $k === 'values' && !empty($it)}
+                        {foreach $it as $val}
+                            <option class="value"
+                                                value="{$val['value']|default:$val['name']|escape}"
+                                                data-count="{if !empty($val['count'])}{$val['count']}{/if}"
+                                                data-icon="{if !empty($val['icon'])}{$val['icon']}{/if}"
+                                                {if $conds['val']|default:''|escape == $val['value']|default:$val['name']|escape}selected="selected"{/if}
+                                            >{$val['name']|escape}</option>
+                        {/foreach}
+                    {else if $k === ':sep'}
+                        <option disabled class="sep"></option>
+                    {else if $k === ':period'}
+                        <option data-period="1"
+                                            data-op="{$conds['period']['op']|default:'='}"
+                                            {if isset($conds) && isset($conds['period'])}selected="selected"  value="{$conds['period']['val']|default:''}"{/if}>
+                            {_wp($it.name|default:'')|escape}
+                        </option>
+                    {/if}
+                {/foreach}
+            {else}
+                {if !empty($item.readonly)}
+                    <option class="cond">{if isset($conds['val'])}{$conds['val']|escape}{/if}</option>
+                {else}
+                    <option class="value cond" data-op="{if isset($conds['op'])}{$conds['op']}{else}={/if}">
+                        {if isset($item['extra']['name'])}
+                            {$item['extra']['name']|escape}
+                        {else}
+                            {if isset($conds['val'])}{$conds['val']|escape}{/if}
+                        {/if}
+                    </option>
+                {/if}
+            {/if}
+        </select>
+    {/if}
+{if $need_strip}{strip}{/if}{/function}
+
+{function render_composite_field item=[] conds=[] id="" extra=[]}
+    {if !empty($item['field']) && $item['field'] instanceof waContactField}
+
+        {$fields = []}
+        {if !empty($item['info'])}
+            {$info = $item['info']}
+            {$fields = $item['info']['fields']}
+        {/if}
+
+        {foreach $fields as $subfield_id => $subfield}
+            <div class="field subfield" data-field-id="{$subfield_id}">
+                <div class="name">{_wp($subfield.name)|escape}</div>
+                <div class="value">
+                    {$cnds = []}
+                    {if isset($conds[$subfield_id])}
+                        {$cnds = $conds[$subfield_id]}
+                    {/if}
+                    {render_combobox_field
+                        item=$subfield
+                        conds=$cnds
+                        id="{$id}.{$subfield_id}"
+                        extra=$extra
+                        need_string=true}
+                </div>
+            </div>
+        {/foreach}
+
+    {/if}
+{/function}
+
+{function render_children_subfields item=[] conds=[] id="" extra=[] show=false}
+    {$children = []}
+    {if !empty($item['children']) && is_array($item['children'])}
+        {$children = $item['children']}
+    {else if !empty($item['items'])}
+        {$children = array_slice($item['items'], 1)}
+    {/if}
+    <div class="children collapsable" {if !$show}style="display:none;"{/if}>
+        {foreach $children as $it_id => $it}
+            {include file="./ContactSearchCondition.inc.html" id=$it.id item=$it conds=$conds[$it_id]|default:null extra=$extra class="subfield" not_removable=true inline}
+        {/foreach}
+    </div>
+{/function}
+
+<div class="field js-field collapsable-wrapper {if !empty($class)}{$class}{/if} {if !empty($item.type) && $item.type === 'Composite'}composite{/if}" data-id="{$id}" {if !empty($item.multiple)}data-multiple="1"{/if}>
+    {if !empty($item.html)}
+        <div class="name">
+            {_wp($item.name)|escape}
+        </div>
+        <div class="value">
+            {$item.html}
+        </div>
+    {else if !empty($item.type) && $item.type === 'Composite'}
+        <div class="name">
+            {_wp($item.name)|escape}
+        </div>
+        <div class="value">
+            {if empty($not_removable)}
+                <a href="javascript:void(0)" class="killer" title="[`Hide`]" data-id="1"><i class="icon16 delete"></i></a>
+            {/if}
+            <span class="count bold">{if isset($count)}{$count}{/if}</span>
+            {render_composite_field item=$item conds=$conds id=$id extra=$extra}
+        </div>
+    {else if empty($item.multi)}
+        <div class="name">
+            {if !empty($item['children'])}
+                {$children_conds = []}
+                {$parent_conds = []}
+                {if is_array($conds)}
+                    {foreach $conds as $k => $c}
+                        {if $k !== 'name' && isset($item['items'][$k])}
+                            {$children_conds[$k] = $conds[$k]}
+                        {else if $k === 'name'}
+                            {if is_string($conds[$k])}
+                                {$parent_conds = $conds[$k]}
+                            {else}
+                                {$parent_conds = array_merge($parent_conds, $conds[$k])}
+                            {/if}
+                        {else}
+                            {$parent_conds[$k] = $conds[$k]}
+                        {/if}
+                    {/foreach}
+                {else}
+                    {$parent_conds = $conds}
+                {/if}
+                <span class="collapse-handler no-uppercase">
+                    {_wp($item.name)|escape}
+                    <i class="icon16 {if !$children_conds}rarr{else}darr{/if}"></i>
+                </span>
+            {else}
+                {_wp($item.name)|escape}
+            {/if}
+        </div>
+        <div class="value">
+            <div class="{if !empty($item['children'])}hide-when-expand{/if}" {if !empty($item['children']) && $children_conds}style="display:none;"{/if}>
+                {if empty($not_removable)}
+                    <a href="javascript:void(0)" class="killer" title="[`Hide`]" data-id="2"><i class="icon16 delete"></i></a>
+                {/if}
+                <span class="count bold">{if isset($count)}{$count}{/if}</span>
+                {if empty($item['children'])}
+                    {render_combobox_field item=$item id=$id conds=$conds}
+                {else}
+                    {$it = reset($item['items'])}
+                    {render_combobox_field item=$it id=$it.id conds=$parent_conds}
+                {/if}
+            </div>
+            {if !empty($item['children'])}
+                {render_children_subfields item=$item conds=$conds show=!empty($children_conds)}
+            {/if}
+        </div>
+    {else}
+        <div class="inline-value">
+            {if !empty($item.not)}
+                <select name="{$id}.not" class="c-choose-boolean">
+                    <option value="">{_w($item.name|escape)}</option>
+                    <option value="1" {if !empty($conds['not'])}selected{/if}>{if is_array($item.not) && isset($item.not.name)}{_w($item.not.name|escape)}{else}[`Not`] {_w($item.name|escape)}{/if}</option>
+                </select>
+            {else}
+                <span>{_wp($item.name)|escape}</span>
+            {/if}
+            {if empty($not_removable)}
+                <a href="javascript:void(0);" class="killer" title="[`Hide`]" style="margin-top: 0px;" data-id="3"><i class="icon16 delete"></i></a>
+            {/if}
+            <span class="count bold">{if isset($count)}{$count}{/if}</span>
+        </div>
+        <div class="value">
+            {if !empty($item.items)}
+                {foreach $item.items as $it_id => $it}
+                    <div class="subfield {if !empty($it.checkbox)}checkbox{/if}">
+                        <div class="name">{if empty($it.checkbox)}{_wp($it.name)|escape}{/if}</div>
+                        <div class="value">
+                            {if !empty($it.html)}
+                                {$it.html}
+                            {else if !empty($it.checkbox)}
+                                <label><input type="checkbox" name="{$it.id}" value="1" {if !empty($it.extra.val)}checked="checked"{/if}> {_wp($it.name)|escape}</label>
+                            {else}
+                                {render_combobox_field item=$it conds=$conds[$it_id]|default:[] id="{$id}.{$it_id}" need_strip=false extra=[]}
+                            {/if}
+                        </div>
+                    </div>
+                {/foreach}
+            {else}
+                {if empty($not_removable)}
+                    <a href="javascript:void(0)" class="killer" title="[`Hide`]" data-id="4"><i class="icon16 delete"></i></a>
+                {/if}
+            {/if}
+        </div>
+    {/if}
+</div>

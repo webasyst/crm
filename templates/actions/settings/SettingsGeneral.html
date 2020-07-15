@@ -1,0 +1,101 @@
+<div class="crm-general-settings-page" id="crm-general-settings-page">
+
+    <form action="?module=settings&action=generalSave">
+
+        <div class="c-personal-settings-block">
+            <h1 class="c-personal-setting-header c-page-header">
+                [`Personal settings`]
+            </h1>
+            <div class="c-personal-settings-content">
+                <div class="field-group c-personal-settings-counter-settings-content">
+                    <h2>[`App icon counter`] <span class="indicator red">1</span></h2>
+                    <ul class="c-options-list menu-v">
+                        <li>
+                            <label>
+                                <input type="hidden" name="settings[personal][app_counter][new_messages]" value="0">
+                                <input type="checkbox" name="settings[personal][app_counter][new_messages]" value="1"
+                                       {if !empty($personal_settings.app_counter.new_messages)}checked=""{/if}> [`New messages`]
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="hidden" name="settings[personal][app_counter][new_deals]" value="0">
+                                <input type="checkbox" name="settings[personal][app_counter][new_deals]" value="1"
+                                       {if !empty($personal_settings.app_counter.new_deals)}checked=""{/if}> [`New deals`]
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="hidden" name="settings[personal][app_counter][overdue_reminders]" value="0">
+                                <input type="checkbox" name="settings[personal][app_counter][overdue_reminders]" value="1"
+                                       {if !empty($personal_settings.app_counter.overdue_reminders)}checked=""{/if}> [`My overdue reminders`]
+                            </label>
+                        </li>
+
+                    </ul>
+                </div>
+                <div class="c-personal-settings-reminder-settings-content">
+                    <h2>[`Reminder settings`]</h2>
+                    {$personal_settings.reminder_settings_html}
+                </div>
+            </div>
+        </div>
+
+        {if !empty($common_settings_has_access)}
+            <div class="crm-general-settings-block">
+
+                <h1 class="c-page-header">[`General settings`]</h1>
+
+                <div class="fields">
+                    <div class="field-group">
+                        <div class="field">
+                            <div class="name">[`Contact name edit form`]</div>
+                            <div class="value no-shift"><label>
+                                <input type="radio" name="settings[common][one_name_field]" value="1"{if !empty($common_settings.one_name_field)} checked{/if}>
+                                [`One field for contact name`]
+                            </label></div>
+                            <div class="value no-shift"><label>
+                                <input type="radio" name="settings[common][one_name_field]" value=""{if empty($common_settings.one_name_field)} checked{/if}>
+                                [`Separate fields for name parts`]
+                            </label></div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field">
+                            <div class="name">[`Contact name format`]</div>
+                            <div class="value no-shift"><label>
+                                <input type="radio" name="settings[common][name_order]" value="lfm"{if ifempty($common_settings.name_order) == 'lfm'} checked{/if}>
+                                [`Lastname`] [`Firstname`] [`Middlename`]
+                            </label></div>
+                            <div class="value no-shift"><label>
+                                <input type="radio" name="settings[common][name_order]" value="fml"{if ifempty($common_settings.name_order) == 'fml'} checked{/if}>
+                                [`Firstname`] [`Middlename`] [`Lastname`]
+                            </label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {/if}
+
+        <div class="crm-form-buttons">
+            <div class="crm-submit c-footer-actions js-footer-actions">
+                <input class="button green js-submit-button" type="submit" name="" value="[`Save`]">
+                <span class="c-hidden">
+                        <span style="margin: 0 4px;">[`or`]</span>
+                        <a href="{$wa_app_url}settings/">[`cancel`]</a>
+                    </span>
+                <i class="icon16 loading crm-loading" style="display: none;"></i>
+            </div>
+        </div>
+
+        <script>
+            ( function($) {
+                new CRMSettingsGeneral({
+                    $wrapper: $('#crm-general-settings-page')
+                });
+            })(jQuery);
+        </script>
+
+    </form>
+</div>

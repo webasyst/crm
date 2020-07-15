@@ -1,0 +1,107 @@
+{$block_id = uniqid('c-source-settings-pop3-block')}
+<div class="c-source-settings-pop3-block c-connection-settings-block" id="{$block_id}">
+    <div class="field">
+        <p class="large-hint">
+            [`Set up an email address to receive messages and deal requests.`]
+            [`Please specify an existing email address; it may be hosted on any mail server; e.g., in a popular mail service such as Gmail, Yahoo!, etc., and must be accessible for connection via POP3 protocol.`]
+        </p>
+        <p class="large-hint">
+            [`<strong>IMPORTANT NOTE:</strong> It is recommended that you specify an email account which was specially created for use by the CRM app.`]
+            [`After you configure and save this source, all messages from the specified email account will be downloaded into CRM and will be <strong>deleted from your mail server!</strong>`]
+        </p>
+    </div>
+    <div class="field" style="margin-top: 20px">
+        <div class="value">
+            <div class="field top-padded">
+                <div class="name">[`Email`]</div>
+                <div class="value">
+                    <input type="text" name="source[params][email]" value="{$source.params.email|default:''|escape}" class="equal-width js-connection-settings-input">
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">[`Username`]</div>
+                <div class="value">
+                    <input type="text" name="source[params][login]" value="{$source.params.login|default:''|escape}" autocomplete="off" class="equal-width js-connection-settings-input">
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">
+                    [`Password`]
+                </div>
+                <div class="value">
+                    <input type="password" name="source[params][password]" value="" autocomplete="off" class="equal-width js-connection-settings-input">
+                    {if $source.id}
+                        <p class="hint">[`Leave blank to keep current value unchanged.`]</p>
+                    {/if}
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">[`Incoming server`]</div>
+                <div class="value">
+                    <input type="text" name="source[params][server]" value="{$source.params.server|default:''|escape}" class="equal-width js-connection-settings-input">
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">[`POP3 Port`]</div>
+                <div class="value">
+                    <input type="text" name="source[params][port]" value="{$source.params.port|default:'110'|escape}" class="equal-width js-connection-settings-input">
+                </div>
+            </div>
+            <div class="field">
+                <div class="name"><br/></div>
+                <div class="value">
+                    <input type="hidden" name="source[params][tls]" value="">
+                    <input type="hidden" name="source[params][ssl]" value="">
+
+                    <ul class="menu-v">
+                        <li>
+                            <label>
+                                <input class="c-secure-checkbox js-connection-settings-checkbox" type="checkbox" name="source[params][tls]" value="1" {if !empty($source.params.tls)} checked="checked"{/if}>
+                                [`Use Secure STARTTLS Settings`]
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input class="c-secure-checkbox js-connection-settings-checkbox" type="checkbox" name="source[params][ssl]" value="1"{if !empty($source.params.ssl) && empty($source.params.tls)} checked="checked"{/if}>
+                                [`Use Secure SSL/TLS Settings`]
+                            </label>
+                        </li>
+                    </ul>
+
+                    <p class="hint">
+                        [`If your mail server supports this option, we recommend using POP3 over STARTTLS or SSL/TLS since it provides increased security for your interactions with the remote mail server.`]
+                    </p>
+                </div>
+            </div>
+            <div class="field">
+                <div class="value">
+                    <div class="crm-common-errors-block"></div>
+                </div>
+            </div>
+            <div class="field">
+                <div class="value c-test-connection-button-block" style="display: none;">
+                    <input type="button" class="c-test-connection-button" value="[`Test connection`]">
+                    <i class="icon16 loading c-loading" style="display: none;"></i>
+                    <span class="c-test-connection-fail-message" style="display: none;">
+                    <i class="icon16 cross"></i>
+                    <span>[`Connection to POP3-server failed`]</span>
+                </span>
+                    <span class="c-test-connection-success-message" style="display: none;">
+                    <i class="icon16 yes"></i>
+                    <span>[`POP3-server connected successfully`]</span>
+                </span>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            ( function($) {
+                new CRMSettingsSourceEmailConnectionTestBlock({
+                    $wrapper: $("#{$block_id}"),
+                    source: {$source|json_encode}
+                });
+            })(jQuery);
+        </script>
+
+    </div>
+</div>

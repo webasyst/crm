@@ -1,0 +1,16 @@
+{include file="./form_helpers.html" inline}
+
+{$namespace = $namespace|default:''}
+
+{capture assign=html}
+    {$class_id = 'js-with-contact-section'}
+    {$wrapper_id = uniqid($class_id)}
+    <section class="c-with-contact-section {$class_id}" id="{$wrapper_id}">
+        {include file="./with_contact.inc.html" inline}
+    </section>
+{/capture}
+
+{render_form_block options=[
+    'name' => '[`On contact creation`]',
+    'html' => $html
+]}

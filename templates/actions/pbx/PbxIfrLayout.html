@@ -1,0 +1,190 @@
+{*
+ * This file is loaded in <iframe> trat shows list of ongoing calls on all backend pages.
+ *
+ * `js/pbx.js` works inside iframe.
+ *
+ * `templates/actions/pbx/PbxInit.js` works outside iframe.
+ *}
+
+{capture assign="_renderCalls"}
+    {foreach $calls as $call}
+        {$_state = false}
+        {$_client = $call.client}
+        {if !empty($call.status_id)}
+            {$_state = $states[$call.status_id]}
+        {/if}
+
+        <h2 class="c-call-header js-call-header" data-call-id="{$call.id|escape}" data-call-status="{$call.status_id|escape}">
+            <i class="icon16 phone"></i>
+            {if !empty($call.client_number)}
+                <span class="c-client-number">{$call.client_number}</span>
+            {/if}
+            {if !empty($_state)}
+                <span class="nowrap c-state" style="color: {$_state.color|escape|default:"inherit"};">{_w($_state.name)|escape}</span>
+            {/if}
+
+            <span class="c-call-actions">
+                <i class="icon16 times js-delete-call" title="[`Hide notification`]"></i>
+            </span>
+        </h2>
+
+        <div class="c-call-content js-call-content" data-call-id="{$call.id|escape}">
+            {if !empty($_client.id)}
+                <div class="c-user">
+                    <div class="c-layout">
+                        <div class="c-column c-column-image">
+                            <a href="{$wa_app_url}contact/{$_client.id}/" target="_top">
+                                <img src="{$_client->getPhoto(32)}" alt="{$_client.name|escape}">
+                            </a>
+                        </div>
+                        <div class="c-column middle">
+                            <div class="line">
+                                <a href="{$wa_app_url}contact/{$_client.id}/" target="_top">
+                                    {$_client.name|escape|default:""}
+                                </a>
+                            </div>
+
+                            {* jobtitle *}
+                            {if !empty($_client.jobtitle)}
+                                <div class="line">
+                                    <span class="c-jobtitle hint">{$_client.jobtitle|escape}</span>
+
+                                    {if $_client.company}
+                                        <span class="hint">@</span>
+                                        {if $_client.company_contact_id > 0}
+                                            <a href="{$wa_app_url}contact/{$_client.company_contact_id}/">{$_client.company|escape}</a>
+                                        {else}
+                                            {$_client.company|escape}
+                                        {/if}
+                                    {/if}
+                                </div>
+                            {/if}
+
+                            {* tags *}
+                            {if !empty($call.client_tags)}
+                                {$_tags = $call.client_tags}
+                                <div class="line">
+                                    {strip}
+                                    <ul class="c-tags-list">
+                                        {foreach $_tags as $_tag}
+                                            <li>
+                                                <a class="c-tag" href="{$wa_app_url}contact/tag/{$_tag.id}/">{$_tag.name|escape}</a>
+                                            </li>
+                                        {/foreach}
+                                    </ul>
+                                    {/strip}
+                                </div>
+                            {/if}
+
+                            {* role *}
+                            {if !empty($_client.role_label)}
+                                <div class="line">
+                                    <span class="c-role-tag">{$_client.role_label|escape}</span>
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
+
+                    {if !empty($call.clients_count)}
+                        <div class="line">
+                            <a class="small" href="{$wa_app_url}contact/search/result/contact_info.phone*={$call.plugin_client_number}">
+                                {_w('%d other contact with same phone', '%d other contacts with same phone', $call.clients_count)}
+                            </a>
+                        </div>
+                    {/if}
+                </div>
+            {else}
+                <div class="line">
+                    [`No contacts match this phone`]
+                </div>
+            {/if}
+
+            {if !empty($call.deals)}
+                <ul class="c-deals-list">
+                    {foreach $call.deals as $_deal}
+                        <li class="c-deal">
+                            <div class="line">
+                                <i class="icon16 funnel-state svg-icon" data-color="{$_deal.stage.color}" title="{if $_deal.status_id == "WON"}[`Won`] / {elseif $_deal.status_id == "LOST"}[`Lost`] / {/if}{$_deal.funnel.name|escape} / {$_deal.stage.name|escape}"></i>
+                                <a class="bold" href="{$wa_app_url}deal/{$_deal.id}/" target="_top">
+                                    {$_deal.name|escape}
+                                </a>
+                            </div>
+                            {if !empty($_deal.amount) && $_deal.amount > 0}
+                                <div class="line">
+                                    <span class="bold">{$_deal.amount|wa_format_amount_currency:$_deal.currency_id}</span>
+                                </div>
+                            {/if}
+                        </li>
+                    {/foreach}
+                </ul>
+            {else}
+                <div class="c-new-user">
+                    {if !empty($call.client_contact_id)}
+                        <div class="hint">[`There is no deals for this contact.`]</div>
+                    {else}
+                        <div class="c-link-wrapper">
+                            <a href="{$wa_app_url}contact/new/?call={$call.id|default:""|escape}" class="small"><i class="icon10 add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i>[`Create or update contact`]</a>
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+        </div>
+    {/foreach}
+{/capture}
+
+{capture assign="_callTemplate"}
+    <div>
+        <h2 class="c-call-header js-call-header no-data-stub" data-call-id="" data-call-status="PENDING">
+            [`New incoming call`] <i class="icon16 loading"></i>
+            <span class="c-call-actions">
+                <i class="icon16 times js-delete-call" title="[`Hide notification`]"></i>
+            </span>
+        </h2>
+        <div class="c-call-content js-call-content" data-call-id=""><i class="icon16 loading"></i></div>
+    </div>
+{/capture}
+
+{if $show_layout}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title></title>
+        <base target="_parent">
+
+        {* CSS *}
+        {$wa->css()}
+        <link href="{$wa_app_static_url}js/jquery/jquery-ui.css?v={$wa->version('crm')}" rel="stylesheet">
+        <link href="{$wa_app_static_url}css/pbx.css?v={$wa->version('crm')}" rel="stylesheet">
+
+        {* JS *}
+        {wa_js}
+            {$wa_url}wa-content/js/jquery/jquery-1.11.1.min.js
+            {$wa_url}wa-content/js/jquery/jquery-migrate-1.2.1.min.js
+            {$wa_url}wa-content/js/d3/d3.min.js
+            {$wa_app_static_url}js/jquery/jquery-ui.min.js
+            {$wa_app_static_url}js/pbx.js
+        {/wa_js}
+    </head>
+    <body>
+        {strip}
+            <section class="c-calls-section">
+                <div class="c-calls-block" id="calls-accordion">
+                    {$_renderCalls}
+                </div>
+            </section>
+        {/strip}
+
+        <script>
+            ( function($) {
+                new PBXFrame({
+                    $wrapper: $("#calls-accordion"),
+                    call_template: {$_callTemplate|json_encode}
+                });
+            })(jQuery);
+        </script>
+    </body>
+    </html>
+{else}
+    {$_renderCalls}
+{/if}

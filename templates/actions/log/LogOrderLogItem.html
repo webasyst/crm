@@ -1,0 +1,24 @@
+<div class="c-order-log-item-wrapper">
+    {if !empty($log_item.action_id)}
+        {if $log_item.action_id == 'callback' && !empty($log_item.plugin)}
+            {if !empty($log_item.plugin_icon_url)}
+                <i class="icon16" style="background-image: url('{$log_item.plugin_icon_url}');"></i>
+            {/if}
+            {$log_item.plugin|default:''|escape}
+        {/if}
+        {if !empty($log_item.params.actor_courier_name)}
+            {if $log_item.contact_id}<br>{/if}
+            <i class="icon16 ss courier"></i>
+            {$log_item.params.actor_courier_name|escape}
+        {/if}
+        <strong>{if $log_item.action}{$log_item.action->getOption('log_record')|escape}{else}{$log_item.action_id}{/if}</strong>
+
+        {if $log_item.text}
+            <div{if $log_item.action_id == 'message' || $log_item.action_id == 'comment' || $log_item.action_id == 'pay' || $log_item.action_id == 'ship'} class="c-order-timeline-message{if $log_item.action_id == 'message'} blue{elseif $log_item.action_id == 'ship'} yellow{/if}"{/if}>{$log_item.text|regex_replace:'@\<br\s*/?\>\r?(\n)@':'$1'|nl2br}</div>
+        {/if}
+    {else}
+        {if !empty($log_item.text)}
+            <div>{$log_item.text|regex_replace:'@\<br\s*/?\>\r?(\n)@':'$1'|nl2br}</div>
+        {/if}
+    {/if}
+</div>

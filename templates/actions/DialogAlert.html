@@ -1,0 +1,20 @@
+{strip}
+
+<div class="crm-dialog-wrapper crm-confirm-dialog" id="crm-confirm-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>{if !empty($title)}{$title}{else}%title%{/if}</h1>
+        </header>
+
+        <div class="crm-dialog-content js-content">{if !empty($text)}{$text}{else}%text%{/if}</div>
+
+        <footer class="crm-dialog-footer">
+            <div class="crm-actions">
+                <input class="button js-close-dialog" type="button" value="{if !empty($ok_button)}{$ok_button}{else}%button%{/if}">
+            </div>
+        </footer>
+    </div>
+</div>
+
+{/strip}

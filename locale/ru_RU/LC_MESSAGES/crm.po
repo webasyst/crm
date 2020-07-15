@@ -1,0 +1,4778 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm\n"
+"POT-Creation-Date: 2016-11-14 16:26+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: crm\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"Language: ru_RU\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "Contacts"
+msgstr "Контакты"
+
+msgid "Change search conditions"
+msgstr "Изменить условия поиска"
+
+msgid "Save as filter"
+msgstr "Сохранить в виде фильтра"
+
+msgid "Columns"
+msgstr "Столбцы"
+
+msgid "Contact"
+msgstr "Контакт"
+
+msgid "No contacts."
+msgstr "Контактов нет."
+
+msgid "Add to segments"
+msgstr "Добавить в сегменты"
+
+msgid "Export"
+msgstr "Экспорт"
+
+msgid "Merge"
+msgstr "Объединить"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Exclude from the list"
+msgstr "Исключить из списка"
+
+msgid "Tags"
+msgstr "Теги"
+
+msgid "New contact"
+msgstr "Новый контакт"
+
+msgid "All contacts"
+msgstr "Все контакты"
+
+msgid "Selected contacts"
+msgstr "Выбранные контакты"
+
+msgid "My lists"
+msgstr "Мои списки"
+
+msgid "New segment"
+msgstr "Новый сегмент"
+
+msgid "New list"
+msgstr "Новый список"
+
+msgid "New filter"
+msgstr "Новый фильтр"
+
+msgid "Vaults"
+msgstr "Классы контактов"
+
+msgid "My own"
+msgstr "Мои"
+
+msgid "Admin"
+msgstr "Администратор"
+
+msgid "Merge duplicates"
+msgstr "Объединить дубликаты"
+
+msgid "Import contacts"
+msgstr "Импорт контактов"
+
+msgid "Last activity"
+msgstr "Последнее действие"
+
+msgid "Name "
+msgstr "Имя"
+
+msgid "Signed up"
+msgstr "Зарегистрирован"
+
+msgid "All users"
+msgstr "Все пользователи"
+
+msgid "Who can see %s profile and timeline:"
+msgstr "Кому видны профиль и хронология %s:"
+
+msgid "Who can see profile and timeline"
+msgstr "Кто сможет просматривать профиль и хронологию"
+
+msgid "Selected users only"
+msgstr "Только выбранные пользователи"
+
+msgid "Start typing user name..."
+msgstr "Начните писать имя пользователя..."
+
+msgid "This company has no employees to apply changes to."
+msgstr "В этой компании нет сотрудников, чтобы применить изменения."
+
+msgid "Save"
+msgstr "Сохранить"
+
+msgid "or"
+msgstr "или"
+
+msgid "cancel"
+msgstr "отмена"
+
+msgid "At least one owner must be selected."
+msgstr "Выберите хотя бы одного владельца."
+
+msgid "%d employee."
+msgid_plural "%d employees."
+msgstr[0] "%d сотрудник."
+msgstr[1] "%d сотрудника."
+msgstr[2] "%d сотрудников."
+
+msgid "Add contact"
+msgstr "Добавить контакт"
+
+msgid "Add company contact"
+msgstr "Добавить контакт компании"
+
+msgid "Add company for"
+msgstr "Добавить компанию для"
+
+msgid "Type the position"
+msgstr "Укажите должность"
+
+msgid "Type the company "
+msgstr "Укажите компанию"
+
+msgid "A new company will be created"
+msgstr "Будет создана новая компания"
+
+msgid "Edit tags"
+msgstr "Изменить теги"
+
+msgid "Add tag"
+msgstr "Добавить тег"
+
+msgid "Contact columns"
+msgstr "Столбцы контактов"
+
+msgid "Last name"
+msgstr "Фамилия"
+
+msgid "First name"
+msgstr "Имя"
+
+msgid "Middle name"
+msgstr "Отчество"
+
+msgid "Company"
+msgstr "Компания"
+
+msgid "Job"
+msgstr "Должность"
+
+msgid "Job title"
+msgstr "Должность"
+
+msgid "Phone"
+msgstr "Телефон"
+
+msgid "other"
+msgstr "другое"
+
+msgid "delete"
+msgstr "удалить"
+
+msgid "Add another"
+msgstr "Добавить еще"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "About"
+msgstr "Описание"
+
+msgid "Submit"
+msgstr "Отправить"
+
+msgid "Edit"
+msgstr "Редактировать"
+
+msgid "Change photo"
+msgstr "Изменить фото"
+
+msgid "Add tags"
+msgstr "Добавить теги"
+
+msgid "@"
+msgstr "@"
+
+msgid "No employees."
+msgstr "Нет сотрудников."
+
+msgid "Add employee"
+msgstr "Добавить сотрудника"
+
+msgid "Full contact info"
+msgstr "Полные контактные данные"
+
+msgid "Reduce contact info"
+msgstr "Краткие контактные данные"
+
+msgid "Import from CSV or TXT file"
+msgstr "Импортировать из CSV- или TXT-файла"
+
+msgid "Encoding"
+msgstr "Кодировка"
+
+msgid "OR"
+msgstr "ИЛИ"
+
+msgid "Import from text"
+msgstr "Импорт из текста"
+
+msgid "Copy and paste or simply type in names and other contact data for import."
+msgstr "Вставьте скопированный текст или впишите имена и другие данные, которые нужно импортировать."
+
+msgid "SAMPLE:"
+msgstr "ОБРАЗЕЦ:"
+
+msgid "John, Smith, john@domain.com"
+msgstr "Виктор, Смирнов, viktor@domain.ru"
+
+msgid "Sue, Miller, sue@domain.com"
+msgstr "Мария, Петрова, maria@domain.ru"
+
+msgid "Import"
+msgstr "Импорт"
+
+msgid "You must select at least one of the following fields: First name, Last name, Company name, Email."
+msgstr "Выберите хотя бы один из этих столбцов: Имя, Фамилия, Компания, Email."
+
+msgid "Please specify fields matching these columns."
+msgstr "Выберите свойства, соответствующие этим столбцам."
+
+msgid "field...?"
+msgstr "поле...?"
+
+msgid "Total lines"
+msgstr "Всего строк"
+
+msgid "Import first line"
+msgstr "Импортировать первую строку"
+
+msgid "Enable validation control (required and unique fields and data format)"
+msgstr "Включить валидацию (обязательные и уникальные поля, формат данных)"
+
+msgid "Done! No contacts were imported due to validation errors."
+msgstr "Готово! Из-за ошибок валидации не импортировано ни одного контакта."
+
+msgid "Done! Some contacts were not imported due to validation errors."
+msgstr "Готово! Из-за ошибок валидации некоторые контакты не импортировались."
+
+msgid "Done! All contacts imported successfully."
+msgstr "Готово! Все контакты импортированы."
+
+msgid "Merge contacts"
+msgstr "Объединить контакты"
+
+msgid "Choose a master contact that will be retained after merging."
+msgstr "Выберите главный контакт, который сохранится после объединения."
+
+msgid "Other contacts will be deleted during this merging operation."
+msgstr "Остальные контакты будут удалены в ходе объединения."
+
+msgid "Contact info from the contacts to be deleted, except unique fields, will be added to master contact."
+msgstr "Данные удаляемых контактов, кроме уникальных полей, будут добавлены в главный контакт."
+
+msgid "Links to deleted contacts from other applications will be updated to link to master contact."
+msgstr "Связи других приложений с удаляемыми контактами будут перенаправлены на главный контакт."
+
+msgid "selected as a master contact"
+msgstr "выбран в качестве главного контакта"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Added"
+msgstr "Добавлен"
+
+msgid "Method"
+msgstr "Метод"
+
+msgid "%d other contact will be merged with %%s."
+msgid_plural "%d other contacts will be merged with %%s."
+msgstr[0] "%d другой контакт будет объединен с %%s."
+msgstr[1] "%d других контакта будут объединены с %%s."
+msgstr[2] "%d других контактов будут объединены с %%s."
+
+msgid "%d contact will not be merged by the reasons designated above."
+msgid_plural "%d contacts will not be merged by the reasons designated above."
+msgstr[0] "%d контакт не будет объединен по указанным выше причинам."
+msgstr[1] "%d контакта не будут объединены по указанным выше причинам."
+msgstr[2] "%d контактов не будут объединены по указанным выше причинам."
+
+msgid "Duplicates are the contacts actually representing the same person or company though existing as two or more separate records in your database. This may happen if you use multiple scenarios to collect your contacts, e.g. sign up on your site, mailing subscription, adding contacts in the backend, and etc. Whatever reasons cause duplicates appearance, they are undesirable as do not allow to gather under the same unique account a client's profile, their activities and communication history. Merging duplicates resolves this problem. Two or more contact records will be merged in one. Contact information (phone numbers, email address, and etc.) will be consolidated as well as links from other apps (Shop, Helpdesk, Mailer, and etc.) will be modified to refer the only unique contact left after merging."
+msgstr "Дубликаты &mdash; это контакты, которые фактически является одной персоной или компанией, но существуют в базе данных в виде двух или более отдельных записей. Обычно дубликаты появляются при использовании разных способов добавления контактов: регистрация на сайте, подписка на рассылки, добавление контакта в бекенде и т. д. Каковы бы ни были причины появления дубликатов, они нежелательны, потому что не позволяют собрать в едином месте профиль клиента, историю его действия и взаимодействия с ним. Функция объединения дубликатов решает эту проблему. Несколько записей о контактах будут объединены в одну. Будет объединена контактная информация (телефоны, email-адреса и т. д.) и будут исправлены ссылки на контакт из других приложений («Магазин», «Поддержка», «Рассылки» и т. д.) таким образом, что будут ссылаться на единственный контакт, который останется после объединения."
+
+msgid "Search duplicates by"
+msgstr "Искать дубликаты по"
+
+msgid "Full person name"
+msgstr "Полное имя персоны"
+
+msgid "Start search"
+msgstr "Начать поиск"
+
+msgid "New search"
+msgstr "Новый поиск"
+
+msgid "Merge all groups automatically"
+msgstr "Объединить все группы автоматически"
+
+msgid "As a master contact in every group we will choose contact with the latest creation date. Other contacts will be deleted during this merging operation. Contact info from the contacts to be deleted, except unique fields, will be added to master contact. Links to deleted contacts from other applications will be updated to link to master contact."
+msgstr "Мы выберем в каждой группе в качестве главного контакт с самой поздней датой создания. Дубликаты будут объединены с главным контактом, и в каждой группе останется единственный (главный) контакт."
+
+msgid "<strong>IMPORTANT NOTE:</strong> Merging operation is irreversible."
+msgstr "<strong>ВАЖНО:</strong> Объединение контактов отменить нельзя."
+
+msgid "Merging complete."
+msgstr "Объединение завершено."
+
+msgid "Start auto merging"
+msgstr "Начать автоматическое объединение"
+
+msgid "Pause merging"
+msgstr "Приостановить объединение"
+
+msgid "Resume merging"
+msgstr "Продолжить объединение"
+
+msgid "Merge this group"
+msgstr "Объединить эту группу"
+
+msgid "Duplicates not found."
+msgstr "Дубликаты не найдены."
+
+msgid "<strong>%d duplicate group</strong> found."
+msgid_plural "<strong>%d duplicate groups</strong> found."
+msgstr[0] "найдена <strong>%d группа дубликатов</strong>."
+msgstr[1] "найдены <strong>%d группы дубликатов</strong>."
+msgstr[2] "найдено <strong>%d групп дубликатов</strong>."
+
+msgid "All groups include <strong>%d contact</strong>."
+msgid_plural "All groups include <strong>%d contacts</strong>."
+msgstr[0] "Во всех группах <strong>%d контакт</strong>."
+msgstr[1] "Во всех группах <strong>%d контакта</strong>."
+msgstr[2] "Во всех группах <strong>%d контактов</strong>."
+
+msgid "This group includes <strong>%d contact</strong>."
+msgid_plural "This group includes <strong>%d contacts</strong>."
+msgstr[0] "Во этой группе <strong>%d контакт</strong>."
+msgstr[1] "Во этой группе <strong>%d контакта</strong>."
+msgstr[2] "Во этой группе <strong>%d контактов</strong>."
+
+msgid "%d duplicate"
+msgid_plural "%d duplicates"
+msgstr[0] "%d дубликат"
+msgstr[1] "%d дубликата"
+msgstr[2] "%d дубликатов"
+
+msgid "Shared segments"
+msgstr "Общие сегменты"
+
+msgid "My segments"
+msgstr "Мои сегменты"
+
+msgid "Assign tags"
+msgstr "Присвоить теги"
+
+msgid "Popular tags"
+msgstr "Популярные теги"
+
+msgid "Assign"
+msgstr "Присвоить"
+
+msgid "Contact deletion cannot be undone."
+msgstr "Удалённые контакты восстановить невозможно."
+
+msgid "IMPORTANT NOTE:"
+msgstr "ВАЖНО:"
+
+msgid "All selected contacts have links to other applications."
+msgstr "У всех выбранных контактов есть связи с другими приложениями."
+
+msgid "Deletion of these contacts is allowed to Administrator only."
+msgstr "Удалить эти контакты может только Администратор."
+
+msgid "After deletion of these contacts other applications will refer to not existing contacts."
+msgstr "После удаления этих контактов другие приложения будут ссылаться на несуществующие записи."
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "close"
+msgstr "закрыть"
+
+msgid "Delete anyway"
+msgstr "Удалить все равно"
+
+msgid "%d link"
+msgid_plural "%d links"
+msgstr[0] "%d ссылка"
+msgstr[1] "%d ссылки"
+msgstr[2] "%d ссылок"
+
+msgid "Delete contacts (%d)"
+msgstr "Удалить контакты (%d)"
+
+msgid "%d of %d selected contacts shown below have links to other applications."
+msgstr "%d из %d выбранных ниже контактов связаны с другими приложениями."
+
+msgid "Delete %d of %d selected"
+msgstr "Удалить %d из %d выбранных"
+
+msgid "Checking links to other applications..."
+msgstr "Проверка связей с другими приложениями..."
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "Exclude from list"
+msgstr "Исключить из списка"
+
+msgid "Excluding now. Please wait..."
+msgstr "Выполняется исключение. Подождите..."
+
+msgid "Start exclude"
+msgstr "Начать исключение"
+
+msgid "%d selected contact will be excluded from list \"%s\""
+msgid_plural "%d selected contacts will be excluded from list \"%s\""
+msgstr[0] "%d выбранный контакт будет исключен из списка «%s»"
+msgstr[1] "%d выбранных контакта будут исключены из списка «%s»"
+msgstr[2] "%d выбранных контактов будут исключены из списка «%s»"
+
+msgid "Export contacts"
+msgstr "Экспорт контактов"
+
+msgid "Exporting now. Please wait..."
+msgstr "Выполняется экспорт. Подождите..."
+
+msgid "Start export"
+msgstr "Начать экспорт"
+
+msgid "%d selected contact will be exported into CSV file"
+msgid_plural "%d selected contacts will be exported into CSV file"
+msgstr[0] "%d выбранный контакт будет экспортирован в CSV-файл"
+msgstr[1] "%d выбранных контакта будут экспортированы в CSV-файл"
+msgstr[2] "%d выбранных контактов будут экспортированы в CSV-файл"
+
+msgid "Choose search parameters"
+msgstr "Выберите критерии поиска"
+
+msgid "Advanced search"
+msgstr "Расширенный поиск"
+
+msgid "Advanced contact search"
+msgstr "Расширенный поиск контактов"
+
+msgid "New filter is easy to create using search function. To do so, use <strong>Save as filter</strong> option on the search results page."
+msgstr "Новый фильтр легко создать с помощью функции поиска. Используйте действие <strong>Сохранить в виде фильтра</strong> на странице результатов поиска."
+
+msgid "Choose search parameters in the sidebar"
+msgstr "Выберите критерии поиска в боковой панели."
+
+msgid "Find"
+msgstr "Найти"
+
+msgid "Searching..."
+msgstr "Поиск..."
+
+msgid "Hide"
+msgstr "Скрыть"
+
+msgid "Not"
+msgstr "Не"
+
+msgid "30 days"
+msgstr "30 дней"
+
+msgid "90 days"
+msgstr "90 дней"
+
+msgid "180 days"
+msgstr "180 дней"
+
+msgid "365 days"
+msgstr "365 дней"
+
+msgid "Enter date..."
+msgstr "Выберите дату..."
+
+msgid "Over %s ago"
+msgstr "%s тому назад"
+
+msgid "or earlier"
+msgstr "или раньше"
+
+msgid "or later"
+msgstr "или позже"
+
+msgid "Edit segment list"
+msgstr "Изменить список сегмента"
+
+msgid "Create segment search filter"
+msgstr "Создать фильтр поиска сегмента"
+
+msgid "Create segment list"
+msgstr "Создать список сегмента"
+
+msgid "Name"
+msgstr "Имя"
+
+msgid "Icon"
+msgstr "Иконка"
+
+msgid "Access"
+msgstr "Доступ"
+
+msgid "only me"
+msgstr "только я"
+
+msgid "all users"
+msgstr "все пользователи"
+
+msgid "This list is the search result:"
+msgstr "Этот список сформирован поиском:"
+
+msgid "Created by"
+msgstr "Автор"
+
+msgid "This list is based on a category transferred from the standard version of the Contacts app."
+msgstr "Этот список сформирован из категории, перенесенной из стандартного приложения «Контакты»."
+
+msgid "Contact entries in this category are created and updated automatically by the %s app."
+msgstr "Контакты в этой категории автоматически создаются и обновляются приложением «%s»."
+
+msgid "This list is based on a category created in the %s app."
+msgstr "Этот список сформирован из категории, созданной в приложении «%s»."
+
+msgid "To change settings or delete this category use appropriate tools of the %s app."
+msgstr "Чтобы изменить настройки или удалить эту категорию, перейдите в приложение «%s»."
+
+msgid "This list consists of selected contacts. To add/remove contacts use \"Actions with selected\" menu."
+msgstr "Этот список состоит из выбранных контактов. Добавляйте и удаляйте контакты через меню «Действия с выбранными»."
+
+msgid "Delete segment"
+msgstr "Удалить сегмент"
+
+msgid "Delete segment?"
+msgstr "Удалить сегмент?"
+
+msgid "Do you really want to delete this list?"
+msgstr "Действительно удалить этот список?"
+
+msgid "Contacts will NOT be deleted."
+msgstr "Контакты НЕ будут удалены."
+
+msgid "New deal"
+msgstr "Новая сделка"
+
+msgid "Deal name"
+msgstr "Название сделки"
+
+msgid "Funnel"
+msgstr "Воронка"
+
+msgid "Estimated amount"
+msgstr "Предварительная стоимость"
+
+msgid "Estimated close date"
+msgstr "Предварительная дата закрытия"
+
+msgid "Description"
+msgstr "Описание"
+
+msgid "Edit contact data"
+msgstr "Изменить контактные данные"
+
+msgid "Switch to another contact"
+msgstr "Выбрать другой контакт"
+
+msgid "Switch"
+msgstr "Изменить"
+
+msgid "Other reason"
+msgstr "Другая причина"
+
+msgid "Close the deal"
+msgstr "Закрытие сделки"
+
+msgid "Specify the deal closing status."
+msgstr "Укажите статус закрытия сделки."
+
+msgid "Lost reason"
+msgstr "Причина проигрыша"
+
+msgid "Your lost reason"
+msgstr "Ваша причина проигрыша"
+
+msgid "WON"
+msgstr "Выиграна"
+
+msgid "LOST"
+msgstr "Проиграна"
+
+msgid "Remove contact"
+msgstr "Удалить контакт"
+
+msgid "Transfer ownership"
+msgstr "Передача прав"
+
+msgid "Remove owner"
+msgstr "Удалить ответственного"
+
+msgid "User name"
+msgstr "Имя пользователя"
+
+msgid "Add new contact"
+msgstr "Добавить новый контакт"
+
+msgid "Find existing contact"
+msgstr "Найти существующий контакт"
+
+msgid "Enter name, email or phone"
+msgstr "Введите имя, email или телефон"
+
+msgid "Role label"
+msgstr "Роль в сделке"
+
+msgid "Contact person"
+msgstr "Персона контакта"
+
+msgid "Find existing"
+msgstr "Найти существующий"
+
+msgid "Lastname"
+msgstr "Фамилия"
+
+msgid "Firstname"
+msgstr "Имя"
+
+msgid "Middlename"
+msgstr "Отчество"
+
+msgid "Edit deal"
+msgstr "Изменить сделку"
+
+msgid "change"
+msgstr "изменить"
+
+msgid "Deals"
+msgstr "Сделки"
+
+msgid "Expected close date is not set"
+msgstr "Предварительная дата закрытия не выбрана"
+
+msgid "Expected close date is expired"
+msgstr "Предварительная дата закрытия истекла"
+
+msgid "Created at"
+msgstr "Дата создания"
+
+msgid "Expected close date"
+msgstr "Предварительная дата закрытия"
+
+msgid "Set expected close date"
+msgstr "Выбрать предварительную дату закрытия"
+
+msgid "Closed at"
+msgstr "Дата закрытия"
+
+msgid "Reopen deal"
+msgstr "Переоткрыть сделку"
+
+msgid "Won"
+msgstr "Выигранные"
+
+msgid "Lost"
+msgstr "Проигранные"
+
+msgid "Set estimated amount"
+msgstr "Ввести предварительную стоимость"
+
+msgid "Invoices"
+msgstr "Счета"
+
+msgid "#"
+msgstr "№"
+
+msgid "Add invoice"
+msgstr "Добавить счет"
+
+msgid "Files"
+msgstr "Файлы"
+
+msgid "Remove file"
+msgstr "Удалить файл"
+
+msgid "Participants"
+msgstr "Участники"
+
+msgid "No owner"
+msgstr "Нет ответственного"
+
+msgid "Take ownership"
+msgstr "Стать ответственным"
+
+msgid "Set owner"
+msgstr "Выбрать ответственного"
+
+msgid "Add user"
+msgstr "Добавить пользователя"
+
+msgid "Exclude contact"
+msgstr "Исключить контакт"
+
+msgid "Exclude"
+msgstr "Исключить"
+
+msgid "Remove"
+msgstr "Удалить"
+
+msgid "Are you sure?"
+msgstr "Вы уверены?"
+
+msgid "Stage"
+msgstr "Этап"
+
+msgid "Deal"
+msgstr "Сделка"
+
+msgid "Price"
+msgstr "Цена"
+
+msgid "Owner"
+msgstr "Ответственный"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Loading"
+msgstr "Загрузка"
+
+msgid "no deals"
+msgstr "сделок нет"
+
+msgid "Some deals may not show due to access rights restrictions."
+msgstr "Некоторые сделки могут быть не видны из-за ограниченных прав доступа."
+
+msgid "One-time configuration required"
+msgstr "Требуется разовая конфигурация"
+
+msgid "Please set up at least one funnel before using Deals section."
+msgstr "Настройте хотя бы одну воронку, чтобы работать со «Сделками»."
+
+msgid "Create automatically"
+msgstr "Создать автоматически"
+
+msgid "proceed to manual set up"
+msgstr "настроить вручную"
+
+msgid "Full application rights are required to proceed."
+msgstr "Чтобы продолжить, нужны полные права доступа к приложению."
+
+msgid "Invoice is paid"
+msgstr "Счет оплачен"
+
+msgid "Payment is in process"
+msgstr "Выполняется оплата"
+
+msgid "Billed To"
+msgstr "Плательщик"
+
+msgid "Date of Issue"
+msgstr "Дата счета"
+
+msgid "Due Date"
+msgstr "Оплатить до"
+
+msgid "Invoice Number"
+msgstr "Номер счета"
+
+msgid "Amount Due"
+msgstr "Сумма к оплате"
+
+msgid "without"
+msgstr "без"
+
+msgid "including"
+msgstr "включая"
+
+msgid "tax"
+msgstr "налог"
+
+msgid "Comment"
+msgstr "Комментарий"
+
+msgid "Payment"
+msgstr "Оплата"
+
+msgid "Oops! We are sorry, but <strong>we can not offer any payment option for your order</strong>. Checkout can not be completed."
+msgstr "Ой! Извините, но <strong>мы не можем предложить никакого способа оплаты для вашего заказа</strong>. Заказ не может быть оформлен."
+
+msgid "Pay"
+msgstr "Оплатить"
+
+msgid "All"
+msgstr "Все"
+
+msgid "Draft"
+msgstr "Черновик"
+
+msgid "Pending"
+msgstr "Ожидание"
+
+msgid "Processing"
+msgstr "Обработка"
+
+msgid "Paid"
+msgstr "Оплачен"
+
+msgid "Refunded"
+msgstr "Возврат"
+
+msgid "Archived"
+msgstr "Архив"
+
+msgid "Newest"
+msgstr "Новые"
+
+msgid "Updated"
+msgstr "Обновлен"
+
+msgid "New invoice"
+msgstr "Новый счет"
+
+msgid "Set client"
+msgstr "Выбрать клиента"
+
+msgid "Invoice"
+msgstr "Счет"
+
+msgid "issued on"
+msgstr "от"
+
+msgid "Company name"
+msgstr "Название компании"
+
+msgid "Client"
+msgstr "Клиент"
+
+msgid "change client"
+msgstr "изменить клиента"
+
+msgid "Currency"
+msgstr "Валюта"
+
+msgid "Product or service name"
+msgstr "Название товара или услуги"
+
+msgid "Product or service"
+msgstr "Товар или услуга"
+
+msgid "Amount"
+msgstr "Сумма"
+
+msgid "Qty"
+msgstr "Кол-во"
+
+msgid "Total"
+msgstr "Итого"
+
+msgid "Subtotal"
+msgstr "Подытог"
+
+msgid "Tax"
+msgstr "Налог"
+
+msgid "Type your comment here"
+msgstr "Напишите комментарий"
+
+msgid "Create"
+msgstr "Создать"
+
+msgid "Contact is required"
+msgstr "Требуется контакт"
+
+msgid "Archive"
+msgstr "Архивировать"
+
+msgid "Restore"
+msgstr "Восстановить"
+
+msgid "Deal not shown due to access rights restrictions."
+msgstr "Сделка не видна из-за ограниченных прав доступа."
+
+msgid "State"
+msgstr "Статус"
+
+msgid "Public link"
+msgstr "Общедоступная ссылка"
+
+msgid "A settlement required for invoice publication."
+msgstr "Для публикации счетов настройте поселение."
+
+msgid "Use site application to configure settlement for CRM."
+msgstr "Чтобы добавить поселение для CRM, перейдите в приложение «Сайт»."
+
+msgid "Transactions"
+msgstr "Транзакции"
+
+msgid "Accept payment"
+msgstr "Принять платеж"
+
+msgid "Refuse payment"
+msgstr "Отвергнуть платеж"
+
+msgid "Refund"
+msgstr "Возврат"
+
+msgid "Cancel payment"
+msgstr "Отменить платеж"
+
+msgid "Mark as paid"
+msgstr "Оплачен"
+
+msgid "Return to draft"
+msgstr "Вернуть в черновики"
+
+msgid "Activate"
+msgstr "Активировать"
+
+msgid "no invoices"
+msgstr "счетов нет"
+
+msgid "mark as done"
+msgstr "выполнен"
+
+msgid "edit"
+msgstr "редактировать"
+
+msgid "Add"
+msgstr "Добавить"
+
+msgid "Reminder"
+msgstr "Напоминание"
+
+msgid "note"
+msgstr "заметку"
+
+msgid "file"
+msgstr "файл"
+
+msgid "Create note"
+msgstr "Добавить заметку"
+
+msgid "Attach file"
+msgstr "Прикрепить файл"
+
+msgid "Drop file here"
+msgstr "Перетащите файл сюда"
+
+msgid "File successful added"
+msgstr "Файл добавлен"
+
+msgid "Bad datetime"
+msgstr "Недопустимое значение даты и времени"
+
+msgid "Required field is empty"
+msgstr "Обязательное поле не заполнено"
+
+msgid "All time"
+msgstr "Все время"
+
+msgid "Select dates..."
+msgstr "Выберите даты..."
+
+msgid " from"
+msgstr "с"
+
+msgid "from"
+msgstr "от"
+
+msgid "from %s"
+msgstr "от %s"
+
+msgid "Incoming call from %s."
+msgstr "Входящий звонок от %s."
+
+msgid " to"
+msgstr "по"
+
+msgid "to"
+msgstr "до"
+
+msgid "to "
+msgstr " "
+
+msgid "to %s"
+msgstr "%s"
+
+msgid "Status: %s"
+msgstr "Статус: %s"
+
+msgid "Duration: %s"
+msgstr "Длительность: %s"
+
+msgid "Outgoing call to %s."
+msgstr "Исходящий звонок на %s."
+
+msgid "by day"
+msgstr "по дням"
+
+msgid "by month"
+msgstr "по месяцам"
+
+msgid "Apply"
+msgstr "Применить"
+
+msgid "Last %d day"
+msgid_plural "Last %d days"
+msgstr[0] "Последний %d день"
+msgstr[1] "Последние %d дня"
+msgstr[2] "Последние %d дней"
+
+msgid "unknown user"
+msgstr "неизвестный пользователь"
+
+msgid "Loading..."
+msgstr "Загрузка..."
+
+msgid "added contact"
+msgstr "добавлен контакт"
+
+msgid "Application"
+msgstr "Приложение"
+
+msgid "Reminders"
+msgstr "Напоминания"
+
+msgid "Search to-dos"
+msgstr "Поиск заданий"
+
+msgid "My reminders"
+msgstr "Мои напоминания"
+
+msgid "Add reminder"
+msgstr "Добавить напоминание"
+
+msgid "Show all %d completed reminder"
+msgid_plural "Show all %d completed reminders"
+msgstr[0] "Показать %d выполненное напоминание"
+msgstr[1] "Показать все %d выполненные напоминания"
+msgstr[2] "Показать все %d выполненных напоминаний"
+
+msgid "set time"
+msgstr "выбрать время"
+
+msgid "Time"
+msgstr "Время"
+
+msgid "clear time"
+msgstr "очистить время"
+
+msgid "Assign another user"
+msgstr "Назначить другому пользователю"
+
+msgid "Choose a user"
+msgstr "Выбрать пользователя"
+
+msgid "Reminder text"
+msgstr "Текст напоминания"
+
+msgid "Create reminder"
+msgstr "Добавить напоминание"
+
+msgid "Reports"
+msgstr "Отчеты"
+
+msgid "Settings"
+msgstr "Настройки"
+
+msgid "General settings"
+msgstr "Общие настройки"
+
+msgid "Companies"
+msgstr "Компании"
+
+msgid "Currencies"
+msgstr "Валюты"
+
+msgid "Countries & Regions"
+msgstr "Страны и регионы"
+
+msgid "Field constructor"
+msgstr "Конструктор полей"
+
+msgid "Funnels"
+msgstr "Воронки продаж"
+
+msgid "Lost reasons"
+msgstr "Причины проигрыша"
+
+msgid "Deal loss reasons"
+msgstr "Причины проигрыша сделок"
+
+msgid "Notifications"
+msgstr "Уведомления"
+
+msgid "Web forms"
+msgstr "Веб-формы"
+
+msgid "SMS"
+msgstr "SMS"
+
+msgid "New company"
+msgstr "Новая компания"
+
+msgid "Next"
+msgstr "След."
+
+msgid "Before"
+msgstr "Пред."
+
+msgid "Add new company"
+msgstr "Добавить новую компанию"
+
+msgid "Logo"
+msgstr "Логотип"
+
+msgid "Drag-n-drop company logo here"
+msgstr "Перетащите логотип сюда"
+
+msgid "Change logo"
+msgstr "Изменить логотип"
+
+msgid "Delete logo"
+msgstr "Удалить логотип"
+
+msgid "Address"
+msgstr "Адрес"
+
+msgid "Tax name"
+msgstr "Название налога"
+
+msgid "Tax options"
+msgstr "Параметры налога"
+
+msgid "Add tax option"
+msgstr "Добавить вариант налога"
+
+msgid "Delete company"
+msgstr "Удалить компанию"
+
+msgid "Saved"
+msgstr "Сохранено"
+
+msgid "Primary currency"
+msgstr "Основная валюта"
+
+msgid "Edit currency"
+msgstr "Изменить валюту"
+
+msgid "Remove currency"
+msgstr "Удалить валюту"
+
+msgid "Change primary currency"
+msgstr "Изменить основную валюту"
+
+msgid "Add currency"
+msgstr "Добавить валюту"
+
+msgid "Delete currency"
+msgstr "Удалить валюту"
+
+msgid "After deletion it will be not possible to set deal and invoice amount in that currency."
+msgstr "После удаления вы не сможете указывать стоимость сделок и счетов в этой валюте."
+
+msgid "Currency in existing deals and invoices will not be affected."
+msgstr "Валюта существующих сделок и счетов останется без изменений."
+
+msgid "Select primary currency"
+msgstr "Выбрать основную валюту"
+
+msgid "Currency list is empty"
+msgstr "Список валют пуст"
+
+msgid "Change"
+msgstr "Изменить"
+
+msgid "person"
+msgstr "персона"
+
+msgid "company"
+msgstr "компания"
+
+msgid "Main contact fields cannot be modified or disabled."
+msgstr "Главные поля контактов нельзя изменять и удалять."
+
+msgid "disabled"
+msgstr "отключено"
+
+msgid "New field"
+msgstr "Новое поле"
+
+msgid "Text (input)"
+msgstr "Текст (input)"
+
+msgid "Text (textarea)"
+msgstr "Текст (textarea)"
+
+msgid "Number (input)"
+msgstr "Число (input)"
+
+msgid "Selectable (radio)"
+msgstr "Список (radio)"
+
+msgid "Selectable (select)"
+msgstr "Список (select)"
+
+msgid "Selectable (checkboxes)"
+msgstr "Список (checkboxes)"
+
+msgid "Conditional (select/input)"
+msgstr "Зависимый список (select/input)"
+
+msgid "Checkbox"
+msgstr "Флажок"
+
+msgid "Date (input)"
+msgstr "Дата (input)"
+
+msgid "Add item"
+msgstr "Добавить элемент"
+
+msgid "Delete field"
+msgstr "Удалить поле"
+
+msgid "No data in the field"
+msgstr "В поле нет данных."
+
+msgid "Deleting this field will not cause a loss of any contact information."
+msgstr "Удаление этого поля не приведет к потере информации о контактах."
+
+msgid "Deleting the field will cause a loss of this contact information."
+msgid_plural "Deleting the field will cause a loss of these contacts information."
+msgstr[0] "Удаление этого поля приведет к потере информации об этом контакте."
+msgstr[1] "Удаление этого поля приведет к потере информации об этих контактах."
+msgstr[2] "Удаление этого поля приведет к потере информации об этих контактах."
+
+msgid "%d contact have data in the field"
+msgid_plural "%d contacts have data in the field"
+msgstr[0] "У %d контакта есть данные в этом поле."
+msgstr[1] "У %d контактов есть данные в этом поле."
+msgstr[2] "У %d контактов есть данные в этом поле."
+
+msgid "Edit field"
+msgstr "Изменить поле"
+
+msgid "Add name in another language"
+msgstr "Добавить название на другом языке"
+
+msgid "Field ID"
+msgstr "ID поля"
+
+msgid "Type of field"
+msgstr "Тип поля"
+
+msgid "Address fields"
+msgstr "Поля адреса"
+
+msgid "This will remove field and all its data from all existing contacts. Are you sure?"
+msgstr "Будет удалено это поле и связанные с ним данные у всех контактов. Удалить?"
+
+msgid "List items"
+msgstr "Список"
+
+msgid "Enter each new item on new line"
+msgstr "Введите каждый элемент списка с новой строки"
+
+msgid "Applied to"
+msgstr "Применить к"
+
+msgid "Person"
+msgstr "Персона"
+
+msgid "Enable field"
+msgstr "Включить поле"
+
+msgid "Disable field"
+msgstr "Отключить поле"
+
+msgid "Form"
+msgstr "Форма"
+
+msgid "Forms"
+msgstr "Формы"
+
+msgid "No forms"
+msgstr "Форм нет"
+
+msgid "New form"
+msgstr "Новая форма"
+
+msgid "Forms are used to set up customer subscription on your website."
+msgstr "Формы нужны, чтобы организовать подписку на вашем сайте."
+
+msgid "Create a form, publish it on your website, and visitors will be able to subscribe themselves."
+msgstr "Создайте форму, опубликуйте ее на сайте, и посетители смогут стать вашими зарегистрированными клиентами."
+
+msgid "Are you sure delete this form?"
+msgstr "Точно удалить эту форму?"
+
+msgid "Allows your subscriber to create a password for further authorization on your site and log in to their customer portal. Requires Email field in the form."
+msgstr "Позволяет подписчику придумать себе пароль для входа в личный кабинет на вашем сайте. В форме должно быть поле Email."
+
+msgid "Form name"
+msgstr "Название формы"
+
+msgid "Add fields"
+msgstr "Добавить поля"
+
+msgid "Sign up"
+msgstr "Зарегистрироваться"
+
+msgid "Form width (200-600px)"
+msgstr "Ширина формы (200–600px)"
+
+msgid "After form submission"
+msgstr "После отправки формы"
+
+msgid "This setting will redirect clients to any specified URL or display any text message after the form is submitted."
+msgstr "После отправки формы клиент  будет перенаправлен на указанный URL, или ему будет показано сообщение."
+
+msgid "After successfull submission:"
+msgstr "Что делать после отправки формы:"
+
+msgid "Redirect to URL"
+msgstr "Перенаправить на URL"
+
+msgid "Display text instead of the form"
+msgstr "Показать текст на месте формы"
+
+msgid "Thanks for subscribing!"
+msgstr "Спасибо за подписку!"
+
+msgid "Confirm registration"
+msgstr "Подтверждение регистрации"
+
+msgid "To enable this option, your form must contain Email field."
+msgstr "Чтобы включить эту настройку, в форме должно быть поле Email."
+
+msgid "An automatic notification will be sent to a subscriber‘s email address, with a special link to be clicked for a client to confirm registration. You may add extra instructions for your clients to the notification text."
+msgstr "На email-адрес подписчика будет отправлено автоматическое уведомление со ссылкой для подтверждения регистрации. Добавьте в текст сообщения дополнительные подсказки для своих клиентов."
+
+msgid "From"
+msgstr "От"
+
+msgid "Specified"
+msgstr "Указанный"
+
+msgid "It is recommended to specify an existing email address which you do not check for new mail as the sender's address for such notifications; e.g., noreply@yourdomain.com. This will help minimize the number of redundant requests."
+msgstr "Укажите адрес существующего почтового ящика, который вы не проверяете. Например, noreply@yourdomain.ru. Это нужно, чтобы ответы клиента на это сообщение не приводили к появлению новых ненужных запросов."
+
+msgid "Subject"
+msgstr "Тема"
+
+msgid "Please confirm your email"
+msgstr "Подтвердите свой email-адрес"
+
+msgid "Text"
+msgstr "Текст"
+
+msgid "Variable &#123;CONFIRM_URL&#125; must be present in the text of your message template shown above. It will be replaced in the outgoing message with a confirmation URL that your client should click to confirm registration."
+msgstr "Переменная &#123;CONFIRM_URL&#125; обязательно должна быть в шаблоне сообщения. При отправке сообщения она заменяется на тот URL, по которому ваш клиент сможет подтвердить регистрацию."
+
+msgid "Confirmation link redirects to My profile page in customer portal"
+msgstr "Ссылка подтверждения указывает на страницу профиля клиента в личном кабинете."
+
+msgid "IMPORTANT NOTE: Customer portal disabled."
+msgstr "ВНИМАНИЕ: Личный кабинет отключен."
+
+msgid "Set up your customer portal."
+msgstr "Настройте личный кабинет."
+
+msgid "Create deal"
+msgstr "Создать сделку"
+
+msgid "A deal will be created upon subscription."
+msgstr "Сделка сформируется после регистрации."
+
+msgid "Publication"
+msgstr "Публикация"
+
+msgid "To publish this form on your website use this code:"
+msgstr "Опубликуйте форму на своем сайте с помощью этого кода:"
+
+msgid "To publish the form on external site use this code:"
+msgstr "Для публикации формы на других сайтах используйте этот код:"
+
+msgid "Delete this form"
+msgstr "Удалить эту форму"
+
+msgid "Delete this source"
+msgstr "Удалить этот источник"
+
+msgid "Field settings"
+msgstr "Настройки поля"
+
+msgid "Text paragraph"
+msgstr "Абзац текста"
+
+msgid "Edit funnel"
+msgstr "Изменить воронку"
+
+msgid "Create funnel"
+msgstr "Добавить воронку"
+
+msgid "Funnel name"
+msgstr "Название воронки"
+
+msgid "Stage name"
+msgstr "Название этапа"
+
+msgid "New stage"
+msgstr "Новый этап"
+
+msgid "%d deal in stage"
+msgid_plural "%d deals in stage"
+msgstr[0] "%d сделка на этапе"
+msgstr[1] "%d сделки на этапе"
+msgstr[2] "%d сделок на этапе"
+
+msgid "remove limit"
+msgstr "удалить лимит"
+
+msgid "remove stage"
+msgstr "удалить этап"
+
+msgid "Stages"
+msgstr "Этапы"
+
+msgid "Add stage"
+msgstr "Добавить этап"
+
+msgid "%d deal in funnel"
+msgid_plural "%d deals in funnel"
+msgstr[0] "%d сделка в воронке"
+msgstr[1] "%d сделки в воронке"
+msgstr[2] "%d сделок в воронке"
+
+msgid "New funnel"
+msgstr "Новая воронка"
+
+msgid "No funnels here"
+msgstr "Здесь воронок нет."
+
+msgid "Add funnel"
+msgstr "Добавить воронку"
+
+msgid "Captcha"
+msgstr "Капча"
+
+msgid "Site Key"
+msgstr ""
+
+msgid "Secret"
+msgstr ""
+
+msgid "Get Google reCAPTCHA site key and secret for your site on <a href=\"https://www.google.com/recaptcha\" target=\"_blank\">https://www.google.com/recaptcha</a>"
+msgstr "Получите ключи Google reCAPTCHA для своего сайта по адресу <a href=\"https://www.google.com/recaptcha\" target=\"_blank\">https://www.google.com/recaptcha</a>"
+
+msgid "Request a reason for lost deals"
+msgstr "Требовать указание причины при проигрыше сделки"
+
+msgid "Allow entering free-form reasons in addition to predefined options"
+msgstr "Позволять дописывать причину в свободной форме кроме выбора одного из стандартных значений"
+
+msgid "Reason name"
+msgstr "Название причины"
+
+msgid "New reason"
+msgstr "Новая причина"
+
+msgid "Add reason"
+msgstr "Добавить причину"
+
+msgid "saving"
+msgstr "сохраняется"
+
+msgid "saved"
+msgstr "сохранено"
+
+msgid "Message from"
+msgstr "Сообщение от"
+
+msgid "Add notification"
+msgstr "Добавить уведомление"
+
+msgid "Create notification"
+msgstr "Создать уведомление"
+
+msgid "Edit notification"
+msgstr "Изменить уведомление"
+
+msgid "Delete notification"
+msgstr "Удалить уведомление"
+
+msgid "Event"
+msgstr "Событие"
+
+msgid "Choose event"
+msgstr "Выберите событие"
+
+msgid "Enabled"
+msgstr "Включено"
+
+msgid "Transport"
+msgstr "Транспорт"
+
+msgid "Email subject"
+msgstr "Тема email-сообщения"
+
+msgid "Email body"
+msgstr "Текст email-сообщения"
+
+msgid "SMS content"
+msgstr "Текст SMS"
+
+msgid "Max 300 chars."
+msgstr "Макс. 300 символов"
+
+msgid "This will permanently delete this notification. Are you sure?"
+msgstr "Уведомление будет удалено навсегда. Удалить?"
+
+msgid "Add payment option"
+msgstr "Добавить способ оплаты"
+
+msgid "Browse payment plugins..."
+msgstr "Поиск плагинов оплаты...."
+
+msgid "Multiple instances of every payment option with custom settings can be created."
+msgstr "Можно добавить несколько одинаковых способов оплаты, но выбрать для них разные настройки."
+
+msgid "Configure"
+msgstr "Конфигурация"
+
+msgid "No payment options are defined."
+msgstr "Способы оплаты не настроены."
+
+msgid "Delete %payment"
+msgstr "Удалить %payment"
+
+msgid "This will permanently delete this payment option. Are you sure?"
+msgstr "Способ оплаты будет удален навсегда. Удалить?"
+
+msgid "Error"
+msgstr "Ошибка"
+
+msgid "Delete this payment option"
+msgstr "Удалить этот способ оплаты"
+
+msgid "Payment option name"
+msgstr "Название способа оплаты"
+
+msgid "Logo URL"
+msgstr "URL логотипа"
+
+msgid "A collection of payment option icons is available for free: <a href=\"%s\" target=\"_blank\">%s</a> <i class=\"icon10 new-window\"></i>"
+msgstr "Бесплатная коллекция иконок способов оплаты доступна по адресу <a href=\"%s\" target=\"_blank\">%s</a> <i class=\"icon10 new-window\"></i>"
+
+msgid "https://support.webasyst.com/27128/crm-payment-methods-icons/"
+msgstr "https://support.webasyst.ru/27127/crm-payment-methods-icons/"
+
+msgid "HTML. Payment option description is shown to customer during the checkout."
+msgstr "Описание способа оплаты, которое видит покупатель при оформлении заказа (HTML)."
+
+msgid "Delivery info"
+msgstr "Информация о доставке"
+
+msgid "Optional text to be sent to customer with the order notification email. Plain text, no HTML allowed."
+msgstr "Необязательный текст, который будет отправлен покупателю вместе с email-уведомлением о заказе. HTML-теги не поддерживаются."
+
+msgid "Countries & regions"
+msgstr "Страны и регионы"
+
+msgid "Country"
+msgstr "Страна"
+
+msgid "Select a country"
+msgstr "Выберите страну"
+
+msgid "Clone on top of the list"
+msgstr "Дублировать в начале списка"
+
+msgid "Regions"
+msgstr "Регионы"
+
+msgid "Region name"
+msgstr "Название региона"
+
+msgid "Region code"
+msgstr "Код региона"
+
+msgid "No regions (states, provinces) are defined for this country."
+msgstr "Для этой страны не определено ни одного региона (штата, провинции)."
+
+msgid "Add region"
+msgstr "Добавить регион"
+
+msgid "Click “Save” button below to commit the delete."
+msgstr "Нажмите на кнопку «Сохранить», чтобы подтвердить удаление."
+
+msgid "Regions are not saved. Are you sure you want to leave current page?"
+msgstr "Регионы не сохранены. Покинуть эту страницу без сохранения?"
+
+msgid "Sender IDs"
+msgstr "ID отправителей"
+
+msgid "Enter Sender IDs to use with this SMS gateway (Sender ID is either your phone number or up-to-11-characters text label). Enter * to use default Sender ID issued for your account by the gateway."
+msgstr "Введите идентификаторы отправителей для этого SMS-шлюза. ID отправителя — это номер телефона или строка длиной до 11 символов. Введите звездочку *, чтобы использовать ID, назначенный SMS-шлюзом."
+
+msgid "Once connection to a gateway is set up, add SMS notifications in “<a href=\"%s\">Notifications</a>” settings."
+msgstr "После настройки SMS-шлюза добавляйте и изменяйте SMS-уведомления в разделе настроек «<a href=\"%s\">Уведомления</a>»."
+
+msgid "<a href=\"%s\" target=\"_blank\">See documentation</a> for details."
+msgstr "Подробное описание опубликовано <a href=\"%s\" target=\"_blank\">в документации</a>."
+
+msgid "https://support.webasyst.com/22505/crm-sms-notifications/"
+msgstr "https://support.webasyst.ru/22149/crm-sms-notifications/"
+
+msgid "To enable SMS message sending, install and configure sending plugin for your preferred SMS gateway.<br /> <a href=\"%s\">Browse for SMS gateway plugins</a> in Installer app."
+msgstr "Для отправки SMS-сообщений установите и настройте подключение к SMS-провайдеру.<br />Плагины подключения к SMS-провайдерам доступны для установки <a href=\"%s\">в «Инсталлере»</a>."
+
+msgid "Edit vault"
+msgstr "Изменить класс контактов"
+
+msgid "Create vault"
+msgstr "Добавить класс контактов"
+
+msgid "Style"
+msgstr "Стили"
+
+msgid "background color"
+msgstr "цвет фона"
+
+msgid "There are %d contact in vault \"%%s\"."
+msgid_plural "There are %d contacts in vault \"%%s\"."
+msgstr[0] "В классе «%%s» %d контакт."
+msgstr[1] "В классе «%%s» %d контакта."
+msgstr[2] "В классе «%%s» %d контактов."
+
+msgid "Vault deleting cause free access to this contacts data for all backend users."
+msgstr "Если удалить класс, то контакты из него будут доступны всем пользователям бекенда."
+
+msgid "There are no contacts in vault \"%s\". Vault deleting cause no effect to access any contacts data."
+msgstr "В классе «%s» нет контактов. Удаление этого класса не повлияет на изменение доступа к контактным данным."
+
+msgid "Vault name"
+msgstr "Название класса"
+
+msgid "Add vault"
+msgstr "Добавить класс контактов"
+
+msgid "Live"
+msgstr "Сейчас"
+
+msgid "Calls"
+msgstr "Звонки"
+
+msgid "Search"
+msgstr "Поиск"
+
+msgid "Recent"
+msgstr "Недавнее"
+
+msgid "Automation"
+msgstr "Автоматизация"
+
+msgid "Plugins"
+msgstr "Плагины"
+
+msgid "Server error"
+msgstr "Ошибка сервера"
+
+msgid "%d owner"
+msgid_plural "%d owners"
+msgstr[0] "%d владелец"
+msgstr[1] "%d владельца"
+msgstr[2] "%d владельцев"
+
+msgid "Info"
+msgstr "Инфо"
+
+msgid "Manage access"
+msgstr "Изменить доступ"
+
+msgid "Manage access "
+msgstr "Настроить доступ"
+
+msgid "At least one of name field must be filled"
+msgstr "Заполните любое поле имени"
+
+msgid "Tag #%s"
+msgstr "Тег #%s"
+
+msgid "Access denied"
+msgstr "Доступ запрещен"
+
+msgid "<not imported>"
+msgstr "<не импортировано>"
+
+msgid "This line was not imported"
+msgstr "Эта строка не импортирована"
+
+msgid "Error details shown in columns"
+msgstr "Подробная информация об ошибках показана в столбцах"
+
+msgid "One of these fields must have a value"
+msgstr "Один из этих столбцов должен быть заполнен"
+
+msgid "This field is required"
+msgstr "Это поле обязательное"
+
+msgid "Incorrect import data format"
+msgstr "Недопустимый формат данных для импорта"
+
+msgid "Users can not be merged into other contacts."
+msgstr "Пользователей нельзя объединять с другими контактами."
+
+msgid "%d contact was skipped because they have user accounts"
+msgid_plural "%d contacts were skipped because they have user accounts"
+msgstr[0] "%d контакт пропущен, потому что он является пользователем."
+msgstr[1] "%d контакта пропущены, потому что они являются пользователями."
+msgstr[2] "%d контактов пропущены, потому что они являются пользователями."
+
+msgid "%s of %s contacts have been merged"
+msgstr "%s из %s контактов объединены."
+
+msgid "No contacts were merged"
+msgstr "Ни один из контактов не был объединен."
+
+msgid "Segment #%s"
+msgstr "Сегмент #%s"
+
+msgid "Name is required"
+msgstr "Имя обязательное"
+
+msgid "Confirm action"
+msgstr "Подтвердите действие"
+
+msgid "Specified contact is already listed in deal"
+msgstr "Этот контакт уже указан в сделке."
+
+msgid "Invalid value"
+msgstr "Недопустимое значение"
+
+msgid "Edit contact"
+msgstr "Изменить контакт"
+
+msgid "This field required"
+msgstr "Это поле обязательное"
+
+msgid "All stages"
+msgstr "Все этапы"
+
+msgid "File not found"
+msgstr "Файл не найден"
+
+msgid "Failed to upload file %s."
+msgstr "Не удалось загрузить файл %s."
+
+msgid "Can't create deal. Funnel not found"
+msgstr "Не удалось добавить сделку — нет указанной воронки."
+
+msgid "Can't create deal. Stage not found"
+msgstr "Не удалось добавить сделку — нет указанного этапа."
+
+msgid "Form not found"
+msgstr "Форма не найдена."
+
+msgid "At least one of these fields must be filled."
+msgstr "Заполните хотя бы одно из этих полей."
+
+msgid "Page not found"
+msgstr "Страница не найдена."
+
+msgid "invalid number"
+msgstr "неправильный номер"
+
+msgid "Notes"
+msgstr "Заметки"
+
+msgid "All types"
+msgstr "Все типы"
+
+msgid "Plugin settings page"
+msgstr "Страница настроек плагина"
+
+msgid "Done"
+msgstr "Готово"
+
+msgid "Invalid tax percent"
+msgstr "Неправильный размер налога в процентах"
+
+msgid "Can't construct field"
+msgstr "Не удалось создать поле"
+
+msgid "We have found %d duplicate for this field"
+msgid_plural "We have found %d duplicates for this field"
+msgstr[0] "Найден %d дубликат этого поля."
+msgstr[1] "Найдено %d дубликата этого поля."
+msgstr[2] "Найдено %d дубликатов этого поля."
+
+msgid "Unknown locale: %s"
+msgstr "Неизвестная локаль: %s"
+
+msgid "Required field"
+msgstr "Обязательное поле"
+
+msgid "Only English alphanumeric, hyphen and underline symbols are allowed"
+msgstr "Разрешены только латинские буквы, дефисы и символы подчеркивания."
+
+msgid "This ID is already in use"
+msgstr "Этот ID уже используется."
+
+msgid "Unknown field type:"
+msgstr "Неизвестный тип поля:"
+
+msgid "Horizontal rule"
+msgstr "Горизонтальный разделитель"
+
+msgid "Show %s records on a page"
+msgstr "Показать %s записей на странице"
+
+msgid "Pages"
+msgstr "Страницы"
+
+msgid "of"
+msgstr "из"
+
+msgid "prev"
+msgstr "пред"
+
+msgid "next"
+msgstr "след"
+
+msgid "%s deal"
+msgstr "Сделка «%s»"
+
+msgid "B"
+msgstr "Б"
+
+msgid "KB"
+msgstr "КБ"
+
+msgid "MB"
+msgstr "МБ"
+
+msgid "Payment plugins not installed yet"
+msgstr "Плагины оплаты еще не установлены."
+
+msgid "Total:"
+msgstr "Всего:"
+
+msgid "Folders:"
+msgstr "Папки:"
+
+msgid "Files:"
+msgstr "Файлы:"
+
+msgid "Page:"
+msgstr "Страница:"
+
+msgid "Previous page"
+msgstr "Предыдущая страница"
+
+msgid "Next page"
+msgstr "Следующая страница"
+
+msgid "no name"
+msgstr "без названия"
+
+msgid "Any discount coupon"
+msgstr "Любой купон на скидку"
+
+msgid "Coupon"
+msgstr "Купон"
+
+msgid "Backend"
+msgstr "Бекенд"
+
+msgid "Any UTM campaign"
+msgstr "Любая URM-кампания"
+
+msgid "Invoice issued"
+msgstr "Выписка счёта"
+
+msgid "Invoice payment"
+msgstr "Оплата счёта"
+
+msgid "Invoice canceled"
+msgstr "Отмена счёта"
+
+msgid "Invoice expired"
+msgstr "Истечение счёта"
+
+msgid "Can edit or delete contacts added by other users"
+msgstr "Может изменять и удалять контакты, добавленные другими пользователями"
+
+msgid "Access to funnels"
+msgstr "Доступ к воронкам"
+
+msgid "No access"
+msgstr "Нет доступа"
+
+msgid "Only own deals"
+msgstr "Только свои сделки"
+
+msgid "Only own invoices"
+msgstr "Только свои счета"
+
+msgid "Full access"
+msgstr "Полный доступ"
+
+msgid "Access to vaults"
+msgstr "Доступ к классам контактов"
+
+msgid "Can manage invoices"
+msgstr "Может управлять счетами"
+
+msgid "added a new contact"
+msgstr "добавил новый контакт"
+
+msgid "deleted contact"
+msgstr "удалил контакт"
+
+msgid "edited contact"
+msgstr "изменил контакт"
+
+msgid "changed contact owner"
+msgstr "изменил ответственного за контакт"
+
+msgid "merged contacts"
+msgstr "объединил контакты"
+
+msgid "added deal"
+msgstr "добавил сделку"
+
+msgid "changed stage"
+msgstr "изменил этап"
+
+msgid "added contact to a deal"
+msgstr "добавил контакт к сделке"
+
+msgid "excluded deal participant"
+msgstr "исключил из сделки участника"
+
+msgid "reopened deal"
+msgstr "переоткрыл сделку"
+
+msgid "closed deal as won"
+msgstr "закрыл сделку как выигранную"
+
+msgid "closed deal as lost"
+msgstr "закрыл сделку как проигранную"
+
+msgid "edited deal"
+msgstr "изменил сделку"
+
+msgid "changed deal contact"
+msgstr "изменил контакт сделки"
+
+msgid "changed deal owner"
+msgstr "изменил ответственного сделки"
+
+msgid "remove deal owner"
+msgstr "удалил ответственного сделки"
+
+msgid "added reminder"
+msgstr "добавил напоминание"
+
+msgid "marked reminder as done"
+msgstr "отметил напоминание как выполненное"
+
+msgid "marked reminder as active"
+msgstr "отметил напоминание как активное"
+
+msgid "added note"
+msgstr "добавил заметку"
+
+msgid "edited note"
+msgstr "изменил заметку"
+
+msgid "deleted note"
+msgstr "удалил заметку"
+
+msgid "added file"
+msgstr "добавил файл"
+
+msgid "deleted file"
+msgstr "удалил файл"
+
+msgid "added funnel"
+msgstr "добавил воронку"
+
+msgid "edited funnel"
+msgstr "изменил воронку"
+
+msgid "added invoice"
+msgstr "добавил счет"
+
+msgid "issued invoice"
+msgstr "выписал счет"
+
+msgid "created signup form"
+msgstr "добавил форму регистрации"
+
+msgid "filled form"
+msgstr "заполнил форму"
+
+msgid "Contact info"
+msgstr "Контактные данные"
+
+msgid "Empty"
+msgstr "Пусто"
+
+msgid "Not empty"
+msgstr "Не пусто"
+
+msgid "Contact type"
+msgstr "Тип контакта"
+
+msgid "today"
+msgstr "сегодня"
+
+msgid "today or tomorrow"
+msgstr "сегодня или завтра"
+
+msgid "in the nearest week"
+msgstr "в ближайшую неделю"
+
+msgid "in the nearest month"
+msgstr "в ближайший месяц"
+
+msgid "select a period"
+msgstr "выберите период"
+
+msgid "Creating method and date"
+msgstr "Метод и дата создания"
+
+msgid "Activity"
+msgstr "Активность"
+
+msgid "Performed an action"
+msgstr "Выполнил действие"
+
+msgid "Action"
+msgstr "Действие"
+
+msgid "any action"
+msgstr "любое действие"
+
+msgid "Period"
+msgstr "Период"
+
+msgid "Applied an action to"
+msgstr "К кому применено действие"
+
+msgid "Event participants"
+msgstr "Участники мероприятия"
+
+msgid "Forbidden"
+msgstr "Запрещено"
+
+msgid "Customer portal only"
+msgstr "Только личный кабинет"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Online"
+msgstr "Онлайн"
+
+msgid "Offline"
+msgstr "Офлайн"
+
+msgid "Never logged in"
+msgstr "Никогда не входил"
+
+msgid "Blog"
+msgstr "Блог"
+
+msgid "Wrote posts"
+msgstr "Публиковал записи"
+
+msgid "Lifetime"
+msgstr "Все время"
+
+msgid "Wrote comments"
+msgstr "Добавлял комментарии"
+
+msgid "To post"
+msgstr "К записи"
+
+msgid "Helpdesk"
+msgstr "Поддержка"
+
+msgid "Wrote requests"
+msgstr "Присылал запросы"
+
+msgid "Current status"
+msgstr "Текущий статус"
+
+msgid "Performed an action with requests"
+msgstr "Выполнял действие с запросами"
+
+msgid "Mailer"
+msgstr "Рассылки"
+
+msgid "Received campaigns"
+msgstr "Получал рассылки"
+
+msgid "Campaign"
+msgstr "Кампания"
+
+msgid "Bounced"
+msgstr "Отказ"
+
+msgid "Unknown"
+msgstr "Неизвестный"
+
+msgid "Read"
+msgstr "Прочитано"
+
+msgid "Unsubscribed"
+msgstr "Отписался"
+
+msgid "Shop"
+msgstr "Магазин"
+
+msgid "Placed orders"
+msgstr "Оформлял заказы"
+
+msgid "Current state"
+msgstr "Текущий статус"
+
+msgid "Payment method"
+msgstr "Способ оплаты"
+
+msgid "Shipment method"
+msgstr "Способ доставки"
+
+msgid "Purchased product"
+msgstr "Купил товар"
+
+msgid "Product"
+msgstr "Товар"
+
+msgid "Total spent"
+msgstr "Всего потратил"
+
+msgid "Count only paid orders"
+msgstr "Считать только оплаченные заказы"
+
+msgid "Number of orders"
+msgstr "Количество заказов"
+
+msgid "Last order"
+msgstr "Последний заказ"
+
+msgid "First order"
+msgstr "Первый заказ"
+
+msgid "Discount"
+msgstr "Скидка"
+
+msgid "Referer"
+msgstr "Реферер"
+
+msgid "Storefront"
+msgstr "Витрина"
+
+msgid "Timeline"
+msgstr "Хронология действий"
+
+msgid "Employees"
+msgstr "Сотрудники"
+
+msgid "changed title"
+msgstr "изменил обращение"
+
+msgid "changed expected close date"
+msgstr "изменил предварительную дату закрытия"
+
+msgid "All responsibles"
+msgstr "Все ответственные"
+
+msgid "Responsibles"
+msgstr "Ответственные"
+
+msgid "No assigned owner"
+msgstr "Не назначен ответственный"
+
+msgid "Hide archived segments"
+msgstr "Скрыть архивные сегменты"
+
+msgid "Show %d archived segment"
+msgid_plural "Show %d archived segments"
+msgstr[0] "Показать %d архивный сегмент"
+msgstr[1] "Показать %d архивных сегмента"
+msgstr[2] "Показать %d архивных сегментов"
+
+msgid "Segments"
+msgstr "Сегменты"
+
+msgid "Archived segments"
+msgstr "Архивные сегменты"
+
+msgid "Show dynamic segments"
+msgstr "Показать динамические сегменты"
+
+msgid "Edit segments"
+msgstr "Редактировать сегменты"
+
+msgid "No dynamic segments"
+msgstr "Отсутствует в динамических сегментах"
+
+msgid "Separator:"
+msgstr "Разделитель:"
+
+msgid "Comma \",\""
+msgstr "Запятая \",\""
+
+msgid "Semicolon \";\""
+msgstr "Точка-с-запятой \";\""
+
+msgid "Create deals"
+msgstr "Создать сделки"
+
+msgid "You have no access rights to delete selected contacts."
+msgstr "У вас недостаточно прав для удавления выбранных контактов."
+
+msgid "Encoding:"
+msgstr "Кодировка:"
+
+msgid "me"
+msgstr "я"
+
+msgid "Count"
+msgstr "Количество"
+
+msgid "Back"
+msgstr "Назад"
+
+msgid "Client contact data required"
+msgstr "Необходимо указать контакт клиента"
+
+msgid "No reminders assigned"
+msgstr "Нет запланированных напоминаний"
+
+msgid "Overdue reminder"
+msgstr "Есть просроченные напоминания"
+
+msgid "Move <strong>%s</strong> to <strong>%s</strong> stage?"
+msgstr "Переместить <strong>%s</strong> на этап <strong>%s</strong>?"
+
+msgid "Assign me"
+msgstr "Закрепить сделку за собой"
+
+msgid "The deal was deleted"
+msgstr "Сделка была удалена"
+
+msgid "Move this deal to <strong>%s</strong> stage?"
+msgstr "Переместить эту сделку на этап <strong>%s</strong>?"
+
+msgid "Remove owner <strong>%s</strong> from the deal?"
+msgstr "Удалить ответственного <strong>%s</strong> из сделки?"
+
+msgid "Remove owner <strong>%s</strong> from the conversation?"
+msgstr "Удалить ответственного <strong>%s</strong> из переписки?"
+
+msgid "Exclude <strong>%s</strong> from the deal?"
+msgstr "Исключить <strong>%s</strong> из сделки?"
+
+msgid "Are you sure to delete this deal?"
+msgstr "Вы уверены, что хотите удалить сделку?"
+
+msgid "Add deal"
+msgstr "Добавить сделку"
+
+msgid "No deals"
+msgstr "Нет сделок"
+
+msgid "Send message to"
+msgstr "Отправить сообщение"
+
+msgid "Write"
+msgstr "Написать"
+
+msgid "Write message"
+msgstr "Написать сообщение"
+
+msgid "Write a message"
+msgstr "Напишите сообщение"
+
+msgid "Start typing a name"
+msgstr "Начните вводить имя"
+
+msgid "Edit recipient"
+msgstr "Изменить получателя"
+
+msgid "Type email"
+msgstr "Введите email"
+
+msgid "Type name"
+msgstr "Введите имя"
+
+msgid "Remove from CC"
+msgstr "Удалить из копии"
+
+msgid "Change recipient"
+msgstr "Изменить получателя"
+
+msgid "Select deal"
+msgstr "Выберите сделку"
+
+msgid "Create new"
+msgstr "Создать новую"
+
+msgid "Reply on message"
+msgstr "Ответить на сообщение"
+
+msgid "Forward message"
+msgstr "Переслать сообщение"
+
+msgid "Deal messages"
+msgstr "Сообщения сделки"
+
+msgid "All messages"
+msgstr "Все сообщения"
+
+msgid "Without a deal"
+msgstr "Без сделки"
+
+msgid "Cancel creation"
+msgstr "Отменить создание"
+
+msgid "Type a deal name"
+msgstr "Введите название сделки"
+
+msgid "Delete message"
+msgstr "Удалить сообщение"
+
+msgid "Delete message from %s"
+msgstr "Удалить сообщение от %s"
+
+msgid "Minimize by deals"
+msgstr "Свернуть по сделкам"
+
+msgid "No email sourses configured."
+msgstr "Нет настроенных email-источников."
+
+msgid "show the message"
+msgstr "показать сообщение"
+
+msgid "open conversation"
+msgstr "открыть переписку"
+
+msgid "To recieve and handle emails from clients %sset up an email deal source%s"
+msgstr "Чтобы получать и обрабатывать электронные письма от клиентов, %sнастройте источник электронной почты%s."
+
+msgid "Send email"
+msgstr "Отправить email"
+
+msgid "Message sent successfully"
+msgstr "Сообщение успешно отправлено"
+
+msgid "No invoices for this customer"
+msgstr "Нет счетов на оплату у этого клиента"
+
+msgid "Add note"
+msgstr "Добавить заметку"
+
+msgid "Send to timeline"
+msgstr "Отправить в ленту событий"
+
+msgid "File is too large or another upload error occured."
+msgstr "Файл слишком большой или произошла иная ошибка загрузки."
+
+msgid "no subject"
+msgstr "без темы"
+
+msgid "Download original"
+msgstr "Скачать оригинал сообщения"
+
+msgid "Thanks for subscribing"
+msgstr "Спасибо за подписку"
+
+msgid "You're now subscribed to notifications. You can unsubscribe at any time."
+msgstr "Теперь вы подписаны на уведомления. Отменить подписку можно в любое время."
+
+msgid "Finish Subscribing!"
+msgstr "Завершить подписку!"
+
+msgid "Unsaved reminder"
+msgstr "Несохраненное напоминание"
+
+msgid "You are about to leave this page without saving your input. Are you sure?"
+msgstr "Вы собираетесь покинуть страницу без сохранения введенных данных. Вы уверены?"
+
+msgid "Leave"
+msgstr "Покинуть"
+
+msgid "Not specified"
+msgstr "Не указано"
+
+msgid "There are no closed deals for specified period."
+msgstr "За указанный период отсутствуют закрытые сделки."
+
+msgid "%d deal"
+msgid_plural "%d deals"
+msgstr[0] "%d сделка"
+msgstr[1] "%d сделки"
+msgstr[2] "%d сделок"
+
+msgid "%d deal lost"
+msgid_plural "%d deals lost"
+msgstr[0] "%d сделка проиграна"
+msgstr[1] "%d сделки проиграны"
+msgstr[2] "%d сделок проиграно"
+
+msgid "PBX"
+msgstr "АТС"
+
+msgid "Deal sources"
+msgstr "Источники сделок"
+
+msgid "Delete confirmation"
+msgstr "Подтверждение удаления"
+
+msgid "There are %s for this company."
+msgstr "Для этой компании %s."
+
+msgid "%d payment option configured"
+msgid_plural "%d payment options configured"
+msgstr[0] "настроен %d способ оплаты"
+msgstr[1] "настроены %d способа оплаты"
+msgstr[2] "настроены %d способов оплаты"
+
+msgid "Payment configurations will be deleted without ability to restore."
+msgstr "Настройки оплаты будут удалены без возможности восстановления."
+
+msgid "There are %s from this company."
+msgstr "От лица этой компании %s."
+
+msgid "%d invoice issued"
+msgid_plural "%d invoices issued"
+msgstr[0] "выписан %d счет"
+msgstr[1] "выписаны %d счета"
+msgstr[2] "выписаны %d счетов"
+
+msgid "%d invoice"
+msgid_plural "%d invoices"
+msgstr[0] "%d счет"
+msgstr[1] "%d счета"
+msgstr[2] "%d счетов"
+
+msgid "Switch %s to"
+msgstr "Переоформить %s на"
+
+msgid "Select company"
+msgstr "Выбрать компанию"
+
+msgid "and delete company"
+msgstr "и удалить компанию"
+
+msgid "Disabled"
+msgstr "Выключено"
+
+msgid "Contact name edit form"
+msgstr "Редактирование имени"
+
+msgid "One field for contact name"
+msgstr "Единое поле для имени"
+
+msgid "Separate fields for name parts"
+msgstr "Отдельные поля для фамилии, имени и отчества"
+
+msgid "Contact name format"
+msgstr "Формат имени"
+
+msgid "Push notifications settings"
+msgstr "Настройки push-уведомлений"
+
+msgid "Set up push notifications"
+msgstr "Настройте push-уведомления"
+
+msgid "For each phone number, select users who will see pop-up notifications on incoming calls to that number, with information about calling clients."
+msgstr "Для каждого телефонного номера выберите пользователей, которые будут видеть всплывающие уведомления о входящих звонках на этот номер — с информацией о звонящих клиентах."
+
+msgid "You blocked push-notifications from this domain."
+msgstr "Push-уведомления заблокированы для текущего домена."
+
+msgid "Please grant push-notification permission to enable CRM pop-up details during incoming calls."
+msgstr "Разрешите Push-уведомления, чтобы позволить CRM показывать подробности во время входящих звонков."
+
+msgid "OneSignal User Auth Key"
+msgstr ""
+
+msgid "A OneSignal account is required to notify backend users about incoming calls."
+msgstr "Для работы всплывающих уведомлений о входящих звонках необходим аккаунт в сервисе OneSignal."
+
+msgid "Each domain used by your backend users has to be configured separately in OneSignal account."
+msgstr "Каждый домен, в котором происходит работа с бекендом, нужно настроить в вашем аккаунте OneSignal."
+
+msgid "To add a different domain, open Webasyst backend on that domain."
+msgstr "Для подключения другого домена откройте бекенд Webasyst на этом домене."
+
+msgid "Connected"
+msgstr "Подключено"
+
+msgid "Not connected"
+msgstr "Не подключено"
+
+msgid "Connect domain to OneSignal"
+msgstr "Подключить домен к OneSignal"
+
+msgid "Add email source"
+msgstr "Добавить email-источник"
+
+msgid "Personally"
+msgstr "Индивидуально"
+
+msgid "To"
+msgstr "Кому"
+
+msgid "Select"
+msgstr "Выбрать"
+
+msgid "Select "
+msgstr "Выпадающий список (select)"
+
+msgid "Created in the app"
+msgstr "Создано в приложении"
+
+msgid "Add another recipient"
+msgstr "Добавить еще получателя"
+
+msgid "All messages will be sent as blind copies (BCC)."
+msgstr "Все сообщения отправляются как скрытые копии (BCC)."
+
+msgid "Source email address"
+msgstr "Email-адрес источника"
+
+msgid "Use source email address"
+msgstr "Использовать в качестве отправителя адрес источника"
+
+msgid "WYSIWYG"
+msgstr ""
+
+msgid "Variables"
+msgstr "Переменные"
+
+msgid "Include attachments"
+msgstr "Включить вложения"
+
+msgid "New email source"
+msgstr "Новый email-источник"
+
+msgid "Please specify an existing email address; it may be hosted on any mail server; e.g., in a popular mail service such as Gmail, Yahoo!, etc., and must be accessible for connection via POP3 protocol."
+msgstr "Укажите адрес реально существующего почтового ящика; он может размещаться на любом почтовом сервере (включая популярные сервисы Mail.ru, Gmail и др.) и быть доступным по протоколу POP3."
+
+msgid "<strong>IMPORTANT NOTE:</strong> It is recommended that you specify an email account which was specially created for use by the CRM app."
+msgstr "<strong>ВНИМАНИЕ!</strong> Рекомендуется использовать электронный адрес, специально созданный только для работы с приложением CRM."
+
+msgid "After you configure and save this source, all messages from the specified email account will be downloaded into CRM and will be <strong>deleted from your mail server!</strong>"
+msgstr "После того как вы настроите и сохраните этот источник, все сообщения из указанного почтового ящика будут загружены в CRM и <strong>удалены с почтового сервера!</strong>"
+
+msgid "Username"
+msgstr "Имя пользователя"
+
+msgid "Password"
+msgstr "Пароль"
+
+msgid "Leave blank to keep current value unchanged."
+msgstr "Оставьте пустым, чтобы не изменять текущее значение."
+
+msgid "Incoming server"
+msgstr "Входящий сервер"
+
+msgid "POP3 Port"
+msgstr "Порт POP3"
+
+msgid "Use Secure STARTTLS Settings"
+msgstr "Использовать STARTTLS"
+
+msgid "Use Secure SSL/TLS Settings"
+msgstr "Использовать SSL/TLS"
+
+msgid "If your mail server supports this option, we recommend using POP3 over STARTTLS or SSL/TLS since it provides increased security for your interactions with the remote mail server."
+msgstr "Если ваш почтовый сервер поддерживает эту настройку, мы рекомендуем использовать протокол STARTTLS или SSL/TLS, потому что он обеспечивает дополнительную безопасность при передаче данных."
+
+msgid "Spam control"
+msgstr "Защита от спама"
+
+msgid "Every time you receive a message from an unknown email address which is not yet stored in your Contacts database, an automatic notification will be sent to the sender's address."
+msgstr "На любое сообщение, поступившее с неизвестного адреса, которого нет в вашей базе данных «Контактов», будет автоматически отправлено ответное уведомление."
+
+msgid "This notification contains a special link which must be clicked to confirm the sending of the first request. You may also add extra instructions for your clients to the notification text."
+msgstr "Такое уведомление содержит специальную ссылку, по которой необходимо перейти для подтверждения отправки первого обращения. В текст такого уведомления вы можете добавить дополнительные инструкции для клиентов."
+
+msgid "Messages"
+msgstr "Сообщения"
+
+msgid "No messages"
+msgstr "Нет сообщений"
+
+msgid "via"
+msgstr "через"
+
+msgid "personal settings"
+msgstr "настройки"
+
+msgid "Copy"
+msgstr "Копия"
+
+msgid "Copy settings"
+msgstr "Копировать настройки"
+
+msgid "Name or email"
+msgstr "Имя или email"
+
+msgid "Participants in the deal"
+msgstr "Участники сделки"
+
+msgid "Send email message"
+msgstr "Отправить email-сообщение"
+
+msgid "Send another email message"
+msgstr "Отправить ещё email-сообщение"
+
+msgid "Unknown server error"
+msgstr "Неизвестная ошибка"
+
+msgid "Delete source"
+msgstr "Удалить источник"
+
+msgid "%d contact has been deleted"
+msgid_plural "%d contacts have been deleted"
+msgstr[0] "%d контакт удален"
+msgstr[1] "%d контакта удалены"
+msgstr[2] "%d контактов удалены"
+
+msgid "Invalid email"
+msgstr "Email-адрес указан неправильно"
+
+msgid "Participant already exists"
+msgstr "Контакт уже является участником сделки"
+
+msgid "app"
+msgstr "приложение"
+
+msgid "method"
+msgstr "метод"
+
+msgid "Invalid API key"
+msgstr "Неверный API key"
+
+msgid "Encryption requires OpenSSL PHP module to be installed."
+msgstr "Чтобы включить шифрование, необходим модуль PHP OpenSSL."
+
+msgid "Unknown error."
+msgstr "Неизвестная ошибка."
+
+msgid "IMAP is not supported. Please use POP3."
+msgstr "Протокол IMAP не поддерживается. Используйте POP3."
+
+msgid "An error occured while attempting to connect with specified settings."
+msgstr "При попытке подключиться с указанными параметрами возникла ошибка."
+
+msgid "Subject of the original message"
+msgstr "Тема оригинального сообщения"
+
+msgid "Text of the original message"
+msgstr "Текст оригинального сообщения"
+
+msgid "URL address for not registered clients to confirm their original email."
+msgstr "Адрес (URL) по которому незарегистрированные клиенты подтверждают свой электронный адрес."
+
+msgid "Unique identifier automatically assigned to each customer in Contacts"
+msgstr "Уникальный идентификатор клиента, который автоматически присваивается каждому клиенту в Контактах"
+
+msgid "Full formatted name of customer"
+msgstr "Полное имя клиента"
+
+msgid "Value of customer field \"%s\""
+msgstr "Значение поля контакта клиента \"%s\""
+
+msgid "Client (request originator)"
+msgstr "Клиенту (от кого поступил запрос)"
+
+msgid "Assigned user"
+msgstr "Назначенному пользователю"
+
+msgid "sent message"
+msgstr "отправил сообщение"
+
+msgid "CRM"
+msgstr ""
+
+msgid "Tagged"
+msgstr "Помечены тегом"
+
+msgid "Tag"
+msgstr "Тег"
+
+msgid "Participates in deals"
+msgstr "Участвуют в сделках"
+
+msgid "Has invoices"
+msgstr "Получал счета на оплату"
+
+msgid "%d pending call"
+msgid_plural "%d pending calls"
+msgstr[0] "%d ожидающий ответа звонок"
+msgstr[1] "%d ожидающих ответа звонка"
+msgstr[2] "%d ожидающих ответа звонков"
+
+msgid "No pending calls!"
+msgstr "Нет ожидающих ответа звонков!"
+
+msgid "Nothing to worry about."
+msgstr ""
+
+msgid "Click to open detailed info."
+msgstr "Кликните для подробной информации"
+
+msgid "Open "
+msgstr "Открыта"
+
+msgid "unknown"
+msgstr "неизвестно"
+
+msgid "Form source"
+msgstr "Источник сделок веб-форма"
+
+msgid "Email source"
+msgstr "Email-источник сделок"
+
+msgid "Source not found"
+msgstr "Источник сделок не найден"
+
+msgid "Change deal stage"
+msgstr "Изменение этапа сделки"
+
+msgid "Change stage"
+msgstr "Изменить этап"
+
+msgid "Other"
+msgstr "Другое"
+
+msgid "Actions"
+msgstr "Действия"
+
+msgid "Add contacts to segment"
+msgstr "Добавить контакты в сегмент"
+
+msgid "Restore from archive"
+msgstr "Восстановить из архива"
+
+msgid "Move to archive"
+msgstr "Отправить в архив"
+
+msgid "Only users with access to vault"
+msgstr "Только пользователи с доступом к классу контактов"
+
+msgid "remove"
+msgstr "удалить"
+
+msgid "Add person"
+msgstr "Добавить персону"
+
+msgid "Add company"
+msgstr "Добавить компанию"
+
+msgid "Create person"
+msgstr "Создать персону"
+
+msgid "Open extended form"
+msgstr "Открыть расширенную форму"
+
+msgid "Create company"
+msgstr "Создать компанию"
+
+msgid "Contact name"
+msgstr "Имя контакта"
+
+msgid "Personal settings"
+msgstr "Персональные настройки"
+
+msgid "Open dialog for contact creation"
+msgstr "Открывать диалог для создания контакта"
+
+msgid "Open extended form for contact creation"
+msgstr "Открывать расширенную форму для создания контакта"
+
+msgid "Set me as owner when I create a contact"
+msgstr "Назначать меня ответственным за создаваемый контакт"
+
+msgid "another..."
+msgstr "другое..."
+
+msgid "what?"
+msgstr "что?"
+
+msgid "Extended contact data"
+msgstr "Дополнительные данные контакта"
+
+msgid "Hide extended fields"
+msgstr "Скрыть дополнительные поля"
+
+msgid "Contact name required"
+msgstr "Необходимо указать имя контакта"
+
+msgid "Deal name required"
+msgstr "Необходимо указать название сделки"
+
+msgid "Export field names"
+msgstr "Экспортировать названия полей"
+
+msgid "Do not export empty columns"
+msgstr "Исключить из экспорта пустые колонки"
+
+msgid "Change filter conditions"
+msgstr "Изменить условия фильтра"
+
+msgid "Add contacts to segment \"%s\""
+msgstr "Добавить контакты в сегмент \"%s\""
+
+msgid "Find contact"
+msgstr "Найти контакт"
+
+msgid "Edit segment"
+msgstr "Редактировать сегмент"
+
+msgid "Create segment"
+msgstr "Создать сегмент"
+
+msgid "Static list"
+msgstr "Статический список"
+
+msgid "manually selected contacts"
+msgstr "вручную отобранные контакты"
+
+msgid "Dynamic filter"
+msgstr "Динамический фильтр"
+
+msgid "advanced search results"
+msgstr "результат поиска по условиям"
+
+msgid "Change funnel / stage"
+msgstr "Изменить воронку / этап"
+
+msgid "Change owner"
+msgstr "Изменить ответственного"
+
+msgid "choose user"
+msgstr "выбрать пользователя"
+
+msgid "Export deals"
+msgstr "Экспортировать сделки"
+
+msgid "%d selected deal will be exported into CSV file"
+msgid_plural "%d selected deals will be exported into CSV file"
+msgstr[0] "%d выбранная сделка будет экспортирована в CSV-файл"
+msgstr[1] "%d выбранных сделки будут экспортированы в CSV-файл"
+msgstr[2] "%d выбранных сделок будут экспортированы в CSV-файл"
+
+msgid "No invoices in this deal"
+msgstr "Нет счетов на оплату в этой сделке"
+
+msgid "Сhange owner"
+msgstr "Изменить ответственного"
+
+msgid "Delete %s deals"
+msgstr "Удалить отмеченные сделки"
+
+msgid "Contacts of deal participants will not be deleted."
+msgstr "Контакты участников сделки будут сохранены."
+
+msgid "Deal deletion cannot be undone."
+msgstr "Отменить удаление сделки будет невозможно."
+
+msgid "Deals merge"
+msgstr "Объединение сделок"
+
+msgid "Choose a master deal that will be retained after merging."
+msgstr "Выберите главную сделку, которая сохранится после объединения."
+
+msgid "Other deals will be deleted during this merging operation."
+msgstr "Остальные сделки будут удалены в ходе объединения."
+
+msgid "Selected as the main deal"
+msgstr "Выбрано в качестве главной сделки"
+
+msgid "Confirmed"
+msgstr "Подтверждено"
+
+msgid "Provider"
+msgstr "Поставщик"
+
+msgid "Payment date"
+msgstr "Дата оплаты"
+
+msgid "Delete invoice"
+msgstr "Удалить счет"
+
+msgid "Invoice deletion cannot be undone."
+msgstr "Удаление счета отменить невозможно."
+
+msgid "Refund payment for invoice"
+msgstr "Возврат оплаты по счету"
+
+msgid "Operation can not be undone."
+msgstr "Действие невозможно будет отменить."
+
+msgid "Show all"
+msgstr "Показать все"
+
+msgid "Redirect"
+msgstr "Перевести"
+
+msgid "Redirect call"
+msgstr "Перевести звонок"
+
+msgid "Select number"
+msgstr "Выберите номер"
+
+msgid "Delete number"
+msgstr "Удалить номер"
+
+msgid "Number does not exist"
+msgstr "Номер не существует"
+
+msgid "Other "
+msgstr "Другой"
+
+msgid "Hide notification"
+msgstr "Скрыть уведомление"
+
+msgid "Outgoing call:"
+msgstr "Исходящий звонок:"
+
+msgid "Call started.."
+msgstr "Запуск вызова.."
+
+msgid "Call pending"
+msgstr "Ожидание"
+
+msgid "Call connected"
+msgstr "Звонок подключен"
+
+msgid "Call finished"
+msgstr "Звонок завершен"
+
+msgid "There is no contact with this phone number."
+msgstr "Клиент с этим номером телефона отсутствует."
+
+msgid "Create new contact"
+msgstr "Создать новый контакт"
+
+msgid "New incoming call"
+msgstr "Новый входящий звонок"
+
+msgid "Any type"
+msgstr "Все типы"
+
+msgid "Show my reminders only"
+msgstr "Показывать только мои напоминания"
+
+msgid "Show all reminders"
+msgstr "Показывать все напоминания"
+
+msgid "Show reminders assigned to users from selected groups"
+msgstr "Показывать напоминания, назначенные на пользователей из выбранных групп"
+
+msgid "Notify me"
+msgstr "Уведомлять меня"
+
+msgid "Daily recap on what’s up next"
+msgstr "Ежедневно сообщать о том, что запланировано"
+
+msgid "for today"
+msgstr "на сегодня"
+
+msgid "for today and tomorrow"
+msgstr "на сегодня и завтра"
+
+msgid "Popup "
+msgstr "Всплывающее окно за"
+
+msgid "minutes before due time"
+msgstr "мин. до начала"
+
+msgid "Enter the number of minutes"
+msgstr "Введите количество минут"
+
+msgid "When someone assigns me a reminder"
+msgstr "Когда кто-то назначает мне напоминание"
+
+msgid "When someone marks my reminder as done"
+msgstr "Когда кто-то отмечает мое напоминание как выполненное"
+
+msgid "Total won amount"
+msgstr "Общая сумма выигранных сделок"
+
+msgid "deal won"
+msgid_plural "deals won"
+msgstr[0] "сделка выиграна"
+msgstr[1] "сделки выиграны"
+msgstr[2] "сделок выиграно"
+
+msgid "Shop-Script integration"
+msgstr "Интеграция с Shop-Script"
+
+msgid "Invoice template"
+msgstr "Шаблон счета на оплату"
+
+msgid "After successful confirmation"
+msgstr "После успешного подтверждения"
+
+msgid "Display text"
+msgstr "Показать текст"
+
+msgid "Will be available after saving"
+msgstr "Будет доступно после сохранения"
+
+msgid "Consent to terms"
+msgstr "Согласие с условиями"
+
+msgid "Field"
+msgstr "Поле"
+
+msgid "Terms description"
+msgstr "Описание условий"
+
+msgid "Checked by default"
+msgstr "Отмечено по умолчанию"
+
+msgid "Label in this form"
+msgstr "Подпись в форме"
+
+msgid "Label placement"
+msgstr "Размещение подписи"
+
+msgid "left from field"
+msgstr "слева от поля"
+
+msgid "above of the field"
+msgstr "над полем"
+
+msgid "hide"
+msgstr "скрыть"
+
+msgid "Placeholder"
+msgstr "Подсказка"
+
+msgid "Required"
+msgstr "Обязательное"
+
+msgid "Web-worms"
+msgstr "Веб-формы"
+
+msgid "Add new funnel"
+msgstr "Создать новую воронку"
+
+msgid "Full access to CRM app"
+msgstr "Полный доступ к приложению CRM"
+
+msgid "No access to CRM app yet"
+msgstr "Пока нет доступа к приложению CRM"
+
+msgid "Own and unassigned deals"
+msgstr "Свои и свободные сделки"
+
+msgid "Show groups without access to CRM app"
+msgstr "Показать группы без доступа к приложению CRM"
+
+msgid "Hide groups without access to CRM app"
+msgstr "Скрыть группы без доступа к приложению CRM"
+
+msgid "Add a web form"
+msgstr "Добавить источник-форму"
+
+msgid "Select user groups which you want to be able to access this vault."
+msgstr "Укажите группы пользователей, которым вы хотите предоставить доступ к этому классу контактов."
+
+msgid "Mass action"
+msgstr "Массовое действие"
+
+msgid "Create datetime"
+msgstr "Дата создания"
+
+msgid "Expected date"
+msgstr "Ожидаемая дата закрытия"
+
+msgid "Closing date"
+msgstr "Дата закрытия"
+
+msgid "Invalid color"
+msgstr "Указан неверный цвет"
+
+msgid "Invalid url"
+msgstr "Указан неверный веб-адрес"
+
+msgid "Error in plugin"
+msgstr "Ошибка в плагине"
+
+msgid "Please follow this link to confirm your registration:"
+msgstr "Пожалуйста, перейдите по этой ссылке для подтверждения регистрации:"
+
+msgid "Thank you!"
+msgstr "Спасибо!"
+
+msgid "Text - value of field text, description of deal"
+msgstr "Текст - содержимое текстового поля, описание сделки"
+
+msgid "Company name specified in your Installer settings (also displayed in the top-left corner of your backend)"
+msgstr "Название компании, которое указано в настройках «Инсталлера» (также отображается в левом верхнем углу в бекенде)"
+
+msgid "Responsible user (owner)"
+msgstr "Ответственный"
+
+msgid "Attachments"
+msgstr "Вложения"
+
+msgid "Meeting"
+msgstr "Встреча"
+
+msgid "Call"
+msgstr "Звонок"
+
+msgid "Message"
+msgstr "Письмо"
+
+msgid "Message "
+msgstr "Сообщение "
+
+msgid "Export fields name"
+msgstr "Экспортировать названия полей"
+
+msgid "Cron Jobs"
+msgstr "Задания CRON"
+
+msgid "No <tt>cron</tt> job required for automated email capture and execution of deals."
+msgstr "У вас не настроены задания <tt>cron</tt>, которые необходимы для автоматического сбора почты."
+
+msgid "<tt>Cron</tt> job required for automated email capture and execution of deals is set up properly."
+msgstr "Задание <tt>CRON</tt>, необходимое для автоматического сбора email-сообщений и обработки сделок, настроено."
+
+msgid "Without a <tt>cron</tt> job set up, new mail is captured and deals are executed only as long as you keep CRM open in your browser."
+msgstr "Без настройки <tt>cron</tt> почта забирается из ящиков, только пока приложение CRM открыто в браузере."
+
+msgid "Last execution time:"
+msgstr "Последнее выполнение:"
+
+msgid "<tt>cron</tt> job is set up properly."
+msgstr "<tt>cron</tt> настроен и работает."
+
+msgid "http://www.webasyst.com/framework/docs/server/cron/"
+msgstr "http://www.webasyst.ru/developers/docs/tips/cron/"
+
+msgid "<tt>Cron</tt> job required for sending greetings to customers."
+msgstr "Необходимо настроить задание <tt>cron</tt> для рассылки <b>поздравлений клиентам</b>."
+
+msgid "<tt>Cron</tt> job required for daily recap."
+msgstr "Необходимо настроить задание <tt>cron</tt> для <b>рассылки напоминаний</b>."
+
+msgid "<tt>Cron</tt> job required to automatically handle invoices expiration."
+msgstr "Необходимо настроить задание <tt>cron</tt> для <b>автоматического перевода в архив истекших счетов</b>."
+
+msgid "<tt>Cron</tt> job required for deal stages overdue."
+msgstr "Необходимо настроить задание <tt>cron</tt> для автоматической установки <b>просрочивания сделок</b>."
+
+msgid "<tt>Cron</tt> job required for deal stages overdue is set up properly."
+msgstr "Задание <tt>cron</tt> для автоматической установки <b>просрочивания сделок</b>, настроена должным образом."
+
+msgid "<tt>Cron</tt> job required for currencies copy."
+msgstr "Необходимо настроить задание <tt>cron</tt> для автоматического <b>копирования валют</b>."
+
+msgid "<tt>Cron</tt> job required for currencies copy is set up properly."
+msgstr "Задание <tt>cron</tt> для автоматического <b>копирования валют</b>, настроена должным образом."
+
+msgid "Valid through"
+msgstr "Действителен до"
+
+msgid "Company name is must be filled"
+msgstr "Название компании необходимо указать"
+
+msgid "Lead In"
+msgstr "Первичный контакт"
+
+msgid "Needs Defining"
+msgstr "Переговоры"
+
+msgid "Working with objections"
+msgstr "Подготовка предложения"
+
+msgid "Proposal Making"
+msgstr "Принимают решение"
+
+msgid "Conditions Approval"
+msgstr "Согласование условий / договора"
+
+msgid "Rival was preferred"
+msgstr "Предпочел конкурента"
+
+msgid "Junk lead"
+msgstr "Мусорный запрос"
+
+msgid "Not interested"
+msgstr "Не заинтересован"
+
+msgid "Maybe in the future"
+msgstr "Возможно в будущем"
+
+msgid "Product is not required"
+msgstr "Продукт не требуется"
+
+msgid "Product does not satisfy"
+msgstr "Продукт не устроил"
+
+msgid "Price is too high"
+msgstr "Цена не устроила"
+
+msgid "An array containing information about the invoice"
+msgstr "Массив, содержащий данные счета"
+
+msgid "Field %s of invoice"
+msgstr "Поле %s счета"
+
+msgid "An array containing information about the %s"
+msgstr "Массив, содержащий данные о %s"
+
+msgid "Field %s of %s"
+msgstr "Поле %s из %s"
+
+msgid "Default email of %s"
+msgstr "Основной email %s"
+
+msgid "Default phone of %s"
+msgstr "Основной телефон %s"
+
+msgid "Webasyst CRM is excellent for managing your clients database and sales."
+msgstr "Webasyst CRM отлично подходит для управления вашей базой клиентов и продажами."
+
+msgid "Customer birthday"
+msgstr "День рождения клиента"
+
+msgid "Fields must be delimited by comma (,), semicolon (;) or tab. Different contacts on separate lines."
+msgstr "Поля должны быть разделены запятой (,), точкой с запятой (;) или табуляцией. По одному контакту на строку."
+
+msgid "{$customer.name}, happy birthday! From {$wa->accountName()}"
+msgstr "{$customer.name}, поздравляем с днём рождения! От компании {$wa->accountName()}"
+
+msgid "Happy birthday to you from {$wa->accountName()}"
+msgstr "Поздравление с днём рождения от компании {$wa->accountName()}"
+
+msgid "New primary currency"
+msgstr "Новая основная валюта"
+
+msgid "Order by:"
+msgstr "Сортировка:"
+
+msgid "Date created"
+msgstr "Дата создания"
+
+msgid "Find by number"
+msgstr "Найти по номеру"
+
+msgid "Create deals from orders in your online store!"
+msgstr "Создавайте сделки из заказов интернет-магазина!"
+
+msgid "Set up <i>automatic</i> creation of deals upon execution of various order actions, individually for each of your storefronts."
+msgstr "Настройте <i>автоматическое</i> создание сделок при выполнении действий с заказами — отдельно для каждой витрины."
+
+msgid "Or <i>manually</i> create deals in the online store backend, regardless of the settings on this page."
+msgstr "Или <i>вручную</i> создавайте сделки в бекенде интернет-магазина независимо от настроек на этой странице."
+
+msgid "No PBX plugins installed."
+msgstr "Плагины для IP-телефонии не установлены."
+
+msgid "Install and set up <a href=\"%s\">IP telephony integration plugins</a>."
+msgstr "Установите и настройте <a href=\"%s\">плагины для интеграции с IP-телефонией</a>."
+
+msgid "PBX plugins are not configured."
+msgstr "Плагины для IP-телефонии не настроены."
+
+msgid "Once telephony plugin is properly set up, use this section to configure pop-up notifications on incoming calls with information about calling clients."
+msgstr "После успешной установки плагина используйте этот раздел для настройки всплывающих уведомлений о входящих звонках с информацией о звонящих клиентах."
+
+msgid "Dropped"
+msgstr "Сброшено"
+
+msgid "Redirected"
+msgstr "Переадресовано"
+
+msgid "Finished"
+msgstr "Завершено"
+
+msgid "Voicemail"
+msgstr "Автоответчик"
+
+msgid "Any state"
+msgstr "Все статусы"
+
+msgid "Save the email correspondence with your client using email address"
+msgstr "Сохраняйте переписку с клиентом в истории сделки с помощью email-адреса"
+
+msgid "Add this address to the “CC” field when sending a message to the client to get the message copy saved in the deal history."
+msgstr "Добавляйте этот адрес в копию, когда пишете клиенту, чтобы ваше письмо попало в историю сделки."
+
+msgid "copied to clipboard"
+msgstr "скопировано в буфер обмена"
+
+msgid "Company settings"
+msgstr "Настройки компании"
+
+msgid "disable"
+msgstr "выключить"
+
+msgid "enable"
+msgstr "включить"
+
+msgid "New invoice No. {$invoice.number} issued for you by {$company.name}"
+msgstr "Вам выставлен счёт № {$invoice.number} от {$company.name}"
+
+msgid "Invoice #{$invoice.number} has been issued for you by {$company.name} for {wa_currency($invoice.amount, $invoice.currency_id)}."
+msgstr "Вам выставлен счёт № {$invoice.number} от {$company.name} на сумму {wa_currency($invoice.amount, $invoice.currency_id)}"
+
+msgid "Received payment for invoice No. {$invoice.number} from {$company.name}"
+msgstr "Поступила оплата по счёту № {$invoice.number} от {$company.name}"
+
+msgid "Your payment for invoice #{$invoice.number} from {$company.name} has been received. Thank you!"
+msgstr "От вас поступила оплата по счёту № {$invoice.number} от {$company.name}. Спасибо!"
+
+msgid "Canceled invoice No. {$invoice.number} from {$company.name}"
+msgstr "Счёт № {$invoice.number} от {$company.name} отменён"
+
+msgid "Invoice #{$invoice.number} from {$company.name} for {wa_currency($invoice.amount, $invoice.currency_id)} has been canceled"
+msgstr "Счёт № {$invoice.number} от {$company.name} на сумму {wa_currency($invoice.amount, $invoice.currency_id)} отменён"
+
+msgid "one-line text"
+msgstr "одна строка текста"
+
+msgid "multi-line text"
+msgstr "многострочный текст"
+
+msgid "number"
+msgstr "число"
+
+msgid "drop-down list"
+msgstr "выпадающий список"
+
+msgid "date"
+msgstr "дата"
+
+msgid "sort by column"
+msgstr "сортировать по колонке"
+
+msgid "%d other contact with same phone"
+msgid_plural "%d other contacts with same phone"
+msgstr[0] "%d другой контакт с тем же номером"
+msgstr[1] "%d других контакта с тем же номером"
+msgstr[2] "%d других контактов с тем же номером"
+
+msgid "There is no deals for this contact."
+msgstr "У этого контакта нет сделок."
+
+msgid "Welcome to your new funnel!"
+msgstr "Добро пожаловать в вашу новую воронку продаж!"
+
+msgid "Start by creating your first deal"
+msgstr "Начните с создания первой сделки"
+
+msgid "To handle phone calls in CRM, install and set up <a href=\"%s\">IP telephony integration plugins</a>."
+msgstr "Для обработки телефонных звонков установите и настройте <a href=\"%s\">плагины для интеграции с IP-телефонией</a>."
+
+msgid "Duration"
+msgstr "Длительность"
+
+msgid "User"
+msgstr "Пользователь"
+
+msgid "incoming"
+msgstr "входящий"
+
+msgid "Incoming"
+msgstr "Входящие"
+
+msgid "outgoing"
+msgstr "исходящий"
+
+msgid "Outgoing"
+msgstr "Исходящие"
+
+msgid "hidden phone number"
+msgstr "номер телефона скрыт"
+
+msgid "deal is hidden"
+msgstr "сделка скрыта"
+
+msgid "Listen to the recorded conversation"
+msgstr "Прослушать запись разговора"
+
+msgid "Create or update contact"
+msgstr "Создать или обновить контакт"
+
+msgid "No phone calls."
+msgstr "Нет звонков"
+
+msgid "Edit filter conditions"
+msgstr "Изменить условия фильтра"
+
+msgid "Import from file"
+msgstr "Импортировать из файла"
+
+msgid "File"
+msgstr "Файл"
+
+msgid "sample:"
+msgstr "пример:"
+
+msgid "Update existing contact"
+msgstr "Обновить существующий контакт"
+
+msgid "contact"
+msgstr "контакт"
+
+msgid "Shipping"
+msgstr "Доставка"
+
+msgid "Preferred shipping time:"
+msgstr "Желаемое время доставки:"
+
+msgid "Shipment tracking number"
+msgstr "Номер отправления"
+
+msgid "Order content is unknown"
+msgstr "Состав заказа неизвестен"
+
+msgid "Deal description"
+msgstr "Описание сделки"
+
+msgid "Copy to clipboard"
+msgstr "Копировать в буфер обмена"
+
+msgid "No contacts match this phone"
+msgstr "Не найдено контактов с этим номером телефона"
+
+msgid "Reopen reminder"
+msgstr "Вернуть напоминание"
+
+msgid "Won deals reports"
+msgstr "Отчеты по выигранным сделкам"
+
+msgid "Lost deals reports"
+msgstr "Отчеты по проигранным сделкам"
+
+msgid "Webasyst Captcha"
+msgstr ""
+
+msgid "Google reCAPTCHA"
+msgstr ""
+
+msgid "Remove \"%name%\" from recipients of %number%?"
+msgstr "Исключить \"%name%\" из получателей %number%?"
+
+msgid "Create deal when"
+msgstr "Создавать сделку когда"
+
+msgid "Order was placed"
+msgstr "Заказ создан"
+
+msgid "Order was confirmed and accepted for processing"
+msgstr "Заказ подтвержден и принят в обработку"
+
+msgid "Test connection"
+msgstr "Проверка подключения"
+
+msgid "Connection to POP3-server failed"
+msgstr "Подключение к POP3-серверу не удалось"
+
+msgid "POP3-server connected successfully"
+msgstr "POP3-сервер подключен успешно"
+
+msgid "CRM deal"
+msgstr "Сделка CRM"
+
+msgid "Owner:"
+msgstr "Ответственный:"
+
+msgid "not assigned"
+msgstr "не назначен"
+
+msgid "Create deal in CRM"
+msgstr "Создать сделку в CRM"
+
+msgid "Funnel:"
+msgstr "Воронка:"
+
+msgid "Order"
+msgstr "Заказ"
+
+msgid "Email address suffix test"
+msgstr "Проверка поддержки суффиксов в адресе"
+
+msgid "This letter is automatically created for checking address suffix supporting"
+msgstr "Это письмо автоматически создано для проверки поддержки суффиксов в адресе получателя"
+
+msgid "Reminder due today"
+msgstr "Напоминание на сегодня"
+
+msgid "unknown number"
+msgstr "неизвестный номер"
+
+msgid "called"
+msgstr "позвонил"
+
+msgid "Open"
+msgstr ""
+
+msgid "Shop source"
+msgstr "Источник-Магазин"
+
+msgid "Comma"
+msgstr "Запятая"
+
+msgid "Semicolon"
+msgstr "Точка с запятой"
+
+msgid "Tab"
+msgstr "Табуляция"
+
+msgid "API keys for pop-up notifications are not set up."
+msgstr "Не настроены ключи API для работы всплывающих уведомлений."
+
+msgid "Enable connection to the notifications-sending service according to the <a href=\"https://support.webasyst.com/21425/crm-push-notifications-incoming-calls/\">manual</a>."
+msgstr "Настройте подключение к сервису отправки уведомлений с помощью <a href=\"https://support.webasyst.ru/21424/crm-push-notifications-incoming-calls/\">инструкции</a>."
+
+msgid "Please set up a <tt>cron</tt> job (<a href=\"%s\" target=\"_blank\">view instructions</a>) using the command specified below in your web-hosting control panel:"
+msgstr "Настройте задание <tt>cron</tt> (<a href=\"%s\" target=\"_blank\">инструкция по настройке</a>) с указанной ниже командой в контрольной панели вашего хостинга:"
+
+msgid "Template color"
+msgstr "Цвет шаблона"
+
+msgid "Template A"
+msgstr "Шаблон А"
+
+msgid "Template B"
+msgstr "Шаблон Б"
+
+msgid "Choose period"
+msgstr "Выберите период"
+
+msgid "You need Shop-Script version %s or newer for CRM integration."
+msgstr "Для интеграции требуется Shop-Script версии %s или выше."
+
+msgid "Any direction"
+msgstr "Все направления"
+
+msgid "Any transports"
+msgstr "Все типы"
+
+msgid "Associate with a deal"
+msgstr "Связать со сделкой"
+
+msgid "Associate call with a deal"
+msgstr "Связать звонок со сделкой"
+
+msgid "Associate conversation with a deal"
+msgstr "Связать переписку со сделкой"
+
+msgid "Associate"
+msgstr "Связать"
+
+msgid "Tag not found"
+msgstr "Тег не найден"
+
+msgid "Invalid rate"
+msgstr "Неверный курс"
+
+msgid "Close %d deal"
+msgid_plural "Close %d deals"
+msgstr[0] "Закрыть %d сделку"
+msgstr[1] "Закрыть %d сделки"
+msgstr[2] "Закрыть %d сделок"
+
+msgid "Move %d deal to"
+msgid_plural "Move %d deals to"
+msgstr[0] "Переместить %d сделку в"
+msgstr[1] "Переместить %d сделки в"
+msgstr[2] "Переместить %d сделок в"
+
+msgid "Transfer %d deal to"
+msgid_plural "Transfer %d deals to"
+msgstr[0] "Передать %d сделку пользователю"
+msgstr[1] "Передать %d сделки пользователю"
+msgstr[2] "Передать %d сделок пользователю"
+
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d час"
+msgstr[1] "%d часа"
+msgstr[2] "%d часов"
+
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d минута"
+msgstr[1] "%d минуты"
+msgstr[2] "%d минут"
+
+msgid "in %d minute"
+msgid_plural "in %d minutes"
+msgstr[0] "Через %d минуту"
+msgstr[1] "Через %d минуты"
+msgstr[2] "Через %d минут"
+
+msgid "Due now"
+msgstr "Сейчас"
+
+msgid "Kanban board"
+msgstr "Доска «канбан»"
+
+msgid "List view"
+msgstr "Список"
+
+msgid "Add phone %s to contact"
+msgstr "Добавить номер телефона %s в данные контакта"
+
+msgid "The following <tt>cron</tt> job command is currently in use (%ssetting up a cron job%s):"
+msgstr "Это задание <tt>cron</tt> уже используется (%sкак настроить%s):"
+
+msgid "Notification name"
+msgstr "Название уведомления"
+
+msgid "Recipient"
+msgstr "Получатель"
+
+msgid "Set the owner"
+msgstr "Назначить ответственного"
+
+msgid "Set the owner for the customer"
+msgstr "Назначить ответственного за клиента"
+
+msgid "The customer owner"
+msgstr "Ответственный за клиента"
+
+msgid "Clear ownership"
+msgstr "Удалить назначение ответственного"
+
+msgid "Remove customer %s from ownership of %s"
+msgstr "Удалить клиента %s из ответственности %s"
+
+msgid "Ownership for %d selected contact will be assigned to:"
+msgid_plural "Ownership for %d selected contacts will be assigned to:"
+msgstr[0] "Ответственным за %d выбранный контакт будет назначен:"
+msgstr[1] "Ответственным за %d выбранных контакта будет назначен:"
+msgstr[2] "Ответственным за %d выбранных контактов будет назначен:"
+
+msgid "Change the access to the contact."
+msgstr "Измените доступ к контакту."
+
+msgid "The responsible person is not assigned to this client, since he has no access rights."
+msgid_plural "The responsible person is not assigned to these clients, since he has no access rights."
+msgstr[0] "Этому клиенту ответственный не назначен, так как у него нет прав доступа."
+msgstr[1] "Этим клиентам ответственный не назначен, так как у него нет прав доступа."
+msgstr[2] "Этим клиентам ответственный не назначен, так как у него нет прав доступа."
+
+msgid "The error in the appointment of"
+msgstr "Ошибка при назначении"
+
+msgid "Expires in"
+msgstr "Срок действия"
+
+msgid "clear due date"
+msgstr "очистить срок действия"
+
+msgid "Variant A"
+msgstr "Вариант А"
+
+msgid "Variant B"
+msgstr "Вариант Б"
+
+msgid "Color"
+msgstr "Цвет"
+
+msgid "Template settings"
+msgstr "Настройка шаблонов"
+
+msgid "include"
+msgstr "включен в стоимость"
+
+msgid "append"
+msgstr "добавляется к стоимости"
+
+msgid "none"
+msgstr "без налога"
+
+msgid "Add new template"
+msgstr "Добавить новый шаблон"
+
+msgid "New template"
+msgstr "Новый шаблон"
+
+msgid "Create invoice template"
+msgstr "Создание шаблона счета"
+
+msgid "Edit invoice template"
+msgstr "Редактирование шаблона счета"
+
+msgid "Invoice templates"
+msgstr "Шаблоны счетов"
+
+msgid "Custom variables"
+msgstr "Дополнительные переменные"
+
+msgid "Field name"
+msgstr "Название поля"
+
+msgid "Type"
+msgstr "Тип"
+
+msgid "Code"
+msgstr "Код"
+
+msgid "Add variable"
+msgstr "Добавить переменную"
+
+msgid "Variable code may not start with a digit"
+msgstr "Код переменной не может начинаться с цифры"
+
+msgid "Variable code may only contain digits, latin symbols and underscore"
+msgstr "Код переменной может состоять только из цифр, латинских символов и подчеркивания"
+
+msgid "Variable codes sould be unique"
+msgstr "Коды переменных не должны совпадать"
+
+msgid "Signature"
+msgstr "Подпись"
+
+msgid "signature"
+msgstr "настройка подписи"
+
+msgid "Set up custom variables to show extra company-related data on an invoice; e.g., payment details, contact information, business license number, etc. Save appropriate values for your variables in each company’s settings and add the variables to an invoice template."
+msgstr "Настройте список собственных переменных, чтобы показывать в счёте дополнительную информацию о компании, например: платёжные реквизиты, контактную информацию, номер лицензии и т. п. В настройках каждой компании заполните значения для своих переменных и добавьте переменные в шаблон счёта."
+
+msgid "Sender"
+msgstr "Отправитель"
+
+msgid "John Doe"
+msgstr "Василий Иванович"
+
+msgid "System default"
+msgstr "Системный по умолчанию"
+
+msgid "Reply"
+msgstr "Ответить"
+
+msgid "days"
+msgstr "дней"
+
+msgid "hours"
+msgstr "часов"
+
+msgid "Recalculate prices"
+msgstr "Пересчёт цен"
+
+msgid "You have changed the invoice currency."
+msgstr "Вы изменили валюту счёта."
+
+msgid "Recalculate the prices of items at the appropriate rate?"
+msgstr "Пересчитать цены в счёте по соответствующему курсу?"
+
+msgid "Recalculate"
+msgstr "Пересчитать"
+
+msgid "Do not change prices"
+msgstr "Не пересчитывать цены"
+
+msgid "Reset changes"
+msgstr "Отменить изменения"
+
+msgid "Preview"
+msgstr "Просмотр"
+
+msgid "Click “Save” button below to commit changes."
+msgstr "Нажмите на кнопку «Сохранить», чтобы подтвердить изменения."
+
+msgid "Manage conditions"
+msgstr "Настроить условия"
+
+msgid "Set default fixed value"
+msgstr "Установить значение"
+
+msgid "Default fixed value:"
+msgstr "Фиксированное значение:"
+
+msgid "Enter available options for %s depending on it’s parent field value."
+msgstr "Заполните списки значений поля «%s» в зависимости от значения его родительского поля."
+
+msgid "http://www.shop-script.com/help/conditional-contact-fields/"
+msgstr "http://www.webasyst.ru/help/7/conditional-contact-fields/"
+
+msgid "Get help"
+msgstr "Помощь"
+
+msgid "<strong>IF</strong> parent field"
+msgstr "<strong>IF</strong> родительское поле"
+
+msgid "Prompt to select %s from the following list:"
+msgstr "Предлагать выбрать %s из следующих вариантов:"
+
+msgid "<strong>ELSE</strong>, in case parent field value does not match any of the listed above"
+msgstr "<strong>ELSE</strong>, если значение родительского поля не совпадает ни с одним из вариантов"
+
+msgid "Display &lt;input&gt; (custom text) field for %s"
+msgstr "Показать &lt;input&gt; для ввода произвольного текста"
+
+msgid "Do not prompt for %s"
+msgstr "Не запрашивать поле «%s»"
+
+msgid "Add rule"
+msgstr "Добавить правило"
+
+msgid "IF"
+msgstr "ЕСЛИ"
+
+msgid "Add option"
+msgstr "Добавить вариант"
+
+msgid "This field is required."
+msgstr "Это поле является обязательным."
+
+msgid "OneSignal takes longer than expected to load! Please make sure you're not running AdBlock."
+msgstr "Запуск OneSignal происходит дольше ожидаемого! Если вы используете AdBlock, отключите его на этом сайте."
+
+msgid "OneSignal failed to load! Please make sure you're not running AdBlock."
+msgstr "Не удалось запустить OneSignal! Проверьте, что вы не используете AdBlock на этом сайте."
+
+msgid "Processed %s%% (%s of %s group(s))"
+msgstr "Выполнено %s%% (%s из %s групп)"
+
+msgid "Clear"
+msgstr "Очистить"
+
+msgid "Enter name or email"
+msgstr "Укажите имя или email"
+
+msgid "Extended deal data"
+msgstr "Расширенные данные сделки"
+
+msgid "Unread messages"
+msgstr "Непрочитанные сообщения"
+
+msgid "You have no access rights to handle Shop-Script orders. Order will remain unchanged."
+msgstr "Недостаточно прав для обработки заказов Shop-Script. Действие с заказом в Shop-Script не будет выполнено."
+
+msgid "You have no permission to access this page."
+msgstr "Недостаточно прав для доступа к этой странице."
+
+msgid "Please refer to your system administrator."
+msgstr "Пожалуйста, обратитесь к вашему системному администратору."
+
+msgid "<p>The requested URL was not found on this server.</p><p>Please contact app developer.</p>"
+msgstr "<p>Запрашиваемая страница не найдена на сервере.</p><p>Пожалуйста, обратитесь к разработчику приложения.</p>"
+
+msgid "Invoice has been canceled and no longer valid"
+msgstr "Счет отменен и более не действителен"
+
+msgid "Payment error"
+msgstr "Ошибка оплаты"
+
+msgid "Create copy"
+msgstr "Создать копию"
+
+msgid "Payment transactions"
+msgstr "Транзакции оплаты"
+
+msgid "Attach existed files:"
+msgstr "Прикрепить существующие файлы:"
+
+msgid "File is too large or another upload error occurred."
+msgstr ""
+
+msgid "Lost deals"
+msgstr "Проигранные сделки"
+
+msgid "Won deals"
+msgstr "Выигранные сделки"
+
+msgid "Paid invoices"
+msgstr "Оплаченные счета"
+
+msgid "Total paid amount"
+msgstr "Общая сумма оплат"
+
+msgid "There are no paid invoices for specified period."
+msgstr "За указанный период нет оплаченных счетов."
+
+msgid "invoice paid"
+msgid_plural "invoices paid"
+msgstr[0] "оплаченный счет"
+msgstr[1] "оплаченных счета"
+msgstr[2] "оплаченных счетов"
+
+msgid "Drag-n-drop company image here"
+msgstr "Перетащите логотип компании сюда"
+
+msgid "Change image"
+msgstr "Изменить изображение"
+
+msgid "Delete image"
+msgstr "Удалить изображение"
+
+msgid "<tt>Cron</tt> job required for daily recap is set up properly."
+msgstr "Задание <tt>cron</tt> для рассылки напоминаний настроено."
+
+msgid "<tt>Cron</tt> job required to automatically handle invoices expiration is set up properly."
+msgstr "Задание <tt>cron</tt> для автоматического перевода в архив истекших счетов настроено."
+
+msgid "<tt>Cron</tt> job required for sending greetings to customers is set up properly."
+msgstr "Задание <tt>cron</tt> для рассылки поздравлений клиентам настроено."
+
+msgid "Copy Shop-Script currency settings"
+msgstr "Копировать настройки валют из Shop-Script"
+
+msgid "New main currency rate"
+msgstr "Курс новой основной валюты"
+
+msgid "deal"
+msgstr "сделка"
+
+msgid "Radio selector advanced settings"
+msgstr "Расширенные настройки поля-переключателя"
+
+msgid "Depending on the current radio selector value, other contact form fields may be set to be omitted (become hidden). Manage form fields visibility settings using checkboxes below for each radio selector value."
+msgstr "В зависимости от выбранного значения поля-переключателя другие поля формы для ввода контактной информации могут быть отмечены как скрытые (т. е. будут пропущены). Для каждого из значений поля-переключателя отметьте галочками те поля формы ввода контактной информации, которые должны быть запрошены у пользователя."
+
+msgid "Please specify options for multiple choice field."
+msgstr "Укажите значения для множественного поля."
+
+msgid "This field can be invisible in some cases, so it may not be required."
+msgstr "Это поле в некоторых случаях становится невидимым, и поэтому не может быть обязательным."
+
+msgid "View"
+msgstr ""
+
+msgid "Plain text"
+msgstr "Текстовое поле"
+
+msgid "Redactor"
+msgstr "Редактор"
+
+msgid "Placeholder for confirm password input"
+msgstr "Подсказка для поля подтверждения пароля"
+
+msgid "Test notification"
+msgstr "Тестовое уведомление"
+
+msgid "Send to"
+msgstr "Куда"
+
+msgid "Please enter a valid Email"
+msgstr "Пожалуйста, укажите корректный адрес email"
+
+msgid "Send test notification"
+msgstr "Отправка тестового уведомления"
+
+msgid "Send test"
+msgstr "Отправить"
+
+msgid "Automatic deal creation"
+msgstr "Автоматическое создание сделки"
+
+msgid "Workflow-Funnel synchronization"
+msgstr "Синхронизация статусов заказа и этапов сделки"
+
+msgid "CRM &rarr; Shop-Script"
+msgstr ""
+
+msgid "No action"
+msgstr "Нет действия"
+
+msgid "Shop-Script &rarr; CRM"
+msgstr ""
+
+msgid "Template name"
+msgstr "Название шаблона"
+
+msgid "Removing a template is prohibited. The template is associated with {$company_count} companies"
+msgstr "Этот шаблон используется в настройках компаний. Удаление недоступно."
+
+msgid "Refresh CAPTCHA"
+msgstr "Обновить CAPTCHA"
+
+msgid "Confirm password"
+msgstr "Пароль повторно"
+
+msgid "Deal in CRM"
+msgstr "Сделка в CRM"
+
+msgid "Create new deal"
+msgstr "Создать новую сделку"
+
+msgid "There are unsaved changes"
+msgstr "Есть несохраненные изменения"
+
+msgid "Unsaved changes will be lost if you leave this page now. Are you sure?"
+msgstr "Несохраненные изменения будут потеряны, если покинуть страницу. Вы уверены?"
+
+msgid "All funnels"
+msgstr "Все воронки"
+
+msgid "This link is no longer valid"
+msgstr "Срок действия ссылки истек"
+
+msgid "Confirmation failed"
+msgstr "Подтверждение неудачно"
+
+msgid "You have not enough rights to view message."
+msgstr "Недостаточно прав для чтения сообщения."
+
+msgid "Deal not found"
+msgstr "Сделка не найдена"
+
+msgid "<p><br></p></b><br><section data-role=\"c-email-signature\">:SIGNATURE:</section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>"
+msgstr "<p><br></p></b><br><section data-role=\"c-email-signature\">:SIGNATURE:</section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: написал:</p><blockquote>:BODY:</blockquote>"
+
+msgid "All companies"
+msgstr "Все компании"
+
+msgid "Composite field group"
+msgstr "Группа полей"
+
+msgid "Number"
+msgstr "Число"
+
+msgid "Region"
+msgstr "Регион"
+
+msgid "Hidden field"
+msgstr "Скрытое поле"
+
+msgid "Full name"
+msgstr "Полное имя"
+
+msgid "Unknown field"
+msgstr "Неизвестное поле"
+
+msgid "Conditional field"
+msgstr "Зависимое поле"
+
+msgid "Unknown parent field"
+msgstr "Неизвестное родительское поле"
+
+msgid "Company id, file extension or type unknown"
+msgstr ""
+
+msgid "Image"
+msgstr "Изображение"
+
+msgid "String"
+msgstr "Строка"
+
+msgid "Basic template info not found"
+msgstr ""
+
+msgid "Unknown value"
+msgstr "Неизвестное значение"
+
+msgid "Not a string"
+msgstr "Не строка"
+
+msgid "I agree to <a class=\"c-agreement-checkbox-link\" href=\"%s\" target=\"_blank\">personal data protection policy</a>"
+msgstr "Я соглашаюсь с <a class=\"c-agreement-checkbox-link\" href=\"%s\" target=\"_blank\">политикой обработки персональных данных</a>"
+
+msgid "---INSERT A LINK HERE!---"
+msgstr "---ВСТАВЬТЕ СЮДА АДРЕС!---"
+
+msgid "Field %s of company"
+msgstr "Поле %s данных компании"
+
+msgid "An array containing information about invoice items"
+msgstr "Массив, содержащий информацию о составе счета"
+
+msgid "Field %s of customer"
+msgstr "Поле %s данных клиента"
+
+msgid "Reminders daily recap"
+msgstr "Ежедневная сводка напоминаний"
+
+msgid "Message not found"
+msgstr "Сообщение не найдено"
+
+msgid "Hi %s,"
+msgstr "%s,"
+
+msgid "Here is your <a href=\"%swebasyst/crm/reminder/\">daily recap</a> for %s:"
+msgstr "Вот ваша <a href=\"%swebasyst/crm/reminder/\">ежедневная сводка</a> на %s:"
+
+msgid "<strong>%s</strong> on %s"
+msgstr "<strong>%s</strong> к %s"
+
+msgid "non-working_public_link"
+msgstr ""
+
+msgid "%s has been selected as a master contact."
+msgstr "%s выбран как главный контакт."
+
+msgid "However, there are no contacts to be merged with %s, by the reasons designated above."
+msgstr "Однако, нет ни одного контакта, который мог бы быть объединен с %s, по причинам указанным выше."
+
+msgid "Was deleted"
+msgstr "Был удален"
+
+msgid "Shop-Script order %s is in <strong>%s</strong> state."
+msgstr "Заказ Shop-Script %s находится в статусе <strong>%s</strong>."
+
+msgid "Action <strong>%s</strong> is not available. Order will remain unchanged."
+msgstr "Действие с заказом <strong>%s</strong> недоступно. Состояние заказа не будет изменено."
+
+msgid "Bulk stage change will not affect to corresponding orders."
+msgstr "При массовом изменении этапа не производится действий с соответствующими заказами."
+
+msgid "Bulk deal close will not affect to corresponding orders."
+msgstr "При массовом закрытии сделок не производится действий с соответствующими заказами."
+
+msgid "Orders will remain unchanged."
+msgstr "Заказы изменены не будут."
+
+msgid "%d selected deal are linked to Shop-Script orders."
+msgid_plural "%d selected deals are linked to Shop-Script orders."
+msgstr[0] "%d выбранная сделка связана с заказами Shop-Script."
+msgstr[1] "%d выбранные сделки связаны с заказами Shop-Script."
+msgstr[2] "%d выбранных сделок связаны с заказами Shop-Script."
+
+msgid "This deal is linked to Shop-Script order %s"
+msgstr "Эта сделка связана с заказом Shop-Script %s"
+
+msgid "Any deal changes will not affect the order."
+msgstr "Редактирование сделки не приведет к изменениям в заказе."
+
+msgid "Currency exchange rates changed in Shop-Script settings are updated in CRM in 1 minute."
+msgstr "Изменения курсов валют в настройках Shop-Script обновляются в CRM через 1 минуту."
+
+msgid "Use vaults to limit access to certain contacts for selected backend users. Add contacts to a vault and select the vault in users’ access rights settings."
+msgstr "Включите доступ к отдельным контактам только для выбранных пользователей: добавьте контакты в класс и выберите этот класс в настройках прав доступа пользователей."
+
+msgid "If a contact is included in a vault, only users who have access to that vault can view the contact."
+msgstr "Если контакт включён в класс, то он будет виден только тем пользователям, у которых есть доступ к этому классу."
+
+msgid "No client"
+msgstr "Нет клиента"
+
+msgid "Unknown state"
+msgstr "Неизвестный статус"
+
+msgid "Bind"
+msgstr "Связать"
+
+msgid "Filter"
+msgstr "Фильтр"
+
+msgid "No deals found for given conditions"
+msgstr "Не найдено сделок по заданным условиям"
+
+msgid "Change company"
+msgstr "Изменить компанию"
+
+msgid "To recieve and handle messages from clients %sset up a message source%s"
+msgstr "Чтобы получать и обрабатывать сообщения от клиентов необходимо %sнастроить источники сообщений%s"
+
+msgid "Reply on SMS"
+msgstr "Ответить по SMS"
+
+msgid "Write SMS"
+msgstr "Написать SMS"
+
+msgid "Write SMS to %s"
+msgstr "Написать SMS на %s"
+
+msgid "Type SMS here"
+msgstr "Введите текст сообщения"
+
+msgid "Send SMS"
+msgstr "Отправить SMS"
+
+msgid "no message text"
+msgstr "пустой текст"
+
+msgid "Deal stages"
+msgstr "Этапы сделки"
+
+msgid "Select extension number"
+msgstr "Укажите внутренний номер"
+
+msgid "No message sourses configured."
+msgstr "Нет настроенных источников сообщений."
+
+msgid "Set up an email address to receive messages and deal requests."
+msgstr "Настройте адрес email, который будет использоваться для получения обращений от клиентов."
+
+msgid "Set up connection to instant messengers to receive deal requests and messages."
+msgstr "Настройте подключение к мессенджерам, через которые вы будете принимать обращения от клиентов."
+
+msgid "Create a form and publish it on your website for visitors to easily initiate new deals."
+msgstr "Создайте форму и опубликуйте ее на вашем сайте для получения обращений от клиентов."
+
+msgid "Add %s source"
+msgstr "Добавить %s"
+
+msgid "deals in stage"
+msgstr ""
+
+msgid "add time limit"
+msgstr "задать лимит времени"
+
+msgid "(no subject)"
+msgstr "(пустая тема)"
+
+msgid "Send"
+msgstr "Отправить"
+
+msgid "New connection to instant messenger"
+msgstr "Новое подключение к мессенджеру"
+
+msgid "Can not connect with the specified parameters to server"
+msgstr "Не удалось подключиться с заданными параметрами к серверу"
+
+msgid "No settings page for this source"
+msgstr "Для этого источника отсутствуют настройки"
+
+msgid "Reminder due tomorrow"
+msgstr "Напоминание на завтра"
+
+msgid "All recipients"
+msgstr "Все получатели"
+
+msgid "Messengers"
+msgstr "Мессенджеры"
+
+msgid "Can't send SMS"
+msgstr "Невозможно отправить SMS"
+
+msgid "An array containing information about the deal"
+msgstr "Массив, содержащий информацию о сделке"
+
+msgid "Special source"
+msgstr "Специальный источник"
+
+msgid "Instant messenger source"
+msgstr "Источник, подключенный к мессенджеру"
+
+msgid "Specify configuration parameters on <a href=\"%s\">deal source settings</a>."
+msgstr "Укажите параметры конфигурации в <a href=\"%s\">настройках источников сделок</a>."
+
+msgid "%d attachment"
+msgid_plural "%d attachments"
+msgstr[0] "%d вложение"
+msgstr[1] "%d вложения"
+msgstr[2] "%d вложений"
+
+msgid "Stage time limit expired for deal"
+msgstr "Превышен период сделки в этапе"
+
+msgid "Deal created"
+msgstr "Создание сделки"
+
+msgid "Deal moved to another stage"
+msgstr "Перемещение сделки на другой этап"
+
+msgid "Deal won"
+msgstr "Выигрыш сделки"
+
+msgid "Deal lost"
+msgstr "Потеря сделки"
+
+msgid "Deal restored"
+msgstr "Восстановление сделки"
+
+msgid "Deal reopened"
+msgstr "Переоткрытие сделки"
+
+msgid "Responsibility for %d selected contact will be assigned to:"
+msgid_plural "Responsibility for %d selected contacts will be assigned to:"
+msgstr[0] "Ответственный за %d выбранный контакт:"
+msgstr[1] "Ответственный за %d выбранных контакта:"
+msgstr[2] "Ответственный за %d выбранных контактов:"
+
+msgid "Change the owner"
+msgstr "Поменять ответственного"
+
+msgid "Deleted contact"
+msgstr "Контакт удален"
+
+msgid "Delete conversation"
+msgstr "Удалить переписку"
+
+msgid "BCC"
+msgstr ""
+
+msgid "Write an answer"
+msgstr "Написать ответ"
+
+msgid "Conversation with"
+msgstr "Переписка с"
+
+msgid "Minimize by conversations"
+msgstr "Свернуть по перепискам"
+
+msgid "no owner"
+msgstr "нет ответственного"
+
+msgid "deals closed."
+msgstr ""
+
+msgid "Average deal lifetime: "
+msgstr "Среднее время жизни сделки: "
+
+msgid "deals count in stages now"
+msgstr ""
+
+msgid "There are no data for report."
+msgstr "Нет данных для построения отчета."
+
+msgid "average timeout for deal in stage"
+msgstr ""
+
+msgid "There are no stages."
+msgstr ""
+
+msgid "Remove customer %s from responsibility of %s"
+msgstr "Удалить для клиента %s выбор ответственного сотрудника %s"
+
+msgid "Responsible"
+msgstr ""
+
+msgid "All owners"
+msgstr "Все ответственные"
+
+msgid "Deal stage overdue"
+msgstr "Превышение лимита времени на этапе"
+
+msgid "Deal create"
+msgstr "Создание сделки"
+
+msgid "Deal move"
+msgstr "Изменение этапа сделки"
+
+msgid "Deal restore"
+msgstr "Восстановление сделки"
+
+msgid "We have found %d column in imported data."
+msgid_plural "We have found %d columns in imported data."
+msgstr[0] "Мы обнаружили %d столбец в импортируемых данных."
+msgstr[1] "Мы обнаружили %d столбца в импортируемых данных."
+msgstr[2] "Мы обнаружили %d столбцов в импортируемых данных."
+
+msgid "Field %s of deal"
+msgstr "Поле сделки %s"
+
+msgid "Install messenger integration plugins."
+msgstr "Установить плагины интеграции с мессенджерами."
+
+msgid "Operations"
+msgstr "Операции"
+
+msgid "Select Webasyst default captcha or Google reCAPTCHA"
+msgstr "Выбрать стандартную капчу Webasyst или Google reCAPTCHA"
+
+msgid "Captcha settings"
+msgstr "Настройки капчи"
+
+msgid "Payment for invoice #%s issued on %s."
+msgstr "Оплата по счёту №%s от %s."
+
+msgid "Set contact language"
+msgstr "Задать язык контакта"
+
+msgid "Choose segments"
+msgstr "Выбрать сегменты"
+
+msgid "Hide segments"
+msgstr "Свернуть список"
+
+msgid "On contact creation"
+msgstr "При создании контакта"
+
+msgid "Shop-Script order actions"
+msgstr "Действия с заказами Shop-Script"
+
+msgid "CRM deal stages"
+msgstr "Этапы обработки сделок CRM"
+
+msgid "Here is your <a href=\"%scrm/reminder/\">daily recap</a> for %s:"
+msgstr "Вот ваши <a href=\"%scrm/reminder/\">ежедневные напоминания</a> на %s:"
+
+msgid "Access to calls"
+msgstr "Доступ к звонкам"
+
+msgid "Only own calls"
+msgstr "Только свои звонки"
+
+msgid "Order %s"
+msgstr "Заказ %s"
+
+msgid "Edit order"
+msgstr "Редактировать заказ"
+
+msgid "Create order"
+msgstr "Создать заказ"
+
+msgid "Orders"
+msgstr "Заказы"
+
+msgid "New order"
+msgstr "Новый заказ"
+
+msgid "%d employee"
+msgid_plural "%d employees"
+msgstr[0] "%d сотрудник"
+msgstr[1] "%d сотрудника"
+msgstr[2] "%d сотрудников"
+
+msgid "ext"
+msgstr ""
+
+msgid "clear"
+msgstr "очистить"
+
+msgid "Edit order shipping details"
+msgstr "Изменить параметры доставки заказа"
+
+msgid "Funnel deleted"
+msgstr "Воронка удалена"
+
+msgid "Total order weight"
+msgstr "Общий вес заказа"
+
+msgid "Width × length × height"
+msgstr "Ширина × длина × высота"
+
+msgid "Total order dimensions"
+msgstr "Общие габариты заказа"
+
+msgid "Courier"
+msgstr "Курьер"
+
+msgid "Shipping time"
+msgstr "Время доставки"
+
+msgid "Edit shipping details"
+msgstr "Изменить параметры доставки"
+
+msgid "Stage deleted"
+msgstr "Этап удален"
+
+msgid "Add field"
+msgstr "Добавить поле"
+
+msgid "Select (radio)"
+msgstr "Список (radio)"
+
+msgid "Also apply this change to %d employee of this company."
+msgid_plural "Also apply this change to %d employees of this company."
+msgstr[0] "Также применить это изменение к %d сотруднику этой компании."
+msgstr[1] "Также применить это изменение к %d сотрудникам этой компании."
+msgstr[2] "Также применить это изменение к %d сотрудникам этой компании."
+
+msgid "Registered client"
+msgstr "Зарегистрированный клиент"
+
+msgid "Conversation not found"
+msgstr "Переписка не найдена"
+
+msgid "No orders"
+msgstr "Нет заказов"
+
+msgid "No other orders"
+msgstr "Нет других заказов"
+
+msgid "%d order"
+msgid_plural "%d orders"
+msgstr[0] "%d заказ"
+msgstr[1] "%d заказа"
+msgstr[2] "%d заказов"
+
+msgid "No other deals"
+msgstr "Нет других сделок"
+
+msgid "%d more client found with the same email address"
+msgid_plural "%d more clients found with the same email address"
+msgstr[0] "%d клиент найден с таким же email-адресом"
+msgstr[1] "%d клиента найдено с таким же email-адресом"
+msgstr[2] "%d клиентов найдено с таким же email-адресом"
+
+msgid "%d more client found with the same phone number"
+msgid_plural "%d more clients found with the same phone number"
+msgstr[0] "%d клиент найден с таким же номером телефона"
+msgstr[1] "%d клиента найдено с таким же номером телефона"
+msgstr[2] "%d клиентов найдено с таким же номером телефона"
+
+msgid "App icon counter"
+msgstr "Счетчик на иконке"
+
+msgid "My overdue reminders"
+msgstr "Мои просроченные напоминания"
+
+msgid "New messages"
+msgstr "Новые сообщения"
+
+msgid "New deals"
+msgstr "Новые сделки"
+
+msgid "Reminder settings"
+msgstr "Настройки напоминаний"
+
+msgid "“Text” field contents"
+msgstr "Содержимое поля «Текст»"
+
+msgid "Select “%s” in “%s” section below to make these fields available for adding to the form."
+msgstr "Выберите ниже «%s» в разделе «%s», чтобы эти поля стали доступны для добавления в форму."
+
+msgid "New call"
+msgstr "Новый звонок"
+
+msgid "No open deals"
+msgstr "Нет открытых сделок"
+
+msgid "%d open deal"
+msgid_plural "%d open deals"
+msgstr[0] "%d открытая сделка"
+msgstr[1] "%d открытых сделок"
+msgstr[2] "%d открытых сделок"
+
+msgid "Are you sure you want to detach this conversation from the deal “<strong>%s</strong>”?"
+msgstr "Вы действительно хотите открепить эту переписку от сделки «<strong>%s</strong>»?"
+
+msgid "Are you sure you want to detach selected messages from the deals?"
+msgstr "Вы действительно хотите открепить выбранные сообщения от сделок?"
+
+msgid "Are you sure you want to detach selected conversations from the deals?"
+msgstr "Вы действительно хотите открепить выбранные переписки от сделок?"
+
+msgid "Are you sure you want to delete all selected messages?"
+msgstr "Вы действительно хотите удалить все выбранные сообщения?"
+
+msgid "Are you sure you want to delete all selected conversations?"
+msgstr "Вы действительно хотите удалить все выбранные переписки?"
+
+msgid "Detach from deal"
+msgstr "Открепить от сделки"
+
+msgid "Detach"
+msgstr "Открепить"
+
+msgid "Attach to another deal"
+msgstr "Прикрепить к другой сделке"
+
+msgid "Attach this conversation to another deal"
+msgstr "Прикрепить эту переписку к другой сделке"
+
+msgid "Message sending error"
+msgstr "Ошибка отправки сообщения"
+
+msgid "Email message has not been sent."
+msgstr "Email-сообщение не было отправлено."
+
+msgid "See detailed error-related information in log file <em>%s</em>."
+msgstr "См. подробную информацию об ошибке в лог-файле <em>%s</em>."
+
+msgid "Check <a href=\"%s\">email sending settings</a>."
+msgstr "Проверьте <a href=\"%s\">настройки отправки email-сообщений</a>."
+
+msgid "Check <a href=\"%s\">sms sending settings</a>."
+msgstr "Проверьте <a href=\"%s\">настройки отправки sms-сообщений</a>."
+
+msgid "Open in Shop-Script"
+msgstr "Открыть в Shop-Script"
+
+msgid "View map"
+msgstr "Открыть карту"
+
+msgid "Order list"
+msgstr "Состав заказа"
+
+msgid "Access to conversations"
+msgstr "Доступ к перепискам"
+
+msgid "Own or free"
+msgstr "Собственные и свободные"
+
+msgid "Only own"
+msgstr "Только собственные"
+
+msgid "It looks like your online store is not set up yet.<br>Please <a href=\"%s\">make initial Shop-Script settings</a>"
+msgstr "Похоже, ваш интернет-магазин еще не настроен.<br>Пожалуйста <a href=\"%s\">выполните первичную настройку Shop-Script</a>"
+
+msgid "Order was paid on %s"
+msgstr "Заказ был оплачен %s"
+
+msgid "Call error"
+msgstr "Ошибка вызова"
+
+msgid "Close deal"
+msgstr "Закрыть сделку"
+
+msgid "not specified"
+msgstr "не указано"
+
+msgid "Deal term"
+msgstr "Сроки сделки"
+
+msgid "Deal properties"
+msgstr "Параметры сделки"
+
+msgid "Owner deleted"
+msgstr "Ответственный удален"
+
+msgid "The deal is linked to Shop-Script order #%s."
+msgstr "Сделка связана с заказом №%s"
+
+msgid "Live Stream"
+msgstr "Лента событий"
+
+msgid "Technical information about the error"
+msgstr "Техническая информация об ошибке"
+
+msgid "Show %d more"
+msgstr "Показать еще %d"
+
+msgid "Unknown source"
+msgstr "Неизвестный источник"
+
+msgid "Contact with ID %s doesn't exist"
+msgstr "Контакт с ID %s не существует"
+
+msgid "deleted id=%d"
+msgstr ""
+
+msgid "Reminder due to %s"
+msgstr "Напоминание на %s"
+
+msgid "%d min."
+msgstr "%d мин."
+
+msgid "%d h."
+msgstr "%d ч."
+
+msgid "%d d."
+msgstr ""
+
+msgid "Recipient email is not defined"
+msgstr "Email получателя не определен"
+
+msgid "%d pcs."
+msgstr ""
+
+msgid "%s pcs."
+msgstr ""
+
+msgid "to <span class=\"c-message-to-with-name\">%s</span>"
+msgstr "<span class=\"c-message-from\">%s</span>"
+
+msgid "from <span class=\"c-message-from\">%s</span>"
+msgstr "от <span class=\"c-message-from\">%s</span>"
+
+msgid "%d contact"
+msgid_plural "%d contacts"
+msgstr[0] "%d контакт"
+msgstr[1] "%d контакта"
+msgstr[2] "%d контактов"
+
+msgid "\"%s\""
+msgstr "«%s»"
+
+msgid "has deleted"
+msgstr "удалил"
+
+msgid "has deleted contact"
+msgstr "удалил контакт"
+
+msgid "has deleted contacts"
+msgstr "удалил контакты"
+
+msgid "%s and %s more"
+msgstr "%s и еще %s"
+
+msgid "%s \"%s\" to contact %s"
+msgstr "%s «%s» контакту %s"
+
+msgid "%s to contact %s"
+msgstr "%s контакту %s"
+
+msgid "Any company"
+msgstr "Любая компания"
+
+msgid "Mark as read"
+msgstr "Отметить как прочитанное"
+
+msgid "Mark as unread"
+msgstr "Отметить как непрочитанное"
+
+msgid "%d conversation will not be affected by the action due to insufficient access rights"
+msgid_plural "%d conversations will not be affected by the action due to insufficient access rights"
+msgstr[0] "Действие не повлияет на %d переписку из-за недостаточных прав доступа"
+msgstr[1] "Действие не повлияет на %d переписки из-за недостаточных прав доступа"
+msgstr[2] "Действие не повлияет на %d переписок из-за недостаточных прав доступа"
+
+msgid "%d deal will not be affected by the action due to insufficient access rights"
+msgid_plural "%d deals will not be affected by the action due to insufficient access rights"
+msgstr[0] "Действие не повлияет на %d сделку из-за недостаточных прав доступа"
+msgstr[1] "Действие не повлияет на %d сделки из-за недостаточных прав доступа"
+msgstr[2] "Действие не повлияет на %d сделок из-за недостаточных прав доступа"
+
+msgid "Deal fields"
+msgstr "Поля сделки"
+
+msgid "Source"
+msgstr "Источник"
+
+msgid "Add description"
+msgstr "Добавить описание"
+
+msgid "Edit description"
+msgstr "Редактировать описание"
+
+msgid "Phone number"
+msgstr "Номер телефона"
+
+msgid "Access to deal is denied."
+msgstr "Доступ к сделке запрещён."
+
+msgid "Instant messenger"
+msgstr "Интернет-мессенджер"
+
+msgid "Category"
+msgstr "Категория"
+
+msgid "Cannot delete the last template."
+msgstr "Невозможно удалить последний шаблон."

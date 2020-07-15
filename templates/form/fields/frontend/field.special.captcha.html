@@ -1,0 +1,16 @@
+{**
+  * Template for render !captcha field in constructor
+  *}
+{$class_id = 'c-captcha-wrapper'}
+{$wrapper_id = uniqid('c-captcha-wrapper')}
+<div class="{$class_id}" id="{$wrapper_id}">
+    {$params.object->getHtml()}
+    {if empty($params.isReCaptcha)}
+        <script>
+            (function ($) {
+                var $wrapper = $('#{$wrapper_id}');
+                $wrapper.find('[name="captcha"]').attr('name', 'crm_form[!captcha]');
+            })(jQuery);
+        </script>
+    {/if}
+</div>

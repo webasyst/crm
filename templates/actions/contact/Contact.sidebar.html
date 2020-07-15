@@ -1,0 +1,188 @@
+{$_user_id = $wa->userId()}
+{$_is_admin = $wa->user()->isAdmin($wa->app())}
+{$_merge_rights = $wa->user()->getRights('crm', 'edit')}
+<aside class="c-contacts-sidebar" id="c-contacts-sidebar">
+    {if !empty($contact_create_type) && $contact_create_type == "page"}
+        <a href="{$wa_app_url}contact/new/" class="bold c-add-link"><i class="icon16 add"></i>[`New contact`]</a>
+    {else}
+        <a href="javascript:void(0);" class="bold c-add-link js-add-link"><i class="icon16 add"></i>[`New contact`]</a>
+    {/if}
+
+    <ul class="menu-v with-icons stack">
+        <li class="all-contacts-link">
+            <span class="count">{$all_contacts_count|default:""}</span>
+            <a href="{$wa_app_url}contact/"><i class="icon16 contact"></i>[`All contacts`]</a>
+        </li>
+        <li class="selected-contacts-link js-selected-contacts js-selected-contacts-hidden">
+            <span class="count">0</span>
+            <a href="{$wa_app_url}contact/selected/" class="js-disable-router"><i class="icon16 view-thumb-list"></i>[`Selected contacts`]</a>
+        </li>
+    </ul>
+
+    {foreach ['shared', 'my'] as $shared_type}
+        {if !empty($segments[$shared_type])}
+            <div id="collapsible-mylists-{$shared_type}" class="block" data-block="mylists-{$shared_type}">
+                {if $shared_type == 'my'}
+                    <h5 class="heading collapse-handler c-segment-header "><i class="icon16 darr"></i>[`My lists`]</h5>
+                {/if}
+                <ul class="menu-v with-icons stack c-segment-list archived-hidden collapsible" data-shared="{if $shared_type === 'shared'}shared{else}my{/if}">
+                    {strip}
+                    {$archived_count = 0}
+                    {foreach $segments[$shared_type] as $_segment}
+                        {$_is_droparea = false}
+                        {if $_segment.type === "category" && ($_is_admin || $_segment.contact_id == $_user_id)}
+                            {$_is_droparea = true}
+                        {/if}
+
+                        {if $_segment.archived}
+                            {$archived_count = $archived_count + 1}
+                        {else}
+                            <li class="{if !empty($_is_droparea)}c-segment-droparea js-segment-droparea{/if}" data-id="{$_segment.id}">
+                                <span class="count">{$_segment.count}</span>
+                                <a href="{$wa_app_url}contact/segment/{$_segment.id}/">
+                                    {if !empty($_segment.icon_path)}
+                                        <i class="icon16 userpic20" style="background-image: url({$_segment.icon_path}); border-radius: 0;"></i>
+                                    {elseif !empty($_segment.icon)}
+                                        <i class="icon16 {$_segment.icon}"></i>
+                                    {/if}
+                                    <span class='name'>{$_segment.name|escape}</span>
+                                </a>
+                            </li>
+                        {/if}
+                    {/foreach}
+
+                    {if $archived_count}
+                        <li class="c-archived-section sort-disabled">
+                            <div class="c-visible">
+                                <a href="javascript:void(0);" class="inline-link js-show-list js-stop-scroll gray">
+                                    <b><i>{_w('Show %d archived segment', 'Show %d archived segments', $archived_count)}</i></b>
+                                </a>
+                            </div>
+
+                            <div class="c-hidden">
+                                <a href="javascript:void(0);" class="inline-link js-hide-list js-stop-scroll gray">
+                                    <b><i>[`Hide archived segments`]</i></b>
+                                </a>
+
+                                <ul class="c-list">
+                                    {foreach $segments[$shared_type] as $_segment}
+                                        {if $_segment.archived}
+                                            {$_is_droparea = false}
+                                            {if $_segment.type === "category" && ($_is_admin || $_segment.contact_id == $_user_id)}
+                                                {$_is_droparea = true}
+                                            {/if}
+
+                                            <li data-id="{$_segment.id}" class="archived sort-disabled {if !empty($_is_droparea)}c-segment-droparea js-segment-droparea{/if}">
+                                                <span class="count">{$_segment.count}</span>
+                                                <a href="{$wa_app_url}contact/segment/{$_segment.id}/">
+                                                    {if !empty($_segment.icon_path)}
+                                                        <i class="icon16 userpic20" style="background: url({$_segment.icon_path}); border-radius: 0;"></i>
+                                                    {elseif !empty($_segment.icon)}
+                                                        <i class="icon16 {$_segment.icon}"></i>
+                                                    {/if}
+                                                    <span class='name'>{$_segment.name|escape}</span>
+                                                </a>
+                                            </li>
+                                        {/if}
+                                    {/foreach}
+                                </ul>
+                            </div>
+                        </li>
+                    {/if}
+                    {/strip}
+                </ul>
+            </div>
+        {/if}
+    {/foreach}
+
+    <div class="block">
+        <a href="javascript:void(0);" class="c-create-new-segment bold"> <i class="icon16 add"></i>[`New segment`]</a>
+    </div>
+
+    {if !empty($cloud)}
+        <div id="collapsible-tags" class="block" data-block="tags">
+            <h5 id="c-tags" class="heading collapse-handler"><i class="icon16 darr"></i>[`Tags`]</h5>
+            <div class="block align-center c-tags-wrapper collapsible">
+                {foreach $cloud as $tag}
+                    <a style="font-size: {$tag.size}%; opacity: {$tag.opacity}" data-id="{$tag.id}" href="{$wa_app_url}contact/tag/{$tag.id}/">{$tag.name|escape}</a>
+                {/foreach}
+            </div>
+        </div>
+    {/if}
+        <div id="collapsible-vaults" class="block" data-block="vaults">
+            <h5 id="c-vaults" class="heading collapse-handler"><i class="icon16 darr"></i>[`Vaults`]</h5>
+            {strip}
+            <ul class="menu-v stack with-icons collapsible">
+                {if !empty($vaults)}
+                    {foreach $vaults as $_vault}
+                        <li data-id="{$_vault.id}">
+                            <span class="count">{ifempty($_vault.count, 0)}</span>
+                            <a href="{$wa_app_url}contact/vault/{$_vault.id}/">
+                                <i class="icon16 color" style="background: {$_vault.color|default:"transparent"|escape};"></i>
+                                <span class='name'>{$_vault.name|escape}</span>
+                            </a>
+                        </li>
+                    {/foreach}
+                {/if}
+                <li data-id="own">
+                    <span class="count">{ifempty($own_count, 0)}</span>
+                    <a href="{$wa_app_url}contact/vault/own/">
+                        <i class="icon16 color" style="background: #ccc;"></i>
+                        <span class='name'>[`My own`]</span>
+                    </a>
+                </li>
+            </ul>
+            {/strip}
+        </div>
+
+        <div id="collapsible-responsibles" class="block" data-block="responsibles">
+            <h5 class="heading collapse-handler"><i class="icon16 darr"></i>[`Responsibles`]</h5>
+            {strip}
+            <ul class="menu-v stack with-icons collapsible">
+                {if !empty($responsibles)}
+                    {foreach $responsibles as $_responsible}
+                        <li data-id="{$_responsible.id}">
+                            <span class="count">{ifempty($_responsible.count, 0)}</span>
+                            <a href="{$wa_app_url}contact/responsible/{$_responsible.id}/">
+                                <i class="icon16 userpic20" style="background-image: url({waContact::getPhotoUrl($_responsible.id, $_responsible.photo, 20)|escape});"></i>
+                                <span class='name'>{$_responsible.name|escape}</span>
+                            </a>
+                        </li>
+                    {/foreach}
+                {/if}
+            </ul>
+            {/strip}
+        </div>
+
+    {if $_is_admin || $_merge_rights}
+        <div id="collapsible-admin" class="block" data-block="admin">
+            <h5 class="heading collapse-handler"><i class="icon16 darr"></i>[`Operations`]</h5>
+            <ul class="menu-v with-icons stack collapsible">
+                <li>
+                    <a href="{$wa_app_url}contact/merge/duplicates/"><i class="icon16 merge"></i><span class='name'>[`Merge duplicates`]</span></a>
+                </li>
+                {if $_is_admin}
+                <li>
+                    <a href="{$wa_app_url}contact/import/"><i class="icon16 import"></i><span class='name'>[`Import contacts`]</span></a>
+                </li>
+                {/if}
+            </ul>
+        </div>
+    {/if}
+
+</aside>
+
+<script>
+    ( function($) { "use strict";
+        var $sidebar = $("#c-contacts-sidebar");
+
+        var sidebar_controller = new CRMContactsSidebar({
+            $wrapper: $sidebar,
+            is_admin: {$wa->user()->isAdmin('crm')|json_encode}
+        });
+
+        $sidebar.data("sidebar_controller", sidebar_controller);
+
+        CRMContactsSidebar.initCollapsibleSidebar();
+    })(jQuery);
+</script>

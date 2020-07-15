@@ -1,0 +1,21 @@
+<p>
+    {waDateTime::format('datetime')}
+    {if $deal.status_id == 'WON'}won{else}lost{/if} deal
+    “<a href="{$deal.url}">{$deal.name|escape}</a>” was reopened
+    on stage “{$deal.stage.name|escape}” in funnel “{$deal.funnel.name|escape}”.
+</p>
+<p>
+    <b>Deal details</b><br>
+    Customer: {$customer.name|escape}{if !empty($customer.company)}, {$customer.company|escape}{/if}<br>
+    Description: {$deal.description_sanitized}<br>
+    Estimated amount: {$deal.amount|wa_format_amount_currency:$deal.currency_id}
+    Estimated closing date: {$deal.expected_date|wa_datetime}
+    Responsible: {$responsible.name|escape}.
+</p>
+
+--<br>
+<p>
+    --<br>
+    {$wa->accountName()|escape}<br>
+    {$wa->domainUrl()}
+</p>

@@ -1,0 +1,71 @@
+{$company_contact_id = waRequest::request("company_contact_id")}
+
+<div class="crm-dialog-wrapper c-contact-edit-dialog-wrapper" id="c-contact-edit-dialog-wrapper">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>[`Add contact`]</h1>
+            <div class="c-content-toggle-wrapper js-content-toggle-wrapper">
+                <label class="c-off-label" for="js-ibutton-1">[`Add person`]</label>
+                <input type="checkbox" class="js-ibutton" id="js-ibutton-1">
+                <label class="c-on-label" for="js-ibutton-1">[`Add company`]</label>
+            </div>
+        </header>
+
+        <div class="c-toggle-content js-toggle-content is-selected" data-content="contact">
+            <form>
+                <div class="crm-dialog-content">
+                    {include file="./ContactForm.inc.html" hide_role=true company_contact_id=$company_contact_id inline}
+                </div>
+
+                <footer class="crm-dialog-footer">
+                    <div class="c-layout">
+                        <div class="c-column middle">
+                            <input class="button green" type="submit" value="[`Create person`]">
+                            <span style="margin: 0 4px;">[`or`]</span>
+                            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                        </div>
+                        <div class="c-column middle right">
+                            <a href="javascript:void(0);" class="inline-link js-extended-form"><b><i>[`Open extended form`]</i></b></a>
+                        </div>
+                    </div>
+                </footer>
+            </form>
+        </div>
+
+        <div class="c-toggle-content js-toggle-content" data-content="company">
+            <div class="c-add-contact-company-form">
+            <form>
+                <div class="crm-dialog-content">
+                    {include file="./Contact.companyAddForm.html" inline}
+
+                    <div class="js-errors-place"></div>
+                </div>
+                <footer class="crm-dialog-footer">
+                    <div class="c-layout">
+                        <div class="c-column middle">
+                            <input class="button green" type="submit" value="[`Create company`]">
+                            <span style="margin: 0 4px;">[`or`]</span>
+                            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                        </div>
+                        <div class="c-column middle right">
+                            <a href="javascript:void(0);" class="inline-link js-extended-form"><b><i>[`Open extended form`]</i></b></a>
+                        </div>
+                    </div>
+
+                </footer>
+            </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        ( function($) {
+            new CRMContactAddDialog({
+                $wrapper: $("#c-contact-edit-dialog-wrapper"),
+                contact_id: {if !empty($contact.id)}{$contact.id}{else}false{/if}
+            });
+        })(jQuery);
+    </script>
+</div>
+
+

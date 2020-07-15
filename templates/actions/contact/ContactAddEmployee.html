@@ -1,0 +1,33 @@
+<div class="crm-dialog-wrapper c-contact-add-employee-dialog" id="c-contact-add-employee-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>[`Add employee`]</h1>
+        </header>
+
+        <div class="crm-dialog-content">
+            <form id="c-contact-add-employee-form">
+                {include file="../deal/DealContactForm.inc.html" contact=[] exclude_company_id=true hide_role=true inline}
+
+                <input type="hidden" name="contact[company_contact_id]" value="{$company_contact.id|escape}">
+            </form>
+
+            <div class="js-errors-place"></div>
+        </div>
+
+        <footer class="crm-dialog-footer">
+            <input class="button green" type="submit" form="c-contact-add-employee-form" value="[`Add`]">
+            <span style="margin: 0 4px;">[`or`]</span>
+            <a class="inline-link js-close-dialog" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+        </footer>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMContactAddEmployeeDialog({
+                $wrapper: $("#c-contact-add-employee-dialog"),
+                contact_id: {if !empty($contact.id)}{$contact.id}{else}false{/if}
+            });
+        })(jQuery);
+    </script>
+</div>

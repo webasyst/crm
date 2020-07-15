@@ -1,0 +1,21 @@
+{**
+  * Template for render !captcha field in constructor
+  *}
+{$class_id = 'c-captcha-wrapper'}
+{$wrapper_id = uniqid('c-captcha-wrapper')}
+<div class="{$class_id}" id="{$wrapper_id}">
+    {if !empty($params.isReCaptcha)}
+        <img src='{$wa_app_static_url}{$params.img_url}'>
+    {else}
+        <div class="wa-captcha">
+            <p>
+                <img class="wa-captcha-img" src="{$wa_app_static_url}{$params.img_url}" alt="CAPTCHA" title="[`Refresh CAPTCHA`]">
+                <strong>→</strong>
+                <input type="text" name="captcha" class="wa-captcha-input" autocomplete="off">
+            </p>
+            <p>
+                <a href="#" class="wa-captcha-refresh">[`Refresh CAPTCHA`]</a>
+            </p>
+        </div>
+    {/if}
+</div>

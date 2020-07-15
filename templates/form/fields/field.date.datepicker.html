@@ -1,0 +1,73 @@
+{$wrapper_id = uniqid('c-deal-date-field-wrapper')}
+<div class="c-deal-date-field-wrapper" id="{$wrapper_id}">
+    <span class="c-datepicker-wrapper js-datepicker-wrapper">
+        <input class="c-datepicker js-datepicker" type="text" value="{$params.value|default:''|wa_date}" name="{$input_name}" {if !empty($params.funnel_parameters)}required{/if}>
+        <input type="hidden" name="{$input_name}" value="{$params.value|default:''}">
+        <i class="icon16 calendar js-icon"></i>
+    </span>
+    <script>
+        (function ($) {
+            var $field_wrapper = $('#{$wrapper_id}'),
+                $wrapper = $field_wrapper.find(".js-datepicker-wrapper"),
+                $input = $wrapper.find(".js-datepicker"),
+                $altField = $wrapper.find('input[type=hidden]');
+
+            $input.datepicker({
+                altField: $altField,
+                altFormat: "yy-mm-dd",
+                changeMonth: true,
+                changeYear: true,
+                onSelect: checkDate
+            });
+
+            $input.on('blur', checkDate);
+
+            $input.on("keydown keypress keyup", function(event) {
+                if ( event.which === 13 ) {
+                    event.preventDefault();
+                }
+            });
+
+            $input.on("click", ".js-icon", function () {
+                $input.focus();
+            });
+
+            function checkDate() {
+                var format = $.datepicker._defaults.dateFormat,
+                    is_valid = false;
+                try {
+                    $.datepicker.parseDate(format, $input.val());
+                    is_valid = true;
+                } catch(e) {
+
+                }
+                if (is_valid) {
+                    $input.data('last-correct-value', $input.val());
+                    $altField.data('last-correct-value', $altField.val());
+                } else {
+                    $input.val($input.data('last-correct-value') || '');
+                    $altField.val($altField.data('last-correct-value') || '');
+                }
+                $field_wrapper.find('.errormsg').remove();
+            }
+
+            // clearing hidden input on text input clearing
+
+            (function (onChange) {
+                var timer = null;
+                $input.keydown(function () {
+                    timer && clearTimeout(timer);
+                    timer = setTimeout(function () {
+                        onChange();
+                    }, 250);
+                });
+                $input.change(onChange);
+            })(function () {
+                if ($.trim($input.val()).length <= 0) {
+                    $input.datepicker('setDate', null);
+                }
+            });
+
+        })(jQuery);
+    </script>
+</div>

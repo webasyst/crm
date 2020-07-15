@@ -1,0 +1,405 @@
+{* CONTACT PROFILE *}
+
+{$list_expander_required = count($top_info_fields) > 3}
+
+<div class="c-profile-page" id="c-profile-page">
+    <div class="c-profile js-profile block double-padded shadowed"{if !empty($vault.color)} style="background-color:{$vault.color|escape}"{elseif $contact.crm_vault_id < 0} style="background-color:#ddd"{/if}>
+        <div class="c-profile-actions float-right">
+            <ul class="menu-h profile-header-links">
+                <li class="responsible-contact">
+                {capture assign=responsible_link_content}
+                    {if isset($responsible.id)}
+                        <i class="icon16 userpic20" style="background-image: url('{$responsible.photo_url|escape}');"></i><span title="[`Owner`]">{$responsible.name|escape}</span>
+                    {else}
+                        <i class="icon16 user"></i>[`No owner`]
+                    {/if}
+                {/capture}
+
+                {if !$one_owner_user || $responsible.id|default:null != $owner_id }
+                    {if $editable}
+                        <a href="javascript:void(0);"
+                            class="responsible-link js-responsible-link"
+                            data-dialog-url="{$wa_app_url}?module=contact&action=responsibleDialog&contact_id={$contact.id}">
+                                {$responsible_link_content}
+                        </a>
+                    {else}
+                        {$responsible_link_content}
+                    {/if}
+                {/if}
+                </li>
+
+                {if $access_dialog_name !== null}
+                    <li><a href="javascript:void(0);"
+                            class="classify-access-link js-access-link"
+                            data-dialog-url="{$wa_app_url}?module=contact&action=accessDialog&contact_id={$contact.id}"
+                        ><i class="icon16 lock"></i>{$access_dialog_name|escape}</a>
+                    </li>
+                {/if}
+                {if $editable}
+                    <li><a href="javascript:void(0);" class="edit-link js-edit-link"><i class="icon16 edit"></i>[`Edit`]</a></li>
+                    <li><a href="javascript:void(0);" class="crm-delete-link js-delete-link"><i class="icon16 delete"></i>[`Delete`]</a></li>
+                {/if}
+            </ul>
+        </div>
+
+        <div class="profile image144px">
+            <div class="image">
+                <img src="{$contact->getPhoto2x(96)}" class="userpic c-userpic">
+                {if $editable}
+                    <div class="wa-contact-photo-buttons">
+                        <div class="photo-change-link">
+                            <a href="javascript:void(0)">[`Change photo`]</a>
+                        </div>
+                    </div>
+                {/if}
+            </div>
+            <div class="details">
+
+                <h1>
+                    {if !empty($contact.title)}
+                        <span class="title" style="margin: 0 4px 0 0;">{$contact.title|escape}</span>
+                    {/if}
+
+                    <span
+                        data-editable-placeholder="{$wa->crm->namePlaceholder()|escape}"
+                        class="contact-name{if $editable} js-name-editable editable{/if}{if empty($contact.name)} is-empty{/if}"
+                    >
+                        {$wa->crm->contactName($contact.name)}
+                    </span>
+
+                    {if !empty($contact.login)}
+                        <span class="hint" style="margin: 0 0 0 4px;">@{$contact.login|escape}</span>
+                    {/if}
+                </h1>
+
+                {strip}
+                    <ul class="c-tags-list">
+                        {foreach $tags as $_tag}
+                            <li>
+                                <a class="c-tag" href="{$wa_app_url}contact/tag/{$_tag.id}/">{$_tag.name|escape}</a>
+                            </li>
+                        {/foreach}
+                        <li>
+                            <a class="inline-link crm-contact-assign-tags small" href="javascript:void(0);">
+                                <i class="icon16 tags"></i>
+                                <b><i>{if $tags}[`Edit tags`]{else}[`Add tags`]{/if}</i></b>
+                            </a>
+                        </li>
+                    </ul>
+                {/strip}
+
+                <ul class="menu-v compact">
+                    <li class="c-company-wrapper">
+                        {if !$contact.is_company}
+                            {$contact.jobtitle|default:''|escape}
+                            {if $contact.company}
+                                [`@`]
+                                {if $contact.company_contact_id > 0}
+                                    <a href="{$wa_app_url}contact/{$contact.company_contact_id}/" style="display: inline;">{$contact.company|escape}</a>
+                                {else}
+                                    {$contact.company|escape}
+                                    {if $editable}
+                                        <a href="javascript:void(0);" class="js-add-company-contact inline-link small" data-dialog-url="{$wa_app_url}?module=contact&action=addCompanyContactDialog&contact_id={$contact.id}">
+                                            <i class="icon10 add" style="vertical-align: baseline;"></i> <b><i>[`Add company contact`]</i></b>
+                                        </a>
+                                    {/if}
+                               {/if}
+                            {elseif ($editable)}
+                                <a href="javascript:void(0);" class="js-add-company-contact inline-link small" data-dialog-url="{$wa_app_url}?module=contact&action=addCompanyContactDialog&contact_id={$contact.id}">
+                                    <i class="icon10 add" style="vertical-align: baseline;"></i> <b><i>[`Add company`]</i></b>
+                                </a>
+                            {/if}
+                        {else}
+                            {if $contact.employees_count}
+                                <a class="js-view-employees" href="{$wa_app_url}contact/{$contact.id}/employees/" style="display: inline;">
+                                    {_w('%d employee.', '%d employees.', $contact.employees_count)}
+                                </a>
+                            {else}
+                                [`No employees.`]
+                            {/if}
+                            <a class="js-add-employee inline-link small" href="javascript:void(0);" style="display: inline;"><i class="icon16 add"></i><b><i>[`Add employee`]</i></b></a>
+                        {/if}
+                    </li>
+
+                    <li class="c-segments-wrapper">
+                        {strip}
+                        <span>[`Segments`]:</span>
+                        <span class="js-segment-list">
+                            {if !empty($contact_segments)}
+                                {foreach $contact_segments as $_id => $_seg}
+                                    <a class="nowrap" href="{$wa_app_url}contact/segment/{$_id|escape}/" style="display: inline;">
+                                        {if !empty($_seg.icon_path)}
+                                            <i class="icon16 userpic20" style="background: url({$_seg.icon_path|escape}); border-radius: 0;"></i>
+                                        {elseif !empty($_seg.icon)}
+                                            <i class="icon16 {$_seg.icon|escape}"></i>
+                                        {/if}
+                                        {$_seg.name|escape}
+                                    </a>
+                                    {if !$_seg@last},{/if}
+                                {/foreach}
+                            {/if}
+                        </span>
+                        {/strip}
+                        {if !empty($search_segments)}
+                            <a class="inline-link js-show-dynamic-segments small nowrap" href="javascript:void(0);" style="display: inline;">
+                                <i class="icon16 folder-dynamic"></i>
+                                <b><i>[`Show dynamic segments`]</i></b>
+                            </a>
+                        {/if}
+                        <a class="inline-link crm-contact-assign-segments small nowrap" href="javascript:void(0);" style="display: inline;">
+                            <i class="icon16 add-to-list"></i>
+                            <b><i>{if !empty($contact_segments)}[`Edit segments`]{else}[`Add to segments`]{/if}</i></b>
+                        </a>
+                    </li>
+
+                    {if !empty($contact.email)}
+                        {foreach $contact.email as $_email}
+                            <li>
+                                <a class="c-email js-show-message-dialog" href="javascript:void(0);" data-email="{$_email.value|escape}" data-id="{$contact.id}" style="display: inline; padding: 0; margin: 0;">
+                                    {$_email_status = $_email.status|default:''}
+
+                                    {if $_email_status == waContactEmailsModel::STATUS_CONFIRMED}
+                                        <i class="icon16 email-confirmed" title="[`Confirmed`]"></i>
+                                    {else}
+                                        <i class="icon16 email"></i>
+                                    {/if}
+
+                                    <span class="c-value {if $_email_status == waContactEmailsModel::STATUS_CONFIRMED}c-confirmed{/if}">
+                                        {$_email.value|escape}
+                                    </span>
+                                    {if $_email.ext}
+                                        <em class="hint">{_ws($_email.ext)|escape}</em>
+                                    {/if}
+
+                                    {if !empty($duplicate_counters.email.count) && $_email.value == $duplicate_counters.email.value|default:''}
+                                        <a href="{$wa_app_url}contact/search/result/contact_info.email={urlencode($duplicate_counters.email.value)}" class="nowrap c-duplicate-contacts-link">
+                                            <i class="icon10 exclamation"></i>
+                                            {_w('%d more client found with the same email address', '%d more clients found with the same email address', $duplicate_counters.email.count)}
+                                        </a>
+                                    {/if}
+                                </a>
+                            </li>
+                        {/foreach}
+                    {/if}
+
+                    {if !empty($contact.phone)}
+                        {foreach $contact->get('phone', 'js') as $_index => $_phone}
+                            {$_phone_number = $contact.phone[$_index]["value"]|default:""|escape}
+                            {$_phone_status = $contact.phone[$_index]["status"]|default:""}
+                            <li>
+                                <a class="c-phone {if $is_init_call}js-show-call-dialog{/if}" href="{if $is_init_call}javascript:void(0);{else}tel:+{$_phone_number}{/if}" data-phone="{$_phone_number}" data-id="{$contact.id}"  style="display: inline;">
+
+                                    {if $_phone_status == waContactDataModel::STATUS_CONFIRMED}
+                                        <i class="icon16 phone-confirmed" title="[`Confirmed`]"></i>
+                                    {else}
+                                        <i class="icon16 phone"></i>
+                                    {/if}
+
+                                    <span class="c-value {if $_phone_status == waContactDataModel::STATUS_CONFIRMED}c-confirmed{/if}">
+                                        {$_phone.value|escape}
+                                    </span>
+                                    {if $_phone.ext}
+                                        <em class="hint">{_ws($_phone.ext)|escape}</em>
+                                    {/if}
+                                </a>
+
+                                {if $is_sms_configured}
+                                    <a class="js-show-send-sms-dialog" href="javascript:void(0);" style="display: inline;" data-id="{$contact.id}" data-phone="{$_phone_number}"><i class="icon16 sms"></i>[`SMS`]</a>
+                                {/if}
+
+                                {if !empty($duplicate_counters.phone.count) && $_phone_number == $duplicate_counters.phone.value|default:''}
+                                <a href="{$wa_app_url}contact/search/result/contact_info.phone={urlencode($duplicate_counters.phone.value)}" class="nowrap c-duplicate-contacts-link">
+                                    <i class="icon10 exclamation"></i>
+                                    {_w('%d more client found with the same phone number', '%d more clients found with the same phone number', $duplicate_counters.phone.count)}
+                                </a>
+                                {/if}
+                            </li>
+                        {/foreach}
+                    {/if}
+
+                    <li class="c-info-list js-info-list" style="{if $list_expander_required}display: none;{/if}">
+                        {foreach $top_info_fields as $field}
+                            <div class="field" data-id="{$field.id}" data-type="{$field.type}">
+                                <div class="name {if !empty($field.multi) || $field.type == 'Composite'}multiline{/if}">{$field.name|escape}</div>
+                                <div class="value">
+                                    <ul class="menu-v compact">
+                                        {foreach $field.values as $sort => $value}
+                                            <li>
+                                                {if !in_array($field.type, ['SocialNetwork', 'IM', 'Address', 'Url', 'Composite'])}
+                                                    {$value = $value|escape}
+                                                {/if}
+                                                {if $field.type === 'Text'}
+                                                    {$value|nl2br}
+                                                {else}
+                                                    {$value}
+                                                {/if}
+                                                {if !empty($field.data[$sort].ext)}
+                                                    <em class="hint">{_ws($field.data[$sort].ext)|escape}</em>
+                                                {/if}
+                                            </li>
+                                        {/foreach}
+                                    </ul>
+                                </div>
+                            </div>
+                        {/foreach}
+                        {if $files}
+                            <div class="field">
+                                <div class="name multiline">[`Files`]</div>
+                                <div class="value">
+                                    <ul class="menu-v compact c-files-list js-files-list">
+                                        {foreach $files as $_file}
+                                            {$_file_link = "?module=file&action=download&id=`$_file.id`"}
+                                            {$_ext = crmHelper::getExtInfo($_file.ext)}
+                                            {$_ext_icon = $_ext.img}
+
+                                            <li class="c-file" data-id="{$_file.id}">
+                                                <div class="c-layout">
+                                                    {* ICON *}
+
+                                                    {if !empty($_ext_icon)}
+                                                        <div class="c-column c-image-wrapper middle" style="padding-right: 8px;">
+
+                                                        <span class="c-image">
+                                                            <img src="{$_ext_icon}" alt="{$_file.name|escape}">
+                                                        </span>
+
+                                                        </div>
+                                                    {/if}
+                                                    <div class="c-column middle">
+                                                        <div class="">
+                                                            <a class="c-name js-disable-router" href="{$_file_link}" style="display: inline;">{$_file.name|escape}</a>
+                                                            <span class="c-remove-link js-remove-file" title="[`Remove file`]">
+                                                                <i class="icon16 delete"></i>
+                                                            </span>
+                                                        </div>
+                                                        <span class="c-size hint">{crmHelper::formatFileSize($_file.size)}</span>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        {/foreach}
+                                    </ul>
+                                </div>
+                            </div>
+                        {/if}
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {if $list_expander_required}
+            <div class="c-info-toggle js-info-toggle">
+                <div class="c-visible">
+                    <a class="inline-link" href="javascript:void(0);">
+                        <i class="icon16 down"></i><b><i>[`Full contact info`]</i></b>
+                    </a>
+                </div>
+                <div class="c-hidden">
+                    <a class="inline-link" href="javascript:void(0);">
+                        <i class="icon16 up"></i><b><i>[`Reduce contact info`]</i></b>
+                    </a>
+                </div>
+            </div>
+        {/if}
+    </div>
+
+    <div class="c-short-profile js-short-profile">
+        <div class="c-layout">
+            <div class="c-column c-column-image">
+                <img src="{$contact->getPhoto2x(50)}" class="userpic">
+            </div>
+            <div class="c-column middle c-column-name">
+                <h2>
+                    {if !empty($contact.title)}
+                        <span class="c-title" style="margin: 0 4px 0 0;">{$contact.title|escape}</span>
+                    {/if}
+
+                    <span class="c-name">
+                        {$wa->crm->contactName($contact.name)}
+                    </span>
+
+                    {if !empty($contact.login)}
+                        <span class="hint" style="margin: 0 0 0 4px;">@{$contact.login|escape}</span>
+                    {/if}
+                </h2>
+                {if !$contact.is_company}
+                    <div class="c-company-line">
+                        {$contact.jobtitle|default:''|escape}
+                        {if $contact.company}
+                            [`@`]
+                            {if $contact.company_contact_id > 0}
+                                <a href="{$wa_app_url}contact/{$contact.company_contact_id}/" style="display: inline;">{$contact.company|escape}</a>
+                            {else}
+                                {$contact.company|escape}
+                            {/if}
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+            <div class="c-column middle right c-column-actions">
+                <ul class="menu-h">
+                    <li class="responsible-contact">
+                        {capture assign=responsible_link_content}
+                        {if isset($responsible.id)}
+                        <i class="icon16 userpic20" style="background-image: url('{$responsible.photo_url|escape}');"></i><span title="[`Owner`]">{$responsible.name|escape}</span>
+                        {else}
+                        <i class="icon16 user"></i>[`No owner`]
+                        {/if}
+                        {/capture}
+                        {if !$one_owner_user || $responsible.id|default:null != $owner_id }
+                        {if $editable}
+                        <a href="javascript:void(0);"
+                           class="responsible-link js-short-responsible-link"
+                           data-dialog-url="{$wa_app_url}?module=contact&action=responsibleDialog&contact_id={$contact.id}">
+                            {$responsible_link_content}
+                        </a>
+                        {else}
+                        {$responsible_link_content}
+                        {/if}
+                        {/if}
+                    </li>
+
+                    {if $access_dialog_name !== null}
+                    <li><a href="javascript:void(0);"
+                           class="classify-access-link js-short-access-link"
+                           data-dialog-url="{$wa_app_url}?module=contact&action=accessDialog&contact_id={$contact.id}"
+                    ><i class="icon16 lock"></i>{$access_dialog_name|escape}</a>
+                    </li>
+                    {/if}
+                    {if $editable}
+                    <li><a href="javascript:void(0);" class="edit-link js-short-edit-link"><i class="icon16 edit"></i>[`Edit`]</a></li>
+                    <li><a href="javascript:void(0);" class="crm-delete-link js-short-delete-link"><i class="icon16 delete"></i>[`Delete`]</a></li>
+                    {/if}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {if $editable}
+        {include file="./ContactOperationDeleteCheckingDialog.inc.html" inline}
+    {/if}
+
+    {* TABS *}
+    {$wa->contactProfileTabs($contact.id, ['selected_tab' => waRequest::param('tab', 'history', 'string'), 'tabs' => $tabs])}
+
+    <script>
+        (function($) {
+            new CRMContactPage({
+                $wrapper: $("#c-profile-page"),
+                photo_dialog_url: "{$wa_app_url}?module=contact&action=photoDialog&id={$contact.id}",
+                contact_id: {$contact.id|json_encode},
+                editable: {$editable|json_encode},
+                locales: {
+                    remove_file_title: '[`Remove file`]',
+                    remove_file_text: '[`Remove file`] <strong>%s</strong>?',
+                    remove_file_button: '[`Remove`]',
+                    no_segments: "[`No dynamic segments`]"
+                }
+            });
+            $.crm.title.set({$contact.name|json_encode});
+
+            $('#c-sidebar-block').load('?module=sidebar');
+
+        })(jQuery);
+
+    </script>
+</div>

@@ -1,0 +1,53 @@
+{**
+  * Template for render !deal_attachments field in constructor
+  *}
+{$class_id = 'crm-attachments-wrapper'}
+{$wrapper_id = uniqid($class_id)}
+<div class="{$class_id}" id="{$wrapper_id}">
+    <div class="crm-attachments">
+        <div class="crm-attachment" data-template="1" style="display: none;">
+            <input type="file" name="crm_form_deal_attachment[]" disabled="disabled">
+            <a href="javascript:void(0);" class="c-remove-attachment" style="display: none;">[`Remove`]</a>
+        </div>
+        <div class="crm-attachment">
+            <input type="file" name="crm_form_deal_attachment[]">
+            <a href="javascript:void(0);" class="c-remove-attachment" style="display: none;">[`Remove`]</a>
+        </div>
+    </div>
+    <script>
+        (function ($) {
+
+            var $wrapper = $('#{$wrapper_id}'),
+                $template = $wrapper.find('.crm-attachment[data-template="1"]'),
+                count = 1;
+
+            var addNewInput = function() {
+                var $attachment = $template.clone();
+                $attachment.data('template', '').attr('data-template', '').show();
+                $attachment.find(':file').attr('disabled', false).removeClass('crm-error');
+                $wrapper.append($attachment);
+                count += 1;
+                if (count > 1) {
+                    $attachment.prevAll('.crm-attachment:first').find('.c-remove-attachment').show();
+                }
+            };
+
+
+            // when user selects an attachment, add another field
+            $wrapper.on('change', ':file:last', function() {
+                addNewInput();
+            });
+
+            // attachment remove links
+            $wrapper.on('click', '.c-remove-attachment',
+                function () {
+                    $(this).closest('.crm-attachment').remove();
+                    count -= 1;
+                    if (count <= 1) {
+                        $wrapper.find('.c-remove-attachment').hide();
+                    }
+                }
+            );
+        })(jQuery);
+    </script>
+</div>

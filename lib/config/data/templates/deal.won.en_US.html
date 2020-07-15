@@ -1,0 +1,19 @@
+<p>
+    {waDateTime::format('datetime')} deal
+    “<a href="{$deal.url}">{$deal.name|escape}</a>”
+    in funnel “{$deal.funnel.name|escape}” was won.
+    Responsible: {$responsible.name|escape}.
+</p>
+<p>
+    <b>Deal details</b><br>
+    Customer: {$customer.name|escape}{if !empty($customer.company)}, {$customer.company|escape}{/if}<br>
+    Description: {$deal.description_sanitized}<br>
+    Total amount of invoices paid by customer: {$deal.amount|wa_format_amount_currency:$deal.currency_id}
+</p>
+
+--<br>
+<p>
+    --<br>
+    {$wa->accountName()|escape}<br>
+    {$wa->domainUrl()}
+</p>

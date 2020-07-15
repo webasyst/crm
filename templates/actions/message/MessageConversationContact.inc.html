@@ -1,0 +1,78 @@
+{$_is_admin = $wa->user()->isAdmin('crm')}
+{if !empty($_contact)}
+    {$_photo = $_contact->getPhoto(50)}
+    {$_jobtitle = $_contact->get('jobtitle')}
+    {$_company = $_contact->get('company')}
+    <div class="c-conversation-member{if !empty($_class)} {$_class}{/if}">
+        <div class="c-layout">
+            {if !empty($_photo)}
+                <div class="c-column c-image-column">
+                    <div class="c-image">
+                        <i class="icon50" style="background-image: url({$_photo});"></i>
+                    </div>
+                </div>
+            {/if}
+            <div class="c-column middle">
+                <ul class="menu-v compact">
+                    <li class="c-name-line">
+                        <a class="c-name" href="{$wa_app_url}contact/{$_contact.id}/" style="display: inline; padding: 0; margin: 0;">{$_contact.name|escape}</a>
+                    </li>
+
+                    {if !empty($_jobtitle) || !empty($_company)}
+                        <li>
+                            {if !empty($_jobtitle)}{$_jobtitle|escape}{/if}
+                            {if !empty($_jobtitle) && !empty($_company)}@{/if}
+                            {if !empty($_company)}{$_company|escape}{/if}
+                        </li>
+                    {/if}
+
+                    {$_emails = $_contact->get('email')}
+                    {if !empty($_emails)}
+                        {foreach $_emails as $_e}
+                            {if !empty($_e.value)}
+                                <li class="nowrap">
+                                    <a href="javascript:void(0);" class="js-show-message-dialog" data-email="{$_e.value|escape}" data-id="{$_contact.id}" style="display: inline; padding: 0; margin: 0;">
+                                        <i class="icon16 email"></i>{$_e.value|escape} {if $_e.ext}({_ws($_e.ext)}){/if}
+                                    </a>
+                                </li>
+                            {/if}
+                        {/foreach}
+                    {/if}
+                </ul>
+            </div>
+        </div>
+
+        {if isset($_type) && $_type == 'responsible' && ($_is_admin || $_contact.id == $wa->user()->getId())}
+            <div class="c-actions-wrapper">
+                <span class="c-change-toggle js-show-combobox" title="[`Transfer ownership`]">
+                    <i class="icon16 edit"></i>
+                </span>
+                <span class="c-change-toggle js-remove-owner" title="[`Clear ownership`]">
+                    <i class="icon16 close"></i>
+                </span>
+            </div>
+            <div class="c-owner-toggle js-owner-toggle">
+                <h3 class="c-header">[`Transfer ownership`]</h3>
+                <input class="js-owner-autocomplete" type="text" name="some_name" placeholder="[`User name`]">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="inline-link js-hide-combobox" href="javascript:void(0);">
+                    <b>
+                        <i>[`cancel`]</i>
+                    </b>
+                </a>
+            </div>
+        {/if}
+    </div>
+{else}
+    <div class="c-responsible-select-wrapper js-responsible-select-wrapper">
+        <div class="c-visible">
+            <a class="inline-link js-set-extended" href="javascript:void(0);"><b><i>[`Set the owner`]</i></b></a>
+        </div>
+        <div class="c-hidden">
+            <div style="margin: 0 0 6px;">[`Set the owner`]</div>
+            <input class="js-responsible-autocomplete" placeholder="[`User name`]"/>
+            <span style="margin: 0 4px;">[`or`]</span>
+            <a class="inline-link js-unset-extended" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+        </div>
+    </div>
+{/if}

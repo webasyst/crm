@@ -1,0 +1,46 @@
+<div class="crm-dialog-wrapper c-email-personal-settings-dialog" id="c-email-personal-settings-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block" style="min-width:800px">
+        <form>
+
+            <header class="crm-dialog-header">
+                <h1>[`Personal settings`]</h1>
+            </header>
+
+            <div class="crm-dialog-content">
+                <div class="fields">
+                    <div class="field">
+                        <div class="name">[`Name`]</div>
+                        <div class="value c-sender-name-wrapper">
+                            <input class="js-sender-name-input" type="text" name="sender_name"
+                                   value="{if $user_name !== $sender_name}{$sender_name|escape}{/if}"
+                                   placeholder="{$user_name|escape}">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">[`Signature`]</div>
+                    </div>
+                    <div class="field">
+                        <textarea class="js-wysiwyg-field" name="email_signature">{$email_signature}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <span class="c-visible">
+                    <input class="button green" type="submit" value="[`Save`]">
+                </span>
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="inline-link js-close-dialog" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+            </footer>
+        </form>
+    </div>
+
+    <script>
+        (function($) {
+            new CRMEmailPersonalSettingsDialog({
+                $wrapper: $("#c-email-personal-settings-dialog")
+            });
+        })(jQuery);
+    </script>
+</div>

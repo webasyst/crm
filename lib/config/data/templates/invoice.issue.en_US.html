@@ -1,0 +1,24 @@
+<p>Dear Sirs,</p>
+<p>Invoice No. {$invoice.number|escape} has been issued for you by {$company.name|escape}.</p>
+
+<p>Invoice No.: {$invoice.number|escape}<br>
+Amount: {wa_currency($invoice.amount, $invoice.currency_id)}<br>
+Invoice date: {$invoice.invoice_date|wa_date}</p>
+
+<p>Invoice items:</p>
+<ol>
+{foreach $invoice.items as $item}
+<li>{$item.name|escape} x {$item.quantity}</li>
+{/foreach}
+</ol>
+
+<p>
+Link to view invoice online:<br>
+<a href="{$link}">{$link}</a>
+</p>
+
+<p>
+–-<br>
+{$wa->accountName()|escape}<br>
+{$wa->domainUrl()}
+</p>

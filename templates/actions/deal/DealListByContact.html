@@ -1,0 +1,258 @@
+{* CSS *}
+<link rel="stylesheet" href="{$wa_app_static_url}css/contact_deals.css?v={$wa->version()}">
+<script src="{$wa_url}wa-content/js/d3/d3.min.js"></script>
+
+{capture assign="_add_button"}
+    <a href="{$wa_backend_url}crm/deal/new/?contact={$contact_id}"><i class="icon16 add" style="margin: 0 4px 0 0; position: relative; top: 2px; vertical-align: baseline;"></i>[`Add deal`]</a>
+{/capture}
+
+{* PAGE *}
+<div class="c-contact-deals-tab" id="c-contact-deals-tab">
+    {if $deals}
+        <table class="c-deals-list zebra single-lined">
+            {foreach $deals as $_deal}
+                {$_stage = ifset($funnels[$_deal.funnel_id].stages[$_deal.stage_id])}
+                {$_now = date('Y-m-d H:i:s')}
+
+                <tr class="c-deal-wrapper {if !$_deal.closed_datetime && $_deal.reminder_datetime && $_deal.reminder_datetime < $_now}overdue{/if}">
+                    <td class="c-column-1" style="width: 16px;">
+                        {if !empty($_stage.color)}
+                            {$_funnel_name = $funnels[$_deal.funnel_id].name|escape}
+                            <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color}" style="margin: 0;" title="{$_funnel_name|escape}"></i>
+                        {/if}
+                    </td>
+                    <td class="c-column-2">
+                        <div>
+                            {if $_deal.status_id == "WON"}
+                                <span class="c-state-wrapper is-won">
+                                    <span class="c-state">
+                                        <span class="c-status">[`WON`]</span> {if !empty($_deal.closed_datetime)}<span class="hint">{$_deal.closed_datetime|wa_datetime}</span>{/if}
+                                    </span>
+                                </span>
+                            {elseif $_deal.status_id == "LOST"}
+                                <span class="c-state-wrapper is-lost">
+                                    <span class="c-state">
+                                        <span class="c-status">[`LOST`]</span>  {if !empty($_deal.closed_datetime)}<span class="hint">{$_deal.closed_datetime|wa_datetime}</span>{/if}
+                                    </span>
+                                </span>
+                            {else}
+                                <span class="c-state-wrapper"{if !empty($_stage.color)} style="background-color: {$_stage.color};"{/if}>
+                                    <span class="c-state">{$_stage.name|escape}</span>
+                                </span>
+                            {/if}
+
+                            <i class="shortener"></i>
+                            <a class="c-full-line-link" href="{$wa_app_url}deal/{$_deal.id}/" target="_parent"></a>
+                        </div>
+                    </td>
+                    <td class="c-column-date">
+                        <div>
+                            {waDateTime::format('shortdate', strtotime($_deal.create_datetime))}
+                            <i class="shortener"></i>
+                            <a class="c-full-line-link" href="{$wa_app_url}deal/{$_deal.id}/" target="_parent"></a>
+                        </div>
+                    </td>
+                    <td class="c-column-exclamation">
+                        {if !$_deal.closed_datetime}
+                            {if empty($_deal.reminder_datetime)}
+                                <i class="icon16 exclamation" title="[`No reminders assigned`]"></i>
+                            {else}
+                                <i class="c-reminder-marker {$_deal.reminder_state|default:""}" title="{$_deal.reminder_title|default:""}"></i>
+                            {/if}
+                        {/if}
+                    </td>
+                    <td class="c-column-3">
+                        <div>
+                            <a class="js-deal-link" href="{$wa_app_url}deal/{$_deal.id}/">
+                                {$_contact_photo = $_deal.contact->getPhoto(32)}
+                                {if !empty($_contact_photo)}
+                                    <i class="icon32" style="background-image: url({$_contact_photo})"></i>
+                                {/if}
+                                <span class="c-name">{$_deal.name|escape}</span>
+                            </a>
+
+                            <i class="shortener"></i>
+                            <a class="c-full-line-link" href="{$wa_app_url}deal/{$_deal.id}/" target="_parent"></a>
+                        </div>
+                    </td>
+                    <td class="c-column-4">
+                        <div>
+                            <span class="c-price">
+                                {if $_deal.amount}
+                                    {$_deal.amount|wa_format_amount_currency:$_deal.currency_id}
+                                {else}
+                                    &mdash;
+                                {/if}
+                            </span>
+
+                            <a class="c-full-line-link" href="{$wa_app_url}deal/{$_deal.id}/" target="_parent"></a>
+                        </div>
+                    </td>
+                    <td class="c-column-5">
+                        <div>
+                            {if $_deal.user_contact_id}
+                                {$_user_photo = $_deal.user_contact->getPhoto(32)}
+                                {if !empty($_user_photo)}
+                                    <i class="icon32" style="background-image: url({$_user_photo})"></i>
+                                {/if}
+                                {$_deal.user_contact.name|escape}
+                                {* $_deal.user_contact.name_status *}
+                            {/if}
+
+                            <i class="shortener"></i>
+                            <a class="c-full-line-link" href="{$wa_app_url}deal/{$_deal.id}/" target="_parent"></a>
+                        </div>
+                    </td>
+                </tr>
+            {/foreach}
+        </table>
+
+        {if $available_funnel}
+            <p style="margin: 1em 0 0;">{$_add_button}</p>
+        {/if}
+
+        <script>
+            ( function($) {
+
+                var $wrapper = $("#c-contact-deals-tab");
+
+                $wrapper.on("click", ".c-deal-wrapper", function(event) {
+                    var $target = $(event.target),
+                        $deal = $(this);
+
+                    var is_link = !!($target.is('a') || $target.closest("a").length);
+                    if (!is_link) {
+                        var $deal_link = $deal.find(".js-deal-link");
+                        if ($deal_link.length) {
+                            if (window.parent) {
+                                var redirect_uri = $deal_link[0].href;
+                                window.parent.$.crm.content.load(redirect_uri);
+                            } else {
+                                $deal_link.trigger("click");
+                            }
+                        }
+                    }
+                });
+
+            })(jQuery);
+        </script>
+
+    {else}
+        <div class="block double-padded">
+            <div class="c-tab-empty gray" style="padding: 1em 0;">[`No deals`]</div>
+            {if $available_funnel}
+                <p style="margin: 1em 0 0;">{$_add_button}</p>
+            {/if}
+        </div>
+    {/if}
+
+    {if !$wa->user()->isAdmin('crm')}
+        <p class="hint">[`Some deals may not show due to access rights restrictions.`]</p>
+    {/if}
+
+    <script>
+        if (typeof d3 === "undefined") {
+            alert("D3 is required");
+        }
+
+        ( function($, d3) {
+            var $wrapper = $("#c-contact-deals-tab");
+            //
+            renderSVG($wrapper);
+            //
+            function renderSVG($wrapper) {
+                // to find all icons and generate svg
+
+                var SVGIcon = ( function($, d3) {
+
+                    SVGIcon = function(options) {
+                        var that = this;
+
+                        // DOM
+                        that.$icon = options["$icon"];
+                        that.svg = d3.select(that.$icon[0]).append("svg");
+
+                        // VARS
+                        that.type = that.$icon.data("type");
+
+                        // DYNAMIC VARS
+                        that.icon_w = that.$icon.outerWidth();
+                        that.icon_h = that.$icon.outerHeight();
+
+                        // INIT
+                        that.initClass();
+                    };
+
+                    SVGIcon.prototype.initClass = function() {
+                        var that = this;
+
+                        that.svg.attr("width", that.icon_w)
+                            .attr("height", that.icon_h);
+
+                        if (that.$icon.hasClass("funnel-state")) {
+                            that.renderFunnelState();
+                        }
+
+                        // save backdoor
+                        that.$icon.data("icon", that);
+                    };
+
+                    SVGIcon.prototype.renderFunnelState = function() {
+                        var that = this,
+                            color = ( that.$icon.data("color") || "#aaa" );
+
+                        var svg = that.svg,
+                            group = svg.append("g");
+
+                        group.append("polygon")
+                            .attr("points", "4,16 0,16 3.9,7.9 0,0 4,0 8.7,7.9")
+                            .style("opacity", .33)
+                            .style("fill", color);
+
+                        group.append("polygon")
+                            .attr("points", "8,16 4,16 7.9,7.9 4,0 8,0 12.6,7.9")
+                            .style("opacity", .66)
+                            .style("fill", color);
+
+                        group.append("polygon")
+                            .attr("points", "11.9,16 7.9,16 11.8,7.9 7.9,0 11.9,0 16,7.9")
+                            .style("fill", color);
+                    };
+
+                    SVGIcon.prototype.refresh = function() {
+                        var that = this;
+
+                        that.icon_w = that.$icon.outerWidth();
+                        that.icon_h = that.$icon.outerHeight();
+
+                        that.svg
+                            .attr("width", that.icon_w)
+                            .attr("height", that.icon_h);
+                    };
+
+                    return SVGIcon;
+
+                })(jQuery, d3);
+
+                if (typeof $wrapper === "string") {
+                    $wrapper = $($wrapper);
+                }
+
+                if ($wrapper.length) {
+                    $wrapper.find(".svg-icon").each( function() {
+                        var $icon = $(this),
+                            icon = $icon.data("icon");
+
+                        if (icon) {
+                            icon.refresh();
+                        } else if (SVGIcon) {
+                            new SVGIcon({
+                                $icon: $icon
+                            });
+                        }
+                    });
+                }
+            }
+        })(jQuery, d3);
+    </script>
+</div>

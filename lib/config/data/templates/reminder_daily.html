@@ -1,0 +1,11 @@
+{sprintf('[`Hi %s,`]', $userName)}<br><br>
+{sprintf('[`Here is your <a href="%scrm/reminder/">daily recap</a> for %s:`]', rtrim($wa->domainUrl(), '/')|cat:$wa_backend_url, $now|wa_date:'humandate')}
+<br><br>
+{foreach $reminders as $reminder}
+    {$format = 'humandate'}
+    {if $reminder.due_datetime}{$format = 'humandatetime'}{/if}
+    <p>{sprintf('[`<strong>%s</strong> on %s`]', $reminder.content|nl2br, $reminder.due_datetime|default:$reminder.due_date|wa_datetime:$format:$timezone)}</p>
+{/foreach}
+<br>
+--<br>
+{$wa->accountName()}

@@ -1,0 +1,1047 @@
+{$_is_closed = false}
+{$_is_won = false}
+{$_is_lost = false}
+
+{if $deal.status_id == "WON"}
+    {$_is_won = true}
+    {$_is_closed = true}
+{elseif $deal.status_id == "LOST"}
+    {$_is_lost = true}
+    {$_is_closed = true}
+{/if}
+
+{$_show_stages_line = !$funnel || !empty($funnel.id)}
+
+<div class="c-deal-page" id="c-deal-page">
+
+    {* HEADER *}
+    <header class="c-page-header js-page-header">
+        <div class="c-table-box space-15">
+            {* BACK *}
+            <div class="c-column s-back-column">
+                {if $funnel && !empty($funnel.id) && $has_access_to_funnel}
+                    <a class="s-back-link" href="{$wa_app_url}deal/?funnel={$funnel.id}">&larr;&nbsp;{$funnel.name|escape}</a>
+                {else}
+                    <span class="s-back-link">[`Funnel deleted`]</span>
+                {/if}
+            </div>
+
+            {* NAME *}
+            <div class="c-column">
+                <h1 class="c-deal-name {if $_is_lost}is-lost-deal{/if}"><span class="{if !$_is_closed && $can_edit_deal}c-editable js-editable{/if}">{strip_tags($deal.name)|escape}</span></h1>
+            </div>
+
+            {* ACTIONS *}
+            {if !empty($can_edit_deal)}
+                <div class="c-column right">
+                    <ul class="c-actions-list menu-h">
+                        <li>
+                            <a href="{$wa_app_url}deal/{$deal.id}/edit/" title="[`Edit deal`]"><i class="icon16 edit"></i>[`Edit deal`]</a>
+                        </li>
+                        {if !empty($can_delete)}
+                            <li>
+                                <a class="js-deal-delete" href="javascript:void(0);" title="[`Delete`]"><i class="icon16 delete"></i>[`Delete`]</a>
+                            </li>
+                        {/if}
+                    </ul>
+                </div>
+            {/if}
+        </div>
+
+        <div class="c-table-box middle space-15">
+            <div class="c-column">
+
+                {* TAGS *}
+                <div class="c-tags-section">
+                    {strip}
+                        <ul class="c-tags-list">
+                            {foreach $tags as $_tag}
+                                <li>
+                                    <a class="c-tag nowrap" href="{$wa_app_url}deal/?tag={$_tag.id}">{$_tag.name|escape}</a>
+                                </li>
+                            {/foreach}
+                            {if $can_edit_deal}
+                                <li>
+                                    <a class="inline-link js-assign-tags small nowrap" href="javascript:void(0);">
+                                        <i class="icon16 tags"></i>
+                                        <b><i>{if $tags}[`Edit tags`]{else}[`Add tags`]{/if}</i></b>
+                                    </a>
+                                </li>
+                            {/if}
+                        </ul>
+                    {/strip}
+                </div>
+            </div>
+            <div class="c-column">
+
+                <div class="c-actions">
+                    {if $_is_closed}
+                        <a class="inline-link small js-reopen-deal" href="javascript:void(0);" style="margin-left: 8px;"><i class="icon16 rotate-left"></i><b><i>[`Reopen deal`]</i></b></a>
+                    {elseif !$_show_stages_line}
+                        <button class="js-close-deal button gray">[`Close deal`]</button>
+                    {/if}
+
+                    {* LOST REASON *}
+                    {if $_is_lost && $_show_stages_line && !empty($deal.lost_text)}
+                        <span class="c-reason-text">{$deal.lost_text|escape}</span>
+                    {/if}
+                </div>
+
+            </div>
+        </div>
+
+        {* FUNNEL *}
+        <section class="c-funnel-section">
+            {if $_show_stages_line}
+                <div class="c-funnel-wrapper">
+                    {$_undone = false}
+
+                    {$_last_stage = [
+                        "id" => false,
+                        "color" => "#aaa",
+                        "name" => "[`Close`]"
+                    ]}
+
+                    {if $_is_won}
+                        {$_last_stage = [
+                            "id" => false,
+                            "type" => "won",
+                            "color" => "#0f0",
+                            "class" => "is-won",
+                            "name" => "[`WON`]"
+                        ]}
+                    {elseif $_is_lost}
+                        {$_last_stage = [
+                            "id" => false,
+                            "type" => "lost",
+                            "color" => "#f00",
+                            "class" => "is-lost",
+                            "name" => "[`LOST`]"
+                        ]}
+                    {/if}
+
+                    {$stages[] = $_last_stage}
+
+                    {$_stage_count = $stages|count}
+                    {$_selected_width = 1.5 * 100/$_stage_count}
+                    {$_gray_range = []}
+                    {$_undone_index = 0}
+
+                    {foreach $stages as $_stage}
+                        {$_is_active = false}
+                        {if !$_is_closed}
+                            {if $_stage.id == $deal.stage_id}
+                                {$_is_active = true}
+                            {/if}
+                        {else}
+                            {if $_stage@last}
+                                {$_is_active = true}
+                            {/if}
+                        {/if}
+
+                        {if $_stage.id == $deal.stage_id}
+                            {$_undone_count = $_stage_count - $_stage@iteration - 1}
+                            {if $_undone_count > 1}
+                                {foreach range(0xdd, 0xaa, (0xaa - 0xdd) / $_undone_count) as $part}
+                                    {$_gray_range[] = "#{$part|dechex}{$part|dechex}{$part|dechex}"}
+                                {/foreach}
+                            {else}
+                                {$_gray_range[] = "#ddd"}
+                            {/if}
+                        {/if}
+
+                        {$_classes = []}
+                        {if $_is_active}
+                            {$_classes[] = "selected"}
+                        {elseif !$_is_closed}
+                            {if $_stage.id > 0}
+                                {$_classes[] = "js-set-state"}
+                            {else}
+                                {$_classes[] = "js-close-deal"}
+                            {/if}
+                        {/if}
+                        {if !empty($_stage.class)}
+                            {$_classes[] = $_stage.class}
+                        {/if}
+
+                        {if !empty($_undone) && $_stage.id > 0}
+                            {$_classes[] = "is-undone"}
+
+                            {$_stage.hover_color = $_stage.color}
+                            {$_stage.color = $_gray_range[$_undone_index]}
+                            {$_undone_index = $_undone_index + 1}
+                        {/if}
+
+                        <div class="c-state-item {$_classes|join:" "}" data-id="{$_stage.id}" {if $_is_active}style="width: {$_selected_width}%;"{/if}>
+                            <div class="c-state-block" style="{if !$can_edit_deal || $_is_closed}cursor: default;{/if}">
+
+                                <i class="svg-icon {if $_stage@first}funnel-1{else}funnel{/if}"
+                                    data-color="{$_stage.color|default:"#ddd"}"
+                                    {if $_is_active}
+                                        data-stroke-width="3"
+                                    {/if}
+                                    {if $can_edit_deal}
+                                        {if !empty($_stage.hover_color)}
+                                            data-hover-color="{$_stage.hover_color}"
+                                        {/if}
+                                        {if !$_is_active && !$_is_closed}
+                                            data-hover="true"
+                                        {/if}
+                                    {/if}
+                                ></i>
+
+                                <span class="c-name">
+                                    {if !empty($_stage.type)}
+                                        {if $_stage.type == "won"}<i class="icon10 yes"></i>{/if}
+                                        {if $_stage.type == "lost"}<i class="icon10 delete"></i>{/if}
+                                    {/if}
+                                    {$_stage.name|escape}
+                                </span>
+                            </div>
+                        </div>
+
+                        {if $_stage.id == $deal.stage_id}
+                            {$_undone = true}
+                        {/if}
+                    {/foreach}
+                </div>
+            {elseif $_is_closed}
+                {if $_is_won}
+                    <div class="c-closed-stage-block is-won">
+                        <span class="c-name">
+                            <i class="icon10 yes"></i> [`WON`]
+                        </span>
+                    </div>
+                {elseif $_is_lost}
+                    <div class="c-closed-stage-block is-lost">
+                        <span class="c-name">
+                            <i class="icon10 delete"></i> [`LOST`]
+                        </span>
+                    </div>
+                    {if !empty($deal.lost_text)}
+                        <div class="c-lost-reason">
+                            <span class="c-reason bold">{$deal.lost_text|escape}</span>
+                        </div>
+                    {/if}
+                {/if}
+            {/if}
+        </section>
+    </header>
+
+    {* BOARD *}
+    <main class="c-deal-board">
+        <div class="c-table-box">
+            <div class="c-column content bordered-right blank">
+
+                {* CONTENT *}
+                <div class="c-deal-content block double-padded">
+
+                    {if !empty($order)}
+                        {include file="./Deal.order.inc.html" order=$order inline}
+
+                    {elseif $can_create_order}
+                        <div class="c-create-order-link-wrapper">
+                            <a href="javascript:void(0)" class="c-create-order-link js-create-order-link">
+                                <i class="icon16 userpic20" style="background-image: url('/wa-apps/shop/img/shop.png'); position: relative; top: 2px; vertical-align: baseline; margin: 0;"></i>
+                                [`Create order`]
+                                <i class="icon16 loading"></i>
+                            </a>
+                        </div>
+                    {/if}
+
+                    {* DESCRIPTION *}
+                    <div class="c-description-section">
+                        <div class="c-description-toggle js-description-toggle">
+                            {if !$_is_closed}
+                                {if $can_edit_deal}
+                                    <div class="c-description-wrapper c-visible js-output-value">
+                                        <a href="javascript:void(0)" class="js-add-description" {if !empty($deal.description)}style="display: none"{/if}>
+                                            <i class="icon16 add"></i>[`Add description`]</a>
+                                        <div class="c-description">{$deal.description_sanitized}</div>
+                                        <a href="javascript:void(0)" class="js-edit-description" style="visibility: hidden">
+                                            <i class="icon16 edit"></i>[`Edit description`]</a>
+                                    </div>
+
+                                    <div class="c-hidden">
+                                        <div class="c-wysiwyg-wrapper">
+                                            <textarea class="js-wysiwyg js-description-value" name="deal[description]" placeholder="[`Deal description`]">{$deal.description_sanitized|escape}</textarea>
+                                        </div>
+                                        <input type="hidden" name="data[deal_id]" value="{$deal.id}">
+                                        <div class="c-actions">
+                                            <button class="js-save-description button green">[`Save`]</button>
+                                            [`or`]
+                                            <a class="inline-link js-cancel" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                                        </div>
+                                    </div>
+                                {/if}
+                            {else}
+                                <div class="gray">
+                                    <strong><div class="c-description">{$deal.description_sanitized}</div></strong>
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+
+                {* LOGS *}
+                <div class="c-deal-log-section">
+                    {$log_html}
+                </div>
+
+            </div>
+            <div class="c-column sidebar right350px">
+                <div class="c-deal-aside-wrapper">
+
+                {* ASIDE *}
+                <aside class="c-deal-aside block" id="js-deal-aside">
+                    {* PRICES *}
+                    <div class="c-details-block">
+                        <h3 class="c-block-title heading">[`Estimated amount`]</h3>
+                        <div class="c-block-content">
+
+                            <div class="c-deal-price">
+                                {$_can_edit_price = $can_edit_deal && !$order}
+
+                                <div class="c-price-toggle js-price-toggle {if $_is_lost}is-lost-deal{/if}">
+                                    {* VISIBLE *}
+                                    <span class="c-visible">
+                                        <span class="js-span c-price {if $_can_edit_price && !$_is_closed}c-editable js-set-price{/if}" style="{if !($deal.amount|abs > 0)}display:none;{/if}">
+                                            {if !empty($deal.amount)}{$deal.amount|wa_currency_html:$deal.currency_id}{/if}
+                                        </span>
+
+                                        {if $_is_closed && !($deal.amount|abs > 0)}
+                                            <span class="c-price-notice">[`not specified`]</span>
+                                        {/if}
+
+                                        {if $_can_edit_price}
+                                            <a class="inline-link js-link js-set-price" style="{if $_is_closed || ($deal.amount|abs > 0)}display:none;{/if}" href="javascript:void(0);">
+                                                <b><i>[`Set estimated amount`]</i></b>
+                                            </a>
+                                        {/if}
+                                    </span>
+
+                                    {* HIDDEN *}
+                                    {if $_can_edit_price}
+                                        <span class="c-hidden">
+                                            <input class="js-price-field" type="text" value="{$deal.amount}">
+                                            <select class="js-currency-field">
+                                                {foreach $currencies as $_key => $_val}
+                                                    <option value="{$_key}" {if $_key == $deal.currency_id}selected{/if}>{$_val.sign}</option>
+                                                {/foreach}
+                                            </select>
+
+                                            {* ACTIONS *}
+                                            <span class="c-actions">
+                                                <i class="icon16 disk js-save-price" style=""></i>
+                                                [`or`]
+                                                <a class="inline-link js-cancel" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                                            </span>
+                                        </span>
+                                    {/if}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {* DATES *}
+                    <div class="c-details-block">
+                        <h3 class="c-block-title heading">[`Deal term`]</h3>
+                        <div class="c-block-content">
+
+                            <div class="c-deal-dates">
+                                <span title="{_w("Created at")|escape}">{$deal.create_datetime|wa_date}</span>
+                                {if !empty($deal.expected_date) || $can_edit_deal}
+                                    <span class="c-divider">—</span>
+                                {/if}
+
+                                {if !$_is_closed}
+                                    <span class="c-date-toggle js-date-toggle" data-title="[`Expected close date`]">
+                                        <span class="c-visible">
+                                            <span class="js-span js-set-date" style="{if empty($deal.expected_date)}display:none;{/if}" title="{_w("Expected close date")|escape}">
+                                                <span class="js-name bold">{if !empty($deal.expected_date)}{$deal.expected_date|wa_date}{/if}</span>
+                                            </span>
+                                            {if $can_edit_deal}
+                                                <a class="inline-link js-link js-set-date" style="{if !empty($deal.expected_date)}display:none;{/if}" href="javascript:void(0);"><b><i>[`Expected close date`]</i></b></a>
+                                            {/if}
+                                        </span>
+                                        {if $can_edit_deal}
+                                            <span class="c-hidden">
+                                                <input class="js-datepicker" type="text" value="{$deal.expected_date|wa_date}">
+                                                <input class="js-field" type="hidden" value="{$deal.expected_date}">
+                                                <a class="inline-link js-close-edit-date" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                                            </span>
+                                        {/if}
+                                    </span>
+
+                                {else}
+                                    {if !empty($deal.closed_datetime)}
+                                        <span class="c-closed-time gray">[`Closed at`] <strong>{$deal.closed_datetime|wa_date}</strong></span>
+                                    {/if}
+                                {/if}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {* OPTIONS *}
+                    {$_fields = $deal.fields|default:[]}
+                    {if !empty($_fields)}
+                        {$_fields_html = []}
+                        {strip}
+                        {foreach $_fields as $field_id => $field_info}
+
+                            {$_is_zero_digit = $field_info.value === 0 || $field_info.value === '0'}
+                            {$_is_empty_value = empty($field_info.value) && !$_is_zero_digit}
+
+                            {$field_required = ""}
+                            {if !empty($field_info.funnels_parameters.required)}
+                                {$field_required = "required"}
+                            {/if}
+
+                            {if !$_is_empty_value || !empty($field_required)}
+                                {capture append="_fields_html"}
+                                    {if $field_id == 'source'}
+                                        {if ($field_info.type) == 'FORM'}
+                                            {$field_type = " text"}
+                                        {elseif ($field_info.type) == 'EMAIL'}
+                                            {$field_type = " email"}
+                                        {/if}
+
+                                        <div class="field">
+                                            <div class="name">[`Source`]</div>
+                                            <div class="value" style="white-space: nowrap; max-width:150px; overflow:hidden; text-overflow: ellipsis;" title="{$field_info.value_formatted|escape}">
+                                                {if ($field_info.type) == 'IM'}
+                                                    <i class="icon16" style="background-image: url('{$field_info.icon}'); background-size: contain;"></i>{$field_info.value_formatted|escape}
+                                                {else}
+                                                    <i class="icon16{if isset($field_type)}{$field_type}{/if}"
+                                                       {if $field_info.type == 'SHOP'}style="background-image: url('/wa-apps/shop/img/shop16.png'); position: relative;"{/if}></i>{$field_info.value_formatted|escape}
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    {elseif $field_info.type == "String"}
+                                        <div class="field">
+                                            <div class="c-field">
+                                                <div class="name">{$field_info.name|escape}</div>
+                                                {if !$_is_closed}
+                                                    <div class="c-field-toggle value js-field-toggle">
+                                                        {* VISIBLE *}
+                                                        <span class="c-visible">
+                                                            <span class="js-span js-output-value c-editable" data-empty-text="[`not specified`]">
+                                                                {if !empty($field_info.value_formatted)}
+                                                                    {$field_info.value_formatted|escape}
+                                                                {else}
+                                                                    [`not specified`]
+                                                                {/if}
+                                                            </span>
+                                                        </span>
+
+                                                        {* HIDDEN *}
+                                                        {if $can_edit_deal}
+                                                            <span class="c-hidden">
+                                                                <input class="js-field-value" {$field_required} type="text" data-field-type="string" data-field-id="{$field_info.id}" value="{$field_info.value_formatted|escape}">
+                                                            </span>
+                                                        {/if}
+                                                    </div>
+
+                                                {else}
+                                                <div class="value">
+                                                    <span class="c-visible">
+                                                        {if !empty($field_info.value_formatted)}
+                                                            {$field_info.value_formatted|escape}
+                                                        {else}
+                                                            [`not specified`]
+                                                        {/if}
+                                                    </span>
+                                                </div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    {elseif $field_info.type == "Text"}
+                                        <div class="field">
+                                            <div class="c-field">
+                                                <div class="name">{$field_info.name|escape}</div>
+                                                {if !$_is_closed}
+                                                    <div class="c-field-toggle value js-field-toggle js-textarea">
+                                                        {* VISIBLE *}
+                                                        <span class="c-visible">
+                                                            <span class="js-span js-output-value c-editable" data-empty-text="[`not specified`]">
+                                                                {if !empty($field_info.value_formatted)}
+                                                                    {$field_info.value_formatted|escape}
+                                                                {else}
+                                                                    [`not specified`]
+                                                                {/if}
+                                                            </span>
+                                                        </span>
+
+                                                        {* HIDDEN *}
+                                                        {if $can_edit_deal}
+                                                            <span class="c-hidden">
+                                                                <textarea class="js-field-value-text" {$field_required}>{$field_info.value_formatted|escape}</textarea>
+                                                                {* ACTIONS *}
+                                                                <span class="c-actions">
+                                                                    <i class="icon16 disk js-save-field" data-field-type="text" data-field-id="{$field_info.id}"></i>
+                                                                    [`or`]&nbsp;
+                                                                    <a class="inline-link js-cancel" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                                                            </span>
+                                                        {/if}
+                                                    </div>
+
+                                                {else}
+                                                <div class="value">
+                                                    <span class="c-visible">
+                                                        {if !empty($field_info.value_formatted)}
+                                                            {$field_info.value_formatted|escape}
+                                                        {else}
+                                                            [`not specified`]
+                                                        {/if}
+                                                    </span>
+                                                </div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    {elseif $field_info.type == "Number"}
+                                        <div class="field">
+                                            <div class="c-field">
+                                                <div class="name">{$field_info.name|escape}</div>
+                                                {if !$_is_closed}
+                                                    <div class="c-field-toggle value js-field-toggle">
+                                                        {* VISIBLE *}
+                                                        <span class="c-visible">
+                                                            <span class="js-span js-output-value c-editable" data-empty-text="[`not specified`]">
+                                                                {if ifset($field_info.value_formatted, '') !== ''}
+                                                                    {$field_info.value_formatted|escape}
+                                                                {else}
+                                                                    [`not specified`]
+                                                                {/if}
+                                                            </span>
+                                                        </span>
+
+                                                        {* HIDDEN *}
+                                                        {if $can_edit_deal}
+                                                            <span class="c-hidden">
+                                                                <input class="js-field-value" {$field_required} type="text" data-field-type="number" data-field-id="{$field_info.id}" value="{$field_info.value_formatted|escape}">
+                                                            </span>
+                                                        {/if}
+                                                    </div>
+
+                                                {else}
+                                                    <div class="value">
+                                                        <span class="c-visible">
+                                                            {if ifset($field_info.value_formatted, '') !== ''}
+                                                                {$field_info.value_formatted|escape}
+                                                            {else}
+                                                                [`not specified`]
+                                                            {/if}
+                                                        </span>
+                                                    </div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    {elseif $field_info.type == "Select" && $field_info.class != "crmDealRadioField"}
+                                        <div class="field">
+                                            <div class="c-field">
+                                                <div class="name">{$field_info.name|escape}</div>
+                                                {if !$_is_closed}
+                                                    <div class="c-field-toggle value js-field-toggle">
+                                                        {* VISIBLE *}
+                                                        <span class="c-visible">
+                                                            <span class="js-span js-output-value c-editable" data-empty-text="[`not specified`]">
+                                                                {if !empty($field_info.value_formatted)}
+                                                                    {$field_info.value_formatted|escape}
+                                                                {else}
+                                                                    [`not specified`]
+                                                                {/if}
+                                                            </span>
+                                                        </span>
+
+                                                        {* HIDDEN *}
+                                                        {if $can_edit_deal}
+                                                            <span class="c-hidden">
+                                                                <select class="js-field-value-select" {$field_required} type="text" data-field-type="select" data-field-id="{$field_info.id}">
+                                                                    <option value=""></option>
+                                                                    {foreach $field_info.options as $option_key => $option_val}
+                                                                        <option {if $option_val == $field_info.value}selected{/if} value="{$option_val}">{$option_val}</option>
+                                                                    {/foreach}
+                                                                </select>
+                                                            </span>
+                                                        {/if}
+                                                    </div>
+
+                                                {else}
+                                                    <div class="value">
+                                                        <span class="c-visible">
+                                                            {if !empty($field_info.value_formatted)}
+                                                                {$field_info.value_formatted|escape}
+                                                            {else}
+                                                                [`not specified`]
+                                                            {/if}
+                                                        </span>
+                                                    </div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    {elseif $field_info.type == "Select" && $field_info.class == "crmDealRadioField"}
+                                        <div class="field">
+                                            <div class="c-field">
+                                                <div class="name">{$field_info.name|escape}</div>
+                                                {if !$_is_closed}
+                                                    <div class="c-field-toggle value js-field-toggle">
+                                                        {* VISIBLE *}
+                                                        <span class="c-visible">
+                                                            <span class="js-span js-output-value c-editable" data-empty-text="[`not specified`]">
+                                                                {if !empty($field_info.value_formatted)}
+                                                                    {$field_info.value_formatted|escape}
+                                                                {else}
+                                                                    [`not specified`]
+                                                                {/if}
+                                                            </span>
+                                                        </span>
+
+                                                        {* HIDDEN *}
+                                                        {if $can_edit_deal}
+                                                            <div class="c-hidden">
+                                                                <div class="js-field-value-radio-block c-deal-inline-edit-field-radio" data-field-id="{$field_info.id}" data-field-type="radio">
+                                                                    {foreach $field_info.options as $option_key => $option_val}
+                                                                        <div class="c-deal-inline-edit-field-radio-option">
+                                                                            <label>
+                                                                                {* 'name' attribute here is need so radio options works as it have to - one option exclude another *}
+                                                                                <input type="radio" value="{$option_val}" name="deal_field_{$field_info.id}" {if $option_val == $field_info.value}checked="checked"{/if}> {$option_val}
+                                                                            </label>
+                                                                        </div>
+                                                                    {/foreach}
+                                                                    {if !$field_required}
+                                                                        <a class="js-clear-link clear-link hint" href="javascript:void(0)">[`clear`]</a>
+                                                                    {/if}
+                                                                </div>
+                                                            </div>
+                                                        {/if}
+                                                    </div>
+
+                                                {else}
+                                                    <div class="value">
+                                                        <span class="c-visible">
+                                                            {if !empty($field_info.value_formatted)}
+                                                                {$field_info.value_formatted|escape}
+                                                            {else}
+                                                                [`not specified`]
+                                                            {/if}
+                                                        </span>
+                                                    </div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    {elseif $field_info.type == "Checkbox"}
+                                        <div class="field">
+                                            <div class="c-field">
+                                                <div class="name">{$field_info.name|escape}</div>
+                                                {if !$_is_closed}
+                                                    <div class="c-field-toggle value js-field-toggle">
+                                                        {* VISIBLE *}
+                                                        <span class="c-visible">
+                                                            <span class="js-span js-output-value c-editable" data-empty-text="[`not specified`]">
+                                                                {if !empty($field_info.value_formatted)}
+                                                                    {$field_info.value_formatted|escape}
+                                                                {else}
+                                                                    [`not specified`]
+                                                                {/if}
+                                                            </span>
+                                                        </span>
+
+                                                        {* HIDDEN *}
+                                                        {if $can_edit_deal}
+                                                            <span class="c-hidden">
+                                                                <input class="js-field-value-checkbox" {$field_required} type="checkbox" data-field-type="checkbox" data-field-id="{$field_info.id}" {if $field_info.value == 1}checked{/if}>
+                                                            </span>
+                                                        {/if}
+                                                    </div>
+
+                                                {else}
+                                                    <div class="value">
+                                                        <span class="c-visible">
+                                                            {if !empty($field_info.value_formatted)}
+                                                                {$field_info.value_formatted|escape}
+                                                            {else}
+                                                                [`not specified`]
+                                                            {/if}
+                                                        </span>
+                                                    </div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    {elseif $field_info.type == "Date"}
+                                        <div class="field">
+                                            <div class="c-field">
+                                                <div class="name">{$field_info.name|escape}</div>
+                                                {if !$_is_closed}
+                                                    <div class="c-field-toggle value js-field-toggle">
+                                                        {* VISIBLE *}
+                                                        <span class="c-visible">
+                                                            <span class="js-span js-output-value c-editable"  data-empty-text="[`not specified`]">
+                                                                {if !empty($field_info.value|wa_date)}
+                                                                    {$field_info.value|wa_date}
+                                                                {else}
+                                                                    [`not specified`]
+                                                                {/if}
+                                                            </span>
+                                                        </span>
+
+                                                        {* HIDDEN *}
+                                                        {if $can_edit_deal}
+                                                            <span class="c-hidden">
+                                                                <input class="js-datepicker-field" type="text" value="{$field_info.value|wa_date}">
+                                                                <input class="js-field-value" {$field_required} type="hidden" data-field-type="date" data-field-id="{$field_info.id}" value="{$field_info.value|escape}">
+                                                            </span>
+                                                        {/if}
+                                                    </div>
+
+                                                {else}
+                                                    <div class="value">
+                                                        <span class="c-visible">
+                                                            {if !empty($field_info.value)}
+                                                                {$field_info.value|wa_date}
+                                                            {else}
+                                                                [`not specified`]
+                                                            {/if}
+                                                        </span>
+                                                    </div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    {/if}
+                                {/capture}
+                            {/if}
+                        {/foreach}
+                        {/strip}
+
+                        {if !empty($_fields_html)}
+                            <div class="c-details-block">
+                                <h3 class="c-block-title heading">[`Deal properties`]</h3>
+                                <div class="c-block-content">
+
+                                    <div class="c-deal-options-section" data-deal-id="{$deal.id}">
+                                        {$_fields_html|join:""}
+                                    </div>
+
+                                </div>
+                            </div>
+                        {/if}
+                    {/if}
+
+                    {* USERS *}
+                    <div class="c-details-block">
+                        <h3 class="c-block-title heading">[`Participants`]</h3>
+                        <div class="c-block-content">
+
+                            <div class="c-users-section">
+
+                                {if $deal.contacts.user}
+                                    {* Counters for user or user participants not need to show *}
+                                    {include file="../deal/DealContact.html"
+                                        contact=$deal.contacts.user
+                                        type='owner'
+                                        role_id='USER'
+                                        tags=$contact_tags
+                                        can_manage_responsible=$can_manage_responsible
+                                        counters=[]
+                                    inline}
+                                {/if}
+
+                                {if $can_manage_responsible}
+                                    <div class="c-empty-user-wrapper js-empty-user-wrapper" style="{if !empty($deal.contacts.user)}display: none;{/if}">
+                                        <div class="c-visible">
+                                            <div style="margin: 0 0 6px;">
+                                                {if empty($deal.contacts.user) && $deal.user_contact_id > 0}
+                                                    [`Owner deleted`]
+                                                {else}
+                                                    [`No owner`]
+                                                {/if}
+                                                <a class="inline-link js-set-user-me small" href="javascript:void(0);"><b><i>([`Assign me`])</i></b></a>
+                                            </div>
+                                            <a class="inline-link js-set-extended" href="javascript:void(0);"><b><i>[`Set the owner`]</i></b></a>
+                                        </div>
+                                        <div class="c-hidden">
+                                            <div style="margin: 0 0 6px;">[`Set the owner`]</div>
+                                            <div class="c-owner-toggle js-owner-toggle">
+                                                <input class="js-empty-user-autocomplete" type="text" name="some_name" placeholder="[`User name`]">
+                                                <span style="margin: 0 4px;">[`or`]</span>
+                                                <a class="inline-link js-unset-extended" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {/if}
+
+                                {if $deal_users}
+                                    {* Counters for user or user participants not need to show *}
+                                    {foreach $deal_users as $_id => $_contact}
+                                        {include file="../deal/DealContact.html"
+                                            contact=$_contact
+                                            status=true
+                                            type='contact_participant'
+                                            role_id='USER'
+                                            tags=$contact_tags
+                                            counters=[]
+                                        inline}
+                                    {/foreach}
+                                {/if}
+
+                                {if $can_edit_deal}
+                                    <div class="c-add-contact js-add-user-wrapper">
+                                        <a class="inline-link js-add-contact" href="javascript:void(0);">
+                                            <i class="icon10 add"></i>
+                                            <b><i>[`Add user`]</i></b>
+                                        </a>
+                                        <div class="c-form-wrapper">
+                                            <input class="js-contact-autocomplete" type="text" name="some_name" placeholder="[`User name`]">
+                                            <a class="inline-link js-close-add-contact" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                                        </div>
+                                    </div>
+                                {/if}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {* CONTACTS *}
+                    <div class="c-details-block">
+                        <h3 class="c-block-title heading">[`Contacts`]</h3>
+                        <div class="c-block-content">
+
+                            <section class="c-contacts-section js-contacts-section">
+                                {$_hide_add_button = false}
+
+                                {if $deal.contacts.contact}
+                                    {$_hide_add_button = false}
+                                    {include file="../deal/DealContact.html"
+                                        is_init_call=$is_init_call
+                                        contact=$deal.contacts.contact
+                                        is_registered=!empty($deal.contacts.contact.password)
+                                        type="contact_owner"
+                                        tags=$contact_tags
+                                        counters=$counters
+                                    inline}
+                                {else}
+                                    <div class="c-empty-contact-wrapper js-empty-contact-wrapper">
+                                        <h3 class="c-group-header">[`No client`]</h3>
+                                        <div class="">
+                                            <a class="inline-link js-set-company-owner" href="javascript:void(0);"><b><i>[`Set client`]</i></b></a>
+                                        </div>
+                                    </div>
+                                {/if}
+
+                                {if $deal_contacts}
+                                    {foreach $deal_contacts as $_id => $_contact}
+                                        {include file="../deal/DealContact.html"
+                                            contact=$_contact
+                                            is_registered=!empty($_contact.password)
+                                            type="contact_participant"
+                                            role_id='CLIENT'
+                                            contact_company=$deal.contacts.contact.company
+                                            tags=$contact_tags
+                                            counters=$counters
+                                        inline}
+                                    {/foreach}
+                                {/if}
+
+                                {if $can_edit_deal}
+                                    <div class="c-add-contact js-add-company-contact" style="{if $_hide_add_button}display: none;{/if}">
+                                        <a class="inline-link js-add-external-contact" href="javascript:void(0);">
+                                            <i class="icon10 add"></i>
+                                            <b><i>[`Add contact`]</i></b>
+                                        </a>
+                                    </div>
+                                {/if}
+                            </section>
+
+                        </div>
+                    </div>
+
+                    {if !empty($magic_source_email)}
+                        <div class="c-magic-email-wrapper js-copy-to-clipboard" title="[`Copy to clipboard`]">
+                            <div class="line">[`Save the email correspondence with your client using email address`]:</div>
+                            <div class="line" style="position: relative;">
+                                <textarea class="js-email">{$magic_source_email|escape}</textarea>
+                                <span class="c-indicator js-indicator"><i class="icon16 yes"></i>[`copied to clipboard`]</span>
+                            </div>
+                            <div class="line">
+                                <span class="hint">[`Add this address to the “CC” field when sending a message to the client to get the message copy saved in the deal history.`]</span>
+                            </div>
+                        </div>
+
+                        <script>
+                            ( function($) {
+                                var $wrapper = $(".js-copy-to-clipboard").first(),
+                                    $email = $wrapper.find(".js-email"),
+                                    $icon = $wrapper.find(".js-indicator"),
+                                    show_class = "is-shown",
+                                    hide_class = "is-hide";
+
+                                $email.on("keydown", function(event) {
+                                    event.preventDefault();
+                                });
+
+                                $wrapper.on("click", function() {
+                                    $email[0].select();
+                                    try {
+                                        var successful = document.execCommand('copy');
+                                        if (successful) {
+                                            $icon.addClass(show_class);
+                                            $email.addClass(hide_class);
+                                            setTimeout(function() {
+                                                var is_exist = $.contains(document, $icon[0]);
+                                                if (is_exist) {
+                                                    $icon.removeClass(show_class);
+                                                    $email.removeClass(hide_class);
+                                                }
+                                            }, 2000);
+                                        }
+                                    } catch (err) {
+                                    }
+                                });
+                            })(jQuery);
+                        </script>
+                    {/if}
+
+                    {* INVOICES *}
+                    {if !empty($can_manage_invoices)}
+                        <div class="c-details-block">
+                            <h3 class="c-block-title heading">[`Invoices`]</h3>
+                            <div class="c-block-content">
+
+                                <div class="c-invoices-wrapper">
+                                    {if !empty($invoices)}
+                                        <ul class="menu-v compact c-invoices">
+                                            {foreach $invoices as $_i}
+                                                <li class="c-invoice">
+                                                    {if $can_manage_invoices}
+                                                        <a class="c-number" href="{$wa_app_url}invoice/{$_i.id}/">[`#`]{$_i.number|escape}</a>
+                                                    {else}
+                                                        [`#`]{$_i.number|escape}
+                                                    {/if}
+                                                    <span class="c-price bold">{$_i.amount|wa_format_amount_currency:$_i.currency_id}</span>
+
+                                                    {$_invoice_state = crmInvoice::getState($_i.state_id)}
+                                                    <span class="c-state {strtolower($_i.state_id)}">{$_invoice_state.name|default:$_i.state_id|escape}</span>
+
+                                                    <span class="c-date hint">{$_i.invoice_date|wa_date}</span>
+                                                    <div>
+                                                        <span class="hint">{$_i.summary|escape}</span>
+                                                    </div>
+                                                </li>
+                                            {/foreach}
+                                        </ul>
+                                    {else}
+                                        <div class="line hint">[`No invoices in this deal`]</div>
+                                    {/if}
+
+                                    {if $can_edit_deal}
+                                        <div class="c-add-invoice">
+                                            <a href="{$wa_app_url}invoice/new/?deal_id={$deal.id}"><i class="icon10 add"></i> [`Add invoice`]</a>
+                                        </div>
+                                    {/if}
+                                </div>
+
+                            </div>
+                        </div>
+                    {/if}
+
+                    {* FILES *}
+                    {if !empty($attachments)}
+                        <div class="c-details-block">
+                            <h3 class="c-block-title heading">[`Files`]</h3>
+                            <div class="c-block-content">
+
+                                <div class="c-files-wrapper">
+                                    <ul class="menu-v compact c-files">
+                                        {foreach $attachments as $_file}
+                                            {$_file_link = "?module=file&action=download&id=`$_file.id`"}
+                                            {$_ext = crmHelper::getExtInfo($_file.ext)}
+                                            {$_ext_icon = $_ext.img}
+
+                                            <li class="c-file js-file" data-id="{$_file.id}">
+                                                <div class="c-layout">
+                                                    {* ICON *}
+
+                                                    {if !empty($_ext_icon)}
+                                                        <div class="c-column c-image-wrapper middle" style="padding-right: 8px;">
+
+                                                            <span class="c-image">
+                                                                <img src="{$_ext_icon}" alt="{$_file.name|escape}">
+                                                            </span>
+
+                                                        </div>
+                                                    {/if}
+                                                    <div class="c-column middle">
+                                                        <div class="line">
+                                                            <a class="c-name js-disable-router" href="{$_file_link}" style="display: inline;">{$_file.name|escape}</a>
+                                                            <span class="c-remove-link js-remove-file" title="[`Remove file`]">
+                                                                <i class="icon16 delete"></i>
+                                                            </span>
+                                                        </div>
+                                                        <span class="c-size hint">{crmHelper::formatFileSize($_file.size)}</span>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        {/foreach}
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
+                    {/if}
+
+                    {* SPACE HACK *}
+                    <div style="width: 100%; height: 100px;"></div>
+                </aside>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {strip}
+    {capture assign="_create_order_dialog_html"}
+        {$_title = _w('New order')}
+        {if $can_edit_order}{$_title = _w('Edit order')}{/if}
+
+        {include file="./Deal.editOrderDialog.inc.html" title=$_title inline}
+    {/capture}
+    {/strip}
+
+    {$_locales = [
+        "remove_owner_title"    => {_w("Remove owner")},
+        "remove_owner_text"     => {_w("Remove owner <strong>%s</strong> from the deal?")},
+        "remove_owner_button"   => {_w("Remove")},
+        "remove_contact_title"  => {_w("Exclude contact")},
+        "remove_contact_text"   => {_w("Exclude <strong>%s</strong> from the deal?")},
+        "remove_contact_button" => {_w("Exclude")},
+        "remove_file_title"     => {_w("Remove file")},
+        "remove_file_text"      => {sprintf("%s <strong>%s</strong>", _w("Remove file"), "%s")},
+        "remove_file_button"    => {_w("Remove")},
+        "delete_deal_title"     => {sprintf("<span class='gray'>%s</span> %s", _w('Delete'), $deal.name)},
+        "delete_deal_text"      => {_w("Are you sure to delete this deal?")},
+        "delete_deal_button"    => {_w("Delete")},
+        "shop_alert_title"      => {_w("Shop")},
+        "shop_in_welcome_stage" => {sprintf_wp('It looks like your online store is not set up yet.<br>Please <a href="%s">make initial Shop-Script settings</a>', "`$wa_backend_url`shop")}
+    ]}
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$deal.name|strip_tags|json_encode});
+
+            new CRMDeal({
+                $wrapper: $("#c-deal-page"),
+                funnel_id: {$deal.funnel_id},
+                user_id: {$wa->userId()},
+                deal: {$deal|json_encode},
+                order_id: {if $order && $order.id > 0}{$order.id}{else}0{/if},
+                can_edit_deal: {$can_edit_deal|json_encode},
+                shop_in_welcome_stage: {$shop_in_welcome_stage|json_encode},
+                templates: {
+                    "create_order_dialog_html": {$_create_order_dialog_html|default:""|json_encode}
+                },
+                locales: {$_locales|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

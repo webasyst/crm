@@ -1,0 +1,89 @@
+{$_states = crmInvoice::getStates()}
+
+{* PAGE *}
+<div class="c-contact-invoices-tab" id="c-contact-invoices-tab">
+
+    {capture assign="_add_button"}
+        <a href="{$wa_backend_url}crm/invoice/new/?contact={$contact_id}"><i class="icon16 add" style="margin: 0 4px 0 0; position: relative; top: 2px; vertical-align: baseline;"></i>[`Add invoice`]</a>
+    {/capture}
+
+    {if $invoices}
+
+        <style>
+            .c-invoices-list .c-invoice-wrapper.pending {
+                color: #008000;
+            }
+            .c-invoices-list .c-invoice-wrapper.processing {
+                color: #ff8c00;
+            }
+            .c-invoices-list .c-invoice-wrapper.paid {
+                color: #8a2be2;
+            }
+            .c-invoices-list .c-invoice-wrapper.refunded {
+                color: #b22222;
+            }
+            .c-invoices-list .c-invoice-wrapper.archived {
+                color: #a9a9a9;
+            }
+            .c-invoices-list .c-invoice-wrapper.draft {
+                color: #808080;
+            }
+            .c-invoices-list .c-invoice-wrapper a {
+                color: inherit !important;
+            }
+        </style>
+
+        <table class="c-invoices-list zebra single-lined">
+            {foreach $invoices as $_i}
+                {$_state = $_states["PENDING"]["class"]}
+                {if !empty($_i.state_id) && !empty($_states[$_i.state_id])}
+                    {$_state = $_states[$_i.state_id]["class"]}
+                {/if}
+
+                <tr class="c-invoice-wrapper {$_state|default:"pending"}">
+                    <td class="c-column-date">
+                        <a href="{$wa_app_url}invoice/{$_i.id}/" target="_top">
+                            <span class="c-date">{$_i.create_datetime|wa_date}</span>
+                        </a>
+                    </td>
+                    <td class="c-column-number">
+                        <a href="{$wa_app_url}invoice/{$_i.id}/" target="_top">
+                            <span class="c-name nowrap">{$_i.number|escape}</span>
+                        </a>
+                    </td>
+                    <td class="c-column-summary">
+                        <a href="{$wa_app_url}invoice/{$_i.id}/" target="_top">
+                            {$_i.summary|escape}
+                        </a>
+                    </td>
+                    <td class="c-column-price">
+                        <a href="{$wa_app_url}invoice/{$_i.id}/" target="_top">
+                            <span class="c-price nowrap">{$_i.amount|wa_format_amount_currency:$_i.currency_id}</span>
+                        </a>
+                    </td>
+                    <td class="c-column-name">
+                        {$_s = crmInvoice::getState($_i.state_id)}
+                        <a class="c-state" href="{$wa_app_url}invoice/{$_i.id}/" target="_top">
+                            {$_s.name|escape}
+                        </a>
+                    </td>
+                    {if isset($creators[$_i.creator_contact_id])}
+                        <td class="c-column-author">
+                            <a href="{$wa_app_url}invoice/{$_i.id}/" target="_top">
+                                <i class="icon16 userpic20" style="background-image: url({$creators[$_i.creator_contact_id].photo_url_16})"></i>
+                                {$creators[$_i.creator_contact_id].name|escape}
+                            </a>
+                        </td>
+                    {/if}
+                </tr>
+            {/foreach}
+        </table>
+
+        <p style="margin: 1em 0 0;">{$_add_button}</p>
+    {else}
+        <div class="block double-padded">
+            <div class="c-tab-empty gray" style="padding: 1em 0;">[`No invoices for this customer`]</div>
+            <p style="margin: 1em 0 0;">{$_add_button}</p>
+        </div>
+    {/if}
+</div>

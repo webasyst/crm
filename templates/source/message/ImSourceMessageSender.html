@@ -1,0 +1,208 @@
+{$class = 'c-source-im-message-sender-dialog'}
+{$dialog_id = uniqid($class)}
+
+{function renderContact contact=[]}
+    <a href="{$wa_app_url}contact/{$contact.id}/" target="_top" class="c-contact-link">
+        <img src="{$contact.photo_url_16}" alt="{$contact.name|escape}" class="c-contact-photo">
+        {$contact.name|escape}
+    </a>
+{/function}
+
+{if !empty($message.body_formatted)}
+    {$body_formatted = $message.body_formatted}
+{elseif !empty($message.body_sanitized)}
+    {$body_formatted = $message.body_sanitized}
+{else}
+    {$body_formatted = $message.body|escape}
+{/if}
+
+{if !empty($message.subject_formatted)}
+    {$subject_formatted = $message.subject_formatted}
+{else}
+    {$subject_formatted = $message.subject|escape}
+{/if}
+{$subject_formatted = $subject_formatted|default:'[`(no subject)`]'}
+
+<div class="crm-dialog-wrapper {$class} c-message-show-body-dialog" id="{$dialog_id}">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <form method="post">
+            <header class="crm-dialog-header">
+                <h3>
+                    {if !empty($icon_url)}
+                        <img src="{$icon_url}" title="{$source.name|escape}" style="width: 16px; margin-top: 2px;">
+                    {/if}
+                    <span>{$source.name|default:_w('Unknown source')|escape}</span>
+                </h3>
+
+                <div class="c-message-actions">
+                    {if !empty($message.create_datetime)}
+                        <span class="c-text-item">
+                            {if $message.direction === "IN"}
+                                <i class="icon16 import" title="[`incoming`]"></i>
+                            {else}
+                                <i class="icon16 message-out" title="[`outgoing`]"></i>
+                            {/if}
+                            {$message.create_datetime|wa_datetime}
+                        </span>
+                    {/if}
+                    {if $message.conversation_id}
+                        <a href="{$wa_app_url}message/conversation/{$message.conversation_id}" class="small" style="padding: 13px 10px 12px;">[`open conversation`]</a>
+                    {/if}
+                </div>
+            </header>
+            <div class="crm-dialog-content">
+                <div class="c-message-info">
+                    <div class="js-message-data">
+
+                        {if $message.direction === "IN"}
+
+                            <div style="margin-bottom: 10px;">
+
+                                {if !empty($from_contact)}
+                                    {renderContact contact=$from_contact}
+                                {elseif !empty($from_html)}
+                                    {$from_html}
+                                {else}
+                                    {$message.from|escape}
+                                {/if}
+
+                            </div>
+
+                        {else}
+
+                            {if !empty($from_html) || !empty($from_contact) || !empty($message.from)}
+                                <div class="field">
+                                    <div class="name">[`From`]</div>
+                                    <div class="value">
+                                        {if !empty($from_contact)}
+                                            {renderContact contact=$from_contact}
+                                        {elseif !empty($from_html)}
+                                            {$from_html}
+                                        {else}
+                                            {$message.from|escape}
+                                        {/if}
+                                    </div>
+                                </div>
+                            {/if}
+
+                            {if !empty($to_html) || !empty($to_contact) || !empty($message.to)}
+                                <div class="field">
+                                    <div class="name">[`To`]</div>
+                                    <div class="value">
+                                        {if !empty($to_contact)}
+                                            {renderContact contact=$to_contact}
+                                        {elseif !empty($to_html)}
+                                            {$to_html}
+                                        {else}
+                                            {$message.to|escape}
+                                        {/if}
+                                    </div>
+                                </div>
+                            {/if}
+
+                        {/if}
+
+                        {if isset($message.deal)}
+                            {$deal = $message.deal}
+                            {$funnel = ifset($message.funnel)}
+                            {capture assign="_message_deal_view"}
+                                {strip}
+                                    <div>
+                                        {if !empty($deal.id)}
+                                            {$_funnel = $funnel[$deal.funnel_id]|default:null}
+                                            {if $_funnel}
+                                                {$_stage = $_funnel.stages[$deal.stage_id]|default:null}
+                                                {if $_stage}
+                                                    <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                                    <a href="{$wa_app_url}deal/{$deal.id}/">{$deal.name|escape}</a>
+                                                {else}
+                                                    <a href="{$wa_app_url}deal/{$deal.id}/">{$deal.name|escape}</a> <span class="hint">[`Stage deleted`]</span>
+                                                {/if}
+                                            {else}
+                                                <a href="{$wa_app_url}deal/{$deal.id}/">{$deal.name|escape}</a> <span class="hint">[`Funnel deleted`]</span>
+                                            {/if}
+                                        {elseif !empty($deal.name)}
+                                            <span style="color: #999;">{$deal.name|escape}</span>
+                                        {else}
+                                            <span style="color: #999;">deleted deal_id={ifset($message.deal_id)}</span>
+                                        {/if}
+                                    </div>
+                                {/strip}
+                            {/capture}
+
+                            {if $message.direction === "IN"}
+                                {$_message_deal_view}
+                            {else}
+                                <div class="field">
+                                    <div class="name">[`Deal`]</div>
+                                    <div class="value">
+                                        {$_message_deal_view}
+                                    </div>
+                                </div>
+                            {/if}
+                        {/if}
+
+                    </div>
+                </div>
+
+                <div class="c-message-body js-message-body">
+                    <p>{$body_formatted}</p>
+                    {if $message.attachments}
+                        <div class="c-attachments-block">
+                            <ul class="menu-v c-attachments-list">
+                                {foreach $message.attachments as $a}
+                                    <li>
+                                        <i class="icon16 attachment" style="margin-right: 8px;"></i>
+                                        <a class="js-disable-router" href="?module=file&action=download&id={$a.id}">{$a.name|escape}</a><span class="c-size hint">{crmHelper::formatFileSize($a.size)}</span>
+                                    </li>
+                                {/foreach}
+                            </ul>
+                        </div>
+                    {/if}
+                    <textarea name="body" style="width: 100%; height: 100px;"></textarea>
+                    <input type="hidden" name="message_id" value="{$message.id}">
+                </div>
+
+                <div class="js-errors-place"></div>
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <div class="c-layout">
+                    <div class="c-column">
+                        <div class="c-footer-actions js-dialog-footer">
+                            <input class="button green js-send-button" type="submit" value="[`Send`]">
+                            [`or`] <a href="javascript:void(0);" class="js-cancel-dialog">[`cancel`]</a>
+                        </div>
+                    </div>
+            </footer>
+        </form>
+    </div>
+
+    {capture assign="_success_html"}
+        <div class="crm-dialog-content" style="min-height: 40px;">
+            <p>[`Message sent successfully`]</p>
+        </div>
+
+        <footer class="crm-dialog-footer">
+            <input class="button gray js-close-dialog" type="button" value="[`Close`]">
+        </footer>
+    {/capture}
+
+    <script>
+        (function ($) {
+        var $body = $(window.top.document).find("body");
+        new CRMDialog({
+            html: $body.find('#{$dialog_id}').show(),
+            onOpen: function($wrapper) {
+                new CRMImSourceSendMessageDialog({
+                    $wrapper: $wrapper,
+                    message: {$message|json_encode},
+                    success_html: {$_success_html|json_encode},
+                    send_action_url: {$send_action_url|default:''|json_encode}
+                });
+            }
+        });
+        })(jQuery);
+    </script>
+</div>

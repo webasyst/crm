@@ -1,0 +1,24 @@
+<p>Здравствуйте,</p>
+<p>Мы получили ваш платеж по счёту №{$invoice.number|escape} от {$company.name|escape}. Спасибо!</p>
+
+<p>Номер счёта: {$invoice.number|escape}<br>
+Сумма: {wa_currency($invoice.amount, $invoice.currency_id)}<br>
+Дата счёта: {$invoice.invoice_date|wa_date}</p>
+
+<p>Состав счёта:</p>
+<ol>
+{foreach $invoice.items as $item}
+<li>{$item.name|escape}: {$item.quantity} шт.</li>
+{/foreach}
+</ol>
+
+<p>
+Ссылка для онлайн-просмотра счёта:<br>
+<a href="{$link}">{$link}</a>
+</p>
+
+<p>
+–-<br>
+{$wa->accountName()|escape}<br>
+{$wa->domainUrl()}
+</p>

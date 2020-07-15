@@ -1,0 +1,151 @@
+.crm-form-block {
+  max-width: 600px;
+  min-width: 100px;
+  width: 100%;
+}
+.crm-form-block .redactor-box .redactor-layer,
+.crm-form-block .redactor-box .redactor-editor {
+  background: transparent;
+  height: 200px;
+}
+.crm-form-block .redactor-box .redactor-toolbar {
+  z-index: auto;
+}
+.crm-form-block .redactor-box .redactor-toolbar:after {
+  display: none;
+}
+.crm-form-block .crm-form-fields-block {
+  margin: 15px 0;
+  width: 100%;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields {
+  margin-top: 14px;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field input[type=text],
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field input[type=password],
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field textarea,
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field select {
+  width: 100%;
+  box-sizing: border-box;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field input[type=text].crm-birthday-input,
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field input[type=password].crm-birthday-input,
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field textarea.crm-birthday-input,
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field select.crm-birthday-input {
+  width: auto;
+  min-width: inherit;
+  margin-left: 2px;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field textarea {
+  height: 100px;
+  resize: vertical;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .crm-form-field-line {
+  display: table;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 2px 6px;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .crm-form-field-line:hover .crm-delete-col {
+  opacity: 1;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .crm-form-field-line .crm-form-field-col {
+  display: table-cell;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .crm-form-field-line .crm-form-field-col.crm-caption-col {
+  width: 40%;
+  vertical-align: top;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .crm-form-field-line.crm-form-field-1st-line .crm-input-col {
+  width: 60%;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .crm-form-field-line.crm-form-field-1st-line .crm-input-col p {
+  margin: 0;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .crm-form-field-line.crm-form-field-1st-line .crm-input-col p label {
+  display: block;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .crm-form-field-line.crm-form-field-2st-line {
+  display: none;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field.crm-caption-style-above .crm-form-field-line.crm-form-field-1st-line .crm-input-col,
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field.crm-caption-style-above .crm-form-field-line.crm-form-field-1st-line .crm-sorting-col {
+  opacity: 0;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field.crm-caption-style-above .crm-form-field-line.crm-form-field-2st-line {
+  display: table;
+  margin-top: -12px;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field.crm-caption-style-above .crm-form-field-line.crm-form-field-2st-line .crm-input-col {
+  width: 90%;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field.crm-caption-style-none .crm-form-field-line.crm-form-field-1st-line {
+  display: none;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field.crm-caption-style-none .crm-form-field-line.crm-form-field-2st-line {
+  display: table;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field.crm-caption-style-none .crm-form-field-line.crm-form-field-2st-line .crm-input-col {
+  width: 90%;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .wa-captcha {
+  position: relative;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .wa-captcha strong {
+  position: absolute;
+  top: 8px;
+  left: 120px;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .wa-captcha .wa-captcha-refresh {
+  display: inline-block;
+  clear: left;
+  font-size: 0.8em;
+  text-decoration: underline;
+  color: #aaa;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .wa-captcha .wa-captcha-input {
+  min-width: 58px !important;
+  width: 58px !important;
+  position: absolute;
+  top: 8px;
+  left: 135px;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .wa-captcha p img {
+  float: none !important;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .c-agreement-checkbox-wrapper .c-agreement-checkbox-html-label {
+  display: inline-block !important;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .c-agreement-checkbox-wrapper .c-agreement-checkbox-html-label.c-disabled {
+  color: #aaa;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .c-agreement-checkbox-wrapper .c-agreement-checkbox-html-label.c-disabled a {
+  color: #aaa !important;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .c-agreement-checkbox-wrapper .c-agreement-checkbox-html-label.c-disabled a:hover {
+  color: #aaa !important;
+}
+.crm-form-block .crm-form-fields-block .crm-submit-button-wrapper {
+  margin: 20px 0;
+}
+.crm-form-block .crm-form-fields-block .c-datepicker-wrapper .calendar {
+  display: none;
+}
+.crm-form-block .crm-error-msg {
+  display: block;
+  font-size: 0.9em;
+  color: #f00;
+}
+.crm-form-block .crm-error {
+  border: 2px solid #f00;
+}
+.crm-form-block .c-agreement-checkbox-wrapper.crm-error {
+  border: none;
+  color: #f00;
+}
+.crm-form-block .c-agreement-checkbox-wrapper.crm-error a {
+  color: #f00;
+}
+.crm-form-block .crm-loading {
+  margin-top: 6px;
+}

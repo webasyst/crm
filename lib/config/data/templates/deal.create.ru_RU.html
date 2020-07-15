@@ -1,0 +1,19 @@
+<p>
+    {$deal.create_datetime|wa_datetime} создана новая сделка
+    «<a href="{$deal.url}">{$deal.name|escape}</a>»
+    на этапе «{$deal.stage.name|escape}» воронки «{$deal.funnel.name|escape}».
+</p>
+<p>
+    <b>Информация о сделке</b><br>
+    Клиент: {$customer.name|escape}{if !empty($customer.company)}, {$customer.company|escape}{/if}<br>
+    Описание: {$deal.description_sanitized}<br>
+    Предварительная стоимость: {$deal.amount|wa_format_amount_currency:$deal.currency_id}<br>
+    Предварительная дата закрытия: {$deal.expected_date|wa_date}<br>
+</p>
+
+--<br>
+<p>
+    --<br>
+    {$wa->accountName()|escape}<br>
+    {$wa->domainUrl()}
+</p>

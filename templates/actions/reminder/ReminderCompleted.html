@@ -1,0 +1,116 @@
+{if !empty($reminders)}
+    {$_reminder_types = crmConfig::getReminderType()}
+
+    {foreach $reminders as $_reminder}
+        {$_is_deal = ( $_reminder.contact_id < 0 )}
+        {if !empty($_reminder.type) && !empty($_reminder_types[$_reminder.type])}
+            {$_active_reminder_type = $_reminder_types[$_reminder.type]}
+        {/if}
+
+        {capture assign="_header"}{strip}
+            {if $_reminder.type !== "OTHER" && !empty($_active_reminder_type)}
+                {strip}
+                    {if !empty($_active_reminder_type.icon)}<i class="icon16 {$_active_reminder_type.icon}"></i>{/if}
+                    <span class="c-reminder-type">{$_active_reminder_type.name|escape}</span>
+                {/strip}
+            {/if}
+            {if $_is_deal}
+                {$_deal_id = abs($_reminder.contact_id)}
+                {if !empty($deals[$_deal_id])}
+                    {$_deal = $deals[$_deal_id]}
+                    {if !empty($contacts[$_deal.contact_id])}
+                        {$_user = $contacts[$_deal.contact_id]}
+                        {$_userpic = $_user->getPhoto(16)}
+                    {/if}
+                    <a class="c-user" href="{$wa_app_url}deal/{$_deal_id}/">
+                        {if !empty($_userpic)}
+                            <i class="icon16 userpic20" style="background-image: url({$_userpic});"></i>
+                        {/if}
+                        {$_deal.name|escape}
+                    </a>
+                {/if}
+            {else}
+                {$_user = false}
+                {if !empty($contacts[$_reminder.contact_id])}
+                    {$_user = $contacts[$_reminder.contact_id]}
+                {/if}
+                {if $_user}
+                    <a href="{$wa_app_url}contact/{$_user.id}/" class="c-user">
+                        {$_userpic = $_user->getPhoto(16)}
+                        {if !empty($_userpic)}
+                            <i class="icon16 userpic20" style="background-image: url({$_userpic});"></i>
+                        {/if}
+                        {$_user.name|escape}
+                    </a>
+                {/if}
+            {/if}
+        {/strip}{/capture}
+
+        <li class="c-reminder-wrapper c-completed-reminder {$_reminder.state|default:""}" data-id="{$_reminder.id}" data-datetime="{$_reminder.complete_datetime}" id="c-completed-reminder-{$_reminder.id}">
+            {if !empty($_reminder.rights)}
+                <span class="c-marker c-reopen-reminder js-reopen-reminder" title="[`Reopen reminder`]"></span>
+            {else}
+                <span class="c-marker c-mark-done is-done"></span>
+            {/if}
+
+
+            {if !empty($_header)}
+                <header class="c-header">{$_header}</header>
+            {/if}
+
+            <div class="c-content">
+                {if !empty($_reminder.rights)}
+                    <div class="c-quick-content-toggle-wrapper js-quick-content-toggle-wrapper">
+                        <form>
+                            <textarea class="c-text-field js-textarea" name="data[content]" data-text="{$_reminder.content|escape}">{$_reminder.content|escape}</textarea>
+                            <input name="data[id]" type="hidden" value="{$_reminder.id}">
+                            <input name="data[contact_id]" type="hidden" value="{$_reminder.contact_id}">
+                            <input name="data[user_contact_id]" type="hidden" value="{$_reminder.user_contact_id}">
+                            <input name="data[due_date]" type="hidden" value="{$_reminder.due_date}">
+                            {if !empty($_reminder.due_datetime)}
+                                {$_time = waDateTime::format('H:i', $_reminder.due_datetime)}
+                                <input name="data[due_time]" type="hidden" value="{$_time}">
+                            {/if}
+                            {if !empty($_reminder.deal_id)}
+                                <input name="data[deal_id]" type="hidden" value="{$_reminder.deal_id}">
+                            {/if}
+                        </form>
+                    </div>
+                {else}
+                    <span class="js-text">{$_reminder.content|escape|nl2br}</span>
+                {/if}
+            </div>
+
+            <footer class="c-footer">
+                <div class="c-layout">
+                    <div class="c-column">
+
+                        {if !empty($_reminder.complete_datetime)}
+                            <span class="c-date hint">{waDateTime::format('humandatetime', $_reminder.complete_datetime)}</span>
+                        {/if}
+
+                    </div>
+                    <div class="c-column right">
+
+                        <span class="c-create-date hint">[`Created at`]: {$_reminder.create_datetime|wa_date:"d.m.Y H:i"}</span>
+
+                    </div>
+                </div>
+            </footer>
+
+            {if !empty($_reminder.rights)}
+                <script>
+                    ( function($) {
+                        new CRMCompletedReminder({
+                            $wrapper: $("#c-completed-reminder-{$_reminder.id}"),
+                            reminder_id: {$_reminder.id|default:"false"}
+                        });
+                    })(jQuery);
+                </script>
+            {/if}
+        </li>
+    {/foreach}
+    <li class="js-lazy-load" style="padding: 10px 16px;">
+        <i class="icon16 loading"></i>
+    </li>
+{/if}

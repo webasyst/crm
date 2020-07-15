@@ -1,0 +1,21 @@
+<p>
+    {waDateTime::format('datetime')} переоткрыта
+    {if $deal.status_id == 'WON'}выигранная{else}проигранная{/if} сделка
+    «<a href="{$deal.url}">{$deal.name|escape}</a>»
+    на этапе «{$deal.stage.name|escape}» в воронке «{$deal.funnel.name|escape}».
+</p>
+<p>
+    <b>Информация о сделке</b><br>
+    Клиент: {$customer.name|escape}{if !empty($customer.company)}, {$customer.company|escape}{/if}<br>
+    Описание: {$deal.description_sanitized}<br>
+    Предварительная стоимость: {$deal.amount|wa_format_amount_currency:$deal.currency_id}
+    Предварительная дата закрытия: {$deal.expected_date|wa_datetime}
+    Ответственный: {$responsible.name|escape}.
+</p>
+
+--<br>
+<p>
+    --<br>
+    {$wa->accountName()|escape}<br>
+    {$wa->domainUrl()}
+</p>

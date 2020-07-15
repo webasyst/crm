@@ -1,0 +1,324 @@
+/**
+This file is connected in: "crm/templates/actions/frontend/FrontendInvoice.html"
+Is also contained in "crm/css/crm.css"
+BE CAREFUL WHEN ADDING GLOBAL STYLES
+**/
+.c-invoice-front-section.with-background {
+  background: #f0f0f0;
+}
+.c-invoice-front-section .c-front-invoice-wrapper {
+  width: 800px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 40px 0;
+  font: 16px/20px Arial, sans-serif;
+  color: #585858;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .nowrap {
+  white-space: nowrap;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-layout {
+  display: table;
+  width: 100%;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-layout.inline {
+  width: auto;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-layout.fixed {
+  table-layout: fixed;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-layout > .c-column {
+  display: table-cell;
+  vertical-align: top;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-layout > .c-column.middle {
+  vertical-align: middle;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-layout > .c-column.center {
+  text-align: center;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-layout > .c-column.right {
+  text-align: right;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .line {
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .line:first-child {
+  margin-top: 0;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section {
+  margin: 32px 0;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options {
+  margin: 0;
+  padding: 16px 0;
+  border-top: 3px solid #2296bf;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item {
+  position: relative;
+  margin: 0 0 32px;
+  padding: 0;
+  list-style: none;
+  clear: both;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item.is-active .c-payment-content.is-hidden {
+  display: block;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item.has-error {
+  background: rgba(255,0,0,0.1);
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .c-payment-header {
+  margin: 0;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .c-payment-header label > * {
+  display: inline;
+  vertical-align: middle;
+  margin: 0 8px 0 0;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .c-payment-description {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.25em;
+  color: #666;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .c-payment-content {
+  margin: 1em 0 0;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .c-payment-content.is-hidden {
+  display: none;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .wa-form {
+  margin: 16px 0;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .wa-form .wa-field {
+  display: table;
+  width: 100%;
+  margin: 8px 0 0;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .wa-form .wa-field:first-child {
+  margin-top: 0;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .wa-form .wa-field .wa-name,
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .wa-form .wa-field .wa-value {
+  display: table-cell;
+  vertical-align: top;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .wa-form .wa-field .wa-name {
+  width: 20%;
+  color: #aaa;
+  font-size: 12px;
+}
+.c-invoice-front-section .c-front-invoice-wrapper .c-payment-section .c-payment-options .c-payment-item .wa-form label input[type="radio"] {
+  position: static;
+}
+.c-invoice-front-section .c-front-invoice-block {
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 3px;
+  padding: 32px;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  font: 16px/20px Arial, sans-serif;
+  color: #585858;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-header {
+  color: #2296bf;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-border {
+  border-color: #2296bf;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-logo {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 200px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-logo img {
+  max-width: 100%;
+  max-height: 200px;
+  vertical-align: top;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-info-section {
+  margin: 32px 0 0;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-info-section > .c-column:not(:last-child) {
+  padding-right: 20px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-info-section .c-date-due {
+  margin: 26px 0 0;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-info-section .c-amount-wrapper .c-amount {
+  font-size: 24px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section {
+  margin: 32px 0 0;
+  border-style: solid;
+  border-width: 3px 0 0;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table {
+  border-collapse: collapse;
+  padding: 0;
+  width: 100%;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tr td input {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  box-sizing: border-box;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tr td.right {
+  text-align: right;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tr td.right input {
+  text-align: right;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tr td.c-number {
+  width: 20px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tr td.c-amount {
+  width: 10%;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tr td.c-price {
+  width: 20%;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tr td.c-total {
+  width: 20%;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table thead tr td,
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tbody tr td {
+  border-bottom: 1px solid #e6e6e6;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table thead tr td {
+  height: 32px;
+  padding: 0 8px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tbody tr td {
+  padding: 8px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tfoot tr:first-child td {
+  padding-top: 6px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tfoot tr td {
+  height: 26px;
+  padding: 0 8px 4px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tfoot tr.c-total-row td {
+  border-width: 1px 0 0;
+  border-style: solid;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-items-section table tfoot tr.c-total-row .c-total {
+  font-size: 24px;
+  line-height: 1.5em;
+}
+.c-invoice-front-section .c-front-invoice-block.type-1 .c-comment-wrapper {
+  margin: 32px 0 0;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-header {
+  color: #2296bf;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-border {
+  border-color: #2296bf;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-logo {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 200px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-logo img {
+  max-width: 100%;
+  max-height: 200px;
+  vertical-align: top;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-info-section {
+  margin: 32px 0 0;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-info-section > .c-column:not(:last-child) {
+  padding-right: 20px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-info-section .c-date-due {
+  margin: 26px 0 0;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-info-section .c-amount-wrapper .c-amount {
+  font-size: 24px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section {
+  margin: 32px 0 0;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table {
+  border-collapse: collapse;
+  padding: 0;
+  width: 100%;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tr td {
+  border: 1px solid #a9a9a9;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tr td input {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  box-sizing: border-box;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tr td.right {
+  text-align: right;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tr td.right input {
+  text-align: right;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tr td.c-number {
+  width: 20px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tr td.c-amount {
+  width: 10%;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tr td.c-price {
+  width: 18%;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tr td.c-tax {
+  width: 15%;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tr td.c-total {
+  width: 18%;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table thead tr td {
+  height: 32px;
+  padding: 0 8px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tbody tr td {
+  padding: 8px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tfoot tr:first-child td {
+  padding-top: 6px;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tfoot tr td {
+  height: 26px;
+  padding: 0 8px 4px;
+  border: 0;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-items-section table tfoot tr.c-total-row .c-total {
+  font-size: 24px;
+  line-height: 1.5em;
+}
+.c-invoice-front-section .c-front-invoice-block.type-2 .c-comment-wrapper {
+  margin: 32px 0 0;
+}
+@media print {
+  .c-invoice-front-section.with-background,
+  .c-invoice-front-section {
+    background: transparent;
+  }
+  .c-invoice-front-section.with-background .c-front-invoice-block,
+  .c-invoice-front-section .c-front-invoice-block {
+    border: 0;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .c-invoice-front-section.with-background .c-payment-section,
+  .c-invoice-front-section .c-payment-section {
+    display: none;
+  }
+}

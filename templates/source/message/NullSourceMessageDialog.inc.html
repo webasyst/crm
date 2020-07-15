@@ -1,0 +1,95 @@
+{$class = 'c-source-null-message-viewer-dialog'}
+{$dialog_id = uniqid($class)}
+
+<div class="crm-dialog-wrapper {$class} c-message-show-body-dialog" id="{$dialog_id}">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h2><span>{$message.subject|default:''|escape}</span></h2>
+            <div class="c-message-actions">
+                {if !empty($message.create_datetime)}
+                    <span class="c-text-item">
+                {if $message.direction === "IN"}
+                    <i class="icon16 import" title="[`incoming`]"></i>
+                {else}
+                  <i class="icon16 message-out" title="[`outgoing`]"></i>
+                {/if}
+                        {$message.create_datetime|wa_datetime}
+
+                {if $message.transport === crmMessageModel::TRANSPORT_IM || $message.transport === crmMessageModel::TRANSPORT_EMAIL && $message.conversation_id}
+                    <a href="{$wa_app_url}message/conversation/{$message.conversation_id}" class="small" style="padding: 0 10px;">[`open conversation`]</a>
+                {/if}
+            </span>
+                {/if}
+            </div>
+        </header>
+        <div class="crm-dialog-content">
+            <div class="c-message-info">
+                <div class="js-message-data">
+                    <div class="field">
+                        <div class="name">[`From`]</div>
+                        <div class="value">
+                            {$message.from|escape}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">[`To`]</div>
+                        <div class="value">
+                            {$message.to|escape}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="c-message-body js-message-body">
+                <p>{$message.body|default:''}</p>
+                {if $message.attachments}
+                    <div class="c-attachments-block">
+                        <ul class="menu-v c-attachments-list">
+                            {foreach $message.attachments as $a}
+                                <li>
+                                    <i class="icon16 attachment" style="margin-right: 8px;"></i>
+                                    <a class="js-disable-router" href="?module=file&action=download&id={$a.id}">{$a.name|escape}</a><span class="c-size hint">{crmHelper::formatFileSize($a.size)}</span>
+                                </li>
+                            {/foreach}
+                        </ul>
+                    </div>
+                {/if}
+            </div>
+
+            <div class="js-errors-place"></div>
+        </div>
+
+        <footer class="crm-dialog-footer">
+            <div class="c-layout">
+                <div class="c-column">
+                    <div class="c-footer-actions js-dialog-footer">
+                        <input class="button green js-reply-button" type="button" value="[`Reply`]">
+                        [`or`] <a href="javascript:void(0);" class="js-close-dialog">[`cancel`]</a>
+                    </div>
+                </div>
+                {if $can_delete}
+                    <div class="c-column middle right">
+                        <a href="javascript:void(0);" class="inline-link js-delete-message" style="color:red;"><b><i>[`Delete message`]</i></b></a>
+                    </div>
+                {/if}
+        </footer>
+    </div>
+
+    <script>
+        (function ($) {
+            var AnonymousClass = CRMMessageDeleteLinkMixin.mixInFor(function () {
+                this.$wrapper = $("#{$dialog_id}");
+                this.message = {$message|json_encode};
+                this.$button = this.$wrapper.find('.js-reply-button');
+                this.locales = {
+                    delete: "[`Delete`]",
+                    delete_message: "[`Delete message`]",
+                    delete_message_text: "[`Delete message`]"
+                };
+                this.initMessageDeleteLink();
+            });
+            new AnonymousClass();
+        })(jQuery);
+    </script>
+</div>

@@ -1,0 +1,10 @@
+{function formatted_subject message=[]}{strip}
+    {if !empty($message.subject_formatted)}
+        {$subject = $message.subject_formatted}
+    {else}
+        {$body = strip_tags($message.body)}
+        {$subject = strip_tags($message.subject)|escape}
+        {$subject = $subject|default:$body|default:'[`no subject`]'|truncate:50:'...':true}
+    {/if}
+    <span class="c-message-subject">{$subject}</span>
+{/strip}{/function}

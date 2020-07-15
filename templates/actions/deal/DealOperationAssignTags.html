@@ -1,0 +1,44 @@
+<div class="crm-dialog-wrapper c-deal-assign-tags-dialog" id="js-deal-assign-tags-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>[`Assign tags`]</h1>
+        </header>
+        <div class="crm-dialog-content">
+            <div class="crm-tags-input-block">
+                {$_tags = []}
+                {foreach $deal_tags as $tag}
+                    {$_tags[] = $tag['name']|escape}
+                {/foreach}
+                <input type="text" name="tags" id="js-deal-assign-tags-input" value="{$_tags|join:','}" class="crm-tags-input" placeholder="[`Add tag`]">
+            </div>
+            <div class="crm-popular-tags-block">
+                {if $popular_tags}
+                    <ul class="crm-popular-tags menu-h">
+                        <li class="crm-title">[`Popular tags`]</li>
+                        {foreach $popular_tags as $tag}
+                            <li class="crm-popular-tag-item">
+                                <a href="javascript:void(0);" class="crm-popular-tag-item-link inline-link"><b><i>{$tag.name|escape}</i></b></a>
+                            </li>
+                        {/foreach}
+                    </ul>
+                {/if}
+            </div>
+        </div>
+        <footer class="crm-dialog-footer">
+            <input class="button green js-save" type="button" value="[`Assign`]">
+            <i class="icon16 loading crm-loading" style="display: none;"></i>
+            <span style="margin: 0 4px;">[`or`]</span>
+            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+        </footer>
+    </div>
+    <script>
+        ( function($) {
+            new CRMDealOperationAssignTags({
+                $wrapper: $('#js-deal-assign-tags-dialog'),
+                context: {$context|json_encode},
+                is_assign: {$is_assign|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

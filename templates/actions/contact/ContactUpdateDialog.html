@@ -1,0 +1,41 @@
+{$_number = $call.plugin_client_number|escape}
+
+<div class="crm-dialog-wrapper c-contact-update-dialog" id="js-contact-update-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <form>
+            <header class="crm-dialog-header">
+                <h1>{sprintf(_w("Add phone %s to contact"), $_number)}</h1>
+            </header>
+            <div class="crm-dialog-content" style="min-height: 100px;">
+
+                <div class="field">
+                    <div class="name">[`Find contact`]</div>
+                    <div class="value">
+                        <div class="c-autocomplete-wrapper js-autocomplete-wrapper">
+                            <input class="js-autocomplete" placeholder="[`Enter name or email`]">
+                            <input class="js-field" name="contact[id]" type="hidden">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="js-errors-place"></div>
+            </div>
+            <footer class="crm-dialog-footer js-dialog-footer">
+                <input class="button green js-submit-button" type="submit" value="[`Save`]" disabled>
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+            </footer>
+
+            <input name="call[id]" value="{$call.id}" type="hidden">
+        </form>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMContactUpdateDialog({
+                $wrapper: $("#js-contact-update-dialog")
+            });
+        })(jQuery);
+    </script>
+</div>

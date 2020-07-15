@@ -1,0 +1,133 @@
+<div class="c-front-invoice-block type-2">
+    <header class="c-block-header c-layout">
+        <div class="c-column">
+            {* LOGO *}
+            {if !empty($_logo)}
+                <div class="c-logo">
+                    <img src="{$_logo}" alt="">
+                </div>
+            {/if}
+        </div>
+
+        <div class="c-column right">
+
+            {* AUTHOR *}
+            <div class="c-author">
+                <p class="line">{ifempty($invoice.company.name, $invoice.company_id)|escape}</p>
+                {if !empty($invoice.company.address)}
+                    <p class="line">{$invoice.company.address|escape|nl2br}</p>
+                {/if}
+                {if !empty($invoice.company.phone)}
+                    <p class="line">{$invoice.company.phone|escape}</p>
+                {/if}
+            </div>
+
+        </div>
+    </header>
+
+    <section class="c-info-section c-layout fixed">
+        <h1 class="line">[`Invoice`]: <span class="c-header" {if !empty($_color)}style="color: {$_color};"{/if}>[`#`]{$invoice.number|escape}</span> [`issued on`] <span class="c-header" {if !empty($_color)}style="color: {$_color};"{/if}>{$invoice.invoice_date|wa_date}</span></h1>
+        <p class="line">
+            {strip}
+                [`Provider`]:
+                {ifempty($invoice.company.name, $invoice.company_id)|escape}
+                {if !empty($invoice.company.address)}, {$invoice.company.address|escape|nl2br}{/if}
+                {if !empty($invoice.company.phone)}, {$invoice.company.phone|escape}{/if}
+            {/strip}
+        </p>
+        <p class="line">
+            [`Billed To`]:
+            {if $customer.company}
+                {$customer.company|escape}
+            {else}
+                {$customer.name|escape}
+            {/if}
+            {$_city = $customer->get('address:city', 'default')}
+            {if $_city}{$_city}{/if}
+        </p>
+        {if !empty($invoice.due_date)}
+            <p class="line">{$invoice.due_date|wa_date}</p>
+        {/if}
+    </section>
+
+    <section class="c-items-section c-border">
+        <table>
+            <thead>
+            <tr>
+                <td class="c-header c-number" {if !empty($_color)}style="color: {$_color};"{/if}>№</td>
+                <td class="c-header c-name" {if !empty($_color)}style="color: {$_color};"{/if}>[`Product or service`]</td>
+                <td class="c-header c-amount right" {if !empty($_color)}style="color: {$_color};"{/if}>[`Qty`]</td>
+                <td class="c-header c-price right" {if !empty($_color)}style="color: {$_color};"{/if}>[`Price`]</td>
+                <td class="c-header c-total right" {if !empty($_color)}style="color: {$_color};"{/if}>[`Amount`]</td>
+            </tr>
+            </thead>
+            <tbody>
+            {$_subtotal = 0}
+            {foreach $invoice.items as $_item}
+                {$_item_total = ($_item.quantity * $_item.price)}
+                <tr>
+                    <td class="c-number">
+                        <span class="c-field">{$_item@iteration}</span>
+                    </td>
+                    <td class="c-name">
+                        {$_item.name|escape}
+                    </td>
+                    <td class="c-amount right">
+                        {$_item.quantity|wa_format}
+                    </td>
+                    <td class="c-price right">
+                        {$_item.price|wa_format}
+                    </td>
+                    <td class="c-total right">
+                        {$_item_total|wa_format}
+                    </td>
+                    {$_subtotal = $_subtotal + $_item_total}
+                </tr>
+            {/foreach}
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="4" class="right">[`Subtotal`]</td>
+                <td class="c-total right">
+                    <span>{$_subtotal|wa_format}</span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" class="right">
+                    {$_type = ""}
+                    {if ($invoice.tax_type == "NONE")}
+                        {$_type = "[`without`]"}
+                    {elseif ($invoice.tax_type == "INCLUDE")}
+                        {$_type = "[`including`]"}
+                    {/if}
+
+                    {$_name = "[`tax`]"}
+                    {if !empty($invoice.tax_name)}
+                        {$_name = $invoice.tax_name}
+                    {/if}
+
+                    <span>{if !empty($_type)}{$_type}&nbsp;{/if}{$_name|escape}{if $invoice.tax_type != "NONE"}&nbsp;{$invoice.tax_percent|escape}%{/if}</span>
+                </td>
+                <td class="c-total right">
+                    {if $invoice.tax_type != "NONE"}
+                        <span>{$invoice.tax_amount|wa_format}</span>
+                    {/if}
+                </td>
+            </tr>
+            <tr class="c-total-row">
+                <td colspan="4" class="right c-border">[`Total`]</td>
+                <td class="c-total right c-border">
+                    <span class="nowrap c-total">{$invoice.amount|wa_format_amount_currency:$invoice.currency_id}</span>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </section>
+
+    {if !empty($invoice.comment)}
+        <div class="c-comment-wrapper">
+            <div class="c-header" {if !empty($_color)}style="color: {$_color};"{/if}>[`Comment`]</div>
+            <p>{$invoice.comment|default:""}</p>
+        </div>
+    {/if}
+</div>

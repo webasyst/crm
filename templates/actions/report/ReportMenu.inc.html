@@ -1,0 +1,60 @@
+{$types_filter = [
+    "lost" => [
+        "id" => "lost",
+        "name" => "[`Lost deals`]",
+        "href" => "{$wa_app_url}report/"
+    ],
+    "won" => [
+        "id" => "won",
+        "name" => "[`Won deals`]",
+        "href" => "{$wa_app_url}report/?chart=1"
+    ],
+    "invoices" => [
+        "id" => "invoices",
+        "name" => "[`Paid invoices`]",
+        "href" => "{$wa_app_url}report/invoices/"
+    ]
+]}
+
+{*
+"stages" => [
+"id" => "stages",
+"name" => "[`Deal stages`]",
+"href" => "{$wa_app_url}report/stages/"
+]
+*}
+
+{$_active_type_filter = reset($types_filter)}
+{if !empty($_active) && !empty($types_filter[$_active])}
+    {$_active_type_filter = $types_filter[$_active]}
+{/if}
+
+<li class="c-filter-wrapper is-main">
+    <a class="inline-link" href="javascript:void(0);">
+        <b><i>{$_active_type_filter.name|escape}</i></b>&nbsp;<i class="icon10 darr"></i>
+    </a>
+    <ul class="menu-v without-icons">
+        {foreach $types_filter as $_type}
+            <li class="c-menu-item {if $_active === $_type.id}selected{/if}">
+                <a class="nowrap" href="{$_type.href}">{$_type.name|escape}</a>
+            </li>
+        {/foreach}
+    </ul>
+</li>
+
+{*
+<ul class="c-view-toggle-wrapper">
+    <li{if $_active == 'lost'} class="is-active"{/if}>
+        <a href="{$wa_app_url}report/"><i class="icon16 funnel"></i>[`Lost deals`]</a>
+    </li>
+    <li{if $_active == 'won'} class="is-active"{/if}>
+        <a href="{$wa_app_url}report/?chart=1"><i class="icon16 reports"></i>[`Won deals`]</a>
+    </li>
+    <li{if $_active == 'invoices'} class="is-active"{/if}>
+        <a href="{$wa_app_url}report/invoices/"><i class="icon16 invoice"></i>[`Paid invoices`]</a>
+    </li>
+    <li{if $_active == 'stages'} class="is-active"{/if}>
+        <a href="{$wa_app_url}report/stages/"><i class="icon16 invoice"></i>[`Deal stages`]</a>
+    </li>
+</ul>
+*}

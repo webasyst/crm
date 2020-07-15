@@ -1,0 +1,9 @@
+{**
+  * Template for render !agreement_checkbox field in constructor
+  *}
+<div class="c-agreement-checkbox-wrapper">
+    <input type="checkbox" disabled="disabled" {if !empty($params.default_checked)}checked="checked"{/if}>
+    <label class="c-agreement-checkbox-html-label c-disabled">
+        {$params.html_label|default:''|trim}
+    </label>
+</div>

@@ -1,0 +1,203 @@
+<link rel="stylesheet" href="{$wa_app_static_url}css/log.css?{$wa->version()}">
+
+<div class="c-live-page shadowed" id="c-live-page">
+
+    <div class="blank">
+        <header class="c-live-header">
+
+            <div class="c-layout">
+                <div class="c-column">
+                    {strip}
+                    <form class="js-filters-form">
+                        <ul class="c-nav-wrapper menu-h dropdown">
+
+                            <li class="c-filter-wrapper">
+                                <a class="inline-link" href="javascript:void(0);">
+                                    {if !empty($selected_filter_action.color)}
+                                        <i class="icon16 color round" style="background: {$selected_filter_action.color};"></i>
+                                    {/if}
+                                    <b><i>{$selected_filter_action.name|escape}</i></b>&nbsp;<i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v with-icons">
+                                    {foreach $filter_actions as $_filter_action}
+                                        <li class="{if $selected_filter_action.id == $_filter_action.id}selected{/if}">
+                                            <a href="{crmHelper::getUrl("type", $_filter_action.id)}">
+                                                {if !empty($_filter_action.color)}
+                                                    <i class="icon16 color round" style="background: {$_filter_action.color};"></i>
+                                                {/if}
+                                                {$_filter_action.name|escape}
+                                            </a>
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                                <input name="type" value="{$selected_filter_action.id}" type="hidden">
+                            </li>
+
+                            {* USERS *}
+                            {$filter_users = [
+                                "" => [
+                                    "id"           => 'all',
+                                    "name"         => "[`All users`]",
+                                    "photo_url_16" => "`$wa_url`wa-content/img/userpic20.jpg"
+                                ]
+                            ]}
+                            {$filter_users = $filter_users + $users}
+
+                            {if $list_params.user_id && !empty($filter_users[$list_params.user_id])}
+                                {$selected_filter_user = $filter_users[$list_params.user_id]}
+                            {else}
+                                {$selected_filter_user = reset($filter_users)}
+                            {/if}
+
+                            <li class="c-filter-wrapper">
+                                <a class="inline-link" href="javascript:void(0);">
+                                    {if !empty($selected_filter_user.photo_url_16)}
+                                        <i class="icon16 userpic20" style="background-image: url({$selected_filter_user.photo_url_16})"></i>
+                                    {/if}
+                                    <b><i>{$selected_filter_user.name|escape}</i></b>&nbsp;<i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v with-icons" style="width: 250px;">
+                                    {foreach $filter_users as $_user}
+                                        <li class="t-menu-item {if $list_params.user_id == $_user.id}selected{/if}">
+                                            <a href="{crmHelper::getUrl("user", $_user.id)}">
+                                                {if !empty($_user.photo_url_16)}
+                                                    <i class="icon16 userpic20" style="background-image: url({$_user.photo_url_16})"></i>
+                                                {/if}
+                                                {$_user.name|escape}
+                                            </a>
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                                <input name="user" value="{$selected_filter_user.id}" type="hidden">
+                            </li>
+                        </ul>
+                    </form>
+                    {/strip}
+                </div>
+                <div class="c-column right">
+
+                    <div class="c-dates-filter js-dates-filter">
+                        <form>
+                            <ul class="c-nav-wrapper menu-h dropdown">
+
+                                {* DATE *}
+                                {$filter_dates = [
+                                    "30" => [
+                                        "id" => "30",
+                                        "name" => _w('Last %d day', 'Last %d days', 30),
+                                        "group_by" => "days",
+                                        "timeframe" => 30
+                                    ],
+                                    "90" => [
+                                        "id" => "90",
+                                        "name" => _w('Last %d day', 'Last %d days', 90),
+                                        "group_by" => "days",
+                                        "timeframe" => 90
+                                    ],
+                                    "365" => [
+                                        "id" => "365",
+                                        "name" => _w('Last %d day', 'Last %d days', 365),
+                                        "group_by" => "months",
+                                        "timeframe" => 365
+                                    ],
+                                    "all" => [
+                                        "id" => "all",
+                                        "name" => "[`All time`]",
+                                        "group_by" => "months",
+                                        "timeframe" => "all"
+                                    ],
+                                    "custom" => [
+                                        "id" => "custom",
+                                        "name" => "[`Select dates...`]",
+                                        "group_by" => "",
+                                        "timeframe" => "custom"
+                                    ]
+                                ]}
+
+                                {if $chart_params.timeframe && !empty($filter_dates[$chart_params.timeframe])}
+                                    {$selected_filter_date = $filter_dates[$chart_params.timeframe]}
+                                {else}
+                                    {$selected_filter_date = reset($filter_dates)}
+                                {/if}
+
+                                <li class="c-filter-wrapper c-hidden-part js-hidden-part {if $chart_params.timeframe == "custom"}is-shown{/if}">
+                                    <div class="c-filter-text">
+                                        [` from`]
+                                        <input class="js-datepicker" type="text" value="{$chart_params.start_date|wa_date}" style="width:100px;" data-selector="js-start-field">
+                                        <input class="js-start-field" name="from" type="hidden" value="{$chart_params.start_date}">
+                                        [` to`]
+                                        <input class="js-datepicker" type="text" value="{$chart_params.end_date|wa_date}" style="width:100px;" data-selector="js-end-field">
+                                        <input class="js-end-field" name="to" type="hidden" value="{$chart_params.end_date}">
+
+                                        <select name="groupby" class="js-group-field">
+                                            <option value="days" {if $chart_params.group_by == "days"}selected{/if}>[`by day`]</option>
+                                            <option value="months" {if $chart_params.group_by == "months"}selected{/if}>[`by month`]</option>
+                                        </select>
+                                        <input type="submit" value="[`Apply`]">
+                                    </div>
+                                </li>
+                                <li class="c-filter-wrapper">
+                                    <a class="inline-link" href="javascript:void(0);">
+                                        <b><i class="js-link-text">{$selected_filter_date.name|escape}</i></b>&nbsp;<i class="icon10 darr"></i>
+                                    </a>
+                                    <ul class="menu-v with-icons js-list right">
+                                        {foreach $filter_dates as $_date}
+                                            <li class="js-toggle {if $selected_filter_date.id == $_date.id}selected{/if}" data-timeframe="{$_date.timeframe}" data-group="{$_date.group_by}">
+                                                <a href="javascript:void(0);">{$_date.name|escape}</a>
+                                            </li>
+                                        {/foreach}
+                                    </ul>
+                                    <input class="js-timeframe-field" name="timeframe" type="hidden" value="{$selected_filter_date.timeframe}">
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </header>
+
+        <section class="c-chart-section js-chart-section">
+            <div class="c-chart-wrapper js-chart-wrapper"></div>
+            <div class="c-hint-wrapper js-hint-wrapper">
+                <div class="line">
+                    <span class="c-app"></span>: <span class="c-value"></span>
+                </div>
+                <div class="line">
+                    <span class="c-date"></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="c-log-section" id="c-log-section">
+            {* TIMELINE *}
+            {include file="./LogLiveTimeline.html" inline}
+        </section>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMLogLive({
+                $wrapper: $("#c-live-page"),
+                chartData: {$chart|json_encode},
+                chartParams: {$chart_params|json_encode},
+                locales: {
+                    months: [
+                        "{_ws('January', 'January')}",
+                        "{_ws('February', 'February', 1)}",
+                        "{_ws('March', 'March')}",
+                        "{_ws('April', 'April')}",
+                        "{_ws('May', 'May')}",
+                        "{_ws('June', 'June')}",
+                        "{_ws('July', 'July')}",
+                        "{_ws('August', 'August')}",
+                        "{_ws('September', 'September')}",
+                        "{_ws('October', 'October')}",
+                        "{_ws('November', 'November')}",
+                        "{_ws('December', 'December')}"
+                    ]
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

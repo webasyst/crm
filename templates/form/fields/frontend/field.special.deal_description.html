@@ -1,0 +1,64 @@
+{**
+  * Template for render !deal_description field in constructor
+  *}
+{$class_id = 'crm-deal-description-wrapper'}
+{$wrapper_id = uniqid($class_id)}
+<div class="{$class_id}" id="{$wrapper_id}">
+    <div class="crm-deal-description">
+        <textarea
+            name="crm_form[!deal_description]"
+            placeholder="{$params.placeholder|default:''|escape}"
+            class="{if !empty($params.required)}crm-required-input{/if} {if !empty($params.redactor)}c-is-redactor{/if}"></textarea>
+    </div>
+    {if !empty($params.redactor)}
+
+        {$_locale_string = substr($wa->locale(), 0, 2)}
+
+        <script>(function() { "use strict";
+
+            var options = {
+                wa_url: {$wa_url|json_encode},
+                wa_version: {$wa->version(true)|json_encode},
+                lang: {$_locale_string|json_encode}
+            };
+
+            // Load Redactor scripts: we have to load them only once otherwise it breaks
+            var promise;
+            if (window.Redactor) {
+                promise = $.Deferred().resolve().promise();
+            } else if (window.crm_form_redactor_loaded) {
+                promise = window.crm_form_redactor_loaded;
+            } else {
+                // Load CSS
+                $('<link>').appendTo('head').attr({
+                    href: options.wa_url + 'wa-content/js/redactor/2/redactor.css?' + options.wa_version,
+                    rel: 'stylesheet',
+                    type: 'text/css'
+                });
+
+                // Load JS
+                var js_url = options.wa_url + 'wa-content/js/redactor/2/redactor.min.js?' + options.wa_version;
+                window.crm_form_redactor_loaded = promise = $.getScript(js_url).then(function(){
+                    if (options.lang && options.lang != 'en') {
+                        return $.getScript(options.wa_url + 'wa-content/js/redactor/2/'+options.lang+'.js?' + options.wa_version);
+                    }
+                });
+            }
+
+            // Initialize WYSIWYG once everything is loaded
+            $(function () {
+                promise.then(function() {
+                    var $wrapper = $('#{$wrapper_id}');
+                    $wrapper.find('textarea').redactor({
+                        buttons: ['bold', 'italic', 'underline', 'lists', 'link', 'fontcolor', 'fontsize'],
+                        plugins: ['fontcolor', 'fontsize'],
+                        imageUpload: false,
+                        focus: false,
+                        minHeight: 250
+                    });
+                });
+            });
+
+        }());</script>
+    {/if}
+</div>

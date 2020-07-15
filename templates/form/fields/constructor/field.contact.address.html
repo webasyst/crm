@@ -1,0 +1,16 @@
+{**
+  * Template for render address control
+  *}
+<div class="c-field-wrapper">
+    <p>
+        {$subfields = $field.field->getFields()}
+        {foreach $subfields as $subfield_id => $subfield}
+            {if !($subfield instanceof waContactHiddenField)}
+                <span class="field field-address-{$subfield_id}">
+                    <span>{$subfield->getName()|escape}</span>
+                    {$subfield->getHtml([], 'disabled="disabled"')}
+                </span>
+            {/if}
+        {/foreach}
+    </p>
+</div>

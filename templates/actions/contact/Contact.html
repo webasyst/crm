@@ -1,0 +1,54 @@
+{$title = $title|default:'[`Contacts`]'}
+{$context = $context|default:[]}
+{$context.type = $context.type|default:''}
+{if !isset($context.hash)}
+    {$context.hash = $hash|default:''}
+{/if}
+{$sort = $sort|default:'name'}
+{$asc  = $asc|default:false}
+
+<div class="c-contacts-page shadowed" id="c-contacts-page">
+    <div class="c-layout fixed">
+        <div class="c-column sidebar left250px js-sidebar">
+            <div id="js-aside-block">
+                {include file="./Contact.sidebar.html" inline}
+            </div>
+        </div>
+        <div class="c-column content bordered-left blank">
+            <div id="js-content-block">
+                {if $view == "thumbs"}
+                    {include file="./Contact.thumbs.html" inline}
+                {elseif $view == "thumb-list"}
+                    {include file="./Contact.thumb-list.html" inline}
+                {else}
+                    {include file="./Contact.list.html" inline}
+                {/if}
+            </div>
+        </div>
+
+        {include file="./ContactOperationDeleteCheckingDialog.inc.html" inline}
+
+    </div>
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$title|json_encode});
+
+            new CRMContactsPage({
+                $wrapper: $("#c-contacts-page"),
+                is_admin: {$is_admin|json_encode},
+                context: {$context|default:[]|json_encode},
+                view: {$view|default:'thumbs'|json_encode},
+                total_count: {$total_count|json_encode},
+                limit: {$limit},
+                page_count: {$page_count|json_encode},
+                page: "{if !empty($page) && $page > 1}{$page}{/if}",
+                locales: {
+                    'delete_segment_title': '[`Delete segment?`]',
+                    'delete_segment_text': '<p>[`Do you really want to delete this list?`]</p><p>[`Contacts will NOT be deleted.`]</p>',
+                    'delete_segment_button': '[`Delete`]'
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

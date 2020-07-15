@@ -1,0 +1,125 @@
+{$block_id = uniqid('crm-form-block-')}
+{$form_id = $block_id|cat:'-form'}
+
+<link rel="stylesheet" href="{$wa_app_static_url}css/form.css?{$wa->version()}">
+<script src="{$wa_app_static_url}js/crm.frontend.form.js?{$wa->version()}"></script>
+
+{$_ignore_include_jquery = false}
+{if isset($options.ignore_include_jquery)}
+    {$_ignore_include_jquery = $options.ignore_include_jquery}
+{/if}
+
+{if !$_ignore_include_jquery}
+    <script src="{$wa_url}wa-content/js/jquery/jquery-1.11.1.min.js?v={$wa->version(true)}"></script>
+    <script>
+        var wa_crm_form_jquery = jQuery.noConflict(true);
+    </script>
+{/if}
+
+{$_locale_string = substr($wa->locale(), 0, 2)}
+
+{$_ignore_include_jquery_ui = false}
+{if isset($options.ignore_include_jquery_ui)}
+    {$_ignore_include_jquery_ui = $options.ignore_include_jquery_ui}
+{/if}
+
+{$_ignore_include_jquery_ui_css = false}
+{if isset($options.ignore_include_jquery_ui_css)}
+    {$_ignore_include_jquery_ui_css = $options.ignore_include_jquery_ui_css}
+{/if}
+
+{$_ignore_include_jquery_ui_js = false}
+{if isset($options.ignore_include_jquery_ui_js)}
+    {$_ignore_include_jquery_ui_js = $options.ignore_include_jquery_ui_js}
+{/if}
+
+{if $need_datepicker && !$_ignore_include_jquery_ui}
+
+    {if !$_ignore_include_jquery_ui_css}
+        <link href="{$wa_app_static_url}js/jquery/jquery-ui.css?v={$wa->version()}" rel="stylesheet">
+    {/if}
+
+    {if !$_ignore_include_jquery_ui_js}
+        <script src="{$wa_app_static_url}js/jquery/jquery-ui.min.js?v={$wa->version()}"></script>
+        {if $_locale_string != 'en'}
+            <script src="{$wa_app_static_url}js/jquery/i18n/datepicker-{$_locale_string}.js?v={$wa->version()}"></script>
+        {/if}
+    {/if}
+
+{/if}
+
+{function form_field_html field=[]}
+    {$captionplace = $field.captionplace|default:'left'}
+    <div class="crm-form-field {if $captionplace !== 'left'}crm-caption-style-{$captionplace}{/if}" data-id="{$field.id}" data-uid="{$field.uid}">
+        <div class="crm-form-field-line crm-form-field-1st-line">
+            <div class="crm-form-field-col crm-caption-col">
+                <span class="crm-caption">
+                    {if isset($field.caption)}
+                        {$field.caption|escape}
+                    {else}
+                        {$field.name|escape}
+                    {/if}
+                    {if !empty($field.required) && $field.id !== '!captcha'} *{/if}
+                </span>
+            </div>
+            <div class="crm-form-field-col crm-input-col">
+                {if $captionplace === 'left'}
+                    {$field.html}
+                    <div class="crm-error-msg-block" data-id="{$field.id}" data-uid="{$field.uid}"></div>
+                {/if}
+            </div>
+        </div>
+        {if $captionplace !== 'left'}
+            <div class="crm-form-field-line crm-form-field-2st-line">
+                <div class="crm-form-field-col crm-input-col">
+                    {$field.html}
+                    <div class="crm-error-msg-block" data-id="{$field.id}" data-uid="{$field.uid}"></div>
+                </div>
+            </div>
+        {/if}
+    </div>
+{/function}
+
+<div class="crm-form-block"  style="width: {$form.params.formwidth|default:400}px" id="{$block_id}">
+
+    <div class="crm-form-fields-block">
+        <div class="crm-form-fields">
+            <form id="{$form_id}" method="post" action="{$action_url}" enctype="multipart/form-data" target="{$form_id}-target" autocomplete="off">
+                {foreach $form.params.fields as $field_id => $field}
+                    {form_field_html field=$field}
+                {/foreach}
+                <div class="crm-error-msg crm-error-common"></div>
+                <div class="crm-submit-button-wrapper">
+                    <input type="hidden" name="crm_form[id]" value="{$form.id}">
+                    <input class="crm-form-submit-button button green" type="submit" value="{$form.params.button_caption|escape|default:'[`Sign up`]'}">
+                    <i class="icon16 loading crm-loading" style="display: none;"></i>
+                </div>
+            </form>
+
+            <iframe src="javascript:true" name="{$form_id}-target" id="{$form_id}-target" style="width:0 !important;height:0 !important;border:0 !important;"></iframe>
+
+            <div class="crm-after-submit-block">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (jQuery) {
+        crmFrontendForm('{$block_id}', false, {
+            wa_url: {$wa_url|json_encode},
+            wa_version: {$wa->version(true)|json_encode},
+            lang: {$_locale_string|json_encode},
+            jQuery: typeof wa_crm_form_jquery !== 'undefined' ? wa_crm_form_jquery : jQuery,
+            validate_messages: {
+                required: "{_ws('This field is required')}",
+                passwords_not_match: "{_ws('Passwords do not match')}"
+            },
+            messages: {
+                server_error: "[`Server error`]",
+            }
+        });
+        if (typeof wa_crm_form_jquery !== 'undefined') {
+            wa_crm_form_jquery == undefined;
+        }
+    })(jQuery);
+</script>

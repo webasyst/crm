@@ -1,0 +1,62 @@
+<div class="c-settings-source-page" id="c-im-settings-source-page">
+    <form class="crm-source-settings-form">
+
+        <h1 class="c-page-header">
+            <img src="{$icon_url}">
+            {if $source.id <= 0}[`New connection to instant messenger`]{else}{$source.name|escape}{/if}
+        </h1>
+
+        <div class="c-fields-section">
+
+            {$blocks.specific_settings_block|default:''}
+
+            <div class="field"><hr></div>
+
+            {$blocks.with_contact|default:''}
+
+            <div class="field"><hr></div>
+
+            {$blocks.create_deal|default:''}
+
+            <div class="field"><hr></div>
+
+            {$blocks.responsible|default:''}
+
+            <div class="crm-form-buttons">
+                <div class="c-layout">
+                    <div class="c-column">
+                        <input type="submit" class="button green" value="[`Save`]">
+                        <span style="margin: 0 4px;">[`or`]</span>
+                        <a class="inline-link" href="{$wa_app_url}settings/sources/"><b><i>[`cancel`]</i></b></a>
+                        <i class="icon16 loading crm-loading" style="display:none"></i>
+                        <span class="crm-success-status" style="display: none;"> [`Saved`] <i class="icon16 yes"></i>
+                    </span>
+                    </div>
+                    {if $source.id > 0}
+                        <div class="c-column middle right">
+                            <div class="crm-delete-link-wrapper">
+                                <a href="javascript:void(0);" class="inline-link crm-delete-source-link"><i class="icon16 delete"></i><b><i>[`Delete this source`]</i></b></a>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="source[id]" value="{$source.id}">
+    </form>
+
+    <script>
+        ( function($) {
+            new CRMSettingsSourceIm({
+                $wrapper: $("#c-im-settings-source-page"),
+                source: {$source|json_encode},
+                messages: {
+                    'delete_confirm_title': '[`Delete source`]',
+                    'delete_confirm_text': '[`Are you sure?`]',
+                    'delete_confirm_button': '[`Delete`]'
+                }
+            });
+        })(jQuery);
+    </script>
+
+</div>

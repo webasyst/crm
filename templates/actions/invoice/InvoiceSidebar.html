@@ -1,0 +1,17 @@
+{* LIST *}
+
+<div class="c-invoices-wrapper">
+
+    <ul class="zebra c-invoices-list js-invoices-list">
+        {foreach $invoices as $_invoice}
+            {include file="./InvoiceSidebar.item.inc.html" invoice=$_invoice inline}
+        {/foreach}
+    </ul>
+
+    {if !empty($invoices)}
+        <div class="c-loading-wrapper block double-padded js-lazyload" data-offset="{$list_params.offset + $list_params.limit}" style="text-align: center">
+            <i class="icon16 loading"></i> <span style="color:#aaa;">[`Loading`]...</span>
+        </div>
+    {/if}
+
+</div>

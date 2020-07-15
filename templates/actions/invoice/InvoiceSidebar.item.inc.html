@@ -1,0 +1,79 @@
+{strip}
+
+{$_states = [
+    "PENDING" => [
+        "icon" => "status-green-tiny",
+        "class" => "pending"
+    ],
+    "PAID" => [
+        "icon" => "yes-bw",
+        "class" => "paid"
+    ],
+    "REFUNDED" => [
+        "icon" => "no-bw",
+        "class" => "refunded"
+    ],
+    "ARCHIVED" => [
+        "icon" => "trash",
+        "class" => "archived"
+    ],
+    "DRAFT" => [
+        "icon" => "status-gray-tiny",
+        "class" => "draft"
+    ],
+    "PROCESSING" => [
+        "icon" => "light-bulb",
+        "class" => "processing"
+    ]
+]}
+
+{$_userpic = $invoice.contact->getPhoto(50)}
+
+{$_state = false}
+{if $invoice.state_id && !empty($_states[$invoice.state_id])}
+    {$_state = $_states[$invoice.state_id]}
+{/if}
+
+{$_invoice_classes = []}
+{if !empty($invoice_id) && $invoice.id === $invoice_id}
+    {$_invoice_classes[] = "selected"}
+{/if}
+{if !empty($_state)}
+    {$_invoice_classes[] = $_state.class}
+{/if}
+{if !empty($invoice_max_id) && $invoice.id > $invoice_max_id}
+    {$_invoice_classes[] = "highlighted"}
+{/if}
+
+<li class="c-invoice {$_invoice_classes|join:" "}" data-id="{$invoice.id}">
+    <a class="js-disable-router" href="{$wa_app_url}invoice/{$invoice.id}/">
+        <div class="profile image50px">
+            {if !empty($_userpic)}
+                <div class="image">
+                    <img src="{$_userpic}" class="userpic">
+                </div>
+            {/if}
+            <div class="details">
+                {if !empty($invoice.amount)}
+                    <span class="count c-price">{$invoice.amount|wa_currency_html:$invoice.currency_id}</span>
+                {/if}
+                {if !empty($invoice.number)}
+                    <div class="line">
+                        {if !empty($_state) && !empty($_state.icon)}
+                            <i class="icon16 {$_state.icon}"></i>&nbsp;
+                        {/if}
+                        <span class="c-number">{$invoice.number|escape}</span>
+                    </div>
+                {/if}
+                <div class="line">
+                    <span class="small black">{$wa->crm->contactName($invoice.contact.name)}</span>
+                </div>
+                <div class="line">
+                    <span class="hint">{$invoice.invoice_date|wa_date}</span>
+                </div>
+            </div>
+        </div>
+    </a>
+</li>
+
+{/strip}

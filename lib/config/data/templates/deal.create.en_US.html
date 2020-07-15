@@ -1,0 +1,19 @@
+<p>
+    {$deal.create_datetime|wa_datetime} new deal
+    “<a href="{$deal.url}">{$deal.name|escape}</a>” was created
+    on stage “{$deal.stage.name|escape}” of funnel “{$deal.funnel.name|escape}”.
+</p>
+<p>
+    <b>Deal details</b><br>
+    Customer: {$customer.name|escape}{if !empty($customer.company)}, {$customer.company|escape}{/if}<br>
+    Description: {$deal.description_sanitized}<br>
+    Estimated amount: {$deal.amount|wa_format_amount_currency:$deal.currency_id}<br>
+    Estimated closing date: {$deal.expected_date|wa_date}<br>
+</p>
+
+--<br>
+<p>
+    --<br>
+    {$wa->accountName()|escape}<br>
+    {$wa->domainUrl()}
+</p>

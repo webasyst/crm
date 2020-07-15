@@ -1,0 +1,22 @@
+{function input_name id=''}{strip}
+
+    {$_id = $id}
+    {$_namespace = $namespace|default:''}
+
+    {if $_namespace}
+        {$_id = $_namespace|cat:'|':$_id}
+    {/if}
+
+    {$_first = true}
+    {foreach explode('|', $_id) as $_id_part}
+        {if !$_first}
+            {$_id_part = '['|cat:$_id_part:']'}
+        {/if}
+        {$_first = false}
+        {$_id_parts[] = $_id_part}
+    {/foreach}
+
+    {$_id = join('', $_id_parts)}
+
+    {$_id}
+{/strip}{/function}

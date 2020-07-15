@@ -1,0 +1,129 @@
+<div class="crm-sms-settings-page" id="crm-sms-settings-page">
+    {* HEADER *}
+    <h1 class="c-page-header">[`SMS`]</h1>
+
+    <div class="crm-sms-settings-fields-block">
+        <form action="?module=settings&action=smsSave" method="post">
+
+            <div class="">
+                {if count($sms_adapters)}
+
+                    <p>
+                        {sprintf('[`Once connection to a gateway is set up, add SMS notifications in “<a href="%s">Notifications</a>” settings.`]', "{$wa_app_url}settings/notifications/")}
+                        <br>
+                        {sprintf('[`<a href="%s" target="_blank">See documentation</a> for details.`]', '[`https://support.webasyst.com/22505/crm-sms-notifications/`]')}
+                    </p>
+
+                    <div class="field-group">
+                        <div class="field">
+                            <div class="name">[s`National direct-dialing code (NDD)`]</div>
+
+                            {$_phone_transform_prefix = $phone_transform_prefix|default:[]}
+
+                            <div class="value">
+                                {$_input_code = $_phone_transform_prefix['input_code']|default:''}
+                                <input type="text" class="short" name="phone_transform_prefix[input_code]" value="{$_input_code}">
+                                <div class="hint" style="margin-top: 10px;">
+                                    [s`Enter the NDD code which is used for making calls within your country.`]<br>
+                                    [s`The NDD, if specified, will be replaced with the country code in website visitors’ phone numbers.`]
+                                </div>
+                            </div>
+
+                            <div class="name">[s`Country code`]</div>
+                            <div class="value">
+                                {$_output_code = $_phone_transform_prefix['output_code']|default:''}
+                                + <input type="text" class="short" name="phone_transform_prefix[output_code]" value="{$_output_code}">
+                                <div class="hint" style="margin-top: 10px;">
+                                    [s`Enter your country’s phone number code to be used in website visitors’ phone numbers instead of the NDD.`]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {foreach $sms_adapters as $i => $a}
+                        <div class="field-group">
+                            <div class="field">
+                                <div class="name">[`Name`]</div>
+                                <div class="value">
+                                    <strong><i class="icon16" style="background-image: url('{$a.icon}');"></i>{$a.name}</strong><br>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <div class="name">{if isset($a.controls.from.title)}{$a.controls.from.title}{else}[`Sender IDs`]{/if}</div>
+                                <div class="value">
+                                    {strip}
+                                        <textarea name="sms[{$i}][from]">
+                                            {if !empty($a.config.from)}{implode("\n", $a.config.from)}{/if}
+                                        </textarea>
+                                    {/strip}
+                                    <p class="hint">{if isset($a.controls.from.description)}{$a.controls.from.description}{else}[`Enter Sender IDs to use with this SMS gateway (Sender ID is either your phone number or up-to-11-characters text label). Enter * to use default Sender ID issued for your account by the gateway.`]{/if}</p>
+                                </div>
+                            </div>
+
+                            {foreach $a.controls as $k => $v}
+                                {if $k != 'from'}
+                                    <div class="field">
+                                        <div class="name">{$v.title}</div>
+                                        <div class="value">
+                                            {if ifset($v.control_type) == 'checkbox'}
+                                                <input type="hidden" name="sms[{$i}][{$k}]" value="">
+                                                <input type="checkbox" name="sms[{$i}][{$k}]" value="1" {if !empty($a.config[$k])}checked{/if}>
+                                            {else}
+                                                <input type="text" name="sms[{$i}][{$k}]" value="{if !empty($a.config[$k])}{$a.config[$k]|escape}{/if}">
+                                            {/if}
+                                            {if !empty($v.description)}
+                                                <p class="hint">{$v.description}</p>
+                                            {/if}
+                                        </div>
+                                    </div>
+                                {/if}
+                            {/foreach}
+                        </div>
+
+                        <input name="sms[{$i}][adapter]" type="hidden" value="{$a.id}">
+                    {/foreach}
+                {else}
+                    <div class="value no-shift">
+                        <p>
+                            {sprintf('[`To enable SMS message sending, install and configure sending plugin for your preferred SMS gateway.<br /> <a href="%s">Browse for SMS gateway plugins</a> in Installer app.`]', $wa_backend_url|cat:'installer/#/plugins/wa-plugins/sms/')}
+                        </p>
+                    </div>
+                {/if}
+            </div>
+
+            {if count($sms_adapters)}
+                <div class="crm-form-buttons">
+                    <div class="crm-submit">
+                        <input class="button green" type="submit" name="" value="[`Save`]">
+                        <i class="icon16 loading crm-loading" style="display: none;"></i>
+                        <span class="crm-success-status" style="display: none;">
+                            [`Saved`] <i class="icon16 yes crm-yes-status"></i>
+                        </span>
+                    </div>
+                </div>
+            {/if}
+
+        </form>
+    </div>
+</div>
+
+<script>$(function() { "use strict";
+
+    var $form = $('#crm-sms-settings-page form');
+    $form.submit(function(e) {
+        e.preventDefault();
+        var $submit = $form.find(':submit').prop('disabled', true);
+        var $status = $form.find('.crm-success-status').stop().css('opacity', 1).hide();
+        var $loading = $form.find('.crm-loading').show();
+        $.post($form.attr('action'), $form.serialize()).then(function() {
+            $status.show().fadeOut(500);
+        }, function() {
+            alert("Error saving data");
+        }).always(function() {
+            $submit.prop('disabled', false);
+            $loading.hide();
+        });
+    });
+
+});</script>

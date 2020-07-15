@@ -1,0 +1,82 @@
+{$class = 'c-call-init-contact'}
+{$dialog_id = uniqid($class)}
+
+<div class="{$class}-container">
+    <div class="crm-dialog-wrapper {$class}" id="{$dialog_id}">
+        <div class="crm-dialog-background"></div>
+        <div class="crm-dialog-block">
+            <form>
+                <header class="crm-dialog-header">
+                    <h2>
+                        [`Outgoing call:`] {$contact.name|escape} <span style="color: #999; white-space: nowrap;">{$format_client_number|escape}</span>
+                    </h2>
+                </header>
+                <div class="c-content js-content">
+                    {if $call_ready == 'ready'}
+                        <div class="c-call-pending">[`Call started..`]</div>
+                    {else}
+                        <div class="field">
+                            <div class="name">[`Select extension number`]</div>
+                            <div class="value">
+                                <div class="js-numbers-list">
+                                    {foreach $pbx_numbers as $_number}
+                                        <label class="c-call-from js-number-item" data-plugin-id="{$_number.plugin_id}">
+                                            <input type="radio" name="call[from]" value="{$_number.plugin_user_number|escape}">
+                                            {if $_number.plugin_icon|escape}
+                                                <i class="icon16" title="{$_number.plugin_name|escape}" style="background-image: url('{$_number.plugin_icon|escape}'); background-size: 16px 16px;"></i>
+                                            {/if}
+                                            {$_number.plugin_user_number|escape}
+                                        </label>
+                                    {/foreach}
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+
+                <footer class="crm-dialog-footer">
+                    <div class="c-footer-actions js-dialog-footer">
+                        {if $call_ready == 'ready'}
+                            <input class="button js-close-dialog" type="submit" value="[`Close`]">
+                            <input type="hidden" name="call[from]" value="{$pbx_numbers.0.plugin_user_number|escape}"/>
+                            <input type="hidden" name="call[plugin_id]" value="{$pbx_numbers.0.plugin_id|escape}" />
+                        {else}
+                            <input type="hidden" class="js-plugin-id" name="call[plugin_id]" />
+
+                            <input class="button blue js-init-call" type="submit" value="[`Call`]" disabled>
+                            <span style="margin: 0 4px;">[`or`]</span>
+                            <a class="js-close-dialog js-cancel-dialog" href="javascript:void(0);">[`cancel`]</a>
+                        {/if}
+                        <input type="hidden" name="call[contact_id]" value="{$contact.id|escape}" />
+                        <input type="hidden" name="call[to]" value="{$client_number|escape}"/>
+                        <input type="hidden" name="call[deal_id]" value="{$deal_id|escape}"/>
+                    </div>
+                </footer>
+            </form>
+        </div>
+
+        {$_locales = [
+            "Close" => {_w("Close")},
+            "call_pending" => {_w("Call pending")},
+            "call_connected" => {_w("Call connected")},
+            "call_finished" => {_w("Call finished")},
+            "call_error" => {_w("Call error")}
+        ]}
+
+        <script>
+            ( function($) {
+                var $body = $(window.top.document).find("body");
+                new CRMDialog({
+                    html: $body.find('#{$dialog_id}').show(),
+                    onOpen: function($wrapper) {
+                        new CRMCallInitContactDialog({
+                            $wrapper: $wrapper,
+                            call_ready: "{$call_ready}",
+                            locales: {$_locales|json_encode}
+                        });
+                    }
+                });
+            })(jQuery);
+        </script>
+    </div>
+</div>

@@ -1,0 +1,131 @@
+<div class="crm-dialog-wrapper c-contact-access-dialog" id="c-contact-access-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <form>
+            <header class="crm-dialog-header">
+                <h1>{$contact.name|escape}</h1>
+            </header>
+            <div class="crm-dialog-content">
+                <p>{sprintf_wp('Who can see %s profile and timeline:', $contact.name)|escape}</p>
+
+                <ul class="c-options-list js-options-list menu-v">
+                    <li class="c-option {if $contact.crm_vault_id == 0}is-active{/if}">
+                        <label class="c-label">
+                            <input class="js-option-field" type="radio" name="option" value="all" {if $contact.crm_vault_id == 0}checked{/if}> [`All users`]
+                        </label>
+                    </li>
+                    {if $vaults_count|default:0 > 0}
+                        <li class="c-option {if $contact.crm_vault_id > 0}is-active{/if}">
+                        <label class="c-label">
+                            <input class="js-option-field" type="radio" name="option" value="vaults" {if $contact.crm_vault_id > 0}checked{/if}> [`Only users with access to vault`]
+                        </label>
+
+                        <div class="c-option-inline-content">
+                            {$_active_vault = reset($vaults)}
+                            {if $contact.crm_vault_id > 0 && !empty($vaults[$contact.crm_vault_id])}
+                                {$_active_vault = $vaults[$contact.crm_vault_id]}
+                            {/if}
+
+                            <ul class="menu-h dropdown c-vaults-toggle js-vault-toggle">
+                                <li>
+                                    <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                        <span class="js-text">
+                                            <i class="icon16 color" style="background: {$_active_vault.color|default:"transparent"|escape};"></i>
+                                            <b><i class="js-name">{$_active_vault.name|escape}</i></b>
+                                        </span>&nbsp;<i class="icon10 darr"></i>
+                                    </a>
+                                    <ul class="menu-v with-icons">
+                                        {strip}
+                                            {foreach $vaults as $_vault}
+                                                <li class="{if $contact.crm_vault_id > 0 && $contact.crm_vault_id == $_vault.id}selected{/if}">
+                                                    <a href="javascript:void(0);" data-id="{$_vault.id}">
+                                                        <i class="icon16 color" style="background: {$_vault.color|default:"transparent"|escape};"></i>
+                                                        <b><i>{$_vault.name|escape}</i></b>
+                                                    </a>
+                                                </li>
+                                            {/foreach}
+                                        {/strip}
+                                    </ul>
+                                    <input class="js-field" type="hidden" value="{$_active_vault.id|default:""}">
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    {/if}
+                    <li class="c-option {if $contact.crm_vault_id < 0}is-active{/if}">
+                        <label class="c-label">
+                            <input class="js-option-field" type="radio" name="option" value="owners" {if $contact.crm_vault_id < 0}checked{/if}> [`Selected users only`]
+                        </label>
+
+                        <div class="c-option-content">
+                            <ul class="c-owners-list js-owners-list menu-v">
+
+                                {function name="_renderOwner"}
+                                    {if empty($_owner)}
+                                        {$_owner = [
+                                        "id" => "%id%",
+                                        "name" => "%name%",
+                                        "photo_url" => "%photo_url%"
+                                        ]}
+                                    {/if}
+
+                                    <li class="c-owner" data-id="{$_owner.id}">
+                                        <span>
+                                            <i class="icon16 userpic20" style="background-image: url({$_owner.photo_url});"></i>
+                                            <span class="c-name">{$_owner.name|escape}</span>
+                                        </span>
+                                        <i class="icon16 delete c-delete js-delete-owner" title="[`remove`]"></i>
+                                    </li>
+                                {/function}
+
+                                {capture assign="_ownerTemplate"}{_renderOwner _owner=[]}{/capture}
+
+                                <li>
+                                    <i class="icon16 add" style="vertical-align: baseline; margin: 0; position: relative; top: 2px;"></i>
+                                    <input type="text" class="bold js-autocomplete" placeholder="[`Start typing user name...`]">
+                                </li>
+
+                                {foreach $owners as $_owner}{_renderOwner _owner=$_owner}{/foreach}
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+
+                {if $employees_count !== null}
+                    <p class="apply-to-employees">
+                        {if $employees_count > 0}
+                            <label>
+                                <input class="js-employees-field" type="checkbox" name="employees" checked>
+                                {_w('Also apply this change to %d employee of this company.', 'Also apply this change to %d employees of this company.', $employees_count)}
+                            </label>
+                        {/if}
+                    </p>
+                {/if}
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <div class="js-errors-place"></div>
+
+                <input class="button green js-save" type="submit" value="[`Save`]">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+            </footer>
+
+            <input name="contact_id" type="hidden" value="{$contact.id|default:""}">
+        </form>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMContactAccessDialog({
+                $wrapper: $("#c-contact-access-dialog"),
+                contact_id: {$contact.id|json_encode},
+                owners: {if !empty($owners)}{$owners|array_values|json_encode}{else}[]{/if},
+                owner_template_html: {$_ownerTemplate|json_encode|strip},
+                locales: {
+                    empty_owner: "[`At least one owner must be selected.`]"
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

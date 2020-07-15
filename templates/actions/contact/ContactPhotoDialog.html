@@ -1,0 +1,47 @@
+<div class="crm-dialog-wrapper dialog" id="c-contact-photo-dialog"
+    data-photo-upload-url="{$wa_app_url}?module=contact&action=savePhoto"
+    data-photo-delete-url="{$wa_app_url}?module=contact&action=savePhoto"
+>
+    <style>
+        #c-contact-photo-dialog {
+            position:absolute;
+            display:block;
+        }
+        #c-contact-photo-dialog .crm-dialog-block {
+            width: 80%;
+        }
+    </style>
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block js-dialog-drag-and-drop-area">
+        <div class="crm-dialog-content">
+            {include file=$parent_template_path inline}
+        </div>
+
+        <footer class="crm-dialog-footer">
+            {* Buttons will be injected here by JS *}
+        </footer>
+    </div>
+</div>
+<script>(function() { "use strict";
+
+    var $wrapper = $('#c-contact-photo-dialog');
+    var crm_dialog = $wrapper.data('dialog');
+
+    /* move buttons where appropriate */
+    var $buttons = $wrapper.find('.crm-dialog-content .buttons').appendTo(
+        $wrapper.find('.crm-dialog-footer')
+    );
+
+    // Close dialog when user clicks cancel
+    $buttons.on('click', '.cancel', function() {
+        crm_dialog.close();
+    });
+
+    // Resize and re-center dialog when image dimensions change
+    $wrapper.find('#c-pe-photo-big').load(function() {
+        setTimeout(function() {
+            crm_dialog.resize();
+        }, 50);
+    });
+
+})();</script>

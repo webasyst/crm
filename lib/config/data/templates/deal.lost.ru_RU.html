@@ -1,0 +1,20 @@
+<p>
+    {waDateTime::format('datetime')} потеряна сделка
+    «<a href="{$deal.url}">{$deal.name|escape}</a>»
+    в воронке «{$deal.funnel.name|escape}».
+    Ответственный: {$responsible.name|escape}.
+</p>
+<p>
+    <b>Информация о сделке</b><br>
+    Клиент: {$customer.name|escape}{if !empty($customer.company)}, {$customer.company|escape}{/if}<br>
+    Описание: {$deal.description_sanitized}<br>
+    Предварительная стоимость: {$deal.amount|wa_format_amount_currency:$deal.currency_id}
+    Предварительная дата закрытия: {$deal.expected_date|wa_datetime}
+</p>
+
+--<br>
+<p>
+    --<br>
+    {$wa->accountName()|escape}<br>
+    {$wa->domainUrl()}
+</p>

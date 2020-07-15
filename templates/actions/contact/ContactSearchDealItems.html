@@ -1,0 +1,99 @@
+{$class = 'crm-contact-search-deal-items-block'}
+{$wrapper_id = uniqid($class)}
+
+<div class="{$class}" id="{$wrapper_id}">
+    {if $item_id === crmContactsSearchDealItem::ITEM_ID_FUNNEL}
+
+        <select name="{$item_id}">
+            <option value=""></option>
+            {foreach $funnels as $funnel}
+                <option value="{$funnel.id}" {if $funnel.id == $funnel_id}selected="selected"{/if}>{$funnel.name|escape}</option>
+            {/foreach}
+        </select>
+
+        <i class="icon16 loading crm-funnel-loading" style="display: none; float: right; margin-top: 2px; margin-right: -16px;"></i>
+
+        <script>
+            $(function () {
+                var $wrapper = $('#{$wrapper_id}'),
+                    clz = '{$class}',
+                    $select = $wrapper.find('select');
+
+                $select.unbind('.crm-deal-participant-search')
+                    .bind('change.crm-deal-participant-search',
+                        function () {
+                            var val = $(this).val(),
+                                url = '{$wa_app_url}?module=contactSearchDealItems',
+                                $loading = $wrapper.find('.crm-funnel-loading'),
+                                data = {
+                                    item_id: 'crm.deal_participants.stage',
+                                    funnel_id: val
+                                };
+
+                            $loading.show();
+                            $.get(url, data)
+                                .done(function (html) {
+                                    var $tmp = $('<div>').html(html),
+                                        $slct = $('.' + clz + ' select[name="crm.deal_participants.stage"]');
+
+                                    $slct.children().remove();
+                                    $slct.append($tmp.find('.' + clz + ' select').children());
+                                    $tmp.remove();
+                                })
+                                .always(function () {
+                                    $loading.hide();
+                                });
+                });
+            });
+        </script>
+
+    {elseif $item_id === crmContactsSearchDealItem::ITEM_ID_STAGE}
+
+        <select name="{$item_id}">
+            <option value=""></option>
+            {foreach $stages as $stage}
+                <option value="{$stage.id}" {if $stage.id == $stage_id}selected="selected"{/if}>{$stage.name|escape}</option>
+            {/foreach}
+        </select>
+
+    {elseif $item_id === crmContactsSearchDealItem::ITEM_ID_STATUS}
+
+        <select name="{$item_id}">
+            <option value=""></option>
+            {foreach $statuses as $_status => $name}
+                <option value="{$_status}" {if $_status == $status}selected="selected"{/if}>{$name|escape}</option>
+            {/foreach}
+        </select>
+
+        <script>
+            $(function () {
+                var $wrapper = $('#{$wrapper_id}'),
+                    clz = '{$class}',
+                    $select = $wrapper.find('select'),
+                    $lost_reasons = $('.' + clz + ' select[name="{crmContactsSearchDealItem::ITEM_ID_LOST_REASON}"]'),
+                    $lost_reasons_block = $lost_reasons.closest('.subfield').hide();
+
+                $select.unbind('.crm-deal-participant-search')
+                    .bind('change.crm-deal-participant-search',
+                        function () {
+                            var $el = $(this);
+                            if ($el.val() === 'LOST') {
+                                $lost_reasons_block.show();
+                            }
+                        })
+                    .trigger('change');
+            });
+        </script>
+
+    {elseif $item_id === crmContactsSearchDealItem::ITEM_ID_LOST_REASON}
+
+        <select name="{$item_id}">
+            <option value=""></option>
+            {foreach $lost_reasons as $_reason}
+                <option value="{$_reason.id}" {if $_reason.id == $lost_reason_id}selected="selected"{/if}>{$_reason.name|escape}</option>
+            {/foreach}
+        </select>
+
+    {/if}
+
+</div>

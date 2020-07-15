@@ -1,0 +1,24 @@
+<div data-id="{$field.id}" class="field">
+    <div class="name">
+        <i class="icon16 sort"></i>
+        <a href="javascript:void(0);" class="crm-edit-field-link" data-id="{$field.id}">{$field.name|escape}</a>
+    </div>
+    <div class="value">
+        {if $field.editable}
+            {if $field.disabled && empty($field.deal_mirror)}
+                <span class="red small">[`disabled`]</span>
+            {else}
+                <span class="{if $field.pStatus === 'disabled'}hint{else}small bold{/if}">[`person`]</span>
+                <span class="{if $field.cStatus === 'disabled'}hint{else}small bold{/if}">[`company`]</span>
+                <span class="{if empty($field.deal_mirror)}hint{else}small bold{/if}">[`deal`]</span>
+            {/if}
+        {else}
+            {if $field.disabled}
+                <span class="red small">[`disabled`]</span>
+            {else}
+                <span class="{if $field.pStatus === 'disabled'}hint{else}small bold{/if}">[`person`]</span>
+                <span class="{if $field.cStatus === 'disabled'}hint{else}small bold{/if}">[`company`]</span>
+            {/if}
+        {/if}
+    </div>
+</div>

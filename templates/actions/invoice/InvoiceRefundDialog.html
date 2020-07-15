@@ -1,0 +1,40 @@
+<div class="crm-dialog-wrapper c-invoice-refund-dialog" id="js-invoice-refund-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <form>
+            <header class="crm-dialog-header">
+                <h1>[`Refund payment for invoice`] [`#`]{$invoice.number|escape}</h1>
+            </header>
+
+            <div class="crm-dialog-content" style="min-height: 100px;">
+                <p>[`Operation can not be undone.`]</p>
+
+                <!-- plugin hook: 'backend_invoice_refund' -->
+                {* @event backend_invoice_refund.%plugin_id%.receipts_block *}
+                {if !empty($backend_invoice_refund)}
+                    {foreach $backend_invoice_refund as $_}{ifset($_.receipts_block)}{/foreach}
+                {/if}
+
+                <input type="hidden" name="invoice_id" value="{$invoice.id}">
+                <input type="hidden" name="action" value="refund">
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <input class="button red" type="submit" value="[`Refund`]">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+            </footer>
+        </form>
+    </div>
+
+    <script>
+        ( function($) {
+            var $wrapper = $("#js-invoice-refund-dialog");
+
+            new CRMInvoiceRefundDialog({
+                $wrapper: $wrapper,
+                invoice_id: {$invoice.id|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

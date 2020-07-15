@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="{$wa_app_static_url}css/invoice.css">
+    <script src="{$wa_url}wa-content/js/jquery/jquery-1.11.1.min.js"></script>
+</head>
+<body style="padding: 0; margin: 0;">
+    <section class="c-invoice-front-section with-background" id="c-invoice-front-section">
+        <div class="c-front-invoice-wrapper">
+            {$html}
+        </div>
+    </section>
+
+    <script>
+        {if !empty($set_height)}
+            ( function($) {
+                var set_height = !!(window.parent && window.frameElement);
+                if (set_height) { $(window).load(setHeight); }
+
+                function setHeight() {
+                    var $iframe = $(window.frameElement);
+                    $iframe.height( $(document).height() );
+                }
+            })(jQuery);
+        {/if}
+    </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{strip}
+    {$title = $title|default:'[`Access denied`]'}
+    {$text = $text|default:'<p>[`You have no permission to access this page.`]</p><p>[`Please refer to your system administrator.`]</p>'}
+    <div class="crm-dialog-wrapper crm-access-denied-dialog" id="crm-access-denied-dialog">
+        <div class="crm-dialog-background"></div>
+        <div class="crm-dialog-block">
+            <header class="crm-dialog-header">
+                <h1>{$title}</h1>
+            </header>
+
+            <div class="crm-dialog-content js-content">{$text}</div>
+
+            <footer class="crm-dialog-footer">
+                <div class="crm-actions">
+                    <input class="button red crm-button js-confirm-dialog js-confirm-button" type="button" value="[`Close`]">
+                </div>
+            </footer>
+        </div>
+    </div>
+{/strip}

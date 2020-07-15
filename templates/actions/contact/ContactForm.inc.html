@@ -1,0 +1,221 @@
+{$fields = $wa->crm->getContactFields()}
+
+{$_disabled = $disabled|default:false}
+
+{if !empty($contact)}
+
+    {$_formated = $contact->get("phone", "value")}
+    {$_phones_data = $contact->get("phone")}
+    {$_phones = []}
+    {foreach $_formated as $_i => $_phone}
+        {$_ext = ""}
+        {if !empty($_phones_data.$_i.ext)}
+            {$_ext = $_phones_data.$_i.ext}
+        {/if}
+        {$_phones[] = [
+            "value" => $_phone,
+            "ext" => $_ext
+        ]}
+    {/foreach}
+
+    {$_emails = $contact->get('email')}
+
+{else}
+
+    {$contact = [
+        "id" => "",
+        "firstname" => "",
+        "middlename" => "",
+        "lastname" => "",
+        "company" => "",
+        "company_contact_id" => "",
+        "jobtitle" => "",
+        "about" => ""
+    ]}
+
+    {$_phones = []}
+    {$_emails = []}
+
+    {if !empty($phone)}
+        {$_phones[] = [
+            "value" => $phone,
+            "ext" => ""
+        ]}
+    {/if}
+
+    {if !empty($email)}
+        {$_emails[] = [
+            "value" => $email,
+            "ext" => ""
+        ]}
+    {/if}
+
+{/if}
+
+<div class="c-contact-form-wrapper" id="c-contact-edit-form">
+    {* FIO *}
+    <div class="field-group c-fio-wrapper">
+        {if !$wa->setting('one_name_field')}
+            <div class="field">
+                <div class="name bold">[`First name`]</div>
+                <div class="value">
+                    <input class="bold large js-focus-field" type="text" placeholder="[`First name`]" name="contact[firstname]" value="{$contact["firstname"]|escape}" {if $_disabled}disabled="disabled"{/if}>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">[`Middle name`]</div>
+                <div class="value">
+                    <input class="bold large" type="text" placeholder="[`Middle name`]" name="contact[middlename]" value="{$contact["middlename"]|escape}" {if $_disabled}disabled="disabled"{/if}>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">[`Last name`]</div>
+                <div class="value">
+                    <input class="bold large" type="text" placeholder="[`Last name`]" name="contact[lastname]" value="{$contact["lastname"]|escape}" {if $_disabled}disabled="disabled"{/if}>
+                </div>
+            </div>
+        {else}
+            <div class="field">
+                <div class="name">[`Name`]</div>
+                <div class="value">
+                    <input class="bold large js-focus-field" type="text" placeholder="{$wa->crm->namePlaceholder()|escape}" name="contact[name]" value="{if !empty($contact.name)}{$contact.name|escape}{/if}"  {if $_disabled}disabled="disabled"{/if}>
+                </div>
+            </div>
+        {/if}
+    </div>
+
+    <div class="field-group">
+        {* COMPANY *}
+        {if !empty($company_contact_id)}
+            <input type="hidden" name="contact[company_contact_id]" value="{$company_contact_id|escape}">
+        {else}
+            <div class="field">
+                <div class="name">
+                    <span class="">[`Company`]</span>
+                </div>
+                <div class="value">
+                    <input class="" type="text" name="contact[company]" value="{$contact["company"]|escape}" placeholder="[`Company`]" {if $_disabled}disabled="disabled"{/if}>
+                    <input type="hidden" name="contact[company_contact_id]" value="{$contact["company_contact_id"]|escape}" {if $_disabled}disabled="disabled"{/if}>
+                </div>
+            </div>
+        {/if}
+
+        {* JOB *}
+        <div class="field">
+            <div class="name">
+                <span class="">[`Job title`]</span>
+            </div>
+            <div class="value">
+                <input class="" type="text" name="contact[jobtitle]" value="{$contact["jobtitle"]|escape}" placeholder="[`Job`]" {if $_disabled}disabled="disabled"{/if}>
+            </div>
+        </div>
+    </div>
+
+    <div class="field-group">
+
+        {* PHONE *}
+        <div class="field">
+            {function _renderPhone}
+                <li>
+                    <input class="js-value" type="tel" value="{if !empty($value)}{$value|escape}{/if}" placeholder="[`Phone`]" {if $_disabled}disabled="disabled"{/if}>
+                    <select class="js-ext" {if $_disabled}disabled="disabled"{/if}>
+                        {$_phone_fields = array_merge($fields.phone.ext, ["other" => "[`other`]"])}
+                        {foreach $_phone_fields as $ext_id => $ext_name}
+                            <option value="{$ext_id}" {if !empty($ext) && $ext_id == $ext}selected{/if}>{$ext_name|escape}</option>
+                        {/foreach}
+                    </select>
+                    <a class="inline-link c-delete-link js-remove-phone" href="javascript:void(0);"><b><i>[`delete`]</i></b></a>
+                </li>
+            {/function}
+
+            {capture assign="_phone_template_html"}{_renderPhone value="" ext=""}{/capture}
+
+            <div class="name">
+                <span class="">[`Phone`]</span>
+            </div>
+            <div class="value">
+
+                <ul class="menu-v compact c-phone-list js-phone-list">
+                    {if !empty($_phones)}
+                        {foreach $_phones as $_phone}
+                            {_renderPhone value=$_phone.value ext=$_phone.ext}
+                        {/foreach}
+                    {else}
+                        {_renderPhone value="" ext=""}
+                    {/if}
+                </ul>
+
+                <a href="javascript:void(0)" class="small inline-link js-add-phone">
+                    <i class="icon10 add"></i>&nbsp;<b>[`Add another`]</b>
+                </a>
+
+            </div>
+        </div>
+
+        {* EMAIL *}
+        <div class="field">
+            {function _renderEmail}
+                <li>
+                    <input class="js-value" type="email" value="{if !empty($value)}{$value|escape}{/if}" placeholder="[`Email`]" {if $_disabled}disabled="disabled"{/if}>
+                    <select class="js-ext" {if $_disabled}disabled="disabled"{/if}>
+                        {$_email_fields = array_merge($fields.email.ext, ["other" => "[`other`]"])}
+                        {foreach $_email_fields as $ext_id => $ext_name}
+                            <option value="{$ext_id}" {if !empty($ext) && $ext_id == $ext}selected{/if}>{$ext_name|escape}</option>
+                        {/foreach}
+                    </select>
+                    <a class="inline-link c-delete-link js-remove-email" href="javascript:void(0);"><b><i>[`delete`]</i></b></a>
+                </li>
+            {/function}
+
+            {capture assign="_email_template_html"}{_renderEmail value="" ext=""}{/capture}
+
+            <div class="name">
+                <span class="crm-field-name">[`Email`]</span>
+            </div>
+            <div class="value">
+
+                <ul class="menu-v compact c-email-list js-email-list">
+                    {if !empty($_emails)}
+                        {foreach $_emails as $_email}
+                            {_renderEmail value=$_email.value|escape ext=$_email.ext}
+                        {/foreach}
+                    {else}
+                        {_renderEmail value="" ext=""}
+                    {/if}
+                </ul>
+
+                <a href="javascript:void(0)" class="small inline-link js-add-email">
+                    <i class="icon10 add"></i>&nbsp;<b>[`Add another`]</b>
+                </a>
+
+            </div>
+        </div>
+
+        {if empty($hide_role)}
+            <div class="field">
+                <div class="name">[`Role label`]</div>
+                <div class="value">
+                    <input type="text" name="participant[label]" value="{$contact.label|default:''|escape}" {if $_disabled}disabled="disabled"{/if}>
+                </div>
+            </div>
+        {/if}
+    </div>
+
+    <input name="contact[id]" type="hidden" value="{$contact.id|default:''|escape}" {if $_disabled}disabled="disabled"{/if}>
+    {if !empty($contact.id)}
+        <input name="contact_action" type="hidden" value="edit" {if $_disabled}disabled="disabled"{/if}>
+    {/if}
+
+    {if !$_disabled}
+        <script>
+            ( function($) {
+                new CRMContactEditForm({
+                    $wrapper: $("#c-contact-edit-form"),
+                    contact_id: {if !empty($contact.id)}{$contact.id}{else}false{/if},
+                    phone_template_html: {$_phone_template_html|trim|strip|json_encode},
+                    email_template_html: {$_email_template_html|trim|strip|json_encode}
+                });
+            })(jQuery);
+        </script>
+    {/if}
+</div>

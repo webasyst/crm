@@ -1,0 +1,65 @@
+{include file="./common_helpers.inc.html" inline}
+
+{function render_form_block options=[]}
+    {$block_id = $id|default:$options.id}
+    {$class_id = 'crm-form-settings-block-'|cat:$block_id}
+    {$wrapper_id = uniqid($class_id)}
+    <div class="crm-form-section {$class_id}" id="{$wrapper_id}">
+        <div class="crm-form-section-header">{$options.name|escape}</div>
+        <div class="crm-form-section-content">
+            <div class="crm-form-toggle-block">
+                {$options.toggle_html|default:''}
+            </div>
+            <p>{$options.description|default:''}</p>
+            <div class="crm-form-toggle-block-content js-crm-block {if $options.hidden|default:0}hidden{/if}">
+                {$options.html}
+            </div>
+        </div>
+    </div>
+{/function}
+
+{function render_form_optional_block options=[]}
+    {$_name = $options.checkbox_name}
+    {$_is_checked = $options.is_checked|default:''}
+    {$block_id = $id|default:$options.id}
+    {$toggle_id = uniqid('js-ibutton-'|cat:$block_id)}
+
+    {capture assign=script_html}
+        <script>
+            (function($) {
+                var $toggle = $('#{$toggle_id}');
+                $toggle.iButton({
+                    labelOn : "",
+                    labelOff : "",
+                    classContainer: "c-ibutton ibutton-container mini"
+                });
+
+                var handler = function() {
+                    var $section = $toggle.closest('.crm-form-section'),
+                        $block = $section.find('.js-crm-block');
+                    if ($toggle.is(':checked')) {
+                        $block.show().find(':input').attr('disabled', false);
+                        $block.trigger('toggled', [true]);
+                    } else {
+                        $block.hide().find(':input').attr('disabled', true);
+                        $block.trigger('toggled', [false]);
+                    }
+                };
+                $toggle.change(handler).trigger('change');
+            })(jQuery);
+        </script>
+    {/capture}
+
+    {capture assign=toggle_html}
+        <input type="hidden" name="{$_name}" value="0"><p>
+        <label class="gray" for="{$toggle_id}">[`Disabled`]</label>
+            <input type="checkbox" class="js-ibutton" id="{$toggle_id}" name="{$_name}" value="1"
+               {if $_is_checked}checked="checked"{/if}>
+        <label for="{$toggle_id}">[`Enabled`]</label></p>
+    {/capture}
+
+    {$options.toggle_html = $toggle_html|cat:$script_html}
+    {$options.hidden = !$_is_checked}
+    {render_form_block options=$options}
+
+{/function}

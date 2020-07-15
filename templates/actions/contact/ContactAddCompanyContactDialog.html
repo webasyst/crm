@@ -1,0 +1,63 @@
+{$class = 'c-contact-add-company-contact'}
+{$dialog_id = uniqid($class)}
+
+<div class="{$class}-container">
+    <div class="crm-dialog-wrapper {$class}" id="{$dialog_id}">
+        <div class="crm-dialog-background"></div>
+        <div class="crm-dialog-block">
+            <form>
+                <header class="crm-dialog-header">
+                    <h2>
+                        [`Add company for`] {$contact.name|escape}
+                    </h2>
+                </header>
+
+                <div class="crm-dialog-content" style="min-height: 0;">
+                    <div class="field">
+                        <div class="name">[`Job title`]</div>
+                        <div class="value">
+                            <input type="text" name="contact[position]" value="{$contact.jobtitle|default:""|escape}" {if empty($contact.jobtitle)}autofocus{/if} />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">[`Company`]</div>
+                        <div class="value js-company-value">
+                            <div class="c-company-field js-company-field">
+                                <span class="c-selected-company js-selected-company hidden"></span>
+                                <a title="[`Change company`]" class="c-change-company js-change-company">x</a>
+                            </div>
+                            <input type="text" class="js-autocomplete-company" name="company[name]" value="{$contact.company|default:""|escape}" {if !empty($contact.jobtitle)}autofocus{/if} />
+                            <input type="hidden" class="js-company-id" name="company[id]" value="0" />
+                            <div class="js-label-new-company" style="font-size: smaller; color: #fff;margin-top: 4px;">[`A new company will be created`]</div>
+                        </div>
+                    </div>
+
+                    <div class="js-errors-place"></div>
+                </div>
+
+                <footer class="crm-dialog-footer">
+                    <input type="hidden" name="contact[id]" value="{$contact.id}"/>
+                    <div class="c-footer-actions js-dialog-footer">
+                        <input class="button js-submit" type="submit" value="[`Add`]">
+                        <span style="margin: 0 4px;">[`or`]</span>
+                        <a class="js-close-dialog js-cancel-dialog" href="javascript:void(0);">[`cancel`]</a>
+                    </div>
+                </footer>
+            </form>
+        </div>
+
+        <script>
+            ( function($) {
+                var $body = $(window.top.document).find("body");
+                new CRMDialog({
+                    html: $body.find('#{$dialog_id}').show(),
+                    onOpen: function($wrapper) {
+                        new CRMContactAddCompanyContactDialog({
+                            $wrapper: $wrapper
+                        });
+                    }
+                });
+            })(jQuery);
+        </script>
+    </div>
+</div>

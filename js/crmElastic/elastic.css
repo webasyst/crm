@@ -1,0 +1,11 @@
+.crm-elastic-block {
+  position: relative;
+}
+.crm-elastic-block.fixed-to-top {
+  position: fixed;
+  top: 0;
+}
+.crm-elastic-block.fixed-to-bottom {
+  position: fixed;
+  bottom: 0;
+}

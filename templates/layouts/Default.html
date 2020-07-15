@@ -1,0 +1,234 @@
+{strip}
+
+{$_locale_string = substr($wa->locale(), 0, 2)}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
+
+    {* CSS *}
+    {/strip}{$wa->css()}
+    <link href="{$wa_app_static_url}js/jquery/jquery-ui.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}js/timepicker/jquery.timepicker.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}js/imgareaselect/imgareaselect-default.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_url}wa-content/js/farbtastic/farbtastic.css?v={$wa->version(true)}" rel="stylesheet">
+    <link href="{$wa_app_static_url}js/crmDialog/crmDialog.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}js/crmElastic/elastic.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_url}wa-content/js/redactor/2/redactor.css?v{$wa->version(true)}" rel="stylesheet">
+    <link href="{$wa_url}wa-content/css/wa/design.css?{$wa->version()}" rel="stylesheet">
+    <link href="{$wa_url}wa-content/js/jquery-plugins/jquery-tagsinput/jquery.tagsinput.css" rel="stylesheet">
+    <link href="{$wa_url}wa-content/js/jquery-plugins/ibutton/jquery.ibutton.min.css" rel="stylesheet">
+
+    {wa_js file="js/min/vendor.min.js"}
+        {$wa_url}wa-content/js/jquery/jquery-1.11.1.min.js
+        {$wa_url}wa-content/js/jquery/jquery-migrate-1.2.1.min.js
+        {$wa_app_static_url}js/jquery/jquery-ui.min.js
+        {$wa_url}wa-content/js/jquery-ui/jquery.ui.progressbar.min.js
+        {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
+        {$wa_url}wa-content/js/farbtastic/farbtastic.js
+        {$wa_app_static_url}js/timepicker/jquery.timepicker.min.js
+        {$wa_app_static_url}js/imgareaselect/jquery.imgareaselect.min.js
+        {$wa_url}wa-content/js/d3/d3.min.js
+        {$wa_url}wa-content/js/redactor/2/redactor.min.js
+        {$wa_url}wa-content/js/ace/ace.js
+        {$wa_url}wa-content/js/jquery-wa/wa.elrte.ace.js
+        {$wa_url}wa-content/js/jquery-plugins/jquery-tagsinput/jquery.tagsinput.min.js
+        {$wa_url}wa-content/js/jquery-plugins/ibutton/jquery.ibutton.min.js
+        {$wa_url}wa-content/js/jquery-wa/editor2.js
+    {/wa_js}{strip}
+
+    {if $_locale_string != 'en'}
+        <script src="{$wa_app_static_url}js/jquery/i18n/datepicker-{$_locale_string}.js?v={$wa->version()}"></script>
+        <script src="{$wa_url}wa-content/js/redactor/2/{$_locale_string}.js?v{$wa->version()}"></script>
+    {/if}
+
+    {/strip}
+    {wa_js file="js/min/crm.min.js"}
+        {$wa_app_static_url}js/jquery.shiftSelectable.js
+        {$wa_app_static_url}js/crmDialog/crmDialog.js
+        {$wa_app_static_url}js/crmElastic/elastic.js
+        {$wa_app_static_url}js/jquery.sticky.js
+        {$wa_app_static_url}js/crm.js
+        {$wa_app_static_url}js/crm.autocomplete.js
+        {$wa_app_static_url}js/sidebar.js
+        {$wa_app_static_url}js/deal.js
+        {$wa_app_static_url}js/deal.close.js
+        {$wa_app_static_url}js/deal.edit.js
+        {$wa_app_static_url}js/deal.changeClient.js
+        {$wa_app_static_url}js/deals.js
+        {$wa_app_static_url}js/deals.export.js
+        {$wa_app_static_url}js/deal.operation.assignTags.js
+        {$wa_app_static_url}js/invoice.js
+        {$wa_app_static_url}js/invoices.js
+        {$wa_app_static_url}js/reminder.form.edit.js
+        {$wa_app_static_url}js/reminders.js
+        {$wa_app_static_url}js/log.live.js
+        {$wa_app_static_url}js/call.js
+        {$wa_app_static_url}js/call.associateDealDialog.js
+        {$wa_app_static_url}js/call.initContactDialog.js
+        {$wa_app_static_url}js/call.redirectDialog.js
+        {$wa_app_static_url}js/message/message.deleteLink.mixin.js
+        {$wa_app_static_url}js/message/message.js
+        {$wa_app_static_url}js/message/message.conversation.js
+        {$wa_app_static_url}js/message/messages.operations.js
+        {$wa_app_static_url}js/message/message.sendEmailDialog.js
+        {$wa_app_static_url}js/message/message.sendSmsDialog.js
+        {$wa_app_static_url}js/message/message.imSourceMessageDialog.js
+        {$wa_app_static_url}js/message/message.imSourceSendMessageDialog.js
+        {$wa_app_static_url}js/contact.js
+        {$wa_app_static_url}js/contacts.js
+        {$wa_app_static_url}js/contacts.sidebar.js
+        {$wa_app_static_url}js/contacts.operations.js
+        {$wa_app_static_url}js/contacts.operation.addToSegments.js
+        {$wa_app_static_url}js/contacts.operation.excludeFromSegment.js
+        {$wa_app_static_url}js/contacts.operation.export.js
+        {$wa_app_static_url}js/contacts.operation.assignTags.js
+        {$wa_app_static_url}js/contacts.operation.assignResponsible.js
+        {$wa_app_static_url}js/contacts.operation.delete.js
+        {$wa_app_static_url}js/contact.segment.edit.js
+        {$wa_app_static_url}js/contact.segment.addContacts.js
+        {$wa_app_static_url}js/contact.add.js
+        {$wa_app_static_url}js/contact.import.js
+        {$wa_app_static_url}js/contact.import.upload.js
+        {$wa_app_static_url}js/contact.merge.duplicates.js
+        {$wa_app_static_url}js/contact.merge.js
+        {$wa_app_static_url}js/contact.merger.js
+        {$wa_app_static_url}js/report/reports.js
+        {$wa_app_static_url}js/search/search.js
+        {$wa_app_static_url}js/search/jquery.combobox.js
+        {$wa_app_static_url}js/search/period.dialog.js
+        {$wa_app_static_url}js/settings/settings.js
+        {$wa_app_static_url}js/settings/companies.js
+        {$wa_app_static_url}js/settings/currencies.js
+        {$wa_app_static_url}js/settings/funnel.js
+        {$wa_app_static_url}js/settings/funnels.js
+        {$wa_app_static_url}js/settings/field.js
+        {$wa_app_static_url}js/settings/field.edit.js
+        {$wa_app_static_url}js/settings/field.edit.subfield.values.js
+        {$wa_app_static_url}js/settings/field.delete.confirm.js
+        {$wa_app_static_url}js/settings/source/sources.js
+        {$wa_app_static_url}js/settings/source/email.js
+        {$wa_app_static_url}js/settings/source/email.connectionTestBlock.js
+        {$wa_app_static_url}js/settings/source/im.js
+        {$wa_app_static_url}js/settings/source/blocks/block.with_contact.js
+        {$wa_app_static_url}js/settings/source/blocks/block.create_deal.js
+        {$wa_app_static_url}js/settings/source/blocks/block.responsible.js
+        {$wa_app_static_url}js/settings/forms.js
+        {$wa_app_static_url}js/settings/form.js
+        {$wa_app_static_url}js/settings/form.field.edit.js
+        {$wa_app_static_url}js/settings/form.paragraph.edit.js
+        {$wa_app_static_url}js/settings/form.agreement_checkbox.edit.js
+        {$wa_app_static_url}js/settings/general.js
+        {$wa_app_static_url}js/settings/notifications.js
+        {$wa_app_static_url}js/settings/payments.js
+        {$wa_app_static_url}js/settings/reasons.js
+        {$wa_app_static_url}js/settings/regions.js
+        {$wa_app_static_url}js/settings/vaults.js
+        {$wa_app_static_url}js/settings/messagesBlock.js
+        {$wa_app_static_url}js/settings/shop.js
+        {$wa_app_static_url}js/settings/pbx.js
+        {$wa_app_static_url}js/settings/templates.js
+        {$wa_app_static_url}js/emailPersonalSettings.js
+    {/wa_js}{strip}
+
+
+    {capture assign="_confirm_template"}{include file="../actions/DialogConfirm.html"}{/capture}
+
+    {capture assign="_alert_template"}{include file="../actions/DialogAlert.html"}{/capture}
+
+    {* CRM CORE *}
+    <script>
+        {* need for editor2.js *}
+        var wa_app = "{$wa->app()}";
+
+        ( function($) {
+            {* need for waEditorAceInit *}
+            window.wa_url = {$wa_url|json_encode};
+            {* lang for wysiwyg *}
+            $.crm.lang = {$_locale_string|json_encode};
+            {* need for redirects or url generation *}
+            $.crm.app_url = {$wa_app_url|json_encode};
+            {* need for redirects or url generation *}
+            $.crm.backend_url = {$wa_backend_url|json_encode};
+            {* Controls debug output *}
+            $.crm.is_debug = {$wa->debug()|json_encode};
+            {* for set doc.title *}
+            $.crm.title.pattern = "%s — {$wa->accountName(false)|escape:'javascript'}";
+            {* for confirm dialog *}
+            $.crm.confirm.template = {$_confirm_template|json_encode};
+            {* for alert dialog *}
+            $.crm.alert.template = {$_alert_template|json_encode};
+            {* general locales *}
+            $.crm.locales = {
+                "unsaved_dialog_title": "[`There are unsaved changes`]",
+                "unsaved_dialog_text": "[`Unsaved changes will be lost if you leave this page now. Are you sure?`]",
+                "unsaved_dialog_button": "[`Leave`]",
+                "close": "[`Close`]"
+            };
+            {* Background email worker *}
+            {* 2 minutes *}
+            $.crm.runBackgroundWorker({
+                url: $.crm.app_url + '?module=source&action=emailWorker&background_process=1',
+                delay: 120000
+            });
+
+        })(jQuery);
+    </script>
+
+    {* @event backend_assets.%plugin_id% *}
+    {foreach $backend_assets as $item}
+        {$item}
+    {/foreach}
+
+    {$wa->js()}
+
+</head>
+<body>
+
+<div id="wa">
+    {* HEADER *}
+    {$wa->header()}
+
+    {*APP*}
+    <div id="wa-app">
+        <div class="c-main-wrapper" id="c-main-wrapper">
+
+            {* SIDEBAR *}
+            {if empty($hide_sidebar)}
+                <section class="c-sidebar-wrapper sidebar left200px" id="c-sidebar-wrapper">
+                    {$sidebar}
+                </section>
+            {/if}
+
+            {* CONTENT *}
+            <section class="c-content-wrapper">
+                <div class="c-content-block" id="c-content-block">
+                    {$content}
+                </div>
+                <script>
+                    ( function($) {
+                        /* Main content router */
+                        $.crm.content = new ContentRouter({
+                            $content: $("#c-content-block")
+                        });
+                    })(jQuery);
+                </script>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        ( function($) {
+            $.crm.is_page_loaded = true;
+            $.get('?module=cronjobsStart');
+            })(jQuery);
+    </script>
+</div>
+
+</body>
+</html>
+
+{/strip}

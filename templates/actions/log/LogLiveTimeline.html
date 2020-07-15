@@ -1,0 +1,208 @@
+{$logs = $log}
+{$count = $log|count}
+
+{$_timestamp = waRequest::request("timestamp")}
+{$months = waDateTime::getMonthNames()}
+
+<section class="c-activity-section" id="c-activity-section">
+    {if !empty($log)}
+        {$_period = 60 * 60 * 24 * 30}
+        {$_last_datetime = time()}
+        {if !empty($_timestamp)}
+            {$_last_datetime = $_timestamp}
+        {/if}
+        {$_max_id = null}
+
+        <ul class="c-activity-list">
+            {foreach $logs as $_log}
+                {if $_log@last}
+                    {$_max_id = $_log.id}
+                {/if}
+
+                {$time = strtotime($_log.create_datetime)}
+                {$current_month_index = date('n', $time)}
+                {$before_month_index = date('n', $_last_datetime)}
+                {$_long_pause = ( $_last_datetime - $time > $_period) }
+                {$_last_datetime = $time}
+
+                {if $current_month_index != $before_month_index}
+                    <li class="c-month-wrapper">
+                        <h5 class="heading">{$months[date('n', $time)]} {date('Y', $time)}</h5>
+                    </li>
+                {/if}
+
+                {$_item_classes = []}
+                {if !empty($_log.is_empty)}
+                    {$_item_classes[] = "is-empty"}
+                {/if}
+                {if $current_month_index != $before_month_index}
+                    {$_item_classes[] = "is-first"}
+                {/if}
+
+                {$_type = strtolower($_log.object_type)}
+                {if !empty($filter_actions[$_type])}
+                    {$_color = $filter_actions[$_type]["color"]}
+                {/if}
+
+                <li class="c-activity-item {$_item_classes|join:" "}" data-id="{$_log.id}" data-timestamp="{$_last_datetime}" id="c-activity-item-{$_log.id}">
+                    <span class="c-activity-point js-log-marker" {if !empty($_color)}style="background: {$_color};"{/if}>
+
+                        {if $_log.object_type == crmLogModel::OBJECT_TYPE_FILE}
+                            <i class="icon10 c-file"></i>
+
+
+                        {elseif $_log.object_type == crmLogModel::OBJECT_TYPE_REMINDER}
+                            <i class="icon10 c-reminder"></i>
+
+
+                        {elseif $_log.object_type == crmLogModel::OBJECT_TYPE_NOTE}
+                            <i class="icon10 c-note"></i>
+
+
+                        {elseif $_log.object_type == crmLogModel::OBJECT_TYPE_INVOICE}
+                            <i class="icon10 c-invoice"></i>
+
+
+                        {elseif $_log.object_type == crmLogModel::OBJECT_TYPE_CALL}
+                            <i class="icon10 phone"></i>
+
+
+                        {elseif $_log.object_type == crmLogModel::OBJECT_TYPE_MESSAGE}
+                            <i class="icon10 email"></i>
+
+                        {/if}
+
+                    </span>
+
+                    <div class="c-activity-block">
+                        <div class="inline-content">
+                            {if $_log.actor_contact_id && isset($actors[$_log.actor_contact_id])}
+                                {$_actor = $actors[$_log.actor_contact_id]}
+                                {$_photo = $_actor->getPhoto(32)}
+                                <a href="{$wa_app_url}contact/{$_actor.id}/" class="c-user">{strip}
+                                    {if !empty($_photo)}
+                                        <i class="icon16 userpic20" style="background-image: url({$_photo});"></i>
+                                    {/if}
+                                    {$wa->crm->contactName($_actor.name)}
+                                {/strip}</a>
+                            {else}
+                                <span class="hint">[`unknown user`]</span>
+                            {/if}
+
+                            {if $_log.object_type !== crmLogModel::OBJECT_TYPE_ORDER_LOG && !empty($_log.action_name)}
+                                <span class="c-action gray">{$_log.action_name|escape}</span>
+                            {/if}
+
+                            {* FILE *}
+                            {if $_log.action == "file_add"}
+                                {if !empty($_log.object_id) && !empty($_log.name)}
+                                    <i class="icon16 attachment" style="margin-right: 6px;"></i>
+                                    <a class="js-disable-router" href="?module=file&action=download&id={$_log.object_id}">{$_log.name|escape}</a>
+                                    <span class="c-size hint">{crmHelper::formatFileSize($_log.file_size)}</span>
+                                {else}
+                                    <span>{$_log.name|escape}</span>
+                                {/if}
+                            {/if}
+
+                            {* FILE *}
+                            {if $_log.action == "file_delete"}
+                                <span>{$_log.name|escape}</span>
+                            {/if}
+
+                            {* INVOICE *}
+                            {if $_log.action == "invoice_add" || $_log.action == "invoice_issue"}
+                                {if !empty($_log.object_id) && $can_manage_invoices}
+                                    <a class="js-disable-router" href="{$wa_app_url}invoice/{$_log.object_id}/">
+                                        [`#`]{if !empty($invoices[$_log.object_id])}{$invoices[$_log.object_id].number|escape}{else}{$_log.object_id}{/if}
+                                    </a>
+                                {elseif !empty($_log.name)}
+                                    <span>{$_log.name|escape}</span>
+                                {/if}
+                                {if !empty($invoices[$_log.object_id])}
+                                    {$_state = crmInvoice::getState($invoices[$_log.object_id].state_id)}
+                                    <span class="gray">
+                                        {$invoices[$_log.object_id].amount|wa_format_amount_currency:$invoices[$_log.object_id].currency_id}
+                                    </span>
+                                    {$invoices[$_log.object_id].summary|escape}
+                                    <span class="c-state {strtolower($invoices[$_log.object_id].state_id)}">
+                                        {$_state.name|escape|default:$invoices[$_log.object_id].state_id}
+                                    </span>
+                                {/if}
+                            {/if}
+
+                            {if !empty($_log.inline_html)}
+                                {$_log.inline_html|strip}
+                            {/if}
+
+                        </div>
+
+                        {if $_log.action == "reminder_done"}
+                            {$_text = $_log.content|escape|nl2br|default:"adsa dasd asd asdaafa sgda sgdasdgas"}
+                            <div class="line">{$_text}</div>
+                        {/if}
+
+                        {if !empty($_log.create_datetime)}
+                            <div class="line c-datetime hint">{waDateTime::format('humandatetime', $_log.create_datetime)}</div>
+                        {/if}
+
+                        {if !empty($_log.link) || !empty($_log.deal)}
+                            <div class="line">
+                                {if !empty($_log.deal) && !empty($_log.deal.funnel)}
+                                    {strip}
+                                    <span class="c-deal-wrapper">
+                                        {$_funnel_name = $_log.deal.funnel.name|escape}
+                                        {$_funnel_color = $_log.deal.funnel.color}
+                                        <i class="icon16 funnel-state svg-icon" data-color="{$_funnel_color}" title="{$_funnel_name}"></i>
+
+                                        {if !empty($_log.deal.stage)}
+                                            {$_stage_name = $_log.deal.stage.name|escape}
+                                            {$_stage_color = $_log.deal.stage.color}
+                                            <span class="c-state" style="background: {$_stage_color}" title="{$_stage_name}">{$_stage_name}</span>
+                                        {/if}
+
+                                        <a href="{$wa_app_url}deal/{$_log.deal.id}/">{$_log.deal.name|escape}</a>
+                                        {if !empty($_log.link)}
+                                            <br>
+                                            {$_log.link|strip}
+                                        {/if}
+                                    </span>
+                                    {/strip}
+                                {else}
+                                    {if !empty($_log.link)}
+                                        {$_log.link|strip}
+                                    {/if}
+                                {/if}
+                            </div>
+                        {/if}
+
+                        {* NOTE *}
+                        {if $_log.action == "note_add"}
+                            {$_text = $_log.content|escape|nl2br|default:""}
+                            <div class="line">{$_text}</div>
+                        {/if}
+
+                        {* SHOP ORDER LOG *}
+                        {if $_log.object_type === crmLogModel::OBJECT_TYPE_ORDER_LOG}
+                            <div class="line">
+                                {include file="./LogOrderLogItem.html" log_item=$_log.order_log_item|default:[] inline}
+                            </div>
+                        {/if}
+
+                    </div>
+
+                    <script>
+                        ( function($) {
+                            new CRMLogLiveItem({
+                                $wrapper: $("#c-activity-item-{$_log.id}")
+                            });
+                        })(jQuery);
+                    </script>
+                </li>
+            {/foreach}
+        </ul>
+
+        {if ($count == 50)}
+            <div class="c-paging-wrapper" data-max-id="{$_max_id}"><i class="icon16 loading"></i>[`Loading...`]</div>
+        {/if}
+    {/if}
+</section>

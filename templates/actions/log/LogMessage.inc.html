@@ -1,0 +1,5 @@
+<section class="c-log-message-section js-log-message-section" data-id="{$message.id}">
+    <a href="javascript:void(0);" class="c-log-message-show-body inline-link js-toggle-message-body{if $message.read != 1 && $message.transport == 'EMAIL' && $message.direction == 'IN'} bold{/if}">{strip_tags($message.subject)|default:'[`show the message`]'|escape}</a>
+    <i class="icon16 loading js-loading" style="display: none"></i>
+    <div class="c-log-message-body js-log-message-body" style="display:none;"></div>
+</section>
