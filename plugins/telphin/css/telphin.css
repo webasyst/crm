@@ -1,0 +1,26 @@
+.crm-telphin-plugin-settings .crm-telphin-ask {
+  display: table;
+}
+.crm-telphin-plugin-settings .crm-telphin-ask.hidden {
+  display: none;
+}
+.crm-telphin-plugin-settings .crm-telphin-ask .crm-telphin-ask-title {
+  margin: 20px 0 10px 0;
+  line-height: 17px;
+}
+.crm-telphin-plugin-settings .crm-telphin-ask .crm-telphin-ask-title ul {
+  margin: 0;
+  padding: 0;
+  padding-left: 18px;
+}
+.crm-telphin-plugin-settings .crm-telphin-ask .button {
+  margin-left: 17px;
+}
+.crm-telphin-plugin-settings .crm-telphin-request .field .value input[type="email"] {
+  width: 30%;
+  min-width: 200px;
+  margin: 0;
+}
+.crm-telphin-plugin-settings .crm-telphin-request .crm-telphin-submit {
+  margin-left: 180px;
+}

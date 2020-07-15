@@ -1,0 +1,153 @@
+{$class = 'crm-telphin-plugin-settings'}
+{$id = uniqid($class)}
+<div class="{$class}" id="{$id}">
+    <h1>Telphin</h1>
+    {* Ask *}
+    <div class="crm-telphin-ask js-telphin-ask{if $telphin_ask || $api_app_id && $api_app_secret} hidden{/if}">
+        <div>
+            <div class="crm-telphin-ask-title">
+                <ul><li>{_wd('crm_telphin', "Sign up for 'Telfin'<br>if you do not already have an account.")}</li></ul>
+            </div>
+            <input type="button" class="button green js-request" value="{_wd('crm_telphin', 'Send a request for connection')}" />
+        </div>
+        <div style="margin-top: 35px;">
+            <div class="crm-telphin-ask-title">
+                <ul><li>{_wd('crm_telphin', 'If you have an account,<br>go to the plugin settings.')}</li></ul>
+            </div>
+            <input type="button" class="button green js-settings" value="{_wd('crm_telphin', 'Set up connection')}" />
+        </div>
+    </div>
+    {* Request for connection *}
+    <div class="crm-telphin-request js-telphin-request hidden">
+        <h2>{_wd('crm_telphin', "Application for connection to 'Telphin'")}</h2>
+        <p>{_wd('crm_telphin', "The employee of 'Telphin' will contact you on the indicated contact data in order to discuss the terms of connection.")}</p>
+        <div class="fields form">
+            <form>
+                {$wa->csrf()}
+                {* CONTACT *}
+                <div class="field">
+                    <div class="name">
+                        <label for="telphin_crm_telphin_person">{_wd('crm_telphin', 'The contact person')}<span style="color: red;">*</span></label>
+                    </div>
+                    <div class="value">
+                        <input id="telphin_crm_telphin_person" type="text" name="request[person]" class="input" required value="{$user.name|escape}">
+                    </div>
+                </div>
+                {* PHONE *}
+                <div class="field">
+                    <div class="name">
+                        <label for="telphin_crm_telphin_phone">{_wd('crm_telphin', 'Phone number')}<span style="color: red;">*</span></label>
+                    </div>
+                    <div class="value">
+                        <input id="telphin_crm_telphin_phone" type="text" name="request[phone]" class="input" required value="{$user.phone|escape}">
+                    </div>
+                </div>
+                {* EMAIL *}
+                <div class="field">
+                    <div class="name">
+                        <label for="telphin_crm_telphin_email">[`E-mail`]<span style="color: red;">*</span></label>
+                    </div>
+                    <div class="value">
+                        <input id="telphin_crm_telphin_email" type="email" name="request[email]" class="input" required value="{$user.email|escape}">
+                    </div>
+                </div>
+                {* COMPANY *}
+                <div class="field">
+                    <div class="name">
+                        <label for="telphin_crm_telphin_company">{_wd('crm_telphin', 'Company name')}</label>
+                    </div>
+                    <div class="value">
+                        <input id="telphin_crm_telphin_company" type="text" name="request[company]" class="input" value="{$user.company|escape}">
+                    </div>
+                </div>
+                {* COMMENT *}
+                <div class="field">
+                    <div class="name">
+                        <label for="telphin_crm_telphin_comment">{_wd('crm_telphin', 'Comment')}</label>
+                    </div>
+                    <div class="value">
+                        <textarea id="telphin_crm_telphin_company" name="request[comment]" style="max-width: 373px; min-width: 373px;"></textarea>
+                    </div>
+                </div>
+                {* SUBMIT *}
+                <div class="field">
+                    <div class="value crm-telphin-submit">
+                        <input type="submit" class="button green" value="{_wd('crm_telphin', 'Send an application')}">
+                        [`or`]
+                        <a href="javascript:void(0);" class="inline-link js-request-cancel"><b><i>[`cancel`]</i></b></a>
+                        <span id="plugins-settings-form-status" style="display:none"><!-- message placeholder --></span>
+                    </div>
+                </div>
+            </form>
+            <iframe style="display:none" name="plugins-settings-iframe" id="plugins-settings-iframe"></iframe>
+        </div>
+
+    </div>
+
+    {* Plugin settings *}
+    <div class="crm-telphin-settings js-telphin-settings{if !$telphin_ask && !$api_app_id && !$api_app_secret} hidden{/if}">
+
+        <div class="fields form">
+            <form>
+                {$wa->csrf()}
+                <div class="field">
+                    <div class="name">
+                        <label for="telphin_crm_telphin_api_app_id">App ID</label>
+                    </div>
+                    <div class="value">
+                        <input id="telphin_crm_telphin_api_app_id" type="text" name="crm_telphin[api_app_id]" class="input" value="{$api_app_id}">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">
+                        <label for="telphin_crm_telphin_api_app_secret">App Secret</label>
+                    </div>
+                    <div class="value">
+                        <input id="telphin_crm_telphin_api_app_secret" type="text" name="crm_telphin[api_app_secret]" class="input" value="{$api_app_secret}">
+                        <br>
+                        <span class="hint">{_wd('crm_telphin', 'To obtain the authorization parameters, you need to register the application')}:
+                            <a href="https://apiproxy.telphin.ru/app/" target="_blank">apiproxy.telphin.ru</a> <i class="icon10 new-window"></i>
+                           <br>{_wd('crm_telphin', 'The login and password are the same as those used to configure the PBX in the panel teleo.telphin.ru')}<br>
+                           <br>{_wd('crm_telphin', 'Application settings')}:
+                           <br>
+                           <br>
+                           Application Name: Webasyst CRM<br>
+                           Redirect URL: {if $callback_url}{$callback_url}{else}<a href="{$wa_backend_url}site/#/routing/" target="_blank" style="color: red">{_wd('crm_telphin', 'Add settlement for CRM')}</a>{/if}<br>
+                           Application Type: Trusted<br>
+                           Application Access: Call API
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="value">
+                        <div class="crm-telphin-api-status js-api-status" data-ok="{_wd('crm_telphin', 'API connection established')}" data-bad="{_wd('crm_telphin', 'API connection not established')}"></div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="value submit">
+                        <input type="submit" class="button green" value="[`Save`]">
+                        <span id="plugins-settings-form-status"></span>
+                    </div>
+                </div>
+            </form>
+            <iframe style="display:none" name="plugins-settings-iframe" id="plugins-settings-iframe"></iframe>
+        </div>
+
+    </div>
+
+</div>
+<script>
+    (function ($) {
+        new CRMTelphinPluginSettings({
+            $wrapper: $("#{$id}"),
+            locales: {
+                alert_title: "{_wd('crm_telphin', 'Application submitted')}",
+                alert_body: "{_wd('crm_telphin', "The employee of 'Telphin' will contact you on the indicated contact data in order to discuss the terms of connection.")}",
+                alert_close: "[`Close`]",
+                save_error: "{_wd('crm_telphin', 'Something went wrong')}"
+            }
+        });
+    })(jQuery);
+</script>
