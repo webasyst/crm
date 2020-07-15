@@ -1,0 +1,245 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm/plugin/telegram\n"
+"POT-Creation-Date: 2016-11-14 16:26+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: crm/plugin/telegram\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"Language: ru_RU\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "open in Telegram"
+msgstr "открыть в Telegram"
+
+msgid "Response to the /start command"
+msgstr "Ответ на команду /start"
+
+msgid "Variables are supported:"
+msgstr "Поддерживаются переменные:"
+
+msgid "Supported markup:"
+msgstr "Поддерживается разметка:"
+
+msgid "Sticker"
+msgstr "Стикер"
+
+msgid "Unkown sticker"
+msgstr "Неизвестный стикер"
+
+msgid "Location"
+msgstr "Геопозиция"
+
+msgid "Unkown location"
+msgstr "Неизвестная геопозиция"
+
+msgid "See on Foursquare"
+msgstr "Смотрите на Foursquare"
+
+msgid "Venue"
+msgstr "Место встречи"
+
+msgid "Unkown venue"
+msgstr "Неизвестное место встречи"
+
+msgid "Download in full size"
+msgstr "Загрузить в полном размере"
+
+msgid "Voice message"
+msgstr "Голосовое сообщение"
+
+msgid "Unkown voice message"
+msgstr "Неизвестное голосовое сообщение"
+
+msgid "Video note"
+msgstr "Видеосообщение"
+
+msgid "Unkown video note"
+msgstr "Неизвестное видеосообщение"
+
+msgid "Video"
+msgstr "Видео"
+
+msgid "Unkown video"
+msgstr "Неизвестное видео"
+
+msgid "The video tag is not supported by your browser."
+msgstr "Тег video не поддерживается вашим браузером."
+
+msgid "Audio"
+msgstr "Аудио"
+
+msgid "Unkown audio"
+msgstr "Неизвестное аудио"
+
+msgid "Photo"
+msgstr "Фотография"
+
+msgid "Unkown photo"
+msgstr "Неизвестная фотография"
+
+msgid "Attachment"
+msgstr "Вложение"
+
+msgid "Attach photo"
+msgstr "Прикрепить фото"
+
+msgid "Drop photo here"
+msgstr "Перетащите фото сюда"
+
+msgid "Forwarded from"
+msgstr "Переслано от"
+
+msgid "Forwarded messages"
+msgstr "Пересланное сообщение"
+
+msgid "more info"
+msgstr "подробнее"
+
+msgid "Fill in the fields below:"
+msgstr "Заполните поля ниже:"
+
+msgid "Access token is required"
+msgstr "Access token обязателен"
+
+msgid "Invalid access token"
+msgstr "Неверный Access token"
+
+msgid "The bot can not start a conversation with the user"
+msgstr "Бот не может начинать разговор с пользователем"
+
+msgid "Validation error"
+msgstr "Ошибка валидации"
+
+msgid "You can not change the bot within the same source.<br><br>If you want to change the bot — <a href=\"%ssettings/sources/telegram\">create a new source</a> for it."
+msgstr "Нельзя изменять бота в рамках одного источника.<br><br>Если вы хотите изменить бота — <a href=\"%ssettings/sources/telegram\">создайте новый источник</a> для него ."
+
+msgid "Provides integration with Telegram Messenger"
+msgstr "Обеспечивает интеграцию с мессенджером Telegram"
+
+msgid "Deal source disabled"
+msgstr "Источник сделок отключен"
+
+msgid "Hello $contact_name!"
+msgstr "Здравствуйте, $contact_name!"
+
+msgid "Ask a question and we’ll promptly answer it."
+msgstr "Задайте вопрос, и мы скоро на него ответим."
+
+msgid "Your $site_link"
+msgstr "Ваш $site_link"
+
+msgid "Name"
+msgstr "Название"
+
+msgid "Drop file here"
+msgstr "Перетащите файлы сюда"
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "via"
+msgstr "через"
+
+msgid "incoming"
+msgstr "входящее"
+
+msgid "from"
+msgstr "от"
+
+msgid "outgoing"
+msgstr "исходящее"
+
+msgid "to "
+msgstr "кому"
+
+msgid "CRM"
+msgstr ""
+
+msgid "(no subject)"
+msgstr "(нет темы)"
+
+msgid "open conversation"
+msgstr "открыть переписку"
+
+msgid "From"
+msgstr "От"
+
+msgid "To"
+msgstr "Кому"
+
+msgid "Stage deleted"
+msgstr "Этап удалён"
+
+msgid "Funnel deleted"
+msgstr "Воронка удалена"
+
+msgid "Deal"
+msgstr "Сделка"
+
+msgid "Write a message"
+msgstr "Написать сообщение"
+
+msgid "File has been added."
+msgstr ""
+
+msgid "delete"
+msgstr "удалить"
+
+msgid "Attach file"
+msgstr "Прикрепить файл"
+
+msgid "Send"
+msgstr "Отправить"
+
+msgid "or"
+msgstr "или"
+
+msgid "cancel"
+msgstr "отмена"
+
+msgid "Message has been sent."
+msgstr "Сообщение отправлено."
+
+msgid "Unknown source"
+msgstr "Неизвестный источник"
+
+msgid "Reply"
+msgstr "Ответить"
+
+msgid "close"
+msgstr "закрыть"
+
+msgid "Delete message"
+msgstr "Удалить сообщение"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Delete message from %s"
+msgstr "Удалить сообщение от %s"
+
+msgid "Plugin %s is installed and working."
+msgstr "Плагин «%s» установлен и работает."
+
+msgid "Telegram user id is unknown"
+msgstr "Неизвестный пользователь «Телеграма»"
+
+msgid "You cannot change the bot for a source.<br><br>To use a different bot, <a href=\\\"%ssettings/sources/telegram\\\">set up a new source</a> for it."
+msgstr "Нельзя изменить бота для источника.<br><br>Чтобы использовать другого бота, <a href=\\\"%ssettings/sources/telegram\\\">настройте новый источник</a> для этого него."
+
+msgid "Save configuration parameters in <a href=\"%s\">deal source settings</a>."
+msgstr "Сохраните параметры конфигурации в <a href=\"%s\">настройках источника сделок</a>."
+
+msgid "This is a required field."
+msgstr "Это обязательное поле."
+
+msgid "Reply cannot be sent."
+msgstr "Не удалось отправить ответ."

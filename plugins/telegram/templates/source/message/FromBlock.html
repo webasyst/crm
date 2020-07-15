@@ -1,0 +1,17 @@
+{$telegram_url = ifset($message.from_telegram_url)}
+{$contact = ifset($message.creator_contact)}
+<div class="c-telegram-plugin-contact-info">
+    {if !empty($contact)}
+        <a href="{$wa_app_url}contact/{$contact.id}/" target="_top" class="c-contact-link">
+            <img src="{$contact.photo_url_16}" alt="{$contact.name|escape}" class="c-contact-photo">
+            <span>{$contact.name|escape}</span>
+        </a>
+    {/if}
+    {if $telegram_url}
+        {if $message.direction == crmMessageModel::DIRECTION_IN}
+            <a href="{$telegram_url}" target="_blank" class="c-contact-link"><img src="{$plugin_icon}" style="width: 12px;" title="{_wd('crm_telegram', 'open in Telegram')}"></a>
+        {else}
+            [`via`] <a href="{$telegram_url}" target="_blank" class="c-contact-link"><span>@{$message.from|escape}</span> <i class="icon16 new-window"></i></a>
+        {/if}
+    {/if}
+</div>

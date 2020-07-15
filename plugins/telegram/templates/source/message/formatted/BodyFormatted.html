@@ -1,0 +1,148 @@
+<div class='crm-telegram-plugin-message-body{if $is_forward} crm-telegram-plugin-forward-message-body{/if}'>
+    {if $is_forward}
+        {capture assign=fwd_contact}
+            {strip}
+                {if $forward_contact}
+                    <a href="{$wa_app_url}contact/{$forward_contact.id}"><i class="icon16 userpic20" style="background-image: url('{$forward_contact.photo_url_16|escape}');"></i>{$forward_contact.name|escape}</a>
+                {else}
+                    <i class="icon16 user"></i> {$forward_name|escape}
+                {/if}
+            {/strip}
+        {/capture}
+        <div class="crm-telegram-plugin-forward-message">
+            {_wd('crm_telegram', 'Forwarded from')}
+            {$fwd_contact}
+            {if $forward_username}
+                 <a href="https://t.me/{$forward_username|escape}" target="_blank"><img title="{_wd('crm_telegram', 'open in Telegram')}" src="{$wa_app_static_url}plugins/telegram/img/telegram.png" style="width: 12px;   " /></a>
+            {/if}
+        </div>
+    {/if}
+
+    {if $body}
+        <p class="crm-telegram-plugin-message-body-text">
+            {$body}
+        </p>
+    {/if}
+
+    {if $sticker}
+        {if isset($sticker.error)}
+            <span class="hint">{$sticker.error}</span>
+        {else}
+            <img class="crm-telegram-plugin-sticker" src="{$sticker.url}" style="width: {$sticker.width}px">
+        {/if}
+    {/if}
+
+    {if $photo}
+        {if $photo.files}
+            {foreach $photo.files as $_photo}
+                <span style="color: #999;">{_wd('crm_telegram', 'Photo')}:</span>
+                <p>
+                    <br>
+                    <a href="{$wa_app_url}?module=file&action=download&id={$_photo.id}" target="_blank" class="js-disable-router" title="{_wd('crm_telegram', 'Download in full size')}">
+                        <img class="crm-telegram-plugin-photo" src="{$wa_app_url}?module=file&action=download&id={$_photo.id}" style="max-width: 400px;">
+                    </a>
+                </p>
+            {/foreach}
+        {else}
+            <span class="hint">{_wd('crm_telegram', 'Unkown photo')}</span>
+        {/if}
+    {/if}
+
+    {if $audio}
+        {if $audio.files}
+            {foreach $audio.files as $_audio}
+                <span style="color: #999;">{_wd('crm_telegram', 'Audio')}:</span>
+                <p>
+                    <br>
+                    <audio controls>
+                        <source src="{$wa_app_url}?module=file&action=download&id={$_audio.id}" type="audio/{$_audio.ext}">
+                    </audio>
+                </p>
+            {/foreach}
+        {else}
+            <span class="hint">{_wd('crm_telegram', 'Unkown audio')}</span>
+        {/if}
+    {/if}
+
+    {if $video}
+        {if $video.files}
+            {foreach $video.files as $_video}
+                <span style="color: #999;">{_wd('crm_telegram', 'Video')}:</span>
+                <p>
+                    <br>
+                    <video class="crm-telegram-plugin-video" width="300" controls preload="metadata">
+                        <source src="{$wa_app_url}?module=file&action=download&id={$_video.id}" type="video/mp4">
+                        {_wd('crm_telegram', 'The video tag is not supported by your browser.')}
+                    </video>
+                </p>
+            {/foreach}
+        {else}
+            <span class="hint">{_wd('crm_telegram', 'Unkown video')}</span>
+        {/if}
+    {/if}
+
+    {if $voice}
+        {if $voice.files}
+            {foreach $voice.files as $_voice}
+                <span style="color: #999;">{_wd('crm_telegram', 'Voice message')}:</span>
+                <p>
+                    <br>
+                    <audio controls>
+                        <source src="{$wa_app_url}?module=file&action=download&id={$_voice.id}" type="audio/ogg">
+                    </audio>
+                </p>
+            {/foreach}
+        {else}
+            <span class="hint">{_wd('crm_telegram', 'Unkown voice message')}</span>
+        {/if}
+    {/if}
+
+    {if $video_note}
+        {if $video_note.files}
+            {foreach $video_note.files as $_video_note}
+                <span style="color: #999;">{_wd('crm_telegram', 'Video note')}:</span>
+                <p>
+                    <br>
+                    <video autoplay="autoplay" loop="loop" preload="metadata">
+                        <source src="{$wa_app_url}?module=file&action=download&id={$_video_note.id}" type="video/mp4">
+                        {_wd('crm_telegram', 'The video tag is not supported by your browser.')}
+                    </video>
+                </p>
+            {/foreach}
+        {else}
+            <span class="hint">{_wd('crm_telegram', 'Unkown video note')}</span>
+        {/if}
+    {/if}
+
+    {if $location}
+        <div class="crm-telegram-plugin-location" style="color: #999;">
+            {$location.map_html}
+        </div>
+    {/if}
+
+    {if $venue}
+        <div class="crm-telegram-plugin-venue" style="color: #999;">
+            <div style="color: #000;">
+                {$venue.title|escape}
+                {if $venue.foursquare_id}
+                    {strip}
+                    <a href="https://foursquare.com/v/{$venue.foursquare_id|escape}" title="{_wd('crm_telegram', 'See on Foursquare')}" target="_blank">
+                        <img src="{$venue.foursquare_icon}" />
+                    </a>
+                    {/strip}
+                {/if}
+            </div>
+            {if $venue.address}
+                <br>
+                {$venue.address|escape}
+            {/if}
+            <br>
+            <br>
+            {$venue.map_html}
+        </div>
+    {/if}
+
+    {if $caption}
+        <span style="color: #555;">{$caption}</span>
+    {/if}
+</div>

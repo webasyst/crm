@@ -1,0 +1,34 @@
+<div class="c-telegram-plugin-log-inline">
+{if $message.direction == crmMessageModel::DIRECTION_IN}
+    <i class="icon16 message-in" title="[`incoming`]"></i>
+    [`from`]
+    {if isset($message.params.username)}
+        <a href="https://t.me/{$message.params.username|escape}" target="_blank" title="{_wd('crm_telegram', 'open in Telegram')}">
+            @{$message.params.username|escape}
+            <img src="{$plugin_icon}" style="width: 12px;">
+        </a>
+    {else}
+        <img src="{$plugin_icon}" style="width: 12px;" title="Telegram">
+        <span title="Telegram ID">id{$message.from|escape}</span>
+    {/if}
+{else}
+    <i class="icon16 message-out" title="[`outgoing`]"></i>
+    [`to `]
+    {if !empty($contact)}
+        <a href="{$wa_app_url}contact/{$contact.id}/" target="_top" class="c-contact-link" title="{$contact.name|escape}">
+            <img src="{$contact->getPhoto(16)}" alt="{$contact.name|escape}" style="width: 16px; border-radius: 50%" class="c-contact-photo">
+            <span>{$contact.name|escape}</span>
+        </a>
+        {if isset($message.params.username)}
+            <a href="https://t.me/{$message.params.username|escape}" target="_blank">
+                <img src="{$plugin_icon}" style="width: 12px;" title="{$message.params.username|escape}">
+            </a>
+        {/if}
+    {else}
+        <span style="color: #999;">Deleted contact #{$message.contact_id}</span>
+        {if isset($message.params.username)}
+            <img src="{$plugin_icon}" style="width: 12px;" title="{$bot_name}">
+        {/if}
+    {/if}
+{/if}
+</div>

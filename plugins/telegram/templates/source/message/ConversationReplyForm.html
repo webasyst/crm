@@ -1,0 +1,80 @@
+{$class = 'c-telegram-conversation-sender-form'}
+{$dialog_id = uniqid($class)}
+<div class="{$class}" id="{$dialog_id}">
+    <form>
+        <div class="field">
+            <div class="c-wysiwyg-wrapper">
+                <textarea class="js-wysiwyg" name="body" cols="1" rows="1" placeholder="[`Write a message`]..." required></textarea>
+            </div>
+        </div>
+
+        <div class="c-layout fixed">
+            <div class="c-column c-photos-wrapper js-photos-wrapper">
+                <div class="c-drop-wrapper js-drop-area">
+                    <div class="js-drop-text" data-default="{_wd('crm_telegram', 'Attach photo')}" data-hover="{_wd('crm_telegram', 'Drop photo here')}">{_wd('crm_telegram', 'Attach photo')}</div>
+                    <input class="c-drop-field js-drop-field" type="file" accept="image/*" multiple>
+                </div>
+
+                <div class="c-upload-list">
+                    {capture assign="_photo_template_html"}
+                        <div class="c-upload-item">
+                            <i class="icon16 image"></i>
+                            <span class="c-name js-name"></span>
+                            <span class="c-progress-wrapper">
+                                                        <span class="c-progress">
+                                                            <span class="c-bar js-bar" style="width: 0;"></span>
+                                                        </span>
+                                                    </span>
+                            <span class="c-status js-status" data-success="[`File has been added.`]"></span>
+                            <a class="inline-link js-file-delete" href="javascript:void(0);"><i class="icon16 delete"></i><b><i>[`delete`]</i></b></a>
+                        </div>
+                    {/capture}
+                </div>
+            </div>
+            <div class="c-column c-files-wrapper js-files-wrapper">
+                <div class="c-drop-wrapper js-drop-area">
+                    <div class="js-drop-text" data-default="[`Attach file`]" data-hover="[`Drop file here`]">[`Attach file`]</div>
+                    <input class="c-drop-field js-drop-field" type="file" multiple>
+                </div>
+
+                <div class="c-upload-list">
+                    {capture assign="_file_template_html"}
+                        <div class="c-upload-item">
+                            <i class="icon16 attachment"></i>
+                            <span class="c-name js-name"></span>
+                            <span class="c-progress-wrapper">
+                                                        <span class="c-progress">
+                                                            <span class="c-bar js-bar" style="width: 0;"></span>
+                                                        </span>
+                                                    </span>
+                            <span class="c-status js-status" data-success="[`File has been added.`]"></span>
+                            <a class="inline-link js-file-delete" href="javascript:void(0);"><i class="icon16 delete"></i><b><i>[`delete`]</i></b></a>
+                        </div>
+                    {/capture}
+                </div>
+            </div>
+        </div>
+
+        <div class="js-errors-place"></div>
+
+        <input type="hidden" name="message_id" value="{$message.id}" />
+        <input type="hidden" name="hash" value="{$hash}" />
+    </form>
+</div>
+
+<script>
+    (function ($) {
+        new CRMTelegramPluginConversationSenderForm({
+            $wrapper: $("#{$dialog_id}"),
+            $textarea: $(".js-wysiwyg"),
+            file_template_html: {$_file_template_html|json_encode},
+            photo_template_html: {$_photo_template_html|json_encode},
+            max_upload_size: {waRequest::getUploadMaxFilesize()},
+            hash: {$hash|json_encode},
+            message: {$message|json_encode},
+            chat_id: {if $message.direction == crmMessageModel::DIRECTION_IN}{$message.from|escape}{else}{$message.to|escape}{/if},
+            source_id: {ifset($source_id)},
+            send_action_url: {$send_action_url|json_encode}
+        });
+    })(jQuery);
+</script>

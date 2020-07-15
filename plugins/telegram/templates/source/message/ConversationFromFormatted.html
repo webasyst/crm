@@ -1,0 +1,15 @@
+{function name="_renderTelegramIcon" _username=[]}
+    {if ($_username)}
+        {strip}
+            <a href="https://t.me/{$_username|escape}" target="_blank" title="@{$_username}">
+                <img class="crm-telegram-plugin-icon" src="{$plugin_icon}" />
+            </a>
+        {/strip}
+    {/if}
+{/function}
+
+{if $message.direction == crmMessageModel::DIRECTION_IN && $message.params.username}
+    {_renderTelegramIcon _username=$message.params.username|escape}
+{elseif $message.direction == crmMessageModel::DIRECTION_OUT && $message.from}
+    {_renderTelegramIcon _username=$message.from|escape}
+{/if}

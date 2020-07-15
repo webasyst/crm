@@ -1,0 +1,238 @@
+.c-source-settings-telegram-block {
+  padding: 0;
+}
+.c-source-settings-telegram-block .ace {
+  border: 1px solid #eee;
+  max-width: 500px;
+}
+.c-telegram-im-message-sender-dialog,
+.c-telegram-conversation-sender-form {
+  padding: 0;
+}
+.c-telegram-im-message-sender-dialog .redactor-box .redactor-layer.disable,
+.c-telegram-conversation-sender-form .redactor-box .redactor-layer.disable {
+  background-color: #eee;
+}
+.c-source-im-message-viewer-dialog .crm-telegram-plugin-message-subject,
+.c-source-im-message-sender-dialog .crm-telegram-plugin-message-subject {
+  display: inline-block;
+}
+.c-telegram-im-message-sender-dialog .c-wysiwyg-wrapper .redactor-box,
+.c-telegram-conversation-sender-form .c-wysiwyg-wrapper .redactor-box {
+  margin: 0;
+}
+.c-telegram-im-message-sender-dialog .c-wysiwyg-wrapper .redactor-box textarea,
+.c-telegram-conversation-sender-form .c-wysiwyg-wrapper .redactor-box textarea {
+  display: block !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-drop-wrapper:hover,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-drop-wrapper:hover,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-drop-wrapper:hover,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-drop-wrapper:hover,
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-drop-wrapper.is-hover,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-drop-wrapper.is-hover,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-drop-wrapper.is-hover,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-drop-wrapper.is-hover {
+  background: #ffc;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-drop-wrapper.disable,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-drop-wrapper.disable,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-drop-wrapper.disable,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-drop-wrapper.disable {
+  background: #eee;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-drop-wrapper .c-drop-field,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-drop-wrapper .c-drop-field,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-drop-wrapper .c-drop-field,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-drop-wrapper .c-drop-field {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list {
+  padding: 0;
+  margin: 1em 0 0;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item {
+  margin: 4px 0 0;
+  line-height: 1.25em;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item.is-upload .c-progress-wrapper,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item.is-upload .c-progress-wrapper,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item.is-upload .c-progress-wrapper,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item.is-upload .c-progress-wrapper {
+  display: inline-block;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item.is-upload .inline-link,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item.is-upload .inline-link,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item.is-upload .inline-link,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item.is-upload .inline-link {
+  display: none;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item:first-child,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item:first-child,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item:first-child,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item:first-child {
+  margin-top: 0;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item.is-template,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item.is-template,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item.is-template,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item.is-template {
+  display: none;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item .c-name,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item .c-name,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item .c-name,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item .c-name {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item .c-status,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item .c-status,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item .c-status,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item .c-status {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 0 0 8px;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper {
+  display: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  height: 12px;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress {
+  display: inline-block;
+  vertical-align: top;
+  background: #f0f0f0;
+  width: 200px;
+  height: 100%;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress .c-bar,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress .c-bar,
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress .c-bar,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-upload-list .c-upload-item .c-progress-wrapper .c-progress .c-bar {
+  display: inline-block;
+  vertical-align: top;
+  background: #cba;
+  height: 100%;
+  transition: background 100ms linear;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-sizing: border-box;
+}
+.c-telegram-im-message-sender-dialog .c-photos-wrapper .c-drop-wrapper,
+.c-telegram-conversation-sender-form .c-photos-wrapper .c-drop-wrapper {
+  position: relative;
+  padding: 16px;
+  border: 1px dashed #ddd;
+  border-top: 0;
+  border-radius: 0 0 0 3px;
+  text-align: center;
+  background: #f3f3f3;
+  color: #aaa;
+  transition: background 200ms linear;
+  box-sizing: border-box;
+}
+.c-telegram-im-message-sender-dialog .c-files-wrapper .c-drop-wrapper,
+.c-telegram-conversation-sender-form .c-files-wrapper .c-drop-wrapper {
+  position: relative;
+  padding: 16px;
+  border: 1px dashed #ddd;
+  border-left: 0;
+  border-top: 0;
+  border-radius: 0 0 3px 0;
+  text-align: center;
+  background: #f3f3f3;
+  color: #aaa;
+  transition: background 200ms linear;
+  box-sizing: border-box;
+}
+.c-telegram-im-message-sender-dialog .c-attach-existed-files-wrapper,
+.c-telegram-conversation-sender-form .c-attach-existed-files-wrapper {
+  max-height: 200px;
+  overflow: auto;
+}
+.c-telegram-im-message-sender-dialog .c-attach-existed-files-wrapper > li,
+.c-telegram-conversation-sender-form .c-attach-existed-files-wrapper > li {
+  margin-left: 0;
+  margin-right: 0;
+}
+.c-log-message-body .crm-telegram-plugin-photo,
+.crm-dialog-wrapper .crm-telegram-plugin-photo,
+.c-message-wrapper .crm-telegram-plugin-photo,
+.c-log-message-body .crm-telegram-plugin-video,
+.crm-dialog-wrapper .crm-telegram-plugin-video,
+.c-message-wrapper .crm-telegram-plugin-video {
+  border-radius: 6px;
+}
+.c-log-message-body .crm-telegram-plugin-message-body,
+.crm-dialog-wrapper .crm-telegram-plugin-message-body,
+.c-message-wrapper .crm-telegram-plugin-message-body {
+  margin-bottom: 12px;
+}
+.c-log-message-body .crm-telegram-plugin-message-body .crm-telegram-plugin-forward-message,
+.crm-dialog-wrapper .crm-telegram-plugin-message-body .crm-telegram-plugin-forward-message,
+.c-message-wrapper .crm-telegram-plugin-message-body .crm-telegram-plugin-forward-message {
+  color: #999;
+  border-left: 3px solid #fef7cc;
+  border-radius: 3px 0 0 3px;
+  padding: 6px 0 6px 8px;
+  margin: -8px;
+  margin-bottom: 8px;
+  background-color: #ffffe5;
+}
+.c-log-message-body .crm-telegram-plugin-message-body .crm-telegram-plugin-venue .map,
+.crm-dialog-wrapper .crm-telegram-plugin-message-body .crm-telegram-plugin-venue .map,
+.c-message-wrapper .crm-telegram-plugin-message-body .crm-telegram-plugin-venue .map,
+.c-log-message-body .crm-telegram-plugin-message-body .crm-telegram-plugin-location .map,
+.crm-dialog-wrapper .crm-telegram-plugin-message-body .crm-telegram-plugin-location .map,
+.c-message-wrapper .crm-telegram-plugin-message-body .crm-telegram-plugin-location .map {
+  border-radius: 6px;
+}
+.c-log-message-body .crm-telegram-plugin-forward-message-body,
+.crm-dialog-wrapper .crm-telegram-plugin-forward-message-body,
+.c-message-wrapper .crm-telegram-plugin-forward-message-body {
+  background-color: #ffffef;
+  padding: 8px;
+}
+.c-telegram-plugin-settings-page {
+  margin: 80px auto;
+  text-align: center;
+  color: #aaa;
+}
+.c-im-conversation-section img.crm-telegram-plugin-icon {
+  width: 12px;
+  margin: 0 2px -1px 2px;
+}
+.c-telegram-plugin-log-inline .c-contact-link .c-contact-photo {
+  width: 16px;
+  border-radius: 50%;
+}

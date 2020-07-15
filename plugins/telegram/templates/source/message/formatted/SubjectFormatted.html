@@ -1,0 +1,37 @@
+{strip}
+    <div class='crm-telegram-plugin-message-subject'>
+        {if $is_forward}
+            <span><i class="icon16 rotate-right" title="{_wd('crm_telegram', 'Forwarded message')}"></i></span>
+        {/if}
+
+        {if strlen($subject) > 0}
+            {$_subject|escape}
+        {elseif $sticker}
+            {if isset($sticker.error)}
+                <span class="hint">{$sticker.error}</span>
+            {else}
+                <span style="color: #999;">
+                    <img class="crm-telegram-plugin-sticker" src="{$sticker.url}" style="margin: 0 0.25em 0 1px; vertical-align: top; width: {$sticker.width}px"> {_wd('crm_telegram', 'Sticker')}
+                </span>
+            {/if}
+        {elseif $photo}
+            <span style="color: #999;"><i class="icon16 image"></i> {_wd('crm_telegram', 'Photo')}</span>
+        {elseif $audio}
+            <span style="color: #999;"><i class="icon16 play"></i> {_wd('crm_telegram', 'Audio')}</span>
+        {elseif $video}
+            <span style="color: #999;"><i class="icon16 video"></i> {_wd('crm_telegram', 'Video')}</span>
+        {elseif $voice}
+            <span style="color: #999;"><i class="icon16 play"></i> {_wd('crm_telegram', 'Voice message')}</span>
+        {elseif $video_note}
+            <span style="color: #999;"><i class="icon16 lens"></i> {_wd('crm_telegram', 'Video note')}</span>
+        {elseif $location}
+            <span style="color: #999;"><i class="icon16 map"></i> {_wd('crm_telegram', 'Location')}</span>
+        {elseif $venue}
+            <span style="color: #999;"><i class="icon16 marker"></i> {$venue|escape}</span>
+        {elseif $attachment}
+            <span style="color: #999;"><i class="icon16 attachment"></i> {_wd('crm_telegram', 'Attachment')}</span>
+        {else}
+            {strip_tags($body)|truncate:50:'...'}
+        {/if}
+    </div>
+{/strip}
