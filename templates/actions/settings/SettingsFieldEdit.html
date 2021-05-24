@@ -71,7 +71,7 @@
                     <div class="name">[`Field ID`]</div>
                     <div class="value">
                         {if !$field}
-                            <input type="text" name="id_val" data-error-id="id_val" value="{$field.id}">
+                            <input type="text" name="id_val" data-error-id="id_val" value="">
                         {else}
                             <span>{$field.id|escape}</span>
                         {/if}
@@ -108,7 +108,7 @@
                             <input type="checkbox" name="type[]"
                                    value="person"
                                    {if !$field || $field.pStatus != 'disabled'}checked="checked"{/if}
-                                {if $field.type === 'Email'}disabled="disabled"{/if}>
+                                {if $field && $field.type === 'Email'}disabled="disabled"{/if}>
                             [`Person`]
                         </label>
                         <br>
@@ -130,7 +130,7 @@
                     </div>
                 </div>
 
-                {if !empty($field.id) && $field.type == 'Address' && !$field.disabled}
+                {if $field && !empty($field.id) && $field.type == 'Address' && !$field.disabled}
                     <div class="field">
                         <div class="name">[`Address fields`]</div>
                     </div>

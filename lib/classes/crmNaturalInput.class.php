@@ -20,7 +20,7 @@ class crmNaturalInput
             'en_US' => $files_path . 'natural-input-en.json',
             'ru_RU' => $files_path . 'natural-input-ru.json'
         );
-        uksort($files, wa_lambda('$a,$b', 'return $b == wa()->getUser()->getLocale();'));
+        uksort($files, wa_lambda('$a,$b', 'return $b == wa()->getUser()->getLocale() ? 1 : -1;'));
         foreach ($files as $locale => $file) {
             if (file_exists($file)) {
                 self::$json_rules[$locale] = json_decode(file_get_contents($file), true);

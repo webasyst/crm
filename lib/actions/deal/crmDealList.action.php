@@ -543,11 +543,11 @@ class crmDealListAction extends crmBackendViewAction
     protected function sortDeals($a, $b)
     {
         if ($a['reminder_datetime'] && !$b['reminder_datetime']) {
-            return true;
+            return 1;
         } elseif (!$a['reminder_datetime'] && $b['reminder_datetime']) {
-            return false;
+            return -1;
         }
-        return $a['reminder_datetime'] > $b['reminder_datetime'];
+        return $a['reminder_datetime'] > $b['reminder_datetime'] ? 1 : -1;
     }
 
     protected function getFilterReminders() {

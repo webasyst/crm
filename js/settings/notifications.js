@@ -219,10 +219,10 @@ var CRMNotificationEdit = (function ($) {
 
         // init state
         if (getTransportVal() === 'email') {
-            showEmailSenders();
+            showEmailSenders(that.$sender.val() === 'specified');
             hideSmsSenders();
         } else {
-            showSmsSenders();
+            showSmsSenders(that.$sms_sender.val() === 'specified');
             hideEmailSenders();
         }
 

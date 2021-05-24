@@ -131,20 +131,20 @@
 
 
                     {$_recipient_phone_value = ''}
-                    {if !$_found_recipient && $notification.id > 0 && $notification.transport === 'phone'}
+                    {if !$_found_recipient && $notification.id > 0 && $notification.transport === 'sms'}
                         {$_recipient_phone_value = $notification.recipient}
                     {/if}
 
-                    <input name="data[recipient]" type="text" placeholder="+1 555 000-00-00" value="{$_recipient_email_value}" class="c-recipient-content" data-id="sms" required disabled>
+                    <input name="data[recipient]" type="text" placeholder="+1 555 000-00-00" value="{$_recipient_phone_value}" class="c-recipient-content" data-id="sms" required disabled>
                 </div>
             </div>
 
             <div class="field js-senders-block" style="display: none">
                 <div class="name">[`Sender`]</div>
                 <div class="value">
-                    <select name="data[sender]" id="" class='js-sender-list' disabled>
+                    <select name="data[sender]" class='js-sender-list' disabled>
                         {foreach $senders as $key => $item}
-                            <option value="{$key}" {if $notification['sender'] == {$key}}selected{/if}>{$item['name']|escape}</option>
+                            <option value="{$key}" {if $notification['sender'] == {$key} || ($notification['sender'] != 'system' && {$key} == 'specified')}selected{/if}>{$item['name']|escape}</option>
                         {/foreach}
                     </select>
                     <input name="data[sender_name]" type="text" placeholder="[`John Doe`]" class="c-sender-header c-sender-header-name js-specified-sender-name" disabled>
@@ -157,7 +157,7 @@
                 <div class="value">
                     <select name="data[sender]" class='js-sms-sender-list' disabled>
                         {foreach $sms_senders as $key => $item}
-                            <option value="{$key}" {if $notification['sender'] == {$key}}selected{/if}>{$item['name']|escape}</option>
+                            <option value="{$key}" {if $notification['sender'] == {$key} || ($notification['sender'] != 'system' && {$key} == 'specified')}selected{/if}>{$item['name']|escape}</option>
                         {/foreach}
                     </select>
                     <input name="data[sender]" type="text" class="c-sender-header js-specified-sms-sender" required disabled>

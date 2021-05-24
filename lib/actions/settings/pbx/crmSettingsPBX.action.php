@@ -17,7 +17,7 @@ class crmSettingsPBXAction extends crmSettingsViewAction
 
         // Users
         $users = $this->getTelephonyUsers();
-        uasort($users, wa_lambda('$a,$b', 'return strpos($a["name"], $b["name"]);'));
+        uasort($users, wa_lambda('$a,$b', 'return (int)strpos($a["name"], $b["name"]);'));
 
         // Numbers
         $numbers = array();
