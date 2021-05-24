@@ -22,6 +22,12 @@
                 <li class="c-reason" {if !empty($_reason)}data-id="{$_reason.id}"{/if}>
                     <i class="icon16 sort c-sort-toggle js-sort-toggle"></i>
                     <input class="js-name-field" type="text" placeholder="[`Reason name`]" value="{if !empty($_reason)}{$_reason.name|escape}{else}[`New reason`]{/if}" required>
+                    <select class="js-funnel-id-field">
+                        <option value="0">[`All funnels`]</option>
+                        {foreach $_funnels as $_funnel}
+                            <option value="{$_funnel.id}" {if isset($_reason.funnel_id) && $_reason.funnel_id == $_funnel.id}selected{/if}>{$_funnel.name}</option>
+                        {/foreach}
+                    </select>
                     <a class="inline-link c-delete-link js-delete-reason" href="javascript:void(0);">
                         <i class="icon10 delete"></i>
                         <b><i>[`delete`]</i></b>
@@ -29,11 +35,11 @@
                 </li>
             {/function}
 
-            {capture assign="_reason_template_html"}{_renderReason _reason=[]}{/capture}
+            {capture assign="_reason_template_html"}{_renderReason _reason=[] _funnels=$funnels}{/capture}
 
             <ul class="menu-v compact c-reasons-list js-reasons-list">
                 {foreach $reasons as $_reason}
-                    {_renderReason _reason=$_reason}
+                    {_renderReason _reason=$_reason _funnels=$funnels}
                 {/foreach}
             </ul>
 

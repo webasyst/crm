@@ -12,7 +12,7 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: en_US\n"
-"X-Generator: Poedit 1.8.7.1\n"
+"X-Generator: Poedit 2.0.6\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -1328,11 +1328,11 @@ msgid "Public link"
 msgstr ""
 
 #: /wa-apps/crm/templates/actions/invoice/InvoiceId.html:109
-msgid "A settlement required for invoice publication."
+msgid "A CRM settlement is required to publish invoices."
 msgstr ""
 
 #: /wa-apps/crm/templates/actions/invoice/InvoiceId.html:111
-msgid "Use site application to configure settlement for CRM."
+msgid "Use Site app to add a settlement for CRM."
 msgstr ""
 
 #: /wa-apps/crm/templates/actions/invoice/InvoiceId.html:120
@@ -6018,9 +6018,7 @@ msgstr[1] ""
 msgid "Open in Shop-Script"
 msgstr ""
 
-#: /wa-apps/crm/templates/actions/deal/Deal.order.inc.html:53
-#: /wa-apps/crm/templates/actions/deal/DealFunnel.html:293
-#: /wa-apps/crm/templates/actions/deal/DealList.html:274
+#: /wa-apps/crm/templates/actions/deal/Deal.order.inc.html:53 /wa-apps/crm/templates/actions/deal/DealFunnel.html:293 /wa-apps/crm/templates/actions/deal/DealList.html:274
 msgid "Order was paid on %s"
 msgstr ""
 
@@ -6096,8 +6094,7 @@ msgstr ""
 msgid "Фильтр"
 msgstr ""
 
-#: /wa-apps/crm/templates/actions/message/MessageConversationDealAttachDialog.html:6
-#: /wa-apps/crm/templates/actions/message/MessageConversationId.html:165
+#: /wa-apps/crm/templates/actions/message/MessageConversationDealAttachDialog.html:6 /wa-apps/crm/templates/actions/message/MessageConversationId.html:165
 msgid "Attach to another deal"
 msgstr ""
 
@@ -6105,8 +6102,7 @@ msgstr ""
 msgid "Attach this conversation to another deal"
 msgstr ""
 
-#: /wa-apps/crm/templates/actions/message/MessageConversationId.html:168
-#: /wa-apps/crm/templates/actions/message/MessageConversationId.html:435
+#: /wa-apps/crm/templates/actions/message/MessageConversationId.html:168 /wa-apps/crm/templates/actions/message/MessageConversationId.html:435
 msgid "Detach from deal"
 msgstr ""
 
@@ -6118,10 +6114,7 @@ msgstr ""
 msgid "Detach"
 msgstr ""
 
-#: /wa-apps/crm/templates/actions/message/MessageList.html:110
-#: /wa-apps/crm/templates/actions/message/MessageList.html:115
-#: /wa-apps/crm/templates/actions/message/MessageListByConversation.html:96
-#: /wa-apps/crm/templates/actions/message/MessageListByConversation.html:101
+#: /wa-apps/crm/templates/actions/message/MessageList.html:110 /wa-apps/crm/templates/actions/message/MessageList.html:115 /wa-apps/crm/templates/actions/message/MessageListByConversation.html:96 /wa-apps/crm/templates/actions/message/MessageListByConversation.html:101
 msgid "To recieve and handle messages from clients %sset up a message source%s"
 msgstr ""
 
@@ -6129,8 +6122,7 @@ msgstr ""
 msgid "Technical information about the error"
 msgstr ""
 
-#: /wa-apps/crm/templates/actions/message/MessageSendEmailDialog.html:379
-#: /wa-apps/crm/templates/actions/message/MessageSendSMSDialog.html:121
+#: /wa-apps/crm/templates/actions/message/MessageSendEmailDialog.html:379 /wa-apps/crm/templates/actions/message/MessageSendSMSDialog.html:121
 msgid "Message sending error"
 msgstr ""
 
@@ -6158,21 +6150,13 @@ msgstr ""
 msgid "Switch %s to"
 msgstr ""
 
-#: /wa-apps/crm/templates/actions/settings/SettingsCronCurrenciesCopy.inc.html:19
-#: /wa-apps/crm/templates/actions/settings/SettingsCronDailyRecap.inc.html:19
-#: /wa-apps/crm/templates/actions/settings/SettingsCronDealStagesOverDue.inc.html:19
-#: /wa-apps/crm/templates/actions/settings/SettingsCronEmailSource.inc.html:36
-#: /wa-apps/crm/templates/actions/settings/SettingsCronInvoicesArchive.inc.html:19
-#: /wa-apps/crm/templates/actions/settings/SettingsCronNotificationBirthday.inc.html:19
+#: /wa-apps/crm/templates/actions/settings/SettingsCronCurrenciesCopy.inc.html:19 /wa-apps/crm/templates/actions/settings/SettingsCronDailyRecap.inc.html:19 /wa-apps/crm/templates/actions/settings/SettingsCronDealStagesOverDue.inc.html:19
+#: /wa-apps/crm/templates/actions/settings/SettingsCronEmailSource.inc.html:36 /wa-apps/crm/templates/actions/settings/SettingsCronInvoicesArchive.inc.html:19 /wa-apps/crm/templates/actions/settings/SettingsCronNotificationBirthday.inc.html:19
 msgid "The following <tt>cron</tt> job command is currently in use (%ssetting up a cron job%s):"
 msgstr ""
 
-#: /wa-apps/crm/templates/actions/settings/SettingsCronCurrenciesCopy.inc.html:37
-#: /wa-apps/crm/templates/actions/settings/SettingsCronDailyRecap.inc.html:37
-#: /wa-apps/crm/templates/actions/settings/SettingsCronDealStagesOverDue.inc.html:37
-#: /wa-apps/crm/templates/actions/settings/SettingsCronEmailSource.inc.html:16
-#: /wa-apps/crm/templates/actions/settings/SettingsCronInvoicesArchive.inc.html:37
-#: /wa-apps/crm/templates/actions/settings/SettingsCronNotificationBirthday.inc.html:37
+#: /wa-apps/crm/templates/actions/settings/SettingsCronCurrenciesCopy.inc.html:37 /wa-apps/crm/templates/actions/settings/SettingsCronDailyRecap.inc.html:37 /wa-apps/crm/templates/actions/settings/SettingsCronDealStagesOverDue.inc.html:37
+#: /wa-apps/crm/templates/actions/settings/SettingsCronEmailSource.inc.html:16 /wa-apps/crm/templates/actions/settings/SettingsCronInvoicesArchive.inc.html:37 /wa-apps/crm/templates/actions/settings/SettingsCronNotificationBirthday.inc.html:37
 msgid "Please set up a <tt>cron</tt> job (<a href=\"%s\" target=\"_blank\">view instructions</a>) using the command specified below in your web-hosting control panel:"
 msgstr ""
 
@@ -6208,8 +6192,7 @@ msgstr ""
 msgid "Install and set up <a href=\"%s\">IP telephony integration plugins</a>."
 msgstr ""
 
-#: /wa-apps/crm/templates/actions/settings/SettingsShop.html:17
-#: /wa-apps/crm/templates/actions/settings/SettingsShopWorkflow.html:16
+#: /wa-apps/crm/templates/actions/settings/SettingsShop.html:17 /wa-apps/crm/templates/actions/settings/SettingsShopWorkflow.html:16
 msgid "You need Shop-Script version %s or newer for CRM integration."
 msgstr ""
 
@@ -6217,8 +6200,7 @@ msgstr ""
 msgid "There are no contacts in vault \"%s\". Vault deleting cause no effect to access any contacts data."
 msgstr ""
 
-#: /wa-apps/crm/templates/source/message/ImSourceMessageSender.html:35
-#: /wa-apps/crm/templates/source/message/ImSourceMessageViewer.html:34
+#: /wa-apps/crm/templates/source/message/ImSourceMessageSender.html:35 /wa-apps/crm/templates/source/message/ImSourceMessageViewer.html:34
 msgid "Unknown source"
 msgstr ""
 
@@ -6226,8 +6208,7 @@ msgstr ""
 msgid "Contact with ID %s doesn't exist"
 msgstr ""
 
-#: /wa-apps/crm/lib/actions/invoice/crmInvoiceSidebar.action.php:100
-#: /wa-apps/crm/lib/classes/crmTemplatesRender.class.php:214
+#: /wa-apps/crm/lib/actions/invoice/crmInvoiceSidebar.action.php:100 /wa-apps/crm/lib/classes/crmTemplatesRender.class.php:214
 msgid "deleted id=%d"
 msgstr ""
 
@@ -6303,9 +6284,7 @@ msgstr ""
 msgid "No open deals"
 msgstr ""
 
-#: /wa-apps/crm/lib/models/crmDealStages.model.php:94
-#: /wa-apps/crm/lib/models/crmDealStages.model.php:99
-#: /wa-apps/crm/lib/models/crmDealStages.model.php:142
+#: /wa-apps/crm/lib/models/crmDealStages.model.php:94 /wa-apps/crm/lib/models/crmDealStages.model.php:99 /wa-apps/crm/lib/models/crmDealStages.model.php:142
 msgid "%d pcs."
 msgstr ""
 

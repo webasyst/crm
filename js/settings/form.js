@@ -755,6 +755,18 @@ var crmSettingsForm = (function ($) {
             that.renderToVariantSelectors();
         }
 
+        // when delete "company" field remove remove all exclusive company fields and disable them
+        if (id === 'company') {
+            that.$form_available_fields.find('.crm-form-field[data-person-enabled=0][data-company-enabled=1]')
+                .each(function () {
+                    var $field = $(this),
+                        id = $field.data('id'),
+                        $form_field = that.getFormField(id);
+                    that.deleteFormField($form_field);
+                    $field.addClass('crm-disabled');
+                });
+        }
+
         that.setFormChanged();
     };
 
@@ -828,9 +840,15 @@ var crmSettingsForm = (function ($) {
             }
         }
 
+        // enable to select exclusive company fields
+        if (id === 'company') {
+            that.$form_available_fields.find('.crm-form-field.crm-disabled[data-person-enabled=0][data-company-enabled=1]')
+                .removeClass('crm-disabled');
+        }
+
         that.renderField(id, checked);
 
-        if (id == '!paragraph') {
+        if (id === '!paragraph') {
             var $field = that.$form_fields.find('.crm-form-field[data-id="' + id + '"][data-checked="' + checked + '"]');
             that.editField($field);
         }

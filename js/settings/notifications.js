@@ -625,13 +625,13 @@ var CRMNotificationEdit = (function ($) {
             }
 
             var url = that.site_app_url + '?module=pages&action=help',
-                data = 'app=crm&file=notification.' + that.notification_event;
+                data = 'app=crm&key=notification.' + that.notification_event;
             $help.load(url, data, function () {
                 $help.find('#wa-help-wa').remove();
                 $help.find('#wa-help-wa-content').remove();
                 $help.show();
                 $help.find('ul>li.no-tab>p.bold').hide();
-                $help.data('loaded', true);
+                $help.data('loaded.' + that.notification_event, true);
             });
             return false;
         });

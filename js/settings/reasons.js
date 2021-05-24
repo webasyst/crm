@@ -151,7 +151,8 @@ var CRMReasonsPage = ( function($) {
                 that.$reasonsList.find(".c-reason").each( function(index) {
                     var $li = $(this),
                         id = $li.data("id"),
-                        name = $li.find(".js-name-field").val();
+                        name = $li.find(".js-name-field").val(),
+                        funnel_id = $li.find(".js-funnel-id-field").val();
 
                     if (name) {
                         if (id) {
@@ -163,6 +164,10 @@ var CRMReasonsPage = ( function($) {
                         result.push({
                             name: "reasons[" + index + "][name]",
                             value: name
+                        });
+                        result.push({
+                            name: "reasons[" + index + "][funnel_id]",
+                            value: funnel_id
                         });
                     }
                 });

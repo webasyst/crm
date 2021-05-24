@@ -582,33 +582,6 @@ class crmNotification
     }
 
     /**
-     * The array is going to hardcore, for correct processing through wa()->getUser()
-     * @param string $var_name
-     * @return array
-     */
-    public static function getVarsForContact($var_name = 'customer')
-    {
-        $vars = array(
-            '$'.$var_name.'.birth_day'                       => sprintf(_w('Field %s of customer'), 'birth_day'),
-            '$'.$var_name.'.birth_month'                     => sprintf(_w('Field %s of customer'), 'birth_month'),
-            '$'.$var_name.'.birth_year'                      => sprintf(_w('Field %s of customer'), 'name'),
-            '$'.$var_name.'.name|escape'                     => sprintf(_w('Field %s of customer'), 'name'),
-            '$'.$var_name.'.company|escape'                  => sprintf(_w('Field %s of customer'), 'company'),
-            '$'.$var_name.'.jobtitle|escape'                 => sprintf(_w('Field %s of customer'), 'jobtitle'),
-            '$'.$var_name."->get('phone', 'default|top')"    => sprintf(_w('Field %s of customer'), 'phone'),
-            '$'.$var_name."->get('email', 'default')|escape" => sprintf(_w('Field %s of customer'), 'email'),
-        );
-
-        $arr_field = array('street', 'city', 'zip', 'region', 'country');
-
-        foreach ($arr_field as $field) {
-            $vars['$'.$var_name."->get('address:{$field}', 'default')|escape "] = sprintf(_w('Field %s of customer'), $field);
-        }
-
-        return $vars;
-    }
-
-    /**
      * @return crmAppConfig
      */
     protected static function getAppConfig()

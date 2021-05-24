@@ -58,7 +58,7 @@ class crmDealChangeUserController extends crmJsonController
         $funnel_rights_value = $rights->funnel($funnel);
 
         $can_manage_responsible = $deal['user_contact_id'] == wa()->getUser()->getId() || $funnel_rights_value > 2 ||
-            (!$deal['contacts']['user'] && $funnel_rights_value > 0);
+            (!$deal['user_contact_id'] && $funnel_rights_value > 0);
 
         $deal_access_level = $this->getCrmRights()->deal($deal);
         $can_edit_deal = $deal_access_level > crmRightConfig::RIGHT_DEAL_VIEW;

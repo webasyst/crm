@@ -58,7 +58,7 @@ class crmDealChangeFunnelAction extends crmBackendViewAction
     protected function dropUnallowed($ids)
     {
         return $this->getCrmRights()->dropUnallowedDeals($ids, [
-            'level' => crmRightConfig::RIGHT_DEAL_ALL
+            'level' => crmRightConfig::RIGHT_DEAL_EDIT
         ]);
     }
 }

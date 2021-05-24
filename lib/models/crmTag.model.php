@@ -243,4 +243,15 @@ class crmTagModel extends crmModel
         return 0;
     }
 
+    public function deleteUnattachedTags()
+    {
+        $sql = 'SELECT ct.id FROM crm_tag AS ct
+                    LEFT JOIN crm_contact_tags AS cct on ct.id = cct.tag_id
+                WHERE cct.tag_id IS NULL';
+        $unattached_tag_ids = $this->query($sql)->fetchAll('id');
+        if ($unattached_tag_ids) {
+            $this->deleteById(array_keys($unattached_tag_ids));
+        }
+    }
+
 }

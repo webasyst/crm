@@ -141,6 +141,9 @@ class crmSettingsCompaniesSaveController extends crmJsonController
             }
         }
 
+        $params_description['domain'] = true;
+        $new_company['domain'] = ifset($this->company['invoice_options']['domain']);
+
         unset($this->company['invoice_options']['images']);
 
         // Make sure there are no unknown keys in params

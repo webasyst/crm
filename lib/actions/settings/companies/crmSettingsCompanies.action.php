@@ -56,20 +56,29 @@ class crmSettingsCompaniesAction extends crmSettingsViewAction
         $tpm = new crmTemplatesParamsModel();
         $arr_basic_param = $tpm->getParamsByTemplates((int)$company['template_id']);
 
+        $domains = wa()->getRouting()->getByApp($this->getAppId());
+        $storefront_list = array();
+        foreach ($domains as $domain => $storefronts) {
+            $storefront_list[$domain] = $domain . '/' . current($storefronts)['url'];
+        }
+        $has_storefronts = !empty($storefront_list);
+
         $this->view->assign(array(
-            'companies'      => $companies,
-            'company'        => $company,
-            'invoice_count'  => $invoice_count,
-            'payment_count'  => $payment_count,
+            'companies'       => $companies,
+            'company'         => $company,
+            'invoice_count'   => $invoice_count,
+            'payment_count'   => $payment_count,
             //            'logo_file'   => $logo_file,
-            'logo_url'       => $logo_url,
-            'logo_locale'    => wa()->getLocale() == 'ru_RU' ? 'ru_RU' : 'en_US',
-            'templates'      => $templates,
-            'company_params' => $company_params,
-            'basic_params'   => $arr_basic_param,
-            'photo_path'     => wa()->getDataUrl('company_images/', true, 'crm'),
-            'company_id'     => $company['id'],
-            'template_id'    => $company['template_id'],
+            'logo_url'        => $logo_url,
+            'logo_locale'     => wa()->getLocale() == 'ru_RU' ? 'ru_RU' : 'en_US',
+            'templates'       => $templates,
+            'company_params'  => $company_params,
+            'basic_params'    => $arr_basic_param,
+            'photo_path'      => wa()->getDataUrl('company_images/', true, 'crm'),
+            'company_id'      => $company['id'],
+            'template_id'     => $company['template_id'],
+            'has_storefronts' => $has_storefronts,
+            'storefront_list' => $storefront_list,
         ));
     }
 

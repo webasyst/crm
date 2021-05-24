@@ -71,7 +71,12 @@
             <div class="c-column">
                 <ul class="c-nav-wrapper">
                     <li>
-                        <a class="bold js-back-link" href="{$wa_app_url}message/{$_page}">&larr; [`Back`]</a>
+                        {$_deal_id = $wa->get('deal_id')}
+                        {if $_deal_id}
+                            <a class="bold js-back-link" href="{$wa_app_url}deal/{$_deal_id}/">&larr; [`Back`]</a>
+                        {else}
+                            <a class="bold js-back-link" href="{$wa_app_url}message/{$_page}">&larr; [`Back`]</a>
+                        {/if}
                     </li>
                     <li>
                         <div class="c-header">{$conversation.summary|escape}</div>

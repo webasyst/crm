@@ -70,8 +70,14 @@ class crmShopBackend_rightsHandler extends waEventHandler
         // When user can edit deal in CRM, allow to see order in Shop.
         // When user can not edit deal in CRM, deny order in Shop.
         $rights = new crmRights();
-        return array(
-            'orders' => $rights->deal($deal) > crmRightConfig::RIGHT_DEAL_VIEW ? 1 : 0
-        );
+        $right_deal_view = $rights->deal($deal) > crmRightConfig::RIGHT_DEAL_VIEW ? 1 : 0;
+        if ($right_deal_view == 0) {
+            echo '<div class="block double-padded"><h2 id="Title">' . _w('The order is not available because of insufficient access rights for deal editing.') . '</h2></div>';
+            exit;
+        } else {
+            return array(
+                'orders' => $right_deal_view
+            );
+        }
     }
 }

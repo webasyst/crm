@@ -925,10 +925,10 @@ msgstr "Статус"
 msgid "Public link"
 msgstr "Общедоступная ссылка"
 
-msgid "A settlement required for invoice publication."
-msgstr "Для публикации счетов настройте поселение."
+msgid "A CRM settlement is required to publish invoices."
+msgstr "Для публикации счетов требуется поселение CRM."
 
-msgid "Use site application to configure settlement for CRM."
+msgid "Use Site app to add a settlement for CRM."
 msgstr "Чтобы добавить поселение для CRM, перейдите в приложение «Сайт»."
 
 msgid "Transactions"
@@ -2264,7 +2264,7 @@ msgid "Create deals"
 msgstr "Создать сделки"
 
 msgid "You have no access rights to delete selected contacts."
-msgstr "У вас недостаточно прав для удавления выбранных контактов."
+msgstr "У вас недостаточно прав для удаления выбранных контактов."
 
 msgid "Encoding:"
 msgstr "Кодировка:"
@@ -4776,3 +4776,63 @@ msgstr "Категория"
 
 msgid "Cannot delete the last template."
 msgstr "Невозможно удалить последний шаблон."
+
+msgid "Change deal’s responsible user"
+msgstr "Изменить ответственного пользователя"
+
+msgid "Set deal’s responsible user"
+msgstr "Выбрать ответственного пользователя"
+
+msgid "This will make you lose access to this deal."
+msgstr "Это приведёт к потере вами доступа к этой сделке."
+
+msgid "Confirm"
+msgstr "Подтвердить"
+
+msgid "You are about to change the responsible user for deal %s from youself to %s."
+msgstr "Вы собираетесь сменить ответственного пользователя для сделки %s с себя на %s."
+
+msgid "You are about to change the responsible user for deal %s from %s to %s."
+msgstr "Вы собираетесь сменить ответственного пользователя для сделки %s с %s на %s."
+
+msgid "You are about to set %s as the responsible user for deal %s."
+msgstr "Вы собираетесь установить %s в качестве ответственного пользователя для сделки %s."
+
+msgid "Export is in progress. Please don’t leave this page until the process is completed."
+msgstr "Выполняется экспорт. Не закрывайте эту страницу до завершения процесса."
+
+msgid "User not found."
+msgstr "Пользователь не найден."
+
+msgid "Recent views"
+msgstr "Последние просмотры"
+
+msgid "Open in CRM"
+msgstr "Открыть в CRM"
+
+msgid "The order is not available because of insufficient access rights for deal editing."
+msgstr "Заказ недоступен, потому что недостаточно прав для редактирования сделки."
+
+msgid "For each new deal, a randomly selected user with the lowest number of assigned deals will be assinged as the responsible person."
+msgstr "При создании сделки в качестве ответственного будет случайным образом выбран один из пользователей в группе с наименьшим количеством сделок."
+
+msgid "Deal loss reasons are not set up."
+msgstr "Не настроены причины проигрыша сделок."
+
+msgid "To make company-only fields avialable, first add the “Company” field to the form."
+msgstr "Чтобы добавлять поля, относящиеся только к компаниям, сначала добавьте в форму поле «Компания»."
+
+msgid "Public links URL"
+msgstr "URL для опубликованных ссылок"
+
+msgid "To add invoices, set up at least one company."
+msgstr "Чтобы создавать счета, настройте хотя бы одну компанию."
+
+msgid "Tax rules are not set up for the selected company."
+msgstr "Налоговые правила для выбранной компании не настроены."
+
+msgid "Set up"
+msgstr "Настроить"
+
+msgid "company not selected"
+msgstr "компания не выбрана"

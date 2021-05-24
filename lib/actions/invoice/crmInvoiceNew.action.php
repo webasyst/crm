@@ -56,12 +56,14 @@ class crmInvoiceNewAction extends crmInvoiceViewAction
                     $invoice['items'] = array();
 
                     foreach ($shop_order['items'] as $item) {
-                        $invoice['items'][] = array(
-                            'name'       => $item['name'],
-                            'price'      => $item['price'],
-                            'quantity'   => $item['quantity'],
-                            'product_id' => 'shop:'.$item['product_id'].':'.$item['sku_id'],
-                        );
+                        if ($item['quantity'] > 0) {
+                            $invoice['items'][] = array(
+                                'name' => $item['name'],
+                                'price' => $item['price'] - ($item['total_discount'] / $item['quantity']),
+                                'quantity' => $item['quantity'],
+                                'product_id' => 'shop:' . $item['product_id'] . ':' . $item['sku_id'],
+                            );
+                        }
                     }
                     if (floatval($shop_order['shipping'])) {
                         $invoice['items'][] = array(

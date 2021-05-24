@@ -430,6 +430,7 @@ var CRMDeal = ( function($) {
         // DOM
         that.$wrapper = options["$wrapper"];
         that.$aside = that.$wrapper.find(".c-deal-aside");
+        that.$log_section = that.$wrapper.find('.js-deal-log-section');
 
         // VARS
         that.locales = options["locales"];
@@ -509,6 +510,10 @@ var CRMDeal = ( function($) {
 
         that.initScroll();
 
+        if (that.deal_id) {
+            that.initLogSection();
+        }
+
         // EVENTS
 
         that.$wrapper.on("click", ".js-remove-owner", function(event) {
@@ -528,6 +533,21 @@ var CRMDeal = ( function($) {
         that.$wrapper.on("click", ".js-add-external-contact", function(event) {
             event.preventDefault();
             that.addExternalContact( $(this) );
+        });
+    };
+
+    CRMDeal.prototype.initLogSection = function() {
+        var that = this,
+            deal_id = that.deal_id,
+            $log_section = that.$log_section;
+        $log_section.on('click', '.js-open-conversation', function (e) {
+            e.preventDefault();
+            var href = $(this).attr('href');
+            if (href.indexOf('?') === -1) {
+                window.location.href = href + '?deal_id=' + deal_id;
+            } else {
+                window.location.href = href + '&deal_id=' + deal_id;
+            }
         });
     };
 
@@ -1695,7 +1715,12 @@ var CRMDeal = ( function($) {
         }
 
         function changeOwner(user_id, $contact) {
-            if (!is_locked) {
+            if (is_locked) {
+                showToggle($contact);
+                return
+            }
+
+            var changeUser = function () {
                 is_locked = true;
 
                 var href = "?module=deal&action=changeUser",
@@ -1722,7 +1747,7 @@ var CRMDeal = ( function($) {
                     response.data = response.data || {};
 
                     if (response.data.deal_access_denied) {
-                        location.reload();
+                        window.location.href = $.crm.app_url + 'deal/';
                         return;
                     }
 
@@ -1745,7 +1770,33 @@ var CRMDeal = ( function($) {
                 });
             }
 
-            showToggle($contact);
+            changeUserConfirm(user_id, changeUser);
+        }
+
+        function changeUserConfirm(user_id, onConfirmed) {
+            var href = "?module=deal&action=changeUserConfirm",
+                data = {
+                    id: that.deal_id,
+                    user_contact_id: user_id
+                };
+
+            $.post(href, data, "json")
+                .done(function(response) {
+
+                    if (response.data && response.data.need_confirm) {
+                        new CRMDialog({
+                            html: response.data.html || '',
+                            onOpen: function ($dialog_wrapper, dialog) {
+                                $dialog_wrapper.find('.js-confirm-button').on('click', function () {
+                                    onConfirmed();
+                                });
+                            }
+                        });
+                        return;
+                    }
+
+                    onConfirmed();
+                });
         }
 
         function showToggle($contact, show) {
@@ -1784,9 +1835,12 @@ var CRMDeal = ( function($) {
             //
 
             function setOwner(id) {
-                if (!is_locked) {
-                    is_locked = true;
+                if (is_locked) {
+                    return;
+                }
 
+                var changeUser = function () {
+                    is_locked = true;
                     var href = "?module=deal&action=changeUser",
                         data = {
                             id: that.deal_id,
@@ -1795,12 +1849,18 @@ var CRMDeal = ( function($) {
 
                     $.post(href, data, function(response) {
                         if (response.status === "ok") {
+                            if (response.data.deal_access_denied) {
+                                window.location.href = $.crm.app_url + 'deal/';
+                                return;
+                            }
                             renderContact( $(response.data.html) );
                         }
                     }, "json").always( function() {
                         is_locked = false;
                     });
-                }
+                };
+
+                changeUserConfirm(id, changeUser);
 
                 function renderContact($contact) {
                     // delete me if already in list
@@ -1911,10 +1971,16 @@ var CRMDeal = ( function($) {
                     new CRMDialog({
                         html: html,
                         options: {
-                            onChange: function(html) {
-                                $wrapper.replaceWith(html);
+                            onChange: function(data) {
+                                $wrapper.replaceWith(data.html);
 
                                 $wrapper.find(".js-add-company-contact").show();
+
+                                // deal.contact was changed - so update property
+                                var deal_contact_id = parseInt(that.deal.contact_id) || 0;
+                                if (deal_contact_id === contact_id && data.contact.id !== contact_id) {
+                                    that.deal.contact_id = data.contact.id;
+                                }
 
                                 $(document).trigger("refresh");
                             }

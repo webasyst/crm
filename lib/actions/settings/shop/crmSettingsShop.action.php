@@ -39,7 +39,7 @@ class crmSettingsShopAction extends crmSettingsViewAction
             )
         );
 
-        $storefronts = array_merge($storefronts, array_slice(shopHelper::getStorefronts(true), 0, 50));
+        $storefronts = array_merge($storefronts, array_slice(shopHelper::getStorefronts(true), 0, 150));
 
         $urls = waUtils::getFieldValues($storefronts, 'url');
         $sources = crmShopSource::factoryByStorefront($urls);

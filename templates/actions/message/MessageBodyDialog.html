@@ -16,20 +16,16 @@
         {/if}
     {/function}
 
-    {function name="_renderToContact" _contact=[]}
-        {if $message.direction == "IN"}
-            <span style="color: #999">{$message.to|default:null|escape}</span>
+    {function name="_renderToRecipient" recipient=[]}
+        {if $recipient.contact_id > 0}
+            <a href="{$wa_app_url}contact/{$recipient.contact_id}/" target="_top" class="c-contact-link">
+                <img src="{$recipient.photo_url_16}" alt="{$recipient.name|escape}" class="c-contact-photo">&nbsp;
+                {$recipient.name|escape}
+            </a>
+            <span style="color: #999">&lt;{$recipient.destination|escape}&gt;</span>
         {else}
-            {if isset($_contact.id)}
-                <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" class="c-contact-link">
-                    <img src="{$_contact.photo_url_16}" alt="{$_contact.name|escape}" class="c-contact-photo">&nbsp;
-                    {$_contact.name|escape}
-                </a>
-                <span style="color: #999">&lt;{$message.to|escape}&gt;</span>
-            {else}
-                {$_contact.name|escape}&nbsp;
-                <span style="color: #999">&lt;{$message.to|escape}&gt;</span>
-            {/if}
+            {$recipient.name|escape}&nbsp;
+            <span style="color: #999">&lt;{$recipient.destination|escape}&gt;</span>
         {/if}
     {/function}
 
@@ -103,7 +99,13 @@
                         {if !empty($message.to)}
                             <div class="field">
                                 <div class="name">[`To`]</div>
-                                <div class="value">{_renderToContact _contact=$to|default:0}</div>
+                                <div class="value">
+                                    <ul class="c-to-list">
+                                        {foreach $to_list as $_recipient}
+                                            <li>{_renderToRecipient recipient=$_recipient|default:0}</li>
+                                        {/foreach}
+                                    </ul>
+                                </div>
                             </div>
                         {/if}
 
@@ -113,7 +115,9 @@
                                 <div class="value">
                                     <ul class="c-copy-list">
                                         {foreach $recipients as $_recipient}
-                                            <li>{_renderRecipient _contact=$_recipient}</li>
+                                            {if $_recipient.type !== crmMessageRecipientsModel::TYPE_TO}
+                                                <li>{_renderRecipient _contact=$_recipient}</li>
+                                            {/if}
                                         {/foreach}
                                     </ul>
                                 </div>
@@ -292,15 +296,18 @@
 
         <script>
             (function ($) {
+
+                var $dialog = $("#js-message-show-body-dialog");
+
                 new CRMMessagesPage({
-                    $wrapper: $("#js-message-show-body-dialog"),
+                    $wrapper: $dialog,
                     app_url: "{$wa_app_url}",
                     is_dialog: true
                 });
 
                 {if $is_admin}
                     new CRMMessageBodyDialog({
-                        $wrapper: $("#js-message-show-body-dialog"),
+                        $wrapper: $dialog,
                         contact_id: {if $message.direction === 'IN'}{$from.id|default:0}{else}{$to.id|default:0}{/if},
                         message: {$message|json_encode},
                         locales: {

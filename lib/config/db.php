@@ -139,10 +139,12 @@ return array(
     ),
     'crm_deal_lost' => array(
         'id' => array('int', 11, 'null' => 0, 'autoincrement' => 1),
+        'funnel_id' => array('int', 11, 'null' => 0, 'default' => '0'),
         'name' => array('varchar', 255, 'null' => 0),
         'sort' => array('int', 11, 'null' => 0, 'default' => '0'),
         ':keys' => array(
             'PRIMARY' => 'id',
+            'funnel_id' => 'funnel_id',
         ),
     ),
     'crm_deal_params' => array(

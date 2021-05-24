@@ -23,7 +23,8 @@ class crmRightConfig extends waRightConfig
      */
     const RIGHT_DEAL_NONE = 0;
     const RIGHT_DEAL_VIEW = 1;
-    const RIGHT_DEAL_ALL  = 999;
+    const RIGHT_DEAL_EDIT = 2;      // can view, can edit
+    const RIGHT_DEAL_ALL  = 999;    // can view, can edit, can delete
 
     /**
      * Access levels to call(s)

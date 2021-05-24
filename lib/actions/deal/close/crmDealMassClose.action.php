@@ -17,15 +17,17 @@ class crmDealMassCloseAction extends crmBackendViewAction
         $deals = $dm->select('*')->where("id IN('".join("','", $dm->escape($ids))."')")->fetchAll('id');
 
         $shop_linked = 0;
+        $funnel_id = 0;
         foreach ($deals as $d) {
             if ($d['external_id'] && strpos($d['external_id'], 'shop:') === 0) {
                 $shop_linked++;
             }
+            $funnel_id = $d['funnel_id'];
         }
 
         $this->view->assign(array(
             'deals'                => $deals,
-            'reasons'              => $dlm->select('*')->order('sort')->fetchAll('id'),
+            'reasons'              => $dlm->select('*')->where("funnel_id IN (0, {$funnel_id})")->order('sort')->fetchAll('id'),
             'lost_reason_require'  => wa()->getSetting('lost_reason_require'),
             'lost_reason_freeform' => wa()->getSetting('lost_reason_freeform'),
             'shop_linked'          => $shop_linked,

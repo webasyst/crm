@@ -19,7 +19,7 @@ class crmFrontendPaymentPluginController extends waController
         $im = new crmInvoiceModel();
         $iim = new crmInvoiceItemsModel();
         $invoice = $im->getById($order_id);
-        if (!$invoice) {
+        if (!$invoice || $invoice['state_id'] != 'PENDING') {
             throw new waPaymentException('Invoice not found');
         }
         $items = $iim->getByField('invoice_id', $order_id, true);

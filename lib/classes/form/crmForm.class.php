@@ -162,6 +162,7 @@ class crmForm
             $this->info['params']['__fields'][$field['uid']] = $field;
         }
 
+
         return $this->info;
     }
 
@@ -479,42 +480,29 @@ class crmForm
     {
         if (wa()->getLocale() == 'ru_RU') {
             return '{SEPARATOR}'.
-                "<p>Мы ответим вам в ближайшее время.</p>".
-                "<p>Спасибо!</p>".
-                "<p>--</p>".
-                "<p>{COMPANY_NAME}</p>";
+                '<p>Мы ответим вам в ближайшее время.</p>'.
+                '<p>Спасибо!</p>'.
+                '<p>--</p>'.
+                '<p>{$company_name}</p>';
         }
         return '{SEPARATOR}'.
-            "<p>We shall reply to you as soon as possible.</p>".
-            "<p>Thank you!</p>".
-            "<p>--</p>".
-            "<p>{COMPANY_NAME}</p>";
+            '<p>We shall reply to you as soon as possible.</p>'.
+            '<p>Thank you!</p>'.
+            '<p>--</p>'.
+            '<p>{$company_name}</p>';
     }
 
+    /**
+     * @return array
+     */
     public static function getMessageTemplateVars()
     {
-        if (self::$message_template_vars) {
-            return self::$message_template_vars;
-        }
-
         $vars = array(
-            '{ORIGINAL_TEXT}' => _w('“Text” field contents'),
-            '{COMPANY_NAME}' => _w('Company name specified in your Installer settings (also displayed in the top-left corner of your backend)'),
-            '{CUSTOMER_ID}' => _w('Unique identifier automatically assigned to each customer in Contacts'),
-            '{CUSTOMER_NAME}' => _w('Full formatted name of customer')
+            '$original_text' => _w('“Text” field contents'),
+            '$company_name' => _w('Company name specified in your Installer settings (also displayed in the top-left corner of your backend)'),
         );
 
-        $prefix = 'CUSTOMER_';
-        $description = _w('Value of customer field "%s"');
-
-        foreach (waContactFields::getAll() as $field_id => $field) {
-            $key = '{' . $prefix . strtoupper($field_id) . '}';
-            if (!isset($vars[$key])) {
-                $vars[$key] = sprintf($description, $field->getName());
-            }
-        }
-
-        return self::$message_template_vars = $vars;
+        return array_merge($vars, crmHelper::getVarsForContact());
     }
 
     protected function formatMessagesArray($messages)

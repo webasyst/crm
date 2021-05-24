@@ -324,8 +324,9 @@ var CRMDealChangeClient = ( function($) {
                 });
 
                 $.post(href, data, function(response) {
-                    if (response.status == "ok") {
-                        renderContact(response.data.html);
+                    if (response.status === "ok") {
+                        that.dialog.options.onChange(response.data);
+                        that.dialog.close();
                     } else if (response.errors) {
                         showErrors(response.errors);
                     }
@@ -333,11 +334,6 @@ var CRMDealChangeClient = ( function($) {
                     is_locked = false;
                 });
             }
-        }
-
-        function renderContact(html) {
-            that.dialog.options.onChange(html);
-            that.dialog.close();
         }
     };
 

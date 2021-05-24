@@ -166,6 +166,9 @@ class crmModel extends waModel
                 $this->setToContactsLinks($contact_ids, $link_contact_field, $behavior[1]);
             }
         }
+
+        $tag_model = new crmTagModel();
+        $tag_model->deleteUnattachedTags();
     }
 
     private function typecastUnsetContactLinksBehavior()

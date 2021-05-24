@@ -69,6 +69,7 @@ class crmDealPersonUpdateController extends crmContactSaveController
         $this->response = array(
             'html'    => $view->fetch(wa()->getAppPath('templates/actions/deal/DealContact.html', 'crm')),
             'contact' => array(
+                'id' => $after->getId(),
                 'name'     => $after->getName(),
                 'photo_16' => $after->getPhoto(16),
                 'label'    => $after['label'],

@@ -61,6 +61,19 @@ class crmFormContactDataProcessor
         return $this->errors;
     }
 
+    /**
+     * @param array $data
+     * @return array|false $result
+     *      waContact       $result['contact']
+     *      waContact|null  $result['company']
+     * @throws waAuthConfirmEmailException
+     * @throws waAuthConfirmPhoneException
+     * @throws waAuthException
+     * @throws waAuthInvalidCredentialsException
+     * @throws waException
+     * @throws waWebasystIDAccessDeniedAuthException
+     * @throws waWebasystIDAuthException
+     */
     public function process($data)
     {
         if ($this->isStrategyForAuthorizedUser()) {
@@ -70,9 +83,21 @@ class crmFormContactDataProcessor
         }
     }
 
+    /**
+     * @param $data
+     * @return array|false $result
+     *      waContact       $result['contact'] - contact-person
+     *      waContact|null  $result['company'] - contact-company (could be NULL)
+     * @return array
+     * @throws waException
+     */
     protected function processAuthorizedUser($data)
     {
-        $update_data = array();
+        $contact = new crmContact($this->getUser()->getId());
+        $company = new crmContact($contact['company_contact_id']);
+
+        $person_data = [];
+        $company_data = [];
 
         $fields = $this->getFormFields();
 
@@ -99,25 +124,60 @@ class crmFormContactDataProcessor
                 continue;
             }
 
-            if (!$fld->isMulti()) {
-                $update_data[$field['id']] = $data[$field['id']];
-            } else {
-                $update_data[$field['id']] = $this->normalizeFieldValue($fld->getId(), $data[$field['id']]);
+            $is_enabled_for_person = boolval(waContactFields::get($field['id'], 'person'));
+            $is_enabled_for_company = boolval(waContactFields::get($field['id'], 'company'));
+            $is_exclusive_enabled_for_company = $is_enabled_for_company && !$is_enabled_for_person;
+
+            if ($is_enabled_for_person) {
+                // prepare data for update
+                if (!$fld->isMulti()) {
+                    $person_data[$field['id']] = $data[$field['id']];
+                } else {
+                    $person_data[$field['id']] = $this->normalizeFieldValue($fld->getId(), $data[$field['id']]);
+                }
+            }
+
+            if ($is_exclusive_enabled_for_company) {
+                // prepare data for update
+                if (!$fld->isMulti()) {
+                    $company_data[$field['id']] = $data[$field['id']];
+                } else {
+                    $company_data[$field['id']] = $this->normalizeFieldValue($fld->getId(), $data[$field['id']]);
+                }
             }
         }
-
-        $contact = new crmContact($this->getUser()->getId());
 
         if (isset($data['email'])) {
             $contact->setProperty('email_to_send', $data['email']);
         }
 
-        if ($update_data) {
-            $this->updateContact($contact, $update_data);
+        if ($person_data) {
+            $this->updateContact($contact, $person_data);
+        }
+
+        if ($company_data) {
+            if ($company->exists()) {
+                $this->updateContact($company, $company_data);
+            } else {
+                // save new company
+                $company = new crmContact();
+                $company->save(array_merge($company_data, [
+                    'is_company' => 1,
+                    'company' => $contact['company']
+                ]));
+
+                // make person is employee of this company
+                $contact->save([
+                    'company_contact_id' => $company->getId()
+                ]);
+            }
+        } else {
+            $company = null;    // will return null
         }
 
         return array(
             'contact' => $contact,
+            'company' => $company
         );
     }
 
@@ -138,7 +198,7 @@ class crmFormContactDataProcessor
             }
         }
         unset($update_value);
-        
+
         if (!$update_data) {
             return;
         }
@@ -225,15 +285,30 @@ class crmFormContactDataProcessor
             return $value['data'];
         } elseif (isset($value['value'])) {
             return $value['value'];
+        } elseif (!is_array($value)) {
+            return $value;
         } else {
             return '';
         }
     }
 
+    /**
+     * @param $data
+     * @return array|false $result
+     *      waContact       $result['contact'] - contact-person
+     *      waContact|null  $result['company'] - contact-company (could be NULL)
+     * @throws waAuthConfirmEmailException
+     * @throws waAuthConfirmPhoneException
+     * @throws waAuthException
+     * @throws waAuthInvalidCredentialsException
+     * @throws waException
+     * @throws waWebasystIDAccessDeniedAuthException
+     * @throws waWebasystIDAuthException
+     */
     protected function processNotAuthorizedUser($data)
     {
         // creating contact
-        $contact = $this->createContact($data);
+        $contact = $this->createPerson($data);
         if (!$contact) {
             return false;
         }
@@ -253,8 +328,18 @@ class crmFormContactDataProcessor
             $this->logCreateContact($contact, $this->form->getId());
         }
 
+        // create company if need
+        $company = $this->createCompany($data);
+        if ($company) {
+            $company_id = $company->getId();
+            $contact->save([
+                'company_contact_id' => $company_id
+            ]);
+        }
+
         return array(
-            'contact' => $contact
+            'contact' => $contact,
+            'company' => $company,
         );
     }
 
@@ -285,8 +370,9 @@ class crmFormContactDataProcessor
     /**
      * @param $data
      * @return crmContact|null
+     * @throws waException
      */
-    protected function createContact($data)
+    protected function createPerson($data)
     {
         $contact_data = $this->prepareDataForContactSaving($data);
 
@@ -301,12 +387,53 @@ class crmFormContactDataProcessor
         return $contact;
     }
 
-    protected function prepareDataForContactSaving($data)
+    /**
+     * @param $data
+     * @return crmContact|null
+     * @throws waException
+     */
+    protected function createCompany($data)
     {
+        $contact_data = $this->prepareDataForContactSaving($data, 'company');
+        if (!$contact_data) {
+            return null;
+        }
+
+        $contact = new crmContact();
+        $contact->save($contact_data);
+        return $contact;
+    }
+
+    /**
+     * @param $data
+     * @param string $contact_type - allowed only 2 variants for now: 'person', 'company'
+     * @return mixed
+     * @throws waException
+     */
+    protected function prepareDataForContactSaving($data, $contact_type = 'person')
+    {
+        $contact_type = $contact_type === 'person' ? $contact_type : 'company';
+
         foreach ($this->getFormFields() as $field) {
-            if (!crmFormConstructor::isFieldOfContact($field) && isset($data[$field['uid']])) {
+            $is_conform = crmFormConstructor::isFieldOfContact($field);
+            if ($is_conform) {
+                if ($field['id'] !== 'company') {   // field "company" fits to both types of contacts
+                    if ($contact_type === 'person') {
+                        $is_conform &= boolval(waContactFields::get($field['id'], 'person'));
+                    } else {
+                        // for company check exclusiveness!
+                        $is_conform &= boolval(waContactFields::get($field['id'], 'company')) && !boolval(waContactFields::get($field['id'], 'person'));
+                    }
+                }
+            }
+
+            if (!$is_conform) {
                 unset($data[$field['uid']]);
             }
+        }
+
+        if (!$data) {
+            return [];
         }
 
         if (empty($data['locale'])) {
@@ -321,9 +448,20 @@ class crmFormContactDataProcessor
 
         $data['create_app_id'] = 'crm';
         $data['create_contact_id'] = 0;
-        $data['create_method'] = $this->form->getType() === crmForm::TYPE_SIGN_UP ? 'signup' : 'form';
+
+        $data['create_method'] = 'form';
+        if ($contact_type === 'person' && $this->form->getType() === crmForm::TYPE_SIGN_UP) {
+            $data['create_method'] = 'signup';
+        }
+
         $data['create_ip'] = waRequest::getIp();
         $data['create_user_agent'] = waRequest::getUserAgent();
+
+        $data['is_company'] = 1;
+        if ($contact_type === 'person') {
+            $data['is_company'] = 0;
+        }
+
         return $data;
     }
 

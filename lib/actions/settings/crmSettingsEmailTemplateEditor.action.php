@@ -6,6 +6,12 @@ class crmSettingsEmailTemplateEditorAction extends crmBackendViewAction
     {
         $this->accessDeniedForNotAdmin();
 
+        if ($this->getType() === 'form') {
+            $cheat_sheet_key = 'message.form_source';
+        } else {
+            $cheat_sheet_key = 'message.email_source';
+        }
+
         $data = array(
             'input_name' => null,
             'to_name' => null,
@@ -13,10 +19,13 @@ class crmSettingsEmailTemplateEditorAction extends crmBackendViewAction
             'sourcefrom_name' => null,
             'sourcefrom_set' => null,
             'add_attachments_name' => null,
-            'variables' => $this->getMessageTemplateVars(),
             'template' => $this->getDefaultMessageTemplate(),
             'message_to_variants' => $this->getMessageToVariants(),
+            'cheat_sheet' => true,
+            'cheat_sheet_key' => $cheat_sheet_key,
+            'site_app_url' => wa()->getAppUrl('site'),
         );
+
         $data['to_value'] = key($data['message_to_variants']);
         $data = array_intersect_key(waRequest::request(), $data) + $data;
         $this->view->assign($data);
@@ -26,17 +35,6 @@ class crmSettingsEmailTemplateEditorAction extends crmBackendViewAction
     protected function getType()
     {
         return $this->getParameter('type');
-    }
-
-    protected function getMessageTemplateVars()
-    {
-        if ($this->getType() === 'form') {
-            return crmForm::getMessageTemplateVars();
-        } elseif ($this->getType() === 'source') {
-            return crmEmailSource::getMessageTemplateVars();
-        } else {
-            return array();
-        }
     }
 
     protected function getDefaultMessageTemplate()

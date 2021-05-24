@@ -10,6 +10,9 @@
  * - to_value: optional
  * - sourcefrom_name: optional
  * - sourcefrom_set: optional
+ * - cheat_sheet: optional
+ * - cheat_sheet_key: optional
+ * - site_app_url: optional
  *}
 
 {$input_name = ifset($input_name, '')}
@@ -118,6 +121,13 @@
 
                 {if !empty($variables)}
                     <a href="javascript:void(0)" class="crm-variables-link inline-link" style="font-size:.8em;"><b><i>[`Variables`]</i></b></a>
+                {elseif !empty($cheat_sheet)}
+                    <div class="wa-dropdown">
+                        <div class="wa-drop-link">
+                            <a href="javascript:void(0)" class="crm-variables-link inline-link js-help-link" style="font-size:.8em;"><b><i>[s`Cheat sheet`]</i></b></a>
+                        </div>
+                        <div class="wa-dropdown-block js-help-block"></div>
+                    </div>
                 {/if}
 
             </div>
@@ -196,6 +206,66 @@
     };
 
     initEditor(body_textarea);
+
+    var initHelp = function ($wrapper, body_textarea) {
+        var that = this,
+            $document = $(document),
+            $help = $wrapper.find(".js-help-block"),
+            $help_link = $wrapper.find(".js-help-link"),
+            cheat_sheet_key = {$cheat_sheet_key|default:''|json_encode},
+            site_app_url = {$site_app_url|default:''|json_encode};
+
+        var listener = function (e) {
+            // auto-off event-handler from global object
+            if ($document.find($wrapper).length <= 0) {
+                $document.off('click', listener);
+                return;
+            }
+            // click outside of help area lead to close help area
+            var $target = $(e.target);
+            if (!$target.is($help) && $help.find($target).length <= 0) {
+                $help.hide();
+            }
+        };
+
+        $document.on('click', listener);
+
+        $help_link.on('click', function () {
+            if ($help.is(":visible")) {
+                $help.hide();
+                return false;
+            }
+
+            if ($help.data('loaded')) {
+                $help.show();
+                return false;
+            }
+
+            var unique_name = "settings-email-editor-" + (Math.random() + '').slice(2);
+            var url = site_app_url + '?module=pages&action=help',
+                data = 'app=crm&key=' + cheat_sheet_key + '&name=' + unique_name;
+
+            // so system code could set js handlers to links and etc
+            $help.attr('id', 'wa-editor-help-' + unique_name);
+
+            $help.load(url, data, function () {
+                $help.find('#wa-help-wa').remove();
+                $help.find('#wa-help-wa-content').remove();
+                $help.show();
+                $help.find('ul>li.no-tab>p.bold').hide();
+                $help.data('loaded', true);
+            });
+            return false;
+        });
+
+        $help.on('click', "div.fields a.inline-link", function (e) {
+            e.preventDefault();
+            var $el = $(this).find('i');
+            body_textarea.waEditor('insert', $.trim($el.text()));
+        });
+    };
+
+    initHelp(wrapper, body_textarea);
 
     // Controller for combined selectors (select + input)
     wrapper.on('change', '.combined-selector select', function() {

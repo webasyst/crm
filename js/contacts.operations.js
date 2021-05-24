@@ -459,13 +459,18 @@ var CRMContactsOperations = (function ($) {
             context = that.getSelectedContext(),
             count = context.checked_count;
         $.get(url, { checked_count: count } , function (html) {
+            var exportOperation = null;
             new CRMDialog({
                 html: html,
+                esc: false,
                 onOpen: function ($dialog) {
-                    new CRMContactsOperationExport({
+                    exportOperation = new CRMContactsOperationExport({
                         '$wrapper': $dialog,
                         'context': that.getSelectedContext()
                     });
+                },
+                onClose: function () {
+                    exportOperation && exportOperation.cancel();
                 }
             });
         });

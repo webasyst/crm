@@ -256,7 +256,11 @@
                                         {$_order_id = crmShop::getEncodedOrderId($_deal)}
                                         {$_shop_order = $deals[$_deal.id].shop_order|default:[]}
 
-                                        <div class="c-deal-wrapper js-deal-wrapper {$_deal_classes|join:" "}" data-id="{$_deal.id}" data-name="{$_deal.name|truncate:255|escape}" data-open="{if $_is_open}open{/if}" data-shop-order="{$_order_id|default:""|escape}">
+                                        <div class="c-deal-wrapper js-deal-wrapper {$_deal_classes|join:" "}"
+                                                data-id="{$_deal.id}" data-name="{$_deal.name|truncate:255|escape}"
+                                                data-open="{if $_is_open}open{/if}"
+                                                data-shop-order="{$_order_id|default:""|escape}"
+                                                data-can-delete="{if $_deal.can_delete}1{else}0{/if}">
                                             <header class="c-header">
                                                 <div class="c-layout">
                                                     {if !empty($_photo)}
@@ -406,6 +410,7 @@
                                     <li class="c-action">
                                         <a href="javascript:void(0);" class="c-link js-deals-close"><i class="icon16 yes-bw"></i> [`Close`] (<span class="c-count js-open-count"></span>)</a>
                                     </li>
+
                                     <li class="c-action">
                                         <a href="javascript:void(0);" class="c-link js-deals-delete"><i class="icon16 delete"></i> [`Delete`] (<span class="c-count js-count"></span>)</a>
                                     </li>

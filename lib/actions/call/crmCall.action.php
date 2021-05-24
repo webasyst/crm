@@ -53,6 +53,7 @@ class crmCallAction extends crmBackendViewAction
 
         $contact_ids = $deal_ids = array();
         foreach ($calls as &$c) {
+            $c['user_number'] = crmHelper::formatCallNumber($c, 'plugin_user_number');
             $c['client_number'] = crmHelper::formatCallNumber($c);
 
             if ($c['client_contact_id']) {

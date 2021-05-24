@@ -11,6 +11,7 @@ var CRMDialog = ( function($) {
         that.position = ( options["position"] || false );
         that.userPosition = ( options["setPosition"] || false );
         that.options = ( options["options"] || false );
+        that.esc = typeof options["esc"] === 'undefined' ? true : !!options["esc"];
         that.remain_after_load = ( options["remain_after_load"] || false );
         that.$body = $(window.top.document).find("body");
         that.$window = $(window.top);
@@ -65,14 +66,16 @@ var CRMDialog = ( function($) {
             }
         });
 
-        $document.on("keyup", function(event) {
-            var escape_code = 27;
-            if (event.keyCode === escape_code) {
-                if (that.is_visible) {
-                    that.close();
+        if (that.esc) {
+            $document.on("keyup", function (event) {
+                var escape_code = 27;
+                if (event.keyCode === escape_code) {
+                    if (that.is_visible) {
+                        that.close();
+                    }
                 }
-            }
-        });
+            });
+        }
 
         // for confirm, cancel event
         $block.on("click", ".js-cancel-dialog", cancel);

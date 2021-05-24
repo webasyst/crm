@@ -301,7 +301,7 @@ class crmContactOperationDelete
                 ),
             'recent' =>
                 array(
-                    'role' => _wd('crm', 'Recent viewed'),
+                    'role' => _wd('crm', 'Recent views'),
                     'model' => new crmRecentModel()
                 ),
             'invoices' =>

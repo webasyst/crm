@@ -84,20 +84,20 @@ class crmContactOperationExportProcessController extends waLongActionController
 
         $exporter = $this->getExporter();
 
+        $chunk_size = wa('crm')->getConfig()->getContactsExportChunkSize();
+
         if (!$exporter->isExportDone()) {
-            $exporter->exportChunk();
-            return false;
+            $exporter->exportChunk($chunk_size);
         }
 
         if (!$exporter->isExportResultGettingDone()) {
-            foreach ($exporter->getExportResultChunk() as $line) {
+            foreach ($exporter->getExportResultChunk($chunk_size) as $line) {
                 foreach ($line as &$value) {
                     $value = $this->encodeString($value);
                 }
                 unset($value);
                 fputcsv($this->fd, $line, $this->data['separator']);
             }
-            return false;
         }
 
         return false;
@@ -108,6 +108,7 @@ class crmContactOperationExportProcessController extends waLongActionController
         echo json_encode(array(
             'processId' => $this->processId,
             'ready' => false,
+            'progress' => $this->isDone() ? 100 : $this->getExporter()->getCurrentProgress()
         ));
     }
 
@@ -120,6 +121,7 @@ class crmContactOperationExportProcessController extends waLongActionController
             echo json_encode(array(
                 'processId' => $this->processId,
                 'ready' => true,
+                'progress' => $this->isDone() ? 100 : $this->getExporter()->getCurrentProgress()
             ));
             return false;
         }
@@ -129,16 +131,12 @@ class crmContactOperationExportProcessController extends waLongActionController
 
     /**
      * @return string
-     * @throws waException
      */
     protected function getHash()
     {
         if (!$this->isCheckedAll()) {
             $contact_ids = crmHelper::toIntArray($this->getRequest()->request('contact_ids'));
             $contact_ids = crmHelper::dropNotPositive($contact_ids);
-            if (!$contact_ids) {
-                throw new waException('Empty contact IDS list');
-            }
             return 'id/' . join(',', $contact_ids);
         }
         return trim((string)$this->getRequest()->request('hash'));

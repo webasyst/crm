@@ -14,11 +14,22 @@ class crmShopBackend_orderHandler extends waEventHandler
             $deal['user'] = $this->newContact($deal['user_contact_id']);
         }
 
+        $can_create_deal = false;
+        $crm_rights = wa()->getUser()->getRights('crm');
+        if ($crm_rights) {
+            foreach ($crm_rights as $name => $value) {
+                if (($name == 'backend' && $value >= 2) || stripos($name, 'funnel') !== false) {
+                    $can_create_deal = true;
+                }
+            }
+        }
+
         $view = wa()->getView();
         $view->assign(array(
-            'order_id'   => $params['id'],
-            'contact_id' => $params['contact_id'],
-            'deal'       => $deal,
+            'order_id'        => $params['id'],
+            'contact_id'      => $params['contact_id'],
+            'deal'            => $deal,
+            'can_create_deal' => $can_create_deal,
         ));
 
         $rights_model = new waContactRightsModel();

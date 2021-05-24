@@ -252,14 +252,33 @@ class crmEmailSourceWorkerIncomingStrategy extends crmEmailSourceWorkerStrategy
      */
     protected function sendMessages($messages, crmContact $contact, $deal)
     {
-        $vars = array_merge(array(
-            '{ORIGINAL_SUBJECT}' => $this->mail->getSubject(),
-            '{ORIGINAL_TEXT}' => $this->mail->getBody(),
-            '{COMPANY_NAME}' => htmlspecialchars(wa()->accountName())
-        ), $this->getContactVars($contact));
+        $vars = null;
+        $assign = null;
 
         foreach ($messages as $message) {
-            $compiled = $this->compileMailTemplate($message['tmpl'], $vars);
+
+            if (empty($message['is_smarty_tmpl'])) {
+                if ($vars === null) {
+                    $vars = array_merge(array(
+                        '{ORIGINAL_SUBJECT}' => $this->mail->getSubject(),
+                        '{ORIGINAL_TEXT}' => $this->mail->getBody(),
+                        '{COMPANY_NAME}' => htmlspecialchars(wa()->accountName())
+                    ), $this->getContactVars($contact));
+                }
+
+                $compiled = $this->compilePlainMailTemplate($message['tmpl'], $vars);
+            } else {
+                if ($assign === null) {
+                    $assign = [
+                        'original_subject' => $this->mail->getSubject(),
+                        'original_text' => $this->mail->getBody(),
+                        'company_name' => wa()->accountName(),
+                        'customer' => $contact
+                    ];
+                }
+                $compiled = $this->compileSmartyMailTemplate($message['tmpl'], $assign);
+            }
+
             $body = $compiled['body'];
             $subject = $compiled['subject'];
 
@@ -369,7 +388,7 @@ class crmEmailSourceWorkerIncomingStrategy extends crmEmailSourceWorkerStrategy
         $confirm_url = wa()->getRouteUrl('crm/frontend/confirmEmail', array('hash' => $confirmation_hash), true);
         $template = (string)$this->source->getParam('antispam_mail_template');
 
-        $compiled = $this->compileMailTemplate($template, array(
+        $compiled = $this->compilePlainMailTemplate($template, array(
             '{CONFIRM_URL}' => $confirm_url,
             '{ORIGINAL_SUBJECT}' => $this->mail->getSubject(),
             '{ORIGINAL_TEXT}' => $this->mail->getBody()
@@ -408,7 +427,7 @@ class crmEmailSourceWorkerIncomingStrategy extends crmEmailSourceWorkerStrategy
         return $message;
     }
 
-    protected function compileMailTemplate($template, $vars = array())
+    protected function compilePlainMailTemplate($template, $vars = array())
     {
         $parts = explode('{SEPARATOR}', $template, 3);
         $body = array_pop($parts);
@@ -416,6 +435,26 @@ class crmEmailSourceWorkerIncomingStrategy extends crmEmailSourceWorkerStrategy
         $from = array_pop($parts);
         $subject = $this->resolveVars($subject, $vars);
         $body = $this->resolveVars($body, $vars);
+        return array(
+            'from' => $from,
+            'subject' => $subject,
+            'body' => $body
+        );
+    }
+
+    protected function compileSmartyMailTemplate($template, $assign = [])
+    {
+        $view = wa()->getView();
+        $old_vars = $view->getVars();
+        $view->clearAllAssign();
+        $view->assign($assign);
+        $result = $view->fetch('string:'.$template);
+        $view->clearAllAssign();
+        $view->assign($old_vars);
+        $parts = explode('{SEPARATOR}', $result, 3);
+        $body = array_pop($parts);
+        $subject = array_pop($parts);
+        $from = array_pop($parts);
         return array(
             'from' => $from,
             'subject' => $subject,

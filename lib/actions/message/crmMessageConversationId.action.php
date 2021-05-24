@@ -32,6 +32,15 @@ class crmMessageConversationIdAction extends crmBackendViewAction
         $contact_ids = $message_ids = array();
         $last_id = null;
 
+        // collect source IDs for IN EMAIL messages
+        $source_ids = [];
+        foreach ($messages as $m) {
+            if ($m['source_id'] > 0 && $m['transport'] === crmMessageModel::TRANSPORT_EMAIL && $m['direction'] === crmMessageModel::DIRECTION_IN) {
+                $source_ids[] = $m['source_id'];
+            }
+        }
+        $source_emails = $this->getSourceEmailAddresses($source_ids);
+
         foreach ($messages as &$m) {
             $m = $mm->getMessage($m);
             $message_ids[$m['id']] = $m['id'];
@@ -39,8 +48,21 @@ class crmMessageConversationIdAction extends crmBackendViewAction
                 $contact_ids[$m['contact_id']] = intval($m['contact_id']);
             }
             $contact_ids[$m['creator_contact_id']] = intval($m['creator_contact_id']);
-            $m['recipients'] = array();
+
+            $m['recipients'] = [];
+
+            // if message is input and source is of EMAIL type then insert structure in [recipients][to] list
+            if ($m['transport'] === crmMessageModel::TRANSPORT_EMAIL && $m['direction'] === crmMessageModel::DIRECTION_IN && isset($source_emails[$m['source_id']])) {
+                $source_email = $source_emails[$m['source_id']];
+                $m['recipients']['to'][$source_email] = array_merge((new crmMessageRecipientsModel())->getEmptyRow(), [
+                    'destination' => $source_email,
+                    'name' => $source_email,
+                    'type' => crmMessageRecipientsModel::TYPE_TO
+                ]);
+            }
+
             $last_id = $m['id'] > $last_id ? $m['id'] : $last_id;
+
         }
         unset($m);
 
@@ -277,5 +299,38 @@ class crmMessageConversationIdAction extends crmBackendViewAction
         $text = str_replace(':BODY:', $body, $text);
         $text = str_replace(':SIGNATURE:', $this->getUserContact()->getEmailSignature(), $text);
         return $text;
+    }
+
+    /**
+     * Get addresses for email sources
+     * @param array $source_ids
+     * @return array - map of type: source_id => email
+     * @throws waException
+     */
+    protected function getSourceEmailAddresses(array $source_ids)
+    {
+        if (!$source_ids) {
+            return [];
+        }
+
+        $sm = new crmSourceModel();
+
+        // drop not email sources
+        $source_ids = $sm->select('id')->where('id IN(:ids) AND type = :type', [
+            'type' => crmSourceModel::TYPE_EMAIL,
+            'ids' => $source_ids,
+        ])->fetchAll(null, true);
+
+        if (!$source_ids) {
+            return [];
+        }
+
+        $spm = new crmSourceParamsModel();
+        $email_records = $spm->getByField([
+            'source_id' => $source_ids,
+            'name' => 'email'
+        ], true);
+
+        return waUtils::getFieldValues($email_records, 'value', 'source_id');
     }
 }

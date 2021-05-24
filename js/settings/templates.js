@@ -402,7 +402,7 @@ var CRMSettingsTemplate = (function ($) {
             }
 
             var url = that.site_app_url + '?module=pages&action=help',
-                data = 'app=crm&file=invoice' + '&invoice_template_id=' + that.template_id;
+                data = 'app=crm&key=invoice' + '&invoice_template_id=' + that.template_id;
             $help.load(url, data, function () {
                 $help.find('#wa-help-wa').remove();
                 $help.find('#wa-help-wa-content').remove();

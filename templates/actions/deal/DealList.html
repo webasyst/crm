@@ -241,7 +241,10 @@
                                     {$_is_open = true}
                                 {/if}
 
-                                <tr class="c-deal-wrapper js-deal-wrapper {if $_deal.reminder_datetime && $_deal.reminder_datetime < $_now}overdue{/if}" data-id="{$_deal.id}" data-open="{if $_is_open}open{/if}">
+                                <tr class="c-deal-wrapper js-deal-wrapper {if $_deal.reminder_datetime && $_deal.reminder_datetime < $_now}overdue{/if}"
+                                        data-id="{$_deal.id}"
+                                        data-open="{if $_is_open}open{/if}"
+                                        data-can-delete="{if $_deal.can_delete}1{else}0{/if}">
                                     <td class="c-column-checkbox">
                                         <input type="checkbox" class="js-check-deal">
                                     </td>
@@ -467,9 +470,11 @@
                                         <li class="c-operation-li">
                                             <a href="javascript:void(0);" class="c-operation-link js-deals-close"><i class="icon16 yes-bw"></i> [`Close`] (<span class="c-count js-open-count"></span>)</a>
                                         </li>
+
                                         <li class="c-operation-li">
                                             <a href="javascript:void(0);" class="c-operation-link js-deals-delete"><i class="icon16 delete"></i> [`Delete`] (<span class="c-count js-count"></span>)</a>
                                         </li>
+
                                     </ul>
                                 </div>
                             </div>

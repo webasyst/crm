@@ -56,6 +56,7 @@ class crmDealListAction extends crmBackendViewAction
         }
 
         $deals = $this->getDeals($list_params, $users, $total_count);
+        $this->extendByCanDeleteFlag($deals, $funnels);
 
         $last_message_ids = array();
 
@@ -166,7 +167,26 @@ class crmDealListAction extends crmBackendViewAction
             "active_fields"             => $list_params['fields'],
             "fields"                    => $deal_fields,
         ));
+
         wa('crm')->getConfig()->setLastVisitedUrl('deal/');
+    }
+
+    protected function extendByCanDeleteFlag(array &$deals, array $funnels)
+    {
+        $can_delete_deals = [];
+        foreach ($funnels as $f) {
+            if ($f['id'] !== 'all') {
+                $can_delete_deals[$f['id']] = $this->getCrmRights()->funnel($f) >= crmRightConfig::RIGHT_FUNNEL_ALL;
+            }
+        }
+
+        foreach ($deals as &$deal) {
+            $can_delete = isset($can_delete_deals[$deal['funnel_id']]) ? $can_delete_deals[$deal['funnel_id']] : true;
+            $deal['can_delete'] = $can_delete;
+        }
+        unset($deal);
+
+        return $deals;
     }
 
     protected function getDeals($list_params, $users, &$total_count = null)

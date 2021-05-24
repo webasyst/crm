@@ -56,7 +56,11 @@ class crmHtmlSanitizer
         // Remove all tags except known.
         // We don't rely on this for protection. Everything should be escaped anyway.
         // strip_tags() is here so that unknown tags do not show as escaped sequences, making the text unreadable.
-        $content = strip_tags($content, '<a><b><i><u><pre><blockquote><p><strong><section><em><del><strike><span><ul><ol><li><div><font><br><table><thead><tbody><tfoot><tr><td><th><hr><h1><h2><h3><h4><h5><h6>');
+        $allowable_tags = '<a><b><i><u><pre><blockquote><p><strong><section><em><del><strike><span><ul><ol><li><div><font><br><table><thead><tbody><tfoot><tr><td><th><hr><h1><h2><h3><h4><h5><h6><style>';
+        $content = strip_tags($content, $allowable_tags);
+
+        // Strip <style>...</style>
+        $content = $this->stripTagWithContent($content, 'style');
 
         // Replace all &entities; with UTF8 chars, except for &, <, >.
         $content = str_replace(array('&amp;','&lt;','&gt;'), array('&amp;amp;','&amp;lt;','&amp;gt;'), $content);
@@ -79,7 +83,7 @@ class crmHtmlSanitizer
             $this->attr_start = $attr_start = uniqid('<ATTRSTART').'>';
             $this->attr_end = $attr_end = uniqid('<ATTREND').'>';
         } while (strpos($content, $attr_start) !== false || strpos($content, $attr_end) !== false);
-
+        
         // <a href="...">
         $content = preg_replace_callback(
             '~
@@ -279,5 +283,15 @@ class crmHtmlSanitizer
         }
 
         return $url;
+    }
+
+    protected function stripTagWithContent($text, $tag_name)
+    {
+        $opened_tag = '<(?:\s*?)' . $tag_name . '(?:\s+(?:.*?)>|>)';
+        $closed_tag = '<(?:\s*?)/(?:\s*?)' . $tag_name . '(?:\s+(?:.*?)>|>)';
+        $inner_content = '(.*?)';
+        $pattern = '~' . $opened_tag . $inner_content . $closed_tag . '~iuxsm';
+        $text = preg_replace($pattern, '', $text);
+        return $text;
     }
 }

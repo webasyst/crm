@@ -43,7 +43,8 @@ var CRMSettingsSourceResponsibleBlock = ( function($) {
         };
 
         $group.on('change' + that.ns, function () {
-            var $el = $(this);
+            var $el = $(this),
+                $group_hint = $el.parents('.crm-fields').find('.js-group-hint');
 
             $user_id.val('');
             if ($el.val() === 'personally') {
@@ -51,6 +52,11 @@ var CRMSettingsSourceResponsibleBlock = ( function($) {
             } else {
                 hideUserInput();
                 $user_info.hide();
+            }
+            if ($el.val() === 'personally' || $el.val() === '') {
+                $group_hint.hide();
+            } else {
+                $group_hint.show();
             }
             if ($el.val() > 0) {
                 $user_id.val(-$el.val());

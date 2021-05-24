@@ -55,8 +55,16 @@
             </div>
             <div class="crm-process-block" style="display: none;">
                 <p>
-                    [`Exporting now. Please wait...`]<i class="icon16 loading"></i>
+                    [`Export is in progress. Please don’t leave this page until the process is completed.`]<i class="icon16 loading"></i>
                 </p>
+                <div class="crm-progressbar-wrapper js-progressbar-wrapper">
+                    <div class="progressbar blue js-export-contacts-progressbar" style="width: 95%">
+                        <div class="progressbar-outer">
+                            <div class="progressbar-inner js-export-contacts-progressbar-progress" style="width: 0"></div>
+                        </div>
+                    </div>
+                    <div class="js-current-progress-txt"></div>
+                </div>
             </div>
 
             {* FORM FOR DOWNLOAD FILE *}

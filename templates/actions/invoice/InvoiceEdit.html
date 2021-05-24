@@ -17,6 +17,7 @@
 {$_locale_string = substr($wa->locale(), 0, 2)}
 {$_is_ru_locale = false}
 {if $_locale_string == "ru"}{$_is_ru_locale = true}{/if}
+{$hidden_input_style = "visibility: hidden;width: 0;min-width: 0;border: 0;padding: 0;"}
 
 <div class="c-invoice-edit-page " id="c-invoice-edit-page">
 
@@ -50,13 +51,18 @@
             <div class="field">
                 <div class="name">[`Company`]</div>
                 <div class="value">
-                    <select class="js-company-select" name="invoice[company_id]">
-                        {foreach $companies as $_company}
-                            <option value="{$_company.id}"{if $_company.id == $company.id} selected{/if}>
-                                {$_company.name|escape}
-                            </option>
-                        {/foreach}
-                    </select>
+                    {if $companies}
+                        <select class="js-company-select" name="invoice[company_id]">
+                            {foreach $companies as $_company}
+                                <option value="{$_company.id}"{if $_company.id == $company.id} selected{/if}>
+                                    {$_company.name|escape}
+                                </option>
+                            {/foreach}
+                        </select>
+                    {else}
+                        <span class="small"><i class="icon10 exclamation"></i>[`To add invoices, set up at least one company.`]</span>
+                        <input type="text" name="invoice[company_id]" value="" style="{$hidden_input_style}">
+                    {/if}
 
                     {if !empty($_is_admin)}
                         <a href="{$wa_app_url}settings/companies/" class="small" style="margin: 0 0 0 8px;"><i class="icon10 settings" style="vertical-align: baseline; margin: 0 2px 0 0;"></i>[`Company settings`]</a>
@@ -69,7 +75,7 @@
 
                     <div class="c-contact-toggle js-contact-toggle">
                         {strip}
-                        <input class="js-contact-id" type="text" name="invoice[contact_id]" value="{if !empty($contact)}{$_contact_id}{/if}" style="visibility: hidden;width: 0;min-width: 0;border: 0;padding: 0;">
+                        <input class="js-contact-id" type="text" name="invoice[contact_id]" value="{if !empty($contact)}{$_contact_id}{/if}" style="{$hidden_input_style}">
                         <span class="bold js-name">{if !empty($contact)}{$_contact_name|escape}{/if}</span>
                         {/strip}
                         <a class="inline-link js-change-contact" href="javascript:void(0);"><b><i><span class="js-label" data-change-text="[`change client`]">{if !empty($contact)}[`change client`]{else}[`Set client`]{/if}</span></i></b></a>
@@ -132,7 +138,9 @@
                         {/if}
 
                         <div class="c-tax-dropdown js-tax-dropdown {if !empty($_is_changed)}is-changed{/if}">
-                            <input class="c-tax-percent-field js-product-tax-percent" type="text" value="{if !empty($_item.tax_percent) && $_item.tax_type != "NONE"}{floatval($_item.tax_percent)}%{else}[`without`] {$company["tax_name"]}{/if}" readonly>
+                            {if $company}
+                                <input class="c-tax-percent-field js-product-tax-percent" type="text" value="{if !empty($_item.tax_percent) && $_item.tax_type != "NONE"}{floatval($_item.tax_percent)}%{else}[`without`] {$company["tax_name"]}{/if}" readonly>
+                            {/if}
                             <input class="js-product-tax-type" type="hidden" value="{$_item.tax_type|default:""}">
                             <ul class="c-hidden-list ui-menu js-hidden-list"></ul>
                         </div>
@@ -186,7 +194,13 @@
                         </td>
                     </tr>
                     <tr>
+
                         <td colspan="5" class="right">
+                            <span class="js-empty-tax" style="display: none">[`Tax rules are not set up for the selected company.`]
+                                <a href="#" data-href="{$wa_backend_url}crm/settings/companies/" class="js-empty-tax-link">
+                                    [`Set up`]
+                                </a>
+                            </span>
                             <select class="js-tax-toggle" title="[`Tax`]">
                                 {* rendered by JS *}
                             </select>

@@ -101,6 +101,7 @@ class crmFormConstructor
             $this->getContactFields(),
             $this->getSpecialFields()
         );
+
         foreach ($this->getDealFields() as $field_id => $field) {
             if (!isset($available_fields[$field_id])) {
                 $available_fields[$field_id] = $field;
@@ -308,7 +309,7 @@ class crmFormConstructor
         if ($form_field_type !== null) {
             return $form_field_type === self::FIELD_TYPE_CONTACT;
         }
-        $contact_fields = waContactFields::getAll('person', true);
+        $contact_fields = waContactFields::getAll('enabled', true);
         return isset($contact_fields[$field_id]) || $field_id === 'password';
     }
 
@@ -331,7 +332,7 @@ class crmFormConstructor
         if (!$exclusive) {
             return isset($deal_fields[$field_id]);
         }
-        $contact_fields = waContactFields::getAll('person', true);
+        $contact_fields = waContactFields::getAll('enabled', true);
         return !isset($contact_fields[$field_id]) && isset($deal_fields[$field_id]);
     }
 
@@ -344,7 +345,7 @@ class crmFormConstructor
         if (!self::isFieldAllowed($field_id)) {
             return false;
         }
-        $contact_fields = waContactFields::getAll('person', true);
+        $contact_fields = waContactFields::getAll('enabled', true);
         $deal_fields = crmDealFields::getAll('enabled');
         return isset($contact_fields[$field_id]) && isset($deal_fields[$field_id]);
     }
@@ -384,7 +385,7 @@ class crmFormConstructor
             $deal_fields = crmDealFields::getAll('enabled');
         }
         if (!$contact_fields) {
-            $contact_fields = waContactFields::getAll('person', true);
+            $contact_fields = waContactFields::getAll('enabled', true);
         }
 
         if (isset($contact_fields[$field_id])) {
@@ -418,7 +419,7 @@ class crmFormConstructor
             'password',
         );
 
-        $contact_fields = waContactFields::getAll('person', true);
+        $contact_fields = waContactFields::getAll('enabled', true);
         self::$allowed_field_ids = array_merge(self::$allowed_field_ids, array_keys($contact_fields));
 
         $deal_fields = crmDealFields::getAll('enabled');
@@ -448,7 +449,8 @@ class crmFormConstructor
             'specials' => array()
         );
 
-        $all_fields = waContactFields::getAll('person', true);
+        $all_fields = waContactFields::getAll('enabled', true);
+
         if (isset($all_fields['company_contact_id'])) {
             unset($all_fields['company_contact_id']);
         }
@@ -497,6 +499,9 @@ class crmFormConstructor
 
             $name = $field->getName();
 
+            $pf = waContactFields::get($field_id, 'person');
+            $cf = waContactFields::get($field_id, 'company');
+
             $fields[$field_id] = array_merge(
                 array(
                     'id' => $field_id,
@@ -508,7 +513,9 @@ class crmFormConstructor
                         ($field instanceof waContactSelectField
                             || $field instanceof waContactBirthdayField || $field instanceof waContactAddressField
                         ) ? false : true,
-                    'form_field_type' => self::FIELD_TYPE_CONTACT
+                    'form_field_type' => self::FIELD_TYPE_CONTACT,
+                    'person_enabled' => boolval($pf),
+                    'company_enabled' => boolval($cf),
                 ),
                 $params
             );

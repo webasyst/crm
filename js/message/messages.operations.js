@@ -159,6 +159,7 @@ var CRMPageMessagesOperations = (function ($) {
             e.preventDefault();
             var $link = $(this),
                 op = $link.data('id');
+
             switch (op) {
                 case 'associate':
                     that.associateWithDeal();
@@ -322,8 +323,14 @@ var CRMPageMessagesOperations = (function ($) {
                 if (is_link || is_first || is_last) {
                     return;
                 }
-                $message.find('.js-checkbox').attr('checked', true);
-                handleMessageItem($message);
+
+                var $checkbox = $message.find('.js-checkbox');
+
+                // first of all check checkbox
+                $checkbox.attr('checked', true);
+
+                // and only than update inner state invariants
+                $checkbox.trigger('change');
             }
         });
 
@@ -630,7 +637,6 @@ var CRMPageMessagesOperations = (function ($) {
     };
 
     CRMPageMessagesOperations.prototype.markAsUnreadList = function ($message) {
-
         var that = this,
             id = $message.data('id'),
             read = $message.data('read');

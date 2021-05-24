@@ -8,7 +8,7 @@ class crmShopBackend_customers_listHandler extends waEventHandler
             return null;
         }
 
-        $button_text = htmlspecialchars(_wd('crm', 'Open in "CRM"'));
+        $button_text = htmlspecialchars(_wd('crm', 'Open in CRM'));
 
         $hash = $params['hash'];
         $url = wa()->getRootUrl(true).wa()->getConfig()->getBackendUrl()."/crm/contact/search/result/";
@@ -42,24 +42,18 @@ class crmShopBackend_customers_listHandler extends waEventHandler
             }
 
             $url .= urlencode($hash);
-            return array(
-                'top_li' => '<input type="button" onclick="location.href=\'' . $url . '\'" value="' . $button_text . '">',
-            );
-
         } else if (preg_match('/^([a-z_0-9]*)\//', $hash, $match)) {
             $hash = str_replace($match[1] . '/', "shop_customers\/{$match[1]}=", $hash);
             $url .= $hash;
-            return array(
-                'top_li' => '<input type="button" onclick="location.href=\''.$url.'\'" value="' . $button_text . '">',
-            );
-
         } else {
             $hash = 'shop_customers\/' . $hash;
             $url .= $hash;
-            return array(
-                'top_li' => '<input type="button" onclick="location.href=\''.$url.'\'" value="' . $button_text . '">',
-            );
+        }
 
+        if (wa()->getUser()->getRights('crm')) {
+            return array(
+                'top_li' => '<input type="button" onclick="location.href=\'' . $url . '\'" value="' . $button_text . '">',
+            );
         }
     }
 

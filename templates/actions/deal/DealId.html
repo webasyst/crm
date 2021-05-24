@@ -242,7 +242,7 @@
                     {elseif $can_create_order}
                         <div class="c-create-order-link-wrapper">
                             <a href="javascript:void(0)" class="c-create-order-link js-create-order-link">
-                                <i class="icon16 userpic20" style="background-image: url('/wa-apps/shop/img/shop.png'); position: relative; top: 2px; vertical-align: baseline; margin: 0;"></i>
+                                <i class="icon16 userpic20" style="background-image: url('{$wa_url}wa-apps/shop/img/shop.png'); position: relative; top: 2px; vertical-align: baseline; margin: 0;"></i>
                                 [`Create order`]
                                 <i class="icon16 loading"></i>
                             </a>
@@ -284,7 +284,7 @@
                 </div>
 
                 {* LOGS *}
-                <div class="c-deal-log-section">
+                <div class="c-deal-log-section js-deal-log-section">
                     {$log_html}
                 </div>
 

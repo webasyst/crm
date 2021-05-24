@@ -29,6 +29,7 @@ class crmSettingsLostReasonsSaveController extends crmJsonController
         $sort = 0;
         foreach ($reasons as $r) {
             $row = array(
+                'funnel_id' => $r['funnel_id'],
                 'name' => $r['name'],
                 'sort' => $sort++,
             );

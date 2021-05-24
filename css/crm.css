@@ -1933,7 +1933,7 @@ ul.pager li {
   line-height: 16px;
 }
 .c-call-page .c-call-body .c-calls-table .c-column-phone {
-  width: 170px;
+  width: 210px;
   font-size: 12px;
   line-height: 16px;
 }
@@ -11384,6 +11384,9 @@ ul.pager li {
 .c-notification-page .field-group .js-senders-show .c-sender-header-name {
   width: 200px;
 }
+.c-notification-page .wa-cheatsheet-dropdown .wa-cheatsheet-dropdown-block {
+  text-align: left;
+}
 .c-settings-notification-page.c-page-header {
   margin: 0 0 16px;
 }
@@ -13850,19 +13853,23 @@ ul.pager li {
 .c-message-show-body-dialog .c-message-info .field > .value {
   padding-top: 1px;
 }
-.c-message-show-body-dialog .c-message-info .c-copy-list {
+.c-message-show-body-dialog .c-message-info .c-copy-list,
+.c-message-show-body-dialog .c-message-info .c-to-list {
   margin: 0;
   padding: 0;
 }
-.c-message-show-body-dialog .c-message-info .c-copy-list > li {
+.c-message-show-body-dialog .c-message-info .c-copy-list > li,
+.c-message-show-body-dialog .c-message-info .c-to-list > li {
   display: inline-block;
   vertical-align: top;
   margin: 0 8px 6px 0;
 }
-.c-message-show-body-dialog .c-message-info .c-copy-list > li:after {
+.c-message-show-body-dialog .c-message-info .c-copy-list > li:after,
+.c-message-show-body-dialog .c-message-info .c-to-list > li:after {
   content: ",";
 }
-.c-message-show-body-dialog .c-message-info .c-copy-list > li:last-child:after {
+.c-message-show-body-dialog .c-message-info .c-copy-list > li:last-child:after,
+.c-message-show-body-dialog .c-message-info .c-to-list > li:last-child:after {
   display: none;
 }
 .c-message-show-body-dialog .c-message-info .deal-form {

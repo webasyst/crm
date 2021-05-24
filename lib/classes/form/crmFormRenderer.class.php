@@ -220,17 +220,38 @@ class crmFormRenderer
         return $is_required && self::isEmpty($value);
     }
 
+    /**
+     * @param waContactField $field
+     * @return array|int|mixed|string|null
+     * @throws waException
+     */
     protected function getUserFieldValue($field)
     {
-        if (!($field instanceof waContactCompositeField)) {
-            if ($field->isMulti()) {
-                return $this->getUser()->get($field->getId(), 'default');
-            } else {
-                return $this->getUser()->get($field->getId());
+        $person_enabled = waContactFields::get($field->getId(), 'person');
+        $company_enabled = waContactFields::get($field->getId(), 'company');
+        $exclusive_company_enabled = $company_enabled && !$person_enabled;
+
+        $contact = $this->getUser();
+
+        // if need get value from company-contact then substitute contact in case if company exists
+        $is_person = !$this->getUser()->get('is_company');
+        if ($is_person && $exclusive_company_enabled) {
+            $company_id = $contact->get('company_contact_id');
+            $company = new waContact($company_id);
+            if ($company->exists()) {
+                $contact = $company;
             }
         }
 
-        $field_data = $this->getUser()->get($field->getId());
+        if (!($field instanceof waContactCompositeField)) {
+            if ($field->isMulti()) {
+                return $contact->get($field->getId(), 'default');
+            } else {
+                return $contact->get($field->getId());
+            }
+        }
+
+        $field_data = $contact->get($field->getId());
         if (empty($field_data)) {
             return array();
         }

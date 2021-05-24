@@ -93,7 +93,7 @@
                     </div>
                 </div>
 
-                <div class="field crm-values-textarea-wrapper" {if !$field || empty($field.options)}style="display: none;"{/if}>
+                <div class="field crm-values-textarea-wrapper" {if !$field || !isset($field.options)}style="display: none;"{/if}>
                     <div class="name">[`List items`]</div>
                     <div class="value" data-field-value="Menu">
                             <textarea name="select_field_value" placeholder="[`Enter each new item on new line`]"

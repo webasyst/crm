@@ -42,7 +42,7 @@ class crmInvoiceSaveController extends crmJsonController
             unset($invoice_data['deal_id']);
         }
 
-        // Show validation erros if occured
+        // Show validation errors if occurred
         if ($this->errors) {
             return;
         }
@@ -134,6 +134,10 @@ class crmInvoiceSaveController extends crmJsonController
     protected function getInvoiceData($items_data)
     {
         $result = waRequest::post('invoice', array(), waRequest::TYPE_ARRAY_TRIM);
+
+        if (!is_numeric($result['company_id'])) {
+            $this->errors['invoice[company_id]'] = _w('company not selected');
+        }
 
         // Do not to change certain keys via this editor
         $im = new crmInvoiceModel();

@@ -280,6 +280,15 @@ class crmConfig extends waAppConfig
         return (int)$value;
     }
 
+    public function getContactsExportChunkSize()
+    {
+        $value = $this->getOption('contacts_export_chunk_size');
+        if ($value === null) {
+            $value = 100;
+        }
+        return (int)$value;
+    }
+
     /**
      * @param null $plugin_id
      * @return null|crmPluginTelephony|crmPluginTelephony[]

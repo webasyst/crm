@@ -72,6 +72,7 @@ class crmContactsExporter
     /**
      * @param int $chunk_size
      * @return bool Done or not
+     * @throws waException
      */
     public function exportChunk($chunk_size = 100)
     {
@@ -94,6 +95,20 @@ class crmContactsExporter
     }
 
     /**
+     * @return double
+     */
+    public function getCurrentProgress()
+    {
+        $total_count = $this->getCollection()->count();
+        if ($total_count <= 0) {
+            return 100;
+        }
+
+        $offset = $this->getOffset();
+        return ($offset / $total_count) * 100;
+    }
+
+    /**
      * @param int $chunk_size
      * @return array
      */
@@ -102,6 +117,7 @@ class crmContactsExporter
         $data = array();
 
         $result = $this->getSavedResult();
+
         if (!$result || $this->isExportResultGettingDone()) {
             return array();
         }
@@ -608,7 +624,7 @@ class crmContactsExporter
      */
     protected function setOffset($offset)
     {
-        return $this->setCacheVar('offset', $offset);
+        $this->setCacheVar('offset', $offset);
     }
 
     public function isExportDone()
@@ -723,6 +739,7 @@ class crmContactsExporter
         if ($value === null || !$json) {
             return $this->vars[$name] = $value;
         }
+
         return $this->vars[$name] = json_decode($value, true);
     }
 
@@ -736,10 +753,13 @@ class crmContactsExporter
             }
             return;
         }
+
         $this->vars[$name] = $value;
+        
         if ($json) {
             $value = json_encode($value);
         }
+
         $this->getCache()->set($key, $value);
     }
 

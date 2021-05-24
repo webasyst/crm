@@ -8,6 +8,8 @@ var CRMInvoiceEdit = ( function($) {
         that.$form = that.$wrapper.find("form");
         that.$table = that.$wrapper.find(".c-product-table");
         that.$tableBody = that.$table.find("tbody");
+        that.$emptyTax = that.$table.find(".js-empty-tax");
+        that.$emptyTaxLink = that.$table.find(".js-empty-tax-link");
         that.$tax = that.$table.find(".js-tax-toggle");
         that.$taxPercent = that.$table.find(".js-tax-percent");
         that.$taxType = that.$table.find(".js-tax-type");
@@ -704,6 +706,8 @@ var CRMInvoiceEdit = ( function($) {
 
             //
             if (tax_array && tax_name) {
+                that.$emptyTax.hide();
+                that.$tax.show();
                 $.each(tax_array, function(index, item) {
                     var $item = $("<option value=\"" + index + "\"></option>"),
                         text;
@@ -749,6 +753,11 @@ var CRMInvoiceEdit = ( function($) {
                         $taxSelect.append($item);
                     }
                 });
+            } else {
+                that.$tax.hide();
+                that.$emptyTax.show();
+                var href = that.$emptyTaxLink.data('href');
+                that.$emptyTaxLink.attr('href', href + that.$companyField.val().toString() + '/');
             }
 
             $taxSelect.trigger("change", !is_first_load);
@@ -763,8 +772,8 @@ var CRMInvoiceEdit = ( function($) {
         function onChangeTax(event, force) {
             var $options = $(this).find("option");
 
-            that.tax_percent = "";
-            that.tax_type = "";
+            that.tax_percent = 0;
+            that.tax_type = "NONE";
             that.tax_name = "";
 
             if ($options.length) {
@@ -809,6 +818,7 @@ var CRMInvoiceEdit = ( function($) {
         var $wrappers = that.$wrapper.find(".js-name-autocomplete");
         if ($wrappers.length) {
             $wrappers.each( function() { init( $(this) ); });
+            that.refreshTable();
         }
 
         that.$wrapper.on("addProduct", function(event, tr) {

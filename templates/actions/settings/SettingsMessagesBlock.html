@@ -22,7 +22,6 @@
                     <div class="crm-editor-wrapper" data-i="{$i}">
                         {include file="./SettingsEmailEditor.inc.html"
                             input_name="{$namespace}[{$i}][tmpl]"
-                            variables=$message_template_vars
                             template=$m.tmpl|default:null
                             to_name="{$namespace}[{$i}][to]"
                             to_value=$m.to|default:null
@@ -30,6 +29,8 @@
                             sourcefrom_set=$m.sourcefrom|default:null
                             add_attachments_name="{$namespace}[{$i}][add_attachments]"
                             add_attachments_set=$m.add_attachments|default:0
+                            cheat_sheet=$cheat_sheet
+                            cheat_sheet_key=$cheat_sheet_key
                         }
                     </div>
                 </div>

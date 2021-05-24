@@ -127,12 +127,7 @@ class crmDealIdAction extends crmBackendViewAction
             $deal['amount'] = round($deal['amount'], $currency_info['precision']);
         }
 
-        $can_delete = true;
-        if (!wa()->getUser()->isAdmin('crm')
-            && (wa()->getUser()->getId() != $deal['user_contact_id'] || $deal['closed_datetime'])
-        ) {
-            $can_delete = false;
-        }
+        $can_delete = $deal_access_level === crmRightConfig::RIGHT_DEAL_ALL;
 
         /**
          * @var shopOrder $_order

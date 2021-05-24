@@ -23,6 +23,7 @@ abstract class crmEmailSourceSettingsPage extends crmSourceSettingsPage
             'messages_block' => $this->getMessagesBlock($this->source),
             'connection_settings_block' => $this->getConnectionSettingsBlock(),
             'antispam_template_vars' => crmEmailSource::getAntiSpamTemplateVars(),
+            'site_app_url' => wa()->getAppUrl('site'),
         );
     }
 
@@ -117,6 +118,19 @@ abstract class crmEmailSourceSettingsPage extends crmSourceSettingsPage
         $data['params']['messages'] = (array)ifset($data['params']['messages']);
         if (empty($data['params']['messages'])) {
             $data['params']['messages'] = null;
+        } else {
+            $old_messages = $this->getMessages($this->source);
+            foreach ($data['params']['messages'] as $idx => &$message) {
+                $old_message_tmpl = '';
+                if (isset($old_messages[$idx]['tmpl'])) {
+                    $old_message_tmpl = $old_messages[$idx]['tmpl'];
+                }
+                // template of message is changed => user edit this template, so force it to smarty type
+                if ($message['tmpl'] != $old_message_tmpl) {
+                    $message['is_smarty_tmpl'] = true;
+                }
+            }
+            unset($message);
         }
 
         if (empty($data['name']) && !empty($data['params']['email'])) {
@@ -188,12 +202,46 @@ abstract class crmEmailSourceSettingsPage extends crmSourceSettingsPage
     {
         $params = array(
             'namespace' => 'source[params][messages]',
-            'messages' => $source->getMessages(),
+            'messages' => $this->getMessages($source),
             'type' => 'source'
         );
+
         return crmHelper::renderViewAction(
             new crmSettingsMessagesBlockAction($params)
         );
+    }
+
+    private function getMessages(crmEmailSource $source)
+    {
+        $messages = $source->getMessages();
+        foreach ($messages as &$message) {
+            if (empty($message['is_smarty_tmpl'])) {
+                $message['is_smarty_tmpl'] = true;
+                $tmpl = $this->convertToSmarty($message['tmpl']);
+                $message['tmpl'] = $tmpl;
+            }
+        }
+        unset($message);
+        return $messages;
+    }
+
+    private function convertToSmarty($tmpl)
+    {
+        $convert = [
+            '{ORIGINAL_SUBJECT}' => '{$original_subject}',
+            '{ORIGINAL_TEXT}' => '{$original_text}',
+            '{COMPANY_NAME}' => '{$company_name|escape}',
+            '{CUSTOMER_ID}' => '{$customer.id}',
+            '{CUSTOMER_NAME}' => '{$customer.getName()|escape}',
+        ];
+
+        foreach (waContactFields::getAll() as $field_id => $field) {
+            $key = '{CUSTOMER_' . strtoupper($field_id) . '}';
+            $value = "{\$customer.get('{$field_id}', 'default')|escape}";
+            $convert[$key] = $value;
+        }
+
+        return str_replace(array_keys($convert), array_values($convert), $tmpl);
     }
 
 }

@@ -14,9 +14,12 @@ class crmDealCloseDialogAction extends crmBackendViewAction
         $dm = new crmDealModel();
         $dlm = new crmDealLostModel();
 
+        $deal = $dm->getById($deal_id);
+        $funnel_id = $deal['funnel_id'];
+
         $this->view->assign(array(
             'deal'                 => $dm->getById($deal_id),
-            'reasons'              => $dlm->select('*')->order('sort')->fetchAll('id'),
+            'reasons'              => $dlm->select('*')->where("funnel_id IN (0, {$funnel_id})")->order('sort')->fetchAll('id'),
             'lost_reason_require'  => wa()->getSetting('lost_reason_require'),
             'lost_reason_freeform' => wa()->getSetting('lost_reason_freeform'),
         ));

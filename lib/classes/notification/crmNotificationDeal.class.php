@@ -343,10 +343,10 @@ class crmNotificationDeal extends crmNotification
         foreach ((array)$spaces as $space) {
             switch ($space) {
                 case 'deal':
-                    $spaces_vars[$space] = array_merge(self::getVarsForDeal($include_deal_stage), self::getVarsForContact('customer'));
+                    $spaces_vars[$space] = array_merge(self::getVarsForDeal($include_deal_stage), crmHelper::getVarsForContact());
                     break;
                 case 'customer':
-                    $spaces_vars[$space] = self::getVarsForContact('customer');
+                    $spaces_vars[$space] = crmHelper::getVarsForContact();
                     break;
                 default:
                     $spaces_vars[$space] = array();

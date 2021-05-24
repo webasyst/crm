@@ -43,8 +43,13 @@
 {/function}
 
 {function form_available_field field=[] classes=[] disabled=false}
+    {$_is_contact_field = $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT}
     <li data-id="{$field.id}"
         data-form-field-type="{$field.form_field_type}"
+        {if $_is_contact_field}
+            data-person-enabled="{if $field.person_enabled}1{else}0{/if}"
+            data-company-enabled="{if $field.company_enabled}1{else}0{/if}"
+        {/if}
         class="crm-form-field {if (!$field.is_multi && $field.checked > 0) || $disabled}crm-disabled{/if} {$classes|join:' '}">
             <a href="javascript:void(0)">{$field.name|escape}{if $field.required_always|default:''} *{/if}</a>
             {if $field.id === 'password'}
@@ -87,8 +92,10 @@
 
                             {$_available_field_rendered_map = []}
 
+                            {* CONTACT FIELDS ENABLED FOR PERSON *}
                             {foreach $available_fields as $field_id => $field}
-                                {if $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT && $field['id'] !== 'password'}
+                                {$_is_contact_field = $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT}
+                                {if $_is_contact_field && $field['id'] !== 'password' && $field.person_enabled}
                                     {form_available_field field=$field}
                                     {$_available_field_rendered_map[$field.id] = true}
                                 {/if}
@@ -101,6 +108,30 @@
                                     field=$_password
                                     disabled=$available_fields.email.checked <= 0}
                                 {$_available_field_rendered_map[$_password.id] = true}
+                            {/if}
+
+                            {* CONTACT FIELDS EXCLUSIVELY ENABLED FOR COMPANY *}
+                            {$_exclusive_company_fields_exist = false}
+                            {capture assign="_exclusive_company_fields_html"}
+                                {foreach $available_fields as $field_id => $field}
+                                    {$_is_contact_field = $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT}
+                                    {if $_is_contact_field && $field['id'] !== 'password' && !$field.person_enabled && $field.company_enabled}
+                                        {form_available_field
+                                            field=$field
+                                            disabled=$available_fields.company.checked <= 0}
+                                        {$_available_field_rendered_map[$field.id] = true}
+                                        {$_exclusive_company_fields_exist = true}
+                                    {/if}
+                                {/foreach}
+                            {/capture}
+
+                            {if $_exclusive_company_fields_exist}
+                                <li class="crm-form-field crm-top-bordered crm-disabled crm-hint js-hint-about-deal-fields">
+                                    <span class="hint">
+                                        [`To make company-only fields avialable, first add the “Company” field to the form.`]
+                                    </span>
+                                </li>
+                                {$_exclusive_company_fields_html}
                             {/if}
 
                             <li class="crm-form-field crm-top-bordered crm-disabled crm-hint js-hint-about-deal-fields">

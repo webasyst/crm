@@ -89,11 +89,22 @@ class crmNotificationInvoice extends crmNotification
         $invoice = $this->getInvoice();
         if ($invoice) {
 
-            $link = wa()->getRouteUrl(
-                'crm/frontend/invoice',
-                array('hash' => crmHelper::getInvoiceHash($invoice)),
-                true
-            );
+            $cm = new crmCompanyModel();
+            $template_id = $cm->select('template_id')->where("`id` = {$invoice['company_id']}")->fetchField('template_id');
+            $cpm = new crmCompanyParamsModel();
+            $company_params = $cpm->getParams($invoice['company_id'], $template_id);
+
+            $link = null;
+            if (!empty($company_params['domain'])) {
+                $domain = $company_params['domain'];
+                $domains = wa()->getRouting()->getByApp('crm');
+                if (!empty($domains[$domain])) {
+                    $link = self::getLink($invoice, $domain);
+                }
+            }
+            if (is_null($link)) {
+                $link = self::getLink($invoice);
+            }
 
             $company = $invoice['__company'];
 
@@ -112,6 +123,16 @@ class crmNotificationInvoice extends crmNotification
         }
 
         return $this->vars;
+    }
+
+    protected static function getLink($invoice, $domain = null)
+    {
+        return wa()->getRouteUrl(
+            'crm/frontend/invoice',
+            array('hash' => crmHelper::getInvoiceHash($invoice)),
+            true,
+            $domain
+        );
     }
 
     /**
@@ -364,10 +385,10 @@ class crmNotificationInvoice extends crmNotification
         foreach ((array)$spaces as $space) {
             switch ($space) {
                 case 'invoice':
-                    $spaces_vars[$space] = array_merge(self::getVarsForInvoice(), self::getVarsForContact('customer'), self::getVarsForCompany());
+                    $spaces_vars[$space] = array_merge(self::getVarsForInvoice(), crmHelper::getVarsForContact(), self::getVarsForCompany());
                     break;
                 case 'customer':
-                    $spaces_vars[$space] = self::getVarsForContact('customer');
+                    $spaces_vars[$space] = crmHelper::getVarsForContact();
                     break;
                 default:
                     $spaces_vars[$space] = array();

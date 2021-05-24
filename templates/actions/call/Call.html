@@ -167,6 +167,9 @@
                             <td class="c-column-phone">
                                 <span class="nowrap" title="{if $_call.direction === "IN"}[`incoming`]{else}[`outgoing`]{/if}">
                                     <i class="icon16 phone"></i>
+                                    <span>{$_call.user_number|escape|default:"[`unknown`]"}</span>
+                                </span>
+                                <span class="nowrap" title="{if $_call.direction === "IN"}[`incoming`]{else}[`outgoing`]{/if}">
                                     <i class="icon16 {if $_call.direction === "IN"}call-in{else}call-out{/if}"></i>
                                     {if !empty($_client) && !$contacts[$_call.client_contact_id]['is_visible']}
                                         <small class="small">[`hidden phone number`]</small>

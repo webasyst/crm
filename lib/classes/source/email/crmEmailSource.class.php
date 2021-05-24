@@ -44,6 +44,9 @@ abstract class crmEmailSource extends crmSource
         return $instance;
     }
 
+    /**
+     * @return array
+     */
     public function getMessages()
     {
         return $this->getParam('messages_formatted');
@@ -166,23 +169,23 @@ abstract class crmEmailSource extends crmSource
     public static function getDefaultMessageMailTemplate()
     {
         if (wa()->getLocale() == 'ru_RU') {
-            return '[Re: ] {ORIGINAL_SUBJECT}'.
-                "{SEPARATOR}".
-                "<p>Мы ответим вам в ближайшее время.</p>".
-                "<p>Спасибо!</p>".
-                "<p>--</p>".
-                "<p>{COMPANY_NAME}</p>".
-                "<p>Это автоматическое уведомление о получении обращения. Пожалуйста, не отвечайте на это сообщение!</p>".
-                "<blockquote>{ORIGINAL_TEXT}</blockquote>";
+            return '[Re: ] {$original_subject}'.
+                '{SEPARATOR}'.
+                '<p>Мы ответим вам в ближайшее время.</p>'.
+                '<p>Спасибо!</p>'.
+                '<p>--</p>'.
+                '<p>{$company_name}</p>'.
+                '<p>Это автоматическое уведомление о получении обращения. Пожалуйста, не отвечайте на это сообщение!</p>'.
+                '<blockquote>{$original_text}</blockquote>';
         }
-        return '[Re: ] {ORIGINAL_SUBJECT}'.
-            "{SEPARATOR}".
-            "<p>We shall reply to you as soon as possible.</p>".
-            "<p>Thank you!</p>".
-            "<p>--</p>".
-            "<p>{COMPANY_NAME}</p>".
-            "<p>This is an automatic request receipt notification. Please do not reply to this message!</p>".
-            "<blockquote>{ORIGINAL_TEXT}</blockquote>";
+        return '[Re: ] {$original_subject}'.
+            '{SEPARATOR}'.
+            '<p>We shall reply to you as soon as possible.</p>'.
+            '<p>Thank you!</p>'.
+            '<p>--</p>'.
+            '<p>{$company_name}</p>'.
+            '<p>This is an automatic request receipt notification. Please do not reply to this message!</p>'.
+            '<blockquote>{$original_text}</blockquote>';
     }
 
     public static function isMessageToVariant($variant)
@@ -193,10 +196,7 @@ abstract class crmEmailSource extends crmSource
 
     public static function getMessageToVariants()
     {
-        if (!empty(self::$static_cache['message_to_variants'])) {
-            return self::$static_cache['message_to_variants'];
-        }
-        return self::$static_cache['message_to_variants'] = array(
+        return array(
             self::MESSAGE_TO_VARIANT_CLIENT => _w('Client (request originator)'),
             self::MESSAGE_TO_VARIANT_RESPONSIBLE_USER => _w('Responsible user (owner)'),
         );
@@ -211,30 +211,25 @@ abstract class crmEmailSource extends crmSource
         );
     }
 
+    /**
+     * @return array
+     */
     public static function getMessageTemplateVars()
     {
-        if (!empty(self::$static_cache['message_template_vars'])) {
-            return self::$static_cache['message_template_vars'];
-        }
-
         $vars = array(
-            '{ORIGINAL_TEXT}' => _w('Text - value of field text, description of deal'),
-            '{COMPANY_NAME}' => _w('Company name specified in your Installer settings (also displayed in the top-left corner of your backend)'),
-            '{CUSTOMER_ID}' => _w('Unique identifier automatically assigned to each customer in Contacts'),
-            '{CUSTOMER_NAME}' => _w('Full formatted name of customer')
+            '$original_subject' => _w('Subject of the original message'),
+            '$original_text' => _w('Text - value of field text, description of deal'),
+            '$company_name' => _w('Company name specified in your Installer settings (also displayed in the top-left corner of your backend)'),
         );
 
-        $prefix = 'CUSTOMER_';
-        $description = _w('Value of customer field "%s"');
+        $vars = array_merge($vars, crmHelper::getVarsForContact());
 
-        foreach (waContactFields::getAll() as $field_id => $field) {
-            $key = '{' . $prefix . strtoupper($field_id) . '}';
-            if (!isset($vars[$key])) {
-                $vars[$key] = sprintf($description, $field->getName());
-            }
+        $all_vars = [];
+        foreach ($vars as $name => $description) {
+            $all_vars[$name] = $description;
         }
 
-        return self::$static_cache['message_template_vars'] = $vars;
+        return $all_vars;
     }
 
     protected static function formatMessagesArray($messages)

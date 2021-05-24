@@ -160,6 +160,29 @@
                         <span class="c-slider-arrow right js-arrow-right" title="&rarr;"></span>
                     </div>
 
+                    <div class="c-template-options-wrapper">
+                        <div class="field">
+                            <div class="name">[`Public links URL`]</div>
+                            <div class="value">
+                                {if $has_storefronts}
+                                    <select name="company[invoice_options][domain]">
+                                        {foreach $storefront_list as $domain => $storefront}
+                                            <option value="{$domain}"
+                                                    {if isset($company_params.domain) && $company_params.domain == $domain}selected{/if}
+                                            >{$storefront}</option>
+                                        {/foreach}
+                                    </select>
+                                {else}
+                                    <i class="icon16 exclamation"></i>
+                                    [`A CRM settlement is required to publish invoices.`]
+                                    <a href="{$wa_backend_url}site/#/routing/">
+                                        [`Use Site app to add a settlement for CRM.`]
+                                    </a>
+                                {/if}
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="c-template-options-wrapper js-template-options-wrapper">
                         {include file="./SettingsCompaniesRenderParams.html" inline}
                     </div>

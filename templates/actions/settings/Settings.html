@@ -112,14 +112,17 @@
                     ]}
                 {/if}
 
-                {if !crmSourceWorker::isCliOk() || !crmNotificationBirthdayWorker::isCliOk() || !crmRemindersRecap::isCliOk() || !crmInvoice::isCliOk() || !crmDeal::isCliOk() || !crmShop::isCliOk()}
-                    {$_menu[] = [
-                        "icon" => "clock",
-                        "name" => "[`Cron Jobs`] <span class='error indicator inline'>!</span>",
-                        "uri" => "`$wa_app_url`settings/cron/",
-                        "li_class" => "c-settings-sidebar-cron-job-item"
-                    ]}
+                {$cron_indicator_icon = ""}
+                {if !crmSourceWorker::isCliOk() || !crmNotificationBirthdayWorker::isCliOk() || !crmRemindersRecap::isCliOk()
+                    || !crmInvoice::isCliOk() || !crmDeal::isCliOk() || !crmShop::isCliOk()}
+                    {$cron_indicator_icon = "<span class='error indicator inline'>!</span>"}
                 {/if}
+                {$_menu[] = [
+                    "icon" => "clock",
+                    "name" => "[`Cron Jobs`] `$cron_indicator_icon`",
+                    "uri" => "`$wa_app_url`settings/cron/",
+                    "li_class" => "c-settings-sidebar-cron-job-item"
+                ]}
 
                 <aside class="c-settings-sidebar" id="c-settings-sidebar">
                     <ul class="menu-v stack with-icons" style="margin: 0;">

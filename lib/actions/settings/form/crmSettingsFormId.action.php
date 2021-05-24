@@ -47,12 +47,45 @@ class crmSettingsFormIdAction extends crmSettingsViewAction
     {
         $params = array(
             'namespace' => 'form[params][messages]',
-            'messages' => $form->getMessages(),
+            'messages' => $this->getMessages($form),
             'type' => 'form'
         );
+
         return crmHelper::renderViewAction(
             new crmSettingsMessagesBlockAction($params)
         );
+    }
+
+    private function getMessages(crmForm $form)
+    {
+        $messages = $form->getMessages();
+        foreach ($messages as &$message) {
+            if (empty($message['is_smarty_tmpl'])) {
+                $message['is_smarty_tmpl'] = true;
+                $tmpl = $this->convertToSmarty($message['tmpl']);
+                $message['tmpl'] = $tmpl;
+            }
+        }
+        unset($message);
+        return $messages;
+    }
+
+    private function convertToSmarty($tmpl)
+    {
+        $convert = [
+            '{ORIGINAL_TEXT}' => '{$original_text}',
+            '{COMPANY_NAME}' => '{$company_name|escape}',
+            '{CUSTOMER_ID}' => '{$customer.id}',
+            '{CUSTOMER_NAME}' => '{$customer.getName()|escape}',
+        ];
+
+        foreach (waContactFields::getAll() as $field_id => $field) {
+            $key = '{CUSTOMER_' . strtoupper($field_id) . '}';
+            $value = "{\$customer.get('{$field_id}', 'default')|escape}";
+            $convert[$key] = $value;
+        }
+
+        return str_replace(array_keys($convert), array_values($convert), $tmpl);
     }
 
     protected function getIFrameUrl($form_id)

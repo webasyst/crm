@@ -462,11 +462,11 @@ class crmRights
         // Allow for unassigned users.
         if ($funnel_rights == crmRightConfig::RIGHT_FUNNEL_OWN_UNASSIGNED) {
             if (!$deal['user_contact_id']) {
-                return crmRightConfig::RIGHT_DEAL_ALL;
+                return crmRightConfig::RIGHT_DEAL_EDIT;
             } else {
                 $user_contact = new waContact($deal['user_contact_id']);
                 if (!$user_contact->exists()) {
-                    return crmRightConfig::RIGHT_DEAL_ALL;
+                    return crmRightConfig::RIGHT_DEAL_EDIT;
                 }
             }
         }
@@ -474,13 +474,13 @@ class crmRights
 
         // Allow for user assigned to deal.
         if ($deal['user_contact_id'] == $this->contact->getId()) {
-            return crmRightConfig::RIGHT_DEAL_ALL;
+            return crmRightConfig::RIGHT_DEAL_EDIT;
         }
 
         // Allow for participant user
         $is_deal_user_participant = $this->isDealUserParticipant($deal);
         if ($is_deal_user_participant) {
-            return crmRightConfig::RIGHT_DEAL_ALL;
+            return crmRightConfig::RIGHT_DEAL_EDIT;
         }
 
         // Nope... not allowed.

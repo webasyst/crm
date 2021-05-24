@@ -50,12 +50,20 @@ class crmMessageBodyDialogAction extends crmViewAction
             }
 
             if (!ifset($collection[$message['creator_contact_id']])) {
-                $collection[$message['creator_contact_id']] = array('name' => 'deleted contact_id='.$message['creator_contact_id']);
+                $collection[$message['creator_contact_id']] = [
+                    'name' => 'deleted contact_id='.$message['creator_contact_id'],
+                    'photo_url_16' => '',
+                ];
             }
 
             if (!ifset($collection[$message['contact_id']])) {
-                $collection[$message['contact_id']] = array('name' => 'deleted contact_id='.$message['contact_id']);
+                $collection[$message['contact_id']] = [
+                    'name' => 'deleted contact_id='.$message['contact_id'],
+                    'photo_url_16' => '',
+                ];
             }
+
+            $collection[$message['contact_id']]['email'] = $message['to'];
         }
 
         // Add userpic for recipients
@@ -94,10 +102,12 @@ class crmMessageBodyDialogAction extends crmViewAction
             $clean_data = $this->getCleanDealData();
         }
 
+        $to_list = $this->buildToList($recipients, $collection[$message['contact_id']]);
+
         $this->view->assign(array(
             'message'             => $message,
             'from'                => $collection[$message['creator_contact_id']],
-            'to'                  => $collection[$message['contact_id']],
+            'to_list'             => $to_list,
             'deal'                => $deal,
             'clean_data'          => ifempty($clean_data),
             'funnel'              => $this->getFunnel($deal),
@@ -106,6 +116,43 @@ class crmMessageBodyDialogAction extends crmViewAction
             'delete_message_text' => $delete_message_text,
             'is_admin'            => $this->getCrmRights()->isAdmin(),
         ));
+    }
+
+    /**
+     * @param array $recipients - array of crm_message_recipients records
+     * @param $contact - array with keys: 'id', 'email', 'name', 'photo_url_16'
+     * @return array $result
+     *      Array of structures:
+     *          Fields of crm_message_recipients:
+     *              - message_id
+     *              - destination
+     *              - type
+     *              - name
+     *              - contact_id
+     *
+     *          Plus if contact_id > 0
+     *              - photo_url_16
+     * @throws waDbException
+     * @throws waException
+     */
+    protected function buildToList(array $recipients, $contact)
+    {
+        //
+        $to_list = [];
+        foreach ($recipients as $idx => $recipient) {
+            if ($recipient['type'] === crmMessageRecipientsModel::TYPE_TO) {
+                $to_list[] = $recipient;
+                unset($recipients[$idx]);
+            }
+        }
+
+        $to_list[] = array_merge((new crmMessageRecipientsModel())->getEmptyRow(), [
+            'destination' => $contact['email'],
+            'name' => $contact['name'],
+            'photo_url_16' => $contact['photo_url_16'],
+        ]);
+
+        return $to_list;
     }
 
     protected function getFunnel($deal)
@@ -125,6 +172,18 @@ class crmMessageBodyDialogAction extends crmViewAction
     {
         $message = $this->getMessage();
         $mrm = new crmMessageRecipientsModel();
+        $all_recipients = [];
+
+        if ($message['transport'] === crmMessageModel::TRANSPORT_EMAIL && $message['direction'] === crmMessageModel::DIRECTION_IN && $message['source_id'] > 0) {
+            $source = crmEmailSource::factory($message['source_id']);
+            $source_email = $source->getEmail();
+            $all_recipients[$source_email] = array_merge($mrm->getEmptyRow(), [
+                'destination' => $source_email,
+                'name' => $source_email,
+                'type' => crmMessageRecipientsModel::TYPE_TO
+            ]);
+        }
+
         $recipients = $mrm->getRecipients($message['id']);
         foreach ($recipients as $recipient) {
             if ($recipient['destination'] == $recipient['contact_id']) {
@@ -137,7 +196,8 @@ class crmMessageBodyDialogAction extends crmViewAction
             }
         }
         unset($recipients[$message['to']]);
-        return $recipients;
+
+        return array_merge($all_recipients, $recipients);
     }
 
     /**

@@ -256,7 +256,7 @@ class crmFormProcessor
 
     /**
      * Use after initForm strictly
-     * @return strings
+     * @return string
      */
     protected function getStrategyType()
     {
@@ -357,13 +357,32 @@ class crmFormProcessor
      */
     protected function sendMessages($messages, crmContact $contact, $deal)
     {
-        $vars = array_merge(array(
-            '{ORIGINAL_TEXT}' => $deal ? $deal['description'] : '',
-            '{COMPANY_NAME}' => htmlspecialchars(wa()->accountName())
-        ), $this->getContactVars($contact));
+        $vars = null;
+        $assign = null;
 
         foreach ($messages as $message) {
-            $compiled = $this->compileMailTemplate($message['tmpl'], $vars);
+
+            if (empty($message['is_smarty_tmpl'])) {
+                if ($vars === null) {
+                    $vars = array_merge(array(
+                        '{ORIGINAL_TEXT}' => $deal ? $deal['description'] : '',
+                        '{COMPANY_NAME}' => htmlspecialchars(wa()->accountName())
+                    ), $this->getContactVars($contact));
+                }
+
+                $compiled = $this->compilePlainMailTemplate($message['tmpl'], $vars);
+            } else {
+                if ($assign === null) {
+                    $assign = [
+                        'original_text' => $deal ? $deal['description'] : '',
+                        'company_name' => wa()->accountName(),
+                        'customer' => $contact
+                    ];
+                }
+
+                $compiled = $this->compileSmartyMailTemplate($message['tmpl'], $assign);
+            }
+
             $body = $compiled['body'];
             $subject = $compiled['subject'];
 
@@ -423,7 +442,7 @@ class crmFormProcessor
         return $vars;
     }
 
-    protected function compileMailTemplate($template, $vars = array())
+    protected function compilePlainMailTemplate($template, $vars = array())
     {
         $parts = explode('{SEPARATOR}', $template, 3);
         $body = array_pop($parts);
@@ -431,6 +450,31 @@ class crmFormProcessor
         $from = array_pop($parts);
         $subject = $this->resolveVars($subject, $vars);
         $body = $this->resolveVars($body, $vars);
+        return array(
+            'from' => $from,
+            'subject' => $subject,
+            'body' => $body
+        );
+    }
+
+    protected function compileSmartyMailTemplate($template, $assign = [])
+    {
+        $view = wa()->getView();
+        $old_vars = $view->getVars();
+        $view->clearAllAssign();
+        $view->assign($assign);
+
+        $parts = explode('{SEPARATOR}', $template, 3);
+        $body = array_pop($parts);
+        $subject = array_pop($parts);
+        $from = array_pop($parts);
+
+        $body = $view->fetch('string:'.$body);
+        $subject = $view->fetch('string:'.$subject);
+
+        $view->clearAllAssign();
+        $view->assign($old_vars);
+
         return array(
             'from' => $from,
             'subject' => $subject,

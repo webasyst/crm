@@ -57,7 +57,7 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
                 $deal = null;
             }
         }
-        $public_url = self::getPublicUrl($this->invoice);
+
         $show_url = true;
         if (in_array($this->invoice['state_id'], array('DRAFT', 'ARCHIVED', 'REFUNDED'))) {
             $show_url = false;
@@ -70,6 +70,18 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
         // Parameters for events
         $params = array('invoice' => &$this->invoice);
         $backend_invoice = wa('crm')->event('backend_invoice', $params);
+
+        $public_url = null;
+        if (!empty($params['invoice']['company']['invoice_options']['domain'])) {
+            $domain = $params['invoice']['company']['invoice_options']['domain'];
+            $domains = wa()->getRouting()->getByApp($this->getAppId());
+            if (!empty($domains[$domain])) {
+                $public_url = self::getPublicUrl($this->invoice, $domain);
+            }
+        }
+        if (is_null($public_url)) {
+            $public_url = self::getPublicUrl($this->invoice);
+        }
 
         $currency = waCurrency::getInfo($this->invoice['currency_id']);
 
@@ -103,19 +115,20 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
             'invoice_id'             => $invoice_id,
             'backend_invoice'        => $backend_invoice,
             'customer'               => $this->invoice['contact_id'] ? (new waContact($this->invoice['contact_id'])) : null,
-            'company'                => $this->invoice['company'],
+            'company'                => ifset($this->invoice, 'company', null),
             'root_path'              => $this->getConfig()->getRootPath().DIRECTORY_SEPARATOR
         ));
 
         wa('crm')->getConfig()->setLastVisitedUrl('invoice/');
     }
 
-    protected static function getPublicUrl($invoice)
+    protected static function getPublicUrl($invoice, $domain = null)
     {
         return waIdna::dec(wa()->getRouteUrl(
             'crm/frontend/invoice',
             array('hash' => crmHelper::getInvoiceHash($invoice)),
-            true
+            true,
+            $domain
         ));
     }
 

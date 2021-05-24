@@ -376,10 +376,9 @@ var CRMDealsFunnel = ( function($) {
             if ($activeDeals.length > 0) {
                 $header.find(".js-count").text(count);
 
-                //
                 showOpen();
-                //
                 showMerge();
+                showDelete();
             }
 
             function showOpen() {
@@ -401,6 +400,22 @@ var CRMDealsFunnel = ( function($) {
                     $merge.show();
                 } else {
                     $merge.hide();
+                }
+            }
+
+            function showDelete() {
+                var can_delete = false;
+                $($activeDeals).each(function () {
+                    if ($(this).data('can-delete')) {
+                        can_delete = true;
+                        return false; // break
+                    }
+                });
+                var $delete = $header.find('.js-deals-delete').closest('.c-action')
+                if (can_delete) {
+                    $delete.show();
+                } else {
+                    $delete.hide();
                 }
             }
         }
@@ -952,10 +967,9 @@ var CRMDealsList = ( function($) {
                     .show()
                     .find(".js-count").text(count);
 
-                //
                 showOpen();
-                //
                 showMerge();
+                showDelete();
 
                 if(count < that.limit) {
                     $checkAll.prop('indeterminate', true);
@@ -988,6 +1002,22 @@ var CRMDealsList = ( function($) {
                     $merge.show();
                 } else {
                     $merge.hide();
+                }
+            }
+
+            function showDelete() {
+                var can_delete = false;
+                $($activeDeals).each(function () {
+                    if ($(this).data('can-delete')) {
+                        can_delete = true;
+                        return false; // break
+                    }
+                });
+                var $delete = $actions.find('.js-deals-delete').closest('.c-operation-li')
+                if (can_delete) {
+                    $delete.show();
+                } else {
+                    $delete.hide();
                 }
             }
         }

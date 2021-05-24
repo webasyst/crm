@@ -58,7 +58,7 @@
             <a class="small js-reply" href="javascript:void(0);" title="[`Reply`]"><i class="icon16 rotate-left"></i></a>
         {/if}
         {if $message.transport === crmMessageModel::TRANSPORT_IM || $message.transport === crmMessageModel::TRANSPORT_EMAIL && $message.conversation_id}
-            <a href="{$wa_app_url}message/conversation/{$message.conversation_id}" class="small" style="padding: 13px 10px 12px;">[`open conversation`]</a>
+            <a href="{$wa_app_url}message/conversation/{$message.conversation_id}" class="small js-open-conversation" style="padding: 13px 10px 12px;">[`open conversation`]</a>
         {/if}
     </div>
 {/strip}

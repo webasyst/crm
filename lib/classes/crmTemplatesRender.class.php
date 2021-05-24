@@ -178,7 +178,7 @@ class crmTemplatesRender extends waController
         if (!$this->template) {
             $tm = new crmTemplatesModel();
             $template = $tm->getById($this->invoice_template_id);
-            $this->template = $template['content'];
+            $this->template = ifset($template, 'content', null);
 
             if (!$this->template) {
                 $file = wa('crm')->getConfig()->getAppPath('lib/config/data/templates/invoice.template_a.html');
@@ -201,10 +201,10 @@ class crmTemplatesRender extends waController
         $im = new crmInvoiceModel();
         $this->invoice = $im->getInvoiceWithCompany($this->invoice_id);
         $this->company_id = $this->invoice['company_id'];
-        $company = $this->invoice['company'];
+        $company = ifset($this->invoice, 'company', null);
         unset($this->invoice['company']);
 
-        $this->invoice_template_id = $company['template_id'];
+        $this->invoice_template_id = ifset($company, 'template_id', null);
 
         try {
             $this->customer = new waContact($this->invoice['contact_id']);

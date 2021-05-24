@@ -13,14 +13,22 @@ class crmSettingsMessagesBlockAction extends crmBackendViewAction
          */
         $backend_settings_messages_block = wa('crm')->event('backend_settings_messages_block');
 
+        if ($this->getType() === 'form') {
+            $cheat_sheet_key = 'message.form_source';
+        } else {
+            $cheat_sheet_key = 'message.email_source';
+        }
+
         $this->view->assign(array(
             'namespace' => $this->getNamespace(),
             'messages' => $this->getMessages(),
-            'message_template_vars' => $this->getMessageTemplateVars(),
             'default_message_template' => $this->getDefaultMessageTemplate(),
             'message_to_variants' => $this->getMessageToVariants(),
             'type' => $this->getType(),
             'backend_settings_messages_block' => $backend_settings_messages_block,
+            'cheat_sheet' => true,
+            'cheat_sheet_key' => $cheat_sheet_key,
+            'site_app_url' => wa()->getAppUrl('site'),
         ));
     }
 
@@ -37,17 +45,6 @@ class crmSettingsMessagesBlockAction extends crmBackendViewAction
     protected function getMessages()
     {
         return (array)$this->getParameter('messages');
-    }
-
-    protected function getMessageTemplateVars()
-    {
-        if ($this->getType() === 'form') {
-            return crmForm::getMessageTemplateVars();
-        } elseif ($this->getType() === 'source') {
-            return crmEmailSource::getMessageTemplateVars();
-        } else {
-            return array();
-        }
     }
 
     protected function getDefaultMessageTemplate()

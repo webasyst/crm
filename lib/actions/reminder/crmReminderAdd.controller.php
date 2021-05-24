@@ -29,7 +29,7 @@ class crmReminderAddController extends crmJsonController
     protected function validate($user_id, $content, $deal_id, $contact_id)
     {
         if (!$user_id) {
-            throw new waException('User not found');
+            throw new waException('User not found.');
         }
         $errors = array();
         if (!$content) {

@@ -174,50 +174,52 @@
         .crm-create-order-dialog .dropdown .menu-v { margin-top: 0 !important; }
     </style>
 
-    {if $deal}
-        {strip}
-            <a href="{$wa_backend_url}crm/deal/{$deal.id}/" class="js-crm-link">
-                <i class="icon16 userpic20" style="background-image: url('{$wa_url}wa-apps/crm/img/crm96.png'); border-radius: 0;"></i><span class="bold">[`CRM deal`]</span>
-                <span class="hint" style="display: block; margin: 3px 0 0 1px;">[`Owner:`]</span>
-                <span class="hint bold" style="display: block; margin: 1px 0 0 1px;">
-                    {if !empty($deal.user)}
-                        {$deal.user.name|escape}
-                    {else}
-                        [`not assigned`]
-                    {/if}
-                </span>
-            </a>
-        {/strip}
-    {else}
-        {strip}
-            <a href="javascript:void(0);" class="crm-create-deal js-crm-link js-crm-create-deal" data-order="{$order_id}" data-contact="{$contact_id}">
-                <i class="icon16 userpic20" style="background-image: url('{$wa_url}wa-apps/crm/img/crm96.png'); border-radius: 0;"></i>
-                [`Create deal in CRM`]
-            </a>
-        {/strip}
-        <script>
-            ( function($) {
-                var is_locked = false;
+    {if $can_create_deal}
+        {if $deal}
+            {strip}
+                <a href="{$wa_backend_url}crm/deal/{$deal.id}/" class="js-crm-link">
+                    <i class="icon16 userpic20" style="background-image: url('{$wa_url}wa-apps/crm/img/crm96.png'); border-radius: 0;"></i><span class="bold">[`CRM deal`]</span>
+                    <span class="hint" style="display: block; margin: 3px 0 0 1px;">[`Owner:`]</span>
+                    <span class="hint bold" style="display: block; margin: 1px 0 0 1px;">
+                        {if !empty($deal.user)}
+                            {$deal.user.name|escape}
+                        {else}
+                            [`not assigned`]
+                        {/if}
+                    </span>
+                </a>
+            {/strip}
+        {else}
+            {strip}
+                <a href="javascript:void(0);" class="crm-create-deal js-crm-link js-crm-create-deal" data-order="{$order_id}" data-contact="{$contact_id}">
+                    <i class="icon16 userpic20" style="background-image: url('{$wa_url}wa-apps/crm/img/crm96.png'); border-radius: 0;"></i>
+                    [`Create deal in CRM`]
+                </a>
+            {/strip}
+            <script>
+                ( function($) {
+                    var is_locked = false;
 
-                $("#js-crm-backend-order").on("click", ".js-crm-create-deal", function() {
-                    if (!is_locked) {
-                        is_locked = true;
+                    $("#js-crm-backend-order").on("click", ".js-crm-create-deal", function() {
+                        if (!is_locked) {
+                            is_locked = true;
 
-                        var href = "{$wa_backend_url}crm/?module=deal&action=createDialog",
-                            data = {
-                                order_id: {$order_id|json_encode},
-                                contact_id: {$contact_id|json_encode}
-                            };
+                            var href = "{$wa_backend_url}crm/?module=deal&action=createDialog",
+                                data = {
+                                    order_id: {$order_id|json_encode},
+                                    contact_id: {$contact_id|json_encode}
+                                };
 
-                        $.post(href, data, function(html) {
-                            $(document.body).append(html);
-                        }).always( function() {
-                            is_locked = false;
-                        });
-                    }
-                });
-            })(jQuery);
-        </script>
+                            $.post(href, data, function(html) {
+                                $(document.body).append(html);
+                            }).always( function() {
+                                is_locked = false;
+                            });
+                        }
+                    });
+                })(jQuery);
+            </script>
+        {/if}
     {/if}
     <script>
         ( function($) {
