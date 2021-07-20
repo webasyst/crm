@@ -2,7 +2,7 @@
 return array(
     'name'                => 'Telphin',
     'img'                 => 'img/telphin.png',
-    'version'             => '1.1.1',
+    'version'             => '1.1.2',
     'vendor'              => 'webasyst',
     'custom_settings_url' => '?plugin=telphin&action=settings',
     'frontend'            => true,

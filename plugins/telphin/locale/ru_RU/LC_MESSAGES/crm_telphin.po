@@ -16,8 +16,8 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
-msgid "Sign up for 'Telfin'<br>if you do not already have an account."
-msgstr "Зарегистрируйтесь в «Телфин»,<br>если у вас еще нет аккаунта."
+msgid "Sign up at Telphin<br>if you do not have an account."
+msgstr "Зарегистрируйтесь в «Телфине»,<br>если у вас еще нет аккаунта."
 
 msgid "Send a request for connection"
 msgstr "Отправить заявку на подключение"
@@ -72,3 +72,24 @@ msgstr "Соединение с API установлено"
 
 msgid "API connection not established"
 msgstr "Соединение с API не установлено"
+
+msgid "Email"
+msgstr ""
+
+msgid "or"
+msgstr "или"
+
+msgid "cancel"
+msgstr "отмена"
+
+msgid "Save"
+msgstr "Сохранить"
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "Error fetching record URL from Telphin API:"
+msgstr "Ошибка получения URL записи от API «Телфина»:"
+
+msgid "Record does not exist."
+msgstr "Запись не существует."

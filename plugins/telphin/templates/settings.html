@@ -6,7 +6,7 @@
     <div class="crm-telphin-ask js-telphin-ask{if $telphin_ask || $api_app_id && $api_app_secret} hidden{/if}">
         <div>
             <div class="crm-telphin-ask-title">
-                <ul><li>{_wd('crm_telphin', "Sign up for 'Telfin'<br>if you do not already have an account.")}</li></ul>
+                <ul><li>{_wd('crm_telphin', "Sign up at Telphin<br>if you do not have an account.")}</li></ul>
             </div>
             <input type="button" class="button green js-request" value="{_wd('crm_telphin', 'Send a request for connection')}" />
         </div>
@@ -45,7 +45,7 @@
                 {* EMAIL *}
                 <div class="field">
                     <div class="name">
-                        <label for="telphin_crm_telphin_email">[`E-mail`]<span style="color: red;">*</span></label>
+                        <label for="telphin_crm_telphin_email">[`Email`]<span style="color: red;">*</span></label>
                     </div>
                     <div class="value">
                         <input id="telphin_crm_telphin_email" type="email" name="request[email]" class="input" required value="{$user.email|escape}">

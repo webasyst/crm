@@ -14,7 +14,7 @@ class crmTelphinPluginBackendActions extends waActions
         } catch (Exception $e) {
             waLog::log("Error fetching URL of record {$plugin_record_id} for call {$plugin_call_id} from API: ".$e->getMessage().' ('.$e->getCode().')', 'crm/plugins/telphin.log');
             $this->displayJson(null, array(
-                _wp('Error fetching record URL from telphin API:').' '.$e->getMessage(),
+                _wp('Error fetching record URL from Telphin API:').' '.$e->getMessage(),
             ));
             return;
         }
@@ -34,7 +34,7 @@ class crmTelphinPluginBackendActions extends waActions
             ));
 
             $this->displayJson(null, array(
-                _wp('Record does not exist'),
+                _wp('Record does not exist.'),
             ));
         }
     }
@@ -111,13 +111,18 @@ class crmTelphinPluginBackendActions extends waActions
 
     protected function sendRequest($data)
     {
-        wa('installer');
+        if (wa()->appExists('installer')) {
+            wa('installer');
+            if (class_exists('waInstallerApps')) {
+                $installer = new waInstallerApps(); // TODO !!!
+                $data['installation_hash'] = $installer->getHash();
+            }
+        }
+
         $wa_net = new waNet();
-        $installer = new waInstallerApps();
         $serv = $this->getServer();
         $url = "https://{$serv}/my/telphin-signup/";
         $data['domain'] = waRequest::server('HTTP_HOST');
-        $data['installation_hash'] = $installer->getHash();
         $res = $wa_net->query($url, array('data' => $data), waNet::METHOD_POST);
         return json_decode($res, true);
     }
