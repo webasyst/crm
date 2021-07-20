@@ -20,6 +20,10 @@ var crmSettingsFieldEdit = (function ($) {
     crmSettingsFieldEdit.prototype.initClass = function () {
         var that = this;
         //
+        var $first_input = that.$form.find('.crm-local-input-wrapper').eq(0).find('input'),
+            first_input_val = $first_input.val();
+        $first_input.focus().val('').val(first_input_val);
+
         that.bindEvents();
         //
         that.editSubFields();
@@ -65,6 +69,7 @@ var crmSettingsFieldEdit = (function ($) {
                     .text('')
                     .end()
                 .insertAfter($main_wrapper);
+            $clone.find('input').focus();
 
             $el.hide();
 

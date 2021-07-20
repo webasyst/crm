@@ -188,6 +188,7 @@ var CRMContactAddDialog = ( function($) {
             if ($content.length) {
                 $activeContent = $content.addClass(active_class);
             }
+            that.$wrapper.find(".js-focus-field").focus();
 
             that.dialog.resize();
         }

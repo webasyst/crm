@@ -9,7 +9,7 @@ return array(
             96 => 'img/crm96.png',
         ),
     'sash_color' => '#e63a24',
-    'version'  => '1.4.10',
+    'version'  => '1.4.11',
     'vendor'   => 'webasyst',
     'plugins'  => true,
     'rights'   => true,

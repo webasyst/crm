@@ -51,8 +51,8 @@ class crmContactsSearchShopTotalSpentItem
                 $this->range_val['to'] = ifset($this->range_val['to'], '');
             }
         }
-        if ($key !== null) {
-            return $this->range_val[$key];
+        if ($key !== null && $this->range_val !== null) {
+            return ifset($this->range_val, $key, '');
         }
         return $this->range_val;
     }

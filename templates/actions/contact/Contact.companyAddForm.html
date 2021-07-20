@@ -4,7 +4,7 @@
     <div class="field">
         <div class="name">[`Company name`]</div>
         <div class="value">
-            <input class="long large" type="text" name="contact[company]" placeholder="[`Company name`]" required>
+            <input class="long large js-focus-field" type="text" name="contact[company]" placeholder="[`Company name`]" required>
         </div>
     </div>
 
@@ -14,7 +14,7 @@
 
             {$fields = $wa->crm->getContactFields()}
 
-            {function _renderPhone}
+            {function _renderCompanyPhone}
                 <li>
                     <input class="js-value" type="tel" value="{if !empty($value)}{$value|escape}{/if}" placeholder="[`Phone`]">
                     <select class="js-ext">
@@ -27,14 +27,14 @@
                 </li>
             {/function}
 
-            {capture assign="_phone_template_html"}{_renderPhone value="" ext=""}{/capture}
+            {capture assign="_phone_template_html"}{_renderCompanyPhone value="" ext=""}{/capture}
 
             <ul class="menu-v compact c-phone-list js-phone-list">
                 {$_number = ""}
                 {if !empty($call) && !empty($call.plugin_client_number)}
                     {$_number = $call.plugin_client_number|escape}
                 {/if}
-                {_renderPhone value="{$_number}" ext=""}
+                {_renderCompanyPhone value="{$_number}" ext=""}
             </ul>
 
             <a href="javascript:void(0)" class="small inline-link js-add-phone">
@@ -46,7 +46,7 @@
 
     {* EMAIL *}
     <div class="field">
-        {function _renderEmail}
+        {function _renderCompanyEmail}
             <li>
                 <input class="js-value" type="email" value="{if !empty($value)}{$value|escape}{/if}" placeholder="[`Email`]">
                 <select class="js-ext">
@@ -59,7 +59,7 @@
             </li>
         {/function}
 
-        {capture assign="_email_template_html"}{_renderEmail value="" ext=""}{/capture}
+        {capture assign="_email_template_html"}{_renderCompanyEmail value="" ext=""}{/capture}
 
         <div class="name">
             <span class="crm-field-name">[`Email`]</span>
@@ -69,10 +69,10 @@
             <ul class="menu-v compact c-email-list js-email-list">
                 {if !empty($_emails)}
                     {foreach $_emails as $_email}
-                        {_renderEmail value=$_email.value|escape ext=$_email.ext}
+                        {_renderCompanyEmail value=$_email.value|escape ext=$_email.ext}
                     {/foreach}
                 {else}
-                    {_renderEmail value="" ext=""}
+                    {_renderCompanyEmail value="" ext=""}
                 {/if}
             </ul>
 

@@ -103,10 +103,11 @@ abstract class crmContactsAction extends crmContactViewAction
 
     protected function getFields()
     {
-        $fields = array('*,photo_url_32,photo_url_50,photo_url_144,_online_status,tags,address,phone,im,url,socialnetwork,email');
+        $fields = ['*', 'photo_url_32', 'photo_url_50', 'photo_url_144', '_online_status', 'tags', 'address',
+            'phone', 'im', 'url', 'socialnetwork', 'email'];
         $cm = $this->getContactModel();
         foreach ($this->getColumns() as $field_id => $field) {
-            if (!$cm->fieldExists($field_id)) {
+            if (!$cm->fieldExists($field_id) && array_search($field_id, $fields, true) === false) {
                 $fields[] = $field_id;
             }
         }

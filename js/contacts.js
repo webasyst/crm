@@ -694,7 +694,10 @@ var CRMContactsPage = (function ($) {
                         user_ids = [];
 
                     var id = ui.helper.data("user-id"),
-                        ids = ""+ui.helper.data("user-ids");
+                        ids = ui.helper.data("user-ids");
+
+                    id = (typeof id !== "undefined" ? id+"" : null);
+                    ids = (typeof ids !== "undefined" ? ids+"" : null);
 
                     if (id) {
                         user_ids.push(id);
