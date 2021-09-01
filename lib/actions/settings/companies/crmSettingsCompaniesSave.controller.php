@@ -217,6 +217,20 @@ class crmSettingsCompaniesSaveController extends crmJsonController
             }
         }
 
+        $tpm = new crmTemplatesParamsModel();
+        $template_params = $tpm->getParamsByTemplates($out['template_id']);
+        foreach ($template_params as $param_id => $param) {
+            if (isset($out['invoice_options'][$param_id])
+                && $param['type'] == crmTemplatesModel::PARAM_TYPE_STRING
+                && mb_strlen($out['invoice_options'][$param_id]) > 255
+            ) {
+                $this->errors[] = array(
+                    "name"  => "company[invoice_options][$param_id]",
+                    "value" => _w('Entered text is too long. Shorten it to maximum 255 characters.'),
+                );
+            }
+        }
+
         //Check logo
         if ($this->logo_file->count() && $out['logo'] == 'delete') {
             unset($out['logo']);

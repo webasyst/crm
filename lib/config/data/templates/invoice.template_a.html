@@ -130,28 +130,26 @@
                     <span>{$_subtotal|wa_format}</span>
                 </td>
             </tr>
-            <tr>
-                <td colspan="4" class="right">
-                    {$_type = ""}
-                    {if ($invoice.tax_type == "NONE")}
-                        {$_type = "[`without`]"}
-                    {elseif ($invoice.tax_type == "INCLUDE")}
-                        {$_type = "[`including`]"}
-                    {/if}
+            {if ($invoice.tax_type != "NONE")}
+                <tr>
+                    <td colspan="4" class="right">
+                        {$_type = ""}
+                        {if ($invoice.tax_type == "INCLUDE")}
+                            {$_type = "[`including`]"}
+                        {/if}
 
-                    {$_name = "[`tax`]"}
-                    {if !empty($invoice.tax_name)}
-                        {$_name = $invoice.tax_name}
-                    {/if}
+                        {$_name = "[`tax`]"}
+                        {if !empty($invoice.tax_name)}
+                            {$_name = $invoice.tax_name}
+                        {/if}
 
-                    <span>{if !empty($_type)}{$_type}&nbsp;{/if}{$_name|escape}{if $invoice.tax_type != "NONE"}&nbsp;{$invoice.tax_percent|escape}%{/if}</span>
-                </td>
-                <td class="c-total right">
-                    {if $invoice.tax_type != "NONE"}
+                        <span>{if !empty($_type)}{$_type}&nbsp;{/if}{$_name|escape}&nbsp;{$invoice.tax_percent|escape}%</span>
+                    </td>
+                    <td class="c-total right">
                         <span>{$invoice.tax_amount|wa_format}</span>
-                    {/if}
-                </td>
-            </tr>
+                    </td>
+                </tr>
+            {/if}
             <tr class="c-total-row">
                 <td colspan="4" class="right c-border" {if !empty($_color)}style="border-color: {$_color};"{/if}>[`Total`]</td>
                 <td class="c-total right c-border" {if !empty($_color)}style="border-color: {$_color};"{/if}>

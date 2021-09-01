@@ -12,7 +12,7 @@ class crmSettingsFunnelsAction extends crmSettingsViewAction
         $fsm = new crmFunnelStageModel();
         $gfs = crmConfig::getFunnelBaseStages();
 
-        $funnel_id = waRequest::param('id', null, waRequest::TYPE_INT);
+        $funnel_id = waRequest::param('id');
 
         $funnels = $fsm->withStages($fm->getAllFunnels());
         foreach ($funnels as &$funnel) {
@@ -31,7 +31,7 @@ class crmSettingsFunnelsAction extends crmSettingsViewAction
         }
         if ($funnel_id != 'new') {
             $dm = new crmDealModel();
-            $counts = $dm->countByStages($funnel_id, crmDealModel::STATUS_OPEN);
+            $counts = $dm->countByStages((int)$funnel_id, crmDealModel::STATUS_OPEN);
 
             $funnel['deals_count'] = 0;
             foreach ($funnel['stages'] as &$s) {

@@ -59,7 +59,7 @@
 
                         {* DROPAREA + INPUT *}
                         <div class="c-drop-area js-drop-area">
-                            <div class="c-drop-hint">[`Drag-n-drop company image here`]</div>
+                            <div class="c-drop-hint">{if !empty($_param.placeholder)}{$_param.placeholder}{else}[`Drag-n-drop your image here`]{/if}</div>
                             <input class="js-field" name="{if !empty($company_params[$_param['code']])}company[invoice_options][images][{$_param.code}]{/if}" type="file"
                                    title="[`Change image`]" value="">
                         </div>

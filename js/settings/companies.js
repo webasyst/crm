@@ -415,6 +415,9 @@ var CRMSettingsCompanies = ( function($) {
 
                     var $field = that.$wrapper.find("[name=\"" + name + "\"]");
 
+                    $field.removeClass(error_class);
+                    $field.parent().find('span.errormsg').remove();
+
                     if ( name === "contact[firstname]" && !$field.is(":visible") ) {
                         $field = that.$wrapper.find(".js-contact-autocomplete");
                     }

@@ -4836,3 +4836,9 @@ msgstr "Настроить"
 
 msgid "company not selected"
 msgstr "компания не выбрана"
+
+msgid "Drag-n-drop your image here"
+msgstr "Перетащите ваше изображение сюда"
+
+msgid "Entered text is too long. Shorten it to maximum 255 characters."
+msgstr "Введённый текст слишком длинный. Сократите его максимум до 255 символов."

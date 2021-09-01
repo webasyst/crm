@@ -7,7 +7,7 @@ class crmSettingsCompaniesAction extends crmSettingsViewAction
         if (!wa()->getUser()->isAdmin('crm')) {
             throw new waRightsException();
         }
-        $company_id = waRequest::param('id', null, waRequest::TYPE_INT);
+        $company_id = waRequest::param('id');
 
         $tm = new crmTemplatesModel();
         $cm = new crmCompanyModel();
