@@ -297,9 +297,11 @@ class crmTwitterPluginImSourceWorker extends crmImSourceWorker
      */
     protected function exportContact($twitter_user)
     {
-        $options = array(
-            'crm_user_id' => $this->source->getNormalizedResponsibleContactId(),
-        );
+        $responsible_contact_id = $this->source->getNormalizedResponsibleContactId();
+        $options = [];
+        if ($responsible_contact_id > 0) {
+            $options['crm_user_id'] = $responsible_contact_id;
+        }
         $exporter = new crmTwitterPluginContactExporter($twitter_user, $options);
         $contact = $exporter->exportContact();
         $this->is_new_contact = true;

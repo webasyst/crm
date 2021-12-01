@@ -6,6 +6,7 @@ class crmFbPluginBackendActions  extends waActions
     {
         $this->getView()->assign(array(
             'source_settings_url' => wa()->getAppUrl().'settings/sources/?type=im',
+            'need_show_review_widget' => wa()->appExists('installer')
         ));
 
         $template = wa()->getAppPath('plugins/fb/templates/FbPluginSettings.html');

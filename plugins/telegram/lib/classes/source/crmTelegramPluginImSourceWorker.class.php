@@ -136,9 +136,11 @@ class crmTelegramPluginImSourceWorker extends crmImSourceWorker
      */
     protected function exportContact($telegram_user)
     {
-        $options = array(
-            'crm_user_id' => $this->source->getNormalizedResponsibleContactId(),
-        );
+        $responsible_contact_id = $this->source->getNormalizedResponsibleContactId();
+        $options = [];
+        if ($responsible_contact_id > 0) {
+            $options['crm_user_id'] = $responsible_contact_id;
+        }
         $exporter = new crmTelegramPluginContactExporter($telegram_user, $options);
         $contact = $exporter->export();
         $this->is_new_contact = true;

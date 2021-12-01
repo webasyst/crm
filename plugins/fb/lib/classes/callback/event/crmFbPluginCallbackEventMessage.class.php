@@ -172,9 +172,11 @@ class crmFbPluginCallbackEventMessage extends crmFbPluginCallbackEvent
      */
     protected function exportContact($fb_user)
     {
-        $options = array(
-            'crm_user_id' => $this->source->getNormalizedResponsibleContactId(),
-        );
+        $responsible_contact_id = $this->source->getNormalizedResponsibleContactId();
+        $options = [];
+        if ($responsible_contact_id > 0) {
+            $options['crm_user_id'] = $responsible_contact_id;
+        }
         $exporter = new crmFbPluginContactExporter($fb_user, $options);
         $contact = $exporter->export();
         $this->is_new_contact = true;
