@@ -69,7 +69,7 @@
                                         <b><i>[`delete`]</i></b>
                                     </a>
                                 {else}
-                                    <span class="c-delete-link hint">{$_stage.deals_count} [`deals in stage`]</span>
+                                    <span class="c-delete-link hint">{_w('%d deal in stage', '%d deals in stage', $_stage.deals_count)}</span>
                                 {/if}
                             </li>
                         {/function}

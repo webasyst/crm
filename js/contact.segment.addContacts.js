@@ -35,6 +35,9 @@ var CRMContactSegmentAddContacts = (function ($) {
             $input = that.$find_contact,
             $list = that.$contact_list,
             $template = $list.find('.is-template');
+
+        $input.focus();
+
         $input.autocomplete({
             source: "?module=autocomplete",
             minLength: 2,

@@ -166,14 +166,23 @@ abstract class crmSourceWorker
 
     protected static function lockSource(crmSource $source)
     {
-        $source->saveParam(self::$PARAM_WORKER_LOCK, date("Y-m-d H:i:s"));
-        $source->saveParam(self::$PARAM_WORKER_DATETIME, date("Y-m-d H:i:s"));
+        // Only update params, do not save the whole source
+        $source_params_model = new crmSourceParamsModel();
+        $source_params_model->set([$source->getId()], [
+            self::$PARAM_WORKER_LOCK => date("Y-m-d H:i:s"),
+            self::$PARAM_WORKER_DATETIME => date("Y-m-d H:i:s"),
+        ], false);
     }
 
     protected static function unlockSource(crmSource $source)
     {
-        $source->saveParam(self::$PARAM_WORKER_DATETIME, date("Y-m-d H:i:s"));
-        $source->deleteParam(self::$PARAM_WORKER_LOCK);
+        // At this point we save the whole source, not only params.
+        // All modifications to source data during worker process
+        // should also be saved to DB.
+        $source->saveParams([
+            self::$PARAM_WORKER_DATETIME => date("Y-m-d H:i:s"),
+            self::$PARAM_WORKER_LOCK => null,
+        ], false);
     }
 
     /**
@@ -259,11 +268,11 @@ abstract class crmSourceWorker
             }
         }
 
-        $sql = "SELECT source.id 
-                FROM `{$source_table}` source 
+        $sql = "SELECT source.id
+                FROM `{$source_table}` source
                 LEFT JOIN `{$source_params_table}` `lock` ON source.id = `lock`.source_id AND `lock`.name = :worker_lock
                 LEFT JOIN `{$source_params_table}` `datetime` ON source.id = `datetime`.source_id AND `datetime`.name = :worker_datetime
-                WHERE {$where} ( (source.type = 'EMAIL' && source.disabled = '0') || source.type != 'EMAIL' ) AND (`lock`.value IS NULL OR `lock`.value < :when_expired) 
+                WHERE {$where} ( (source.type = 'EMAIL' && source.disabled = '0') || source.type != 'EMAIL' ) AND (`lock`.value IS NULL OR `lock`.value < :when_expired)
                 ORDER BY `datetime`.value
                 LIMIT 10";
 

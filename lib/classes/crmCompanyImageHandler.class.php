@@ -85,7 +85,7 @@ class crmCompanyImageHandler extends crmJsonController
     public function deleteImage()
     {
         if (empty($this->company_id) || empty($this->type) || empty($this->ext)) {
-            throw new waException(_w('Company id, file extension or type unknown'));
+            throw new waException(_w('Unknown company id, file extension or type.'));
         }
 
         if ($this->type == 'logo') {

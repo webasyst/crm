@@ -24,6 +24,8 @@ var CRMContactSegmentEdit = (function ($) {
     CRMContactSegmentEdit.prototype.initClass = function () {
         var that = this;
 
+        that.$wrapper.find('.crm-name-input').focus();
+
         //
         that.initIcons();
         //

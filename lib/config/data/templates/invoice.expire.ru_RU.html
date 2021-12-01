@@ -8,7 +8,7 @@
 <p>Состав счёта:</p>
 <ol>
 {foreach $invoice.items as $item}
-<li>{$item.name|escape}: {$item.quantity} шт.</li>
+<li>{$item.name|escape}: {$item.quantity|wa_format_number:false} шт.</li>
 {/foreach}
 </ol>
 

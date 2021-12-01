@@ -89,7 +89,7 @@
                 <div class="line">
                     {if !empty($field.ext)}
                         <select class="c-ext-toggle js-ext-toggle" data-name-pattern="{$_name_prefix}[ext]">
-                            <option value="" selected>[`ext`]</option>
+                            <option value="" selected>[`type`]</option>
                             {foreach $field.ext as $_value => $_name}
                                 <option value="{$_value|escape}">{$_name|escape}</option>
                             {/foreach}

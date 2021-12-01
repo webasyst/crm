@@ -2755,9 +2755,6 @@ msgstr[2] "%d ожидающих ответа звонков"
 msgid "No pending calls!"
 msgstr "Нет ожидающих ответа звонков!"
 
-msgid "Nothing to worry about."
-msgstr ""
-
 msgid "Click to open detailed info."
 msgstr "Кликните для подробной информации"
 
@@ -3554,7 +3551,7 @@ msgid "called"
 msgstr "позвонил"
 
 msgid "Open"
-msgstr ""
+msgstr "Открытые"
 
 msgid "Shop source"
 msgstr "Источник-Магазин"
@@ -3917,7 +3914,7 @@ msgid "Attach existed files:"
 msgstr "Прикрепить существующие файлы:"
 
 msgid "File is too large or another upload error occurred."
-msgstr ""
+msgstr "Слишком большой файл, или возникла другая ошибка при загрузке."
 
 msgid "Lost deals"
 msgstr "Проигранные сделки"
@@ -3979,8 +3976,8 @@ msgstr "Укажите значения для множественного по
 msgid "This field can be invisible in some cases, so it may not be required."
 msgstr "Это поле в некоторых случаях становится невидимым, и поэтому не может быть обязательным."
 
-msgid "View"
-msgstr ""
+msgid "Mode"
+msgstr "Режим"
 
 msgid "Plain text"
 msgstr "Текстовое поле"
@@ -4090,8 +4087,8 @@ msgstr "Зависимое поле"
 msgid "Unknown parent field"
 msgstr "Неизвестное родительское поле"
 
-msgid "Company id, file extension or type unknown"
-msgstr ""
+msgid "Unknown company id, file extension or type."
+msgstr "Неизвестный id компании, расширение или тип файла."
 
 msgid "Image"
 msgstr "Изображение"
@@ -4099,8 +4096,8 @@ msgstr "Изображение"
 msgid "String"
 msgstr "Строка"
 
-msgid "Basic template info not found"
-msgstr ""
+msgid "Basic template info not found."
+msgstr "Информация об основном шаблоне не найдена."
 
 msgid "Unknown value"
 msgstr "Неизвестное значение"
@@ -4246,9 +4243,6 @@ msgstr "Создайте форму и опубликуйте ее на ваше
 msgid "Add %s source"
 msgstr "Добавить %s"
 
-msgid "deals in stage"
-msgstr ""
-
 msgid "add time limit"
 msgstr "задать лимит времени"
 
@@ -4334,7 +4328,7 @@ msgid "Delete conversation"
 msgstr "Удалить переписку"
 
 msgid "BCC"
-msgstr ""
+msgstr "Скрытая копия"
 
 msgid "Write an answer"
 msgstr "Написать ответ"
@@ -4348,29 +4342,32 @@ msgstr "Свернуть по перепискам"
 msgid "no owner"
 msgstr "нет ответственного"
 
-msgid "deals closed."
-msgstr ""
+msgid "deal closed."
+msgid_plural "deals closed."
+msgstr[0] "сделка закрыта."
+msgstr[1] "сделки закрыты."
+msgstr[2] "сделок закрыто."
 
 msgid "Average deal lifetime: "
 msgstr "Среднее время жизни сделки: "
 
-msgid "deals count in stages now"
-msgstr ""
+msgid "Deals count in stages now"
+msgstr "Количество сделок на этапах сейчас"
 
 msgid "There are no data for report."
 msgstr "Нет данных для построения отчета."
 
-msgid "average timeout for deal in stage"
-msgstr ""
+msgid "Average timeout for deal in stage"
+msgstr "Среднее время нахождения сделки на этапе"
 
 msgid "There are no stages."
-msgstr ""
+msgstr "Сделок нет."
 
 msgid "Remove customer %s from responsibility of %s"
 msgstr "Удалить для клиента %s выбор ответственного сотрудника %s"
 
 msgid "Responsible"
-msgstr ""
+msgstr "Ответственный"
 
 msgid "All owners"
 msgstr "Все ответственные"
@@ -4459,8 +4456,8 @@ msgstr[0] "%d сотрудник"
 msgstr[1] "%d сотрудника"
 msgstr[2] "%d сотрудников"
 
-msgid "ext"
-msgstr ""
+msgid "type"
+msgstr "тип"
 
 msgid "clear"
 msgstr "очистить"
@@ -4673,7 +4670,7 @@ msgid "Contact with ID %s doesn't exist"
 msgstr "Контакт с ID %s не существует"
 
 msgid "deleted id=%d"
-msgstr ""
+msgstr "удалённый id=%d"
 
 msgid "Reminder due to %s"
 msgstr "Напоминание на %s"
@@ -4685,16 +4682,16 @@ msgid "%d h."
 msgstr "%d ч."
 
 msgid "%d d."
-msgstr ""
+msgstr "%d д."
 
 msgid "Recipient email is not defined"
 msgstr "Email получателя не определен"
 
 msgid "%d pcs."
-msgstr ""
+msgstr "%d шт."
 
 msgid "%s pcs."
-msgstr ""
+msgstr "%s шт."
 
 msgid "to <span class=\"c-message-to-with-name\">%s</span>"
 msgstr "<span class=\"c-message-from\">%s</span>"

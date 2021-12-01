@@ -12,7 +12,7 @@ class crmContactPhotoDialogAction extends webasystProfilePhotoAction
 
         parent::execute();
         $this->view->assign(array(
-            'parent_template_path' => 'file:'.wa('webasyst')->getAppPath('templates/actions/profile/ProfilePhoto.html'),
+            'parent_template_path' => 'file:'.wa('webasyst')->getAppPath('templates/actions-legacy/profile/ProfilePhoto.html'),
         ));
     }
 }

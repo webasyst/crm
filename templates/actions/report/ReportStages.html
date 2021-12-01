@@ -163,7 +163,12 @@
             <section class="c-header-section">
                 <h1 class="c-page-header">
                     {if !empty($total.closed_count)}
-                        {$total.closed_count} <span class="gray" style="font-weight: normal;">[`deals closed.`]</span>
+                        {capture name="closed_deals_count"}%d <span class="gray" style="font-weight: normal;">%s</span>{/capture}
+                        {sprintf(
+                            $smarty.capture.closed_deals_count,
+                            $total.closed_count,
+                            _w('deal closed.', 'deals closed.', $total.closed_count)
+                        )}
                     {/if}
                     {if !empty($total.sec_avg)}
                         <span class="gray" style="font-weight: normal;">[`Average deal lifetime: `]</span>
@@ -174,7 +179,7 @@
 
             {if !empty($charts_data.stages)}
                 <section class="c-stage-graph-section js-stage-graph-section">
-                    <h3>[`deals count in stages now`]</h3>
+                    <h3>[`Deals count in stages now`]</h3>
                     {if !empty($charts_data.charts[0][0].exists)}
                         <div class="c-graph-wrapper js-graph-wrapper-1">
                             <div class="c-graph js-graph"></div>
@@ -206,7 +211,7 @@
                         <div class="c-empty-chart">[`There are no data for report.`]</div>
                     {/if}
 
-                    <h3>[`average timeout for deal in stage`]</h3>
+                    <h3>[`Average timeout for deal in stage`]</h3>
                 </section>
             {else}
                 <div class="c-empty-message">[`There are no stages.`]</div>

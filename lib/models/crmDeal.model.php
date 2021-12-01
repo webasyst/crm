@@ -151,6 +151,7 @@ class crmDealModel extends crmModel
     {
         $sql = "SELECT wug.contact_id
                 FROM wa_user_groups wug
+                JOIN wa_contact c ON c.id = wug.contact_id AND c.is_user != -1
                 LEFT JOIN `{$this->table}` cd ON cd.user_contact_id = wug.contact_id AND cd.status_id = :status
                 WHERE wug.group_id = :group_id
                 GROUP BY wug.contact_id
@@ -511,7 +512,7 @@ class crmDealModel extends crmModel
             $deal['params'] = $this->getParams($deal['id']);
             $deal['fields'] = array();
             $fields = crmDealFields::getAll();
-            
+
             $sources = $this->getDealSources($deal['id']);
             if ($sources) {
                 $deal['fields']['source'] = array(
@@ -575,7 +576,7 @@ class crmDealModel extends crmModel
     public function getDealSources($deal_id)
     {
         if (!empty($deal_id)) {
-            $sql = "SELECT s.id, s.type, s.provider, s.name FROM crm_deal d 
+            $sql = "SELECT s.id, s.type, s.provider, s.name FROM crm_deal d
                       INNER JOIN crm_source s ON s.id = d.source_id
                     WHERE d.id = " . intval($deal_id) . " AND d.source_id != ''";
             return $this->query($sql)->fetchAssoc();
@@ -972,8 +973,8 @@ class crmDealModel extends crmModel
                     {$markers_join}
                     {$tag_join}
                     {$fields_join}
-                WHERE {$access_rights_conditions} 
-                    AND {$filter_conditions}                  
+                WHERE {$access_rights_conditions}
+                    AND {$filter_conditions}
                     AND {$participants_condition}
                     AND {$markers_condition}
                 {$group_by}
@@ -981,7 +982,7 @@ class crmDealModel extends crmModel
         if ($limit) {
             $sql .= " LIMIT {$offset}, {$limit}";
         }
-        
+
         // Count rows setting
         $db_result = $this->query($sql);
         if (!empty($params['custom_select'])) {
@@ -1147,7 +1148,7 @@ class crmDealModel extends crmModel
     public static function getStatusName($status)
     {
         if ($status === self::STATUS_OPEN) {
-            return _w('Open ');
+            return _w('Open');
         } elseif ($status === self::STATUS_WON) {
             return _w('Won');
         } elseif ($status === self::STATUS_LOST) {
@@ -1214,7 +1215,7 @@ class crmDealModel extends crmModel
         $sql = "SELECT $select, $val cnt FROM {$this->getTableName()} {$inner_join}
                 WHERE closed_datetime >= '".$this->escape($chart_params['start_date'])
                 ."' AND closed_datetime <= '".$this->escape($chart_params['end_date'])
-                ."' AND status_id = 'WON' {$condition} 
+                ."' AND status_id = 'WON' {$condition}
                 GROUP BY $group_by ORDER BY $group_by";
 
         $res = $this->query($sql)->fetchAll();
@@ -1291,7 +1292,7 @@ class crmDealModel extends crmModel
         $this->getConditions($conditions, $condition, $inner_join);
 
         $sql = "SELECT d.stage_id, COUNT(*) cnt FROM {$this->getTableName()} d {$inner_join}
-                WHERE d.status_id = 'LOST' 
+                WHERE d.status_id = 'LOST'
                   AND d.closed_datetime >= '" . $this->escape($conditions['start_date']) . " 00:00:00'
                   AND d.closed_datetime <= '" . $this->escape($conditions['end_date']) . " 23:59:59' " . $condition . "
                 GROUP BY stage_id";

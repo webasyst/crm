@@ -369,6 +369,7 @@ class crmConversationModel extends crmModel
                     ON c.id = wug.contact_id
                       AND c.last_datetime IS NOT NULL
                       AND UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(c.last_datetime) < '". waUser::getOption('online_timeout') ."'
+                      AND c.is_user != -1
                   JOIN `wa_login_log` wll
                     ON wll.contact_id = wug.contact_id
                       AND wll.datetime_out IS NULL
@@ -386,6 +387,7 @@ class crmConversationModel extends crmModel
         // with the least number of open conversations
         $sql = "SELECT wug.contact_id
                   FROM wa_user_groups wug
+                  JOIN wa_contact c ON c.id = wug.contact_id AND c.is_user != -1
                   LEFT JOIN `{$this->table}` cc ON cc.user_contact_id = wug.contact_id AND cc.type = :type AND cc.is_closed = 0
                 WHERE wug.group_id = :group_id
                 GROUP BY wug.contact_id

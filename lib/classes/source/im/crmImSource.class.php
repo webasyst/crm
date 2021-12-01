@@ -88,7 +88,6 @@ abstract class crmImSource extends crmSource
                     $data['user_contact_id'] = $crm_user_id;
                 }
             }
-
         }
         $id = $this->getConversationModel()->add($data, crmConversationModel::TYPE_IM);
         return $this->getConversationModel()->getConversation($id);

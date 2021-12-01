@@ -317,8 +317,12 @@ class crmShop
     public static function getEncodedOrderId($deal)
     {
         if (($order_id = self::getOrderId($deal)) && crmConfig::isShopSupported()) {
-            wa('shop');
-            return shopHelper::encodeOrderId($order_id);
+            try {
+                wa('shop');
+                return shopHelper::encodeOrderId($order_id);
+            } catch (waException $e) {
+                // in case when e.g. shop meta-update failed to load
+            }
         }
         return null;
     }
@@ -329,7 +333,11 @@ class crmShop
      */
     public static function hasRights()
     {
-        return wa()->appExists('shop') && intval(wa('shop')->getUser()->getRights('shop', 'orders')) != '0';
+        try {
+            return wa()->appExists('shop') && intval(wa('shop')->getUser()->getRights('shop', 'orders')) != '0';
+        } catch (waException $e) {
+            return false; // in case when e.g. shop meta-update failed to load
+        }
     }
 
     /**
@@ -338,7 +346,11 @@ class crmShop
      */
     public static function hasAccess()
     {
-        return wa()->appExists('shop') && wa('shop')->getUser()->getRights('shop', 'backend') >= 1;
+        try {
+            return wa()->appExists('shop') && wa('shop')->getUser()->getRights('shop', 'backend') >= 1;
+        } catch (waException $e) {
+            return false; // in case when e.g. shop meta-update failed to load
+        }
     }
 
     public static function currenciesCopy()

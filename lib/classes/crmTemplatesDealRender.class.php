@@ -68,7 +68,7 @@ class crmTemplatesDealRender extends waController
 
         $path = wa('crm')->getConfig()->getAppPath('lib/config/data/template_deal_info.php');
         if (!file_exists($path)) {
-            throw new Exception(_w('Basic template info not found'));
+            throw new Exception(_w('Basic template info not found.'));
         }
         $this->_content = include($path);
 

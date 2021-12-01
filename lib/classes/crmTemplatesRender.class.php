@@ -63,7 +63,7 @@ class crmTemplatesRender extends waController
 
         $path = wa('crm')->getConfig()->getAppPath('lib/config/data/template_info.php');
         if (!file_exists($path)) {
-            throw new Exception(_w('Basic template info not found'));
+            throw new Exception(_w('Basic template info not found.'));
         }
         $this->_content = include($path);
 
@@ -183,7 +183,7 @@ class crmTemplatesRender extends waController
             if (!$this->template) {
                 $file = wa('crm')->getConfig()->getAppPath('lib/config/data/templates/invoice.template_a.html');
                 if (!file_exists($file)) {
-                    throw new Exception(_w('Basic template info not found'));
+                    throw new Exception(_w('Basic template info not found.'));
                 }
                 $this->template = file_get_contents($file);
             }

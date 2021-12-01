@@ -40,7 +40,7 @@ class crmContactIdAction extends crmBackendViewAction
 
         // Responsible currently assigned to this contact
         $responsible_data = array();
-        if ($contact['crm_user_id'] != NULL) {
+        if ($contact['crm_user_id'] != 0) {
             try {
                 $responsible = new waContact($contact['crm_user_id']);
                 $responsible_data = array(

@@ -105,43 +105,46 @@ abstract class crmParamsModel extends crmModel
 
         $ids = crmHelper::toStrArray($ids);
 
-        if (is_null($params) || $delete_old) {
-            // remove all old params
-            $this->deleteByField(array(
-                $this->external_id => $ids,
-            ));
-        } elseif ($params) {
-            // Remove selected set of params only
-            $this->deleteByField(array(
-                $this->external_id => $ids,
-                'name' => array_keys($params),
-            ));
-        }
-
-        if (!$params) {
-            return true;
-        }
-
-        if ($this->serializing) {
+        if ($params && $this->serializing) {
             $params = $this->serialize($params);
         }
 
-        // accumulate param rows to add
-        $add_params = array();
-        $params = array_filter($params, 'strlen');
-        foreach ($params as $name => $value) {
-            foreach ($ids as $_id) {
-                $add_params[] = array(
-                    'name' => $name,
-                    'value' => $value,
-                    $this->external_id => $_id,
-                );
+        $values = [];
+        $delete_names = [];
+        $do_not_delete_names = [];
+        foreach(ifempty($params, []) as $name => $value) { // $params may be === null
+            if (!strlen($value)) {
+                $delete_names[$name] = $name;
+            } else {
+                $do_not_delete_names[$name] = $name;
+                foreach ($ids as $_id) {
+                    $values[] = sprintf("('%s','%s','%s')", $this->escape($_id), $this->escape($name), $this->escape($value));
+                }
             }
         }
 
-        // add new params
-        if ($add_params) {
-            $this->multipleInsert($add_params);
+        if ($values) {
+            // INSERT...ON DUPLICATE KEY UPDATE
+            // makes sure there's never a state when there are no params in DB
+            // avoiding race condition when another process reads empty params
+            $sql = "INSERT INTO `{$this->table}` (`{$this->external_id}`, `name`, `value`)
+                    VALUES ".join(',', $values)."
+                    ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)";
+            $this->exec($sql);
+        }
+
+        if (is_null($params) || $delete_old) {
+            // remove all old params, i.e. all except what we have just updated
+            $sql = "DELETE FROM `{$this->table}`
+                    WHERE `{$this->external_id}` IN (?)
+                        AND `name` NOT IN (?)";
+            $this->exec($sql, [$ids, ifempty($do_not_delete_names, 'NULL')]);
+        } else if ($delete_names) {
+            // Remove specific params, do not touch anything else
+            $this->deleteByField([
+                $this->external_id => $ids,
+                'name' => $delete_names,
+            ]);
         }
 
         return true;
