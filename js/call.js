@@ -195,7 +195,7 @@ var CRMCallPage = ( function($) {
             if (!is_locked) {
                 is_locked = true;
 
-                var href = "?module=call&action=ts",
+                var href = "?module=call&action=ts&background_process=1",
                     data = {
                         call_ts: that.call_ts
                     };

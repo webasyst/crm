@@ -97,7 +97,7 @@
                                         {sprintf('[`To change settings or delete this category use appropriate tools of the %s app.`]', $segment.app_name|default:'')}
                                     </p>
                                 {else}
-                                    [`This list consists of selected contacts. To add/remove contacts use "Actions with selected" menu.`]
+                                    [`This list consists of selected contacts. To add/remove contacts use “Actions with selected” menu.`]
                                     <br>[`Created by`] {$segment.contact.name|escape}, {$segment.create_datetime|wa_date:'humandatetime'}
                                 {/if}
                             {/if}

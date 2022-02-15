@@ -134,7 +134,7 @@ class crmSettingsFormSaveController extends crmJsonController
         if (strlen($url) <= 0) {
             return _ws('This field is required');
         } elseif (substr($url, 0, 7) !== 'http://' && substr($url, 0, 8) !== 'https://') {
-            return _w('Invalid url');
+            return _w('Invalid URL');
         }
         return null;
     }

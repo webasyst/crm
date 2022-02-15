@@ -92,7 +92,7 @@ class crmWaLogExplainer
 
             if (!$is_contact_exists) {
                 $contact_link = null;
-                $contact_name = sprintf(_w('"%s"'), _w('Deleted contact') . ' ' . $contact_id);
+                $contact_name = sprintf(_w('“%s”'), _w('Deleted contact') . ' ' . $contact_id);
             } else {
                 $contact_link = "{$crm_app_url}contact/{$contact_id}";
                 $contact_name = trim($contact_names[$contact_id]);
@@ -151,7 +151,7 @@ class crmWaLogExplainer
             if (strlen($name) <= 0) {
                 $name = '(' . _w("no name") . ')';
             }
-            $contact_names[$i] = sprintf(_w('"%s"'), htmlspecialchars($name));
+            $contact_names[$i] = sprintf(_w('“%s”'), htmlspecialchars($name));
         }
 
         if ($count > 1) {
@@ -201,7 +201,7 @@ class crmWaLogExplainer
         }
 
         if (!empty($log_item['params']['subject'])) {
-            return sprintf(_w('%s "%s" to contact %s'), $transport_str, $log_item['params']['subject'], $subject_contact_str);
+            return sprintf(_w('%s “%s” to contact %s'), $transport_str, $log_item['params']['subject'], $subject_contact_str);
         } else {
             return sprintf(_w('%s to contact %s'), $transport_str, $subject_contact_str);
         }

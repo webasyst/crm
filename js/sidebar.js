@@ -117,10 +117,13 @@ var CRMSidebar = (function ($) {
         }
     };
 
-    CRMSidebar.prototype.reload = function () {
-        var that = this,
-            app_url = $.crm.app_url,
-            sidebar_uri = app_url + "?module=sidebar";
+    CRMSidebar.prototype.reload = function (background) {
+        const that = this;
+        const app_url = $.crm.app_url;
+        let sidebar_uri = app_url + "?module=sidebar";
+        if (background) {
+            sidebar_uri += '&background_process=1';
+        }
 
         clearTimeout(that.timer);
 
@@ -158,7 +161,7 @@ var CRMSidebar = (function ($) {
 
         that.timer = setTimeout(function () {
             if ($.contains(document, that.$wrapper[0])) {
-                that.reload();
+                that.reload(true);
             }
         }, time);
     };

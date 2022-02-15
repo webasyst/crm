@@ -187,7 +187,7 @@ abstract class crmEmailSourceSettingsPage extends crmSourceSettingsPage
             if (strlen($url) <= 0) {
                 $errors['params']['after_antispam_confirm_url'] = _ws('This field is required');
             } elseif (substr($url, 0, 7) !== 'http://' && substr($url, 0, 8) !== 'https://') {
-                $errors['params']['after_antispam_confirm_url'] = _w('Invalid url');
+                $errors['params']['after_antispam_confirm_url'] = _w('Invalid URL');
             }
         }
 

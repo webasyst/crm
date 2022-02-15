@@ -100,9 +100,9 @@
             <input type="hidden" name="id" value="{$vault.id|default:""}">
         </form>
 
-        {$_confirm_delete_text = "{sprintf_wp('There are no contacts in vault "%s". Vault deleting cause no effect to access any contacts data.', "{$vault.name|escape|default:""}")}"}
+        {$_confirm_delete_text = "{sprintf_wp('There are no contacts in vault “%s”. Vault deleting cause no effect to access any contacts data.', "{$vault.name|escape|default:""}")}"}
         {if !empty($vault.count)}
-            {$_confirm_delete_text = "{sprintf(_w('There are %d contact in vault "%%s".', 'There are %d contacts in vault "%%s".', $vault.count), "{$vault.name|escape|default:""}")} [`Vault deleting cause free access to this contacts data for all backend users.`]"}
+            {$_confirm_delete_text = "{sprintf(_w('There are %d contact in vault “%%s”.', 'There are %d contacts in vault “%%s”.', $vault.count), "{$vault.name|escape|default:""}")} [`Vault deleting cause free access to this contacts data for all backend users.`]"}
         {/if}
 
         <script>

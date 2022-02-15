@@ -12,7 +12,7 @@
             {if $deal.user_contact_id && $deal.user_contact_id == $wa->user('id')}
                 {* YOUSELF CASE *}
                 {$_future_deal_user_name = "<strong>`$future_deal_user.name|escape`</strong>"}
-                <p>{sprintf(_w('You are about to change the responsible user for deal %s from youself to %s.'),
+                <p>{sprintf(_w('You are about to change the responsible user for deal %s from yourself to %s.'),
                     $deal.name|escape, $_future_deal_user_name)}</p>
 
             {elseif $deal.user_contact_id}

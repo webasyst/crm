@@ -84,7 +84,7 @@ class crmSendSMSController extends crmJsonController
 
             $res = $sms->send($data['phone'], $data['text'], $data['from']);
 
-            if ($res <= 0) {
+            if ($res == false) {
                 return false;
             }
 

@@ -227,7 +227,7 @@ var CRMMessagesPage = ( function($) {
 
                 var is_exist = $.contains(document, that.$wrapper[0]);
                 if (is_exist) {
-                    var href = "?module=message&action=ts",
+                    var href = "?module=message&action=ts&background_process=1",
                         data = {
                             message_ts: message_ts
                         };

@@ -89,16 +89,16 @@
         {if !$active_sources}
             <section class="c-cron-birthday-section ">
                 <div class="c-is-cli-ok" style="text-align: center;">
-                    <p class="bold">[`No message sourses configured.`]</p>
+                    <p class="bold">[`No message sources configured.`]</p>
                     <p>
                         {if $_is_admin}
                         {sprintf_wp(
-                        'To recieve and handle messages from clients %sset up a message source%s',
+                        'To receive and handle messages from clients %sset up a message source%s',
                         sprintf('<a href="%s">', "`$crm_app_url`settings/sources/email/"),'</a>'
                         )}
                         {else}
                         {sprintf_wp(
-                        'To recieve and handle messages from clients %sset up a message source%s','',''
+                        'To receive and handle messages from clients %sset up a message source%s','',''
                         )}
                         {/if}
                     </p>

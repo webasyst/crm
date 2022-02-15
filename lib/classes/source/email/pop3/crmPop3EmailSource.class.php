@@ -143,7 +143,7 @@ class crmPop3EmailSource extends crmEmailSource
             } else if (false !== strpos($err, 'IMAP')) {
                 $err = _w('IMAP is not supported. Please use POP3.');
             }
-            $errors[''] = _w('An error occured while attempting to connect with specified settings.').' '.$err;
+            $errors[''] = _w('An error occurred while attempting to connect with specified settings.').' '.$err;
         }
         return $errors;
     }

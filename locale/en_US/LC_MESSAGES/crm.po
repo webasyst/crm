@@ -1028,9 +1028,6 @@ msgstr ""
 msgid "Required field is empty"
 msgstr ""
 
-msgid "File is too large or another upload error occured."
-msgstr ""
-
 msgid "All time"
 msgstr ""
 
@@ -1371,9 +1368,6 @@ msgid "After form submission"
 msgstr ""
 
 msgid "This setting will redirect clients to any specified URL or display any text message after the form is submitted."
-msgstr ""
-
-msgid "After successfull submission:"
 msgstr ""
 
 msgid "Redirect to URL"
@@ -2010,9 +2004,6 @@ msgid "Unknown error."
 msgstr ""
 
 msgid "IMAP is not supported. Please use POP3."
-msgstr ""
-
-msgid "An error occured while attempting to connect with specified settings."
 msgstr ""
 
 msgid "We have found %d duplicate for this field"
@@ -2794,9 +2785,6 @@ msgstr ""
 msgid "Invalid color"
 msgstr ""
 
-msgid "Invalid url"
-msgstr ""
-
 msgid "Error in plugin"
 msgstr ""
 
@@ -2849,9 +2837,6 @@ msgid "Last execution time:"
 msgstr ""
 
 msgid "<tt>cron</tt> job is set up properly."
-msgstr ""
-
-msgid "http://www.webasyst.com/framework/docs/server/cron/"
 msgstr ""
 
 msgid "<tt>Cron</tt> job required for sending greetings to customers is set up for your account."
@@ -3589,9 +3574,6 @@ msgstr ""
 msgid "Enter available options for %s depending on it’s parent field value."
 msgstr ""
 
-msgid "http://www.shop-script.com/help/conditional-contact-fields/"
-msgstr ""
-
 msgid "Get help"
 msgstr ""
 
@@ -3704,12 +3686,6 @@ msgid "Preview"
 msgstr ""
 
 msgid "Variable code may not start with a digit"
-msgstr ""
-
-msgid "Variable code may only contain digits, latin symbols and underscore"
-msgstr ""
-
-msgid "Variable codes sould be unique"
 msgstr ""
 
 msgid "Removing a template is prohibited. The template is associated with {$company_count} companies"
@@ -3982,9 +3958,6 @@ msgid "A new company will be created"
 msgstr ""
 
 msgid "Minimize by clients"
-msgstr ""
-
-msgid "No message sourses configured."
 msgstr ""
 
 msgid "Reply on SMS"
@@ -4539,9 +4512,6 @@ msgstr ""
 msgid "Detach"
 msgstr ""
 
-msgid "To recieve and handle messages from clients %sset up a message source%s"
-msgstr ""
-
 msgid "Technical information about the error"
 msgstr ""
 
@@ -4552,9 +4522,6 @@ msgid "Email message has not been sent."
 msgstr ""
 
 msgid "Check <a href=\"%s\">email sending settings</a>."
-msgstr ""
-
-msgid "Check <a href=\"%s\">sms sending settings</a>."
 msgstr ""
 
 msgid "There are %s for this company."

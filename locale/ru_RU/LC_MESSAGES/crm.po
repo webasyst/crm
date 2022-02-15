@@ -451,8 +451,8 @@ msgstr "Выполняется исключение. Подождите..."
 msgid "Start exclude"
 msgstr "Начать исключение"
 
-msgid "%d selected contact will be excluded from list \"%s\""
-msgid_plural "%d selected contacts will be excluded from list \"%s\""
+msgid "%d selected contact will be excluded from list “%s”"
+msgid_plural "%d selected contacts will be excluded from list “%s”"
 msgstr[0] "%d выбранный контакт будет исключен из списка «%s»"
 msgstr[1] "%d выбранных контакта будут исключены из списка «%s»"
 msgstr[2] "%d выбранных контактов будут исключены из списка «%s»"
@@ -565,7 +565,7 @@ msgstr "Этот список сформирован из категории, с
 msgid "To change settings or delete this category use appropriate tools of the %s app."
 msgstr "Чтобы изменить настройки или удалить эту категорию, перейдите в приложение «%s»."
 
-msgid "This list consists of selected contacts. To add/remove contacts use \"Actions with selected\" menu."
+msgid "This list consists of selected contacts. To add/remove contacts use “Actions with selected” menu."
 msgstr "Этот список состоит из выбранных контактов. Добавляйте и удаляйте контакты через меню «Действия с выбранными»."
 
 msgid "Delete segment"
@@ -1357,7 +1357,7 @@ msgstr "После отправки формы"
 msgid "This setting will redirect clients to any specified URL or display any text message after the form is submitted."
 msgstr "После отправки формы клиент  будет перенаправлен на указанный URL, или ему будет показано сообщение."
 
-msgid "After successfull submission:"
+msgid "After successful submission:"
 msgstr "Что делать после отправки формы:"
 
 msgid "Redirect to URL"
@@ -1669,8 +1669,8 @@ msgstr "Стили"
 msgid "background color"
 msgstr "цвет фона"
 
-msgid "There are %d contact in vault \"%%s\"."
-msgid_plural "There are %d contacts in vault \"%%s\"."
+msgid "There are %d contact in vault “%%s”."
+msgid_plural "There are %d contacts in vault “%%s”."
 msgstr[0] "В классе «%%s» %d контакт."
 msgstr[1] "В классе «%%s» %d контакта."
 msgstr[2] "В классе «%%s» %d контактов."
@@ -1678,7 +1678,7 @@ msgstr[2] "В классе «%%s» %d контактов."
 msgid "Vault deleting cause free access to this contacts data for all backend users."
 msgstr "Если удалить класс, то контакты из него будут доступны всем пользователям бекенда."
 
-msgid "There are no contacts in vault \"%s\". Vault deleting cause no effect to access any contacts data."
+msgid "There are no contacts in vault “%s”. Vault deleting cause no effect to access any contacts data."
 msgstr "В классе «%s» нет контактов. Удаление этого класса не повлияет на изменение доступа к контактным данным."
 
 msgid "Vault name"
@@ -2254,12 +2254,6 @@ msgstr "Отсутствует в динамических сегментах"
 msgid "Separator:"
 msgstr "Разделитель:"
 
-msgid "Comma \",\""
-msgstr "Запятая \",\""
-
-msgid "Semicolon \";\""
-msgstr "Точка-с-запятой \";\""
-
 msgid "Create deals"
 msgstr "Создать сделки"
 
@@ -2383,17 +2377,11 @@ msgstr "Удалить сообщение от %s"
 msgid "Minimize by deals"
 msgstr "Свернуть по сделкам"
 
-msgid "No email sourses configured."
-msgstr "Нет настроенных email-источников."
-
 msgid "show the message"
 msgstr "показать сообщение"
 
 msgid "open conversation"
 msgstr "открыть переписку"
-
-msgid "To recieve and handle emails from clients %sset up an email deal source%s"
-msgstr "Чтобы получать и обрабатывать электронные письма от клиентов, %sнастройте источник электронной почты%s."
 
 msgid "Send email"
 msgstr "Отправить email"
@@ -2409,9 +2397,6 @@ msgstr "Добавить заметку"
 
 msgid "Send to timeline"
 msgstr "Отправить в ленту событий"
-
-msgid "File is too large or another upload error occured."
-msgstr "Файл слишком большой или произошла иная ошибка загрузки."
 
 msgid "no subject"
 msgstr "без темы"
@@ -2701,7 +2686,7 @@ msgstr "Неизвестная ошибка."
 msgid "IMAP is not supported. Please use POP3."
 msgstr "Протокол IMAP не поддерживается. Используйте POP3."
 
-msgid "An error occured while attempting to connect with specified settings."
+msgid "An error occurred while attempting to connect with specified settings."
 msgstr "При попытке подключиться с указанными параметрами возникла ошибка."
 
 msgid "Subject of the original message"
@@ -2718,9 +2703,6 @@ msgstr "Уникальный идентификатор клиента, кото
 
 msgid "Full formatted name of customer"
 msgstr "Полное имя клиента"
-
-msgid "Value of customer field \"%s\""
-msgstr "Значение поля контакта клиента \"%s\""
 
 msgid "Client (request originator)"
 msgstr "Клиенту (от кого поступил запрос)"
@@ -2857,8 +2839,8 @@ msgstr "Исключить из экспорта пустые колонки"
 msgid "Change filter conditions"
 msgstr "Изменить условия фильтра"
 
-msgid "Add contacts to segment \"%s\""
-msgstr "Добавить контакты в сегмент \"%s\""
+msgid "Add contacts to segment “%s”"
+msgstr "Добавить контакты в сегмент «%s»"
 
 msgid "Find contact"
 msgstr "Найти контакт"
@@ -2901,9 +2883,6 @@ msgstr[2] "%d выбранных сделок будут экспортиров�
 
 msgid "No invoices in this deal"
 msgstr "Нет счетов на оплату в этой сделке"
-
-msgid "Сhange owner"
-msgstr "Изменить ответственного"
 
 msgid "Delete %s deals"
 msgstr "Удалить отмеченные сделки"
@@ -3133,7 +3112,7 @@ msgstr "Дата закрытия"
 msgid "Invalid color"
 msgstr "Указан неверный цвет"
 
-msgid "Invalid url"
+msgid "Invalid URL"
 msgstr "Указан неверный веб-адрес"
 
 msgid "Error in plugin"
@@ -3190,8 +3169,8 @@ msgstr "Последнее выполнение:"
 msgid "<tt>cron</tt> job is set up properly."
 msgstr "<tt>cron</tt> настроен и работает."
 
-msgid "http://www.webasyst.com/framework/docs/server/cron/"
-msgstr "http://www.webasyst.ru/developers/docs/tips/cron/"
+msgid "https://developers.webasyst.com/installation/tips/cron/"
+msgstr "https://developers.webasyst.ru/docs/tips/cron/"
 
 msgid "<tt>Cron</tt> job required for sending greetings to customers."
 msgstr "Необходимо настроить задание <tt>cron</tt> для рассылки <b>поздравлений клиентам</b>."
@@ -3496,8 +3475,8 @@ msgstr ""
 msgid "Google reCAPTCHA"
 msgstr ""
 
-msgid "Remove \"%name%\" from recipients of %number%?"
-msgstr "Исключить \"%name%\" из получателей %number%?"
+msgid "Remove “%name%” from recipients of %number%?"
+msgstr "Исключить «%name%» из получателей %number%?"
 
 msgid "Create deal when"
 msgstr "Создавать сделку когда"
@@ -3763,10 +3742,10 @@ msgstr "Добавить переменную"
 msgid "Variable code may not start with a digit"
 msgstr "Код переменной не может начинаться с цифры"
 
-msgid "Variable code may only contain digits, latin symbols and underscore"
+msgid "Variable code may contain only digits, letters, and underscore characters."
 msgstr "Код переменной может состоять только из цифр, латинских символов и подчеркивания"
 
-msgid "Variable codes sould be unique"
+msgid "Variable codes must be unique."
 msgstr "Коды переменных не должны совпадать"
 
 msgid "Signature"
@@ -3832,8 +3811,8 @@ msgstr "Фиксированное значение:"
 msgid "Enter available options for %s depending on it’s parent field value."
 msgstr "Заполните списки значений поля «%s» в зависимости от значения его родительского поля."
 
-msgid "http://www.shop-script.com/help/conditional-contact-fields/"
-msgstr "http://www.webasyst.ru/help/7/conditional-contact-fields/"
+msgid "https://www.shop-script.com/help/46/conditional-contact-fields/"
+msgstr "https://support.webasyst.ru/shop-script/7/conditional-contact-fields/"
 
 msgid "Get help"
 msgstr "Помощь"
@@ -4201,7 +4180,7 @@ msgstr "Не найдено сделок по заданным условиям"
 msgid "Change company"
 msgstr "Изменить компанию"
 
-msgid "To recieve and handle messages from clients %sset up a message source%s"
+msgid "To receive and handle messages from clients %sset up a message source%s"
 msgstr "Чтобы получать и обрабатывать сообщения от клиентов необходимо %sнастроить источники сообщений%s"
 
 msgid "Reply on SMS"
@@ -4228,7 +4207,7 @@ msgstr "Этапы сделки"
 msgid "Select extension number"
 msgstr "Укажите внутренний номер"
 
-msgid "No message sourses configured."
+msgid "No message sources configured."
 msgstr "Нет настроенных источников сообщений."
 
 msgid "Set up an email address to receive messages and deal requests."
@@ -4606,7 +4585,7 @@ msgstr "См. подробную информацию об ошибке в ло�
 msgid "Check <a href=\"%s\">email sending settings</a>."
 msgstr "Проверьте <a href=\"%s\">настройки отправки email-сообщений</a>."
 
-msgid "Check <a href=\"%s\">sms sending settings</a>."
+msgid "Check <a href=\"%s\">SMS sending settings</a>."
 msgstr "Проверьте <a href=\"%s\">настройки отправки sms-сообщений</a>."
 
 msgid "Open in Shop-Script"
@@ -4705,7 +4684,7 @@ msgstr[0] "%d контакт"
 msgstr[1] "%d контакта"
 msgstr[2] "%d контактов"
 
-msgid "\"%s\""
+msgid "“%s”"
 msgstr "«%s»"
 
 msgid "has deleted"
@@ -4720,7 +4699,7 @@ msgstr "удалил контакты"
 msgid "%s and %s more"
 msgstr "%s и еще %s"
 
-msgid "%s \"%s\" to contact %s"
+msgid "%s “%s” to contact %s"
 msgstr "%s «%s» контакту %s"
 
 msgid "%s to contact %s"
@@ -4786,7 +4765,7 @@ msgstr "Это приведёт к потере вами доступа к эт�
 msgid "Confirm"
 msgstr "Подтвердить"
 
-msgid "You are about to change the responsible user for deal %s from youself to %s."
+msgid "You are about to change the responsible user for deal %s from yourself to %s."
 msgstr "Вы собираетесь сменить ответственного пользователя для сделки %s с себя на %s."
 
 msgid "You are about to change the responsible user for deal %s from %s to %s."
@@ -4810,13 +4789,13 @@ msgstr "Открыть в CRM"
 msgid "The order is not available because of insufficient access rights for deal editing."
 msgstr "Заказ недоступен, потому что недостаточно прав для редактирования сделки."
 
-msgid "For each new deal, a randomly selected user with the lowest number of assigned deals will be assinged as the responsible person."
+msgid "For each new deal, a randomly selected user with the lowest number of assigned deals will be assigned as the responsible person."
 msgstr "При создании сделки в качестве ответственного будет случайным образом выбран один из пользователей в группе с наименьшим количеством сделок."
 
 msgid "Deal loss reasons are not set up."
 msgstr "Не настроены причины проигрыша сделок."
 
-msgid "To make company-only fields avialable, first add the “Company” field to the form."
+msgid "To make company-only fields available, first add the “Company” field to the form."
 msgstr "Чтобы добавлять поля, относящиеся только к компаниям, сначала добавьте в форму поле «Компания»."
 
 msgid "Public links URL"
@@ -4839,3 +4818,6 @@ msgstr "Перетащите ваше изображение сюда"
 
 msgid "Entered text is too long. Shorten it to maximum 255 characters."
 msgstr "Введённый текст слишком длинный. Сократите его максимум до 255 символов."
+
+msgid "Use the <em>%s</em> link to set how long a deal is allowed to remain in each of the stages. To learn about overdue deals, <a href=\"https://support.webasyst.com/27828/crm-deal-funnel-stage-time-limit/\" class=\"nowrap\" target=\"_blank\">set up a notification</a> for the “<em>%s</em>” event."
+msgstr "Используйте ссылку «<em>%s</em>», чтобы установить, как долго сделка может оставаться на каждом из этапов. Чтобы узнавать о просроченных сделках, <a href=\"https://support.webasyst.ru/27824/crm-deal-funnel-stage-time-limit/\" class=\"nowrap\" target=\"_blank\">настройте уведомление</a> для события «<em>%s</em>»."
