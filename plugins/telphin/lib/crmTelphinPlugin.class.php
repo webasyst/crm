@@ -193,6 +193,7 @@ class crmTelphinPlugin extends waPlugin
     {
         $call_model = new crmCallModel();
         $call_params_model = new crmCallParamsModel();
+        $log_model = new crmLogModel();
 
         // Any calls scheduled for cleanup?
         $sql = "SELECT id, plugin_call_id
@@ -255,6 +256,9 @@ class crmTelphinPlugin extends waPlugin
             $call_model->deleteById($duplicate_call_ids);
             $call_params_model->deleteByField(array(
                 'call_id' => $duplicate_call_ids,
+            ));
+            $log_model->deleteByField(array(
+                'object_id' => $duplicate_call_ids
             ));
         }
 

@@ -365,6 +365,9 @@ EOF;
         self::getCallParamsModel()->deleteByField(array(
             'call_id' => $duplicate_call_ids,
         ));
+        self::getLogModel()->deleteByField(array(
+            'object_id' => $duplicate_call_ids
+        ));
     }
 
     protected function dumpLog($message)
@@ -427,6 +430,15 @@ EOF;
             $call_params_model = new crmCallParamsModel();
         }
         return $call_params_model;
+    }
+
+    protected static function getLogModel()
+    {
+        static $log_model = null;
+        if (!$log_model) {
+            $log_model = new crmLogModel();
+        }
+        return $log_model;
     }
 
     protected function getApi()
