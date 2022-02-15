@@ -24,12 +24,12 @@
                     {if $callback_url}
                         <input type="text" class="input" style="max-width: 50px;" readonly value="{$callback_url}" />
                     {else}
-                        <a href="{$wa_backend_url}site/#/routing/" target="_blank" style="color: red">{_wd('crm_sipuni', 'Add settlement for CRM')}</a>
+                        <a href="{$wa_backend_url}site/#/routing/" target="_blank" style="color: red">{_wd('crm_sipuni', 'Add a CRM settlement')}</a>
                     {/if}
                     <br>
                     <span class="hint">
                         {sprintf(_wd('crm_sipuni', 'Enter the URL in your PBX %ssettings%s %s'), '<a href="https://sipuni.com/ru_RU/settings/integration/crm_http_api" target="_blank">', '</a>', '<i class="icon10 new-window"></i>')}<br>
-                        {_wd('crm_sipuni', 'The checkbox «Use Web Socket Server» should be <b>turned off</b>')}
+                        {_wd('crm_sipuni', 'The “Use Web Socket Server“ option must be <b>turned off</b>.')}
                     </span>
                 </div>
             </div>
@@ -146,7 +146,7 @@
             user_template_html: {$_user_template_html|default:''|json_encode},
             save_hint: {$_save_hint|json_encode},
             locales: {
-                delete_confirm_title: '[`Remove "%name%" from recipients of %number%?`]',
+                delete_confirm_title: '[`Remove “%name%” from recipients of %number%?`]',
                 delete_confirm_text: "[`Are you sure?`]",
                 delete_confirm_button: "[`Delete`]"
             }

@@ -34,8 +34,8 @@ msgstr "URL принимающего скрипта"
 msgid "Enter the URL in your PBX %ssettings%s %s"
 msgstr "Укажите URL %sв настройках%s %s своей АТС"
 
-msgid "The checkbox «Use Web Socket Server» should be <b>turned off</b>"
-msgstr "Чекбокс «Использовать вебсокет-сервер» должен быть <b>выключен</b>"
+msgid "The “Use Web Socket Server“ option must be <b>turned off</b>."
+msgstr "Флажок «Использовать вебсокет-сервер» должен быть <b>выключен</b>."
 
 msgid "Short numbers of %semployees%s %s"
 msgstr "Короткие номера %sсотрудников%s %s"
@@ -58,5 +58,5 @@ msgstr "На короткие номера сотрудников можно %s�
 msgid "Save to add a user"
 msgstr "Сохраните, чтобы добавить пользователя"
 
-msgid "Add settlement for CRM"
+msgid "Add a CRM settlement"
 msgstr "Добавьте поселение для CRM"
