@@ -2695,8 +2695,8 @@ msgstr "Тема оригинального сообщения"
 msgid "Text of the original message"
 msgstr "Текст оригинального сообщения"
 
-msgid "URL address for not registered clients to confirm their original email."
-msgstr "Адрес (URL) по которому незарегистрированные клиенты подтверждают свой электронный адрес."
+msgid "URL for non-registered clients to confirm their email addresses."
+msgstr "Адрес (URL) для подтверждения email-адресов незарегистрированными клиентами."
 
 msgid "Unique identifier automatically assigned to each customer in Contacts"
 msgstr "Уникальный идентификатор клиента, который автоматически присваивается каждому клиенту в Контактах"
@@ -4821,3 +4821,16 @@ msgstr "Введённый текст слишком длинный. Сокра�
 
 msgid "Use the <em>%s</em> link to set how long a deal is allowed to remain in each of the stages. To learn about overdue deals, <a href=\"https://support.webasyst.com/27828/crm-deal-funnel-stage-time-limit/\" class=\"nowrap\" target=\"_blank\">set up a notification</a> for the “<em>%s</em>” event."
 msgstr "Используйте ссылку «<em>%s</em>», чтобы установить, как долго сделка может оставаться на каждом из этапов. Чтобы узнавать о просроченных сделках, <a href=\"https://support.webasyst.ru/27824/crm-deal-funnel-stage-time-limit/\" class=\"nowrap\" target=\"_blank\">настройте уведомление</a> для события «<em>%s</em>»."
+
+msgid "Delete conversations"
+msgstr "Удалить переписки"
+
+msgid "Detach from deals"
+msgstr "Открепить от сделок"
+
+msgid "Mark messages as read"
+msgstr "Отметить как прочитанные"
+
+msgid "Mark messages as unread"
+msgstr "Отметить как непрочитанные"
+

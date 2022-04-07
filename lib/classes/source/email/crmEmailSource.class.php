@@ -207,7 +207,7 @@ abstract class crmEmailSource extends crmSource
         return array(
             '{ORIGINAL_SUBJECT}' => _w('Subject of the original message'),
             '{ORIGINAL_TEXT}' => _w('Text of the original message'),
-            '{CONFIRM_URL}' => _w('URL address for not registered clients to confirm their original email.')
+            '{CONFIRM_URL}' => _w('URL for non-registered clients to confirm their email addresses.')
         );
     }
 
