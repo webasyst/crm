@@ -366,6 +366,16 @@
                                 </div>
                             {/foreach}
 
+                        {elseif $is_deals_limit}
+                            <div class="c-information-block">
+                                <div class="c-image-wrapper">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="c-text-wrapper">
+                                    <h2>[`Kanban board deal quantity limit exceeded.`]</h2>
+                                    <p>{_w('This section can display a maximum of %d deal.', 'This section can display a maximum of %d deals.', $max_kanban_deals)} {_w('You have now %d deal.', 'You have now %d deals.', $total_count)}</p>
+                                </div>
+                            </div>
                         {else}
 
                             <div class="c-contacts-page">

@@ -39,10 +39,12 @@
         {$wa_url}wa-content/js/jquery-plugins/ibutton/jquery.ibutton.min.js
         {$wa_url}wa-content/js/jquery-wa/editor2.js
     {/wa_js}{strip}
+        
+    <script src="{$wa_url}wa-content/js/fontawesome/fontawesome-all.min.js?v={$wa->version(true)}"></script>
 
     {if $_locale_string != 'en'}
         <script src="{$wa_app_static_url}js/jquery/i18n/datepicker-{$_locale_string}.js?v={$wa->version()}"></script>
-        <script src="{$wa_url}wa-content/js/redactor/2/{$_locale_string}.js?v{$wa->version()}"></script>
+        <script src="{$wa_url}wa-content/js/redactor/2/{$_locale_string}.js?v{$wa->version(true)}"></script>
     {/if}
 
     {/strip}

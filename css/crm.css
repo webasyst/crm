@@ -4284,6 +4284,9 @@ ul.pager li {
 }
 .c-deal-page .c-deal-board .c-field .c-field-toggle.is-shown .c-hidden {
   display: inline-block;
+}
+.c-deal-page .c-deal-board .c-field .c-field-toggle.is-shown .c-hidden .c-actions {
+  display: block;
   text-align: right;
 }
 .c-deal-page .c-deal-board .c-field .c-field-toggle.is-shown .c-hidden > * {
@@ -5367,6 +5370,28 @@ ul.pager li {
 .c-deals-page .c-funnel-table .c-table-content .c-state-row .c-deal-wrapper .c-deal-footer i:last-child,
 .c-deals-page .c-funnel-table .c-table-content .c-state-row .c-deal-wrapper .c-deal-footer .c-message-icon:last-child {
   margin-right: 0;
+}
+.c-deals-page .c-funnel-table .c-table-content .c-information-block {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  margin: 2rem;
+  padding: 1.5rem;
+  background: rgba(253,230,115,0.188);
+  border: 1px solid #fde673;
+  border-radius: 5px;
+}
+.c-deals-page .c-funnel-table .c-table-content .c-information-block p {
+  margin: 0.5rem 0;
+}
+.c-deals-page .c-funnel-table .c-table-content .c-information-block .c-image-wrapper {
+  margin-right: 1.5rem;
+  font-size: 46px;
+  width: 1em;
+  color: #fc0;
 }
 .c-deals-page .c-funnel-table .c-actions-header {
   background: #f7f7f7;
@@ -9471,6 +9496,9 @@ ul.pager li {
 }
 .crm-search-container-wrapper #c-search-block .sidebar ul {
   padding: 0 0 20px 0;
+}
+.crm-search-container-wrapper #c-search-block .collapse-handler {
+  cursor: pointer;
 }
 .c-reminder-edit-form-wrapper .line {
   margin: 8px 0 0;

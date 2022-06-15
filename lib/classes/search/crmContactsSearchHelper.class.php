@@ -2186,7 +2186,8 @@ class crmContactsSearchHelper
                     $table = $model->getTableName();
                 }
             }
-            if ($table === 'wa_contact_data') {
+            if ($table === 'wa_contact_data' || $table === 'wa_contact') {
+                $table = 'wa_contact_data';
                 $sql_t = "(SELECT COUNT(*) FROM `{$table}` WHERE contact_id = c.id AND field = '{$field_id}') :comparation ";
                 $config = array(
                     'field_id' => $field_id,

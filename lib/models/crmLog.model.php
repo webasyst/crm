@@ -164,7 +164,7 @@ class crmLogModel extends crmModel
             }
             $chart[] = array(
                 'id'    => $action,
-                'name'  => _w($data['name']),
+                'name'  => $data['name'],
                 'color' => $data['color'],
                 'data'  => $points,
             );

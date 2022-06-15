@@ -4834,3 +4834,17 @@ msgstr "Отметить как прочитанные"
 msgid "Mark messages as unread"
 msgstr "Отметить как непрочитанные"
 
+msgid "Kanban board deal quantity limit exceeded."
+msgstr "Превышен лимит отображения сделок для доски «Канбан»."
+
+msgid "This section can display a maximum of %d deal."
+msgid_plural "This section can display a maximum of %d deals."
+msgstr[0] "В этом разделе отображается не больше %d сделки."
+msgstr[1] "В этом разделе отображается не больше %d сделок."
+msgstr[2] "В этом разделе отображается не больше %d сделок."
+
+msgid "You have now %d deal."
+msgid_plural "You have now %d deals."
+msgstr[0] "У вас сейчас %d сделка."
+msgstr[1] "У вас сейчас %d сделки."
+msgstr[2] "У вас сейчас %d сделок."

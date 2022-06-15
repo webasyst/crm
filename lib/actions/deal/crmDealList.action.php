@@ -54,9 +54,18 @@ class crmDealListAction extends crmBackendViewAction
         if ($funnel['id'] != 'all') {
             $list_params['funnel_id'] = $funnel['id'];
         }
-
-        $deals = $this->getDeals($list_params, $users, $total_count);
-        $this->extendByCanDeleteFlag($deals, $funnels);
+        $is_deals_limit = false;
+        $count_params = $list_params;
+        $count_params['count_results'] = 'only';
+        $total_count = $this->getDealModel()->getList($count_params);
+        $max_kanban_deals = wa('crm')->getConfig()->getMaxKanbanDeals();
+        if ($this->view_mode == 'thumbs' && $total_count > $max_kanban_deals) {
+            $deals = [];
+            $is_deals_limit = true;
+        } else {
+            $deals = $this->getDeals($list_params, $users, $total_count);
+            $this->extendByCanDeleteFlag($deals, $funnels);
+        }
 
         $last_message_ids = array();
 
@@ -151,6 +160,9 @@ class crmDealListAction extends crmBackendViewAction
             "filter_stages"             => $filter_stages,
             "stage"                     => $stage,
             "deals"                     => $deals,
+            "is_deals_limit"            => $is_deals_limit,
+            "max_kanban_deals"          => $max_kanban_deals,
+            "total_count"               => $total_count,
             "filter_contacts"           => $filter_contacts,
             "selected_filter_contact"   => $selected_filter_contact,
             "filter_reminders"          => $filter_reminders,

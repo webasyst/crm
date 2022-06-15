@@ -209,13 +209,21 @@ class crmConfig extends waAppConfig
 
     public function getLogType($object_type = null)
     {
+        static $translated;
+        if (!$translated) {
+            array_walk($this->log_types, function(&$item) {
+                $item['name'] = _w($item['name']);
+            });
+            $translated = true;
+        }
+
         if (!$object_type) {
             return $this->log_types;
         } elseif (isset($this->log_types[$object_type])) {
             return $this->log_types[$object_type];
         } else {
             return array(
-                "name" => "Unknown",
+                "name" => _w("Unknown"),
                 "color" => "#888"
             );
         }
@@ -256,13 +264,21 @@ class crmConfig extends waAppConfig
 
     public function getCallStates($status_id = null)
     {
+        static $translated;
+        if (!$translated) {
+            array_walk($this->log_types, function(&$item) {
+                $item['name'] = _w($item['name']);
+            });
+            $translated = true;
+        }
+
         if (!$status_id) {
             return $this->call_states;
         } elseif (isset($this->call_states[$status_id])) {
             return $this->call_states[$status_id];
         } else {
             return array(
-                "name" => "Unknown",
+                "name" => _w("Unknown"),
                 "color" => "#888"
             );
         }
@@ -285,6 +301,18 @@ class crmConfig extends waAppConfig
         $value = $this->getOption('contacts_export_chunk_size');
         if ($value === null) {
             $value = 100;
+        }
+        return (int)$value;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxKanbanDeals()
+    {
+        $value = $this->getOption('max_kanban_deals');
+        if ($value === null) {
+            $value = 1000;
         }
         return (int)$value;
     }
