@@ -4848,3 +4848,21 @@ msgid_plural "You have now %d deals."
 msgstr[0] "У вас сейчас %d сделка."
 msgstr[1] "У вас сейчас %d сделки."
 msgstr[2] "У вас сейчас %d сделок."
+
+msgid "Information about the user assigned as responsible for a deal, an instance of the <code>waContact</code> class."
+msgstr "Информация о пользователе, ответственном за выполнение сделки, в виде экземпляра класса <code>waContact</code>."
+
+msgid "Responsible user’s name."
+msgstr "Имя ответственного пользователя."
+
+msgid "Client’s company information as array."
+msgstr "Информация о компании клиента в виде массива."
+
+msgid "Client’s company name."
+msgstr "Название компании клиента."
+
+msgid "A user with limited access rights cannot edit other users’ profiles."
+msgstr "Пользователь с ограниченными правами доступа не может редактировать профили других пользователей."
+
+msgid "This profile is not available for editing."
+msgstr "Профиль недоступен для редактирования."

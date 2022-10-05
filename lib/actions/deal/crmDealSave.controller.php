@@ -156,10 +156,12 @@ class crmDealSaveController extends crmJsonController
         }
         $deal['description'] = (string)ifset($deal['description']);
 
-        $cm = new crmCurrencyModel();
-        $currency = $cm->get($deal['currency_id']);
-        if ($currency) {
-            $deal['currency_rate'] = $currency['rate'];
+        if (isset($deal['currency_id'])) {
+            $cm = new crmCurrencyModel();
+            $currency = $cm->get($deal['currency_id']);
+            if ($currency) {
+                $deal['currency_rate'] = $currency['rate'];
+            }
         }
 
         if ($is_new_deal) {

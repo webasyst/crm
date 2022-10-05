@@ -34,6 +34,7 @@ var CRMDealsExport = (function ($) {
 
         $button.click(function (e) {
             e.preventDefault();
+            $button.attr('disabled', true);
             process = that.process();
         });
 

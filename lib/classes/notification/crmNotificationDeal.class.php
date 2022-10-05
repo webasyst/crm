@@ -380,6 +380,12 @@ class crmNotificationDeal extends crmNotification
         foreach ($fields as $field_id) {
             $vars["\$deal.{$field_id}"] = sprintf(_w('Field %s of deal'), $field_id);
         }
+
+        $vars['$responsible'] = _w('Information about the user assigned as responsible for a deal, an instance of the <code>waContact</code> class.');
+        $vars['$responsible->get("name")'] = _w('Responsible user’s name.');
+        $vars['$company'] = _w('Client’s company information as array.');
+        $vars['$company.name'] = _w('Client’s company name.');
+
         return $vars;
     }
 

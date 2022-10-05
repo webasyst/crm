@@ -96,7 +96,11 @@ class crmSendEmailDialogAction extends crmBackendViewAction
     protected function getFiles()
     {
         $message = $this->getMessage();
-        return $message['attachments'];
+        $deal_files = [];
+        if (!empty($message['deal']['files'])) {
+            $deal_files = $message['deal']['files'];
+        }
+        return $message['attachments'] + $deal_files;
     }
 
     /**

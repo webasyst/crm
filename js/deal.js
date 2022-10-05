@@ -1968,19 +1968,24 @@ var CRMDeal = ( function($) {
                     };
 
                 $.post(href, data, function(html) {
-                    new CRMDialog({
+                    const $dialog = new CRMDialog({
                         html: html,
                         options: {
                             onChange: function(data) {
-                                $wrapper.replaceWith(data.html);
+                                const view_id = $dialog.$block.find('.js-view-toggle > .is-active').data('id');
+
+                                if (view_id === 1) {
+                                    $wrapper.replaceWith(data);
+                                }else{
+                                    $wrapper.replaceWith(data.html);
+                                    // deal.contact was changed - so update property
+                                    const deal_contact_id = parseInt(that.deal.contact_id) || 0;
+                                    if (deal_contact_id === contact_id && data.contact.id !== contact_id) {
+                                        that.deal.contact_id = data.contact.id;
+                                    }
+                                }
 
                                 $wrapper.find(".js-add-company-contact").show();
-
-                                // deal.contact was changed - so update property
-                                var deal_contact_id = parseInt(that.deal.contact_id) || 0;
-                                if (deal_contact_id === contact_id && data.contact.id !== contact_id) {
-                                    that.deal.contact_id = data.contact.id;
-                                }
 
                                 $(document).trigger("refresh");
                             }

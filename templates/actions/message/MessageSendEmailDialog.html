@@ -28,7 +28,7 @@
                             <div class="value">
                                 <div class="c-layout">
                                     <div class="c-column">
-                                        {if $contact.id}
+                                        {if !empty($contact.id)}
                                         <span class="c-user-name">
                                             <i class="icon16 userpic20" style="background-image: url({waContact::getPhotoUrl($contact.id, $contact.photo, 20)|escape});"></i>
                                             {$contact.name|escape} <span style="color: #999;">&lt;{$email|escape}&gt;</span>

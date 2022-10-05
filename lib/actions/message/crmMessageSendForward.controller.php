@@ -252,25 +252,9 @@ class crmMessageSendForwardController extends crmSendEmailController
      */
     protected function formAttachments($data)
     {
-        // existed files
-        $exited_files = array();
-        $deal = $this->getDeal();
-        if ($deal) {
-            $exited_files = $deal['files'];
-        }
-
-        // attach new uploaded files
-        $file_ids = $this->addNewUploadedFiles();
+        // attach checked existed files and new uploaded files
+        $file_ids = array_merge(crmHelper::toIntArray(ifset($data['file_id'])), $this->addNewUploadedFiles());
         $attached_files = $this->getFileModel()->getFiles($file_ids);
-
-        // also attach checked existed files
-        $file_ids = crmHelper::toIntArray(ifset($data['file_id']));
-        foreach ($file_ids as $file_id) {
-            if (isset($exited_files[$file_id])) {
-                $file = $exited_files[$file_id];
-                $attached_files[$file['id']] = $file;
-            }
-        }
 
         return $attached_files;
     }

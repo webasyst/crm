@@ -119,6 +119,10 @@ class crmSettingsTemplatesSaveController extends crmJsonController
 
             $i++;
         }
+
+        $_GET['invoice_template_id'] = $id;
+        $action = new webasystBackendCheatSheetActions();
+        $action->updateAppCacheConfig(waSystem::getApp());
     }
 
     /**

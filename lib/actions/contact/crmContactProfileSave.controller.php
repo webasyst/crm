@@ -11,12 +11,20 @@ class crmContactProfileSaveController extends webasystProfileSaveController
         $contact = new waContact($this->id);
 
         if (!wa()->getUser()->isAdmin() && $contact['is_user'] > 0) {
-            throw new waRightsException();
+            $this->errors[] = [
+                'id' => 'not_enough_rights',
+                'text' => _w('A user with limited access rights cannot edit other users’ profiles.'),
+            ];
+            return null;
         }
 
         $rights = new crmRights();
         if (!$rights->contactEditable($this->id)) {
-            throw new waRightsException();
+            $this->errors[] = [
+                'id' => 'cannot_be_edited',
+                'text' => _w('This profile is not available for editing.'),
+            ];
+            return null;
         }
 
         return $contact;
