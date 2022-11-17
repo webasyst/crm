@@ -138,7 +138,7 @@ class crmHtmlSanitizer
         $content = preg_replace(
             '~
                 &lt;
-                    (/?(?:a|b|i|u|pre|blockquote|p|strong|section|em|del|strike|span|ul|ol|li|div|font|br|table|thead|tbody|tfoot|tr|td|th|hr|h1|h2|h3|h4|h5|h6))
+                    (/?(?:a|b|i|u|pre|blockquote|p|strong|section|em|del|strike|span|ul|ol|li|div|font|br|table|thead|tbody|tfoot|tr|td|th|hr|h1|h2|h3|h4|h5|h6)/?)
                     ((?!&gt;)[^a-z\-\_]((?!&gt;)(\s|.))+)?
                 &gt;
             ~iux',
