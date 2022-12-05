@@ -34,6 +34,8 @@ class crmMessageWriteNewDialogAction extends crmSendEmailDialogAction
         $stages = $fsm->getStagesByFunnel($funnels[$deal['funnel_id']]);
 
         $this->view->assign(array(
+            'recipients'      => [],
+            'participants'    => [],
             'deal'            => $deal,
             'stages'          => $stages,
             'funnels'         => $funnels,

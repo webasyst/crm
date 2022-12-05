@@ -112,6 +112,8 @@ class crmMessageConversationIdAction extends crmBackendViewAction
         $can_edit_conversation = $this->getCrmRights()->canEditConversation($conversation);
 
         $this->view->assign(array(
+            'recipients'      => [],
+            'participants'    => [],
             'messages'        => $this->workupMessages($conversation, $messages),
             'conversation'    => $conversation,
             'deal'            => $deal,

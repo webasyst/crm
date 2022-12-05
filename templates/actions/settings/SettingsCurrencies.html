@@ -57,7 +57,7 @@
             <h1 class="c-page-header">[`Currencies`]</h1>
         </div>
         <div class="c-column middle right">
-            {if empty($_change_is_locked)}
+            {if empty($_change_is_locked) && !empty($currencies)}
                 <a class="inline-link js-change-primary" href="javascript:void(0);"><i class="icon16 dollar"></i><b><i>[`Change primary currency`]</i></b></a>
             {/if}
         </div>
