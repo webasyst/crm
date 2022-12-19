@@ -5,7 +5,7 @@
         <input type="text"
                name="name[{$locale.id}]"
                data-error-id="{$locale.id}"
-               value="{$localized_name_value|escape}"
+               value="{ifset($localized_name_value, '')|escape}"
                {if $is_main_locale}data-main-locale="1"{/if}
             {if !$editable}disabled="disabled"{/if}>
         <span class="errormsg"></span>

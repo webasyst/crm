@@ -47,7 +47,7 @@
     <section class="c-funnel-section" id="c-funnel-section">
         <form action="">
             <div class="c-funnel-form">
-                <input class="wide large js-funnel-name" name="funnel[name]" type="text" value="{$funnel.name|escape}" placeholder="[`Funnel name`]" required>
+                <input class="wide large js-funnel-name" name="funnel[name]" type="text" value="{$funnel.name|default: ''|escape}" placeholder="[`Funnel name`]" required>
 
                 <section class="c-color-section">
                     {$_colors = ["#cc5252","#cc8f52","#cccc52","#52cc52","#52cc8f","#52cccc","#528fcc","#5252cc","#8f52cc","#cc52cc","#cc528f"]}
@@ -311,7 +311,7 @@
                     funnel_id: "{$funnel.id}",
                     stage_html: {$_stage_template|json_encode},
                     locales: {
-                        delete_confirm_title: "[`Delete`] {$funnel.name|escape}",
+                        delete_confirm_title: "[`Delete`] {$funnel.name|default: ''|escape}",
                         delete_confirm_text: "[`Are you sure?`]",
                         delete_confirm_button: "[`Delete`]"
                     }

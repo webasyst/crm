@@ -40,7 +40,7 @@
                 <div class="field">
                     <div class="name">[`Company name`]</div>
                     <div class="value">
-                        <input class="large" type="text" name="company[name]" value="{$company.name|escape}" placeholder="[`Name`]" required>
+                        <input class="large" type="text" name="company[name]" value="{$company.name|default: ''|escape}" placeholder="[`Name`]" required>
                     </div>
                 </div>
                 <div class="field">
@@ -70,19 +70,19 @@
                 <div class="field">
                     <div class="name">[`Phone`]</div>
                     <div class="value">
-                        <input type="text" name="company[phone]" value="{$company.phone|escape}" placeholder="[`Phone`]">
+                        <input type="text" name="company[phone]" value="{$company.phone|default: ''|escape}" placeholder="[`Phone`]">
                     </div>
                 </div>
                 <div class="field">
                     <div class="name">[`Address`]</div>
                     <div class="value">
-                        <textarea name="company[address]" placeholder="[`Address`]">{$company.address|escape}</textarea>
+                        <textarea name="company[address]" placeholder="[`Address`]">{$company.address|default: ''|escape}</textarea>
                     </div>
                 </div>
                 <div class="field">
                     <div class="name">[`Tax name`]</div>
                     <div class="value">
-                        <input class="js-tax-name" type="text" name="company[tax_name]" value="{$company.tax_name|escape}" placeholder="[`Tax name`]"
+                        <input class="js-tax-name" type="text" name="company[tax_name]" value="{$company.tax_name|default: ''|escape}" placeholder="[`Tax name`]"
                                {if !empty($company.tax_options)}required{/if}>
                     </div>
                 </div>

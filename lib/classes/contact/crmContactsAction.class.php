@@ -711,7 +711,7 @@ abstract class crmContactsAction extends crmContactViewAction
     private function getSavedParams()
     {
         $csm = new waContactSettingsModel();
-        $params = $csm->getOne($this->getUser()->getId(), $this->getAppId(), 'contacts_action_params');
+        $params = (string) $csm->getOne($this->getUser()->getId(), $this->getAppId(), 'contacts_action_params');
         $params = json_decode($params, true);
         $params = is_array($params) ? $params : array();
         return $params;

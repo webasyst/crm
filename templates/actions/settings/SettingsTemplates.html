@@ -48,7 +48,7 @@
     <section class="c-template-section" id="c-template-section">
         <form action="" class="js-template-form">
 
-            <input class="wide large js-template-name" name="data[name]" type="text" value="{$template.name|escape}" placeholder="[`Template name`]" required>
+            <input class="wide large js-template-name" name="data[name]" type="text" value="{$template.name|default: ''|escape}" placeholder="[`Template name`]" required>
 
             <section class="c-params-section">
                 <h3 class="heading">[`Custom variables`]</h3>
@@ -186,7 +186,7 @@
                 param_html: {$_param_template|json_encode},
                 template_id: "{$template.id}",
                 locales: {
-                    delete_confirm_title: "[`Delete`] {$template.name|escape}",
+                    delete_confirm_title: "[`Delete`] {$template.name|default: ''|escape}",
                     delete_confirm_text: "[`Are you sure?`]",
                     delete_confirm_button: "[`Delete`]",
                     validate_first_num: "[`Variable code may not start with a digit`]",

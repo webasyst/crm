@@ -41,7 +41,7 @@
                         <div class="field">
                             <div class="name bold">[`Deal name`]</div>
                             <div class="value">
-                                <input class="bold long large" type="text" name="deal[name]" value="{$deal.name|escape}" placeholder="[`Deal name`]" required>
+                                <input class="bold long large" type="text" name="deal[name]" value="{$deal.name|default: ''|escape}" placeholder="[`Deal name`]" required>
                             </div>
                         </div>
 

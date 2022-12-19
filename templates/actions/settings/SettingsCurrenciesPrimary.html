@@ -2,7 +2,7 @@
     <div class="crm-dialog-background"></div>
     <div class="crm-dialog-block">
         <header class="crm-dialog-header">
-            <h1>[`Change primary currency`] ({$currency.code})</h1>
+            <h1>[`Change primary currency`]{if !empty($currency.code)} ({$currency.code}){/if}</h1>
         </header>
 
         <div class="crm-dialog-content">

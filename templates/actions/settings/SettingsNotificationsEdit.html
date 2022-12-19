@@ -271,8 +271,8 @@
                 site_app_url: {$site_app_url|json_encode},
                 sender: {$notification.sender|json_encode},
                 user_data: {
-                    email: {$user_email['value']|json_encode},
-                    phone: {$user_phone['value']|json_encode}
+                    email: {ifset($user_email, 'value', '')|json_encode},
+                    phone: {ifset($user_phone, 'value', '')|json_encode}
                 },
                 dialog_template: {$_dialog_template|json_encode},
                 success_html: {$_success_html|json_encode}
