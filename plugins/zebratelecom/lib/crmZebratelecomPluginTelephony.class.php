@@ -4,12 +4,12 @@ class crmZebratelecomPluginTelephony extends crmPluginTelephony
 {
     public function getRecordHref($call)
     {
-        return array(
+        return [
             'href'    => 'javascript:void('.json_encode($call['id']).');',
-            'onclick' => 'zebraHandleDownload(event,this,'.json_encode(array(
-                    'call' => $call['id'],
-                )).')',
-        );
+            'onclick' => 'zebratelecomHandleDownload(event,this,'.json_encode([
+                    'call' => $call['id']
+                ]).')',
+        ];
     }
 
     /**
@@ -83,5 +83,10 @@ class crmZebratelecomPluginTelephony extends crmPluginTelephony
     {
         $api = new crmZebratelecomPluginApi();
         return $api;
+    }
+
+    public function getRecordUrl($plugin_call_id, $plugin_record_id)
+    {
+        return $plugin_record_id;
     }
 }

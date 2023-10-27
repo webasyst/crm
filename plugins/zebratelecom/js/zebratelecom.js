@@ -1,7 +1,7 @@
 /*
  * Called when user clicks a link to download call record.
  */
-window.zebraHandleDownload = ( function($) { "use strict";
+window.zebratelecomHandleDownload = ( function($) { "use strict";
 
     var ZebraRecord = ( function($) {
 

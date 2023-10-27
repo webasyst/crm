@@ -28,13 +28,13 @@ class crmZebratelecomPluginApi
         );
 
         if (empty($this->o['login'])) {
-            throw new waException('Empty login');
+            throw new waException(_wd('crm_zebratelecom', 'Empty login'));
         }
         if (empty($this->o['password'])) {
-            throw new waException('Empty password');
+            throw new waException(_wd('crm_zebratelecom', 'Empty password'));
         }
         if (empty($this->o['sip_server'])) {
-            throw new waException('Empty sip server (realm)');
+            throw new waException(_wd('crm_zebratelecom', 'Empty sip server (realm)'));
         }
     }
 
@@ -101,7 +101,23 @@ class crmZebratelecomPluginApi
      */
     public function getWebHooks($new = false)
     {
-        $result = $this->getNet()->query(self::API_URL.'accounts/'.$this->account_id.'/webhooks', array(), 'GET');
+        try {
+            $result = $this->getNet()->query(self::API_URL . 'accounts/' . $this->account_id . '/webhooks', array(), 'GET');
+        } catch (waNetException $e) {
+            $message = $e->getMessage();
+            try {
+                $decoded_msg = waUtils::jsonDecode($message, true);
+            } catch (waException $exception) {}
+            if (isset($decoded_msg['error_message'])) {
+                if ($decoded_msg['error_message'] == 'Incorrect password') {
+                    throw new waException(_wd('crm_zebratelecom', 'Incorrect password'));
+                } elseif ($decoded_msg['error_message'] == 'invalid_credentials') {
+                    throw new waException(_wd('crm_zebratelecom', 'Invalid credentials'));
+                }
+            } else {
+                throw new waException($message);
+            }
+        }
         $data = $result['data'];
 
         if (empty($data)) {
@@ -188,7 +204,7 @@ class crmZebratelecomPluginApi
         $result = $this->getNet(array('no_token' => true))->query(self::API_URL.'user_auth', json_encode($data), 'PUT');
 
         if (!$result && !isset($result['data']['auth_token']) && !isset($result['data']['account_id'])) {
-            throw new waException('Auth error!');
+            throw new waException(_wd('crm_zebratelecom', 'Auth error!'));
         }
 
         $this->token = $result['data']['auth_token'];

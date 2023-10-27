@@ -30,3 +30,21 @@ msgstr "Zebra Telecom не поддерживает отправку коллб�
 
 msgid "The %s page should be accessible via the <b>http</b> protocol."
 msgstr "Страница %s должна быть доступна по протоколу <b>http</b>."
+
+msgid "Incorrect password"
+msgstr "Неверный пароль"
+
+msgid "Invalid credentials"
+msgstr "Неверные учетные данные"
+
+msgid "Empty login"
+msgstr "Пустой логин"
+
+msgid "Empty password"
+msgstr "Пустой пароль"
+
+msgid "Empty sip server (realm)"
+msgstr "Пустой SIP сервер"
+
+msgid "Auth error!"
+msgstr "Ошибка авторизации!"
