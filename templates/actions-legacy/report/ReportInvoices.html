@@ -1,0 +1,220 @@
+{$_title = "[`Reports`]"}
+
+{* DATE *}
+{$filter_dates = [
+    "30" => [
+        "id" => "30",
+        "uri" => crmHelper::getUrl(["timeframe" => 30, "start" => null, "end" => null]),
+        "name" => _w('Last %d day', 'Last %d days', 30),
+        "group_by" => "days",
+        "timeframe" => 30
+    ],
+    "90" => [
+        "id" => "90",
+        "uri" => crmHelper::getUrl(["timeframe" => 90, "start" => null, "end" => null]),
+        "name" => _w('Last %d day', 'Last %d days', 90),
+        "group_by" => "days",
+        "timeframe" => 90
+    ],
+    "365" => [
+        "id" => "365",
+        "uri" => crmHelper::getUrl(["timeframe" => 365, "start" => null, "end" => null]),
+        "name" => _w('Last %d day', 'Last %d days', 365),
+        "group_by" => "months",
+        "timeframe" => 365
+    ],
+    "all" => [
+        "id" => "all",
+        "uri" => crmHelper::getUrl(["timeframe" => "all", "start" => null, "end" => null]),
+        "name" => "[`All time`]",
+        "group_by" => "months",
+        "timeframe" => "all"
+    ],
+    "custom" => [
+        "id" => "custom",
+        "uri" => "javascript:void(0);",
+        "name" => "[`Select dates...`]",
+        "group_by" => "",
+        "timeframe" => "custom"
+    ]
+]}
+
+{if $timeframe && !empty($filter_dates[$timeframe])}
+    {$selected_filter_date = $filter_dates[$timeframe]}
+{else}
+    {$selected_filter_date = reset($filter_dates)}
+{/if}
+
+<div class="c-report-page shadowed" id="c-report-page">
+    <div class="blank">
+
+        <header class="c-report-header">
+            <form>
+            <div class="c-layout">
+                <div class="c-column">
+                    <ul class="c-nav-wrapper menu-h dropdown">
+                        {strip}
+
+                        {include file="./ReportMenu.inc.html" _active='invoices' inline}
+
+                        {if $company_id}
+                            <li class="c-filter-wrapper">
+                                <a class="inline-link" href="javascript:void(0);">
+                                    <b><i>{$companies[$company_id].name|escape}</i></b>&nbsp;<i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v with-icons">
+                                    {foreach $companies as $_company}
+                                        <li class="{if $company_id == $_company.id}selected{/if}">
+                                            {if isset($_company.paid_count)}
+                                                <span class="count">{$_company.paid_count}</span>
+                                            {/if}
+                                            <a href="{crmHelper::getUrl('company', $_company.id)}">
+                                                {$_company.name|escape}
+                                            </a>
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                            </li>
+                        {/if}
+
+                        {* USERS *}
+                        <li class="c-filter-wrapper">
+                            <a class="inline-link" href="javascript:void(0);">
+                                {if !empty($users[$user_id].photo_url_16)}
+                                    <i class="icon16 userpic20" style="background-image: url({$users[$user_id].photo_url_16})"></i>
+                                {/if}
+                                <b><i>{$wa->crm->contactName($users[$user_id].name)}</i></b>&nbsp;<i class="icon10 darr"></i>
+                            </a>
+                            <ul class="menu-v with-icons">
+                                {foreach $users as $_contact}
+                                <li class="t-menu-item {if $user_id === $_contact.id}selected{/if}">
+                                    <a href="{crmHelper::getUrl('user', $_contact.id)}">
+                                    {if !empty($_contact.photo_url_16)}
+                                        <i class="icon16 userpic20" style="background-image: url({$_contact.photo_url_16})"></i>
+                                    {/if}
+                                    {$wa->crm->contactName($_contact.name)}
+                                    </a>
+                                </li>
+                                {/foreach}
+                            </ul>
+                        </li>
+                        {/strip}
+                    </ul>
+
+                    {* need for generation uri, "custom" timeframe *}
+                    <input name="company" type="hidden" value="{$company_id}">
+                    <input name="user" type="hidden" value="{$user_id}">
+                </div>
+                <div class="c-column right">
+                    <div class="c-dates-filter js-dates-filter">
+                        <ul class="c-nav-wrapper menu-h dropdown">
+                            <li class="c-filter-wrapper c-hidden-part js-hidden-part {if $timeframe == "custom"}is-shown{/if}">
+                                <div class="c-filter-text">
+                                    [` from`]
+                                    <input class="js-datepicker" type="text" value="{$start_date|wa_date}" style="width:100px;" data-selector="js-start-field">
+                                    <input class="js-start-field" name="start" type="hidden" value="{$start_date}">
+                                    [` to`]
+                                    <input class="js-datepicker" type="text" value="{$end_date|wa_date}" style="width:100px;" data-selector="js-end-field">
+                                    <input class="js-end-field" name="end" type="hidden" value="{$end_date}">
+
+                                    {if !empty($charts)}
+                                        <select name="groupby" class="js-group-field">
+                                            <option value="days" {if $chart_params.group_by == "days"}selected{/if}>[`by day`]</option>
+                                            <option value="months" {if $chart_params.group_by == "months"}selected{/if}>[`by month`]</option>
+                                        </select>
+                                    {/if}
+
+                                    <input type="submit" value="[`Apply`]">
+                                </div>
+                            </li>
+                            <li class="c-filter-wrapper">
+                                <a class="inline-link" href="javascript:void(0);">
+                                    <b><i class="js-link-text">{$selected_filter_date.name|escape}</i></b>&nbsp;<i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v with-icons js-list right">
+                                    {foreach $filter_dates as $_date}
+                                        <li class="js-toggle {if $selected_filter_date.id == $_date.id}selected{/if}" data-timeframe="{$_date.timeframe}">
+                                            <a href="{$_date.uri}">{$_date.name|escape}</a>
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            {if !empty($charts)}<input type="hidden" name="chart" value="1">{/if}
+
+            </form>
+        </header>
+
+        <div class="c-report-page-content block double-padded">
+
+            <section class="c-header-section">
+                {if $paid_invoices_stat.count}
+                    <h1 class="c-page-header">
+                        {$paid_invoices_stat.count}
+                        <span class="gray" style="font-weight: normal;">{_w('invoice paid', 'invoices paid', $paid_invoices_stat.count)}. [`Total paid amount`]:</span>
+                        {$paid_invoices_stat.amount|wa_format_amount_currency:$paid_invoices_stat.currency_id}
+                    </h1>
+                {/if}
+            </section>
+
+            {if !empty($charts) && $paid_invoices_stat.count}
+                <section class="c-graph-section js-graph-section">
+                    <div class="c-graph-wrapper js-sum-graph">
+                        <div class="c-graph js-graph"></div>
+                        <div class="c-hint-wrapper"></div>
+                    </div>
+                    <div class="c-graph-wrapper js-amount-graph">
+                        <div class="c-graph js-graph"></div>
+                        <div class="c-hint-wrapper">
+                            <div class="line">
+                                <span class="js-name"></span>
+                                <span class="js-value"></span>
+                            </div>
+                            <div class="line">
+                                <span class="js-date hint"></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            {else}
+                <div class="c-empty-message">[`There are no paid invoices for specified period.`]</div>
+            {/if}
+        </div>
+    </div>
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$_title|json_encode});
+            $.crm.renderSVG("#c-report-page");
+
+            new CRMReportPage({
+                $wrapper: $("#c-report-page"),
+                funnel_id: {if !empty($funnel.id)}{$funnel.id}{else}false{/if},
+                funnel_color: {$funnel.color|default:"#aaa"|json_encode},
+                chartsData: {if !empty($charts)}{$charts|json_encode}{else}false{/if},
+                group_by: {if !empty($chart_params.group_by)}{$chart_params.group_by|json_encode}{else}false{/if},
+                locales: {
+                    months: [
+                        "{_ws('January', 'January')}",
+                        "{_ws('February', 'February', 1)}",
+                        "{_ws('March', 'March')}",
+                        "{_ws('April', 'April')}",
+                        "{_ws('May', 'May')}",
+                        "{_ws('June', 'June')}",
+                        "{_ws('July', 'July')}",
+                        "{_ws('August', 'August')}",
+                        "{_ws('September', 'September')}",
+                        "{_ws('October', 'October')}",
+                        "{_ws('November', 'November')}",
+                        "{_ws('December', 'December')}"
+                    ]
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

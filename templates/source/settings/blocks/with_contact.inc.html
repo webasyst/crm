@@ -1,19 +1,21 @@
 {$_class_id = "c-with-contact-section-wrapper"}
 {$_wrapper_id = uniqid($_class_id)}
 
-<div class="{$_class_id}" id="{$_wrapper_id}">
+<div class="{$_class_id} fields" id="{$_wrapper_id}">
 
     <div class="field">
         <div class="name">[`Set contact language`]</div>
-        <div class="value">
-            <select name="{input_name id='params|locale'}">
-                <option></option>
-                {foreach $locales as $_locale_id => $_locale}
-                    {$_name = $_locale.name|default:$_locale_id|escape}
-                    {$_region = $_locale.region|default:''|escape}
-                    <option value="{$_locale_id}" {if $_locale_id === $locale}selected="selected"{/if}>{$_name}{if $_region} {$_region}{/if}</option>
-                {/foreach}
-            </select>
+        <div class="value no-shift">
+            <div class="wa-select ">
+                <select class="not-styled" name="{input_name id='params|locale'}">
+                    <option></option>
+                    {foreach $locales as $_locale_id => $_locale}
+                        {$_name = $_locale.name|default:$_locale_id|escape}
+                        {$_region = $_locale.region|default:''|escape}
+                        <option value="{$_locale_id}" {if $_locale_id === $locale}selected="selected"{/if}>{$_name}{if $_region} {$_region}{/if}</option>
+                    {/foreach}
+                </select>
+            </div>
         </div>
     </div>
 
@@ -24,28 +26,85 @@
 
     {$_current_state = 'fold'}
 
+    {$icons_array = [
+        "folder" => "<i class=\"fas fa-folder\"></i>",
+        "search" => "<i class=\"fas fa-search\"></i>",
+        "user" => "<i class=\"fas fa-user\"></i>",
+        "blog" => "<i class=\"fas fa-file-image\"></i>",
+        "notebook" => "<i class=\"fas fa-file\"></i>",
+        "lock" => "<i class=\"fas fa-lock\"></i>",
+        "lock-unlocked" => "<i class=\"fas fa-lock-open\"></i>",
+        "broom" => "<i class=\"icon\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#clean\"></use></svg></i>",
+        "star" => "<i class=\"fas fa-star\"></i>",
+        "livejournal" => "<i class=\"fas fa-pencil-alt\"></i>",
+        "contact" => "<i class=\"fas fa-users\"></i>",
+        "lightning" => "<i class=\"fas fa-bolt\"></i>",
+        "light-bulb" => "<i class=\"fas fa-lightbulb\"></i>",
+        "pictures" => "<i class=\"fas fa-images\"></i>",
+        "reports" => "<i class=\"fas fa-chart-bar\"></i>",
+        "books" => "<i class=\"fas fa-book\"></i>",
+        "marker" => "<i class=\"fas fa-map-marker-alt\"></i>",
+        "lens" => "<i class=\"icon\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#lens\"></use></svg></i>",
+        "alarm-clock" => "<i class=\"icon\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#alarm\"></use></svg></i>",
+        "animal-monkey" => "<i class=\"icon\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#monkey\"></use></svg></i>",
+        "anchor" => "<i class=\"fas fa-anchor\"></i>",
+        "bean" => "<i class=\"icon\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#coffee-beans\"></use></svg></i>",
+        "car" => "<i class=\"fas fa-car\"></i>",
+        "disk" => "<i class=\"fas fa-save\"></i>",
+        "cookie" => "<i class=\"fas fa-cookie\"></i>",
+        "burn" => "<i class=\"fas fa-radiation-alt\"></i>",
+        "clapperboard" => "<i class=\"icon\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#clapper\"></use></svg></i>",
+        "bug" => "<i class=\"fas fa-bug\"></i>",
+        "clock" => "<i class=\"fas fa-clock\"></i>",
+        "cup" => "<i class=\"fas fa-coffee\"></i>",
+        "home" => "<i class=\"fas fa-home\"></i>",
+        "fruit" => "<i class=\"fas fa-apple-alt\"></i>",
+        "luggage" => "<i class=\"fas fa-briefcase\"></i>",
+        "guitar" => "<i class=\"fas fa-guitar\"></i>",
+        "smiley" => "<i class=\"fas fa-grin\"></i>",
+        "sport-soccer" => "<i class=\"fas fa-futbol\"></i>",
+        "target" => "<i class=\"fas fa-bullseye\"></i>",
+        "medal" => "<i class=\"fas fa-award\"></i>",
+        "phone" => "<i class=\"fas fa-phone\"></i>",
+        "store" => "<i class=\"fas fa-store\"></i>",
+        "basket" => "<i class=\"fas fa-shopping-basket\"></i>",
+        "pencil" => "<i class=\"fas fa-pen-alt\"></i>",
+        "lifebuoy" => "<i class=\"fas fa-life-ring \"></i>",
+        "screen" => "<i class=\"fas fa-tablet-alt\"></i>",
+        "noname" => "<i class=\"fas fa-user-friends\"></i>"
+    ]}
+
     <div class="field">
         <div class="name">[`Add to segments`]</div>
 
         <div class="value">
             <a href="javascript:void(0);" class="inline-link c-segments-ul-fold-link" data-state="{$_current_state}">
-                <b><i class="c-link-text">{$_states[$_current_state].link_text|default:''}</i></b>
+                <span class="c-link-text">{$_states[$_current_state].link_text|default:''}</span>
             </a>
 
-            <ul class="menu-v c-segments-ul" {if $_current_state === 'fold'}style="display: none;"{/if}>
+            <ul class="menu c-segments-ul" {if $_current_state === 'fold'}style="display: none;"{/if}>
+                {$my_segment = false}
                 {foreach $segments as $segment}
-                    <li data-id="{$segment.category_id}" class="c-segment-item"><label>
-                            <input type="checkbox" name="{input_name id='params|segments|'}" value="{$segment.category_id}"
-                                   {if ifset($segment.checked)}checked="checked"{/if}>
-                            <span class="c-name-wrapper">
-                        {if !empty($segment.icon_path)}
-                            <i class="icon16 userpic20" style="background: url({$segment.icon_path}); border-radius: 0;"></i>
-                        {elseif !empty($segment.icon)}
-                            <i class="icon16 {$segment.icon}"></i>
-                        {/if}
-                        <span class="c-name">{$segment.name|escape}</span>
-                    </span>
-                        </label></li>
+                    {if !$my_segment && $segment.shared == 0}
+                        {$my_segment = true}
+                        <li>[`My segments`]</li>
+                    {/if}
+                    <li data-id="{$segment.category_id}" class="c-segment-item custom-pb-4"><label>
+                        <input type="checkbox" name="{input_name id='params|segments|'}" value="{$segment.category_id}"
+                               {if ifset($segment.checked)}checked="checked"{/if}>
+                        <span class="c-name-wrapper">
+                            {if !empty($segment.icon_path)}
+                                <span class="icon size-16"><span class="userpic" style="background: url({$segment.icon_path}) center/16px no-repeat; border-radius: 0;"></span></span>
+                            {elseif !empty($segment.icon)}
+                                {if array_key_exists($segment.icon, $icons_array)}
+                                    <span class="icon size-16">{$icons_array[$segment.icon]}</span>
+                                {else}
+                                    <span class="icon size-16">{$icons_array['noname']}</span>
+                                {/if}
+                            {/if}
+                            <span class="c-name">{$segment.name|escape}</span>
+                        </span>
+                    </label></li>
                 {/foreach}
             </ul>
         </div>

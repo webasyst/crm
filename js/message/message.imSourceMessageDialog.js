@@ -45,7 +45,7 @@ var CRMImSourceMessageDialog = ( function($) {
             $wrapper = that.$wrapper,
             dialog = that.dialog,
             $footer = $wrapper.find('.js-dialog-footer'),
-            $loading = $('<i class="icon16 loading" style="vertical-align: middle; margin-left: 6px;"></i>'),
+            $loading = $('<span class="icon size-16"><i class="fas fa-spinner wa-animation-spin custom-mr-4"></i></span>'),
             $button = $wrapper.find('.js-reply-button');
 
         $button.click(function () {
@@ -81,7 +81,7 @@ var CRMImSourceMessageDialog = ( function($) {
             var href = that.app_url+'?module=message&action=writeReplyDialog',
                 params = { id: that.message.id };
             $.post(href, params, function(html) {
-                new CRMDialog({
+                $.waDialog({
                     html: html,
                     onOpen: function ($dialog, send_dialog) {
                         that.send_dialog = send_dialog;

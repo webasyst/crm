@@ -38,7 +38,7 @@ abstract class crmEmailSourceWorkerStrategy
     {
         $recipient = self::getRecipient($source, $mail);
 
-        if ($recipient['full_suffix'] === '+0') {
+        if (ifset($recipient, 'full_suffix', '') === '+0') {
             $source->setEmailSuffixSupporting(crmEmailSource::EMAIL_SUFFIX_SUPPORTING_YES);
             return null;
         }
@@ -144,27 +144,29 @@ abstract class crmEmailSourceWorkerStrategy
         ));
     }
 
-    protected function createConversation(crmContact $contact, $summary, $deal = null)
+    protected function createConversation(crmContact $contact, $message, $deal = null)
     {
-        $responsible_contact_id = null;
-        if ($deal) {
-            $responsible_contact_id = $deal['user_contact_id'];
+        $summary = ifset($message, 'subject', '');
+        $direction = ifset($message, 'direction', crmMessageModel::DIRECTION_IN);
+
+        $crm_user_id = null;
+        if ($direction == crmMessageModel::DIRECTION_IN) {
+            $crm_user_id = $contact->get('crm_user_id');
         }
-        if ($responsible_contact_id <= 0) {
-            $responsible_contact_id = $this->source->getNormalizedResponsibleContactId();
+        if ($crm_user_id <= 0) {
+            $crm_user_id = ($deal && $deal['user_contact_id'] > 0 ? $deal['user_contact_id'] : $this->source->getNormalizedResponsibleContactId());
         }
 
         $data = array(
             'source_id' => $this->source->getId(),
             'contact_id' => $contact->getId(),
-            'user_contact_id' => $responsible_contact_id > 0 ? $responsible_contact_id : null,
+            'user_contact_id' => $crm_user_id,
             'summary' => $summary,
             'deal_id' => $deal ? (int)ifset($deal['id']) : null
         );
-        if (!$data['user_contact_id']) {
-            $data['user_contact_id'] = $contact->get('crm_user_id') > 0 ? $contact->get('crm_user_id') : null;
-        }
+
         $cm = new crmConversationModel();
+
         return $cm->add($data, crmConversationModel::TYPE_EMAIL);
     }
 
@@ -364,11 +366,10 @@ abstract class crmEmailSourceWorkerStrategy
             }
         }
 
-        $res = array();
         foreach ($file_ids as $index => $file_id) {
-            $res[$index]['file_id'] = $file_id;
+            $attachments[$index]['file_id'] = $file_id;
         }
-        return $res;
+        return $attachments;
     }
 
     /**

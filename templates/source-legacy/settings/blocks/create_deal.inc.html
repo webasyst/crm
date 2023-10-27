@@ -1,0 +1,100 @@
+{$class_id = 'js-create-deal-include-row'}
+{$wrapper_id = uniqid($class_id)}
+<div class="crm-field c-create-deal-include-row {$class_id}" id="{$wrapper_id}">
+    {$_name = $_inc_options.name|default:''}
+    {if $_name}
+        <div class="crm-name-col">{$_name}</div>
+    {/if}
+    <div class="crm-input-col-1">
+        <div class="c-funnels-list js-funnels-list crm-input-wrapper">
+            {$_active_funnel = reset($funnels)}
+            {if !empty($funnel_id) && !empty($funnels[$funnel_id])}
+                {$_active_funnel = $funnels[$funnel_id]}
+            {/if}
+
+            <ul class="menu-h dropdown">
+                <li>
+                    <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                <span class="js-text">
+                                    {if !empty($_active_funnel.color)}
+                                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_funnel.color}"></i>
+                                    {/if}
+                                    <b><i class="js-name">{$_active_funnel.name|escape}</i></b>
+                                </span>&nbsp;<i class="icon10 darr"></i>
+                    </a>
+                    <ul class="menu-v with-icons">
+                        {strip}
+                            {foreach $funnels as $_funnel}
+                                <li class="{if $funnel_id == $_funnel.id}selected{/if}">
+                                    <a href="javascript:void(0);" data-id="{$_funnel.id}">
+                                        {if !empty($_funnel.color)}
+                                            <i class="icon16 funnel-state svg-icon" data-color="{$_funnel.color}"></i>
+                                        {/if}
+                                        <b><i>{$_funnel.name|escape}</i></b>
+                                    </a>
+                                </li>
+                            {/foreach}
+                        {/strip}
+                    </ul>
+                    <input class="js-field js-funnel-id" name="{input_name id='funnel_id'}" type="hidden" value="{$_active_funnel.id}">
+                </li>
+            </ul>
+
+        </div>
+    </div>
+    <div class="crm-input-col-2">
+        <div class="c-stages-list js-stages-list crm-input-wrapper">
+
+            {$_active_stage = reset($stages)}
+            {if !($stage_id > 0)}
+                {$stage_id = 0}
+            {/if}
+            {if !empty($stage_id) && !empty($stages[$stage_id])}
+                {$_active_stage = $stages[$stage_id]}
+            {/if}
+
+            <ul class="menu-h dropdown">
+                <li>
+                    <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                <span class="js-text">
+                                    {if !empty($_active_stage.color)}
+                                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_stage.color}"></i>
+                                    {/if}
+                                    <b><i class="js-name">{$_active_stage.name|escape}</i></b>
+                                </span>&nbsp;<i class="icon10 darr"></i>
+                    </a>
+                    <ul class="menu-v with-icons">
+                        {strip}
+                            {foreach $stages as $_id => $_stage}
+                                <li class="{if $stage_id == $_id}selected{/if}">
+                                    <a href="javascript:void(0);" data-id="{$_id}">
+                                        {if !empty($_stage.color)}
+                                            <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color}"></i>
+                                        {/if}
+                                        <b><i>{$_stage.name|escape}</i></b>
+                                    </a>
+                                </li>
+                            {/foreach}
+                        {/strip}
+                    </ul>
+                    <input class="js-field js-stage-id" name="{input_name id='stage_id'}" type="hidden" value="{$_active_stage.id}">
+                </li>
+            </ul>
+
+        </div>
+    </div>
+    <script>
+        {$_id = $_inc_options.id|default:''}
+        {$_class_id = $_inc_options.class_id|default:$class_id}
+        {$_wrapper_id = $_inc_options.wrapper_id|default:$wrapper_id}
+        (function($) {
+            new CRMSettingsSourceCreateDealBlock({
+                'id': {$_id|json_encode},
+                '$wrapper': $('#{$_wrapper_id}'),
+                'class_id': {$_class_id|json_encode},
+                'source': {$source|json_encode},
+                'namespace': {$namespace|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

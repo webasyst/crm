@@ -1,0 +1,128 @@
+{if $iframe}
+{strip}
+
+{$_locale_string = substr($wa->locale(), 0, 2)}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
+
+    {* CSS *}
+    {/strip}
+    {$wa->css()}
+    <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_url}wa-content/js/redactor/2/redactor.css?v{$wa->version(true)}" rel="stylesheet">
+    <link href="{$wa_app_static_url}js/jquery/jquery-ui.css?v={$wa->version()}" rel="stylesheet">
+    
+    {wa_js file="js/min/vendor.min.js"}
+        {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
+        {$wa_app_static_url}js/jquery/jquery-ui.min.js
+        {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
+        {$wa_url}wa-content/js/redactor/2/redactor.min.js
+        {$wa_url}wa-content/js/jquery-wa/wa.js
+    {/wa_js}{strip}
+
+    {if $_locale_string != 'en'}
+        <script src="{$wa_url}wa-content/js/redactor/2/{$_locale_string}.js?v{$wa->version(true)}"></script>
+    {/if}
+
+    {/strip}
+    {wa_js file="js/min/crm.min.js"}
+        {$wa_app_static_url}js/jquery.sticky.js
+        {$wa_app_static_url}js/crm.js
+        {$wa_app_static_url}js/message/message.deleteLink.mixin.js
+        {$wa_app_static_url}js/message/message.js
+        {$wa_app_static_url}js/message/message.conversation.js
+        {$wa_app_static_url}js/message/messages.operations.js
+        {$wa_app_static_url}js/message/message.sendEmailDialog.js
+        {$wa_app_static_url}js/message/message.sendSmsDialog.js
+        {$wa_app_static_url}js/message/message.imSourceMessageDialog.js
+        {$wa_app_static_url}js/message/message.imSourceSendMessageDialog.js
+    {/wa_js}{strip}
+
+    {* CRM CORE *}
+    <script>
+        {* need for editor2.js *}
+        var wa_app = "{$wa->app()}";
+
+        (function ($) {
+            {* lang for wysiwyg *}
+            $.crm.lang = {$_locale_string|json_encode};
+            {* need for redirects or url generation *}
+            $.crm.app_url = {$wa_app_url|json_encode};
+            {* need for redirects or url generation *}
+            $.crm.backend_url = {$wa_backend_url|json_encode};
+
+            $.crm.iframe = {$iframe|json_encode};
+        })(jQuery);
+    </script>
+
+    {* @event backend_assets.%plugin_id% *}
+    {foreach $backend_assets as $item}
+        {$item}
+    {/foreach}
+
+    {$wa->js()}
+{/strip}
+</head>
+<body class="iframe-style">
+<div class="content blank c-shadowed-content">
+<div id="c-content-block">
+{/if}
+{$full_chat_view = $conversations|@count == 1}
+
+<div class="c-messages-page flexbox {if $iframe}iframe-style{/if} {if $full_chat_view}full-chat-style{/if}" id="c-messages-page">
+    {if !$iframe || !$full_chat_view}
+    <div class="sidebar width-19rem wide-mobile blank bordered-right {if !empty($view_param) && !$full_chat_view}desktop-and-tablet-only{/if}" id="c-messages-sidebar">
+        {include file="./MessageListByConversation.html" _active_c=$active_conv inline}
+    </div>
+    {/if}
+    <div class="content wide not-blank hide-scrollbar content-mobile-friendly c-messages-page-content {if empty($view_param) && !$full_chat_view}desktop-and-tablet-only{/if}">
+        {include file="./MessageConversationId.html" inline}
+    </div>
+</div>
+
+<script>
+    (function ($) {
+
+        const $main_wrapper = $('.c-messages-page');
+        const $content = $main_wrapper.find('.content.c-messages-page-content');
+
+        $.message.content = new MessageContentRouter({
+            $content: $content,
+            iframe: {$iframe|default:0},
+        });
+
+        if ($.wa_push) {
+            $.wa_push.init();
+        }
+    })(jQuery);
+    
+</script>
+
+{if $iframe}
+<script>
+    (function ($) {
+        const $spaContainer = $('#c-spaContainer-block');
+        const $content_main = $("#c-content-block");
+        /* Main content router */
+        $.crm.content = new ContentRouter({
+            $content: $content_main,
+            $spaContainer: $spaContainer
+        });
+        $.crm.locales = {
+                "unsaved_dialog_title": "[`There are unsaved changes`]",
+                "unsaved_dialog_text": "[`Unsaved changes will be lost if you leave this page now. Are you sure?`]",
+                "unsaved_dialog_button": "[`Leave`]",
+                "close": "[`Close`]",
+                "cancel": "[`Cancel`]"
+            };
+    })(jQuery);
+</script>
+</div>
+</div>
+</body>
+</html>
+{/if}

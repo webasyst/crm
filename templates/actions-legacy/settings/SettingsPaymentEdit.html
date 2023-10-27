@@ -1,0 +1,119 @@
+{$_back_uri = "{$wa_app_url}settings/payment/?company={$company.id}"}
+
+<div class="c-payment-page" id="c-payment-page">
+    {if !empty($error)}
+        {* ERRORS *}
+        <h1><a href="{$_back_uri}" class="back">&larr;&nbsp;{$company.name|escape}</a>&nbsp;[`Error`]</h1>
+        <span class="errormsg">{$error|escape}</span>
+    {else}
+        <form>
+            {* HEADER *}
+            <header>
+                {if isset($instance.status) && !empty($instance.id)}
+                    <div class="block half-padded float-right">
+                        <ul class="menu-h with-icons">
+                            <li><a href="javascript:void(0);" class="js-delete-payment"><i class="icon16 delete"></i>[`Delete this payment option`]</a></li>
+                        </ul>
+                    </div>
+                {/if}
+
+                <h1><a href="{$_back_uri}" class="back">&larr;&nbsp;{$company.name|escape}</a>&nbsp;{$instance.name|escape}</h1>
+            </header>
+
+            {* CONTENT *}
+            <section>
+                <!-- GENERAL PAYMENT OPTION PARAMS -->
+                <div class="field-group">
+                    <div class="field">
+                        <div class="name">
+                            <label for="s-payment-plugin-status">[`Enabled`]</label>
+                        </div>
+                        <div class="value">
+                            <input name="payment[id]" type="hidden" value="{$plugin_id|escape}">
+                            <input name="payment[plugin]" type="hidden" value="{$instance.plugin|escape}">
+                            <input name="payment[status]" type="checkbox"{if !empty($instance.status)} checked="checked"{/if} id="s-payment-plugin-status" value="1">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">
+                            <label for="s-payment-plugin-name">[`Payment option name`]</label>
+                        </div>
+                        <div class="value">
+                            <input name="payment[name]" type="text" value="{$instance.name|escape}" class="bold" id="s-payment-plugin-name">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">
+                            <label for="s-payment-plugin-logo">[`Logo URL`]</label>
+                        </div>
+                        <div class="value">
+                            <input name="payment[logo]" type="text" class="long" value="{$instance.logo|default:''|escape}" id="s-payment-plugin-logo">
+                            {if !empty($instance.logo)}<img src="{$instance.logo}"  class="s-payment-shipping-logo float-right">{/if}
+                            <p class="hint">{sprintf('[`A collection of payment option icons is available for free at <a href="%s" target="_blank">%s</a> <i class="icon10 new-window"></i>`]','[`https://support.webasyst.com/27128/crm-payment-methods-icons/`]','[`https://support.webasyst.com/27128/crm-payment-methods-icons/`]')}</p>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">
+                            [`Description`]
+                        </div>
+                        <div class="value">
+                            <textarea name="payment[description]">{$instance.description|escape}</textarea>
+                            <p class="hint">[`HTML. Payment option description is shown to customer during the checkout.`]</p>
+                        </div>
+                    </div>
+                    {*
+                    <div class="field">
+                        <div class="name">
+                            [`Delivery info`]
+                        </div>
+                        <div class="value">
+                            <textarea name="payment[email_description]">{$instance.email_description|default:''|escape}</textarea>
+                            <p class="hint">[`Optional text to be sent to customer with the order notification email. Plain text, no HTML allowed.`]</p>
+                        </div>
+                    </div>
+                    *}
+                </div>
+
+                <!-- CUSTOM PAYMENT MODULE PARAMS -->
+                {if !empty($payment_html)}
+                    <div class="field-group">
+                        {$payment_html}
+                    </div>
+                {/if}
+
+                {if !empty($guide_html)}
+                    <div class="field-group">
+                        {$guide_html}
+                    </div>
+                {/if}
+            </section>
+
+            {* FOOTER *}
+            <footer class="c-footer-actions js-footer">
+                <input type="submit" class="button green" value="[`Save`]">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a href="{$_back_uri}" class="inline-link"><b><i>[`cancel`]</i></b></a>
+            </footer>
+
+            <input name="payment[company_id]" type="hidden" value="{$company.id}">
+            <input name="payment[instance_id]" type="hidden" value="{$instance_id|default:''}">
+        </form>
+
+        <script>
+            ( function($) {
+                new CRMPaymentEdit({
+                    $wrapper: $("#c-payment-page"),
+                    instance_id: {if !empty($instance.id)}{$instance.id|json_encode}{else}false{/if},
+                    company_id: {$company.id|json_encode},
+                    locales: {
+                        confirm_delete_title: "[`Delete`] {if !empty($instance.name)}{$instance.name|escape}{/if}",
+                        confirm_delete_text: "[`This will permanently delete this payment option. Are you sure?`]",
+                        confirm_delete_button: "[`Delete`]",
+                        saving: '<span class="c-hint"><i class="icon16 loading"></i> [`saving`]...</span>',
+                        saved: '<span class="c-hint"><i class="icon16 yes"></i> [`saved`]</span>'
+                    }
+                });
+            })(jQuery);
+        </script>
+    {/if}
+</div>

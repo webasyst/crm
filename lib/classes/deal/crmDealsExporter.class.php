@@ -72,6 +72,17 @@ class crmDealsExporter
         return false;
     }
 
+    public function getCurrentProgress()
+    {
+        $total_count = $this->getTotalCount();
+        if ($total_count <= 0) {
+            return 100;
+        }
+        $offset = $this->getOffset();
+
+        return ($offset / $total_count) * 100;
+    }
+
     /**
      * @param int $chunk_size
      * @return array

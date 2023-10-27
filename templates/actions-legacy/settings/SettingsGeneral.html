@@ -1,0 +1,62 @@
+<div class="crm-general-settings-page" id="crm-general-settings-page">
+
+    <form action="?module=settings&action=generalSave">
+
+        {if !empty($common_settings_has_access)}
+            <div class="crm-general-settings-block">
+
+                <h1 class="c-page-header">[`General settings`]</h1>
+
+                <div class="fields">
+                    <div class="field-group">
+                        <div class="field">
+                            <div class="name">[`Contact name edit form`]</div>
+                            <div class="value no-shift"><label>
+                                <input type="radio" name="settings[common][one_name_field]" value="1"{if !empty($common_settings.one_name_field)} checked{/if}>
+                                [`One field for contact name`]
+                            </label></div>
+                            <div class="value no-shift"><label>
+                                <input type="radio" name="settings[common][one_name_field]" value=""{if empty($common_settings.one_name_field)} checked{/if}>
+                                [`Separate fields for name parts`]
+                            </label></div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field">
+                            <div class="name">[`Contact name format`]</div>
+                            <div class="value no-shift"><label>
+                                <input type="radio" name="settings[common][name_order]" value="lfm"{if ifempty($common_settings.name_order) == 'lfm'} checked{/if}>
+                                [`Lastname`] [`Firstname`] [`Middlename`]
+                            </label></div>
+                            <div class="value no-shift"><label>
+                                <input type="radio" name="settings[common][name_order]" value="fml"{if ifempty($common_settings.name_order) == 'fml'} checked{/if}>
+                                [`Firstname`] [`Middlename`] [`Lastname`]
+                            </label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {/if}
+
+        <div class="crm-form-buttons">
+            <div class="crm-submit c-footer-actions js-footer-actions">
+                <input class="button green js-submit-button" type="submit" name="" value="[`Save`]">
+                <span class="c-hidden">
+                        <span style="margin: 0 4px;">[`or`]</span>
+                        <a href="{$wa_app_url}settings/general/">[`cancel`]</a>
+                    </span>
+                <i class="icon16 loading crm-loading" style="display: none;"></i>
+            </div>
+        </div>
+
+        <script>
+            ( function($) {
+                new CRMSettingsGeneral({
+                    $wrapper: $('#crm-general-settings-page')
+                });
+            })(jQuery);
+        </script>
+
+    </form>
+</div>

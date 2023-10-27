@@ -24,13 +24,12 @@ class crmDealChangeExpectedDateController extends crmJsonController
             }
             $this->getDealModel()->updateById($deal['id'], array('expected_date' => $expected_date));
 
-            $action_id = 'deal_edit';
-            $this->logAction($action_id, array('deal_id' => $deal['id']));
+            $this->logAction(crmDealModel::LOG_ACTION_UPDATE, array('deal_id' => $deal['id']));
             $lm = new crmLogModel();
             $lm->log(
-                $action_id,
+                crmDealModel::LOG_ACTION_UPDATE,
                 $deal['id'] * -1,
-                null,
+                $deal['id'],
                 $deal['expected_date'] ? wa_date('date', $deal['expected_date']) : null,
                 $expected_date ? wa_date('date', $expected_date) : null
             );

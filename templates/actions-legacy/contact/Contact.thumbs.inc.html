@@ -1,0 +1,76 @@
+{$ignore_operations = $ignore_operations|default:false}
+
+{strip}
+<ul class="thumbs li150px c-users-list js-contacts-list" id="c-users-list">
+    {foreach $contacts as $user}
+        {$_can_be_drag = true}
+        {$_user_uri = "`$wa_app_url`contact/`$user.id`/"}
+
+        {$_contact_classes = []}
+        {if $user.is_user >= 1}
+            {$_contact_classes[] = "js-move-user"}
+        {/if}
+        {if !empty($contact_max_id) && $user.id > $contact_max_id}
+            {$_contact_classes[] = "highlighted"}
+        {/if}
+        {if !empty($_can_be_drag)}
+            {$_contact_classes[] = "js-move-user"}
+        {/if}
+
+        <li class="c-user-wrapper js-contact-wrapper {$_contact_classes|join:" "}" data-user-id="{$user.id}" data-update-datetime="{$user.update_datetime|default:''}">
+            <div class="c-user-block">
+                {if !$ignore_operations}
+                    <span class="c-checkbox">
+                        <input type="checkbox" class="js-checkbox" name="contact[]" value="{$user.id}">
+                    </span>
+                {/if}
+                <div class="c-userpic-wrapper">
+                    <a href="{$_user_uri}">
+                        <img class="c-userpic js-userpic" src="{$user.photo_url_144}">
+                    </a>
+                </div>
+                <h5 class="c-name">
+                    <a href="{$_user_uri}">
+                            <span class="wa-user-info">
+                                <span class="user-name">
+                                    {$wa->crm->contactName($user.name)}
+                                </span>
+                                {if !empty($user._online_status) && $user._online_status == 'online'}
+                                    {$title = sprintf(_ws('%s is now online'), $user.name|escape)}
+                                    <i class="icon16 status-green-tiny" title="{$title}"></i>
+                                {/if}
+                            </span>
+                    </a>
+                    {if !empty($user.company) && $user.is_company != 1}
+                        <span class="c-company">{$user.company|escape}</span>
+                    {/if}
+                </h5>
+            </div>
+            {if !empty($user.tags)}
+                <ul class="c-tags-list">
+                    {foreach $user.tags as $_tag}
+                        <li>
+                            <a class="c-tag" href="{$wa_app_url}contact/tag/{$_tag.id}/">{$_tag.name|escape}</a>
+                        </li>
+                    {/foreach}
+                </ul>
+            {/if}
+            <script>
+                ( function($) {
+                    if (typeof CRMThumbContact === "function") {
+                        new CRMThumbContact({
+                            $wrapper: $(".c-user-wrapper[data-user-id=\"{$user.id}\"]"),
+                            can_be_drag: {if !empty($_can_be_drag)}true{else}false{/if}
+                        });
+                    }
+                })(jQuery);
+            </script>
+        </li>
+    {/foreach}
+</ul>
+
+{if !$ignore_operations}
+    {include file="./Contact.list.operations.inc.html" inline}
+{/if}
+
+{/strip}

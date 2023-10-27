@@ -1,0 +1,12 @@
+{include file="./Contact.html"
+    context=['type' => 'segment', 'info' => $segment, 'can_edit' => $can_edit]
+    editable_name=!empty($can_edit)
+inline}
+
+{if $segment.archived}
+    <script>(function() { "use strict";
+        // Show archived segments in sidebar
+        var $ul = $('#c-contacts-sidebar .c-segment-list [data-id="{$segment.id|escape}"]').closest('.c-segment-list');
+        $ul.removeClass('archived-hidden').addClass('archived-shown');
+    })();</script>
+{/if}

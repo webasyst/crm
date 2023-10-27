@@ -593,53 +593,6 @@ return array(
                     )
                 )
             ),
-            'event_participants' => array(
-                'name' => 'Event participants',     // _w('Event participants')
-                'multi' => true,
-                'joins' => array(
-                    ':tbl_event_contacts' => array(
-                        'table' => 'contacts_event_contacts'
-                    ),
-                    ':tbl_event' => array(
-                        'table' => 'contacts_event',
-                        'on' => ':tbl_event_contacts.event_id = :table.id'
-                    )
-                ),
-                'items' => array(
-                    'event' => array(
-                        'name' => 'Event',                  // _w('Event')
-                        'items' => array(
-                            ':values' => array(
-                                'autocomplete' => "WHERE name LIKE '%:term%'",
-                                'sql' => "SELECT DISTINCT ce.id AS value, ce.name FROM contacts_event ce
-                                JOIN contacts_event_contacts cec ON ce.id = cec.event_id
-                                :autocomplete",
-                                'where' => array(
-                                    '=' => ':tbl_event.id = :value',
-                                    '*=' => ":tbl_event.name LIKE '%:value%'"
-                                )
-                            )
-                        )
-                    ),
-                    'period' => array(
-                        'name' => 'Period',
-                        'items' => array(
-                            ':period' => array(
-                                'name' => 'select a period',       // _w('select a period')
-                                'where' => array(
-                                    ':between' =>
-                                        "(:tbl_event.end_datetime IS NULL AND DATE(:tbl_event.start_datetime) >= ':0' AND DATE(:tbl_event.start_datetime) <= ':1') OR ".
-                                        "(:tbl_event.end_datetime IS NOT NULL AND NOT (DATE(:tbl_event.end_datetime) < ':0' and DATE(:tbl_event.start_datetime) > ':1') )",
-                                    ':gt' => "(:tbl_event.end_datetime IS NULL AND DATE(:tbl_event.start_datetime) >= ':?') OR ".
-                                                    "(:tbl_event.end_datetime IS NOT NULL AND NOT DATE(:tbl_event.end_datetime) < ':?')",
-                                    ':lt' => "(:tbl_event.end_datetime IS NULL AND DATE(:tbl_event.start_datetime) <= ':?') OR ".
-                                                    "(:tbl_event.end_datetime IS NOT NULL AND NOT DATE(:tbl_event.start_datetime) > ':?')"
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
             'access' => array(
                 'name' => 'Access',         // _w('Access')
                 'readonly' => true,

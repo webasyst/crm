@@ -9,6 +9,9 @@ class crmConfig extends waAppConfig
 
     const ROWS_PER_PAGE = 30;
 
+    const API_CLIENT_ID = 'CRM-WEB-SPA';
+    const API_TOKEN_SCOPE = 'crm';
+
     /**
      * @deprecated
      * @see isShopSupported php-doc for details
@@ -23,6 +26,8 @@ class crmConfig extends waAppConfig
 
     protected static $max_execution_time;
 
+    protected $push_adapter = null;
+
     // see also a hack in FrontController->dispatch()
     public function getRouting($route = array())
     {
@@ -34,10 +39,15 @@ class crmConfig extends waAppConfig
 
     protected function getRoutingPath($type)
     {
+        $is_13_ui = (wa('crm')->whichUI('crm') === '1.3');
+
         if ($type === null) {
             $type = $this->getEnvironment();
         }
-        $filename = ($type === 'backend') ? 'routing.backend.php' : 'routing.php';
+        $filename = 'routing.php';
+        if ($type === 'backend') {
+            $filename = $is_13_ui ? 'routing.backend.php' : 'routing.backend-ui20.php';
+        }
         $path = $this->getConfigPath($filename, true, $this->application);
         if (!file_exists($path)) {
             $path = $this->getConfigPath($filename, false, $this->application);
@@ -70,7 +80,6 @@ class crmConfig extends waAppConfig
     public function checkRights($module, $action)
     {
         $module_and_action = $module . $action;
-
         $only_for_admin = array('contactMerge', 'contactImport');
         foreach ($only_for_admin as $prefix) {
             $len = strlen($prefix);
@@ -84,7 +93,9 @@ class crmConfig extends waAppConfig
         if ($is_settings_section) {
             // ..except general settings page (and proper save controller)
             // it accessible for everybody (cause there are personal settings block in this page)
-            $is_general_settings_page = substr($action, 0, 7) === 'general' || substr($module, 0, 15) === 'settingsGeneral';
+            
+            // $is_general_settings_page = substr($action, 0, 7) === 'general' || substr($module, 0, 15) === 'settingsGeneral';
+            $is_general_settings_page = substr($action, 0, 8) === 'personal' || substr($module, 0, 16) === 'settingsPersonal';
             if (!$is_general_settings_page) {
                 return wa()->getUser()->isAdmin('crm');
             }
@@ -262,9 +273,43 @@ class crmConfig extends waAppConfig
         ),
     );
 
+    protected $call_states_20 = array(
+        'PENDING' => array(
+            "id" => "PENDING",
+            "name" => "Pending",
+            "color" => "#ff0000"
+        ),
+        'CONNECTED' => array(
+            "id" => "CONNECTED",
+            "name" => "Connected",
+            "color" => "#00ff00"
+        ),
+        'DROPPED' => array(
+            "id" => "DROPPED",
+            "name" => "Dropped",
+            "color" => "#ED2509"
+        ),
+        'REDIRECTED' => array(
+            "id" => "REDIRECTED",
+            "name" => "Redirected",
+            "color" => "#00C2ED"
+        ),
+        'FINISHED' => array(
+            "id" => "FINISHED",
+            "name" => "Finished",
+            "color" => "#7256EE"
+        ),
+        'VOICEMAIL' => array(
+            "id" => "VOICEMAIL",
+            "name" => "Voicemail",
+            "color" => "#bc51c3"
+        ),
+    );
+
     public function getCallStates($status_id = null)
     {
         static $translated;
+        $is_20_ui = (wa('crm')->whichUI('crm') === '2.0');
         if (!$translated) {
             array_walk($this->log_types, function(&$item) {
                 $item['name'] = _w($item['name']);
@@ -272,16 +317,22 @@ class crmConfig extends waAppConfig
             $translated = true;
         }
 
-        if (!$status_id) {
-            return $this->call_states;
-        } elseif (isset($this->call_states[$status_id])) {
-            return $this->call_states[$status_id];
-        } else {
-            return array(
-                "name" => _w("Unknown"),
-                "color" => "#888"
-            );
+        if (isset($status_id)) {
+            if ($is_20_ui) {
+                return ifset($this->call_states_20, $status_id, [
+                    'name'  => _w('Unknown'),
+                    'color' => '#888'
+                ]);
+            }
+
+            return ifset($this->call_states, $status_id, [
+                'name'  => _w('Unknown'),
+                'color' => '#888'
+            ]);
         }
+        if ($is_20_ui) return $this->call_states_20;
+
+        return $this->call_states;
     }
 
     /**
@@ -375,6 +426,37 @@ class crmConfig extends waAppConfig
                 "id" => "MESSAGE",
                 "name" => _w('Message'),
                 "icon" => "email"
+            ),
+            'OTHER' => array(
+                "id" => "OTHER",
+                "name" => _w('Other'),
+                "icon" => "clock"
+            )
+        );
+        if ($key) {
+            return ifempty($types[$key], $key);
+        }
+
+        return $types;
+    }
+
+    public static function getReminderTypeUI2($key = null)
+    {
+        $types = array(
+            'MEETING' => array(
+                "id" => "MEETING",
+                "name" => _w('Meeting'),
+                "icon" => "coffee"
+            ),
+            'CALL' => array(
+                "id" => "CALL",
+                "name" => _w('Call'),
+                "icon" => "phone-alt"
+            ),
+            'MESSAGE' => array(
+                "id" => "MESSAGE",
+                "name" => _w('Message'),
+                "icon" => "envelope"
             ),
             'OTHER' => array(
                 "id" => "OTHER",
@@ -557,4 +639,32 @@ class crmConfig extends waAppConfig
         return $explainer->explain();
     }
 
+    public function getPushAdapter()
+    {
+        if (!empty($this->push_adapter)) {
+            return $this->push_adapter;
+        }
+
+        $push_adptr = null;
+        try {
+            $push_adptr = wa()->getPush();
+            if (empty($push_adptr) || $push_adptr->getId() == 'pushcrew' || !$push_adptr->isEnabled()) {
+                $push_adptr = null;
+            }
+        } catch (waException $ex) {
+        }
+
+        if (empty($push_adptr)) {
+            $onesignalPushClassFile = $this->getPath('system'). '/push/adapters/onesignal/onesignalPush.class.php';
+            if (file_exists($onesignalPushClassFile)) {
+                require_once($onesignalPushClassFile);
+                if (class_exists('onesignalPush')) {
+                    $push_adptr = new crmPushAdapter();
+                }
+            }
+        }
+
+        $this->push_adapter = $push_adptr;
+        return $this->push_adapter;
+    }
 }

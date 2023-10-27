@@ -6,22 +6,25 @@
     <div class="c-vaults-wrapper">
         {function _renderVault}
             {strip}
-            <li class="c-vault-item" {if !empty($_vault)}data-id="{$_vault.id}"{/if}>
-                <i class="icon16 sort js-sort-toggle"></i>
-                <i class="icon16 color js-color" style="background: {$_vault.color|default:"transparent"|escape};"></i>
-                <a href="javascript:void(0);" class="c-name js-name js-vault-edit">{$_vault.name|default:"[`Vault name`]"|escape}</a>
-            </li>
+            <div class="c-vault-item" {if !empty($_vault)}data-id="{$_vault.id}"{/if}>
+              <i class="fas fa-grip-vertical text-light-gray sort js-sort-toggle"></i>
+               
+                <span class="c-toggle js-color" style="background: {$_vault.color|default:""|escape}"></span>
+                <a href="javascript:void(0);" class="c-name js-vault-edit"><span class="c-name js-name">{$_vault.name|default:"[`Vault name`]"|escape}</span> <i class="fas fa-pen edit"></i></a>
+            </div>
             {/strip}
         {/function}
 
         {capture assign="_vault_template_html"}{_renderVault _vault=[]}{/capture}
 
-        <ul class="menu-v c-vaults-list js-vaults-list">
+        <div class="c-vaults-list js-vaults-list">
             {foreach $vaults as $_vault}{_renderVault _vault=$_vault}{/foreach}
-        </ul>
+        </div>
 
         <div class="c-add-wrapper">
-            <a class="inline-link js-vault-add" href="javascript:void(0);"><i class="icon16 add"></i><b><i>[`Add vault`]</i></b></a>
+            <button class="button small rounded light-gray js-vault-add">
+              <i class="fas fa-plus-circle text-green add"></i> [`Add vault`]
+            </button>
         </div>
     </div>
 
@@ -31,8 +34,8 @@
                 $wrapper: $("#c-vaults-page"),
                 vault_template_html: {$_vault_template_html|strip|json_encode},
                 locales: {
-                    saving: '<span class="c-hint"><i class="icon16 loading"></i> [`saving`]...</span>',
-                    saved: '<span class="c-hint"><i class="icon16 yes"></i> [`saved`]</span>'
+                    saving: '<span class="c-hint"><i class="fas fa-spinner wa-animation-spin speed-1000"></i> [`saving`]...</span>',
+                    saved: '<span class="c-hint"><i class="fas fa-check"></i> [`saved`]</span>'
                 }
             });
         })(jQuery);

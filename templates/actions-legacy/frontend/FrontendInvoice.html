@@ -1,0 +1,75 @@
+{$_is_include = false}
+{$_hide_payments = false}
+{if !empty($is_include)}
+    {$_is_include = true}
+    {$_hide_payments = true}
+{/if}
+
+{if !$_is_include}
+    <link rel="stylesheet" href="{$wa_app_static_url}css/invoice.css">
+    <script src="{$wa_url}wa-content/js/jquery/jquery-1.11.1.min.js"></script>
+{/if}
+
+<section class="c-invoice-front-section {if !$_is_include}with-background{/if}" id="c-invoice-front-section">
+    <div class="c-front-invoice-wrapper">
+
+        {if $wa->getEnv() == 'frontend' && ($invoice.state_id == 'DRAFT' || $invoice.state_id == 'ARCHIVED')}
+            <p style="text-align:center">
+                <span style="color:gray"><b>[`Invoice has been canceled and no longer valid`]</b></span>
+            </p>
+        {else}
+
+            {$_show_payment_section = true}
+            {if $invoice.state_id == 'PAID'}
+            <p style="text-align:center">
+                <span style="color:green"><b>[`Invoice is paid`]</b></span>
+            </p>
+            {elseif $invoice.state_id == 'PROCESSING'}
+            <p style="text-align:center">
+                <span style="color:darkorange"><b>[`Payment is in process`]</b></span>
+            </p>
+            {elseif $invoice.state_id == 'PENDING' && waRequest::get('result')}
+            {if waRequest::get('result') == 'success'}
+            <p style="text-align:center">
+                <span style="color:darkorange"><b>[`Payment is in process`]</b></span>
+            </p>
+            {$_show_payment_section = false}
+            {elseif waRequest::get('result') == 'fail'}
+            <p style="text-align:center">
+                <span style="color:red"><b>[`Payment error`]</b></span>
+            </p>
+            {/if}
+            {/if}
+
+            {if empty($html)}
+            <iframe scrolling="no" src="?module=invoice&action=templatesRender&invoice_id={$invoice_id|escape}&set_height=true"></iframe>
+            {else}
+            {$html}
+            {/if}
+
+            {if $_show_payment_section}
+            {include file="./invoice/payment.section.inc.html" inline}
+            {/if}
+
+            {if !$_is_include}
+            <script>
+                ( function($) {
+                    var $section = $("#c-invoice-front-section"),
+                        $window = $(window);
+
+                    setHeight();
+
+                    $window.on("resize", setHeight);
+
+                    function setHeight() {
+                        var height = $window.height();
+                        $section.css("min-height", height + "px");
+                    }
+                })(jQuery);
+            </script>
+            {/if}
+
+        {/if}
+
+    </div>
+</section>

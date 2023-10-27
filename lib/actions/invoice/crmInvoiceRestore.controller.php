@@ -16,13 +16,20 @@ class crmInvoiceRestoreController extends crmJsonController
         $invoice['state_id'] = 'PENDING';
         $im->updateById($invoice['id'], array('state_id' => $invoice['state_id']));
 
+        $contact_id = (empty($invoice['deal_id']) ? ifempty($invoice, 'contact_id', null) : -1 * $invoice['deal_id']);
+        $this->getLogModel()->log(
+            'invoice_restored',
+            $contact_id,
+            $invoice['id']
+        );
         $invoice['contact'] = new waContact($invoice['contact_id']);
         $view = wa()->getView();
         $view->assign(array(
-            'invoice'    => $invoice,
+            'invoice' => $invoice,
         ));
+        $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
         $this->response = array(
-            'html' => $view->fetch(wa()->getAppPath('templates/actions/invoice/InvoiceSidebar.item.inc.html', 'crm')),
+            'html' => $view->fetch(wa()->getAppPath('templates/'.$actions_path.'/invoice/InvoiceSidebar.item.inc.html', 'crm')),
         );
     }
 }

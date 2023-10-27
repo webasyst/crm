@@ -15,6 +15,6 @@ class crmSettingsViewAction extends crmBackendViewAction
 
     protected function getTemplate()
     {
-        return 'templates/actions/settings/Settings.html';
+        return (wa()->whichUI() === '1.3') ? 'templates/actions-legacy/settings/Settings.html' : 'templates/actions/settings/Settings.html';
     }
 }

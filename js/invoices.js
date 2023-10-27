@@ -19,8 +19,16 @@ var CRMInvoices = ( function($) {
 
     CRMInvoices.prototype.initClass = function() {
         var that = this;
-        //
-        that.initElastic();
+
+        that.showOnlyDesktopClass = 'desktop-and-tablet-only'
+        that.patternsBeginContent = [
+            ".+\\d+\\/",
+            ".+new\\/"
+        ];
+
+        that.initWaLoading();
+
+        that.filtersDropdown();
         //
         that.initContentRouter();
         //
@@ -29,94 +37,85 @@ var CRMInvoices = ( function($) {
         that.initInvoiceList();
         //
         that.initInvoiceSearch();
+
+        that.initMobileEvents();
     };
 
-    CRMInvoices.prototype.initElastic = function() {
-        var that = this;
 
-        var $wrapper = that.$wrapper,
-            $aside = that.$sidebar,
-            $content = that.$content;
+    CRMInvoices.prototype.hideContentMobile = function() {
+        this.$content.addClass(this.showOnlyDesktopClass);
+        this.$sidebar.removeClass(this.showOnlyDesktopClass);
+    }
 
-        var asideElastic = new CRMElasticBlock({
-            $wrapper: $wrapper,
-            $aside: $aside,
-            $content: $content
+    CRMInvoices.prototype.showContentMobile = function() {
+        this.$sidebar.addClass(this.showOnlyDesktopClass);
+        this.$content.removeClass(this.showOnlyDesktopClass);
+    }
+
+    CRMInvoices.prototype.initMobileEvents = function() {
+        $(document).on("click", ".js-invoice-hide-mobile", () => {
+            this.hideContentMobile();
         });
 
-        var contentElastic = new CRMElasticBlock({
-            $wrapper: $wrapper,
-            $content: $aside,
-            $aside: $content
-        });
+        const { pathname } = window.location;
 
-        initElastic();
-
-        // fix position after change content
-        $(window).trigger("scroll");
-
-        function initElastic() {
-
-            // DOM
-            var $window = $(window),
-                $wrapper = $aside,
-                $header = $aside.find(".js-aside-header");
-
-            // VARS
-            var wrapper_offset = $wrapper.offset(),
-                header_h = $header.outerHeight(),
-                fixed_class = "is-fixed";
-
-            // DYNAMIC VARS
-            var $space = false,
-                is_fixed = false;
-
-            // INIT
-
-            $window.on("scroll", scrollWatcher);
-
-            function scrollWatcher() {
-                var is_exist = $.contains(document, $header[0]);
-                if (is_exist) {
-                    onScroll( $window.scrollTop() );
-                } else {
-                    $window.off("scroll", scrollWatcher);
-                }
-            }
-
-            function onScroll(scroll_top) {
-                var set_fixed = ( scroll_top > wrapper_offset.top );
-                if (set_fixed) {
-
-                    if (!$space) {
-                        $space = $("<div class=\"c-space-wrapper\" />").height(header_h);
-                        $header.after($space);
-                    }
-
-                    $header
-                        .css({
-                            left: wrapper_offset.left
-                        })
-                        .width( $wrapper.outerWidth() )
-                        .addClass(fixed_class);
-
-                    is_fixed = true;
-
-                } else {
-
-                    if ($space && $space.length) {
-                        $space.remove();
-                    }
-
-                    $header
-                        .removeAttr("style")
-                        .removeClass(fixed_class);
-
-                    is_fixed = false;
-                }
+        for (const pattern of this.patternsBeginContent) {
+            if (new RegExp(pattern, "g").test(pathname)) {
+                this.showContentMobile();
+                break;
             }
         }
-    };
+    }
+
+    CRMInvoices.prototype.filtersDropdown = function() {
+        $(".dropdown", this.$sidebar).waDropdown({
+            hover: false,
+            items: ".menu > li > a",
+            change: function(e) {
+                if (e.type !== "touchend") return false;
+
+                const $link = $(e.target).closest('a');
+                if (!$link.length) return false;
+
+                const href = $link.attr('href');
+                if (href) {
+                    window.location = href;
+                }
+            }
+        });
+    }
+
+    CRMInvoices.prototype.initWaLoading = function() {
+        var waLoading = $.waLoading();
+        var $wrapper = $(document),
+            locked_class = "is-locked";
+
+        $wrapper
+            .on("wa_before_load.invoices", function() {
+                waLoading.show();
+                waLoading.animate(10000, 100, false);
+                $wrapper.addClass(locked_class);
+            })
+            .on("wa_loading.invoices", function(event, xhr_event) {
+                var percent = (xhr_event.loaded / xhr_event.total) * 100;
+                waLoading.set(percent);
+            })
+            .on("wa_abort.invoices", function() {
+                waLoading.abort();
+                $wrapper.removeClass(locked_class);
+            })
+            .on("wa_loaded.invoices", function() {
+                waLoading.done();
+                $wrapper.removeClass(locked_class);
+            });
+
+        $('#c-invoices-page').one('remove', function () {
+            $wrapper.off(".invoices");
+            waLoading.$bar.remove();
+            waLoading.$wrapper.remove();
+            $wrapper.removeClass(locked_class);
+        })
+    },
 
     CRMInvoices.prototype.initContentRouter = function() {
         var that = this,
@@ -127,30 +126,36 @@ var CRMInvoices = ( function($) {
             xhr = false;
 
         that.$wrapper.on("click", "a", function(event) {
-            var $link = $(this),
-                content_uri = ( $link.hasClass("js-disable-router") ? $link.attr("href") : false );
+            const $link = $(this),
+                  content_uri = ( $link.hasClass("js-disable-router") ? $link.attr("href") : false );
 
-            if (event.ctrlKey || event.shiftKey || event.metaKey) {
+            const isMobile = () => that.$content.is(':hidden');
 
-            } else if (content_uri) {
-                event.preventDefault();
+            if (!content_uri) return true;
 
-                if (is_enabled) {
+            event.preventDefault();
+            if (is_enabled) {
 
-                    if (need_confirm) {
-                        $.crm.confirm.show({
-                            title: $.crm.locales["unsaved_dialog_title"],
-                            text: $.crm.locales["unsaved_dialog_text"],
-                            button: $.crm.locales["unsaved_dialog_button"],
-                            onConfirm: function() {
-                                $(document).trigger("unsavedChanges", false);
-                                load(content_uri);
-                            }
-                        })
+                if (need_confirm) {
+                    $.waDialog.confirm({
+                        title: $.crm.locales["unsaved_dialog_title"],
+                        text: $.crm.locales["unsaved_dialog_text"],
+                        success_button_title: $.crm.locales["unsaved_dialog_button"],
+                        success_button_class: 'danger',
+                        cancel_button_title: $.crm.locales['cancel'],
+                        cancel_button_class: 'light-gray',
+                        onSuccess: function() {
+                            $(document).trigger("unsavedChanges", false);
+                            load(content_uri);
+                        }
+                    });
 
-                    } else {
-                        load(content_uri);
-                    }
+                } else {
+                    load(content_uri).then(() => {
+                        if (isMobile()) {
+                            that.showContentMobile();
+                        }
+                    });
                 }
             }
         });
@@ -170,8 +175,31 @@ var CRMInvoices = ( function($) {
 
             $(document).trigger("wa_before_load");
 
-            xhr = $.get(content_uri, data, function(html) {
+            xhr = $.ajax({
+                method: 'GET',
+                url: content_uri,
+                data: data,
+                dataType: 'html',
+                global: false,
+                cache: false,
+                xhr: function() {
+                    var xhr = new window.XMLHttpRequest();
 
+                    xhr.addEventListener("progress", function(event) {
+                        $(document).trigger("wa_loading", event);
+                    }, false);
+
+                    xhr.addEventListener("abort", function(event) {
+                        $(document).trigger("wa_abort");
+                    }, false);
+
+                    return xhr;
+                }
+            })
+            .always( function() {
+                that.xhr = false;
+            })
+            .done(function(html) {
                 if (api_enabled) {
                     history.pushState({
                         reload: true,               // force reload history state
@@ -184,70 +212,57 @@ var CRMInvoices = ( function($) {
                 $content.html(html);
 
                 $(document).trigger("wa_loaded");
-
-            }).fail( function(html) {
+            })
+            .fail( function(html) {
+                $(document).trigger("wa_abort");
                 if (html.responseText) {
                     showError(html.responseText);
                 }
-            }).always( function() {
-                that.xhr = false;
             });
 
-            function showError(text) {
-                var href = "?module=dialogConfirm",
-                    data = {
-                        title: "Error",
-                        text: text,
-                        ok_button: "Close"
-                    };
+            return xhr;
 
-                $.post(href, data, function(html) {
-                    new CRMDialog({
-                        html: html
-                    });
-                });
+            function showError(text) {
+                const data = {
+                    title: "Error",
+                    text: text,
+                    button_title: "Close"
+                };
+
+                $.waDialog.alert(data);
             }
         }
     };
 
     CRMInvoices.prototype.initLazy = function() {
-        var that = this;
-
-        var $window = $(window),
-            $list = that.$invoiceList,
-            $loader = that.$wrapper.find(".js-lazyload"),
+        let $list = this.$invoiceList,
+            observer = null,
+            $loader = this.$wrapper.find(".js-lazyload"),
             is_locked = false;
 
-        if ($loader.length) {
-            $window.on("scroll", use);
+        this.$invoiceList.on('touchstart', function () {
+            $("body").css({overflow: "hidden"})
+            $(this).closest('.sidebar-body').css({overflow: "overlay"});
+            setTimeout(()  => {
+                $("body").css({overflow: "auto"})
+            })
+        });
 
-            if ($loader.offset().top < $window.height()) {
-                $window.trigger("scroll");
-            }
+        if (!$loader.length) return;
+
+        function initObserve () {
+            observer = new IntersectionObserver((entries) => {
+                if (entries[0].intersectionRatio <= 0) return;
+                load();
+            });
+
+            observer.observe($loader[0]);
         }
-
-        function use() {
-            var is_exist = $.contains(document, $loader[0]);
-            if (is_exist) {
-                onScroll();
-            } else {
-                $window.off("scroll", use);
-            }
-        }
-
-        function onScroll() {
-            var scroll_top = $(window).scrollTop(),
-                display_h = $window.height(),
-                loader_top = $loader.offset().top;
-
-            if (scroll_top + display_h >= loader_top ) {
-                if (!is_locked) {
-                    load();
-                }
-            }
-        }
+        initObserve();
 
         function load() {
+            if (is_locked) return;
+
             var href = "?module=invoice&action=sidebar",
                 data = {
                     offset: $loader.data("offset")
@@ -265,10 +280,14 @@ var CRMInvoices = ( function($) {
                     $newLoading = $html.find(".js-lazyload"),
                     $items = $html.find(".c-invoice");
 
+                observer.unobserve($loader[0]);
+
                 if ($newLoading.length) {
                     $newLoading.insertAfter($loader);
                     $loader.remove();
                     $loader = $newLoading;
+
+                    observer.observe($loader[0]);
                 } else {
                     $loader.remove();
                 }
@@ -320,7 +339,7 @@ var CRMInvoices = ( function($) {
                 classes: {
                     "ui-autocomplete": "c-search-results-list"
                 },
-                source: that.app_url + "?module=invoiceAutocomplete",
+                source: $.crm.app_url + "?module=invoiceAutocomplete",
                 minLength: 1,
                 html: true,
                 focus: function() {

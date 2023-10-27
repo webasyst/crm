@@ -117,7 +117,7 @@ class crmDealSelectField extends crmDealField
         $html = '<select '.$attrs.' name="'.$this->getHTMLName($params).'"><option value=""></option>';
         foreach ($this->getOptions() as $k => $v) {
             $selected = isset($selected_map[$k]) ? ' selected="selected"' : '';
-            $html .= '<option'.$selected.' value="'.$k.'">'.htmlspecialchars($v).'</option>';
+            $html .= '<option'.$selected.' value="'.htmlspecialchars($k).'">'.htmlspecialchars($v).'</option>';
         }
         $html .= '</select>';
         return $html;

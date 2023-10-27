@@ -1,0 +1,362 @@
+{$_info = $order_shipping_info|default:[]}
+{$_order = $order_shipping_info.order|default:[]}
+
+<section class="c-order-section">
+    <div class="c-order-details">
+
+        <div class="c-table-box space-10">
+            <div class="c-column">
+                <div class="c-details-header">
+                    <div class="c-details-toggle js-details-toggle">
+                        <i class="icon16 rarr"></i>
+                        <span>{sprintf_wp("Order %s", $wa->shop->orderId($_order.id))}</span>
+                    </div>
+
+                    <div class="c-order-state">
+                        {if $_order.state}
+                            <span style="{$_order.state->getStyle()}">
+                                <i class="{$_order.state->getOption('icon')}" style="margin: 0; vertical-align: -2px;"></i>
+                                <span>{$_order.state->getName()|escape}</span>
+                            </span>
+                        {else}
+                            [`Unknown state`]: {$_order.state_id}
+                        {/if}
+                    </div>
+
+                    {if $can_create_order}
+                        <a href="javascript:void(0)" class="c-create-order-link js-create-order-link">
+                            <i class="icon16 userpic20" style="background-image: url('{$wa_url}wa-apps/shop/img/shop.png'); position: relative; top: 2px; vertical-align: baseline; margin: 0;"></i>
+                            [`Create order`]
+                            <i class="icon16 loading"></i>
+                        </a>
+                    {/if}
+
+                    {if $has_access_to_shop}
+                        <a href="{$wa_backend_url}shop/?action=orders#/order/{$_order.id}/">
+                            <i class="icon16 userpic20" style="background-image: url('{$wa_url}wa-apps/shop/img/shop.png');"></i>
+                            [`Open in Shop-Script`]
+                        </a>
+                    {/if}
+
+                    {if $can_edit_order}
+                        <a href="javascript:void(0)" class="c-edit-order-link js-edit-order-link">
+                            <i class="icon16 edit"></i>
+                            [`Edit order`]
+                            <i class="icon16 loading"></i>
+                        </a>
+                    {/if}
+                </div>
+            </div>
+
+            {if !empty($order.paid_date)}
+                <div class="c-column align-right">
+                    <div class="c-paid-order-stamp" title="{sprintf('[`Order was paid on %s`]', $order.paid_date|wa_date:'humandate')}">[`Paid`]</div>
+                </div>
+            {/if}
+        </div>
+
+        <div class="c-hidden">
+            <div class="c-table-box fixed space-20">
+                <div class="c-column">
+
+                    <div class="c-shipping-wrapper">
+                        {if !empty($_info.shipping_address_html)}
+                            <div class="c-shipping-block">
+                                <div class="c-block-title">[`Shipping`]</div>
+                                <div class="c-block-body">
+                                    {if !empty($_info.params.shipping_name)}
+                                        <div class="line">{$_info.params.shipping_name|escape}</div>
+                                    {/if}
+
+                                    {if $_info.shipping_address_html}
+                                        <div class="line">
+                                            <div class="s-order-address">
+                                                {$_info.shipping_address_html}
+                                            </div>
+                                        </div>
+
+                                        {if !empty($_order.shipping_custom_fields)}
+                                            <div class="line">
+                                                <div class="s-order-shipping-custom-fields">
+                                                    {foreach $_order.shipping_custom_fields as $f}
+                                                        {$f.title}: {$f.value|escape}<br>
+                                                    {/foreach}
+                                                </div>
+                                            </div>
+                                        {/if}
+                                    {/if}
+
+                                    {* Not always package info can be shown *}
+                                    {if $_info.can_show_package_info}
+                                        {$_package = shopShipping::extractItemsTotal($_info.order.params, true)}
+                                        {if $_package}
+                                            {if !empty($_package.package_total_weight)}
+                                                <div class="c-order-package">
+                                                    <div class="c-label">[`Total order weight`]:</div>
+                                                    <div class="c-value">{$_package.package_total_weight}</div>
+                                                </div>
+                                            {/if}
+                                            {if !empty($_package)}
+                                                <div class="c-order-package" title="[`Width × length × height`]">
+                                                    <div class="c-label">[`Total order dimensions`]:</div>
+                                                    <div class="c-value">{$_package.package_total_width}&times;{$_package.package_total_length}×{$_package.package_total_height}</div>
+                                                </div>
+                                            {/if}
+                                        {/if}
+                                    {/if}
+
+                                    {if !empty($order_shipping_info.shipping_address_text) && !empty($order_shipping_info.map_settings.type)}
+                                        {$_address = $order_shipping_info.shipping_address_text}
+                                        {$_zoom = 13}
+
+                                        {$_uri = "//yandex.ru/maps/?text=`$_address|urlencode`&z=`$_zoom`"}
+                                        {if $order_shipping_info.map_settings.type === "google"}
+                                            {$_uri = "//maps.google.com/maps?q=`$_address|urlencode`&z=`$_zoom`"}
+                                        {/if}
+
+                                        <div class="line">
+                                            <a href="{$_uri}" target="_blank">
+                                                <i class="icon16 marker"></i> [`View map`]
+                                            </a>
+                                        </div>
+                                    {/if}
+
+                                </div>
+                            </div>
+                        {/if}
+                    </div>
+
+                </div>
+                <div class="c-column">
+
+                    {if $_info.shipping_address_html}
+                        {$_edit_shipping_details_available = false}
+                        {if !empty($_info.order.state)}
+                            {$available_actions = $_info.order.state->getActions()}
+                            {$_edit_shipping_details_available = !empty($available_actions.editshippingdetails)}
+                        {/if}
+
+                        <div class="c-shipping-block">
+                            {if !empty($_info.params.shipping_name)}
+                                <div class="c-block-title">[`Courier`]</div>
+                            {/if}
+
+                            <div class="c-block-body">
+
+                                {if !empty($_info.courier)}
+                                    <h3 class="c-courier-name">
+                                        <a href="{$_info.shop_app_url}#/orders/search/params.courier_id={$_info.courier.id}/">{$_info.courier.name|escape}</a>
+                                    </h3>
+                                {/if}
+
+                                {if $_info.customer_delivery_date || $_info.customer_delivery_time || $_info.customer_delivery_date_str}
+                                    <div class="line">
+                                        <div class="s-order-customer-delivery-date {if !empty($_info.shipping_date)}grey{/if}">
+                                            <span class="c-title">[`Preferred shipping time:`]</span>
+
+                                            {if $_info.customer_delivery_date}
+                                                <span class="customer-delivery-date">{wa_date('date', $_info.customer_delivery_date, waDateTime::getDefaultTimezone())|escape}</span>
+                                            {elseif $_info.customer_delivery_date_str}
+                                                <span>{$_info.customer_delivery_date_str|escape}</span>
+                                            {/if}
+
+                                            {if $_info.customer_delivery_time}
+                                                {if $_info.customer_delivery_date}&nbsp;{/if}
+                                                <span class="customer-delivery-time-from">{$_info.customer_delivery_time.from_hours|escape}:{$_info.customer_delivery_time.from_minutes|escape}</span>
+                                                -
+                                                <span class="customer-delivery-time-to">{$_info.customer_delivery_time.to_hours|escape}:{$_info.customer_delivery_time.to_minutes|escape}</span>
+                                            {/if}
+                                        </div>
+                                    </div>
+                                {/if}
+
+                                {if $_edit_shipping_details_available || !empty($_info.shipping_date)}
+                                    {if !empty($_info.shipping_date)}
+                                        <div class="line">
+                                            <span class="c-label">[`Shipping time`]:</span>
+                                            <span class="c-date">{wa_date('date', $_info.shipping_date, waDateTime::getDefaultTimezone())|escape} {$_info.shipping_time_start|escape} - {$_info.shipping_time_end|escape}</span>
+                                        </div>
+                                    {/if}
+                                    {if $can_edit_order && $_edit_shipping_details_available}
+                                        <div class="line">
+                                            <a href="javascript:void(0)" class="hint js-order-edit-shipping-details-link">[`Edit shipping details`]</a>
+                                            <i class="icon16 loading js-order-edit-shipping-details-loading" style="margin: 0; vertical-align: -2px; display: none;"></i>
+                                        </div>
+                                    {/if}
+                                {/if}
+
+                                {if $can_edit_order && $_edit_shipping_details_available}
+                                    <div class="line">
+                                        {include file="./Deal.editOrderShippingDetailsDialog.html" inline}
+                                    </div>
+                                {/if}
+
+                            </div>
+                        </div>
+
+                        {$has_tracking_number = !empty($_info.params.tracking_number)}
+                        {$has_tracking_info   = !empty($_info.tracking) && $_info.order.state_id != 'completed'}
+
+                        {if $has_tracking_number || $has_tracking_info}
+                            <div class="c-shipping-block">
+                                <div class="c-block-title">[`Shipment tracking number`]</div>
+                                <div class="c-block-body">
+
+                                    {if $has_tracking_number}
+                                        <div class="line">
+                                            <strong class="highlighted">{$_info.params.tracking_number|escape}</strong>
+                                            {if $can_edit_order && $_edit_shipping_details_available}
+                                                <a href="javascript:void(0)"  class="hint js-order-edit-shipping-details-link"><i class="icon10 edit"></i></a>
+                                                <i class="icon16 loading js-order-edit-shipping-details-loading" style="display: none;"></i>
+                                            {/if}
+                                        </div>
+                                    {/if}
+
+                                    {if $has_tracking_info}
+                                        <div class="line">
+                                            <blockquote class="plugin s-tracking">
+                                                {$_info.tracking}
+                                            </blockquote>
+                                        </div>
+                                    {/if}
+                                </div>
+                            </div>
+                        {/if}
+                    {/if}
+
+                    {if !empty($_order.params.payment_name)}
+                        <div class="c-shipping-block">
+                            <div class="c-block-title">[`Payment`]</div>
+                            <div class="c-block-body">
+                                <div class="line">
+                                    {$_order.params.payment_name}
+                                </div>
+                                {if !empty($_order.billing_address)}
+                                    <div class="line">
+                                        <div class="s-order-address">{$_order.billing_address}</div>
+                                    </div>
+                                {/if}
+                            </div>
+                        </div>
+                    {/if}
+
+                </div>
+            </div>
+
+            <!-- order comment -->
+            {if $_order.comment}
+                <div class="line c-comment-wrapper">
+                    {$_order.comment|escape}
+                </div>
+            {/if}
+        </div>
+    </div>
+
+    <div class="c-products-wrapper">
+        <table class="c-products-table">
+            <thead>
+                <tr>
+                    <th colspan="2">
+                        <div class="c-products-toggle js-products-toggle">
+                            <i class="icon16 rarr"></i>[`Order list`]
+                        </div>
+                    </th>
+                    <th class="c-column-amount">[`Qty`]</th>
+                    <th class="c-column-price">[`Total`]</th>
+                </tr>
+            </thead>
+            <tbody>
+                {if !empty($_order.items)}
+                    {$subtotal = 0}
+                    {foreach $_order.items as $item}
+                        <tr data-id="{$item.id}" class="c-product-wrapper {if $item.type === 'service'}is-service{else}is-product{/if}">
+                            <td class="c-column-image">
+                                {if $item.type != 'service'}
+                                    {if !empty($item.image_id)}
+                                        {$wa->shop->productImgHtml(['id' => $item.product_id, 'image_id' => $item.image_id, 'image_filename' => $item.image_filename, 'ext' => $item.ext], '48x48')}
+                                    {else}
+                                        <img src="{$wa_app_static_url}img/image-dummy-small.png" class="not-found" style="width: 48px; height: 48px;">
+                                    {/if}
+                                {/if}
+                            </td>
+                            <td class="c-column-name">
+                                <div class="c-name">
+                                    {if $item.type == 'service'}
+                                        <span class="gray s-overhanging-plus">+</span>
+                                    {/if}
+                                    {$item.name}
+                                </div>
+
+                                {strip}
+                                <div class="c-details">
+                                    {if !empty($item.sku_code)}
+                                        <span class="hint">{$item.sku_code|escape}</span>
+                                    {/if}
+
+                                    {if !empty($item.stock)}
+                                        <span class="small">@{$item.stock.name|escape}</span>
+                                    {/if}
+
+                                    {if !empty($item.stock_icon)}
+                                        <span class="c-icon">{$item.stock_icon}</span>
+                                    {/if}
+                                </div>
+                                {/strip}
+                            </td>
+                            <td class="c-column-amount"><span class="gray">{wa_currency_html($item.price, $_order.currency)} &times;</span> {$item.quantity}</td>
+                            <td class="c-column-price">{wa_currency_html($item.price * $item.quantity, $_order.currency)}</td>
+                        </tr>
+
+                        {$subtotal = $subtotal + $item.price*$item.quantity}
+                    {/foreach}
+                {/if}
+            </tbody>
+            <tfoot>
+                {if empty($_order.items)}
+                    <tr>
+                        <td colspan="4" class="s-empty-order-note">[`Order content is unknown`]</td>
+                    </tr>
+                {/if}
+
+                {if !empty($subtotal)}
+                    <tr class="no-border">
+                        <td colspan="2"></td>
+                        <td class="align-right"><br>[`Subtotal`]</td>
+                        <td class="align-right nowrap"><br>{wa_currency_html($subtotal, $_order.currency)}</td>
+                    </tr>
+                {/if}
+
+                <tr class="no-border">
+                    <td colspan="2"></td>
+                    <td class="align-right">
+                        [`Discount`]
+                        {if !empty($_order.coupon)}
+                            <span><i class="icon16 ss coupon"></i><strong>{$_order.coupon.code|escape}</strong></span>
+                        {/if}
+                    </td>
+                    <td class="align-right nowrap">&minus; {wa_currency_html($_order.discount, $_order.currency)}</td>
+                </tr>
+
+                {if isset($_order.params.shipping_name) || $_order.shipping > 0}
+                    <tr class="">
+                        <td colspan="2"></td>
+                        <td class="align-right">[`Shipping`]</td>
+                        <td class="align-right nowrap">{wa_currency_html($_order.shipping, $_order.currency)}</td>
+                    </tr>
+                {/if}
+
+                <tr class="">
+                    <td colspan="2"></td>
+                    <td class="align-right">[`Tax`]</td>
+                    <td class="align-right nowrap">{wa_currency_html($_order.tax, $_order.currency)}</td>
+                </tr>
+
+                <tr class="no-border bold large" style="font-size: 150%;">
+                    <td colspan="2"></td>
+                    <td class="align-right">[`Total`]</td>
+                    <td class="align-right nowrap">{wa_currency_html($_order.total, $_order.currency)}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</section>

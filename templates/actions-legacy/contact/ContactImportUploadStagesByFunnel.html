@@ -1,0 +1,5 @@
+<select name="deal_stage_id">
+    {foreach $stages as $_id => $_s}
+        <option value="{$_id}" {if $form.params.deal_stage_id|default:0 == $_id} selected="selected"{/if}>{$_s.name|escape}</option>
+    {/foreach}
+</select>

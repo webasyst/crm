@@ -1,0 +1,59 @@
+{$class_id = 'js-responsible-block'}
+{$wrapper_id = uniqid($class_id)}
+{$show_hint = false}
+<div class="crm-field crm-responsible-block {$class_id}" id="{$wrapper_id}">
+    {$_name = $_inc_options.name|default:''}
+    {if $_name}
+        <div class="crm-name-col">{$_name}</div>
+    {/if}
+    {$is_personally = $group_id == 'personally'}
+    <div class="crm-input-col-1" style="vertical-align: middle;">
+        <div class="crm-input-wrapper">
+            <select class="crm-group-id">
+                <option></option>
+                {foreach $groups as $_group}
+                    {if $group_id == $_group.id}
+                        {$show_hint = true}
+                    {/if}
+                    <option value="{$_group.id}" {if $group_id == $_group.id}selected="selected"{/if}>{$_group.name|escape}</option>
+                {/foreach}
+                <option value="personally" {if $is_personally}selected="selected"{/if}>[`Personally`]</option>
+            </select>
+        </div>
+    </div>
+    <div class="crm-input-col-2" style="vertical-align: middle;">
+        <div class="crm-input-wrapper">
+            <input type="input"
+                   {if !$is_personally}disabled="disabled"{/if}
+                   class="crm-user" {if !$is_personally || $user.id > 0}style="display: none;"{/if}>
+
+            <div class="crm-user-info-block" {if !$is_personally || $user.id <= 0}style="display: none;"{/if}>
+                <div class="c-layout" style="border-collapse: collapse;">
+                    <div class="c-column middle">
+                        <i class="icon16 userpic20 crm-user-icon" {if $user.photo_url}style="background-image: url({$user.photo_url});"{/if}></i>
+                        <span class="crm-user-name" title="{$user.name|escape}">{$user.name|escape}</span>
+                    </div>
+                    <div class="c-column middle right">
+                        <a class="crm-delete-link" href="javascript:void(0);"><i class="icon16 delete"></i></a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <input type="hidden" name="{input_name id='responsible_contact_id'}" class="crm-responsible-contact_id" value="{if $group_id > 0}-{$group_id}{else}{$user.id}{/if}">
+    <script>
+        ( function($) {
+            {$_class_id = $_inc_options.class_id|default:$class_id}
+            {$_wrapper_id = $_inc_options.wrapper_id|default:$wrapper_id}
+            new CRMSettingsSourceResponsibleBlock({
+                '$wrapper': $('#{$_wrapper_id}'),
+                'class_id' : {$_class_id|json_encode},
+                'source': {$source|json_encode},
+                'namespace': {$namespace|json_encode}
+            });
+        })(jQuery);
+    </script>
+
+</div>
+<span class="small js-group-hint" {if !$show_hint}style="display: none"{/if}><i class="icon16 info"></i>[`For each new deal, a randomly selected user with the lowest number of assigned deals will be assigned as the responsible person.`]</span>

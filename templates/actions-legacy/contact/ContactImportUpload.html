@@ -1,0 +1,136 @@
+{$block_id = uniqid('crm-import-block-')}
+{$form_id  = uniqid('crm-import-form-')}
+
+<div class="crm-block crm-import-upload-block" id="{$block_id}">
+
+    <div class="crm-title-block">
+        <h1>[`Import contacts`]</h1>
+        <div class="crm-import-message">
+            {if $error}
+                {$error}
+            {else}
+                {$_count = $csv.fields|@count}
+                {sprintf(_w("We have found %d column in imported data.", "We have found %d columns in imported data.", $_count))}
+            {/if}
+        </div>
+        <div class="crm-warning-require-primary-fields" style="display: none">
+            [`You must select at least one of the following fields: First name, Last name, Company name, Email.`]
+        </div>
+    </div>
+
+    <form class="crm-import-form" id="{$form_id}">
+        <div class="crm-specify-message">
+            [`Please specify fields matching these columns.`]
+        </div>
+        <div class="crm-import-table-wrapper">
+            <div class="block not-padded" style="overflow: auto;">
+                {if $csv}
+                    <table width="100%" cellspacing="0" cellpadding="0" class="zebra full-width bottom-bordered crm-import-upload-table">
+                        <thead>
+                        <tr>
+                            {foreach $csv.fields as $i => $f}
+                                <th>
+                                    <select name="fields[{$i}]">
+                                        <option value="">[`field...?`]</option>
+                                        {foreach $fields as $field_id => $field}
+                                            {foreach $field.options as $v => $n}
+                                                <option value="{$v|escape}">{$n|escape}</option>
+                                            {/foreach}
+                                        {/foreach}
+                                    </select>
+                                </th>
+                            {/foreach}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {foreach $csv.records as $record}
+                            <tr>
+                                {foreach $csv.fields as $k => $v}
+                                    <td>{$record[$k]|default:''|escape}</td>
+                                {/foreach}
+                            </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                    {if count($csv.records) < $csv.count}
+                        <div class="table-foot">...</div>
+                    {/if}
+                {/if}
+            </div>
+            <div class="block double-padded">
+                <div class="crm-bottom-panel">
+                    <div class="crm-total-count-column">
+                        [`Total lines`]: <span class="crm-count">{$csv.count}</span>
+                    </div>
+                    <div class="crm-submit-column">
+                        <label>
+                            <input type="checkbox" name="first_line" checked="checked"> [`Import first line`]
+                        </label>
+                        <label>
+                            <input type="checkbox" name="validate"> [`Enable validation control (required and unique fields and data format)`]
+                        </label>
+                        <label>
+                            <input type="checkbox" name="create_deals" value="1"> [`Create deals`]
+                        </label>
+                        <div class="crm-deals-settings-wrapper" style="display: none;">
+
+                            <select name="deal_funnel_id">
+                                {foreach $funnels as $_id => $_f}
+                                    <option value="{$_id}" {if $form.params.deal_funnel_id|default:0 == $_id} selected="selected"{/if}>{$_f.name|escape}</option>
+                                {/foreach}
+                            </select>
+
+                            <select name="deal_stage_id">
+                                {foreach $stages as $_id => $_s}
+                                    <option value="{$_id}" {if $form.params.deal_stage_id|default:0 == $_id} selected="selected"{/if}>{$_s.name|escape}</option>
+                                {/foreach}
+                            </select>
+
+                        </div>
+
+                        <div class="c-add-to-segments-wrapper">
+                            <label>
+                                <input type="checkbox" name="add_to_segments" value="1">
+                                [`Add to segments`]
+                            </label>
+                            <div class="c-add-to-segments-names"></div>
+                        </div>
+
+
+                        <div class="crm-button-wrapper">
+                            <input type="hidden" name="uid" value="{uniqid('crm-contact-import-')}">
+                            <input type="hidden" name="separator" value="{$csv.delimiter}">
+                            <input type="hidden" name="group_id" value="{$group_id}">
+                            <input type="hidden" name="encoding" value="{$csv.encode}">
+                            <input type="hidden" name="columns" value="{count($csv.fields)}">
+                            <input class="crm-import-upload-button button green" type="submit" value="[`Import`]" disabled="disabled">
+                            <i class="icon16 loading crm-loading" style="display:none;"></i>
+                            [`or`] <a href="{$wa_app_url}contact/import/">[`cancel`]</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="crm-import-progressbar-dialog">
+                <div class="crm-progressbar"></div>
+            </div>
+
+        </div>
+    </form>
+
+    <script>
+        $(function () {
+            new crmContactImportUpload({
+                '$wrapper': $('#{$block_id}'),
+                'fieldInfo': {$fieldInfo|json_encode},
+                'messages': {
+                    no_imported: "[`Done! No contacts were imported due to validation errors.`]",
+                    some_imported: "[`Done! Some contacts were not imported due to validation errors.`]",
+                    all_imported: "[`Done! All contacts imported successfully.`]"
+                }
+            });
+        });
+    </script>
+
+</div>

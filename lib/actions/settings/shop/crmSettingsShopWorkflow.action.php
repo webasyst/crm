@@ -64,6 +64,7 @@ class crmSettingsShopWorkflowAction extends crmSettingsShopAction
             $exclude_actions = array(
                 'create',
                 'edit',
+                'editcode',
                 //'editshippingdetails',
                 //'comment',
                 'callback',

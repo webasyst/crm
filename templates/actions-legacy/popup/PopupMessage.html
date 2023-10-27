@@ -1,0 +1,68 @@
+{strip}
+<div class="crm-notification-popup" data-item="message-{$message.id}">
+    <div class="c-notify-head">
+        {if $message.icon_url}
+            <i class="icon16 userpic20" style="background-image: url({$message.icon_url});"{if isset($message.transport_name)} title="{$message.transport_name|escape}"{/if}></i>
+        {else}
+            <i class="icon16 {$message.icon}"></i>
+        {/if}
+        <div class="c-notify-title">
+            <div class="c-notify-title-left-label">
+                {if !empty($message.message_type)}
+                    {$message_type = $message.message_type}
+                {else}
+                    {$message_type = trim(_w('Message'))}
+                {/if}
+                {$message_type} [`from`]
+            </div>
+            <div class="c-notify-title-right-label">
+                {if !empty($message.from_formatted)}
+                    {$from_formatted = $message.from_formatted}
+                {else}
+                    {$from_formatted = $message.from|escape}
+                {/if}
+                {$from_formatted}
+            </div>
+        </div>
+        <i class="icon16 c-notify-close" title="[`Close`]"></i>
+    </div>
+    {if $message.conversation_id}
+        <a href="{$wa_app_url}message/conversation/{$message.conversation_id}" class="c-notify-link">
+    {elseif $message.deal_id}
+        <a href="{$wa_app_url}deal/{$message.deal_id}" class="c-notify-link">
+    {else}
+        <a href="{$wa_app_url}contact/{$message.contact_id}" class="c-notify-link">
+    {/if}
+        <div class="c-notify-body">
+            {if !empty($contact)}
+                <div class="c-popup-contact">
+                    <i class="icon16 userpic20" style="background-image: url('{$contact.photo_url_20}');"></i>
+                    {$contact.name|escape}
+                </div>
+            {/if}
+            {if !empty($deal) && $poligon_svg}
+                <div class="c-popup-deal">
+                    {$poligon_svg}&nbsp;{$deal.name|escape}
+                </div>
+            {/if}
+
+            {if !empty($message.subject_formatted)}
+                {$subject_formatted = $message.subject_formatted}
+            {else}
+                {$subject_formatted = $message.subject|escape}
+            {/if}
+
+            <div class="c-popup-subject">
+                {$subject_formatted}
+            </div>
+
+            {if !empty($message.attachments)}
+                <div class="c-popup-attachments">
+                    <i class="icon16 attachment"></i>
+                    {_w('%d attachment', '%d attachments', count($message.attachments))}
+                </div>
+            {/if}
+        </div>
+    </a>
+</div>
+{/strip}

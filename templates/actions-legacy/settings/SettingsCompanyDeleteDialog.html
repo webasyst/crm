@@ -1,0 +1,66 @@
+<div class="crm-dialog-wrapper c-company-delete-dialog" id="c-company-delete-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <form action="">
+            <header class="crm-dialog-header">
+                <h1>
+                    [`Delete`]
+                    <span class="grey">{$company.name|escape}</span>
+                </h1>
+            </header>
+
+            <div class="crm-dialog-content" style="min-height: 100px;">
+                {if !empty($payments)}
+                    <p>
+                        {sprintf_wp('There are %s for this company.',
+                            _w('%d payment option configured', '%d payment options configured', $payments|count)
+                        )}
+                        <br>
+                        [`Payment configurations will be deleted without ability to restore.`]
+                    </p>
+                {/if}
+
+                {if !empty($invoices)}
+                    <p>
+                        {sprintf_wp('There are %s from this company.',
+                            _w('%d invoice issued', '%d invoices issued', $invoices|count)
+                        )}
+                    </p>
+                    <p>
+                        {sprintf_wp('Switch %s to',
+                            _w('%d invoice', '%d invoices', $invoices|count)
+                        )}
+                        <select name="switch_to" required style="max-width: 150px;">
+                            <option selected disabled value="">[`Select company`]</option>
+                            {foreach $companies as $_company}
+                                {if $_company.id !== $company.id}
+                                    <option value="{$_company.id}">{$_company.name|escape}</option>
+                                {/if}
+                            {/foreach}
+                        </select>
+                        [`and delete company`] <span class="bold">{$company.name|escape}</span>?
+                    </p>
+                {else}
+                    <p>[`Delete company`] <span class="bold">{$company.name|escape}</span>? </p>
+                {/if}
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <input class="button red" type="submit" value="[`Delete`]">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+            </footer>
+
+            <input name="id" type="hidden" value="{$company.id}">
+        </form>
+
+        <script>
+            ( function($) {
+                new CRMCompanyDeleteDialog({
+                    $wrapper: $("#c-company-delete-dialog"),
+                    company_id: {if !empty($company.id)}{$company.id}{else}false{/if}
+                });
+            })(jQuery);
+        </script>
+    </div>
+</div>

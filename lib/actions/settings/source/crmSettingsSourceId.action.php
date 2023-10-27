@@ -15,6 +15,7 @@ class crmSettingsSourceIdAction extends crmSettingsViewAction
             $this->notFound();
         }
         $this->view->assign(array(
+            'alias' => wa()->getAppUrl('crm', true).'settings/message-sources/'.strtolower($source->getType()).'/',
             'settings_html' => crmSourceSettingsPage::renderSource($source)
         ));
     }

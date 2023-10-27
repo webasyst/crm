@@ -32,11 +32,12 @@
             $('.crm-dialog-search-period-wrapper:not(.is-template)').remove();
             $html.removeClass('is-template');
             $html.attr('id', id);
-            $html.appendTo('body');
+            //$html.appendTo('body');
             $html.show();
-            new CRMDialog({
+            $.waDialog({
                 html: $html,
                 onOpen: function ($dialog, dialog) {
+                    
                     $dialog.find('.datepicker').datepicker();
                     if (options.start_datetime) {
                         $dialog.find('.datepicker.start').datepicker('setDate', $.datepicker.parseDate('yy-mm-dd', options.start_datetime));
@@ -61,8 +62,10 @@
                         $dialog.trigger('cancel');
                         dialog.close();
                     });
+
+                    dialog.resize();
                 }
-            });
+            })
             this.data('$dialog', $('#' + id))
             return this.data('$dialog');
         }

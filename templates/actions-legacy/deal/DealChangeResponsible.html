@@ -1,0 +1,59 @@
+<div class="crm-dialog-wrapper c-deals-change-responsible-dialog" id="c-deals-change-responsible-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <form>
+            <header class="crm-dialog-header">
+                <h1>[`Change the owner`]</h1>
+            </header>
+
+            <div class="crm-dialog-content">
+
+                {if $dropped_ids_count > 0}
+                    <p>
+                        <i class="icon16 exclamation"></i> {_w('%d deal will not be affected by the action due to insufficient access rights', '%d deals will not be affected by the action due to insufficient access rights', $dropped_ids_count)}
+                    </p>
+                {/if}
+
+                {_w("Transfer %d deal to", "Transfer %d deals to", count($deals))}
+
+                <ul class="menu-h dropdown c-users-list js-users-list">
+                    <li>
+                        <a class="js-visible-link inline-link" href="javascript:void(0);">
+                            <span class="js-text"><b><i>[`choose user`]</i></b></span>&nbsp;<i class="icon10 darr"></i>
+                        </a>
+                        <ul class="menu-v with-icons">
+                            {foreach $users as $_user}
+                                <li class="js-user" data-id="{$_user.id}">
+                                    <a href="javascript:void(0);">
+                                        {if !empty($_user.photo_url_16)}
+                                            <i class="icon16 userpic20" style="background-image: url({$_user.photo_url_16})"></i>
+                                        {/if}
+                                        {$wa->crm->contactName($_user.name)}
+                                    </a>
+                                </li>
+                            {/foreach}
+                        </ul>
+                    </li>
+                </ul>
+
+                {$_deal_ids = []}{foreach $deals as $_deal}{$_deal_ids[] = $_deal.id}{/foreach}
+                <input name="deal_ids" type="hidden" value="{$_deal_ids|join:","}">
+                <input class="js-user-field" name="user_id" type="hidden" value="">
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <input class="button red js-submit-button" type="submit" value="[`Change`]" disabled>
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+            </footer>
+        </form>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMDealsChangeResponsibleDialog({
+                $wrapper: $("#c-deals-change-responsible-dialog")
+            });
+        })(jQuery);
+    </script>
+</div>

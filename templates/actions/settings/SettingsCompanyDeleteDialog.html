@@ -1,15 +1,15 @@
-<div class="crm-dialog-wrapper c-company-delete-dialog" id="c-company-delete-dialog">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
+<div class="dialog c-company-delete-dialog" id="c-company-delete-dialog">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
         <form action="">
-            <header class="crm-dialog-header">
+            <header class="dialog-header">
                 <h1>
                     [`Delete`]
                     <span class="grey">{$company.name|escape}</span>
                 </h1>
             </header>
 
-            <div class="crm-dialog-content" style="min-height: 100px;">
+            <div class="dialog-content" style="min-height: 100px;">
                 {if !empty($payments)}
                     <p>
                         {sprintf_wp('There are %s for this company.',
@@ -30,14 +30,16 @@
                         {sprintf_wp('Switch %s to',
                             _w('%d invoice', '%d invoices', $invoices|count)
                         )}
-                        <select name="switch_to" required style="max-width: 150px;">
-                            <option selected disabled value="">[`Select company`]</option>
-                            {foreach $companies as $_company}
-                                {if $_company.id !== $company.id}
-                                    <option value="{$_company.id}">{$_company.name|escape}</option>
-                                {/if}
-                            {/foreach}
-                        </select>
+                        <div class="wa-select">
+                            <select name="switch_to" required style="max-width: 150px;">
+                                <option selected disabled value="">[`Select company`]</option>
+                                {foreach $companies as $_company}
+                                    {if $_company.id !== $company.id}
+                                        <option value="{$_company.id}">{$_company.name|escape}</option>
+                                    {/if}
+                                {/foreach}
+                            </select>
+                        </div>
                         [`and delete company`] <span class="bold">{$company.name|escape}</span>?
                     </p>
                 {else}
@@ -45,10 +47,9 @@
                 {/if}
             </div>
 
-            <footer class="crm-dialog-footer">
+            <footer class="dialog-footer">
                 <input class="button red" type="submit" value="[`Delete`]">
-                <span style="margin: 0 4px;">[`or`]</span>
-                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
             </footer>
 
             <input name="id" type="hidden" value="{$company.id}">

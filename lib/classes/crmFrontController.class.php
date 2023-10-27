@@ -42,6 +42,9 @@ class crmFrontController extends waFrontController
             'controller' => $controller,
             'params' => &$params,
         );
+        if (method_exists($class, 'checkSkipUpdateLastPage')) {
+            $class::checkSkipUpdateLastPage();
+        }
         $handled = wa('crm')->event('controller_before.'.$class, $evt_params);
         if ($handled) {
             return;

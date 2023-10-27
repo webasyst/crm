@@ -10,4 +10,17 @@ abstract class crmBackendViewAction extends crmViewAction
             $this->setLayout(new crmDefaultLayout());
         }
     }
+
+    public function preExecute()
+    {
+        $this::checkSkipUpdateLastPage();
+        parent::preExecute();
+    }
+
+    public static function checkSkipUpdateLastPage()
+    {
+        if (waRequest::get('iframe', false)) {
+            waRequest::setParam('skip_update_last_page', '1');
+        }
+    }
 }

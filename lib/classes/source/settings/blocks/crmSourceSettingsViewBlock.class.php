@@ -27,7 +27,8 @@ class crmSourceSettingsViewBlock extends crmViewBlock
 
     protected function getTemplateFolder()
     {
-        return wa()->getAppPath('templates/source/settings/blocks/', 'crm');
+        $source_path = wa('crm')->whichUI('crm') === '1.3' ? 'source-legacy' : 'source';
+        return wa()->getAppPath('templates/'.$source_path.'/settings/blocks/', 'crm');
     }
 
     protected function getFunnels()

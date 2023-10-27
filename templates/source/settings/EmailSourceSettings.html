@@ -1,26 +1,28 @@
+{$_back_uri = "{$wa_app_url}settings/message-sources/email/"}
+
 <div class="c-settings-source-page" id="c-settings-source-page">
     <form class="crm-source-settings-form">
 
         <h1 class="c-page-header">
+            <a href="{$_back_uri}" class="icon size-32 back js-back-button cursor-pointer"><i class="icon fas fa-arrow-left"></i></a>
             <img src="{$icon_url}">
             {if $source.id <= 0}[`New email source`]{else}{$source.name|escape}{/if}
         </h1>
 
-        <div class="c-fields-section">
+        <div class="c-fields-section fields">
 
             {$connection_settings_block|default:''}
 
-            <div class="field"><hr></div>
-
-            <div class="field">
+            <div class="fields-group">
                 <div class="name crm-section">[`Spam control`]</div>
                 <div class="value">
                     <input type="hidden" name="source[params][antispam]" value="0">
 
                     <p>
-                        <label class="gray" for="antispam-checkbox">[`Disabled`]</label>
-                        <input type="checkbox" name="source[params][antispam]" class="js-crm-block-toggle js-ibutton" id="antispam-checkbox" value="1" {if !empty($source.params.antispam)}checked="checked"{/if}>
-                        <label for="antispam-checkbox">[`Enabled`]</label>
+                        <span class="switch smaller" id="js-ibutton">
+                            <input type="checkbox" name="source[params][antispam]" class="js-crm-block-toggle js-ibutton" id="antispam-checkbox" value="1" {if !empty($source.params.antispam)}checked="checked"{/if}>
+                        </span>
+                        <label for="antispam-checkbox" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">[`Disabled`]</label>
                     </p>
 
                     <p class="large-hint">
@@ -70,41 +72,40 @@
                 </div>
             </div>
 
-            <div class="field"><hr></div>
-
-            <div class="field">
+            <div class="fields-group">
                 <div class="name crm-section">[`Messages`]</div>
                 <div class="value crm-messages-wrapper" style="padding-top:1px;">
                     {$messages_block}
                 </div>
             </div>
 
-            <div class="field"><hr></div>
-
             {$blocks.with_contact|default:''}
-
-            <div class="field"><hr></div>
 
             {$blocks.create_deal|default:''}
 
-            <div class="field"><hr></div>
+            {*<div class="field"><hr></div>*}
 
             {$blocks.responsible|default:''}
 
-            <div class="crm-form-buttons">
-                <div class="c-layout">
+            <div class="bottombar sticky custom-mt-20 crm-form-buttons">
+                <div class="custom-px-20 custom-py-16 blank c-layout">
                     <div class="c-column">
-                        <input type="submit" class="button green" value="[`Save`]">
-                        <span style="margin: 0 4px;">[`or`]</span>
-                        <a class="inline-link" href="{$wa_app_url}settings/sources/"><b><i>[`cancel`]</i></b></a>
-                        <i class="icon16 loading crm-loading" style="display:none"></i>
-                        <span class="crm-success-status" style="display: none;"> [`Saved`] <i class="icon16 yes"></i>
+                        <input type="submit" class="button" value="[`Save`]">
+                        <a class="button light-gray" href="{$wa_app_url}settings/message-sources/email/">[`Cancel`]</a>
+                        <span class="crm-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin loading"></i>
+                        </span>
+                        <span class="crm-success-status" style="display: none;">
+                            [`Saved`] <i class="fas fa-check-circle yes"></i>
+                        </span>
                     </span>
                     </div>
                     {if $source.id > 0}
                         <div class="c-column middle right">
                             <div class="crm-delete-link-wrapper">
-                                <a href="javascript:void(0);" class="inline-link crm-delete-source-link"><i class="icon16 delete"></i><b><i>[`Delete this source`]</i></b></a>
+                                <a href="javascript:void(0);" class="button gray outlined crm-delete-source-link">
+                                    <i class="fas fa-times-circle delete"></i> [`Delete this source`]
+                                </a>
                             </div>
                         </div>
                     {/if}

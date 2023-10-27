@@ -1,0 +1,256 @@
+{$_user_locale = $wa->locale()}
+
+{function name="_renderInput" field=[]}
+    <input type="text" name="contact[{$field.id|escape}]" placeholder="{$field.name|escape}" value="">
+{/function}
+
+{function name="_renderDate" field=[]}
+    <span class="js-datepicker">
+        <input type="text" placeholder="{$field.name|escape}" value="">
+        <input type="hidden" name="contact[{$field.id|escape}]">
+    </span>
+{/function}
+
+{function name="_renderSelect" field=[]}
+    <select name="contact[{$field.id|escape}]">
+        {if $field.id === "timezone"}
+            <option value="" selected>Auto</option>
+        {else}
+            <option value="" selected></option>
+        {/if}
+        {$_is_selected = false}
+        {foreach $field.options as $_value => $_name}
+            {if !$_is_selected && $field.id === "locale" && $_value === $_user_locale}
+                {$_is_selected = true}
+            {/if}
+            <option value="{$_value|escape}" {if !empty($_is_selected)}selected{/if}>{$_name|escape}</option>
+        {/foreach}
+    </select>
+{/function}
+
+{function name="_renderTextarea" field=[]}
+    <textarea name="contact[{$field.id|escape}]" placeholder="{$field.name|escape}"></textarea>
+{/function}
+
+{function name="_renderDynamicList" field=[]}
+    <div class="c-dynamic-field-wrapper js-dynamic-field-wrapper">
+        <ul class="menu-v compact c-list js-list">
+            <li class="c-item">
+                <input class="c-small" type="text" placeholder="{$_field.name|escape}" data-name-pattern="contact[{$_field.id|escape}][%index%][value]">
+                <select class="c-ext-toggle js-ext-toggle" data-name-pattern="contact[{$_field.id|escape}][%index%][ext]">
+                    <option value="" selected></option>
+                    {if !empty($_field.ext)}
+                        {foreach $_field.ext as $_value => $_name}
+                            <option value="{$_value|escape}">{$_name|escape}</option>
+                        {/foreach}
+                    {/if}
+                    <option value="custom">[`another...`]</option>
+                </select>
+                <input class="c-ext-field js-ext-field" type="text" style="display: none;" data-name-pattern="contact[{$_field.id|escape}][%index%][ext]" placeholder="[`what?`]" disabled>
+                <a class="inline-link c-delete-link js-remove" href="javascript:void(0);"><b><i>[`delete`]</i></b></a>
+            </li>
+        </ul>
+        <a href="javascript:void(0)" class="small inline-link js-add">
+            <i class="icon10 add"></i>&nbsp;<b>[`Add another`]</b>
+        </a>
+    </div>
+{/function}
+
+{function name="_renderBirthday" field=[]}
+    <div class="c-birthday-wrapper js-birthday-wrapper">
+        <select name="contact[birthday][day]" class="js-day-toggle">
+            <option value="" selected></option>
+            {for $i = 1 to 31}
+                <option value="{$i}">{$i}</option>
+            {/for}
+        </select>
+
+        {$_months = waDateTime::getMonthNames()|array_values}
+        <select name="contact[birthday][month]" class="js-month-toggle">
+            <option value="" selected></option>
+            {foreach $_months as $_month}
+                <option value="{$_month@iteration|escape}">{$_month|escape}</option>
+            {/foreach}
+        </select>
+
+        <input class="c-year-toggle js-year-toggle" name="contact[birthday][year]" type="text" placeholder="{date("Y")}" value="">
+    </div>
+{/function}
+
+{function name="_renderAddress" field=[] is_multi=true}
+    {if $is_multi}
+        {$_name_prefix = "contact[{$field.id|escape}][%index%]"}
+    {else}
+        {$_name_prefix = "contact[{$field.id|escape}]"}
+    {/if}
+    <div class="c-address-section js-address-section">
+        <ul class="c-address-list js-address-list menu-v">
+            <li class="c-address-wrapper js-address-wrapper">
+                <div class="line">
+                    {if !empty($field.ext)}
+                        <select class="c-ext-toggle js-ext-toggle" data-name-pattern="{$_name_prefix}[ext]">
+                            <option value="" selected>[`type`]</option>
+                            {foreach $field.ext as $_value => $_name}
+                                <option value="{$_value|escape}">{$_name|escape}</option>
+                            {/foreach}
+                            <option value="custom">[`another...`]</option>
+                        </select>
+                    {/if}
+
+                    <input class="c-ext-field js-ext-field" type="text" style="display: none;" data-name-pattern="{$_name_prefix}[ext]" placeholder="[`what?`]" disabled>
+
+                    <a class="inline-link c-delete-link js-remove" href="javascript:void(0);"><b><i>[`delete`]</i></b></a>
+                </div>
+
+                {if !empty($field.fields)}
+                    {foreach $field.fields as $_sub_field}
+                        {$_name = "{$_name_prefix}[{$_sub_field.id|escape}]"}
+                        {if $_sub_field.type === "String"}
+                            <div class="line">
+                                <input type="text" data-name-pattern="{$_name}" placeholder="{$_sub_field.name|escape}" value="">
+                            </div>
+
+                        {elseif $_sub_field.type === "Region"}
+                            <div class="line">
+                                <select class="js-region-select" data-name-pattern="{$_name}" style="display: none;" disabled></select>
+                                <input class="js-region-field" type="text" data-name-pattern="{$_name}" placeholder="{$_sub_field.name|escape}">
+                            </div>
+
+                        {elseif $_sub_field.type === "Country" && !empty($_sub_field.options)}
+                            <div class="line">
+                                <select class="js-country-toggle" data-name-pattern="{$_name}">
+                                    <option value="" selected="selected">{$_sub_field.name|escape}...</option>
+                                    {foreach $_sub_field.oOrder as $_key}
+                                        {if isset($_sub_field.options[$_key])}
+                                            <option value="{$_key|escape}">
+                                                {$_sub_field.options[$_key]|escape}
+                                            </option>
+                                        {/if}
+                                    {/foreach}
+                                </select>
+                            </div>
+                        {else}
+                            <div class="line js-custom-sub-field-line c-custom-sub-field-line"
+                                    data-subfield-id="{$_sub_field.id}"
+                                    data-field-id="{$field.id}"
+                                    data-type="{$_sub_field.type}"
+                                    data-subtype="{$_sub_field.sub_type}"
+                                    data-name-pattern="{$_name_prefix}[{$_sub_field.id}]"
+                                    data-label="{$_sub_field.name|escape}"
+                                    {if $_sub_field.type === 'Hidden'}style="display: none;" {/if}>
+
+                                {$is_radio_select = $_sub_field.type === 'Select' && ($_sub_field.sub_type === 'Branch' || $_sub_field.sub_type === 'Radio')}
+                                {if $is_radio_select}
+                                    <div class="c-custom-sub-field-name">
+                                        <span>{$_sub_field.name|escape}</span>
+                                        <a href="javascript:void(0)" class="js-clear-selected-radio-value c-clear-selected-radio-value inline-link"><b><i>[`clear`]</i></b></a>
+                                    </div>
+                                {/if}
+                                {$_sub_field.html|default:''}
+                            </div>
+                        {/if}
+                    {/foreach}
+                {/if}
+            </li>
+        </ul>
+
+        {if $is_multi}
+            <a href="javascript:void(0)" class="small inline-link js-add">
+                <i class="icon10 add"></i>&nbsp;<b>[`Add another`]</b>
+            </a>
+        {/if}
+    </div>
+{/function}
+
+{function name="_renderComposite" field=[] is_multi=true}
+    {if $is_multi}
+        {$_name_prefix = "contact[{$field.id|escape}][%index%]"}
+    {else}
+        {$_name_prefix = "contact[{$field.id|escape}]"}
+    {/if}
+    <div class="c-bank-section js-bank-section">
+        <ul class="c-bank-list js-bank-list menu-v">
+            <li class="c-bank-wrapper js-bank-wrapper">
+                <div class="line">
+                    <select class="c-ext-toggle js-ext-toggle" data-name-pattern="{$_name_prefix}[ext]">
+                        <option value="" selected></option>
+                        {if !empty($field.ext)}
+                            {foreach $field.ext as $_value => $_name}
+                                <option value="{$_value|escape}">{$_name|escape}</option>
+                            {/foreach}
+                        {/if}
+                        <option value="custom">[`another...`]</option>
+                    </select>
+
+                    <input class="c-ext-field js-ext-field" type="text" style="display: none;" data-name-pattern="{$_name_prefix}[ext]" placeholder="[`what?`]" disabled>
+
+                    <a class="inline-link c-delete-link js-remove" href="javascript:void(0);"><b><i>[`delete`]</i></b></a>
+                </div>
+
+                {foreach $field.fields as $_sub_field}
+                    {if $_sub_field.type === "String"}
+                        <div class="line">
+                            <input type="text" data-name-pattern="{$_name_prefix}[{$_sub_field.id|escape}]" placeholder="{$_sub_field.name|escape}">
+                        </div>
+                    {/if}
+                {/foreach}
+            </li>
+        </ul>
+
+        {if $is_multi}
+            <a href="javascript:void(0)" class="small inline-link js-add">
+                <i class="icon10 add"></i>&nbsp;<b>[`Add another`]</b>
+            </a>
+        {/if}
+    </div>
+{/function}
+
+<section class="c-contact-extended-fields js-contact-extended-fields">
+    {if !empty($use_form)}<form>{/if}
+    {foreach $extended_fields as $_field}
+
+        {if $_field.type === "Hidden"}
+
+        {else}
+            <div class="field">
+                <div class="name">{$_field.name|escape|default:"&nbsp;"}</div>
+                <div class="value">
+
+                    {if $_field.type === 'Address'}
+                        {_renderAddress field=$_field is_multi=$_field.multi}
+
+                    {elseif $_field.type === "String"}
+                        {_renderInput field=$_field}
+
+                    {elseif $_field.type === "Number"}
+                        {_renderInput field=$_field}
+
+                    {elseif $_field.type === "Select" && !empty($_field.options)}
+                        {_renderSelect field=$_field}
+
+                    {elseif $_field.type === "Text"}
+                        {_renderTextarea field=$_field}
+
+                    {elseif $_field.type === "Birthday"}
+                        {_renderBirthday field=$_field}
+
+                    {elseif $_field.type === "Date"}
+                        {_renderDate field=$_field}
+
+                    {elseif $_field.is_composite}
+                        {_renderComposite field=$_field is_multi=$_field.multi}
+
+                    {elseif $_field.multi}
+                        {_renderDynamicList field=$_field}
+
+                    {else}
+                        {$_field.html}
+
+                    {/if}
+
+                </div>
+            </div>
+        {/if}
+    {/foreach}
+    {if !empty($use_form)}</form>{/if}
+</section>

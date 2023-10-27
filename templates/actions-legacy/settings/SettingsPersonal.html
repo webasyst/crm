@@ -1,0 +1,64 @@
+<div class="crm-personal-settings-page" id="crm-personal-settings-page">
+
+    <form action="?module=settings&action=personalSave">
+
+        <div class="c-personal-settings-block">
+            <h1 class="c-personal-setting-header c-page-header">
+                [`Personal settings`]
+            </h1>
+            <div class="c-personal-settings-content">
+                <div class="field-group c-personal-settings-counter-settings-content">
+                    <h2>[`App icon counter`] <span class="indicator red">1</span></h2>
+                    <ul class="c-options-list menu-v">
+                        <li>
+                            <label>
+                                <input type="hidden" name="settings[personal][app_counter][new_messages]" value="0">
+                                <input type="checkbox" name="settings[personal][app_counter][new_messages]" value="1"
+                                       {if !empty($personal_settings.app_counter.new_messages)}checked=""{/if}> [`New messages`]
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="hidden" name="settings[personal][app_counter][new_deals]" value="0">
+                                <input type="checkbox" name="settings[personal][app_counter][new_deals]" value="1"
+                                       {if !empty($personal_settings.app_counter.new_deals)}checked=""{/if}> [`New deals`]
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="hidden" name="settings[personal][app_counter][overdue_reminders]" value="0">
+                                <input type="checkbox" name="settings[personal][app_counter][overdue_reminders]" value="1"
+                                       {if !empty($personal_settings.app_counter.overdue_reminders)}checked=""{/if}> [`My overdue reminders`]
+                            </label>
+                        </li>
+
+                    </ul>
+                </div>
+                <div class="c-personal-settings-reminder-settings-content">
+                    <h2>[`Reminder settings`]</h2>
+                    {$personal_settings.reminder_settings_html}
+                </div>
+            </div>
+        </div>
+
+        <div class="crm-form-buttons">
+            <div class="crm-submit c-footer-actions js-footer-actions">
+                <input class="button green js-submit-button" type="submit" name="" value="[`Save`]">
+                <span class="c-hidden">
+                        <span style="margin: 0 4px;">[`or`]</span>
+                        <a href="{$wa_app_url}settings/">[`cancel`]</a>
+                    </span>
+                <i class="icon16 loading crm-loading" style="display: none;"></i>
+            </div>
+        </div>
+
+        <script>
+            ( function($) {
+                new CRMSettingsPersonal({
+                    $wrapper: $('#crm-personal-settings-page')
+                });
+            })(jQuery);
+        </script>
+
+    </form>
+</div>

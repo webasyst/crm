@@ -1,0 +1,24 @@
+{include file="./form_helpers.html" inline}
+
+{capture assign=html}
+    {$class_id = 'js-responsible-section'}
+    {$wrapper_id = uniqid($class_id)}
+    <section class="c-responsible-section {$class_id}" id="{$wrapper_id}">
+        <div class="crm-fields">
+            {include file="./responsible.inc.html"
+                _inc_options=[
+                    'id' => $id,
+                    'class_id' => $class_id,
+                    'wrapper_id' => $wrapper_id
+                ]
+            inline}
+        </div>
+    </section>
+{/capture}
+
+{render_form_optional_block options=[
+    'name' => '[`Set the owner`]',
+    'checkbox_name' => {input_name id='responsible_contact_id'},
+    'is_checked' => !!$responsible_contact_id,
+    'html' => $html
+]}

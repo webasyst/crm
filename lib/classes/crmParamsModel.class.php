@@ -113,7 +113,7 @@ abstract class crmParamsModel extends crmModel
         $delete_names = [];
         $do_not_delete_names = [];
         foreach(ifempty($params, []) as $name => $value) { // $params may be === null
-            if (!strlen($value)) {
+            if ($value === null || !strlen($value)) {
                 $delete_names[$name] = $name;
             } else {
                 $do_not_delete_names[$name] = $name;

@@ -76,7 +76,7 @@ class crmShopBackend_rightsHandler extends waEventHandler
             exit;
         } else {
             return array(
-                'orders' => $right_deal_view
+                'orders' => shopRightConfig::RIGHT_ORDERS_FULL,
             );
         }
     }

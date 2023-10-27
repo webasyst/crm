@@ -32,8 +32,10 @@ class crmShop
         }
     }
 
-    public function workflowPrepare($deal, $after_stage, $before_stage, $force_execute = false)
+    public function workflowPrepare($deal, $after_stage, $before_stage, $force_execute = false, $ui = null)
     {
+        $ui = (empty($ui) ? wa('crm')->whichUI('crm') : $ui);
+        $actions_path = ($ui === '1.3' ? 'actions-legacy' : 'actions');
         if (!is_array($after_stage)) {
             $after_stage_name = _w(ucfirst(strtolower($after_stage)));
             $after_stage_id = strtolower($after_stage);
@@ -42,8 +44,8 @@ class crmShop
             $after_stage_id = $after_stage['id'];
         }
 
-        $order_id = self::getOrderId($deal);
-        if (!$order_id) {
+        $this->order_id = self::getOrderId($deal);
+        if (!$this->order_id) {
             return null;
         }
         $over_jump_result = null;
@@ -54,11 +56,7 @@ class crmShop
                 'stage_name' => $after_stage_name,
             ));
             $over_jump_result = array(
-                'html' => $view->fetch(wa()->getAppPath('templates/actions/deal/DealMoveOverJump.html', 'crm')),
-                //'type'         => 'over_jump',
-                //'order_number' => null,
-                //'action_name'  => null,
-                //'state_name'   => null,
+                'html' => $view->fetch(wa()->getAppPath("templates/$actions_path/deal/DealMoveOverJump.html", 'crm')),
             );
         }
 
@@ -66,22 +64,17 @@ class crmShop
            if (!$force_execute && !self::hasRights() && crmConfig::isShopSupported()) {
                 $view = wa()->getView();
                 $view->assign(array(
-                    'order_number' => shopHelper::encodeOrderId($order_id),
+                    'order_number' => shopHelper::encodeOrderId($this->order_id),
                     'stage_name'   => $after_stage_name,
                 ));
-                $result = array(
-                    'html' => $view->fetch(wa()->getAppPath('templates/actions/deal/DealMoveNoRights.html', 'crm')),
-                    //'type'         => 'rights',
-                    //'order_number' => shopHelper::encodeOrderId($order_id),
-                    //'action_name'  => null,
-                    //'state_name'   => null,
-                );
-                return $result;
+                return [
+                    'html' => $view->fetch(wa()->getAppPath("templates/$actions_path/deal/DealMoveNoRights.html", 'crm')),
+                ];
             }
 
             if ((is_array($after_stage) || (!is_array($after_stage) && $deal['status_id'] == 'OPEN'))
                 && !empty($deal['external_id'])
-                && $order_id
+                && $this->order_id
                 && crmConfig::isShopSupported()
                 && self::hasRights()
             ) {
@@ -90,7 +83,7 @@ class crmShop
 
                 wa('shop', true);
                 $som = new shopOrderModel();
-                $shop_order = $som->getOrder($order_id);
+                $shop_order = $som->getOrder($this->order_id);
 
                 if ($shop_order) {
 
@@ -99,15 +92,15 @@ class crmShop
                     $setting_actions = $asm->select('name')->where("value='".$asm->escape($stage)."' AND name LIKE 'shop:%'")->fetchAll('name', true);
                     $state = $workflow->getStateById($shop_order['state_id']);
                     $actions = $state->getActions($shop_order);
-                    $action = $this->getActionByFunnelId($setting_actions, $actions, $deal['funnel_id']);
+                    list($action_id, $action) = $this->getActionByFunnelId($setting_actions, $actions, $deal['funnel_id']);
 
                     if ($action) {
 
-                        $html = $action->getHTML($shop_order['id']);
+                        $html = gettype($action) == 'object' ? $action->getHTML($shop_order['id']) : null;
                         if ($html) {
                             $result = array(
                                 'html'         => $html,
-                                'order_number' => shopHelper::encodeOrderId($order_id),
+                                'order_number' => shopHelper::encodeOrderId($this->order_id),
                                 'action_name'  => $action->getName(),
                                 'state_name'   => $state->getName(),
                             );
@@ -115,15 +108,11 @@ class crmShop
                             wa('crm', true);
                             $view = wa()->getView();
                             $view->assign($result);
-                            $result = array(
-                                'html' => $view->fetch(wa()->getAppPath('templates/actions/deal/DealMoveShopDialog.html', 'crm')),
-                                //'type'         => '',
-                                //'order_number' => null,
-                                //'action_name'  => null,
-                                //'state_name'   => null,
-                            );
-                            return $result;
-
+                            return [
+                                'html' => $view->fetch(wa()->getAppPath("templates/$actions_path/deal/DealMoveShopDialog.html", 'crm')),
+                                'order_id' => $this->order_id,
+                                'action_id' => $action_id
+                            ];
                         } else {
 
                             if (!$over_jump_result) {
@@ -142,27 +131,21 @@ class crmShop
                     } elseif (!$force_execute) {
 
                         $actions = $workflow->getAvailableActions();
-                        $action = $this->getActionByFunnelId($setting_actions, $actions, $deal['funnel_id']);
+                        list($action_id, $action) = $this->getActionByFunnelId($setting_actions, $actions, $deal['funnel_id']);
                         if ($action) {
-
                             // display confirm
                             wa('crm', true);
 
                             $view = wa()->getView();
                             $view->assign(array(
-                                'order_number' => shopHelper::encodeOrderId($order_id),
+                                'order_number' => shopHelper::encodeOrderId($this->order_id),
                                 'state_name'   => $state->getName(),
                                 'action_name'  => $action['name'],
                                 'stage_name'   => $after_stage_name,
                             ));
-                            $result = array(
-                                'html' => $view->fetch(wa()->getAppPath('templates/actions/deal/DealMoveActionUnavailable.html', 'crm')),
-                                //'type'         => '',
-                                //'order_number' => null,
-                                //'action_name'  => null,
-                                //'state_name'   => null,
-                            );
-                            return $result;
+                            return [
+                                'html' => $view->fetch(wa()->getAppPath("templates/$actions_path/deal/DealMoveActionUnavailable.html", 'crm')),
+                            ];
                         }
                     }
                 }
@@ -178,7 +161,8 @@ class crmShop
         if ($setting_actions && $actions) {
             foreach ($actions as $action_id => $a) {
                 if (isset($setting_actions['shop:'.$action_id.'_'.$funnel_id])) {
-                    return $actions[$action_id];
+                    $action = $actions[$action_id];
+                    return [$action_id, $action];
                 }
             }
         }

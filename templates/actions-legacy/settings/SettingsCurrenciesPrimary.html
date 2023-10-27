@@ -1,0 +1,43 @@
+<div class="crm-dialog-wrapper c-currencies-primary-change-dialog" id="c-currencies-primary-change-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>[`Change primary currency`] ({$currency.code})</h1>
+        </header>
+
+        <div class="crm-dialog-content">
+            <div class="field">
+                <div class="name">[`New primary currency`]</div>
+                <div class="value no-shift">
+                    {if !empty($currencies)}
+                        <select class="js-currencies-toggle">
+                            {if empty($currencies[$currency.code])}
+                                <option disabled>[`Select primary currency`]...</option>
+                            {/if}
+                            {foreach $currencies as $_currency}
+                                <option value="{$_currency.code}" {if $_currency.code == $currency.code}selected{/if}>{$_currency.title|escape}</option>
+                            {/foreach}
+                        </select>
+                    {else}
+                        <p>[`Currency list is empty`]</p>
+                    {/if}
+                </div>
+            </div>
+        </div>
+
+        <footer class="crm-dialog-footer">
+            <input class="button blue crm-button js-change-currency" type="button" value="[`Change`]">
+            <span style="margin: 0 4px;">[`or`]</span>
+            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+        </footer>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMSettingsCurrenciesPrimary({
+                $wrapper: $("#c-currencies-primary-change-dialog"),
+                currency_code: {if !empty($currency)}{$currency.code|json_encode}{else}false{/if}
+            });
+        })(jQuery);
+    </script>
+</div>

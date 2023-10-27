@@ -9,11 +9,14 @@ class crmContactSearchAction extends crmBackendViewAction
         $type = $this->getRequest()->request('type', 'simple');
         $hash_ar = crmContactsSearchHelper::parseHash($hash);
         $items = array();
-
+        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
         $app_id = 'crm';
 
-        $conds = $hash_ar['conds'];
+        if (!empty($iframe) && wa('crm')->whichUI('crm') !== '1.3') {
+            $this->setLayout();
+        }
 
+        $conds = $hash_ar['conds'];
         if ($conds) {
             foreach ($conds as $section_id => $cond) {
                 foreach ($cond as $item_id => $item_cond_ar) {
@@ -95,6 +98,7 @@ class crmContactSearchAction extends crmBackendViewAction
             'sidebar_map' => $this->getSidebarMap(),
             'lang' => substr(wa()->getLocale(), 0, 2),
             'segment' => $this->getSegment(),
+            'iframe' => $iframe
         ));
 
 

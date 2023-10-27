@@ -1,23 +1,25 @@
-<div class="crm-dialog-wrapper c-currencies-primary-change-dialog" id="c-currencies-primary-change-dialog">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
-        <header class="crm-dialog-header">
+<div class="dialog c-currencies-primary-change-dialog" id="c-currencies-primary-change-dialog">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <header class="dialog-header">
             <h1>[`Change primary currency`]{if !empty($currency.code)} ({$currency.code}){/if}</h1>
         </header>
 
-        <div class="crm-dialog-content">
+        <div class="dialog-content">
             <div class="field">
                 <div class="name">[`New primary currency`]</div>
                 <div class="value no-shift">
                     {if !empty($currencies)}
-                        <select class="js-currencies-toggle">
-                            {if empty($currencies[$currency.code])}
-                                <option disabled>[`Select primary currency`]...</option>
-                            {/if}
-                            {foreach $currencies as $_currency}
-                                <option value="{$_currency.code}" {if $_currency.code == $currency.code}selected{/if}>{$_currency.title|escape}</option>
-                            {/foreach}
-                        </select>
+                        <div class="wa-select">
+                            <select class="js-currencies-toggle">
+                                {if empty($currencies[$currency.code])}
+                                    <option disabled>[`Select primary currency`]...</option>
+                                {/if}
+                                {foreach $currencies as $_currency}
+                                    <option value="{$_currency.code}" {if $_currency.code == $currency.code}selected{/if}>{$_currency.title|escape}</option>
+                                {/foreach}
+                            </select>
+                        </div>
                     {else}
                         <p>[`Currency list is empty`]</p>
                     {/if}
@@ -25,10 +27,9 @@
             </div>
         </div>
 
-        <footer class="crm-dialog-footer">
-            <input class="button blue crm-button js-change-currency" type="button" value="[`Change`]">
-            <span style="margin: 0 4px;">[`or`]</span>
-            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+        <footer class="dialog-footer">
+            <input class="button js-change-currency" type="submit" value="[`Change`]">
+            <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
         </footer>
     </div>
 

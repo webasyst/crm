@@ -57,7 +57,7 @@ class crmSegmentModel extends crmModel
     {
         $segments = $this->getAllSegments(array(
             'type' => 'category',
-            'shared' => 1,
+            'shared' => [0, 1],
             'archived' => 0
         ));
 
@@ -328,6 +328,7 @@ class crmSegmentModel extends crmModel
     /**
      * @param int|int[] $segment_id
      * @param int|int[] $contact_id
+     * @return array
      */
     public function addTo($segment_id, $contact_id)
     {
@@ -336,12 +337,12 @@ class crmSegmentModel extends crmModel
         $contact_ids = crmHelper::toIntArray($contact_id);
         $contact_ids = crmHelper::dropNotPositive($contact_ids);
         if (!$segment_ids || !$contact_ids) {
-            return;
+            return [];
         }
 
         $category_ids = $this->extractCategoryIdsForEdit($segment_ids);
         if (!$category_ids) {
-            return;
+            return [];
         }
 
         $this->getContactCategoriesModel()->add($contact_ids, $category_ids);
@@ -353,6 +354,8 @@ class crmSegmentModel extends crmModel
         foreach ($counters as $counter) {
             $this->updateByField('category_id', $counter['id'], array('count' => $counter['cnt']));
         }
+
+        return $counters;
     }
 
     /**
@@ -405,6 +408,7 @@ class crmSegmentModel extends crmModel
     /**
      * @param int|int[] $segment_id
      * @param int|int[] $contact_id
+     * @return array
      */
     public function deleteFrom($segment_id, $contact_id)
     {
@@ -413,13 +417,19 @@ class crmSegmentModel extends crmModel
         $contact_ids = crmHelper::toIntArray($contact_id);
         $contact_ids = crmHelper::dropNotPositive($contact_ids);
         if (!$segment_ids || !$contact_ids) {
-            return;
+            return [];
         }
 
         $category_ids = $this->extractCategoryIdsForEdit($segment_ids);
-        $this->deleteFromCategories($category_ids, $contact_ids);
+
+        return $this->deleteFromCategories($category_ids, $contact_ids);
     }
 
+    /**
+     * @param $category_ids
+     * @param $contact_ids
+     * @return array
+     */
     protected function deleteFromCategories($category_ids, $contact_ids)
     {
         $category_ids = crmHelper::toIntArray($category_ids);
@@ -427,7 +437,7 @@ class crmSegmentModel extends crmModel
         $contact_ids = crmHelper::toIntArray($contact_ids);
         $contact_ids = crmHelper::dropNotPositive($contact_ids);
         if (!$category_ids || !$contact_ids) {
-            return;
+            return [];
         }
 
         $ccm = new waContactCategoriesModel();
@@ -441,6 +451,8 @@ class crmSegmentModel extends crmModel
         foreach ($counters as $counter) {
             $this->updateByField('category_id', $counter['id'], array('count' => $counter['cnt']));
         }
+
+        return $counters;
     }
 
     /**
@@ -520,9 +532,9 @@ class crmSegmentModel extends crmModel
         return $category_ids;
     }
 
-    public static function getIcons()
+    public static function getIcons($ui = '1.3')
     {
-        return array(
+        $icons_1_3 = [
             'contact',
             'search',
             'user',
@@ -566,7 +578,66 @@ class crmSegmentModel extends crmModel
             'pencil',
             'lifebuoy',
             'screen'
-        );
+        ];
+        if ($ui === '1.3') {
+            return $icons_1_3;
+        }
+
+        $icons_2_0 = [
+            'user-friends',
+            'search',
+            'user',
+            'folder',
+            'file',
+            'lock',
+            'lock-open',
+            'brush',
+            'star',
+            'pencil-alt',
+            'bolt',
+            'lightbulb',
+            'images',
+            'chart-bar',
+            'book',
+            'map-marker-alt',
+            'camera',
+            'hourglass-end',
+            'cat',
+            'anchor',
+            'seeding',
+            'car-alt',
+            'save',
+            'cookie',
+            'radiation-alt',
+            'film',
+            'bug',
+            'clock',
+            'coffee',
+            'home',
+            'apple-alt',
+            'briefcase',
+            'guitar',
+            'smile',
+            'futbol',
+            'bullseye',
+            'award',
+            'phone-alt',
+            'store',
+            'shopping-cart',
+            'pen-alt',
+            'life-ring',
+            'columns',
+            'seedling'
+        ];
+        if ($ui === '2.0') {
+            return $icons_2_0;
+        }
+
+        if ($ui === '1.3,2.0' || $ui === '1.3, 2.0') {
+            return array_keys(array_flip($icons_1_3) + array_flip($icons_2_0));
+        }
+
+        return $icons_1_3;
     }
 
     protected function findSegments($options)

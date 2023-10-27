@@ -1,0 +1,24 @@
+{$wrapper_id = uniqid('js-conversation-deal-attach-dialog')}
+<div class="crm-dialog-wrapper c-conversation-deal-attach-dialog js-conversation-deal-attach-dialog" id="{$wrapper_id}">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>[`Attach to another deal`]</h1>
+        </header>
+
+        <div class="crm-dialog-content">
+            <p>[`Attach this conversation to another deal`]</p>
+            <div class="c-conversation-deal js-conversation-deal">
+                {include file="./MessageConversation.dealSelector.inc.html" inline}
+            </div>
+        </div>
+
+        <footer class="crm-dialog-footer">
+            <div class="crm-actions">
+                <input class="button green crm-button js-save-button" type="button" value="[`Save`]">
+                [`or`]
+                <a href="javascript:void(0);" class="js-close-dialog">[`cancel`]</a>
+            </div>
+        </footer>
+    </div>
+</div>

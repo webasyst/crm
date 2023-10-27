@@ -29,7 +29,8 @@ class crmSettingsEmailTemplateEditorAction extends crmBackendViewAction
         $data['to_value'] = key($data['message_to_variants']);
         $data = array_intersect_key(waRequest::request(), $data) + $data;
         $this->view->assign($data);
-        $this->setTemplate('templates/actions/settings/SettingsEmailEditor.inc.html');
+        $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
+        $this->setTemplate('templates/' . $actions_path . '/settings/SettingsEmailEditor.inc.html');
     }
 
     protected function getType()

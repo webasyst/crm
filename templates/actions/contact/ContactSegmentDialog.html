@@ -3,17 +3,17 @@
 {$segment.icon = $segment.icon|default:'contact'}
 {$segment.type = $segment.type|default:crmSegmentModel::TYPE_CATEGORY}
 
-<div class="crm-dialog-wrapper crm-contact-segment-list-edit-wrapper" id="{$wrapper_id}">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
+<div class="dialog crm-contact-segment-list-edit-wrapper" id="{$wrapper_id}">
+    <div class="dialog-background"></div>
+    <div class="dialog-block">
 
         <form method="post" action="{$wa_app_url}?module=contactSegment&action=save{if $segment.id > 0}&id={$segment.id}{/if}">
 
-            <header class="crm-dialog-header">
+            <header class="dialog-header">
                 <h1>Xxx</h1>
             </header>
 
-            <div class="crm-dialog-content">
+            <div class="dialog-content">
 
                 <div class="fields">
                     <div class="field">
@@ -27,21 +27,20 @@
                 </div>
             </div>
 
-            <footer class="crm-dialog-footer">
+            <footer class="dialog-footer">
                 <input class="button green crm-button" type="submit" value="[`Save`]">
-                <i class="icon16 loading crm-loading" style="display: none;"></i>
-                <span style="margin: 0 4px;">[`or`]</span>
+                <span class="icon loading crm-loading" style="display: none"><i class="fas fa-spinner wa-animation-spin speed-1000"></i></span>
 
                 {* Default close link, need in all cases except one, see below comment *}
-                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
 
                 {* This link special treated in double-dialog case, see CRMContactsOperationAddToSegments class *}
-                <a class="crm-cancel-link" href="javascript:void(0);" style="display: none;">[`cancel`]</a>
-                <i class="icon16 loading crm-cancel-loading" style="display: none;"></i>
+                <a class="button light-gray crm-cancel-link" href="javascript:void(0);" style="display: none;">[`Cancel`]</a>
+                <span class="icon loading crm-cancel-loading" style="display: none"><i class="fas fa-spinner wa-animation-spin speed-1000"></i></span>
 
                 {* Delete segment link, see CRMContactSegmentEdit *}
                 {if $segment.id > 0}
-                    <a class="crm-delete-link" href="javascript:void(0);">[`Delete segment`]</a>
+                    <a class="button red crm-delete-link" href="javascript:void(0);">[`Delete segment`]</a>
                 {/if}
             </footer>
 

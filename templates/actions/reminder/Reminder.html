@@ -1,12 +1,12 @@
 {$_title = '[`Reminders`]'}
 {$_user_id = $wa->userId()}
 
-{$_hide_sidebar = false}
+{$_hide_sidebar = $iframe}
 {if !empty($reminder_setting) && $reminder_setting == "my"}
     {$_hide_sidebar = true}
 {/if}
 
-{$_reminder_types = crmConfig::getReminderType()}
+{$_reminder_types = crmConfig::getReminderTypeUI2()}
 
 {$_filter_types = [
     "all" => [
@@ -14,6 +14,7 @@
         "name" => "[`Any type`]"
     ]
 ]}
+
 {$_filter_types = $_filter_types + $_reminder_types}
 {$_type_filter = waRequest::request("type", null)}
 {$_selected_type_filter = reset($_filter_types)}
@@ -21,45 +22,92 @@
     {$_selected_type_filter = $_filter_types[$_type_filter]}
 {/if}
 
-<div class="c-reminders-page shadowed" id="c-reminders-page">
-    {if empty($_hide_sidebar)}
-        <div class="sidebar left250px">
-            {* <div class="c-search-form">
-                <i class="icon16 search-bw"></i>
-                <input type="search" placeholder="[`Search to-dos`]">
-            </div> *}
+{if !empty($iframe)}
+{$_locale_string = substr($wa->locale(), 0, 2)}
+<!DOCTYPE html>
+<html class="blank iframe-style">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
 
+    {* CSS *}
+    {$wa->css()}
+    <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
+        <link href="{$wa_app_static_url}js/jquery/jquery-ui.css?v={$wa->version()}" rel="stylesheet">
+        <link href="{$wa_app_static_url}js/timepicker/jquery.timepicker.css?v={$wa->version()}" rel="stylesheet">
+
+    {wa_js file="js/min/vendor.min.js"}
+        {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
+        {$wa_app_static_url}js/jquery/jquery-ui.min.js
+        {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
+        {$wa_app_static_url}js/timepicker/jquery.timepicker.min.js
+        {$wa_url}wa-content/js/redactor/2/redactor.min.js
+        {$wa_url}wa-content/js/jquery-wa/wa.js
+    {/wa_js}
+
+    {strip}
+    {if $_locale_string != 'en'}
+        <script src="{$wa_app_static_url}js/jquery/i18n/datepicker-{$_locale_string}.js?v={$wa->version()}"></script>
+        <script src="{$wa_url}wa-content/js/redactor/2/{$_locale_string}.js?v{$wa->version(true)}"></script>
+    {/if}
+    {/strip}
+
+    {wa_js file="js/min/crm.min.js"}
+        {$wa_app_static_url}js/crm.js
+        {$wa_app_static_url}js/reminder.form.edit.js
+        {$wa_app_static_url}js/reminders.js
+    {/wa_js}
+</head>
+<body class="blank">
+{/if}
+
+<div class="c-reminders-page flexbox" id="c-reminders-page">
+    {if empty($_hide_sidebar)}
+        <div class="sidebar width-19rem blank bordered-right" id="c-reminders-sidebar">
             <div id="js-aside-block">
-                <ul class="c-users-list zebra">
+                <ul class="menu large custom-mt-0 c-users-list">
+
                     {function _renderUser}
                         {$_is_first = ($user.id == $_user_id)}
-                        {$_is_active = ($user.id == $user_id)}
-                        <li class="c-user-wrapper {if $_is_active}selected{/if}">
-                            <div class="profile image32px">
-                                <div class="image">
+                        {$_is_active = (!$is_all_reminders && $user.id == $user_id)}
+                        <li class="c-user-wrapper {if $_is_active}selected{/if}" data-id="{$user.id}">
+                            <div class="profile flexbox middle space-8" href="{$app_url}reminder/{$user.id}/">
+                                <div class="c-user-photo userpic userpic-32 js-user-photo">
                                     {$_userpic = $user->getPhoto(32)}
-                                    <img src="{$_userpic}" class="userpic">
+                                    <img src="{$_userpic}" class="" alt="userpic">
+                                    {if !empty($user._online_status) && $user._online_status == 'online'}
+                                    <span class="userstatus"></span>
+                                    {/if}
                                 </div>
+
                                 <div class="details">
                                     {$_classes = []}
+                                    {$burnCount = 0}
                                     {if $user.due_count > 0}
                                         {$_classes[] = "indicator"}
                                         {$_classes[] = "overdue"}
+                                        {$burnCount = $user.due_count + $user.burn_count}
                                     {elseif $user.burn_count > 0}
                                         {$_classes[] = "indicator"}
                                         {$_classes[] = "burn"}
-                                    {elseif $user.actual_count > 0}
-                                        {$_classes[] = "indicator"}
-                                        {$_classes[] = "actual"}
+                                        {$burnCount = $user.burn_count}
                                     {/if}
-
-                                    <span class="count {$_classes|join:" "}">{$user.count}</span>
-
-                                    <a class="c-name" href="{$wa_app_url}reminder/{$user.id}/" style="display: inline;">{if $_is_first}[`My reminders`]{else}{$user.name|escape}{/if}</a>
-
-                                    {if !empty($user._online_status) && $user._online_status == 'online'}
-                                        <i class="icon16 status-green-tiny" title="{$user.name|escape}" style="margin: 0;"></i>
-                                    {/if}
+                                    <div class="flexbox full-width nowrap">
+                                        <a class="flexbox middle c-link" href="{$app_url}reminder/{$user.id}/">
+                                        <span class="c-name">{if $_is_first}[`My own`] ({$user.name|escape}){else}{$user.name|escape}{/if}</span>
+                                        </a>
+                                        <div class="flexbox middle" style="align-self: flex-start">
+                                            <div class="custom-m-0 custom-mx-12">
+                                                {if $burnCount > 0}
+                                                <span class="count  {$_classes|join:" "}" data-due-count="{$user.due_count}">{$burnCount}</span>{/if}
+                                                {if $user.count > 0}
+                                                <span class="count all" >{$user.count}</span>{/if}
+                                            </div>
+                                            <!--<a class="flexbox middle c-link-contact" href="{$app_url}contact/{$user.id}/">
+                                                <span class="icon size-14 custom-m-0"><i class="fas fa-external-link-alt fa-w-14 text-light-gray cursor-pointer"></i></span>
+                                            </a>-->
+                                        </div>
+                                    </div>
 
                                     {$_event = $user->getEvent()}
                                     {if !empty($_event)}
@@ -84,7 +132,40 @@
                             </div>
                         </li>
                     {/function}
+                        <li class="c-user-wrapper {if $is_all_reminders}selected{/if}" data-id="all">
+                            <div class="profile flexbox middle space-8" href="{$app_url}reminder/all/">
+                                <div class="c-all-user-photo size-28 js-user-photo">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="details">
+                                    {$_classes = []}
+                                    {$burnCount = 0}
+                                    {if $total_count.due_count > 0}
+                                        {$_classes[] = "indicator"}
+                                        {$_classes[] = "overdue"}
+                                        {$burnCount = $total_count.due_count + $total_count.burn_count}
+                                    {elseif $total_count.burn_count > 0}
+                                        {$_classes[] = "indicator"}
+                                        {$_classes[] = "burn"}
+                                        {$burnCount = $total_count.burn_count}
+                                    {/if}
+                                    <div class="flexbox full-width nowrap">
+                                        <a class="flexbox middle c-link" href="{$app_url}reminder/all/">
+                                        <span class="c-name">[`All employees`]</span>
+                                        </a>
+                                        <div class="flexbox middle" style="align-self: flex-start">
+                                            <div class="custom-m-0 custom-mx-12">
+                                                {if $burnCount > 0}
+                                                <span class="count  {$_classes|join:" "}" data-due-count="{$total_count.due_count}">{$burnCount}</span>{/if}
+                                                {if $total_count.count > 0}
+                                                <span class="count all" >{$total_count.count}</span>{/if}
+                                            </div>
 
+                                        </div>
+
+                                    </div>
+                            </div>
+                        </li>
                     {_renderUser user=$users[$_user_id]}
 
                     {foreach $users as $user}
@@ -96,394 +177,552 @@
             </div>
         </div>
     {/if}
-    <div class="content bordered-left blank">
-        <div class="c-reminder-content-area" id="js-content-block">
+    {function skeleton}
+    <div class="skeleton-wrapper">
+        <div class="skeleton">
+            <span class="skeleton-header"></span>
+            {for $i=1 to 5}
+            <span class="skeleton-list"></span>
+            {/for}
+        </div>
+    </div>
+    {/function}
+    <div class="content blank content-mobile-friendly">
+        <div class="c-reminder-content-area article" id="js-content-block">
+            <div class="article-body" {if !empty($iframe)}style="padding: 0;"{/if}>
+                {skeleton}
+                {$_user_title = $_title}
+                {if $is_all_reminders}
+                    {$_user_title = "[`All reminders`]"}
+                {elseif ($user_id == $_user_id)}
+                    {$_user_title = "[`My reminders`]"}
+                {elseif ifset($users[$user_id])}
+                    {$_user = $users[$user_id]}
+                    {$_user_title = $_user.name|escape}
+                {/if}
 
-            {$_user_title = $_title}
-            {if ($user_id == $_user_id)}
-                {$_user_title = "[`My reminders`]"}
-            {elseif ifset($users[$user_id])}
-                {$_user = $users[$user_id]}
-                {$_user_title = $_user.name|escape}
-            {/if}
-
-            <div class="c-layout">
-                <div class="c-column">
-                    <h1 class="c-page-header">{$_user_title}</h1>
-
-                </div>
-                <div class="c-column middle right">
-
-                    <ul class="menu-h dropdown c-page-actions">
-                        <li>
-                            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
-                                <b><i>{$_selected_type_filter.name|escape}</i></b>
-                                <i class="icon10 darr"></i>
-                            </a>
-                            <ul class="menu-v right with-icons" style="width: 200px;">
-                                {foreach $_filter_types as $_type}
+                <div class="flexbox {if empty($iframe)}custom-p-16{/if}">
+                    {if empty($_hide_sidebar)}
+                    <div class="align-center mobile-only custom-pr-16">
+                            <button class="button small circle light-gray js-expand-sidebar"><i class="fas fa-list-ul"></i></button>
+                    </div>
+                    {/if}
+                    {if !$iframe}
+                    <div class="c-column">
+                        <h1 class="c-page-header">{$_user_title}</h1>
+                    </div>
+                    {/if}
+                    {*<div class="c-column flexbox middle space-16 nowrap hidden">
+                        <div class="dropdown" id="dropdown-filter">
+                            <button class="dropdown-toggle button smaller rounded light-gray c-page-actions">
+                                {$_selected_type_filter.name|escape}
+                            </button>
+                            <div class="dropdown-body right">
+                                <ul class="menu">
+                                    {foreach $_filter_types as $_type}
                                     <li class="{if $_type.id === $_selected_type_filter.id}selected{/if}">
                                         <a href="{crmHelper::getUrl("type", $_type.id)}">
                                             {if !empty($_type.icon)}
-                                                <i class="icon16 {$_type.icon}"></i>
+                                            <span class="icon size-14"><i class="fas fa-{$_type.icon}"></i></span>
                                             {else}
-                                                <i class="icon16" style="visibility: hidden;"></i>
+                                            <span class="icon size-14"><i class="fas fa-blank" style="visibility: hidden;"></i></span>
                                             {/if}
                                             {$_type.name|escape}
                                         </a>
                                     </li>
                                 {/foreach}
-                            </ul>
-                        </li>
-                        <li>
-                            <i class="icon16 settings js-show-settings"></i>
-                        </li>
-                    </ul>
-
-                </div>
-            </div>
-
-            <div class="c-add-form-wrapper" id="c-add-reminder-form">
-                <form>
-                    <div class="c-layout">
-                        <div class="c-column middle c-icon-column">
-                            <i class="icon16 c-plus"></i>
-                        </div>
-                        <div class="c-column">
-
-                            <textarea class="js-textarea" name="data[content]" placeholder="[`Add reminder`]" required></textarea>
-
-                        </div>
-                    </div>
-                    <div class="c-hidden-form">
-                        <div class="c-layout">
-                            <div class="c-column">
-
-                                <ul class="menu-h dropdown c-reminder-type-toggle js-reminder-type-toggle">
-                                    {$_reminder_types = crmConfig::getReminderType()}
-                                    {$_active_reminder_type = $_reminder_types["OTHER"]}
-                                    <li>
-                                        <a class="inline-link c-visible-link with-icon js-visible-link" href="javascript:void(0);">
-                                            <b>
-                                                <i>
-                                                    <span class="js-text">
-                                                        {if !empty($_active_reminder_type.icon)}
-                                                            <i class="icon16 {$_active_reminder_type.icon}"></i>
-                                                        {/if}
-                                                        {$_active_reminder_type.name|escape}
-                                                    </span>
-                                                </i>
-                                            </b>
-                                            <i class="icon10 darr"></i>
-                                        </a>
-                                        <ul class="menu-v with-icons">
-                                            {foreach $_reminder_types as $_type}
-                                                <li class="{if $_type.id === $_active_reminder_type.id}selected{/if}">
-                                                    <a href="javascript:void(0);" data-type-id="{$_type.id}">
-                                                        {if !empty($_type.icon)}
-                                                            <i class="icon16 {$_type.icon}"></i>
-                                                        {else}
-                                                            <i class="icon16" style="visibility: hidden;"></i>
-                                                        {/if}
-                                                        {$_type.name|escape}
-                                                    </a>
-                                                </li>
-                                            {/foreach}
-                                        </ul>
-                                        <input class="js-field" name="data[type]" type="hidden" value="{$_active_reminder_type.id}">
-                                    </li>
                                 </ul>
-
-                                {* DATE *}
-                                {strip}
-                                <span class="c-date">
-                                    <input class="c-datepicker js-datepicker" type="text" value="" placeholder="[`Date`]">
-                                    <i class="icon16 calendar"></i>
-                                    <input name="data[due_date]" type="hidden" value="">
-                                </span>
-                                {/strip}
-
-                                {* TIME *}
-                                <span class="c-time-toggle js-time-toggle">
-                                    <span class="c-visible">
-                                        <a class="inline-link js-show-time hint" href="javascript:void(0);"><b><i>[`set time`]</i></b></a>
-                                    </span>
-                                    <span class="c-hidden">
-                                        <input class="c-timepicker js-timepicker" data-time-format="H:i" name="data[due_time]" placeholder="[`Time`]">
-                                        <a class="inline-link js-reset-time hint" href="javascript:void(0);"><b><i>[`clear time`]</i></b></a>
-                                    </span>
-                                </span>
-
                             </div>
-                            <div class="c-column right">
+                        </div>
 
-                                {* USER *}
-                                <div class="c-contact-wrapper js-contact-wrapper">
-                                    <div class="c-contact js-user">
-                                        {$_userpic = $assign_to_user->getPhoto(16)}
-                                        {if !empty($_userpic)}
-                                            <i class="icon16 userpic20" style="background-image: url({$_userpic});"></i>
-                                        {/if}
-                                        <span class="c-name">{$assign_to_user.name|escape}</span>
-                                        <a class="inline-link js-show-combobox" href="javascript:void(0);"><b><i>[`Assign another user`]</i></b></a>
-                                    </div>
-                                    <div class="c-combobox">
-                                        <input class="js-autocomplete" type="text" value="" placeholder="[`Choose a user`]">
-                                        <a class="inline-link js-hide-combobox" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
-                                    </div>
-                                    <input class="js-field" type="hidden" name="data[user_contact_id]" value="{$assign_to_user.id}">
+                        <div>
+                            <i class="fas fa-cog js-show-settings"></i>
+                        </div>
+
+                        <script>
+                            ( function($) {
+                                $("#dropdown-filter").waDropdown();
+                            })(jQuery);
+                        </script>
+
+                    </div>*}
+                </div>
+
+                <div class="c-add-form-wrapper" id="c-add-reminder-form" {if !empty($iframe)}style="margin-top: 0"{/if}>
+                    <form>
+                        <div class="flexbox middle vertical custom-pl-16 c-add-form-hover">
+                            <div class="flexbox middle width-100">
+                                <div class="c-column c-icon-column cursor-pointer">
+                                    {*<i class="fas fa-plus c-plus"></i>*}
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M9.99951 1C9.99951 0.447715 9.5518 0 8.99951 0C8.44723 0 7.99951 0.447715 7.99951 1L7.99951 8L0.999512 8C0.447227 8 -0.000488281 8.44771 -0.000488281 9C-0.000488281 9.55228 0.447227 10 0.999512 10L7.99951 10L7.99951 18C7.99951 18.5523 8.44723 19 8.99951 19C9.5518 19 9.99951 18.5523 9.99951 18V10L17.9995 10C18.5518 10 18.9995 9.55228 18.9995 9C18.9995 8.44771 18.5518 8 17.9995 8L9.99951 8V1Z" fill="var(--text-color-hint)"/>
+                                    </svg>
                                 </div>
-
-                            </div>
-                        </div>
-
-                        <div class="line">
-                            <input class="button green" type="submit" value="[`Save`]">
-                            <span>[`or`]</span>
-                            <a class="inline-link js-cancel" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
-                        </div>
-                    </div>
-
-                    <input type="hidden" name="data[user_id]" value="{ifset($user_id)}">
-                </form>
-            </div>
-
-            {if !empty($reminders)}
-                <ul class="c-reminders-list">
-                    {foreach $reminders as $_reminder}
-                        {$_is_deal = ( $_reminder.contact_id < 0 )}
-                        {if !empty($_reminder.type) && !empty($_reminder_types[$_reminder.type])}
-                            {$_active_reminder_type = $_reminder_types[$_reminder.type]}
-                        {/if}
-
-                        {capture assign=_header}
-                            {if $_reminder.type !== "OTHER" && !empty($_active_reminder_type)}
-                                {strip}
-                                {if !empty($_active_reminder_type.icon)}<i class="icon16 {$_active_reminder_type.icon}"></i>{/if}
-                                <span class="c-reminder-type">{$_active_reminder_type.name|escape}</span>
-                                {/strip}
-                            {/if}
-
-                            {if $_is_deal && !empty($deals[abs($_reminder.contact_id)])}
-                                {$_deal_id = abs($_reminder.contact_id)}
-                                {$_deal = $deals[$_deal_id]}
-                                {if !empty($contacts[$_deal.contact_id])}
-                                    {$_user = $contacts[$_deal.contact_id]}
-                                    {$_userpic = $_user->getPhoto(16)}
-                                {/if}
-                                <a class="c-user" href="{$wa_app_url}deal/{$_deal_id}/">
-                                    {if !empty($_userpic)}
-                                        <i class="icon16 userpic20" style="background-image: url({$_userpic});"></i>
-                                    {/if}
-                                    {$_deal.name|escape}
-                                </a>
-                            {elseif !$_is_deal && !empty($contacts[$_reminder.contact_id])}
-                                {$_user = $contacts[$_reminder.contact_id]}
-
-                                <a href="{$wa_app_url}contact/{$_user.id}/" class="c-user">
-                                    {$_userpic = $_user->getPhoto(16)}
-                                    {if !empty($_userpic)}
-                                        <i class="icon16 userpic20" style="background-image: url({$_userpic});"></i>
-                                    {/if}
-                                    {$wa->crm->contactName($_user.name)}
-                                </a>
-                            {/if}
-                        {/capture}
-
-                        {$_reminder_classes = []}
-                        {$_reminder_classes[] = $_reminder.state|default:""}
-                        {if $reminder_max_id && $_reminder.id > $reminder_max_id}
-                            {$_reminder_classes[] = "highlighted"}
-                        {/if}
-                        {if $_reminder.id == $reminder_id}
-                            {$_reminder_classes[] = "is-target"}
-                        {/if}
-
-                        <li class="c-reminder-wrapper {$_reminder_classes|join:" "}" data-id="{$_reminder.id}" id="c-reminder-{$_reminder.id}">
-
-                            {* VIEW *}
-                            <div class="c-step is-view is-shown">
-                                {if !empty($_reminder.rights)}
-                                    <span class="c-marker c-mark-done js-mark-done" title="[`mark as done`]"></span>
-                                {else}
-                                    <span class="c-marker"></span>
-                                {/if}
-
-                                {if !empty($_header) && $_header|trim}
-                                    <header class="c-header">{$_header}</header>
-                                {/if}
-
-                                <div class="c-content">
-                                    {if !empty($_reminder.rights)}
-                                        <div class="c-quick-content-toggle-wrapper js-quick-content-toggle-wrapper">
-                                            <form>
-                                                <textarea class="c-text-field js-textarea" name="data[content]" data-text="{$_reminder.content|escape}">{$_reminder.content|escape}</textarea>
-                                                <input name="data[id]" type="hidden" value="{$_reminder.id}">
-                                                <input name="data[contact_id]" type="hidden" value="{$_reminder.contact_id}">
-                                                <input name="data[user_contact_id]" type="hidden" value="{$_reminder.user_contact_id}">
-                                                <input name="data[due_date]" type="hidden" value="{$_reminder.due_date}">
-                                                {if !empty($_reminder.due_datetime)}
-                                                    {$_time = waDateTime::format('H:i', $_reminder.due_datetime)}
-                                                    <input name="data[due_time]" type="hidden" value="{$_time}">
-                                                {/if}
-                                                {if !empty($_reminder.deal_id)}
-                                                    <input name="data[deal_id]" type="hidden" value="{$_reminder.deal_id}">
-                                                {/if}
-                                            </form>
+                                <div class="flexbox width-100 custom-pb-12 custom-pr-16 c-add-form-textarea">
+                                    <div class="flexbox vertical width-100">
+                                        <div class="c-column width-100">
+                                            <textarea class="js-textarea c-text-add" name="data[content]" placeholder="[`Add reminder`]"></textarea>
                                         </div>
-                                    {else}
-                                        <span class="js-text">{$_reminder.content|escape|nl2br}</span>
-                                    {/if}
-                                </div>
-
-                                <footer class="c-footer">
-                                    <div class="c-layout">
-                                        <div class="c-column">
-                                            {if !empty($_reminder.rights)}
-                                                <div class="c-quick-date-toggle-wrapper js-quick-date-toggle-wrapper">
-                                                    <div class="c-visible">
-                                                    <span class="c-date-text c-change-date hint js-change-date">
-                                                        {if $_reminder.due_datetime}
-                                                            {waDateTime::format('humandatetime', $_reminder.due_datetime)}
-                                                        {else}
-                                                            {waDateTime::format('humandate', $_reminder.due_date)}
-                                                        {/if}
-                                                    </span>
+                                        <div class="c-hidden-form">
+                                                <div class="flexbox middle wrap space-16 c-footer">
+                                                    {$_reminder_types = crmConfig::getReminderTypeUI2()}
+                                                    {$_active_reminder_type = $_reminder_types["OTHER"]}
+                                                    <div class="dropdown js-reminder-type-toggle" id="dropdown-new">
+                                                        <button class="dropdown-toggle button button-slim smallest rounded light-gray js-text">
+                                                            {if !empty($_active_reminder_type.icon)}
+                                                            <span class="icon size-12"><i class="fas fa-{$_active_reminder_type.icon}"></i></span>
+                                                            {/if}
+                                                            <span class="js-text">{$_active_reminder_type.name|escape}</span>
+                                                        </button>
+                                                        <div class="dropdown-body">
+                                                            <ul class="menu">
+                                                                {foreach $_reminder_types as $_type}
+                                                                <li class="{if $_type.id === $_active_reminder_type.id}selected{/if}">
+                                                                    <a href="javascript:void(0);" data-type-id="{$_type.id}">
+                                                                        {if !empty($_type.icon)}
+                                                                        <span class="icon size-14"><i class="fas fa-{$_type.icon}"></i></span>
+                                                                        {else}
+                                                                        <i class="fas fa-blank" style="visibility: hidden;"></i>
+                                                                        {/if}
+                                                                    {$_type.name|escape}
+                                                                    </a>
+                                                                </li>
+                                                            {/foreach}
+                                                            </ul>
+                                                            <input class="js-type-field" name="data[type]" type="hidden" value="{$_active_reminder_type.id}">
+                                                        </div>
                                                     </div>
-                                                    <div class="c-hidden">
-                                                        <form action="">
-                                                            {* DATE *}
-                                                            {strip}
-                                                                <span class="c-date-wrapper">
-                                                                    <input class="c-datepicker js-date-field" type="text" value="{$_reminder.due_date|wa_date}" placeholder="[`Date`]" required>
-                                                                    <i class="icon16 calendar"></i>
-                                                                    <input class="js-alt-date-field" name="data[due_date]" type="hidden" value="{$_reminder.due_date}">
-                                                                </span>
-                                                            {/strip}
 
-                                                            {* TIME *}
-                                                            {$_time = false}
-                                                            {if !empty($_reminder.due_datetime)}
-                                                                {$_time = waDateTime::format('H:i', $_reminder.due_datetime)}
-                                                            {/if}
+                                                    {* DATE *}
+                                                    {strip}
+                                                    <span class="flexbox middle nowrap c-date hint">
+                                                        <span class="icon calendar"><i class="fas fa-calendar-alt"></i></span>
+                                                        <input class="c-datepicker js-datepicker input-blank" name="data[due_date]" type="text" value placeholder="[`Term`]" autocomplete="off">
+                                                        {*<input name="data[due_date]" type="hidden" value="">*}
+                                                        <span class="c-hidden custom-pl-4">
+                                                            <span class="icon cursor-pointer text-red js-reset-date"><i class="fas fa-times-circle"></i></span>
+                                                        </span>
+                                                    </span>
+                                                    {/strip}
 
-                                                            <span class="c-time-toggle js-time-toggle {if !empty($_time)}is-active{/if}">
-                                                                <span class="c-visible">
-                                                                    <a class="inline-link js-show-time hint" href="javascript:void(0);"><b><i>[`set time`]</i></b></a>
-                                                                </span>
-                                                                <span class="c-hidden">
-                                                                    <input class="c-timepicker js-timepicker" data-time-format="H:i" name="data[due_time]" type="text" value="{if !empty($_time)}{$_time}{/if}" placeholder="[`Time`]">
-                                                                    <a class="inline-link js-reset-time hint" href="javascript:void(0);"><b><i>[`clear time`]</i></b></a>
-                                                                </span>
+                                                    {* TIME *}
+                                                    <span class="flexbox nowrap c-time-toggle js-time-toggle hint">
+                                                        <span class="c-visible">
+                                                            <span class="js-show-time">
+                                                                <span class="icon calendar"><i class="fas fa-clock"></i></span>
+                                                                <input class="c-timepicker js-timepicker input-blank" data-time-format="H:i" name="data[due_time]" placeholder="[`Time`]">
                                                             </span>
+                                                        </span>
+                                                        <span class="c-hidden">
+                                                            <span class="icon js-reset-time text-red"><i class="fas fa-times-circle"></i></span>
+                                                        </span>
+                                                    </span>
 
-                                                            <span class="c-date-actions">
-                                                                <i class="icon16 disk js-save-date"></i>
-                                                                <span style="margin: 0 2px;">[`or`]</span>
-                                                                <a class="inline-link js-cancel-edit-date" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
-                                                            </span>
-
-                                                            <input name="data[id]" type="hidden" value="{$_reminder.id}">
-                                                            <input name="data[contact_id]" type="hidden" value="{$_reminder.contact_id}">
-                                                            <input name="data[user_contact_id]" type="hidden" value="{$_reminder.user_contact_id}">
-                                                            <input name="data[content]" type="hidden" value="{$_reminder.content|escape}">
-                                                            {if !empty($_reminder.deal_id)}
-                                                                <input name="data[deal_id]" type="hidden" value="{$_reminder.deal_id}">
+                                                    {* Search Contact or deal *}
+                                                    {capture assign=_deal_or_contact_add}
+                                                    {if $setting_deal_id && !empty($deals[$setting_deal_id])}
+                                                        {$_deal = $deals[$setting_deal_id]}
+                                                        {if !empty($contacts[$_deal.contact_id])}
+                                                            {$_user = $contacts[$_deal.contact_id]}
+                                                            {$_userpic = $_user->getPhoto(32)}
+                                                        {/if}
+                                                        <a class="flexbox middle c-user" href="{$app_url}deal/{$setting_deal_id}/" target="_top" data-link="top">
+                                                            {*if !empty($_userpic)}
+                                                                <span class="icon size-18 rounded" style="background-image: url({$_userpic});"></span>
+                                                            {/if*}
+                                                            <span class="c-user-name">{$_deal.name|escape}</span>
+                                                        </a>
+                                                        <div class="hint custom-pl-12 js-open-search cursor-pointer">
+                                                            <span class="icon size-14"><i class="fas fa-pen" title="[`edit`]"></i></span>
+                                                        </div>
+                                                    {elseif $setting_contact_id && !empty($contacts[$setting_contact_id])}
+                                                        {$_user = $contacts[$setting_contact_id]}
+                                                        <a href="{$app_url}contact/{$_user.id}/" class="flexbox middle c-user" target="_top" data-link="top">
+                                                            {$_userpic = $_user->getPhoto(32)}
+                                                            {if !empty($_userpic)}
+                                                                <span class="icon size-18 rounded" style="background-image: url({$_userpic});"></span>
                                                             {/if}
-                                                        </form>
+                                                            <span class="c-user-name">&nbsp;{$wa->crm->contactName($_user.name)}</span>
+                                                        </a>
+                                                        <div class="hint custom-pl-12 js-open-search cursor-pointer">
+                                                            <span class="icon size-14"><i class="fas fa-pen" title="[`edit`]"></i></span>
+                                                        </div>
+                                                    {/if}
+                                                    {/capture}
+                                                    <div class="flexbox middle c-deal-wrapper">
+                                                        <div class="flexbox middle c-deal-item ">
+                                                            {$_deal_or_contact_add}
+                                                        </div>
+                                                        <div class="nowrap hint c-search-contact-wrapper {if $setting_deal_id || $setting_contact_id}is-hidden{/if}">
+                                                            <div class="">
+                                                                <span class="icon"><i class="fas fa-user"></i></span>
+                                                                <span class="icon"><i class="fas fa-flag"></i></span>
+                                                                <input class="js-autocomplete-deal input-blank" id="input-autocomplete-deal" type="text" value="" placeholder="[`Сontact or deal`]">
+                                                            </div>
+                                                            <span class="custom-pl-4 c-hidden">
+                                                                <span class="icon js-reset-deal text-red cursor-pointer" title="[`Delete`]"><i class="fas fa-times-circle"></i></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="c-actions width-100 custom-pt-8">
+                                                        <div class="flexbox middle">
+                                                            <button class="button nowrap small c-actions-button js-save" type="submit">
+                                                                {*<i class="fas fa-save"></i> *}[`Save`]
+                                                            </button>
+                                                            <button class="button nowrap light-gray small c-actions-button js-cancel">
+                                                                {*<i class="fas fa-undo"></i> *}[`Cancel`]
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            {else}
-                                                <span class="c-date-text hint">
-                                                    {if $_reminder.due_datetime}
-                                                        {waDateTime::format('humandatetime', $_reminder.due_datetime)}
-                                                    {else}
-                                                        {waDateTime::format('humandate', $_reminder.due_date)}
-                                                    {/if}
-                                                </span>
-                                            {/if}
+                                            </div>
                                         </div>
-                                        <div class="c-column right">
-
-                                            <span class="c-create-date hint">[`Created at`]: {$_reminder.create_datetime|wa_date:"d.m.Y H:i"}</span>
-
-                                        </div>
+                                    <div class="c-hidden-form">
+                                    <div class="flexbox vertical">
+                                                {* USER *}
+                                                <div class="c-contact-wrapper js-contact-wrapper">
+                                                    <div class="flexbox middle wrap space-16 c-contact js-user js-show-combobox">
+                                                        {$assign_to_user.userpic = $assign_to_user->getPhoto(32)}
+                                                        {if !empty($assign_to_user.userpic)}
+                                                        <span class="icon size-24 rounded" style="background-image: url({$assign_to_user.userpic});"></span>
+                                                        {/if}
+                                                        {*<span class="c-name">{$assign_to_user.name|escape}</span>
+                                                        <a class="inline-link small js-show-combobox" href="javascript:void(0);">[`Assign another user`]</a>*}
+                                                    </div>
+                                                    <div class="c-combobox flexbox middle">
+                                                        <div class="state-with-inner-icon left">
+                                                            <input class="js-autocomplete short" type="text" id="input-autocomplete-owner" value="" placeholder="[`Owner`]">
+                                                            <span class="icon"><i class="fas fa-search"></i></span>
+                                                        </div>
+                                                        <span class="icon user-plus"><i class="fas fa-user-plus"></i></span>
+                                                        {*<a class="inline-link js-hide-combobox" href="javascript:void(0);">[`cancel`]</a>*}
+                                                    </div>
+                                                    <input class="js-contact-field" type="hidden" name="data[user_contact_id]" value="{$assign_to_user.id}">
+                                                </div>
                                     </div>
-                                </footer>
-
-                                {if !empty($_reminder.rights)}
-                                    <div class="c-right-actions">
-                                        {*<i class="icon16 edit js-edit-reminder" title="[`edit`]"></i>*}
-                                        <a class="inline-link js-edit-reminder" href="javascript:void(0);"><b><i>[`edit`]</i></b></a>
                                     </div>
-                                {/if}
-                            </div>
-
-                            {* EDIT *}
-                            <div class="c-step is-edit">
-                                {$_reminder_user = ifset($users[$_reminder.user_contact_id], false)}
-                                {if !empty($_reminder_user)}
-                                    {include file="./ReminderFormEdit.inc.html" _user=$_reminder_user _reminder=$_reminder inline}
-                                {/if}
-                            </div>
-
-                            {* CONFIRM *}
-                            <div class="c-step is-confirm">
-                                <p>[`Are you sure?`]</p>
-                                <div class="c-actions">
-                                    <input class="button red js-confirm-delete" type="button" value="[`Delete`]">
-                                    [`or`]
-                                    <a class="inline-link js-confirm-cancel" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
                                 </div>
                             </div>
 
-                            {if !empty($_reminder.rights)}
-                                <script>
-                                    ( function($) {
-                                        new CRMReminder({
-                                            $wrapper: $("#c-reminder-{$_reminder.id}"),
-                                            id: "{$_reminder.id}"
-                                        });
-                                    })(jQuery);
-                                </script>
-                            {/if}
-                        </li>
-                    {/foreach}
-                </ul>
+                        </div>
+                        <input name="data[contact_id]" value="{if $setting_contact_id && !$setting_deal_id}{$setting_contact_id}{/if}" type="hidden">
+                        <input name="data[deal_id]" value="{if $setting_deal_id}{$setting_deal_id}{/if}" type="hidden">
+                        <input name="data[user_id]" value="{ifset($user_id)}" type="hidden">
+                    </form>
+                </div>
 
-                {if isset($pages_count) && $pages_count > 1}
-                    <div style="padding-left: 11px;">
-                        {wa_pagination total=$pages_count attrs=['class'=>'menu-h']}
-                    </div>
+                {if !empty($reminders)}
+
+                    <ul class="c-reminders-list" id="c-main-reminders-list">
+                        <div class="c-reminders-list-loader"><div class="spinner custom-p-16"></div></div>
+                        {foreach $reminders as $_reminder}
+                            {$_is_deal = ( $_reminder.contact_id < 0 )}
+                            {if !empty($_reminder.type) && !empty($_reminder_types[$_reminder.type])}
+                                {$_active_reminder_type = $_reminder_types[$_reminder.type]}
+                            {/if}
+
+                            {capture assign=_deal_or_contact}
+
+                                {if $_is_deal && !empty($deals[abs($_reminder.contact_id)])}
+                                    {$_deal_id = abs($_reminder.contact_id)}
+                                    {$_deal = $deals[$_deal_id]}
+                                    {if !empty($contacts[$_deal.contact_id])}
+                                        {$_user = $contacts[$_deal.contact_id]}
+                                        {$_userpic = $_user->getPhoto(32)}
+                                    {/if}
+                                    <a class="flexbox middle c-user" href="{$app_url}deal/{$_deal_id}/" target="_top" data-link="top">
+                                        {*if !empty($_userpic)}
+                                            <span class="icon size-18 rounded" style="background-image: url({$_userpic});"></span>
+                                        {/if*}
+                                        <span class="c-user-name">{$_deal.name|escape}</span>
+                                    </a>
+                                    {*if !empty($_reminder.rights)}
+                                    <div class="c-right-actions hint">
+                                        <span class="icon size-14 cursor-pointer js-edit-search"><i class="fas fa-pen" title="[`edit`]"></i></span>
+                                    </div>
+                                     {/if*}
+                                {elseif !$_is_deal && !empty($contacts[$_reminder.contact_id])}
+                                    {$_user = $contacts[$_reminder.contact_id]}
+
+                                    <a href="{$app_url}contact/{$_user.id}/" target="_top" data-link="top" class="flexbox middle c-user">
+                                        {$_userpic = $_user->getPhoto(32)}
+                                        {if !empty($_userpic)}
+                                            <span class="icon size-18 rounded" style="background-image: url({$_userpic});"></span>
+                                        {/if}
+                                        <span class="c-user-name">&nbsp;{$wa->crm->contactName($_user.name)}</span>
+                                    </a>
+                                    {*if !empty($_reminder.rights)}
+                                    <div class="c-right-actions hint">
+                                        <span class="icon size-14 cursor-pointer js-edit-search"><i class="fas fa-pen" title="[`edit`]"></i></span>
+                                    </div>
+                                     {/if*}
+                                {/if}
+
+                            {/capture}
+
+                            {$_reminder_classes = []}
+                            {$_reminder_classes[] = $_reminder.state|default:""}
+                            {if $reminder_max_id && $_reminder.id > $reminder_max_id || $_reminder.id == $highlight_id}
+                                {$_reminder_classes[] = "highlighted"}
+                            {/if}
+                            {if $_reminder.id == $reminder_id}
+                                {$_reminder_classes[] = "is-target"}
+                            {/if}
+
+                            {$_reminder_mark_content = ""}
+                            {if $_reminder_classes[0] == "overdue"}
+                                {$_reminder_mark_content = "!!!"}
+                            {/if}
+                            {if $_reminder_classes[0] == "burn"}
+                                {$_reminder_mark_content = "!!"}
+                            {/if}
+                            {if $_reminder_classes[0] == "actual"}
+                                {$_reminder_mark_content = "!"}
+                            {/if}
+                            <li class="flexbox middle vertical c-reminder-wrapper js-edit-reminder {$_reminder_classes|join:" "}" data-id="{$_reminder.id}" id="c-reminder-{$_reminder.id}">
+                                {* VIEW *}
+                                <div class="flexbox middle space-12 width-100  custom-pl-12 custom-pt-12 c-step is-view is-shown">
+                                    {if !empty($_reminder.rights)}
+                                        <span class="c-marker c-mark-done js-mark-done" title="[`mark as done`]">
+                                            <span class="c-marker-content">{$_reminder_mark_content}</span>
+                                            <span class="icon size-12 c-marker-icon">
+                                                <svg width="20" height="15" viewBox="0 0 20 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M1.99951 7L7.49951 12.5L18.4995 1.5" stroke="var(--text-color)" stroke-width="2.5" stroke-linecap="round"/>
+                                                </svg>
+                                            </span>
+                                        </span>
+                                    {else}
+                                        <span class="c-marker"><span class="c-marker-content">{$_reminder_mark_content}</span></span>
+                                    {/if}
+                                    {$show_user_block = $_reminder.creator_contact_id !== $_reminder.user_contact_id}
+                                    <div class="flexbox width-100 custom-pb-12 custom-pr-16 c-content {if $show_user_block}with-userblock{/if}">
+                                        <div class="flexbox vertical width-100">
+                                            <div class="c-quick-content-toggle-wrapper js-quick-content-toggle-wrapper">
+
+                                                {if !empty($_reminder.rights)}
+                                                    <div class="c-text-field js-float-text">{$_reminder.content|escape|nl2br}</div>
+                                                    {*<textarea class="js-float-textarea c-text-field" name="content" autocomplete="off" required>{$_reminder.content|escape}</textarea>*}
+                                                {else}
+                                                    <div class="c-text-field">{$_reminder.content|escape|nl2br}</div>
+                                                {/if}
+                                            </div>
+                                            <div class="flexbox middle wrap width-100 space-16 c-footer">
+                                                {if $_reminder.type !== "OTHER" && !empty($_active_reminder_type)}
+                                                    {strip}
+                                                    <button class="button button-slim smallest rounded light-gray no-hover">
+                                                        {if !empty($_active_reminder_type.icon)}
+                                                        <span class="icon size-12"><i class="fas fa-{$_active_reminder_type.icon}"></i></span>
+                                                        {/if}
+                                                        <span class="c-reminder-type">{$_active_reminder_type.name|escape}</span>
+                                                    </button>
+                                                    {/strip}
+                                                {/if}
+                                                {if !empty($_reminder.rights)}
+                                                    {if $_reminder.due_datetime || $_reminder.due_date}
+                                                        <div class="c-quick-date-toggle-wrapper js-quick-date-toggle-wrapper">
+                                                            <div class="c-visible">
+                                                            <div class="c-date-text c-change-date hint js-change-date">
+                                                                {if $_reminder.due_datetime}
+                                                                    {waDateTime::format('humandatetime', $_reminder.due_datetime)}
+                                                                {elseif $_reminder.due_date}
+                                                                    {waDateTime::format('humandate', $_reminder.due_date)}
+                                                                {/if}
+                                                            </div>
+                                                            </div>
+                                                        </div>
+                                                    {/if}
+                                                {else}
+                                                    <div class="c-date-text hint">
+                                                        {if $_reminder.due_datetime}
+                                                            {waDateTime::format('humandatetime', $_reminder.due_datetime)}
+                                                        {elseif $_reminder.due_date}
+                                                            {waDateTime::format('humandate', $_reminder.due_date)}
+                                                        {/if}
+                                                    </div>
+                                                {/if}
+                                                <div class="flexbox middle space-12 c-deal-wrapper">
+                                                {$_deal_or_contact}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flexbox vertical full-width c-icons-right">
+                                           
+                                            <div class="flexbox middle space-4 c-creator-contact hint">
+                                            {$creator_id = $_reminder.creator_contact_id}
+                                            {if $show_user_block}
+                                                {if !empty($users[$creator_id])}
+                                                    {$_user_info = $users[$creator_id]}
+                                                    {$_userpic_info = $_user_info->getPhoto(32)}
+                                                    {if !empty($_userpic_info)}
+                                                    <span class="icon size-24 rounded" style="background-image: url({$_userpic_info});" title="{$_user_info.name|escape}"></span>
+                                                    {/if}
+                                                {else}
+                                                    <span class="icon size-24 rounded" title="[`User not found.`]"><i class="fas fa-user-slash" style="max-width: 22px;"></i></span>
+                                                {/if}
+                                                <span class="">
+                                                    <svg width="4.5" height="6.5" viewBox="0 0 5 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M4.4557 3.84532L1.6932 6.60782C1.50227 6.79876 1.19352 6.79876 1.00461 6.60782L0.545547 6.14876C0.354609 5.95782 0.354609 5.64907 0.545547 5.46017L2.50367 3.50204L0.545547 1.54392C0.354609 1.35298 0.354609 1.04423 0.545547 0.855321L1.00258 0.392196C1.19352 0.201259 1.50227 0.201259 1.69117 0.392196L4.45367 3.1547C4.64664 3.34563 4.64664 3.65438 4.4557 3.84532V3.84532Z" fill="#AAAAAA"/>
+                                                        </svg>
+                                                </span>
+                                            {/if}
+                                            {if $show_user_block || $is_all_reminders}
+                                                {if !empty($users[$_reminder.user_contact_id])}
+                                                    {$_user_info = $users[$_reminder.user_contact_id]}
+                                                    {$_userpic_info = $_user_info->getPhoto(32)}
+                                                    {if !empty($_userpic_info)}
+                                                        <span class="icon size-24 rounded" style="background-image: url({$_userpic_info});" title="{$_user_info.name|escape}"></span>
+                                                    {/if}
+                                                {else}
+                                                     <span class="icon size-24 rounded {$_reminder.user_contact_id}" title="[`User not found.`]"><i class="fas fa-user-slash" style="max-width: 22px;"></i></span>
+                                                {/if}
+                                            {/if}
+                                            </div>
+                                           
+
+                                            {if !empty($_reminder.rights)}
+                                            <div class="c-right-actions js-dots-wrapper hint">
+                                                <span class="icon size-14 dots"><i class="fas fa-ellipsis-h" title="[`edit`]"></i></span>
+                                            </div>
+                                            {/if}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {* EDIT *}
+                                <div class="width-100 custom-pl-12 custom-pt-12 c-step is-edit">
+                                    {$_reminder_user = ifset($users[$_reminder.user_contact_id], false)}
+                                    {if !$_reminder_user}
+                                        {$_reminder_user.id = $_reminder.user_contact_id}
+                                        {$_reminder_user.deleted = true}
+                                    {/if}
+                                    {include file="./ReminderFormEdit.inc.html" _user=$_reminder_user _reminder=$_reminder inline}
+                                </div>
+
+                                {* CONFIRM *}
+                                <div class="c-step is-confirm flexbox middle width-100">
+                                    <p>[`Are you sure?`]</p>
+                                    <div class="c-actions">
+                                        <button class="button light-gray small js-confirm-delete"><i class="fas fa-trash-alt text-red bold delete"></i> [`Delete`]</button>
+                                        [`or`]
+                                        <button class="button small nowrap light-gray custom-ml-4 js-confirm-cancel"><i class="fas fa-undo"></i></button>
+                                    </div>
+                                </div>
+
+                                <div class="c-dots-detail">
+                                    <div class="flexbox vertical nowrap">
+                                        <span class="c-create-date small custom-mb-16 align-center"><span class="first-part">[`Created at`]:</span><br><span class="">{$_reminder.create_datetime|wa_date:"d.m.Y H:i"}</span></span>
+                                        <button class="button light-gray smaller width-100 js-edit custom-mb-8"><i class="fas fa-pencil-alt bold edit"></i> [`Edit`]</button>
+                                        <button  class="button light-gray smaller width-100 js-remove"><i class="fas fa-trash-alt text-red bold delete"></i> [`Delete`]</button>
+                                    </div>
+                                    
+                                </div>
+
+
+                                {if !empty($_reminder.rights)}
+                                    <script>
+                                        ( function($) {
+                                            new CRMReminder({
+                                                $wrapper: $("#c-reminder-{$_reminder.id}"),
+                                                iframe: {if $iframe}true{else}false{/if},
+                                                id: "{$_reminder.id}",
+                                                current_page: {$current_page},
+                                                user_id: {if !empty($user_id)}{$user_id}{else}false{/if},
+                                                setting_deal_id: {$setting_deal_id|default:0},
+                                                setting_contact_id: {$setting_contact_id|default:0},
+                                                reminder_user_id: {if !empty($_reminder_user.id)}{$_reminder_user.id}{else}false{/if},
+                                                state: '{$_reminder.state|default:""}'
+                                            });
+                                        })(jQuery);
+                                    </script>
+                                {/if}
+                            </li>
+                        {/foreach}
+                        {if isset($pages_count) && $pages_count > $current_page}
+                        <li class="js-lazy-load">
+                            <div class="spinner custom-p-4"></div>
+                        </li>
+                        {/if}
+                    </ul>
+
+                    {*OLD PAGINATION*}
+                    {*if isset($pages_count) && $pages_count > 1}
+                        <div class="small custom-pt-16">
+                            {wa_pagination total=$pages_count attrs=['class'=>'paging']}
+                        </div>
+                    {/if*}
+                {else}
+                <div class="flexbox vertical middle no-reminders">
+                    <span class="icon size-80 text-light-gray"><i class="fas fa-bell"></i></span>
+                    <span class="custom-my-16 gray">[`Reminders not added`]</span>
+                </div>   
                 {/if}
 
-            {/if}
-
-            {if $completed_reminders_count}
-                <section class="c-completed-reminders-section">
-                    <div class="c-actions">
-                        <a class="inline-link js-load-completed-reminders" href="javascript:void(0);">
-                            <b><i>{_w('Show all %d completed reminder', 'Show all %d completed reminders', $completed_reminders_count)}</i></b>
-                        </a>
-                    </div>
-                    <ul class="c-reminders-list"></ul>
-                </section>
-            {/if}
-        </div>
+                {if $completed_reminders_count}
+                    <section class="c-completed-reminders-section bottombar sticky custom-mt-20">
+                        <div class="flexbox middle c-actions custom-p-20">
+                            <a class="custom-mr-4 bold js-load-completed-reminders" href="javascript:void(0);">
+                                <span class="js-completed-reminders-btn-text">{_w('%d completed reminder', '%d completed reminders', $completed_reminders_count)}</span>
+                                <span class="icon sort-down"><i class="fas fa-angle-down"></i></span>
+                            </a>
+                        </div>
+                        <ul class="c-reminders-list"></ul>
+                    </section>
+                {/if}
+                </div>
+            </div>
     </div>
     <script>
         ( function($) {
             $.crm.title.set({$_title|json_encode});
-
             new CRMReminders({
                 $wrapper: $("#c-reminders-page"),
+                $sidebar: $("#c-reminders-sidebar"),
+                iframe: {if $iframe}true{else}false{/if},
                 user_id: {if !empty($user_id)}{$user_id}{else}false{/if},
+                setting_deal_id: {$setting_deal_id|default:0},
+                setting_contact_id: {$setting_contact_id|default:0},
+                is_all_reminders: {if $is_all_reminders}true{else}false{/if},
+                assign_to_user: {
+                    name: "{$assign_to_user.name|escape}",
+                    id: {$assign_to_user.id|escape},
+                    photo_url: "{$assign_to_user.userpic|escape}",
+                },
+                current_page: {$current_page},
                 locales: {
                     add_confirm_title: "[`Unsaved reminder`]",
                     add_confirm_text: "[`You are about to leave this page without saving your input. Are you sure?`]",
-                    add_confirm_button: "[`Leave`]"
+                    add_confirm_button: "[`Leave`]",
+                    empty: "[`Required field is empty`]",
+
                 }
             });
         })(jQuery);
     </script>
+    {if !empty($focus)}
+    <script>
+        ( function($) {
+            setTimeout(() => $('#c-add-reminder-form .js-textarea').focus(), 100)
+        })(jQuery);
+    </script>
+    {/if}
 </div>
+
+{if !empty($iframe)}
+<script>
+    ( function($) {
+    $.crm.app_url = "{$app_url}";
+    const $content = $("body");
+    const $spaContainer = $('#c-spaContainer-block');
+    /* Main content router */
+    $.crm.content = new ContentRouter({
+        $content: $content,
+        $spaContainer: $spaContainer
+    });
+    $.crm.iframe = {$iframe|json_encode};
+    })(jQuery);
+</script>
+</body>
+</html>
+{/if}

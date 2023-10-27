@@ -1,0 +1,67 @@
+{$_class_id = "c-with-contact-section-wrapper"}
+{$_wrapper_id = uniqid($_class_id)}
+
+<div class="{$_class_id}" id="{$_wrapper_id}">
+
+    <div class="field">
+        <div class="name">[`Set contact language`]</div>
+        <div class="value">
+            <select name="{input_name id='params|locale'}">
+                <option></option>
+                {foreach $locales as $_locale_id => $_locale}
+                    {$_name = $_locale.name|default:$_locale_id|escape}
+                    {$_region = $_locale.region|default:''|escape}
+                    <option value="{$_locale_id}" {if $_locale_id === $locale}selected="selected"{/if}>{$_name}{if $_region} {$_region}{/if}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+
+    {$_states = [
+        'fold' => [ 'link_text' => _w('Choose segments') ],
+        'unfold' => [ 'link_text' => _w('Hide segments') ]
+    ]}
+
+    {$_current_state = 'fold'}
+
+    <div class="field">
+        <div class="name">[`Add to segments`]</div>
+
+        <div class="value">
+            <a href="javascript:void(0);" class="inline-link c-segments-ul-fold-link" data-state="{$_current_state}">
+                <b><i class="c-link-text">{$_states[$_current_state].link_text|default:''}</i></b>
+            </a>
+
+            <ul class="menu-v c-segments-ul" {if $_current_state === 'fold'}style="display: none;"{/if}>
+                {$my_segment = false}
+                {foreach $segments as $segment}
+                    {if !$my_segment && $segment.shared == 0}
+                        {$my_segment = true}
+                        <li>[`My segments`]</li>
+                    {/if}
+                    <li data-id="{$segment.category_id}" class="c-segment-item"><label>
+                        <input type="checkbox" name="{input_name id='params|segments|'}" value="{$segment.category_id}"
+                               {if ifset($segment.checked)}checked="checked"{/if}>
+                        <span class="c-name-wrapper">
+                        {if !empty($segment.icon_path)}
+                            <i class="icon16 userpic20" style="background: url({$segment.icon_path}) center/16px no-repeat; border-radius: 0;"></i>
+                        {elseif !empty($segment.icon)}
+                            <i class="icon16 {$segment.icon}"></i>
+                        {/if}
+                            <span class="c-name">{$segment.name|escape}</span>
+                        </span>
+                    </label></li>
+                {/foreach}
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        (function($) {
+            new CRMSettingsSourceWithContactBlock({
+                '$wrapper': $('#{$_wrapper_id}'),
+                'segments_list_stages': {$_states|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

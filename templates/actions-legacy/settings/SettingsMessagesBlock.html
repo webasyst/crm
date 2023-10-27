@@ -1,0 +1,88 @@
+{$class_id = 'c-settings-messages-block'}
+{$wrapper_id = uniqid($class_id)}
+
+{$namespace = $namespace|default:'params[messages]'}
+
+<div class="{$class_id}" id="{$wrapper_id}">
+
+    <!-- plugin hook: 'backend_settings_messages_block.top' -->
+    {* @event backend_settings_messages_block.%plugin_id%.top *}
+    {if !empty($backend_settings_messages_block)}
+        {foreach $backend_settings_messages_block as $_}{ifset($_.top)}{/foreach}
+    {/if}
+
+    {foreach $messages|default:[] as $i => $m}
+        <div class="crm-one-message crm-email-template-editor">
+            <div class="fields crm-email-template-editor-wrapper">
+                <div class="expandable expanded">
+                    <label class="expandable-legend">
+                        <input type="checkbox" class="js-crm-remove-message-checkbox" checked>
+                        [`Send email message`]
+                    </label>
+                    <div class="crm-editor-wrapper" data-i="{$i}">
+                        {include file="./SettingsEmailEditor.inc.html"
+                            input_name="{$namespace}[{$i}][tmpl]"
+                            template=$m.tmpl|default:null
+                            to_name="{$namespace}[{$i}][to]"
+                            to_value=$m.to|default:null
+                            sourcefrom_name="{$namespace}[{$i}][sourcefrom]"
+                            sourcefrom_set=$m.sourcefrom|default:null
+                            add_attachments_name="{$namespace}[{$i}][add_attachments]"
+                            add_attachments_set=$m.add_attachments|default:0
+                            cheat_sheet=$cheat_sheet
+                            cheat_sheet_key=$cheat_sheet_key
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="clear-left"></div>
+        </div>
+    {/foreach}
+
+    <div class="crm-one-message crm-template crm-email-template-editor" style="display: none">
+        <div class="fields crm-email-template-editor-wrapper">
+            <div class="field-group expandable expanded">
+                <label class="expandable-legend">
+                    <input type="checkbox" class="js-crm-remove-message-checkbox" checked>
+                    [`Send email message`]
+                </label>
+                <div class="crm-editor-wrapper" style="min-width:530px;">
+                    <div class="block"><i class="icon16 loading"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="clear-left"></div>
+    </div>
+
+    <div class="fields width100px">
+        <div class="field">
+            <label>
+                <input type="checkbox" class="js-crm-add-message-checkbox">
+                <span class="js-crm-when-no-messages">
+                    [`Send email message`]
+                </span>
+                <span class="js-crm-when-messages">
+                    [`Send another email message`]
+                </span>
+            </label>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            new CRMSettingsMessagesBlock({
+                '$wrapper' : $('#{$wrapper_id}'),
+                'namespace': '{$namespace}',
+                'type': {$type|default:'form'|json_encode}
+            });
+        });
+    </script>
+
+    <!-- plugin hook: 'backend_settings_messages_block.bottom' -->
+    {* @event backend_settings_messages_block.%plugin_id%.bottom *}
+    {if !empty($backend_settings_messages_block)}
+        {foreach $backend_settings_messages_block as $_}{ifset($_.bottom)}{/foreach}
+    {/if}
+
+</div>
+

@@ -51,7 +51,7 @@ var CRMSettingsVaults = ( function($) {
                 };
 
             xhr = $.post(href, data, function(html) {
-                new CRMDialog({
+              $.waDialog({
                     html: html,
                     options: {
                         onSave: function(id, name, color) {
@@ -63,7 +63,7 @@ var CRMSettingsVaults = ( function($) {
                             }
 
                             $vault.find(".js-name").text(name);
-                            $vault.find(".js-color").css("background", color);
+                            $vault.find(".js-color").css("background-color", color);
                         },
                         onDelete: function () {
                             $vault.remove();
@@ -183,11 +183,14 @@ var CRMVaultEdit = ( function($) {
 
             var id = that.vault_id;
 
-            $.crm.confirm.show({
-                title: that.locales["confirm_delete_title"],
+            $.waDialog.confirm({
+                title: `<i class=\"fas fa-exclamation-triangle smaller state-error\"></i> ${that.locales["confirm_delete_title"]}?`,
                 text: that.locales["confirm_delete_text"],
-                button: that.locales["confirm_delete_button"],
-                onConfirm: function() {
+                success_button_title: `${that.locales["confirm_delete_button"]}`,
+                success_button_class: 'danger',
+                cancel_button_title: `${that.locales["confirm_cancel_button"]}`,
+                cancel_button_class: 'light-gray',
+                onSuccess: function() {
                     deleteVault(id, function() {
                         that.dialog.options.onDelete();
                         that.dialog.close();

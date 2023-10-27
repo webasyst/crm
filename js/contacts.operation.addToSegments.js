@@ -121,7 +121,7 @@ var CRMContactsOperationAddToSegments = (function ($) {
     CRMContactsOperationAddToSegments.prototype.reloadDialog = function (onOpen) {
         var that = this;
         $.get(that.url, function (html) {
-            that.dialog = new CRMDialog({
+            that.dialog = $.waDialog({
                 html: html,
                 onOpen: function ($dialog) {
                     onOpen && onOpen($dialog);
@@ -149,7 +149,7 @@ var CRMContactsOperationAddToSegments = (function ($) {
 
                     that.dialog.close();
 
-                    var dialog = new CRMDialog({
+                    var dialog = $.waDialog({
                         html: html,
                         onOpen: function ($wrapper) {
                             $wrapper.find('.js-close-dialog').hide();

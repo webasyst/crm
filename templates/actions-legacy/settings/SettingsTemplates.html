@@ -1,0 +1,202 @@
+{$_title = "[`Create invoice template`]"}
+{if !empty($template.id)}
+    {$_title = "[`Edit invoice template`]"}
+{/if}
+<div class="c-settings-templates-page" id="js-templates-page">
+
+    {* HEADER *}
+    <header class="c-templates-section">
+        <h1 class="c-page-header">[`Invoice templates`]</h1>
+
+        {* TEMPLATES *}
+        <div class="c-templates-tabs js-templates-tabs">
+            <div class="c-templates-wrapper">
+                <ul class="tabs c-templates-list">
+                    {if empty($template.id)}
+                        {$_new_template = [
+                            "0" => [
+                                "id" => false,
+                                "name" => "[`New template`]"
+                            ]
+                        ]}
+                        {if !$templates}
+                            {$templates = $_new_template}
+                        {else}
+                            {$templates = $_new_template + $templates}
+                        {/if}
+                    {/if}
+
+                    {foreach $templates as $_template}
+                        {$_is_selected = ($template.id == $_template.id)}
+                        <li class="c-template {if $_is_selected}selected{/if}" data-id="{$_template.id|default:""}">
+                            <a class="c-link" href="{if !$_is_selected}{$wa_app_url}settings/templates/{$_template.id}/{else}javascript:void(0);{/if}">
+                                <span class="c-name">{$_template.name|escape}</span>
+                            </a>
+                        </li>
+                    {/foreach}
+                </ul>
+                <span class="c-action right" title="[`Next`]"></span>
+                <span class="c-action left" title="[`Before`]"></span>
+            </div>
+            <div class="c-add-wrapper">
+                <a href="{$wa_app_url}settings/templates/new/"><i class="icon16 add"></i> [`Add new template`]</a>
+            </div>
+        </div>
+    </header>
+
+    {* TEMPLATE *}
+    <section class="c-template-section" id="c-template-section">
+        <form action="" class="js-template-form">
+
+            <input class="wide large js-template-name" name="data[name]" type="text" value="{$template.name|escape}" placeholder="[`Template name`]" required>
+
+            <section class="c-params-section">
+                <h3 class="heading">[`Custom variables`]</h3>
+                <p class="hint">[`Set up custom variables to show extra company-related data on an invoice; e.g., payment details, contact information, business license number, etc. Save appropriate values for your variables in each company’s settings and add the variables to an invoice template.`]</p>
+
+                {function _renderParams}
+                    <tr>
+                        <td>
+                            <input class="js-name-field" name="data[param_name][]" type="text" placeholder="[`Field name`]"
+                                   value="{if !empty($_param)}{$_param.name|escape}{/if}">
+                        </td>
+                        <td>
+                            <select name="data[param_type][]">
+                                {foreach $enum_params as $key => $item}
+                                    <option value="{$key}" {if isset($_param['type']) && $key == $_param['type']}selected{/if}>{$item['name']}</option>
+                                {/foreach}
+                            </select>
+                        </td>
+                        <td>
+                            <input class="js-placeholder-field" name="data[param_placeholder][]" type="text" placeholder="[`Placeholder`]"
+                                   value="{if !empty($_param)}{$_param.placeholder|escape}{/if}">
+                        </td>
+                        <td>
+                            <input class="js-code-field {if empty($_param)}auto-filler{/if}" name="data[param_code][]" type="text" placeholder="[`Code`]"
+                                   value="{if !empty($_param)}{$_param.code|escape}{/if}">
+                        </td>
+                        <td>
+                            <a class="inline-link c-delete-link js-delete-param" href="javascript:void(0);">
+                                <i class="icon10 delete"></i>
+                                <b><i>[`delete`]</i></b>
+                            </a>
+                        </td>
+                    </tr>
+                {/function}
+
+                {capture assign="_param_template"}{_renderParams _param=[]}{/capture}
+
+                <table class="c-params-table zebra" style="min-width: 750px;">
+                    <thead>
+                        <tr>
+                            <th>[`Field name`]</th>
+                            <th>[`Type`]</th>
+                            <th>[`Placeholder`]</th>
+                            <th>[`Code`]</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="c-params-list">
+                        {if !empty($template.params)}
+                            {foreach $template.params as $_param}
+                                {_renderParams _param=$_param}
+                            {/foreach}
+                        {elseif !$template.id}
+                            {_renderParams _param=[]}
+                        {/if}
+                    </tbody>
+                </table>
+
+                <div class="c-actions">
+                    <a class="inline-link js-add-param" href="javascript:void(0);">
+                        <i class="icon16 add"></i>
+                        <b><i>[`Add variable`]</i></b>
+                    </a>
+                </div>
+            </section>
+
+            <div class="c-template-content" data-id="content">
+                <div class="field">
+                    <div class="c-redactor-wrapper js-redactor-wrapper ace bordered">
+                        <textarea class="js-content-body" name="data[content]">{$template.content}{if empty($template.id)}{$basic_template|escape}{/if}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="c-footer-actions js-footer-actions">
+                <div class="c-footer-block js-footer-block">
+                    <div class="c-layout fixed">
+                        <div class="c-column middle">
+                            <input class="button green js-template-save-button" type="submit" value="{if !empty($template.id)}[`Save`]{else}[`Create`]{/if}">
+                            <span class="js-hidden-actions" style="{if !empty($template.id)}display: none;{/if}">
+                                <span style="margin: 0 4px;">[`or`]</span>
+                                <a href="{$wa_app_url}settings/templates/{if !empty($template.id)}{$template.id}/{/if}">[`cancel`]</a>
+                            </span>
+                        </div>
+                        <div class="c-column middle center">
+                                <a class="inline-link js-reset-template {if !$reset_template}hidden{/if}" href="javascript:void(0);"><i class="icon16 broom"></i>
+                                    <b><i>[`Reset changes`]</i></b></a>
+                            {include file='./SettingsNotificationsHelp.inc.html' inline}
+
+                            <a class="inline-link js-show-preview" href="javascript:void(0);"><i class="icon10 new-window"></i><b><i>[`Preview`]</i></b></a>
+                        </div>
+                        <div class="c-column middle right">
+                            {if !empty($template.id) && count($templates) > 1}
+                                <a class="inline-link js-delete-template" href="javascript:void(0);">
+                                    <i class="icon16 delete"></i><b><i>[`Delete`]</i></b>
+                                </a>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+            <input name="data[id]" value="{$template.id}" type="hidden">
+        </form>
+    </section>
+
+    {capture assign="_preview_dialog_template"}
+        <div class="crm-dialog-wrapper c-settings-templates-preview-dialog" id="c-settings-templates-preview-dialog">
+            <div class="crm-dialog-background"></div>
+            <div class="crm-dialog-block">
+                <div class="crm-dialog-content">
+                    <form class="js-preview-form" action="?module=invoice&action=templatesRender" method="post" target="c-preview-iframe">
+                        <input type="hidden" id="js-preview-content" name="content" value="">
+                        <input type="hidden" id="template_id" name="template_id" value="{$template.id}">
+                        {$wa->csrf()}
+                    </form>
+                    <iframe name="c-preview-iframe" class="c-preview-iframe"></iframe>
+                </div>
+
+                <footer class="crm-dialog-footer js-footer-actions">
+                    <a class="js-close-dialog button" href="javascript:void(0);">[`Close`]</a>
+                </footer>
+            </div>
+        </div>
+    {/capture}
+
+    <script>
+        $.crm.title.set({$_title|json_encode});
+        (function ($) {
+            new CRMSettingsTemplate({
+                $wrapper: $("#js-templates-page"),
+                template: {$template|default:null|json_encode},
+                preview_dialog_template: {$_preview_dialog_template|json_encode},
+                site_app_url: {$site_app_url|json_encode},
+                param_html: {$_param_template|json_encode},
+                template_id: "{$template.id}",
+                locales: {
+                    delete_confirm_title: "[`Delete`] {$template.name|escape}",
+                    delete_confirm_text: "[`Are you sure?`]",
+                    delete_confirm_button: "[`Delete`]",
+                    validate_first_num: "[`Variable code may not start with a digit`]",
+                    validate_symbols: "[`Variable code may contain only digits, letters, and underscore characters.`]",
+                    validate_copies: "[`Variable codes must be unique.`]",
+                    success_text: "[`Removing a template is prohibited. The template is associated with {$company_count} companies`]",
+                    success_button: "[`Close`]"
+                },
+                company_count: {$company_count}
+            });
+        })(jQuery);
+    </script>
+</div>

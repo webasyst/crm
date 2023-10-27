@@ -4,13 +4,13 @@ Is also contained in "crm/css/crm.css"
 BE CAREFUL WHEN ADDING GLOBAL STYLES
 **/
 .c-invoice-front-section.with-background {
-  background: #f0f0f0;
+  background: var(--background-color);
+  padding: 1.5rem 0;
 }
 .c-invoice-front-section .c-front-invoice-wrapper {
   width: 800px;
-  max-width: 100%;
   margin: 0 auto;
-  padding: 40px 0;
+  padding: 0;
   font: 16px/20px Arial, sans-serif;
   color: #585858;
 }
@@ -113,7 +113,7 @@ BE CAREFUL WHEN ADDING GLOBAL STYLES
   position: static;
 }
 .c-invoice-front-section .c-front-invoice-block {
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(136,153,170,0.14);
   border-radius: 3px;
   padding: 32px;
   background: #fff;

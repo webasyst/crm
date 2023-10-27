@@ -1,0 +1,41 @@
+<div class="crm-dialog-wrapper c-change-user-confirm-dialog js-change-user-confirm-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block" style="height: 230px;">
+        <header class="crm-dialog-header">
+            {if $deal.user_contact_id}
+                <h1>[`Change deal’s responsible user`]</h1>
+            {else}
+                <h1>[`Set deal’s responsible user`]</h1>
+            {/if}
+        </header>
+        <div class="crm-dialog-content">
+            {if $deal.user_contact_id && $deal.user_contact_id == $wa->user('id')}
+                {* YOUSELF CASE *}
+                {$_future_deal_user_name = "<strong>`$future_deal_user.name|escape`</strong>"}
+                <p>{sprintf(_w('You are about to change the responsible user for deal %s from yourself to %s.'),
+                    $deal.name|escape, $_future_deal_user_name)}</p>
+
+            {elseif $deal.user_contact_id}
+                {* CHANGE USER CASE *}
+                {$_current_deal_user_name = "<strong>`$current_deal_user.name|escape`</strong>"}
+                {$_future_deal_user_name = "<strong>`$future_deal_user.name|escape`</strong>"}
+                    <p>{sprintf(_w('You are about to change the responsible user for deal %s from %s to %s.'),
+                            $deal.name|escape, $_current_deal_user_name, $_future_deal_user_name)}</p>
+
+            {else}
+                {* SET USER CASE *}
+                {$_future_deal_user_name = "<strong>`$future_deal_user.name|escape`</strong>"}
+                <p>{sprintf(_w('You are about to set %s as the responsible user for deal %s.'), $_future_deal_user_name, $deal.name|escape)}</p>
+            {/if}
+            <p>[`This will make you lose access to this deal.`]</p>
+        </div>
+        <div class="dialog-buttons">
+            <div class="dialog-buttons-gradient">
+                {$wa->csrf()}
+                <input class="button green js-confirm-button" type="submit" value="[`Confirm`]">
+                <i class="icon16 loading js-submit-dialog-loading" style="margin-top: 8px; display: none;"></i>
+                [`or`] <a class="cancel js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+            </div>
+        </div>
+    </div>
+</div>

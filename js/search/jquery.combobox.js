@@ -41,7 +41,8 @@
                     minLength: 0,
                     html: true,
                     source: $.proxy(this, "_source"),
-                    item_clz: 'crm-search-ui-autocomplete-item'
+                    item_clz: 'crm-search-ui-autocomplete-item',
+                    width: 270
                 });
                 this.ul = $(this.input).autocomplete('widget');
             } else {
@@ -85,6 +86,7 @@
 
             if (this.options.label !== false) {
                 this.label = $('<span class="c-label"></span>').css({
+                    top: '3px',
                     left: '-20px',
                     position: 'absolute'
                 }).prependTo(this.wrapper);
@@ -272,7 +274,7 @@
                     var text_el = $text.width(Math.max(width - $count.outerWidth(true) - 30, 0));
                     if (text_el.data('sep')) {
                         el.css({
-                            borderTop: '1px solid #ccc'
+                            borderTop: '0px solid #ccc'
                         });
                     }
                 });
@@ -401,7 +403,7 @@
                 self = this;
 
             if (element.find('option').length) {
-                this.arrow = $("<a href='javascript:void(0);' style='margin: -2px 0 0 -20px;'><i class='icon16 darr'></i></a>")
+                this.arrow = $("<a href='javascript:void(0);' style='margin: -2px 0 0 -20px;'><i class='fas fa-caret-down'></i></a>")
                     .attr("tabIndex", -1)
                     .appendTo(this.wrapper)
                     .removeClass("ui-corner-all")
@@ -419,7 +421,7 @@
                     .hide();
 
                 if (element.data('readonly')) {
-                    this.wrapper.find('.icon16').css({
+                    this.wrapper.find('svg').css({
                         backgroundColor: 'white'
                         // marginTop: 2
                     }).parent().css({
@@ -457,7 +459,7 @@
             }
             label += '</span>';
             if ($.isNumeric(item.count)) {
-                label += '<span class="count" style="margin-top: 2px;">' + item.count + '</span>';
+                label += '<span class="count" style="float: right;">' + item.count + '</span>';
             }
             item.label = label;
             if (!item.value) {

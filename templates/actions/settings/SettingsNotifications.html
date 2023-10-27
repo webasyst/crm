@@ -5,23 +5,26 @@
 <div class="c-settings-notification-page" id="c-settings-notification-page">
     <h1 class="c-page-header">{$_title}</h1>
     <section class="c-notifications-section">
-        <ul class="menu-v c-notification-list">
+        <ul class="menu c-notification-list">
             {foreach $notifications as $_notification}
-                {$_icon = "email"}
+                {$_icon = "envelope"}
                 {if !empty($transports[$_notification.transport])}
                     {$_icon = $transports[$_notification.transport].icon}
                 {/if}
-
+                {if $_icon == "email"}
+                {$_icon = "envelope"}
+                {elseif $_icon == "mobile"}
+                {$_icon = "mobile-alt"}
+                {/if}
                 {if $_notification.event === 'customer.birthday' && $_notification.status > 0}
                     {$_is_here_birthday_active_event = true}
                 {/if}
                 <li class="c-notification {if !$_notification.status}c-is-disabled{/if}" data-id="{$_notification.id}">
-
-                    <div class="c-layout inline">
-                        <div class="c-column">
+                    <div class="flexbox full-width">
+                        <div class="flexbox middle">
                             <div class="c-notification-details">
                                 <a href="{$wa_app_url}settings/notifications/edit/{$_notification.id}/">
-                                    <i class="icon16 {$_icon}"></i>
+                                    <i class="fas fa-{$_icon}"></i>
                                     <span class="c-notification-name">{$_notification.name|escape}</span>
                                 </a>
                                 {if !empty($_notification.company) && !empty($_notification.company.name)}
@@ -30,11 +33,15 @@
                             </div>
                         </div>
 
-                        <div class="c-column">
-                            <span class="c-disable-link-wrapper">
-                                <a class="js-c-disable-link c-disable-link nowrap" href="javascript:void(0);">
-                                    {if $_notification.status}[`disable`]{else}[`enable`]{/if}</a>
-                                <i class="icon16 loading c-loading" style="display: none"></i>
+                        <div class="flexbox middle">
+                            <span class="flexbox middle space-8 wrap c-disable-link-wrapper">
+                                <span class="icon size-16 loading c-loading" style="display: none"><i class="fas fa-spinner fa-spin"></i></span>
+                                <div class="switch-with-text js-c-disable-link">
+                                    <label for="switch-notification-input" data-active-text="[`enable`]" data-inactive-text="[`disable`]">{if $_notification.status}[`disable`]{else}[`enable`]{/if}</label>
+                                    <span class="switch" id="switch-{$_notification.id}">
+                                        <input type="checkbox" name="" id="switch-notification-input" {if $_notification.status}checked{/if}>
+                                    </span>
+                                </div>
                             </span>
                         </div>
                     </div>
@@ -42,11 +49,11 @@
             {/foreach}
         </ul>
         <div class="c-add-wrapper">
-            <a href="{$wa_app_url}settings/notifications/edit/" class="inline-link">
-                <i class="icon16 add"></i>
-                <b><i>[`Add notification`]</i></b>
-            </a>
-        </div>
+          <a href="{$wa_app_url}settings/notifications/edit/" class="button small rounded light-gray">
+              <i class="fas fa-plus-circle add text-green"></i>
+               [`Add notification`]
+          </a>
+      </div>
 
         {if $_is_here_birthday_active_event && !crmNotificationBirthdayWorker::isCliOk()}
             <div style="margin-top: 20px;">

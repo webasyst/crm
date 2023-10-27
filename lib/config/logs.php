@@ -51,6 +51,12 @@ return array(
     'reminder_add' => array(
         'name' => /*_w*/('added reminder'),
     ),
+    'reminder_update' => array(
+        'name' => /*_w*/('updated reminder'),
+    ),
+    'reminder_delete' => array(
+        'name' => /*_w*/('deleted reminder'),
+    ),
     'reminder_done' => array(
         'name' => /*_w*/('marked reminder as done'),
     ),
@@ -81,8 +87,32 @@ return array(
     'invoice_add' => array(
         'name' => /*_w*/('added invoice'),
     ),
+    'invoice_archived' => array(
+        'name' => /*_w*/('Invoice archived'),
+    ),
+    'invoice_cancel' => array(
+        'name' => /*_w*/('Invoice restored to draft'),
+    ),
+    'invoice_delete' => array(
+        'name' => /*_w*/('Invoice deleted'),
+    ),
     'invoice_issue' => array(
         'name' => /*_w*/('issued invoice'),
+    ),
+    'invoice_paid' => array(
+        'name' => /*_w*/('Invoice paid'),
+    ),
+    'invoice_paiment_canceled' => array(
+        'name' => /*_w*/('Invoice payment canceled'),
+    ),
+    'invoice_refunded' => array(
+        'name' => /*_w*/('Invoice payment refunded'),
+    ),
+    'invoice_restored' => array(
+        'name' => /*_w*/('Invoice restored'),
+    ),
+    'invoice_updated' => array(
+        'name' => /*_w*/('Invoice edited'),
     ),
     'create_signup_form' => array(
         'name' => /*_w*/('created signup form')
@@ -96,6 +126,12 @@ return array(
     ),
     'call' => array(
         'name' => /*_w*/('called'),
+    ),
+    'call_in' => array(
+        'name' => /*_w*/('incoming call %s sec.'),
+    ),
+    'call_out' => array(
+        'name' => /*_w*/('outgoing call  %s sec.'),
     ),
     'contact_transfer' => array(
         'name' => /*_w*/('changed contact owner'),

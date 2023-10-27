@@ -12,6 +12,12 @@ class crmWebasystBackend_headerHandler extends waEventHandler
             return;
         }
 
+        if (wa()->whichUI('crm') === '2.0') {
+            return array (
+                'header_bottom' => self::notificationsPopup()
+            );
+        }
+
         return array (
             'header_bottom' =>
                 self::fixShopLayout() .
@@ -21,9 +27,9 @@ class crmWebasystBackend_headerHandler extends waEventHandler
     }
 
     protected static function notificationsPopup()
-    {
-        $script_src = wa()->getRootUrl().'wa-apps/crm/js/popup.js?v'.wa('crm')->getVersion();
-        $css_href = wa()->getRootUrl().'wa-apps/crm/css/popup.css?v'.wa('crm')->getVersion();
+    {   $url_prefix = wa()->whichUI('crm') === '2.0' ? '' : '-legacy';
+        $script_src = wa()->getRootUrl().'wa-apps/crm/js'.$url_prefix.'/popup.js?v'.wa('crm')->getVersion();
+        $css_href = wa()->getRootUrl().'wa-apps/crm/css'.$url_prefix.'/popup.css?v'.wa('crm')->getVersion();
         return '
             <link type="text/css" rel="stylesheet" href="'.htmlspecialchars($css_href).'">
             <div id="crm-popup-area" style="display:none;"></div>

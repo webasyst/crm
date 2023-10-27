@@ -1,92 +1,127 @@
 <?php
-
 /**
- * Create a new reminder from plain text.
- *
- * @DEPRECATED
+ * Modify a reminder using data from inline editor form.
  */
 class crmReminderAddController extends crmJsonController
 {
     public function execute()
     {
-        $user_id = waRequest::post('user_id', null, waRequest::TYPE_INT);
-        $content = waRequest::post('content', null, waRequest::TYPE_STRING_TRIM);
-        $deal_id = waRequest::post('deal_id', null, waRequest::TYPE_INT);
-        $contact_id = waRequest::post('contact_id', null, waRequest::TYPE_INT);
+        $data = $this->getData();
 
-        $errors = $this->validate($user_id, $content, $deal_id, $contact_id);
+        $errors = $this->validate($data);
         if ($errors) {
             $this->errors = $errors;
             return;
         }
-        $reminder_id = $this->saveData($user_id, $content, $deal_id, $contact_id);
+        $data['user_contact_id'] = $data['user_contact_id'] ? $data['user_contact_id'] : wa()->getUser()->getId();
+
+        $reminder_id = $this->saveData($data);
 
         $this->response = array(
             'id' => $reminder_id
         );
     }
 
-    protected function validate($user_id, $content, $deal_id, $contact_id)
+    protected function validate($data)
     {
-        if (!$user_id) {
-            throw new waException('User not found.');
-        }
         $errors = array();
-        if (!$content) {
-            $errors['content'] = _w('This field is required');
+
+        if ($data['id']) {
+            $rm = new crmReminderModel();
+            if (!($reminder = $rm->getById($data['id']))) {
+                throw new waException('Reminder not found');
+            }
+            if (!$this->getCrmRights()->reminderEditable($reminder)) {
+                throw new waRightsException();
+            }
         }
-        if ($deal_id) {
+       /* $required = array('content');
+        foreach ($required as $r) {
+            if (empty($data[$r]) && trim($data[$r]) !== '0') {
+                $errors[$r] = _w('This field is required');
+            }
+        }*/
+
+        if ($data['contact_id'] && $data['contact_id'] < 0) {
             $dm = new crmDealModel();
-            $deal = $dm->getById($deal_id);
-            if (!$deal_id) {
+            if (!$dm->getById(abs($data['contact_id']))) {
                 throw new waException('Deal not found');
-            }
-            if (!$this->getCrmRights()->deal($deal)) {
-                throw new waRightsException();
-            }
-        } elseif ($contact_id) {
-            $c = new waContact($contact_id);
-            if (!$this->getCrmRights()->contact($c)) {
-                throw new waRightsException();
             }
         }
         return $errors;
     }
 
-    protected function saveData($user_id, $content, $deal_id, $contact_id)
+    protected function saveData($data)
     {
         $rm = new crmReminderModel();
-
-        $dt = crmNaturalInput::matchDueDate($content);
-
+        $now = date('Y-m-d H:i:s');
+        $types = crmConfig::getReminderType();
         $reminder = array(
-            'create_datetime'    => date('Y-m-d H:i:s'),
-            'creator_contact_id' => wa()->getUser()->getId(),
-            'user_contact_id'    => $user_id,
-            'content'            => $content,
-            'type'               => 'OTHER',
+            'update_datetime' => $now,
+            'user_contact_id' => $data['user_contact_id'],
+            'content'         => $data['content'],
+            'contact_id'      => $data['contact_id'] ? $data['contact_id'] : null,
+            'type'            => ifset($types[$data['type']]) ? $data['type'] : 'OTHER',
         );
-        $reminder['due_date'] = !empty($dt['due_date']) ? $dt['due_date'] : date('Y-m-d', strtotime('+1 day'));
-        $reminder['due_datetime'] = !empty($dt['due_datetime']) ? $dt['due_datetime'] : null;
-        if ($deal_id || $contact_id) {
-            $reminder['contact_id'] = $deal_id ? ($deal_id * -1) : $contact_id;
+        $dt = crmNaturalInput::matchDueDate($data['content']);
+
+        if ($data['due_date']) {
+            $reminder['due_date'] = date('Y-m-d', strtotime($data['due_date']));
+        } else {
+            $reminder['due_date'] = !empty($dt['due_date']) ? $dt['due_date'] : date('Y-m-d', strtotime('+1 day'));
         }
+        if ($data['due_time']) {
+            $reminder['due_datetime'] = waDateTime::parse('Y-m-d H:i:s', $reminder['due_date'].' '.$data['due_time'].':00');
+        } else {
+            $reminder['due_datetime'] = !empty($dt['due_datetime']) ? $dt['due_datetime'] : null;
+        }
+        $action = 'reminder_update';
+        if (!$data['id']) {
+            $action = 'reminder_add';
+            $reminder['create_datetime'] = $now;
+            $reminder['creator_contact_id'] = wa()->getUser()->getId();
+            $id = $reminder['id'] = $rm->insert($reminder);
 
-        $reminder['id'] = $rm->insert($reminder);
-
-        if ($reminder['user_contact_id'] != wa()->getUser()->getId()) {
-            $c = new waContact($reminder['user_contact_id']);
-            if (!$c->getSettings('crm', 'reminder_disable_assign')) {
+            if ($reminder['user_contact_id'] != wa()->getUser()->getId()) {
                 crmReminder::sendNotification($reminder, array($reminder['user_contact_id']), 'reminder_new');
             }
+        } else {
+            $id = $data['id'];
+
+            if (!($old_reminder = $rm->getById($id))) {
+                throw new waException('Reminder not found');
+            }
+            if ($old_reminder['complete_datetime']) {
+                $reminder = array(
+                    'update_datetime' => $now,
+                    'content'         => $data['content'],
+                );
+            }
+            $rm->updateById($id, $reminder);
+            $reminder['contact_id'] = $old_reminder['contact_id'];
         }
         if (!empty($reminder['contact_id'])) {
             crmDeal::updateReminder($reminder['contact_id']);
         }
-        $this->logAction('reminder_add', array('reminder_id' => $reminder['id']));
+        $this->logAction($action, array('reminder_id' => $id));
         $lm = new crmLogModel();
-        $lm->log('reminder_add', $reminder['contact_id'], $reminder['id']);
+        $lm->log($action, $reminder['contact_id'], $id);
 
-        return $reminder['id'];
+        return $id;
+    }
+
+    protected function getData()
+    {
+        $data = $this->getRequest()->post('data', array(), waRequest::TYPE_ARRAY_TRIM);
+
+        $data['id'] = (int)ifset($data['id']);
+        $data['user_contact_id'] = (int)ifset($data['user_contact_id']);
+        $data['due_date'] = ifset($data['due_date']);
+        $data['due_time'] = ifset($data['due_time']);
+        $data['content'] = ifset($data['content']);
+        $data['contact_id'] = intval(!empty($data['deal_id']) ? $data['deal_id'] * -1 : (!empty($data['contact_id']) ? $data['contact_id'] : 0));
+        $data['type'] = ifset($data['type']);
+
+        return $data;
     }
 }

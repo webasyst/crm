@@ -14,7 +14,7 @@
         {* HEADER *}
         <header class="c-companies-header">
             <h1 class="c-page-header">[`Companies`]</h1>
-            <div class="c-tabs-wrapper">
+            <div class="c-tabs-wrapper flexbox middle full-width">
                 <div class="c-companies-wrapper">
                     <ul class="tabs c-companies-list">
                         {foreach $companies as $_company}
@@ -26,17 +26,18 @@
                             </li>
                         {/foreach}
                     </ul>
-                    <span class="c-action right" title="[`Next`]"></span>
-                    <span class="c-action left" title="[`Before`]"></span>
+                    <span class="c-action right" title="[`Next`]"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
+                    <span class="c-action left" title="[`Before`]"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
                 </div>
                 <div class="c-add-wrapper">
-                    <a href="{$wa_app_url}settings/companies/new/"><i class="icon16 add"></i> [`Add new company`]</a>
+                    
+                    <a class="button small rounded light-gray" href="{$wa_app_url}settings/companies/new/"><i class="fas fa-plus-circle text-green"></i> [`Add new company`]</a>
                 </div>
             </div>
         </header>
 
-        <form class="js-form">
-            <section class="c-company-section block double-padded">
+        <form class="js-form fields">
+            <section class="c-company-section block double-padded custom-pt-24">
                 <div class="field">
                     <div class="name">[`Company name`]</div>
                     <div class="value">
@@ -61,7 +62,7 @@
 
                             {* DELETE *}
                             <span class="c-delete-image js-delete-logo" title="[`Delete logo`]">
-                            <i class="icon16 times"></i>
+                            <i class="fas fa-times"></i>
                         </span>
                         </div>
 
@@ -97,24 +98,26 @@
                         ]}
 
                         {function _renderOption}
-                            <li class="c-tax-option">
-                                <i class="icon16 sort js-sort-toggle"></i>
-                                <select name="" class="js-type">
-                                    {foreach $_types as $_type => $_name}
-                                        <option value="{$_type}" {if !empty($_option.tax_type) && $_option.tax_type == $_type}selected{/if}>{$_name}</option>
-                                    {/foreach}
-                                </select>
+                            <li class="flexbox middle c-tax-option">
+                                <i class="fas fa-grip-vertical text-light-gray js-sort-toggle"></i>
+                                <div class="wa-select">
+                                    <select name="" class="js-type">
+                                        {foreach $_types as $_type => $_name}
+                                            <option value="{$_type}" {if !empty($_option.tax_type) && $_option.tax_type == $_type}selected{/if}>{$_name}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
                                 <input class="js-percent" type="text" name="" value="{if !empty($_option.tax_type) && $_option.tax_percent >= 0}{$_option.tax_percent}{/if}" placeholder="20">
                                 <span class="c-label">%</span>
                                 <a class="inline-link c-delete-link js-delete-option" href="javascript:void(0);">
-                                    <i class="icon10 delete"></i> <b><i>[`delete`]</i></b>
+                                    <i class="fas fa-times"></i><span> [`delete`]</span>
                                 </a>
                             </li>
                         {/function}
 
                         {capture assign=tax_option_template}{_renderOption _option=[]}{/capture}
 
-                        <ul class="c-options-list menu-v compact">
+                        <ul class="c-options-list list compact">
                             {if !empty($company.tax_options)}
                                 {foreach $company.tax_options as $_option}
                                     {_renderOption _option=$_option}
@@ -122,63 +125,73 @@
                             {/if}
                         </ul>
 
-                        <div class="c-add-wrapper">
-                            <a class="inline-link c-add-option js-add-option" href="javascript:void(0);">
-                                <i class="icon10 add"></i> <b><i>[`Add tax option`]</i></b>
+                        <div class="c-add-wrapper custom-mt-0">
+                            <a class="button small rounded light-gray c-add-option js-add-option" href="javascript:void(0);">
+                                <i class="fas fa-plus-circle text-green"></i> [`Add tax option`]
                             </a>
                         </div>
 
                     </div>
                 </div>
 
-                <section class="c-templates-section field">
+                <section class="c-templates-section">
                     <header class="c-layout">
                         <div class="c-column">
                             <h3 class="heading">[`Invoice template`]</h3>
                         </div>
                         <div class="c-column middle right">
-                            <a href="{$wa_app_url}settings/templates/"><i class="icon16 settings"></i>[`Template settings`]</a>
+                            <a class="button small rounded light-gray" href="{$wa_app_url}settings/templates/"><i class="fas fa-cog text-blue"></i> [`Template settings`]</a>
                         </div>
                     </header>
-
                     <div class="c-templates-slider">
-                        <ul class="c-templates-list">
+                        <ul class="tabs c-templates-list">
                             {foreach $templates as $_template}
                                 <li class="c-template-wrapper js-template-wrapper {if $company.template_id === $_template.id}is-active{/if}" data-id="{$_template.id|escape}">
-                                    <div class="c-template-block">
-                                        <div class="c-frame-wrapper">
+                                    <div class="card c-template-block">
+                                        <div class="image c-frame-wrapper">
                                             <iframe scrolling="no" src="?module=invoice&action=templatesRender&template_id={$_template.id|escape}&company_id={$company.id|escape}"></iframe>
                                         </div>
-                                        <h3 class="c-title">{$_template.name|escape}</h3>
-
+                                        <div class="details">
+                                            <h3 class="c-title">{$_template.name|escape}</h3>
+                                        </div>
                                         <input class="js-field" type="radio" name="company[template_id]" value="{$_template.id|escape}" {if $company.template_id === $_template.id}checked{/if}>
                                     </div>
                                 </li>
                             {/foreach}
                         </ul>
-                        <span class="c-slider-arrow left js-arrow-left" title="&larr;"></span>
-                        <span class="c-slider-arrow right js-arrow-right" title="&rarr;"></span>
+                        <span class="c-action left js-arrow-left" title="&larr;"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
+                        <span class="c-action right js-arrow-right" title="&rarr;"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
                     </div>
 
-                    <div class="c-template-options-wrapper">
-                        <div class="field">
-                            <div class="name">[`Public links URL`]</div>
-                            <div class="value">
-                                {if $has_storefronts}
-                                    <select name="company[invoice_options][domain]">
-                                        {foreach $storefront_list as $domain => $storefront}
-                                            <option value="{$domain}"
-                                                    {if isset($company_params.domain) && $company_params.domain == $domain}selected{/if}
-                                            >{$storefront}</option>
-                                        {/foreach}
-                                    </select>
-                                {else}
-                                    <i class="icon16 exclamation"></i>
-                                    [`A CRM settlement is required to publish invoices.`]
-                                    <a href="{$wa_backend_url}site/#/routing/">
-                                        [`Use Site app to add a settlement for CRM.`]
-                                    </a>
-                                {/if}
+                    <div class="fields">
+                        <div class="c-template-options-wrapper">
+                            <div class="field">
+                                <div class="name">[`Public links URL`]</div>
+                                <div class="value">
+                                    {if $has_storefronts}
+                                        <div class="wa-select">
+                                            <select name="company[invoice_options][domain]" class="not-styled">
+                                                {foreach $storefront_list as $domain => $storefront}
+                                                    <option value="{$domain}"
+                                                            {if isset($company_params.domain) && $company_params.domain == $domain}selected{/if}
+                                                    >{$storefront}</option>
+                                                {/foreach}
+                                            </select>
+                                        </div>
+                                    {else}
+                                        <div class="alert small custom-mt-0 custom-mb-4">
+                                            <div class="flexbox space-8">
+                                                <span class=""><i class="fas fa-exclamation-triangle text-orange"></i></span>
+                                                <div class="wide">                  
+                                                    [`A CRM settlement is required to publish invoices.`]
+                                                    <a href="{$wa_backend_url}site/#/routing/">
+                                                        [`Use Site app to add a settlement for CRM.`]
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {/if}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -197,16 +210,14 @@
                     <div class="c-column">
 
                         <div class="js-footer-actions">
-                            <input class="button green js-submit-button" type="submit" value="[`Save`]">
+                            <input class="button js-submit-button" type="submit" value="[`Save`]">
                             {if !empty($company.id)}
-                                <span class="js-edit-actions" style="display: none;">
-                                <span style="margin: 0 4px;">[`or`]</span>
-                                <a href="{$wa_app_url}settings/companies/{$company.id}/" class="inline-link"><b><i>[`cancel`]</i></b></a>
+                            <span class="js-edit-actions" style="display: none;">
+                                <a href="{$wa_app_url}settings/companies/{$company.id}/" class="button light-gray">[`Cancel`]</a>
                             </span>
                             {else}
-                                <span class="js-edit-actions">
-                                <span style="margin: 0 4px;">[`or`]</span>
-                                <a href="{$wa_app_url}settings/companies/" class="inline-link"><b><i>[`cancel`]</i></b></a>
+                            <span class="js-edit-actions">
+                                <a href="{$wa_app_url}settings/companies/" class="button light-gray">[`Cancel`]</a>
                             </span>
                             {/if}
                         </div>
@@ -214,7 +225,7 @@
                     </div>
                     {if count($companies) > 1}
                         <div class="c-column middle right">
-                            <a class="inline-link js-company-delete" href="javascript:void(0);"><i class="icon16 delete"></i><b><i>[`Delete company`]</i></b></a>
+                            <a class="button small red outlined js-company-delete" href="javascript:void(0);"><i class="fas fa-times-circle"></i> [`Delete company`]</a>
                         </div>
                     {/if}
                 </div>
@@ -230,8 +241,8 @@
                 company_id: {if !empty($company.id)}{$company.id}{else}false{/if},
                 tax_option_template: {$tax_option_template|json_encode},
                 locales: {
-                    loading: '<span class="c-notice"><i class="icon16 loading"></i></span>',
-                    saved_html: '<span class="c-notice"><i class="icon16 yes"></i> [`Saved`]</span>'
+                    loading: '<span class="c-notice"><i class="fas fa-spinner wa-animation-spin speed-1000"></i></span>',
+                    saved_html: '<span class="c-notice"><i class="fas fa-check"></i></span>'
                 }
             });
         })(jQuery);

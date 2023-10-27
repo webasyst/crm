@@ -234,10 +234,15 @@ class crmMailMessage
                 $inline = false;
 
                 if (isset($a['content-disposition'])) {
-                    $disposition = array();
-                    foreach ((array)$a['content-disposition'] as $item) {
-                        $disposition[] = rtrim(trim($item), ';');
+                    if (is_array($a['content-disposition'])) {
+                        $a['content-disposition'] = implode(' ', $a['content-disposition']);
                     }
+
+                    $disposition = explode(';', $a['content-disposition']);
+                    $disposition = array_map(function ($el) {
+                        return trim($el);
+                    }, $disposition);
+
                     if ($disposition[0] === 'inline') {
                         $inline = true;
                         if (isset($disposition[1])) {

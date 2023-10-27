@@ -1,287 +1,758 @@
+{$is_lazy_load = waRequest::request('lazy', waRequest::get('lazy', null, waRequest::TYPE_INT), waRequest::TYPE_INT)}
+{if !empty($iframe) && !$is_lazy_load}
+{$_locale_string = substr($wa->locale(), 0, 2)}
+
+<!DOCTYPE html>
+<html class="iframe-view">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
+
+    {* CSS *}
+    {$wa->css()}
+    <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
+
+    {wa_js file="js/min/vendor.min.js"}
+        {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
+        {$wa_app_static_url}js/jquery/jquery-ui.min.js
+        {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
+        {$wa_url}wa-content/js/jquery-wa/wa.js
+    {/wa_js}
+
+    {wa_js file="js/min/crm.min.js"}
+        {$wa_app_static_url}js/crm.js
+        {$wa_app_static_url}js/crm.autocomplete.js
+        {$wa_app_static_url}js/call.js
+        {$wa_app_static_url}js/call.associateDealDialog.js
+        {$wa_app_static_url}js/call.initContactDialog.js
+        {$wa_app_static_url}js/call.redirectDialog.js
+        {$wa_app_static_url}js/message/message.deleteLink.mixin.js
+        {$wa_app_static_url}js/contact.js
+    {/wa_js}
+
+    {strip}
+    {capture assign="_confirm_template"}{include file="../DialogConfirm.html"}{/capture}
+    {capture assign="_alert_template"}{include file="../DialogAlert.html"}{/capture}
+    {/strip}
+    <script>
+        {* need for editor2.js *}
+        var wa_app = "{$wa->app()}";
+
+        (function ($) {
+            {* need for waEditorAceInit *}
+            window.wa_url = {$wa_url|json_encode};
+            {* lang for wysiwyg *}
+            $.crm.lang = {$_locale_string|json_encode};
+            {* need for redirects or url generation *}
+            $.crm.app_url = {$wa_app_url|json_encode};
+            {* need for redirects or url generation *}
+            $.crm.backend_url = {$wa_backend_url|json_encode};
+            {* Controls debug output *}
+            $.crm.is_debug = {$wa->debug()|json_encode};
+            {* for set doc.title *}
+            $.crm.title.pattern = "%s — {$wa->accountName(false)|escape:'javascript'}";
+            {* for confirm dialog *}
+            $.crm.confirm.template = {$_confirm_template|json_encode};
+            {* for alert dialog *}
+            $.crm.alert.template = {$_alert_template|json_encode};
+            {* general locales *}
+            $.crm.locales = {
+                "unsaved_dialog_title": "[`There are unsaved changes`]",
+                "unsaved_dialog_text": "[`Unsaved changes will be lost if you leave this page now. Are you sure?`]",
+                "unsaved_dialog_button": "[`Leave`]",
+                "close": "[`Close`]",
+                "cancel": "[`Cancel`]"
+            };
+            {* Background email worker *}
+            {* 2 minutes *}
+            $.crm.runBackgroundWorker({
+                url: $.crm.app_url + '?module=source&action=emailWorker&background_process=1',
+                delay: 120000
+            });
+            $.crm.iframe = {$iframe|json_encode};
+        })(jQuery);
+    </script>
+    {* @event backend_assets.%plugin_id% *}
+    {foreach $backend_assets as $item}
+        {$item}
+    {/foreach}
+</head>
+<body {if !empty($iframe)}class="blank"{/if}>
+<div class="content blank " {if !empty($iframe)}style="min-height: 500px;"{/if}>
+    {*<div id="c-spaContainer-block"></div>*}
+    <div id="c-content-block">
+{/if}
+
 {$_title = "[`Calls`]"}
+{* DATE *}
+{$filter_dates = [
+    "7" => [
+    "id" => "7",
+    "name" => _w('Last %d day', 'Last %d days', 7),
+    "timeframe" => 7
+    ],
+    "30" => [
+        "id" => "30",
+        "name" => _w('Last %d day', 'Last %d days', 30),
+        "timeframe" => 30
+    ],
+    "90" => [
+        "id" => "90",
+        "name" => _w('Last %d day', 'Last %d days', 90),
+        "timeframe" => 90
+    ],
+    "365" => [
+        "id" => "365",
+        "name" => _w('Last %d day', 'Last %d days', 365),
+        "timeframe" => 365
+    ],
+    "all" => [
+        "id" => "null",
+        "name" => "[`All time`]",
+        "timeframe" => "null"
+    ],
+    "custom" => [
+        "id" => "custom",
+        "uri" => "javascript:void(0);",
+        "name" => "[`Select dates...`]",
+        "group_by" => "",
+        "timeframe" => "custom"
+    ]
+]}
 
-{$_is_admin = $wa->user()->isAdmin('crm')}
-<div class="c-call-page shadowed" id="c-call-page">
-    <header class="c-call-header">
-        <div class="c-layout">
+{$_no_deals = waRequest::request('no_deals', waRequest::get('no_deals', null, waRequest::TYPE_INT), waRequest::TYPE_INT)}
 
-            <div class="c-column left">
-                <ul class="c-nav-wrapper menu-h dropdown">
-                    <li class="c-page-name"><h2>{$_title}</h2></li>
-                </ul>
-            </div>
-
-            <div class="c-column right">
-                <ul class="c-call-filter menu-h dropdown">
-                    <li class="c-call-filter-name">
-                        <a href="javascript:void(0);" class="inline-link">
-                            <b><i>{$active_filter_direction.name|escape}</b></i>
-                            <i class="icon10 darr"></i>
-                        </a>
-                        <ul class="menu-v right" style="width: 150px;">
-                            {foreach $filter_directions as $_filter_direction}
-                            <li style="padding-left: 8px;">
-                                <a href="{crmHelper::getUrl(["direction" => $_filter_direction.id, "page" => 1])}" style="padding-left: 8px;">
-                                <span>{$_filter_direction.name|escape}</span>
-                                </a>
-                            </li>
-                            {/foreach}
-                        </ul>
-                    </li>
-                    {if !empty($filter_states)}
-                    <li class="c-call-filter-name">
-                        <a href="javascript:void(0);" class="inline-link" style="color: {$active_filter_state.color|escape|default:"inherit"};">
-                            <b><i>{sprintf_wp($active_filter_state.name)|escape}</b></i>
-                            <i class="icon10 darr"></i>
-                        </a>
-                        <ul class="menu-v right" style="width: 150px;">
-                            {foreach $filter_states as $_filter_state}
-                            <li style="padding-left: 8px;">
-                                <a href="{crmHelper::getUrl(["status" => $_filter_state.id, "page" => null])}" style="padding-left: 8px;">
-                                <span style="color: {$_filter_state.color|escape|default:"inherit"};">{sprintf_wp($_filter_state.name)|escape}</span>
-                                </a>
-                            </li>
-                            {/foreach}
-                        </ul>
-                    </li>
-                    {/if}
-                </ul>
+{if $timeframe && !empty($filter_dates[$timeframe])}
+    {$selected_filter_date = $filter_dates[$timeframe]}
+{else}
+    {$selected_filter_date = reset($filter_dates)}
+{/if}
+{function name="_renderContact" _contact=[]  _full=false}
+<div class="c-user-wrapper">
+    <div class="flexbox middle space-8">
+        <div class="c-column c-column-image">
+            {if ($_contact.is_visible)}
+                <a class="flexbox middle" href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top" >
+                    <img src="{$_contact.photo_url_32}" alt="{$_contact.name|escape}">
+                </a>
+            {else}
+            <img src="{$_contact.photo_url_32}" alt="{$_contact.name|escape}">
+            {/if}
+        </div>
+        <div class="c-column middle nowrap">
+            {if ($_contact.is_visible)}
+                <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top" title="{$_contact.name|escape}">{$_contact.name|escape}</a>
+            {else}
+                {$_contact.name|escape}
+            {/if}
+        </div>
+        
+    </div>
+    <i class="shortener"></i>
+</div>
+{/function}
+{function name="_renderContactFull" _contact=[] _with_job=true}
+<div class="flexbox middle c-user-wrapper">
+    <div class="flexbox middle space-8">
+        <div class="c-column c-column-image">
+            <div class="flexbox middle">
+                <img src="{$_contact.userpic}" alt="{$_contact.name|escape}">
             </div>
         </div>
-    </header>
-    <div class="c-call-body blank">
-        {if !empty($calls)}
-
-            {function name="_renderContact" _contact=[]}
-                <div class="c-user-wrapper">
-                    <div class="c-layout fixed">
-                        <div class="c-column c-column-image">
-                            {if ($_contact.is_visible)}
-                                <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top">
-                                    <img src="{$_contact.photo_url_32}" alt="{$_contact.name|escape}">
-                                </a>
-                            {else}
-                            <img src="{$_contact.photo_url_32}" alt="{$_contact.name|escape}">
+        <div class="c-column middle nowrap">
+            <div class="c-column--name" title="{$_contact.name|escape}">{$_contact.name|escape}</div>
+            {* jobtitle *}
+            {if !empty($_contact.email) && $_with_job}
+                <div class="c-jobtitle hint">{$_contact.email}</div>
+            {/if}
+            {if !empty($_contact.phone) && $_with_job}
+                <div class="c-jobtitle hint">{$_contact.phone}</div>
+            {/if}
+        </div>
+    </div>
+</div>
+{/function}
+{$_is_admin = $wa->user()->isAdmin('crm')}
+<div class="c-call-page" id="c-call-page">
+    {if empty($iframe)}
+    <header class="c-call-header custom-mb-16">
+        <div class="flexbox middle full-width custom-py-16 space-12">
+            <div class="flexbox wrap middle c-nav-wrapper">
+                <div class="c-page-name"><h2>{$_title}</h2></div>
+            </div>
+            <div class="flexbox wrap middle space-16 c-call-header-right">
+                <div class="flexbox middle c-search-wrapper">
+                    <div class="state-with-inner-icon left {if !empty($list_params.client_contact_id)}c-hidden{/if}">
+                        <input class="custom-mr-0 long js-search-field-client" placeholder="[`Search by customer names`]" type="text">
+                        <button class="icon"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="flexbox middle nowrap space-8 c-call-filter-contact js-call-filter-search">
+                        {if !empty($list_params.client_contact_id)}
+                            {_renderContactFull _contact=$contact _with_job=false}
+                            <span class="icon cursor-pointer js-call-filter-contact-cancel"><i class="fas fa-times-circle"></i></span>
+                        {/if}
+                    </div>
+                </div>
+                <div class="flexbox middle space-4">
+                    <button class="button flexbox space-8 light-gray js-filter-button">
+                        <i class="fas fa-filter"></i>
+                        [`Filter`] 
+                        {if !empty($filter_count)}
+                        <span class="badge blue small flexbox">{$filter_count}</span>
+                        {/if}
+                    </button>
+                    {if !empty($filter_count)}
+                    <button class="button flexbox light-gray js-reload-filter-button">
+                        <i class="fas fa-times"></i>
+                    </button> 
+                    {/if}
+                </div>
+            </div>
+            {if !$is_lazy_load}
+            <div class="drawer is-hide right c-call-filter" style="display: none;">
+                <div class="drawer-background">
+                    <div class="drawer-body flexbox vertical custom-px-12 custom-py-20">
+                        <div class="flexbox vertical space-20 drawer-body-filter-wrapper">
+                            <div class="c-filter-top flexbox full-width">
+                                <h2>[`Filter`]</h2>
+                                <a href="#" class="drawer-close js-close-drawer"><i class="fas fa-times"></i></a>
+                            </div>
+                            <div class="c-call-filter-name flexbox vertical space-8">
+                                <div class="c-call-filter-name-wrapper flexbox space-16">
+                                <span class="c-call-filter-name--name">[`Direction`]</span>
+                                    {*<span id="tooltip-example-1" data-wa-tooltip-content="Простой tooltip">
+                                        <i class="fas fa-question-circle"></i>
+                                    </span>
+                                    <script>
+                                        ( function($) {
+                                            $("#tooltip-example-1").waTooltip();
+                                        })(jQuery);
+                                    </script>*}
+                                </div> 
+                                <div class="dropdown custom-pl-8" id="dropdown-directions-filter">
+                                    <button class="dropdown-toggle light-gray" type="button">
+                                        {if $active_filter_direction.id === "in"}
+                                        <span class="icon size-18"><i class="fas fa-long-arrow-alt-right call-in"></i></span>
+                                        {elseif $active_filter_direction.id === "out"}
+                                        <span class="icon size-18"><i class="fas fa-long-arrow-alt-left call-out"></i></span>
+                                        {/if}
+                                        <span class="filter-name">{$active_filter_direction.name|escape}</span>
+                                    </button>
+                                    <div class="dropdown-body">
+                                        <ul class="menu with-icons">
+                                            {foreach $filter_directions as $_filter_direction}
+                                            <li class="{if $active_filter_direction.id === $_filter_direction.id}selected{/if}">
+                                                <a href="javascript:void(0);" data-filter="{$_filter_direction.id}">
+                                                {if $_filter_direction.id === "in"}
+                                                <span class="icon size-18"><i class="fas fa-long-arrow-alt-right call-in"></i></span>
+                                                {elseif $_filter_direction.id === "out"}
+                                                <span class="icon size-18"><i class="fas fa-long-arrow-alt-left call-out"></i></span>
+                                                {/if}
+                                                <span>{$_filter_direction.name|escape}</span>
+                                                </a>
+                                            </li>
+                                            {/foreach}
+                                        </ul>
+                                    </div>
+                                </div>
+                                {*<input id="dropdown-directions-input" name="dropdown_select" type="hidden" value="{$active_filter_direction.id}">*}
+                                <script>
+                                    ( function($) {
+                                        $("#dropdown-directions-filter").waDropdown({
+                                            hover: false,
+                                            items: ".menu > li > a",
+                                            change: function(event, target, dropdown) {
+                                                event.preventDefault();
+                                                dropdown.$menu.find('.selected').removeClass('selected');
+                                                $(target).parent().addClass('selected');
+                                                $("#dropdown-directions-input").val( $(target).data("filter") );
+                                            }
+                                        });
+                                    })(jQuery);
+                                </script>
+                            </div>
+                            {if !empty($filter_states)}
+                            <div class="c-call-filter-name flexbox vertical space-8">
+                                <span class="c-call-filter-name--name">[`State`]</span>
+                                <div class="dropdown custom-pl-8" id="dropdown-states-filter">
+                                    <button class="dropdown-toggle light-gray" type="button">
+                                        
+                                        <span class="filter-name">
+                                            <i class="fas fa-circle custom-pr-4" style="color: {$active_filter_state.color|escape|default:"inherit"};"></i>
+                                            {sprintf_wp($active_filter_state.name)|escape}
+                                        </span>
+                                    </button>
+                                    <div class="dropdown-body">
+                                        <ul class="menu with-icons">
+                                            {foreach $filter_states as $_filter_state}
+                                            <li class="{if $active_filter_state.id === $_filter_state.id}selected{/if}">
+                                                <a href="javascript:void(0);" data-filter="{$_filter_state.id}">
+                                                <span>
+                                                    <i class="fas fa-circle custom-pr-4" style="color: {$_filter_state.color|escape|default:"inherit"};"></i>
+                                                    {sprintf_wp($_filter_state.name)|escape}</span>
+                                                </a>
+                                            </li>
+                                            {/foreach}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <script>
+                                    ( function($) {
+                                        $("#dropdown-states-filter").waDropdown({
+                                            hover: false,
+                                            items: ".menu > li > a",
+                                            change: function(event, target, dropdown) {
+                                            event.preventDefault();
+                                            dropdown.$menu.find('.selected').removeClass('selected');
+                                            $(target).parent().addClass('selected');
+                                            $("#dropdown-states-input").val( $(target).data("filter") );
+                                            }
+                                        });
+                                    })(jQuery);
+                                </script>
+                            </div>
                             {/if}
-                        </div>
-                        <div class="c-column middle">
-                            {if ($_contact.is_visible)}
-                                <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" title="{$_contact.name|escape}">{$_contact.name|escape}</a>
-                            {else}
-                                {$_contact.name|escape}
-                            {/if}
-
-                            {* jobtitle *}
-                            {if !empty($_contact.jobtitle)}
-                                <span class="c-jobtitle hint">{$_contact.jobtitle|escape}</span>
-
-                                {if !empty($_contact.company)}
-                                    <span class="hint">@</span>
-                                    {if $_contact.company_contact_id > 0}
-                                        <a href="{$wa_app_url}contact/{$_contact.company_contact_id}/">{$_contact.company|escape}</a>
-                                    {else}
-                                        {$_contact.company|escape}
+                            <div class="c-call-filter-name flexbox vertical space-8">
+                                <span class="c-call-filter-name--name">[`Client`]</span>
+                                <div class="c-call-filter-name--input custom-pl-8">
+                                    <input class="js-search-field-contact width-90 {if !empty($list_params.client_contact_id)}c-hidden{/if}" placeholder="[`Start typing a name`]" type="text" id="input-autocomplete-contact" value="">
+                                </div>
+                                <div class="flexbox  nowrap space-16 c-call-filter-contact js-call-filter-contact">
+                                    {if !empty($list_params.client_contact_id)}
+                                        {_renderContactFull _contact=$contact _with_job=true}
+                                        <span class="icon js-call-filter-contact-cancel"><i class="fas fa-times-circle"></i></span>
                                     {/if}
+                                </div>
+                            </div>
+                            <div class="c-call-filter-name flexbox vertical space-8">
+                                <span class="c-call-filter-name--name">[`Responsible user (owner)`]</span>
+                                {if isset($list_params['user_contact_id']) && isset($users[$list_params['user_contact_id']])}
+                                    {$active_user = $users[$list_params['user_contact_id']]}
+                                {else}
+                                    {$active_user = null}
+                                   
                                 {/if}
-                            {/if}
+                                <div class="dropdown custom-pl-8" id="dropdown-responsible-filter">
+                                    <button class="dropdown-toggle light-gray" type="button">
+                                        <span class="flexbox space-4 filter-name">
+                                            {if $active_user}
+                                                <i class="icon"><img src="{$active_user.photo_url_32}" class="rounded" alt="{$active_user.name|escape}"></i>
+                                                <span>{$active_user.name|escape}</span>
+                                            {else}
+                                                <span>[`All responsibles`]</span>
+                                            {/if}
+                                        </span>
+                                    </button>
+                                    <div class="dropdown-body">
+                                        <ul class="menu with-icons">
+                                            <li class="{if !$active_user}selected{/if}">
+                                                <a href="javascript:void(0);" data-filter="">
+                                                <span class="flexbox space-4">
+                                                    <span>[`All responsibles`]</span>
+                                                </a>
+                                            </li>
+                                            {foreach $users as $_user}
+                                            <li class="{if $active_user && $active_user.id === $_user.id}selected{/if}">
+                                                <a href="javascript:void(0);" data-filter="{$_user.id}">
+                                                <span class="flexbox space-4">
+                                                    <i class="icon">
+                                                        <img src="{$_user.photo_url_32}" class="rounded" alt="{$_user.name|escape}">
+                                                    </i>
+                                                    {$_user.name|escape}
+                                                </span>
+                                                </a>
+                                            </li>
 
-                            {*<div class="line">*}
-                                {*{if !empty($_contact.tags)}*}
-                                    {*{strip}*}
-                                        {*<ul class="c-tags-list">*}
-                                            {*{foreach $_contact.tags as $_tag}*}
-                                                {*<li>*}
-                                                    {*<a class="c-tag" href="{$wa_app_url}contact/tag/{$_tag.id}/">{$_tag.name|escape}</a>*}
-                                                {*</li>*}
-                                            {*{/foreach}*}
-                                        {*</ul>*}
-                                    {*{/strip}*}
-                                {*{/if}*}
-                            {*</div>*}
+                                            {/foreach}
 
-                            {*{if !empty($_contact.role_label)}<span class="c-role-tag">{$_contact.role_label|escape}</span>{/if}*}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <script>
+                                    ( function($) {
+                                        $("#dropdown-responsible-filter").waDropdown({
+                                            hover: false,
+                                            items: ".menu > li > a",
+                                            change: function(event, target, dropdown) {
+                                            event.preventDefault();
+                                            dropdown.$menu.find('.selected').removeClass('selected');
+                                            $(target).parent().addClass('selected');
+                                            $("#dropdown-responsible-input").val( $(target).data("filter") );
+                                            }
+                                        });
+                                    })(jQuery);
+                                </script>
+                            </div>
+                            <div class="c-call-filter-name flexbox vertical space-8">
+                             
+                                <span class="c-call-filter-name--name">[`Deal`]</span>
+                                <div class="c-call-filter-name--input custom-pl-8">
+                                    <input class="js-search-field-deal width-90 {if $deal}c-hidden{/if}" placeholder="[`Start typing a title`]" type="text" id="input-autocomplete-deal" value="">
+                                </div>
+                                <div class="flexbox  nowrap space-16 c-call-filter-deal js-call-filter-deal">
+                                    
+                                    {if $deal}
+                                        <div class="c-deal-wrapper nowrap">
+                                            <div class="flexbox space-8 ">
+                                                <i class="fas fa-circle" style="color: {$deal.funnel.color|escape}"></i>
+                                            </div>
+                                            <div>
+                                                <div class="c-deal-wrapper--name">{$deal.name|escape}</div>
+                                                <div>
+                                                    {if !empty($deal.create_datetime)}
+                                                        <span class="hint">{$deal.create_datetime|wa_date}</span>
+                                                    {/if}
+                                                    {if !empty($deal.date.closed_datetime)}
+                                                        <span> - </span>
+                                                        <span class="hint">{$deal.date.closed_datetime|wa_date}</span>
+                                                    {/if}
+                                                </div>
+                                                {if !empty($deal.amount)}
+                                                <div class="hint">{$deal.amount|ceil}</div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                        <span class="icon js-call-filter-deal-cancel"><i class="fas fa-times-circle"></i></span>
+                                    {/if}
+                                </div>
+                            </div>
+                            <div class="c-call-filter-name flexbox vertical space-8">
+                                <div class="switch-with-text custom-pl-8">
+                                    <span class="switch " id="switch-deal-off">
+                                        <input type="checkbox" name="" id="input-switch-deal-off" {if $list_params['deal_id'] === 0} checked{/if}>
+                                    </span>
+                                    <label for="input-switch-deal-off">[`Do not relate to deal`]</label>
+                                </div>
+                                
+                                <script>
+                                    ( function($) {
+                                        $("#switch-deal-off").waSwitch({
+                                            ready: function (wa_switch) {
+                                            },
+                                            change: function(active, wa_switch) {
+                                                if (active) {
+                                                    $("#input-deal").val(0);
+                                                    $(".js-search-field-deal").prop('disabled', true);
+                                                    $(".js-call-filter-deal").addClass('c-disabled');
+                                                }
+                                                else {
+                                                    $("#input-deal").val($("#input-autocomplete-deal").val());
+                                                    $(".js-search-field-deal").prop('disabled', false);
+                                                    $(".js-call-filter-deal").removeClass('c-disabled');
+                                                }
+                                            }
+                                        });
+                                    })(jQuery);
+                                </script>
+                            </div>
+                            <div class="c-call-filter-name flexbox vertical space-8">
+                                <span class="c-call-filter-name--name">[`Period`]</span>
+                                <div class="c-call-filter-name--input custom-pl-8">
+                                    <div class="dropdown" id="dropdown-date-filter">
+                                        <button class="dropdown-toggle nowrap light-gray" type="button">
+                                            <span class="js-link-text">{$selected_filter_date.name|escape}</span>
+                                        </button>
+                                        <div class="dropdown-body right">
+                                            <ul class="menu with-icons js-list">
+                                                {foreach $filter_dates as $_date}
+                                                    <li class="js-toggle {if $selected_filter_date.id == $_date.id}selected{/if}">
+                                                        <a href="javascript:void(0);" data-timeframe="{$_date.timeframe}">{$_date.name|escape}</a>
+                                                    </li>
+                                                {/foreach}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <script>
+                                        ( function($) {
+                                            $("#dropdown-date-filter").waDropdown({
+                                            hover: false,
+                                            items: ".menu > li > a",
+                                            change: function(event, target, dropdown) {
+                                                event.preventDefault();
+                                                dropdown.$menu.find('.selected').removeClass('selected');
+                                                $(target).parent().addClass('selected');
+                                                const timeframe = $(target).data("timeframe");
+                                                const $hidden = $(".c-call-filter-date-hidden");
+                                                const shown_class = "is-shown";
+                                                $("#dropdown-timeframe-input").val( timeframe );
+                                                if (timeframe !== "custom") {
+                                                    $hidden.removeClass(shown_class);
+                                                    $('.js-start-field').val('');
+                                                    $('.js-end-field').val('');
+                                                } else {
+                                                    $hidden.addClass(shown_class);
+                                                }
+                                            }
+                                        });
+                                        })(jQuery);
+                                    </script>
+                                </div>
+                                <div class="c-call-filter-date-hidden c-hidden-part {if $timeframe == "custom"}is-shown{/if}">
+                                    <div class="c-filter-text">
+                                        [` from`]
+                                        <input class="small custom-mr-0 js-datepicker" type="text" value="{$list_params['create_datetime_begin']|wa_date}" style="width:107px;" data-selector="js-start-field">
+                                        [` to`]
+                                        <input class="small custom-mr-0 js-datepicker" type="text" value="{$list_params['create_datetime_end']|wa_date}" style="width:107px;" data-selector="js-end-field">
+                                    </div>
+                                </div>
+                            </div>
+                            <form class="c-call-filter-form" action="">
+                                <input id="dropdown-directions-input" name="direction" type="hidden" value="{$active_filter_direction.id}">
+                                <input id="dropdown-states-input" name="status" type="hidden" value="{$active_filter_state.id}">
+                                <input id="input-contact" name="contact" type="hidden" value="{$list_params['client_contact_id']}">
+                                <input id="input-deal" name="deal" type="hidden" value="{$list_params['deal_id']}">
+                                <input id="dropdown-timeframe-input" name="timeframe" type="hidden" value="{$selected_filter_date.id}">
+                                <input class="js-start-field" name="start" type="hidden" value="{$list_params['create_datetime_begin']}">
+                                <input class="js-end-field" name="end" type="hidden" value="{$list_params['create_datetime_end']}">
+                                <input id="dropdown-responsible-input" name="user" type="hidden" value="{$list_params['user_contact_id']}">
+                            </form>
+                        </div>
+                        <div class="c-filter-buttom flexbox space-8">
+                            <button class="button js-apply-filter">[`Apply`]</button>
+                            <button class="button gray js-reset-filter">[`Reset`]</button>
+                            <button class="button light-gray js-restore-filter">[`Cancel`]</button>
                         </div>
                     </div>
                 </div>
-            {/function}
+            </div>
+            {/if}
+        </div>
+    </header>
+    {/if}
+    <div class="c-call-body blank">
+        {if !empty($calls)}
 
-            <table class="zebra c-calls-table" id="js-calls-table">
-                <thead>
-                    <tr class="white">
-                        <td class="c-column-icon">
-                        </td>
-                        <td class="c-column-date">
-                            <span>[`Date`]</span>
-                        </td>
-                        <td class="c-column-phone">
-                            <span style="margin: 0 0 0 48px;">[`Phone`]</span>
-                        </td>
-                        <td class="c-column-state">
-                            <span>[`State`]</span>
-                        </td>
-                        <td class="c-column-duration"></td>
-                        <td class="c-column-client">
-                            <span>[`Client`]</span>
-                        </td>
-                        <td class="c-column-deal">
-                            <span>[`Deal`]</span>
-                        </td>
-                        <td class="c-column-user">
-                            <span>[`User`]</span>
-                        </td>
-                        <td class="c-column-actions"></td>
-                        <td class="c-column-actions"></td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {foreach $calls as $_call}
-                        {$_client = false}
-                        {$_user = false}
-                        {$_deal = false}
-                        {$_state = false}
+            <div class="flexbox vertical small single-lined c-calls-table" id="js-calls-table" data-ui2="1">
+                        {foreach $calls as $_call}
+                            {$_client = false}
+                            {$_user = false}
+                            {$_deal = false}
+                            {$_state = false}
 
-                        {if !empty($_call.client_contact_id) && !empty($contacts[$_call.client_contact_id])}
-                            {$_client = $contacts[$_call.client_contact_id]}
-                        {/if}
-                        {if !empty($_call.user_contact_id) && !empty($contacts[$_call.user_contact_id])}
-                            {$_user = $contacts[$_call.user_contact_id]}
-                        {/if}
-                        {if !empty($_call.deal_id) && !empty($deals[$_call.deal_id])}
-                            {$_deal = $deals[$_call.deal_id]}
-                        {/if}
-                        {if !empty($_call.status_id)}
-                            {$_state = $states[$_call.status_id]}
-                        {/if}
-
-                        <tr class="c-call-wrapper" data-id="{$_call.id|escape}">
-                            <td class="c-column-icon">
-                                {if $_call.plugin_icon}
-                                    <i class="icon16" title="{$_call.plugin_name|escape}" style="background-image: url('{$_call.plugin_icon}'); background-size: 16px 16px;"></i>
-                                {/if}
-                            </td>
-                            <td class="c-column-date">
-                                {if !empty($_call.create_datetime)}
-                                    <span class="nowrap c-date">{$_call.create_datetime|wa_datetime}</span>
-                                {/if}
-                            </td>
-                            <td class="c-column-phone">
-                                <span class="nowrap" title="{if $_call.direction === "IN"}[`incoming`]{else}[`outgoing`]{/if}">
-                                    <i class="icon16 phone"></i>
-                                    <span>{$_call.user_number|escape|default:"[`unknown`]"}</span>
-                                </span>
-                                <span class="nowrap" title="{if $_call.direction === "IN"}[`incoming`]{else}[`outgoing`]{/if}">
-                                    <i class="icon16 {if $_call.direction === "IN"}call-in{else}call-out{/if}"></i>
-                                    {if !empty($_client) && !$contacts[$_call.client_contact_id]['is_visible']}
-                                        <small class="small">[`hidden phone number`]</small>
-                                    {else}
-                                        {$_call.client_number|escape|default:"[`unknown`]"}
-                                    {/if}
-                                </span>
-                            </td>
-                            <td class="c-column-state">
-                                {if !empty($_state)}
-                                    <span class="nowrap c-state" style="color: {$_state.color|escape|default:"inherit"};">{strip}
-                                        {sprintf_wp($_state.name)|escape}
-                                        {if $_state.id == "CONNECTED"}
-                                            <a href="javascript:void(0)" class="c-finish-call js-finish-call">
-                                                <i class="icon16 yes-bw" title="[`Finished`]"></i>
-                                                <i class="icon16 loading" style="display: none;"></i>
-                                            </a>
+                            {if !empty($_call.client_contact_id) && !empty($contacts[$_call.client_contact_id])}
+                                {$_client = $contacts[$_call.client_contact_id]}
+                            {/if}
+                            {if !empty($_call.user_contact_id) && !empty($contacts[$_call.user_contact_id])}
+                                {$_user = $contacts[$_call.user_contact_id]}
+                            {/if}
+                            {if !empty($_call.deal_id) && !empty($deals[$_call.deal_id])}
+                                {$_deal = $deals[$_call.deal_id]}
+                            {/if}
+                            {if !empty($_call.status_id)}
+                                {$_state = $states[$_call.status_id]}
+                            {/if}
+                            {$record_link = crmHelper::getCallRecordLinkHtml($_call)}
+                            <div class="flexbox middle wrap width-100 full-width c-call-wrapper" data-id="{$_call.id|escape}">
+                                <div class="flexbox middle c-column-first">
+                                    <div class="c-column-duration nowrap">
+                                        <span class="c-duration">
+                                            {$record_link}
+                                            <i class="icon16 play disabled"></i>
+                                            {crmHelper::formatSeconds($_call.duration)}
+                                        </span>
+                                    </div>
+                                    <div class="c-column-date">
+                                        {if !empty($_call.create_datetime)}
+                                        <div class="nowrap single-line">
+                                            <span class="nowrap c-date">{$_call.create_datetime|wa_datetime}</span>
+                                        </div>
                                         {/if}
-                                    {/strip}</span>
-                                {/if}
-                            </td>
-                            <td class="c-column-duration nowrap">
-                                <span class="c-duration">{crmHelper::formatSeconds($_call.duration)}</span>
-                                {crmHelper::getCallRecordLinkHtml($_call)}
-                            </td>
-                            <td class="c-column-client">
-                                <div class="c-single-line">
-                                    {if !empty($_client)}
-                                        {_renderContact _contact=$_client}
-                                    {else}
-                                        <a href="{$wa_app_url}contact/new/?call={$_call.id|default:""|escape}" class="small"><i class="icon10 add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i>[`Create or update contact`]</a>
-                                    {/if}
+                                    </div>
+                                    <div class="c-column-state">
+                                        {if !empty($_state)}
+                                            <span class="nowrap c-state badge" style="background-color: {$_state.color|escape|default:"inherit"};">
+                                                {strip}
+                                                {sprintf_wp($_state.name)|escape}
+                                                {/strip}
+                                            </span>
+                                            {if $_state.id == "CONNECTED"}
+                                            <a href="javascript:void(0)" class="c-finish-call js-finish-call custom-ml-12">
+                                                <span class="icon size-16 loading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></span>
+                                                <span class="icon size-16 yes-bw" title="[`Finished`]"><i class="fas fa-check"></i></span>
+                                            </a>
+                                            {/if}
+                                        {/if}
+                                    </div>
                                 </div>
-                            </td>
-                            <td class="c-column-deal">
-                                <div class="c-single-line">
-                                    {if !empty($_deal) && $_deal.is_visible}
-
-                                        <div class="c-deal-wrapper">
-                                            {$_funnel = $funnels[$_deal.funnel_id]|default:null}
-                                            {if $_funnel}
-                                                {$_stage = $_funnel.stages[$_deal.stage_id]|default:null}
-                                                {if $_stage}
-                                                    <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
-                                                    <a href="{$wa_app_url}deal/{$_deal.id}/" title="{$_deal.name|escape}">{$_deal.name|escape}</a>
-                                                {else}
-                                                    <a href="{$wa_app_url}deal/{$_deal.id}/" title="{$_deal.name|escape}">{$_deal.name|escape}</a> <span class="hint">[`Stage deleted`]</span>
-                                                {/if}
+                                <div class="flexbox middle c-column-second">
+                                    <div class="c-column-phone">
+                                        <div class="nowrap single-line">
+                                            {if !empty($_client)}
+                                                {_renderContact _contact=$_client}
                                             {else}
-                                                <a href="{$wa_app_url}deal/{$_deal.id}/" title="{$_deal.name|escape}">{$_deal.name|escape}</a> <span class="hint">[`Funnel deleted`]</span>
+                                            <div class="flexbox middle space-8">
+                                                <img class="icon size-24" src="{$site_url}wa-content/img/userpic.svg" />
+                                                <a href="javascript:void(0);" class="add-contact">
+                                                    <span class="call-number" title="[`Create or update contact`]">
+                                                        
+                                                        {if !empty($_client) && !$contacts[$_call.client_contact_id]['is_visible']}
+                                                            <span class="">[`hidden phone number`]</span>
+                                                        {else}
+                                                            {$_call.client_number|escape|default:"[`unknown`]"}
+                                                        {/if}
+                                                    </span>
+                                                </a>
+                                                <div class="c-dots js-phone-menu-wrapper">   
+                                                    <div class="dropdown " id="dropdown-phone-menu-{$_call.id}">  
+                                                        <a class="dropdown-toggle without-arrow " href="javascript:void(0);">
+                                                            <span class="icon size-14 hint js-phone-menu cursor-pointer"><i class="fas fa-ellipsis-h"></i></span> 
+                                                        </a>
+                                                        <div class="dropdown-body">
+                                                            <ul class="menu">
+                                                                <li>
+                                                                    <a href="javascript:void(0);" class="js-show-create-dialog" data-number="{$_call.client_number|escape}">
+                                                                        Создать новый контакт
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="javascript:void(0);" class="js-show-update-dialog" data-id="{$_call.id}">
+                                                                        Подключить к существующему
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <script>
+                                                        ( function($) {
+                                                            const $dropdown = $("#dropdown-phone-menu-{$_call.id}");
+                                                            $dropdown.waDropdown({
+                                                                hover: false,
+                                                                //items: ".menu > li > i",
+                                                                open: function(dropdown_instance) {
+                                                                    $dropdown.closest('.c-column-phone').css('overflow', 'visible');
+                                                                },
+                                                                close: function(event, active_item, dropdown_instance) {
+                                                                    $dropdown.closest('.c-column-phone').css('overflow', 'hidden')
+                                                                }
+                                                            });
+                                                        })(jQuery);
+                                                    </script>
+                                                </div> 
+                                            </div>
+
                                             {/if}
                                         </div>
-                                    {elseif !empty($availble_funnels) && !empty($_client) && $contacts[$_call.client_contact_id]['is_visible'] && empty($_deal) && !$_deal.is_visible}
-                                        <a href="javascript:void(0);" class="inline-link small js-associate-deal" data-dialog-url="{$wa_app_url}?module=call&action=associateDealDialog&call_id={$_call.id}"><i class="icon10 add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i><b><i>[`Associate with a deal`]</i></b></a>
-                                    {elseif !empty($_deal) && !$_deal.is_visible}
-                                        <span class="small">[`deal is hidden`]</span>
+
+                                    </div>
+                                    <div class="c-column-direction">
+                                        <span class="flexbox middle nowrap" title="{if $_call.direction === "IN"}[`incoming`]{else}[`outgoing`]{/if}"  {if $_call.direction === "IN"}data-number='{$_call.client_number|escape|default:"[`unknown`]"}'{/if}>
+                                            <span class="icon size-18 custom-pt-4"><i class="fas fa-{if $_call.direction === "IN"}long-arrow-alt-right call-in {else}long-arrow-alt-left call-out{/if}"></i></span>
+                                        </span>
+                                    </div>
+                                    <div class="c-column-user">
+                                        <div class="single-line nowrap">
+                                            {if !empty($_user)}
+                                            {_renderContact _contact=$_user}
+                                            {else}
+                                        
+                                            <div class="flexbox middle space-8">
+                                                <img class="icon size-24" src="{$site_url}wa-content/img/userpic.svg" />
+                                                <span>{$_call.user_number|escape|default:"[`unknown`]"}</span>
+                                            </div>
+                                            
+                                            {/if}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flexbox middle full-width c-column-third">
+                                    <div class="c-column-deal">
+                                        {if !$_no_deals}
+                                        <div class="single-line">
+                                            {if !empty($_deal) && $_deal.is_visible}
+
+                                                <div class="c-deal-wrapper nowrap">
+                                                    {$_funnel = $funnels[$_deal.funnel_id]|default:null}
+                                                    {if $_funnel}
+                                                        {$_stage = $_funnel.stages[$_deal.stage_id]|default:null}
+                                                        {if $_stage}
+                                                            {*<i class="icon funnel-state svg-icon" data-color="{$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>*}
+                                                            <i class="fas fa-circle custom-pt-4" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                                            <a href="{$wa_app_url}deal/{$_deal.id}/" target="_top" data-link="top" title="{$_deal.name|escape}">{$_deal.name|escape}</a>
+                                                        {else}
+                                                            <a href="{$wa_app_url}deal/{$_deal.id}/" target="_top" data-link="top" title="{$_deal.name|escape}">{$_deal.name|escape}</a> <span class="hint">[`Stage deleted`]</span>
+                                                        {/if}
+                                                    {else}
+                                                        <a href="{$wa_app_url}deal/{$_deal.id}/" target="_top" data-link="top" title="{$_deal.name|escape}">{$_deal.name|escape}</a> <span class="hint">[`Funnel deleted`]</span>
+                                                    {/if}
+                                                </div>
+                                            {elseif !empty($availble_funnels) && !empty($_client) && $contacts[$_call.client_contact_id]['is_visible'] && empty($_deal)}
+                                                <a href="javascript:void(0);" class="js-associate-deal" data-dialog-url="{$wa_app_url}?module=call&action=associateDealDialog&call_id={$_call.id}"><i class="fas fa-plus-circle text-light-gray custom-mr-4 add"></i>
+                                                    <span class="text-light-gray bold nowrap">[`Associate with a deal`]</span>
+                                                </a>
+                                            {elseif !empty($_deal) && !$_deal.is_visible}
+                                                <span class="text-light-gray bold">[`deal is hidden`]</span>
+                                            {/if}
+                                            
+                                        </div>
+                                        {/if}
+                                    </div>
+                                    <div class="c-dots js-dots-wrapper">     
+                                        <span class="icon size-14 hint js-dots cursor-pointer"><i class="fas fa-ellipsis-h"></i></span>  
+                                        <div class="c-dots-detail c-column-actions-wrapper">
+                                            {if ifempty($_call.redirect_allowed)}
+                                            <div class="c-column-actions nowrap">
+                                                <a class="js-redirect-call" href="javascript:void(0);" title="[`Redirect call`]"><i class="fas fa-exchange-alt text-blue"></i> [`Redirect call`]</a>
+                                            </div>
+                                            {/if}
+                                            <div class="c-column-actions nowrap js-delete-call">
+                                                {if !empty($_is_admin)}
+                                                    <div class="c-actions-wrapper">
+                                                        {$_status_name = ""}{if !empty($_state)}{$_status_name = "<span style='color: {$_state.color|escape|default:"inherit"};'>{sprintf_wp($_state.name)|escape}</span>"}{/if}
+                                                        {$_direction = "[`to`]"}{if $_call.direction === "IN"}{$_direction = "[`from`]"}{/if}
+                                                        {$_number = $_call.plugin_client_number|default:"[`unknown`]"|escape}
+                                                        
+                                                        {$_delete_confirm_title = sprintf("[`Delete`] %s [`call`] %s %s", $_status_name, $_direction, $_number)}
+        
+                                                        <a class="c-delete-call" href="javascript:void(0);" data-title="{$_delete_confirm_title|escape}" title="[`delete`]"><i class="fas fa-trash text-red delete"></i> [`Delete`]</a>
+                                                    </div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flexbox middle c-column-audio custom-pt-4" style="display: none">
+                                    {*<div class="progressbar width-100" id="progressbar-{$_call.id|escape}">
+                                        <script>
+                                            ( function($) {
+                                               // $("#progressbar-{$_call.id|escape}").waProgressbar();
+                                            })(jQuery);
+                                        </script>
+                                    </div>*}
+                                    {if !empty($record_link)}
+                                        <input type="range" id="c-audio-slider" max="100" value="0">
+                                        <div class="c-audio-time nowrap custom-pl-16 small">
+                                            <span id="current-time" class="c-audio-current-time">0:00</span>
+                                            <span class="c-audio-delimiter"> / </span>
+                                            <span id="duration" class="c-audio-duration">0:00</span>
+                                        </div>
                                     {/if}
                                 </div>
-                            </td>
-                            <td class="c-column-user">
-                                <div class="c-single-line">
-                                    {if !empty($_user)}{_renderContact _contact=$_user}{/if}
-                                </div>
-                            </td>
-                            <td class="c-column-actions">
-                                {if ifempty($_call.redirect_allowed)}
-                                    <a class="js-redirect-call" href="javascript:void(0);" title="[`Redirect call`]"><i class="icon16 rotate-right"></i></a>
-                                {/if}
-                            </td>
-                            <td class="c-column-actions">
-                                {if !empty($_is_admin)}
-                                    <div class="c-actions-wrapper">
-                                        {$_status_name = ""}{if !empty($_state)}{$_status_name = "<span style='color: {$_state.color|escape|default:"inherit"};'>{$_state.name}</span>"}{/if}
-                                        {$_direction = "[`to`]"}{if $_call.direction === "IN"}{$_direction = "[`from`]"}{/if}
-                                        {$_number = $_call.plugin_client_number|default:"[`unknown`]"}
-                                        {$_delete_confirm_title = sprintf("Delete %s call %s %s", $_status_name, $_direction, $_number)}
-
-                                        <a class="js-delete-call" href="javascript:void(0);" data-title="{$_delete_confirm_title|escape}" title="[`delete`]"><i class="icon16 delete"></i></a>
-                                    </div>
-                                {/if}
-                            </td>
-                        </tr>
-                    {/foreach}
-                </tbody>
-            </table>
+                            </div>
+                        {/foreach}
+                        {if isset($pages_count) && $pages_count > $current_page}
+                            <div class="js-lazy-load">
+                                <div class="spinner"></div> 
+                            </div>
+                        {/if}   
+            </div>
 
         {else}
 
-            <p class="block double-padded">
+            <div class="flexbox vertical middle no-calls">
+                <span class="icon size-80 text-light-gray"><i class="fas fa-phone-alt"></i></span>
                 {if $pbx_plugins}
-                    [`No phone calls.`]
+                <span class="custom-my-16 gray">[`No phone calls.`]</span>
                 {else}
                     [`No PBX plugins installed.`]<br><br>
 
                     {sprintf_wp(
-                        'To handle phone calls in CRM, install and set up <a href="%s">IP telephony integration plugins</a>.',
+                        'To handle phone calls in CRM, install and set up <a class="js-disable-router" href="%s" target="_top" >IP telephony integration plugins</a>.',
                         "`$wa_app_url`plugins/"
                     )}
 
                 {/if}
-            </p>
+            </div>
         {/if}
-
-        {$_url_params = ''}
-        {foreach waRequest::get() as $_k=>$_v}
-            {if $_k != '_' && $_k != 'page' && $_v}
-                {$_url_params = "`$_url_params`&`$_k`=`$_v`"}
-            {/if}
-        {/foreach}
-        {$_url_params = substr($_url_params, 1)}
-
-        {$wa->crm->pager($total_count|default:0, $page, $_url_params)}
     </div>
 
     <script>
@@ -292,12 +763,50 @@
                 $wrapper: $("#c-call-page"),
                 call_ts: {if !empty($call_ts)}{$call_ts|json_encode}{else}false{/if},
                 numbers_assigned: {json_encode(!empty($numbers_assigned))},
+                current_page: {$current_page},
+                iframe: {$iframe|default:0},
+                is_lazy_load: {$is_lazy_load|default:0},
+                contact: { name: "{if isset($contact.name)}{$contact.name|escape}{/if}",
+                           userpic: "{if isset($contact.userpic)}{$contact.userpic|escape}{/if}",
+                           email: "{if isset($contact.email)}{$contact.email|escape}{/if}",
+                           phone: "{if isset($contact.phone)}{$contact.phone|escape}{/if}",
+                            },
+                deal: { name: "{if isset($deal.name)}{$deal.name|escape}{/if}",
+                        stage: { color: "{if isset($deal.funnel.color)}{$deal.funnel.color|escape}{/if}" },
+                        amount: "{if isset($deal.amount)}{$deal.amount|ceil}{/if}",
+                        closed_datetime: "{if isset($deal.date.closed_datetime)}{$deal.date.closed_datetime|wa_date}{/if}",
+                        create_datetime: "{if isset($deal.create_datetime)}{$deal.create_datetime|wa_date}{/if}"
+                     },
                 locales: {
                     delete_confirm_text: "[`Are you sure?`]",
-                    delete_confirm_button: "[`Delete`]"
+                    delete_confirm_button: "[`Delete`]",
+                    delete_cancel_button: "[`Cancel`]"
                 }
             });
 
         })(jQuery);
     </script>
 </div>
+{if !empty($iframe)}
+    </div>
+</div>
+<script>
+    (function ($) {
+        const $content = $("#c-content-block");
+        const $spaContainer = $('#c-spaContainer-block');
+
+        /* Teleport SPA to the correct block */
+        if ($content.find("#app").length)
+            $content.contents().detach().appendTo($spaContainer);
+
+        /* Main content router */
+        $.crm.content = new ContentRouter({
+            $content: $content,
+            $spaContainer: $spaContainer
+        });
+    })(jQuery);
+</script>
+</body>
+</html>
+{/if}
+

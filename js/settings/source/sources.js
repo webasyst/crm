@@ -19,11 +19,13 @@ var CRMSettingsSources = ( function($) {
         var that = this,
             $wrapper = that.$wrapper;
 
-        $.crm.renderSVG($wrapper);
+        //$.crm.renderSVG($wrapper);
 
         that.initTabs();
 
         that.initWebFormLinks();
+
+        that.initSourcesClick();
 
         that.initDisableLinks();
     };
@@ -70,42 +72,65 @@ var CRMSettingsSources = ( function($) {
         });
     };
 
+    CRMSettingsSources.prototype.initSourcesClick = function () {
+        var that = this,
+            $wrapper = that.$wrapper,
+            $loader =  $('<span class="icon size-16 loading " ><i class="fas fa-spinner fa-spin"></i></span>');
+        $wrapper.on('click', '.c-source-details a', function () {
+            $(this).parent().append($loader);
+          
+        });
+    };
+   
+
     CRMSettingsSources.prototype.initDisableLinks = function () {
         var that = this,
             $wrapper = that.$wrapper,
+            $switchers = $wrapper.find('.js-c-disable-link'),
             xhr = null,
             url = $.crm.app_url + '?module=settingsSource&action=disable';
 
-        $wrapper.on('click', '.js-c-disable-link', function (e) {
-            e.preventDefault();
+            $switchers.each(function () {
+                var $switch_wrapper = $(this),
+                    $item = $switch_wrapper.closest('.c-source'),          
+                    id = $item.data('id'),
+                    $loading = $item.find('.c-loading'),
+                    $switch = $switch_wrapper.find("#switch-" + id);
+                    //is_disabled = $item.hasClass('c-is-disabled'),
 
-            var $link = $(this),
-                $item = $link.closest('.c-source'),
-                id = $item.data('id'),
-                is_disabled = $item.hasClass('c-is-disabled'),
-                $loading = $item.find('.c-loading');
-
-            xhr && xhr.abort();
-            $loading.show();
-
-            xhr = $.post(url, { id: id, disabled: is_disabled ? 0 : 1 })
-                .done(function (r) {
-                    if (r.status !== 'ok') {
-                        return;
-                    }
-                    if (r.data.disabled) {
-                        $link.text(that.messages.enable);
-                        $item.addClass('c-is-disabled');
-                    } else {
-                        $link.text(that.messages.disable);
-                        $item.removeClass('c-is-disabled');
-                    }
-                })
-                .always(function () {
-                    xhr = null;
-                    $loading.hide();
-                })
-        });
+                    $switch.waSwitch({
+                        ready: function (wa_switch) {
+                            let $label = wa_switch.$wrapper.siblings('label');
+                            wa_switch.$label = $label;
+                            wa_switch.active_text = $label.data('active-text');
+                            wa_switch.inactive_text = $label.data('inactive-text');
+                        },
+                        change: function(active, wa_switch) {
+                            $loading.show();
+                            wa_switch.disable(true);
+                            xhr && xhr.abort();
+                            xhr = $.post(url, { id: id, disabled: active ? 0 : 1 })
+                            .done(function (r) {
+                                if (r.status !== 'ok') {
+                                    return;
+                                }
+                                if (active) {
+                                    wa_switch.$label.text(wa_switch.inactive_text); 
+                                    $item.removeClass('c-is-disabled');
+                                } else {
+                                    wa_switch.$label.text(wa_switch.active_text);
+                                    $item.addClass('c-is-disabled');
+                                }
+                                wa_switch.disable(false);
+                            })
+                            .always(function () {
+                                xhr = null;
+                                $loading.hide();
+                            })
+                        }
+                    });
+    
+            });
     };
 
     // STATIC METHODS
@@ -119,11 +144,11 @@ var CRMSettingsSources = ( function($) {
             text: messages['delete_confirm_text'],
             button: messages['delete_confirm_button'],
 
-            onConfirm: function () {
-
+            onConfirm: function() {
                 var url = $.crm.app_url + '?module=settings&action=sourceDelete',
-                    $loading = this.$wrapper.find('.crm-loading').show(),
-                    $button = this.$wrapper.find('.js-confirm-dialog').attr('disabled', true);
+                    $dialog_wrapper = $('.crm-confirm-dialog'),
+                    $loading = $dialog_wrapper.find('.crm-loading').show(),
+                    $button = $dialog_wrapper.find('.js-confirm-dialog').attr('disabled', true);
 
                 $.post(url, { id: id })
                     .always(function () {
@@ -131,7 +156,6 @@ var CRMSettingsSources = ( function($) {
                         $loading.hide();
                         $button.attr('disabled', false);
                     });
-
                 return false;
 
 

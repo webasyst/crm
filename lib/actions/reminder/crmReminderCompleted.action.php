@@ -8,21 +8,41 @@ class crmReminderCompletedAction extends crmBackendViewAction
     {
         $user_id = waRequest::request('user_id', waRequest::param('user_id', wa()->getUser()->getId(), waRequest::TYPE_INT));
         $min_dt = waRequest::request('min_dt', 0, waRequest::TYPE_STRING_TRIM);
+        $contact_id = waRequest::get('contact', null, waRequest::TYPE_INT);
+        $deal_id = abs(waRequest::get('deal', 0, waRequest::TYPE_INT));
 
+        $limit = 50;
+        $contacts = [];
+        $contact_ids = [];
+        $deal_ids = [];
+        $deals = [];
+        $dm = new crmDealModel();
         $rm = new crmReminderModel();
+        if ($user_id === 'all') {
+            $where = 'complete_datetime IS NOT NULL';
+        } else {
+            $where = 'user_contact_id = '.$user_id.' AND complete_datetime IS NOT NULL';
+        }
+        if ($deal_id) {
+            $where .= ' AND contact_id = '.((int) $deal_id * -1);
+        } elseif ($contact_id) {
+            $deals = $dm->select('id')->where('contact_id = ?', $contact_id)->fetchAll('id');
+            $deal_ids = array_map(function ($_deal_id) {return $_deal_id * -1;}, array_keys($deals));
+            $where .= ' AND contact_id IN ('.implode(',', [$contact_id] + $deal_ids).')';
+        }
+        $completed_reminders_count = $rm->select('COUNT(*) cnt')
+            ->where($where)
+            ->fetchField('cnt');
 
-        $contacts = $contact_ids = $deal_ids = $deals = array();
-
-        $where = 'user_contact_id = '.$user_id.' AND complete_datetime IS NOT NULL';
         if ($min_dt) {
             $where .= " AND complete_datetime < '".$rm->escape($min_dt)."'";
         }
-        $limit = 50;
 
-        $reminders = $rm->select('*')->where($where)->order('complete_datetime DESC')->limit((int)$limit)->fetchAll('id');
-
-        $reminders_count = $rm->select('COUNT(*) cnt')->where('user_contact_id = '.$user_id
-            .' AND complete_datetime IS NOT NULL')->fetchField('cnt');
+        $reminders = $rm->select('*')
+            ->where($where)
+            ->order('complete_datetime DESC')
+            ->limit($limit)
+            ->fetchAll('id');
 
         foreach ($reminders as $id => &$r) {
             $contact_ids[$r['user_contact_id']] = 1;
@@ -38,10 +58,10 @@ class crmReminderCompletedAction extends crmBackendViewAction
         unset($r);
 
         if ($deal_ids) {
-            $dm = new crmDealModel();
-            $deals = $dm->select('id, name, contact_id')->where(
-                "id IN('".join("','", $dm->escape(array_keys($deal_ids)))."')"
-            )->fetchAll('id');
+            $deals = $dm->getList([
+                'id'           => array_keys($deal_ids),
+                'check_rights' => true
+            ]);
             foreach ($deals as $d) {
                 if ($d['contact_id']) {
                     $contact_ids[$d['contact_id']] = 1;
@@ -57,9 +77,10 @@ class crmReminderCompletedAction extends crmBackendViewAction
         }
         $this->view->assign(array(
             'reminders'       => $reminders,
-            'reminders_count' => $reminders_count,
+            'completed_reminders_count' => $completed_reminders_count,
             'contacts'        => $contacts,
             'deals'           => $deals,
+            'completed_limit' => $limit,
         ));
     }
 }

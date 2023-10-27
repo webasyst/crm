@@ -1,0 +1,43 @@
+{$_cron_command = "php {$root_path}cli.php crm worker sources calls"}
+{$_last_cron_time = crmEmailSourceWorker::getLastCliRunDateTime()}
+{$_cli_ok = crmEmailSourceWorker::isCliOk()}
+
+<section class="c-settings-cron-section {if $_cli_ok}is-set{/if}">
+    <div class="c-cron-not-ok-block {if $_cli_ok}c-is-cli-ok{/if}">
+        <p>
+            [`No <tt>cron</tt> job required for automated email capture and execution of deals.`]
+        </p>
+
+        <p class="red bold">
+            <i class="icon16 exclamation"></i> [`Without a <tt>cron</tt> job set up, new mail is captured and deals are executed only as long as you keep CRM open in your browser.`]
+        </p>
+
+        <p>{sprintf_wp(
+            'Please set up a <tt>cron</tt> job (<a href="%s" target="_blank">view instructions</a>) using the command specified below in your web-hosting control panel:',
+            _w('https://developers.webasyst.com/installation/tips/cron/')
+            )}</p>
+
+        <p class="bold"><code>{$_cron_command}</code></p>
+
+        {if $_last_cron_time}
+            <p>[`Last execution time:`] {$_last_cron_time|wa_date:'datetime'}</p>
+        {/if}
+    </div>
+
+    <div class="c-cron-ok-block {if $_cli_ok}c-is-cli-ok{/if}">
+        <p>
+            <i class="icon16 yes"></i>
+            [`<tt>Cron</tt> job required for automated email capture and execution of deals is set up properly.`]
+            [`Last execution time:`]
+            {$_last_cron_time|wa_date:'datetime'}
+        </p>
+
+        <p>{sprintf_wp(
+            'The following <tt>cron</tt> job command is currently in use (%ssetting up a cron job%s):',
+            sprintf('<a href="%s" target="_blank">', _w('https://developers.webasyst.com/installation/tips/cron/')),
+            '</a>'
+            )}</p>
+
+        <p class="bold"><code>{$_cron_command}</code></p>
+    </div>
+</section>

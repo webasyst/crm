@@ -43,7 +43,15 @@ class crmDealUserAddController extends crmJsonController
         $action = 'deal_addcontact';
         $this->logAction($action, array('deal_id' => $deal_id), $contact_id);
         $lm = new crmLogModel();
-        $lm->log($action, $deal_id * -1, $contact_id, null, $c->getName());
+        $lm->log(
+            $action,
+            $deal_id * -1,
+            $deal_id,
+            null,
+            $c->getName(),
+            null,
+            ['contact_id' => $contact_id]
+        );
         
         $can_edit_deal = $deal_access_level > crmRightConfig::RIGHT_DEAL_VIEW;
 

@@ -8,24 +8,54 @@
 {if $segment}
     {$_button_name = '[`Save`]'}
 {/if}
+{if !empty($iframe)}
+<!DOCTYPE html>
+<html style="height: 100%;">
+<head>
+<title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
+{$wa->css()}
+<link href="{$wa_app_static_url}js/jquery/jquery-ui.css?v={$wa->version()}" rel="stylesheet">
+<link href="{$wa_app_static_url}js/timepicker/jquery.timepicker.css?v={$wa->version()}" rel="stylesheet">
+<link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
+<link href="{$wa_app_static_url}css/crm2.css?v={$wa->version()}" rel="stylesheet">
 
-<div class="block shadowed crm-search-container-wrapper">
+<script src="{$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="{$wa_app_static_url}js/jquery/jquery-ui.min.js?v={$wa->version()}"></script>
+<script type="text/javascript" src="{$wa_url}wa-content/js/jquery-plugins/jquery.store.js?v={$wa->version()}"></script>
+<script type="text/javascript" src="{$wa_app_static_url}js/crm.js?v={$wa->version()}"></script>
+<script type="text/javascript" src="{$wa_app_static_url}js/search/search.js?v={$wa->version()}"></script>
+<script type="text/javascript" src="{$wa_app_static_url}js/search/jquery.combobox.js?v={$wa->version()}"></script>
+<script type="text/javascript" src="{$wa_app_static_url}js/search/period.dialog.js?v={$wa->version()}"></script>
+<script type="text/javascript" src="{$wa_app_static_url}js/crm.autocomplete.js"></script>
+<script>
+    (function ($) {
+        window.wa_url = {$wa_url|json_encode};
+        $.crm.lang = {$lang|json_encode};
+        $.crm.app_url = {$wa_app_url|json_encode};
+        $.crm.backend_url = {$wa_backend_url|json_encode};
+        $.crm.is_debug = {$wa->debug()|json_encode};
+        $.crm.title.pattern = "%s — {$wa->accountName(false)|escape:'javascript'}";
+    })(jQuery);
+</script>
+</head>
+<body style="height: 100%;">
+{/if}
+<div class="block shadowed crm-search-container-wrapper" {if !empty($iframe)}style="overflow-y: auto; height: 100%;" {/if}>
     <div id="c-search-container">
         <form>
             <div class="c-search-block" id="c-search-block">
-                <div class="c-layout">
-                    <div class="c-column" style="width: 350px;">
+                <div class="flexbox">
+                    <div class="sidebar width-20rem blank c-shadowed-content crm-second-sidebar bordered-right" {if !empty($iframe)}style="height: 100vh; top: 0" {/if}>
 
-                        <div class="sidebar">
-                            <h2>[`Choose search parameters`]:</h2>
-                            <br>
+                        <div class="sidebar-wrapper custom-p-12">
+                            <div class="large bold custom-mb-16">[`Choose search parameters`]:</div>
                             {foreach $config as $section_id => $cnfg}
-                                <div class="block not-padded collapsable-wrapper" data-id="{$section_id}">
-                                    <h3 class="collapse-handler">
-                                        {_wp($cnfg.name)|escape}
-                                        <i class="icon16 {if empty($sidebar_map[$section_id])}rarr{else}darr{/if}"></i>
-                                    </h3>
-                                    <ul class="menu-v collapsable" {if empty($sidebar_map[$section_id])}style="display:none;"{/if}>
+                                <div class="block not-padded collapsable-wrapper custom-pt-8" data-id="{$section_id}">
+                                    <div class="collapse-header collapse-handler cursor-pointer {if empty($sidebar_map[$section_id])}close{else}open{/if}">
+                                        <span class="custom-pr-4 ">{_wp($cnfg.name)|escape}</span>
+                                        <i class="fas fa-caret-right"></i>
+                                    </div>
+                                    <ul class="menu collapsable" {if empty($sidebar_map[$section_id])}style="display:none;"{/if}>
                                         {foreach $cnfg.items as $id => $item}
                                             {if empty($item.parent)}
                                                 <li data-id="{$section_id}.{$id}" class="add-condition-item" {if !empty($item.multiple)}data-multiple="1"{/if}>
@@ -39,41 +69,38 @@
                         </div>
 
                     </div>
-                    <div class="c-column">
+                    <div class="content blank content-mobile-friendly">
 
-                        <div class="block double-padded" style="width: auto;">
-                            <div class="content">
-                                <h1>{$_title|escape}</h1>
-                                {foreach $items as $item}
-                                    {include file="./ContactSearchCondition.inc.html"
-                                    item=$item['item']
-                                    count=$item['count']|default:""
-                                    id=$item['item_id']
-                                    conds=$item['conds']
-                                    class="hidden"
-                                    extra=[]
-                                    inline}
-                                {/foreach}
-                                <div id="c-choose-parameters-message" class="align-center" style="{if !empty($items)}display:none;{/if} margin-top: 50px;">
-                                    [`Choose search parameters in the sidebar`]
+                        <div class="article">
+                            <div class="article-body custom-pb-0">
+                                <div class="content-fields fields">
+                                    <h1>{$_title|escape}</h1>
+                                    {foreach $items as $item}
+                                        {include file="./ContactSearchCondition.inc.html"
+                                        item=$item['item']
+                                        count=$item['count']|default:""
+                                        id=$item['item_id']
+                                        conds=$item['conds']
+                                        class="c-hidden"
+                                        extra=[]
+                                        inline}
+                                    {/foreach}
+                                    <div id="c-choose-parameters-message" class="align-center custom-mt-48" style="{if !empty($items)}display:none;{/if}">
+                                        [`Choose search parameters in the sidebar`]
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div class="clear"></div>
-
-                            <div class="buttons" id="c-search-buttons" style="margin-top: 50px">
-                                <div class="line">
-                                    <input type="submit" class="button green" value="{$_button_name}">
-                                    <i class="icon16 loading" style="display:none;"></i>
-                                    {if $segment}
-                                        <span>[`or`]</span>
-                                        <a href="{$wa_app_url}contact/segment/{$segment.id}/">[`cancel`]</a>
-                                    {/if}
+                                <div class="buttons custom-mt-48 custom-mb-16" id="c-search-buttons">
+                                    <div class="line">
+                                        <input type="submit" class="button" value="{$_button_name}">
+                                        {if $segment}
+                                            <a href="{$wa_app_url}contact/segment/{$segment.id}/" class="button light-gray c-search-buttons__cancel">[`Cancel`]</a>
+                                        {/if}
+                                        <span class="icon loading" style="display:none;"><i class="fas fa-spinner fa-spin"></i></span>
+                                    </div>
+                                    <div class="line" id="c-search-message"></div>
                                 </div>
-                                <div class="line" id="c-search-message"></div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -89,7 +116,7 @@
         </div>
     </div>
 
-    <div id="c-searching" style="display:none;"><i class="icon16 loading"></i> [`Searching...`]</div>
+    <div id="c-searching" style="display:none;"><i class="fas fa-spinner fa-spin loading"></i> [`Searching...`]</div>
     <div id="c-contacts-count-text" style="display:none;"></div>
 
     <div id="contacts-container" class="tab-content no-border" style="display:none;">
@@ -101,7 +128,6 @@
 
     <script>
         ( function($) {
-
             $.crm.title.set({$_title|json_encode});
 
             $('#wa').addClass('c-search');
@@ -139,26 +165,26 @@
                 $.get(getActionUrl('condition'), { op: 'expand_section', id: wrapper.data('id') });
             };
             var collapse = function(h) {
-                var i = h.find('i');
+                //var i = h.find('.collapse-handler');
                 var wrapper = h.closest('.collapsable-wrapper');
-                if (i.hasClass('darr')) {
+                if (h.hasClass('open')) {
                     wrapper.find('.collapsable').hide();
                     wrapper.find('.hide-when-expand').show();
-                    i.removeClass('darr').addClass('rarr');
+                    h.removeClass('open');
                     onCollapse.call(h);
                 }
             };
             var expand = function(h) {
-                var i = h.find('i');
+               // var i = h.find('.collapse-handler');
                 var wrapper = h.closest('.collapsable-wrapper');
                 wrapper.find('.collapsable').show();
                 wrapper.find('.hide-when-expand').hide();
-                i.removeClass('rarr').addClass('darr');
+                h.addClass('open');
                 onExpand.call(h);
             };
             $('#c-search-container').off('click', '.collapse-handler').
                 on('click', '.collapse-handler', function() {
-                    if ($(this).find('i').hasClass('darr')) {
+                    if ($(this).hasClass('open')) {
                         collapse($(this));
                     } else {
                         expand($(this));
@@ -167,9 +193,9 @@
                 });
 
             var advanced_block = $('#c-search-block');
-            advanced_block.find('.content .collapse-handler').each(function() {
-                var i = $(this).find('i');
-                if (i.hasClass('rarr')) {
+            advanced_block.find('.content-fields .collapse-handler').each(function() {
+                //var i = $(this).find('.collapse-handler');
+                if (!$(this).hasClass('open')) {
                     onCollapse.call(this);
                 } else {
                     onExpand.call(this);
@@ -180,8 +206,8 @@
 
             function makeChoosePeriodControl(el)
             {
-                var start_input = $('<input class="datepicker" style="width:111px;">');
-                var end_input = $('<input class="datepicker" style="width:111px;">');
+                var start_input = $('<input class="datepicker small" style="width:119px;" type="text" autocomplete="off">');
+                var end_input = $('<input class="datepicker small custom-ml-4" style="width:119px;" type="text" autocomplete="off">');
                 var hidden_input = $('<input type="hidden" name="' + el.data('id') + '">');
 
                 var init_val = el.data('value');
@@ -250,22 +276,16 @@
                 el.find('option').each(function() {
                     items += '<li><a href="javascript:void(0)" class="item" data-value="' + $(this).val() + '">' + $(this).text() + '</a></li>';
                 });
-                var menu = $('<ul class="menu-h dropdown">' +
-                  '<li style="display: inline-block; padding: 0;">' +
-                    '<a href="javascript:void(0);" class="inline-link chooser"><b><i class="chooser-text">' + el.find('option:selected').text() + '</i></b></a>' +
-                    '<ul class="menu-v" style="display:none;">' + items + '</ul>' +
-                  '</li>' +
-                '</ul>')
-                    .find('.chooser').click(function() {
-                        menu.find('.menu-v').toggle();
-                        return false;
-                    }).end()
-                    .find('.item').click(function() {
+                var menu = $('<div class="dropdown" id="dropdown-choose-boolean">' + 
+                             '<button class="dropdown-toggle light-gray outlined inline-link chooser" type="button"><div class="chooser-text">' + el.find('option:selected').text() +  '</div></button>' + 
+                             '<div class="dropdown-body">' +    
+                             '<ul class="menu">' + items + '</ul></div></div>')
+                    menu.waDropdown();
+                    menu.find('.item').click(function() {
                         input.val($(this).data('value'));
-                        menu.find('.menu-v').hide().end()
-                            .find('.chooser-text').text($(this).text());
+                        menu.find('.chooser-text').text($(this).text());
                     }).end().insertAfter(el);
-                menu.find('.menu-v').width(el.width());
+               // menu.find('.menu').width(el.width());
                 el.hide();
             }
 
@@ -279,7 +299,7 @@
                 var multiple = $(this).data('multiple');
                 var item = $('.templates .js-field[data-id="' + id + '"]', container).clone();
                 var prepareItem = function(item) {
-                    $('.content', advanced_block).append(item);
+                    $('.content-fields', advanced_block).append(item);
                     item.find('.combobox').combobox({
                         url: getActionUrl('values')
                     });
@@ -297,7 +317,7 @@
 
                 };
                 if (!item.length) {
-                    var  loading = $('<i class="icon16 loading"></i>').appendTo($(this).find('a'));
+                    var loading = $('<span class="icon loading custom-pl-4"><i class="fas fa-spinner fa-spin"></i></span>').appendTo($(this).find('a'));
                     self.data('loading', 1);
                     $.get(getActionUrl('condition'), { id: id }, function(html) {
                         self.data('loading', 0);
@@ -312,7 +332,7 @@
                         loading.remove();
                         $('#c-search-message').hide();
 
-                        if ($('#c-search-block .content .js-field:first').length) {
+                        if ($('#c-search-block .content-fields .js-field:first').length) {
                             $('#c-search-buttons').show();
                         }
 
@@ -328,7 +348,7 @@
                         } else {
                             it.find('input:not(:hidden):not(.datepicker):first').focus();
                         }
-                        if ($('#c-search-block .content .js-field:first').length) {
+                        if ($('#c-search-block .content-fields .js-field:first').length) {
                             $('#c-search-buttons').show();
                         }
                     }
@@ -397,6 +417,7 @@
 
             form.submit(function(e) {
                 e.preventDefault();
+                const loading = form.find('#c-search-buttons .loading').show();
                 {if $segment}
                     var hash = formSearchHash(true),
                         url = $.crm.app_url + '?module=contactSegment&action=save',
@@ -406,7 +427,8 @@
                         return;
                     }
                     $.post(url, data, function () {
-                        $.crm.content.load($.crm.app_url + 'contact/segment/' + data.id + '/');
+                        openLinkInIframe($.crm.app_url + 'contact/segment/' + data.id + '/?refetchSegments=1');
+                       // $.crm.content.load($.crm.app_url + 'contact/segment/' + data.id + '/');
                     });
                 {else}
                     var hash = formSearchHash();
@@ -414,7 +436,11 @@
                         return;
                     }
                     $('#c-search-message').hide();
-                    location.href = getResultUrl(hash);
+                    {if empty($iframe)}
+                        location.href = getResultUrl(hash);
+                    {else}
+                        openLinkInIframe(getResultUrl(hash));
+                    {/if}
                 {/if}
             });
 
@@ -423,12 +449,33 @@
                 var id = item.data('id');
                 item.remove();
                 $.crm.search.indexBlocks(id);
-                if (!$('#c-search-block .content .js-field:first').length) {
+                if (!$('#c-search-block .content-fields .js-field:first').length) {
                     $('#c-search-buttons').hide();
                     $('#c-choose-parameters-message').show();
                 }
                 $.get(getActionUrl('condition'), { id: id, op: 'delete' });
             });
+
+            container.on('click', '.c-search-buttons__cancel', function (e) {
+                e.preventDefault();
+                openLinkInIframe(e.target.href);
+            });
+
+            function openLinkInIframe (link) {
+                if (window.location !== window.parent.location) {
+                    if (window.history && history.pushState) {
+                        window.parent.history.pushState({ reload: true }, '', link);
+                    } else {
+                        window.parent.location.href = link;
+                    }
+                } else {
+                    location.href = link;
+                }
+            }
         })(jQuery);
     </script>
 </div>
+{if !empty($iframe)}
+</body>
+</html>
+{/if}

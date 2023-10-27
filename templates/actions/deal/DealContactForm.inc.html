@@ -4,12 +4,12 @@
         <ul class="c-contact-view-toggle js-contact-view-toggle">
             <li class="c-toggle js-show-fio" data-mode="fio" style="{if !empty($is_wide)}display: none;{/if}">
                 <a href="javascript:void(0);" class="inline-link">
-                    <i class="icon16 add"></i><b><i>[`Add new contact`]</i></b>
+                    <i class="fas fa-plus-circle text-green add"></i> [`Add new contact`]
                 </a>
             </li>
             <li class="c-toggle is-active" data-mode="name">
                 <a href="javascript:void(0);" class="inline-link">
-                    <i class="icon16 search"></i><b><i>[`Find existing contact`]</i></b>
+                    <i class="fas fa-search text-dark-gray"></i> [`Find existing contact`]
                 </a>
             </li>
         </ul>
@@ -17,12 +17,12 @@
         <input class="js-action-field" name="contact_action" type="hidden" value="search">
     </div>
 
-    <div class="c-fields-wrapper">
+    <div class="fields">
         {*FIO*}
-        <div class="js-fio" style="display: none;">
-            <div class="field-group c-fio-wrapper">
+        <div class="fields-group blank custom-mt-0">
+            <div class="js-fio custom-mt-16" style="display: none;">
                 {if !$wa->setting('one_name_field')}
-                    <div class="field">
+                    <div class="c-fio-wrapper field">
                         <div class="name">
                             <span class="">[`First name`]</span>
                         </div>
@@ -59,22 +59,19 @@
                     </div>
                 {/if}
             </div>
-        </div>
 
-        {* NAME AUTOCOMPLETE *}
-        <div class="js-combo-name" style="display: block;">
-            <div class="field-group">
+            {* NAME AUTOCOMPLETE *}
+            <div class="js-combo-name custom-mt-16" style="display: block;">
                 <div class="field">
                     <div class="name">[`Contact`]</div>
                     <div class="value">
-                        <input class="long large bold js-contact-autocomplete" type="text" placeholder="[`Enter name, email or phone`]" value="{$contact.name|default:""|escape}" {if !empty($contact_is_locked)}disabled{/if}>
+                        <input class="long js-contact-autocomplete custom-m-0" type="text" placeholder="[`Enter name, email or phone`]" value="{$contact.name|default:""|escape}" {if !empty($contact_is_locked)}disabled{/if}>
                         <input class="js-contact-id-field" type="hidden" name="{$id_field_name|default:"contact[id]"}" value="{$contact.id|default:""}">
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="field-group">
+
             {* COMPANY *}
             {if empty($exclude_company_id)}
                 <div class="field">
@@ -103,9 +100,6 @@
                     </div>
                 </div>
             {/if}
-        </div>
-
-        <div class="field-group">
 
             {$_contact_phone = ""}
             {if !empty($contact.phone)}

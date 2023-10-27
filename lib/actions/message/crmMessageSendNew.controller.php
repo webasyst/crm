@@ -17,8 +17,11 @@ class crmMessageSendNewController extends crmSendEmailController
      */
     protected $deal;
 
-    public function execute()
+    protected $api = false;
+
+    public function execute($api = false)
     {
+        $this->api = $api;
         $result = $this->send();
         if (isset($result['errors'])) {
             $this->errors = $result['errors'];
@@ -32,6 +35,7 @@ class crmMessageSendNewController extends crmSendEmailController
         }
 
         $this->response = array(
+            'id' => $id,
             'message_id' => $email_message['message_id'],
             'attachment_count' => isset($email_message['attachments']) ? count($email_message['attachments']) : 0
         );
@@ -162,6 +166,16 @@ class crmMessageSendNewController extends crmSendEmailController
         }
 
         $notification['message_id'] = crmEmailSourceWorker::generateMessageId($deal_id);
+        if (empty($deal_id)) {
+            $contact_id = $this->getRecipientContact()->getId();
+            $conversations = (array) $this->getConversationModel()->getByField('contact_id', $contact_id, true);
+            if (count($conversations) === 1) {
+                $conversation = reset($conversations);
+                if ($conversation['type'] === crmConversationModel::TYPE_EMAIL) {
+                    $notification['conversation_id'] = $conversation['id'];
+                }
+            }
+        }
 
         return $notification;
     }
@@ -172,7 +186,7 @@ class crmMessageSendNewController extends crmSendEmailController
             return $this->deal;
         }
 
-        $id = $this->getRequest()->post('deal_id');
+        $id = $this->getParameter('deal_id');
         if ($id == 'none') {
             return null;
         }
@@ -262,5 +276,24 @@ class crmMessageSendNewController extends crmSendEmailController
         }
 
         return $attached_files;
+    }
+
+    protected function getEmail()
+    {
+        if ($this->api) {
+            return trim((string) $this->getParameter('email'));
+        }
+
+        return parent::getEmail();
+    }
+
+    public function getMessageId()
+    {
+        return ifset($this->response, 'id', 0);
+    }
+
+    public function getError()
+    {
+        return $this->errors;
     }
 }

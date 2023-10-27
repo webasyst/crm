@@ -4,11 +4,11 @@ class crmContactsProfileTabHandler extends waEventHandler
 {
     public function execute(&$params)
     {
-        if ($this->isOldContacts()) {
+        if ($this->isOldContacts() || $this->isRequestCrm20()) {
             return;
         }
 
-        $contact_id = $params;
+        $contact_id = (is_array($params) ? ifset($params, 'id', 0) : $params);
 
         $has_access_app = wa()->getUser()->getRights(wa()->getApp(), 'backend');
 
@@ -89,5 +89,16 @@ class crmContactsProfileTabHandler extends waEventHandler
             $is_old_contacts = version_compare(wa()->getVersion('contacts'), '1.2.0') < 0;
         }
         return $is_old_contacts;
+    }
+
+    protected function isRequestCrm20()
+    {
+        if (wa()->getApp() === 'crm') {
+            if (wa()->whichUI('crm') !== '1.3' || wa()->getEnv() === 'api') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

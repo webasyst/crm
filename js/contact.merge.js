@@ -81,7 +81,16 @@ var crmContactMerge = (function ($) {
                 onDone: function () {
                     $.crm.storage.del('crm/merge/field');
                     var content_uri = $.crm.app_url + "contact/" + master_id + "/";
-                    $.crm.content.load(content_uri);
+                    let iframe = new URLSearchParams(document.location.search).get('iframe');
+                    if (window.parent && iframe) {
+                        if (window.history && history.pushState) {
+                            window.parent.history.pushState({ reload: true }, '', content_uri);
+                        } else {
+                            window.parent.location = content_uri; 
+                        }
+                    } else {
+                        $.crm.content.load(content_uri);
+                    }
                 },
                 onError: function () {
                     that.$button.attr('disabled', false);

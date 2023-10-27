@@ -1,101 +1,137 @@
-<div class="c-contacts-page shadowed" id="c-contacts-page">
-    <div class="c-layout fixed">
-        <div class="c-column sidebar left250px">
-            <div id="js-aside-block">
-                {include file="./Contact.sidebar.html" inline}
-            </div>
-        </div>
-        <div class="c-column content bordered-left blank">
-            <div id="js-content-block">
+{if !empty($iframe)}
+<!DOCTYPE html>
+<html style="height: 100%;">
+<head>
+    <title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
 
-                <div class="block double-padded c-contact-merge-page" id="c-contact-merge-page">
-                    <h1 class="c-page-header">[`Merge contacts`]</h1>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    {$wa->css()}
+    <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
 
-                    <p class="crm-help-info">
-                        [`Choose a master contact that will be retained after merging.`]
-                        [`Other contacts will be deleted during this merging operation.`]
-                        [`Contact info from the contacts to be deleted, except unique fields, will be added to master contact.`]
-                        [`Links to deleted contacts from other applications will be updated to link to master contact.`]
-                    </p>
+    {wa_js}
+        {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
+        {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
+        {$wa_app_static_url}js/crm.js
+        {$wa_app_static_url}js/contact.merge.js
+        {$wa_app_static_url}js/contact.merger.js
+    {/wa_js}
+    <script type="text/javascript" src="{$wa_app_static_url}js/crm.js?v={$wa->version()}"></script>
+    <script>
+        (function ($) {
+            $.crm.app_url = {$wa_app_url|json_encode};
+            $.crm.title.pattern = "%s — {$wa->accountName(false)|escape:'javascript'}";
+        })(jQuery);
+    </script>
+</head>
+<body style="height: 100%;">
+<div class="content blank" style="min-height: 100%;">
+{/if}
 
-                    <div class="crm-contacts-data">
-                        {foreach $contacts as $c}
-                            <div class="crm-contact-row-wrapper">
-                                <div class="crm-contact-row">
-                                    <div class="crm-contact-selector-column">
+<div class="article c-contacts-page" id="c-contacts-page">
+    <div class="article-body">
+        <div class="content" id="js-content-block">
+
+            <div class="c-contact-merge-page" id="c-contact-merge-page">
+                <h1 class="c-page-header">[`Merge contacts`]</h1>
+
+                <p class="crm-help-info">
+                    [`Choose a master contact that will be retained after merging.`]
+                    [`Other contacts will be deleted during this merging operation.`]
+                    [`Contact info from the contacts to be deleted, except unique fields, will be added to master contact.`]
+                    [`Links to deleted contacts from other applications will be updated to link to master contact.`]
+                </p>
+
+                <div class="crm-contacts-data">
+                    {foreach $contacts as $c}
+                        <div class="crm-contact-row-wrapper">
+                            <div class="crm-contact-row">
+                                <div class="crm-contact-selector-column">
+                                    <span class="wa-radio">
                                         <input class="crm-selector" name="c_list_selector" value="{$c.id}" type="radio">
-                                    </div>
-                                    <div class="crm-contact-image-column">
-                                        <a href="{$wa_app_url}contact/{$c.id}/">
-                                            <img src="{$c.photo_url_96}" class="crm-userpic userpic" alt="">
-                                        </a>
-                                    </div>
-                                    <div class="crm-contact-info-column">
-                                        <p class="crm-contact-name">
-                                            {if $c.master_only}
-                                                <i class="icon16 exclamation"></i>
-                                            {/if}
-                                            <a href="{$wa_app_url}contact/{$c.id}/" class="no-underline">{$c.name}</a>
-                                            <span class="crm-js-hide-when-not-selected bold crm-as-master-text">&mdash; [`selected as a master contact`]</span>
-                                        </p>
+                                        <span></span>
+                                    </span>
+                                </div>
+                                <div class="crm-contact-image-column">
+                                    <a href="{$wa_app_url}contact/{$c.id}/">
+                                        <img src="{$c.photo_url_96}" class="userpic crm-contact-image-column-img" alt="">
+                                    </a>
+                                </div>
+                                <div class="crm-contact-info-column">
+                                    <p class="crm-contact-name">
                                         {if $c.master_only}
-                                            <p class="errormsg">{$c.master_only}</p>
+                                            <i class="fas fa-exclamation-triangle text-yellow"></i>
                                         {/if}
-                                        {foreach $fields as $field_id => $field_name}
-                                            {if !empty($c[$field_id])}
-                                                <p>
-                                                    <span class="crm-details-label">{$field_name|escape}:</span> {$c[$field_id]}
-                                                </p>
-                                            {/if}
-                                        {/foreach}
+                                        <a href="{$wa_app_url}contact/{$c.id}/" class="no-underline">{$c.name}</a>
+                                        <span class="crm-js-hide-when-not-selected bold crm-as-master-text">&mdash; [`selected as a master contact`]</span>
+                                    </p>
+                                    {if $c.master_only}
+                                        <p class="errormsg state-error-hint">{$c.master_only}</p>
+                                    {/if}
+                                    {foreach $fields as $field_id => $field_name}
+                                        {if !empty($c[$field_id])}
+                                            <p>
+                                                <span class="crm-details-label">{$field_name|escape}:</span> {$c[$field_id]}
+                                            </p>
+                                        {/if}
+                                    {/foreach}
 
-                                        <div class="hint">
-                                            <span>[`ID`]: {$c.id}</span>
-                                            <span style="margin-left: 25px;">[`Added`]: {if !empty($c.author.name)}{$c.author.name|escape} {/if}{$c.create_datetime|wa_datetime:'datetime'}</span>
-                                            <span style="margin-left: 25px;">[`Method`]: {if $c.create_method}{$c.create_method} ({$c.create_app_id}){else}{$c.create_app_id}{/if}</span>
-                                        </div>
+                                    <div class="hint semibold">
+                                        <span>[`ID`]: {$c.id}</span>
+                                        <span style="margin-left: 25px;">[`Added`]: {if !empty($c.author.name)}{$c.author.name|escape} {/if}{$c.create_datetime|wa_datetime:'datetime'}</span>
+                                        <span style="margin-left: 25px;">[`Method`]: {if $c.create_method}{$c.create_method} ({$c.create_app_id}){else}{$c.create_app_id}{/if}</span>
                                     </div>
                                 </div>
-
-                                <div class="crm-merge-description-for-master">
-                                    {sprintf('[`%s has been selected as a master contact.`]', sprintf('<strong>%s</strong>', $c.name))}
-                                    {$slaves_num = count($slave_ids)}
-                                    {if !$c.master_only}
-                                        {$slaves_num = $slaves_num - 1}
-                                    {/if}
-
-                                    {if $slaves_num > 0}
-                                        {sprintf(_w('%d other contact will be merged with %%s.', '%d other contacts will be merged with %%s.', $slaves_num), $c.name)}
-                                        {$unable_to_merge_num = count($contacts) - $slaves_num - 1}
-                                        {if $unable_to_merge_num > 0}
-                                            {_w('%d contact will not be merged by the reasons designated above.', '%d contacts will not be merged by the reasons designated above.', $unable_to_merge_num)}
-                                        {/if}
-                                    {else}
-                                        {sprintf('[`However, there are no contacts to be merged with %s, by the reasons designated above.`]', $c.name)}
-                                        <span class="crm-js-not-allowed-as-master" style="display: none;"></span>
-                                    {/if}
-                                </div>
-
                             </div>
 
-                        {/foreach}
+                            <div class="crm-merge-description-for-master">
+                                {sprintf('[`%s has been selected as a master contact.`]', sprintf('<strong>%s</strong>', $c.name))}
+                                {$slaves_num = count($slave_ids)}
+                                {if !$c.master_only}
+                                    {$slaves_num = $slaves_num - 1}
+                                {/if}
 
-                        <div class="crm-merge-description"></div>
-                    </div>
+                                {if $slaves_num > 0}
+                                    {sprintf(_w('%d other contact will be merged with %%s.', '%d other contacts will be merged with %%s.', $slaves_num), $c.name)}
+                                    {$unable_to_merge_num = count($contacts) - $slaves_num - 1}
+                                    {if $unable_to_merge_num > 0}
+                                        {_w('%d contact will not be merged by the reasons designated above.', '%d contacts will not be merged by the reasons designated above.', $unable_to_merge_num)}
+                                    {/if}
+                                {else}
+                                    {sprintf('[`However, there are no contacts to be merged with %s, by the reasons designated above.`]', $c.name)}
+                                    <span class="crm-js-not-allowed-as-master" style="display: none;"></span>
+                                {/if}
+                            </div>
 
-                    <div class="crm-merge-button-block">
-                        <input type="button" class="crm-merge-submit button green" value="[`Merge`]" disabled>
-                        <i class="icon16 loading crm-loading" style="display: none;"></i>
-                        [`or`] <a class="crm-merge-cancel" href="{$wa_app_url}contact/merge/duplicates/">[`cancel`]</a>
-                    </div>
+                        </div>
+
+                    {/foreach}
+
+                    <div class="crm-merge-description"></div>
                 </div>
 
+                <div class="crm-merge-button-block">
+                    <button type="button" class="button green crm-merge-submit" disabled>
+                        <span class="custom-mr-4 crm-loading" style="display: none;"><i class="fas fa-spinner wa-animation-spin speed-1000"></i></span>[`Merge`]
+                    </button>
+                    <a class="button light-gray crm-merge-cancel" href="{$wa_app_url}?module=contactMergeDuplicates{if !empty($iframe)}&iframe=1{/if}">[`Cancel`]</a>
+                </div>
             </div>
+
         </div>
     </div>
 
     <script>
         ( function($) {
+
+            if (window.location !== window.parent.location) { 
+                $('.crm-merge-cancel').on('click', function (e) {
+                    e.preventDefault();
+                    if (window.history && history.pushState) {
+                        window.parent.history.pushState({ reload: true }, '', '{$wa_app_url}contact/merge/duplicates/');
+                    }
+                });
+            }
+
             new crmContactMerge({
                 $wrapper: $("#c-contact-merge-page"),
                 slave_ids: {json_encode($slave_ids)},
@@ -107,3 +143,9 @@
         })(jQuery);
     </script>
 </div>
+
+{if !empty($iframe)}
+</div>
+</body>
+</html>
+{/if}

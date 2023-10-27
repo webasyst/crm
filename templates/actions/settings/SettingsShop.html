@@ -1,16 +1,10 @@
 <div class="c-settings-shop-page" id="js-settings-shop-page">
     <h1 class="c-page-header">[`Shop-Script integration`]</h1>
 
-    {strip}
-    <ul class="c-view-toggle-wrapper">
-        <li class="is-active">
-            <a href="{$wa_app_url}settings/shop/">[`Automatic deal creation`]</a>
-        </li>
-        <li>
-            <a href="{$wa_app_url}settings/shop/workflow/">[`Workflow-Funnel synchronization`]</a>
-        </li>
-    </ul>
-    {/strip}
+    <div class="toggle" id="toggle-menu">
+        <a class="selected" href="{$wa_app_url}settings/shop/">[`Automatic deal creation`]</a>
+        <a href="{$wa_app_url}settings/shop/workflow/">[`Workflow-Funnel synchronization`]</a>
+    </div>
 
     {if !$supported}
         <p>
@@ -25,7 +19,7 @@
         </p>
 
         <form action="{$wa_app_url}?module=settings&action=shopSave">
-            <ul class="menu-v c-storefront-list js-storefront-list">
+            <div class="fields c-storefront-list js-storefront-list">
                 {foreach $storefronts as $storefront}
                     {$_url = $storefront.url|escape}
 
@@ -35,30 +29,31 @@
                         {$_namespace = "storefront[NULL]"}
                     {/if}
 
-                    <li class="c-storefront">
+                    <div class="field-group c-storefront">
 
                         <h3>{$storefront.name|default:''|escape}</h3>
 
                         <div class="js-ibutton-wrapper">
-                            <label class="c-off-label gray" for="js-ibutton-{$storefront@iteration}">[`Disabled`]</label>
-                            <input type="checkbox" class="c-storefont-checkbox js-ibutton" id="js-ibutton-{$storefront@iteration}" name="{$_namespace}[checked]" value="1" {if $storefront.checked}checked{/if}>
-                            <label class="c-on-label" for="js-ibutton-{$storefront@iteration}">[`Enabled`]</label>
+                            <span class="switch smaller" id="c-storefront-switch">
+                                <input type="checkbox" class="c-storefont-checkbox js-ibutton" id="js-ibutton-{$storefront@iteration}" name="{$_namespace}[checked]" value="1" {if $storefront.checked}checked{/if}>
+                            </span>
+                            <label for="js-ibutton-{$storefront@iteration}" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">[`Disabled`]</label>
                         </div>
 
                         <div class="c-storefront-params-block" {if !$storefront.checked}style="display: none;"{/if}>
                             <div class="field">
                                 <div class="name">[`Create deal when`]:</div>
                                 <div class="value">
-                                    <ul class="menu-v compact" style="margin-top: 0;">
+                                    <ul class="menu compact" style="margin-top: 0;">
                                         <li>
                                             <label>
-                                                <input type="radio" name="{$_namespace}[create_deal_trigger]" value="order_create" {if !$storefront.create_deal_trigger || $storefront.create_deal_trigger === 'order_create'}checked{/if}>
+                                                <span class="wa-radio"><input type="radio" name="{$_namespace}[create_deal_trigger]" value="order_create" {if !$storefront.create_deal_trigger || $storefront.create_deal_trigger === 'order_create'}checked{/if}><span></span></span>
                                                 [`Order was placed`]
                                             </label>
                                         </li>
                                         <li>
                                             <label>
-                                                <input type="radio" name="{$_namespace}[create_deal_trigger]" value="order_process" {if $storefront.create_deal_trigger === 'order_process'}checked{/if}>
+                                                <span class="wa-radio"><input type="radio" name="{$_namespace}[create_deal_trigger]" value="order_process" {if $storefront.create_deal_trigger === 'order_process'}checked{/if}><span></span></span>
                                                 [`Order was confirmed and accepted for processing`]
                                             </label>
                                         </li>
@@ -68,15 +63,17 @@
 
                             {$storefront.deal_block}
                         </div>
-                    </li>
+                    </div>
                 {/foreach}
-            </ul>
+            </div>
 
             <div class="c-footer-actions js-footer-actions">
-                <input class="button green js-submit-button" type="submit" value="[`Save`]">
+                <input class="button js-submit-button" type="submit" value="[`Save`]">
+                <span class="c-loading" style="display: none;">
+                    <i class="fas fa-spinner fa-spin loading"></i>
+                    </span>
                 <span class="c-hidden">
-                    <span style="margin: 0 4px;">[`or`]</span>
-                    <a href="{$wa_app_url}settings/shop/">[`cancel`]</a>
+                    <a href="{$wa_app_url}settings/shop/" class="button light-gray">[`Cancel`]</a>
                 </span>
             </div>
         </form>

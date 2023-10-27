@@ -1,14 +1,47 @@
+{if $iframe}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
+
+    {* CSS *}
+    {$wa->css()}
+    <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}css/crm2.css?v={$wa->version()}" rel="stylesheet">
+
+    {wa_js file="js/min/vendor.min.js"}
+        {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
+        {$wa_app_static_url}js/jquery/jquery-ui.min.js
+        {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
+        {$wa_url}wa-content/js/jquery-wa/wa.js
+    {/wa_js}{strip}
+
+
+    {/strip}
+    {wa_js file="js/min/crm.min.js"}
+        {$wa_app_static_url}js/crm.js
+        {$wa_app_static_url}js/call.js
+        {$wa_app_static_url}js/call.associateDealDialog.js
+        {$wa_app_static_url}js/call.initContactDialog.js
+        {$wa_app_static_url}js/call.redirectDialog.js
+    {/wa_js}
+
+    {$wa->js()}
+</head>
+<body style="background: var(--background-color-blank);">
+{/if}
+
 {$class = 'c-call-init-contact'}
 {$dialog_id = uniqid($class)}
 
-<div class="{$class}-container">
-    <div class="crm-dialog-wrapper {$class}" id="{$dialog_id}">
-        <div class="crm-dialog-background"></div>
-        <div class="crm-dialog-block">
+    <div class="{if $iframe}iframe-style {else}dialog {/if}{$class}" id="{$dialog_id}">
+        <div class="dialog-background"></div>
+        <div class="dialog-body">
             <form>
-                <header class="crm-dialog-header">
+                <header class="dialog-header">
                     <h2>
-                        [`Outgoing call:`] {$contact.name|escape} <span style="color: #999; white-space: nowrap;">{$format_client_number|escape}</span>
+                        [`Outgoing call:`] {$contact.name|escape} <span class="header-number">{$format_client_number|escape}</span>
                     </h2>
                 </header>
                 <div class="c-content js-content">
@@ -23,7 +56,7 @@
                                         <label class="c-call-from js-number-item" data-plugin-id="{$_number.plugin_id}">
                                             <input type="radio" name="call[from]" value="{$_number.plugin_user_number|escape}">
                                             {if $_number.plugin_icon|escape}
-                                                <i class="icon16" title="{$_number.plugin_name|escape}" style="background-image: url('{$_number.plugin_icon|escape}'); background-size: 16px 16px;"></i>
+                                                <i class="icon" title="{$_number.plugin_name|escape}" style="background-image: url('{$_number.plugin_icon|escape}'); background-size: 16px 16px;"></i>
                                             {/if}
                                             {$_number.plugin_user_number|escape}
                                         </label>
@@ -34,7 +67,7 @@
                     {/if}
                 </div>
 
-                <footer class="crm-dialog-footer">
+                <footer class="dialog-footer">
                     <div class="c-footer-actions js-dialog-footer">
                         {if $call_ready == 'ready'}
                             <input class="button js-close-dialog" type="submit" value="[`Close`]">
@@ -65,18 +98,23 @@
 
         <script>
             ( function($) {
-                var $body = $(window.top.document).find("body");
-                new CRMDialog({
-                    html: $body.find('#{$dialog_id}').show(),
-                    onOpen: function($wrapper) {
+                //var $body = $(window.top.document).find("body");
+                //$.waDialog({
+                    //html: $body.find('#{$dialog_id}').show(),
+                    //onOpen: function($wrapper) {
                         new CRMCallInitContactDialog({
-                            $wrapper: $wrapper,
+                            $wrapper: $('#{$dialog_id}'),
                             call_ready: "{$call_ready}",
-                            locales: {$_locales|json_encode}
+                            locales: {$_locales|json_encode},
+                            iframe: {$iframe}
                         });
-                    }
-                });
+                  //  }
+                //});
             })(jQuery);
         </script>
     </div>
-</div>
+
+{if $iframe}
+</body>
+</html>
+{/if}

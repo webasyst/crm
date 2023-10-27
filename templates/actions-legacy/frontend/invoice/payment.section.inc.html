@@ -1,0 +1,75 @@
+{if !$_hide_payments && (!empty($payment_methods) || !empty($payment))}
+    <section class="c-payment-section">
+        {if !empty($payment_methods)}
+            <input class="c-button button js-show-payments" type="button" value="[`Payment`]">
+            <div class="c-payments-wrapper js-payments-wrapper" style="display: none;">
+                <form method="post">
+                    <ul class="c-payment-options">
+                        {foreach $payment_methods as $m}
+                            <li class="c-payment-item {if $m.id == $payment_id}is-active{/if} {if !empty($m.error)}has-error{/if}" >
+                                <h3 class="c-payment-header">
+                                    <label>
+                                        {if !empty($m.logo)}<img class="c-payment-image" src="{$m.logo}">{/if}
+                                        <input class="c-payment-input" type="radio" name="payment_id" value="{$m.id}" {if $m.id == $payment_id}checked{/if} {if !empty($m.error)}disabled="disabled"{/if}>
+                                        <span class="c-payment-name">{$m.name|escape}</span>
+                                    </label>
+                                </h3>
+                                {if $m.description}
+                                    <p class="c-payment-description">{$m.description}</p>
+                                {/if}
+                                {if !empty($m.error)}
+                                    <p class="error"><em>{$m.error}</em></p>
+                                {/if}
+                                {if !empty($m.custom_html)}
+                                    <div class="c-payment-content {if $m.id != $payment_id}is-hidden{/if} wa-form">{$m.custom_html}</div>
+                                {/if}
+                            </li>
+                            {foreachelse}
+                            <li class="c-payment-item">
+                                <em class="error">[`Oops! We are sorry, but <strong>we can not offer any payment option for your order</strong>. Checkout can not be completed.`]</em>
+                            </li>
+                        {/foreach}
+                    </ul>
+                    <input type="hidden" name="hash" value="{$hash|escape}">
+                    <input class="button" type="submit" value="[`Pay`]">
+                </form>
+            </div>
+            <script>
+                ( function($) {
+                    var $wrapper = $("#c-invoice-front-section"),
+                        $paymentW = $wrapper.find(".js-payments-wrapper") ;
+
+                    $wrapper.on("click", ".js-show-payments", function () {
+                        $(this).hide();
+                        $paymentW.show();
+                    });
+
+                    initActivePayment();
+
+                    function initActivePayment() {
+                        var active_class = "is-active",
+                            $activeItem = $paymentW.find(".c-payment-item." + active_class);
+
+                        $paymentW.on("change", ".c-payment-item input:radio", setActive);
+
+                        function setActive() {
+                            var $input = $(this),
+                                $item = $input.closest(".c-payment-item");
+
+                            if ($activeItem.length) {
+                                $activeItem.removeClass(active_class);
+                            }
+
+                            $activeItem = $item.addClass(active_class);
+                        }
+                    }
+
+                })(jQuery);
+            </script>
+        {elseif (!empty($payment))}
+            {$payment}
+        {/if}
+    </section>
+{else}
+    {*<p>No payment methods or payment</p>*}
+{/if}

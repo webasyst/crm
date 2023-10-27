@@ -1,0 +1,223 @@
+
+{if !empty($reminders)}
+    {$_reminder_types = crmConfig::getReminderTypeUI2()}
+
+    {foreach $reminders as $_reminder}
+        {$_is_deal = ( $_reminder.contact_id < 0 )}
+        {if !empty($_reminder.type) && !empty($_reminder_types[$_reminder.type])}
+            {$_active_reminder_type = $_reminder_types[$_reminder.type]}
+        {/if}
+        {capture assign=_deal_or_contact}
+            {if $_is_deal && !empty($deals[abs($_reminder.contact_id)])}
+                {$_deal_id = abs($_reminder.contact_id)}
+                {$_deal = $deals[$_deal_id]}
+                {if !empty($contacts[$_deal.contact_id])}
+                    {$_user = $contacts[$_deal.contact_id]}
+                    {$_userpic = $_user->getPhoto(32)}
+                {/if}
+                <a class="flexbox middle c-user" href="{$app_url}deal/{$_deal_id}/" target="_top" data-link="top">
+                    {*if !empty($_userpic)}
+                        <span class="icon size-18 rounded" style="background-image: url({$_userpic});"></span>
+                    {/if*}
+                    <span class="c-user-name">{$_deal.name|escape}</span>
+                </a>
+                {*if !empty($_reminder.rights)}
+                <div class="c-right-actions hint">
+                    <span class="icon size-14 cursor-pointer js-edit-search"><i class="fas fa-pen" title="[`edit`]"></i></span>
+                </div>
+                 {/if*}
+            {elseif !$_is_deal && !empty($contacts[$_reminder.contact_id])}
+                {$_user = $contacts[$_reminder.contact_id]}
+                <a href="{$app_url}contact/{$_user.id}/" class="flexbox middle c-user" target="_top" data-link="top">
+                    {$_userpic = $_user->getPhoto(32)}
+                    {if !empty($_userpic)}
+                        <span class="icon size-18 rounded" style="background-image: url({$_userpic});"></span>
+                    {/if}
+                    <span class="c-user-name">&nbsp;{$wa->crm->contactName($_user.name)}</span>
+                </a>
+                {*if !empty($_reminder.rights)}
+                <div class="c-right-actions hint">
+                    <span class="icon size-14 cursor-pointer js-edit-search"><i class="fas fa-pen" title="[`edit`]"></i></span>
+                </div>
+                 {/if*}
+            {/if}
+        {/capture}
+        {$_reminder_classes = []}
+        {$_reminder_classes[] = $_reminder.state|default:""}
+        {if $reminder_max_id && $_reminder.id > $reminder_max_id || $_reminder.id == $highlight_id}
+            {$_reminder_classes[] = "highlighted"}
+        {/if}
+        {if $_reminder.id == $reminder_id}
+            {$_reminder_classes[] = "is-target"}
+        {/if}
+        
+        {$_reminder_mark_content = ""}
+        {if $_reminder_classes[0] == "overdue"}
+            {$_reminder_mark_content = "!!!"}
+        {/if}
+        {if $_reminder_classes[0] == "burn"}
+            {$_reminder_mark_content = "!!"}
+        {/if}
+        {if $_reminder_classes[0] == "actual"}
+            {$_reminder_mark_content = "!"}
+        {/if}
+        <li class="flexbox middle vertical c-reminder-wrapper js-edit-reminder {$_reminder_classes|join:" "}" data-id="{$_reminder.id}" id="c-reminder-{$_reminder.id}">
+            {* VIEW *}
+            <div class="flexbox middle space-12 width-100  custom-pl-12 custom-pt-12 c-step is-view is-shown">
+                {if !empty($_reminder.rights)}
+                    <span class="c-marker c-mark-done js-mark-done" title="[`mark as done`]">
+                        <span class="c-marker-content">{$_reminder_mark_content}</span>
+                        <span class="icon size-12 c-marker-icon">
+                            <svg width="20" height="15" viewBox="0 0 20 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1.99951 7L7.49951 12.5L18.4995 1.5" stroke="var(--text-color)" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                        </span>
+                    </span>
+                {else}
+                    <span class="c-marker"><span class="c-marker-content">{$_reminder_mark_content}</span></span>
+                {/if}
+                {$show_user_block = $_reminder.creator_contact_id !== $_reminder.user_contact_id}
+                <div class="flexbox width-100 custom-pb-12 custom-pr-16 c-content {if $show_user_block}with-userblock{/if}">
+                    <div class="flexbox vertical width-100">
+                        <div class="c-quick-content-toggle-wrapper js-quick-content-toggle-wrapper">
+
+                            {if !empty($_reminder.rights)}
+                                <div class="c-text-field js-float-text">{$_reminder.content|escape|nl2br}</div>
+                                {*<textarea class="js-float-textarea c-text-field" name="content" autocomplete="off" required>{$_reminder.content|escape}</textarea>*}
+                            {else}
+                                <div class="c-text-field">{$_reminder.content|escape|nl2br}</div>
+                            {/if}
+                        </div>
+                        <div class="flexbox middle wrap width-100 space-16 c-footer">
+                            {if $_reminder.type !== "OTHER" && !empty($_active_reminder_type)}
+                                {strip}
+                                <button class="button button-slim smallest rounded light-gray no-hover">
+                                    {if !empty($_active_reminder_type.icon)}
+                                    <span class="icon size-12"><i class="fas fa-{$_active_reminder_type.icon}"></i></span>
+                                    {/if}
+                                    <span class="c-reminder-type">{$_active_reminder_type.name|escape}</span>
+                                </button>
+                                {/strip}
+                            {/if}   
+                            {if !empty($_reminder.rights)}
+                                {if $_reminder.due_datetime || $_reminder.due_date}
+                                    <div class="c-quick-date-toggle-wrapper js-quick-date-toggle-wrapper">
+                                        <div class="c-visible">
+                                        <div class="c-date-text c-change-date hint js-change-date">
+                                            {if $_reminder.due_datetime}
+                                                {waDateTime::format('humandatetime', $_reminder.due_datetime)}
+                                            {elseif $_reminder.due_date}
+                                                {waDateTime::format('humandate', $_reminder.due_date)}
+                                            {/if}
+                                        </div>
+                                        </div>
+                                    </div>
+                                {/if}
+                            {else}
+                                <div class="c-date-text hint">
+                                    {if $_reminder.due_datetime}
+                                        {waDateTime::format('humandatetime', $_reminder.due_datetime)}
+                                    {elseif $_reminder.due_date}
+                                        {waDateTime::format('humandate', $_reminder.due_date)}
+                                    {/if}
+                                </div>
+                            {/if}
+                            <div class="flexbox middle space-12 c-deal-wrapper">
+                            {$_deal_or_contact}
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <div class="flexbox vertical full-width c-icons-right {if !$show_user_block}flex-end{/if} ">
+                        <div class="flexbox middle space-4 c-creator-contact hint">
+                            {if $show_user_block}
+                                {if !empty($users[$_reminder.creator_contact_id])}
+                                    {$_user_info = $users[$_reminder.creator_contact_id]}
+                                    {$_userpic_info = $_user_info->getPhoto(32)}
+                                    {if !empty($_userpic_info)}
+                                    <span class="icon size-24 rounded" style="background-image: url({$_userpic_info});" title="{$_user_info.name|escape}"></span>
+                                    {/if}
+                                {else}
+                                    <span class="icon size-24 rounded" title="[`User not found.`]"><i class="fas fa-user-slash" style="max-width: 22px;"></i></span>
+                                {/if}
+                                <span class="">
+                                    <svg width="4.5" height="6.5" viewBox="0 0 5 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M4.4557 3.84532L1.6932 6.60782C1.50227 6.79876 1.19352 6.79876 1.00461 6.60782L0.545547 6.14876C0.354609 5.95782 0.354609 5.64907 0.545547 5.46017L2.50367 3.50204L0.545547 1.54392C0.354609 1.35298 0.354609 1.04423 0.545547 0.855321L1.00258 0.392196C1.19352 0.201259 1.50227 0.201259 1.69117 0.392196L4.45367 3.1547C4.64664 3.34563 4.64664 3.65438 4.4557 3.84532V3.84532Z" fill="#AAAAAA"/>
+                                        </svg>
+                                </span>
+                            {/if}
+                            {if $show_user_block || $is_all_reminders}
+                                {if !empty($users[$_reminder.user_contact_id])}
+                                    {$_user_info = $users[$_reminder.user_contact_id]}
+                                    {$_userpic_info = $_user_info->getPhoto(32)}
+                                    {if !empty($_userpic_info)}
+                                        <span class="icon size-24 rounded" style="background-image: url({$_userpic_info});" title="{$_user_info.name|escape}"></span>
+                                    {/if}
+                                {else}
+                                     <span class="icon size-24 rounded {$_reminder.user_contact_id}" title="[`User not found.`]"><i class="fas fa-user-slash" style="max-width: 22px;"></i></span>
+                                {/if}
+                            {/if}
+                        </div>
+
+                        {if !empty($_reminder.rights)}
+                        <div class="c-right-actions js-dots-wrapper hint">
+                            <span class="icon size-14 dots"><i class="fas fa-ellipsis-h" title="[`edit`]"></i></span>
+                        </div>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+
+            {* EDIT *}
+            <div class="width-100 custom-pl-12 custom-pt-12 c-step is-edit">
+                {$_reminder_user = ifset($users[$_reminder.user_contact_id], false)}
+                {if !empty($_reminder_user)}
+                    {include file="./ReminderFormEdit.inc.html" _user=$_reminder_user _reminder=$_reminder inline}
+                {/if}
+            </div>
+
+            {* CONFIRM *}
+            <div class="c-step is-confirm flexbox middle width-100">
+                <p>[`Are you sure?`]</p>
+                <div class="c-actions">
+                    <button class="button light-gray small js-confirm-delete"><i class="fas fa-trash-alt text-red bold delete"></i> [`Delete`]</button>
+                    [`or`]
+                    <button class="button small nowrap light-gray custom-ml-4 js-confirm-cancel"><i class="fas fa-undo"></i></button>   
+                </div>
+            </div>
+            <div class="c-dots-detail">
+                <div class="flexbox vertical nowrap">
+                    <span class="c-create-date small custom-mb-16 align-center"><span class="first-part">[`Created at`]:</span><br><span class="">{$_reminder.create_datetime|wa_date:"d.m.Y H:i"}</span></span>
+                    <button class="button light-gray smaller width-100 js-edit custom-mb-8"><i class="fas fa-pencil-alt bold edit"></i> [`Edit`]</button>
+                    <button  class="button light-gray smaller width-100 js-remove"><i class="fas fa-trash-alt text-red bold delete"></i> [`Delete`]</button>
+                </div>
+                
+            </div>
+
+            {if !empty($_reminder.rights)}
+                <script>
+                    
+                    ( function($) {
+                        new CRMReminder({
+                            $wrapper: $("#c-reminder-{$_reminder.id}"),
+                            id: "{$_reminder.id}",
+                            iframe: {if $iframe}true{else}false{/if},
+                            current_page: {$current_page},
+                            user_id: {if !empty($user_id)}{$user_id}{else}false{/if},
+                            setting_deal_id: {$setting_deal_id|default:0},
+                            setting_contact_id: {$setting_contact_id|default:0},
+                            reminder_user_id: {if !empty($_reminder_user.id)}{$_reminder_user.id}{else}false{/if},
+                            state: '{$_reminder.state|default:""}'
+                        });
+                    })(jQuery);
+                </script>
+            {/if}
+        </li>
+    {/foreach}
+    {if isset($pages_count) && $pages_count > $current_page}
+    <li class="js-lazy-load">
+        <div class="spinner custom-p-4"></div>
+    </li>
+    {/if}
+{/if}
+

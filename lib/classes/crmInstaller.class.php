@@ -98,6 +98,36 @@ class crmInstaller
             $clear_cache = true;
         }
 
+        try {
+            $m->exec("SELECT crm_last_log_id FROM wa_contact WHERE 0 LIMIT 0");
+        } catch (Exception $e) {
+            $m->exec("ALTER TABLE `wa_contact`
+                      ADD `crm_last_log_id` BIGINT NULL DEFAULT NULL");
+            $clear_cache = true;
+        }
+
+        try {
+            $m->exec("SELECT crm_last_log_datetime FROM wa_contact WHERE 0 LIMIT 0");
+        } catch (Exception $e) {
+            $m->exec("ALTER TABLE `wa_contact`
+                      ADD `crm_last_log_datetime` DATETIME NULL DEFAULT NULL");
+            $clear_cache = true;
+        }
+
+        try {
+            $m->exec("SELECT last_log_id FROM crm_deal WHERE 0 LIMIT 0");
+        } catch (Exception $e) {
+            $m->exec("ALTER TABLE `crm_deal` ADD `last_log_id` BIGINT NULL DEFAULT NULL");
+            $clear_cache = true;
+        }
+
+        try {
+            $m->exec("SELECT last_log_datetime FROM crm_deal WHERE 0 LIMIT 0");
+        } catch (Exception $e) {
+            $m->exec("ALTER TABLE `crm_deal` ADD `last_log_datetime` DATETIME NULL DEFAULT NULL");
+            $clear_cache = true;
+        }
+
         if (!empty($clear_cache)) {
             $cache = new waRuntimeCache('db/default/wa_contact', -1, 'webasyst');
             $cache->clearAll();
@@ -402,7 +432,7 @@ class crmInstaller
             $inserted_value = null;
             if (array_key_exists($field, $insert_map)) {
                 $inserted_value = $insert_map[$field];
-                if (strpos($inserted_value, '`') !== false) {
+                if ($inserted_value !== null && strpos($inserted_value, '`') !== false) {
                     $inserted_value = str_replace('`', '', $inserted_value);
                     if ($from_model->fieldExists($inserted_value)) {
                         $inserted_value = "`{$inserted_value}`";

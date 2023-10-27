@@ -1,0 +1,46 @@
+{$_title = "[`Field constructor`]"}
+{$wrapper_id = uniqid('crm-field-constructor-wrapper-')}
+
+<div class="crm-field-constructor-wrapper" id="{$wrapper_id}">
+
+    <h1>{$_title}</h1>
+    <div class="block double-padded crm-field-constructor">
+        <div class="block not-padded fieldset crm-main-fields">
+            <div class="fields">
+                {foreach $fields.main as $field}
+                    <div class="field">
+                        <div class="name">{$field.name|escape}</div>
+                        <div class="value">
+                            <span class="{if $field.pStatus === 'disabled'}hint{else}small bold{/if}">[`person`]</span>
+                            <span class="{if $field.cStatus === 'disabled'}hint{else}small bold{/if}">[`company`]</span>
+                        </div>
+                    </div>
+                {/foreach}
+            </div>
+            <div class="float-right gray" style="width:35%">
+                <p>[`Main contact fields cannot be modified or disabled.`]</p>
+            </div>
+        </div>
+        <div class="block not-padded fieldset no-border crm-other-fields">
+            <div class="fields js-other-fields">
+                {foreach $fields.other as $field}
+                    {include file="./SettingsFieldRow.inc.html" field=$field inline}
+                {/foreach}
+            </div>
+            <div class="float-right" style="width:35%; padding: 1px 0;">
+                <a href="javascript:void(0);" class="crm-edit-field-link bold no-underline"><i class="icon16 add"></i>[`New field`]</a>
+            </div>
+        </div>
+        <div class="clear-left"></div>
+    </div>
+
+    <script>
+        $(function () {
+            $.crm.title.set({$_title|json_encode});
+            new crmSettingsField({
+                '$wrapper': $('#{$wrapper_id}')
+            });
+        });
+    </script>
+
+</div>

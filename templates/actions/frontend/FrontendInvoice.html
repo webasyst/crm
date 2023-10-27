@@ -41,11 +41,23 @@
             {/if}
             {/if}
 
-            {if empty($html)}
-            <iframe scrolling="no" src="?module=invoice&action=templatesRender&invoice_id={$invoice_id|escape}&set_height=true"></iframe>
-            {else}
-            {$html}
-            {/if}
+            <div class="c-front-invoice-template">
+                {if empty($html)}
+                {if !empty($use_skeleton)}
+                    <div class="skeleton c-front-invoice-template-iframe" id="js-invoice-skeleton" style="padding: 1.5rem 0;">
+                        <div class="box contentbox" style="background: var(--background-color-blank); border-radius: 3px; max-width: 765px; margin: 0 auto;">
+                            <span class="skeleton-header custom-mt-16" style="width: 40%;"></span>
+                            {for $i = 0 to 9}
+                                <span class="skeleton-line"></span>
+                            {/for}
+                        </div>
+                    </div>
+                {/if}
+                <iframe scrolling="no" src="?module=invoice&action=templatesRender&invoice_id={$invoice_id|escape}&set_height=true" class="c-front-invoice-template-iframe js-invoice-iframe" data-skeleton="#js-invoice-skeleton"></iframe>
+                {else}
+                {$html}
+                {/if}
+            </div>
 
             {if $_show_payment_section}
             {include file="./invoice/payment.section.inc.html" inline}
@@ -69,6 +81,27 @@
             </script>
             {/if}
 
+        {/if}
+
+        {if !empty($use_skeleton)}
+        <script>
+            ( function($) {
+                window.parent.document.documentElement.style.setProperty('--invoice-template-height', '525px');
+
+                const $invoice_iframe = $(".js-invoice-iframe").css({
+                    'visibility': 'hidden',
+                    'max-height': '0'
+                });
+
+                $invoice_iframe.on('load', function() {
+                    $invoice_iframe.css({
+                        'visibility': 'visible',
+                        'max-height': 'initial'
+                    });
+                    $($invoice_iframe.data('skeleton')).addClass('hidden');
+                })
+            })(jQuery);
+        </script>
         {/if}
 
     </div>

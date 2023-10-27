@@ -1,0 +1,145 @@
+{$class = 'c-send-sms-dialog'}
+{$dialog_id = uniqid($class)}
+
+<div class="{$class}-container">
+    <div class="crm-dialog-wrapper {$class}" id="{$dialog_id}" style="display: none;">
+        <div class="crm-dialog-background"></div>
+        <div class="crm-dialog-block">
+            <form>
+                <header class="crm-dialog-header">
+                    <h1>
+                        {sprintf(_w("Write SMS to %s"), $phone_formatted)}
+                    </h1>
+                </header>
+
+                <div class="crm-dialog-content">
+                    <div class="c-message-form-wrapper">
+
+                        <div class="field">
+                            <div class="name">[`Sender`]</div>
+                            <div class="value">
+                                <select name="from" class="js-sms-sender-list">
+                                    {foreach $sms_senders as $key => $item}
+                                        <option value="{$key}">{$item['name']|escape}</option>
+                                    {/foreach}
+                                </select>
+                                <input name="from" type="text" class="js-specified-sms-sender c-specified-sms-sender" style="display: none;" required disabled>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="name">[`To`]</div>
+                            <div class="value">
+                                <div class="c-layout">
+                                    <div class="c-column">
+                                        <span class="c-user-name">
+                                            <i class="icon16 userpic20" style="background-image: url({waContact::getPhotoUrl($contact.id, $contact.photo, 20)|escape});"></i>
+                                            {$contact.name|escape}
+
+                                            <input type="hidden" name="contact_id" value="{$contact.id}">
+                                            <input type="hidden" name="phone" value="{$phone}">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {if !empty($deal)}
+                            <div class="field">
+                                <div class="name">[`Deal`]</div>
+                                <div class="value js-message-deal">
+                                    {$_funnel = $funnels[$deal.funnel_id]|default:null}
+                                    {if $_funnel}
+                                        {$_stage = $stages[$deal.stage_id]|default:null}
+                                        {if $_stage}
+                                            <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                            <a href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
+                                            <script>
+                                                ( function($) {
+                                                    var $wrapper = $(".js-message-deal");
+                                                    $.crm.renderSVG($wrapper);
+                                                })(jQuery);
+                                            </script>
+                                        {else}
+                                            [`Stage deleted`]
+                                        {/if}
+                                    {else}
+                                        [`Funnel deleted`]
+                                    {/if}
+                                </div>
+                                <input type="hidden" name="deal_id" value="{$deal.id}">
+                            </div>
+                        {/if}
+
+                        <div class="field">
+                            <div class="name">[`Text`]</div>
+                            <div class="value">
+                                <textarea name="text" class="wide js-send-sms-textarea" value="" placeholder="[`Type SMS here`]" required></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <footer class="crm-dialog-footer">
+                    <input class="button blue js-submit-button" type="submit" value="[`Send SMS`]">
+                    <span style="margin: 0 4px;">[`or`]</span>
+                    <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                </footer>
+
+                <input name="hash" value="{$hash|default:""}" type="hidden">
+            </form>
+        </div>
+
+        {capture assign="_success_html"}
+            <div class="crm-dialog-content" style="min-height: 40px;">
+                <p>[`Message sent successfully`]</p>
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <input class="button gray js-close-dialog" type="button" value="[`Close`]">
+            </footer>
+        {/capture}
+
+        {capture assign="_error_html"}
+            <div>
+                <p class="js-error-text"></p>
+                {if $wa->user()->isAdmin()}
+                    <p class="js-technical-info-block js-unknown-error">
+                        {sprintf(_w('See detailed error-related information in log file <em>%s</em>.', "sms.log"))}
+                    </p>
+                    <p>{sprintf(_w('Check <a href="%s">SMS sending settings</a>.'), "`$wa_backend_url`webasyst/settings/sms/")}</a></p>
+                {else}
+                    <p>{_ws('Please refer to your system administrator.')}</p>
+                {/if}
+            </div>
+        {/capture}
+
+    </div>
+
+    {$_locales = [
+        'send_error_title' => {_w("Message sending error")},
+        'send_error_text' => {_w("Can't send SMS")}
+    ]}
+
+    <script>
+        ( function($) {
+            var $body = $(window.top.document).find("body");
+            new CRMDialog({
+                html: $body.find('#{$dialog_id}').show(),
+                onOpen: function() {
+                    new CRMSendSmsDialog({
+                        $wrapper: $('#{$dialog_id}'),
+                        success_html: {$_success_html|json_encode},
+                        error_html: {$_error_html|json_encode},
+                        hash: {$hash|json_encode},
+                        send_action_url: {$send_action_url|default:''|json_encode},
+                        app_url: {"`$wa_backend_url`crm/"|json_encode},
+                        locales: {$_locales|json_encode}
+                    });
+                }
+            });
+        })(jQuery);
+    </script>
+
+</div>

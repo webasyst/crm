@@ -328,7 +328,10 @@ var CRMSettingsFunnel = ( function($) {
     CRMSettingsFunnel.prototype.initSave = function() {
         var that = this,
             is_locked = false,
-            $loading = that.$wrapper.find(".js-loading");
+            $loading = $('<span class="c-notice"><i class="fas fa-spinner wa-animation-spin speed-1000 js-loading"></i></span>'),
+            $saved = $('<span class="c-notice"><i class="fas fa-check"></i></span>'),
+            $button = that.$wrapper.find(".js-funnel-save-button");
+
 
         that.$form.on("submit", onSubmit);
 
@@ -369,15 +372,16 @@ var CRMSettingsFunnel = ( function($) {
         function save(data) {
             var href = "?module=settings&action=funnelSave";
 
-            $loading.removeClass('yes').removeClass('no').addClass('loading').show();
+            $loading.insertAfter($button);
 
             $.post(href, data, function(response) {
                 if (response.status === "ok") {
-                    $loading.removeClass('loading').addClass('yes').show();
+                    $loading.remove();
+                    $saved.insertAfter($button);
+                   // $loading.removeClass('loading').addClass('yes').show();
                     var content_uri = $.crm.app_url + "settings/funnels/" + response.data.id + "/";
                     $.crm.content.load(content_uri);
                 } else {
-                    $loading.hide();
                 }
             }, "json").always( function() {
                 is_locked = false;
@@ -393,12 +397,14 @@ var CRMSettingsFunnel = ( function($) {
 
         function showConfirm(event) {
             event.preventDefault();
-
-            $.crm.confirm.show({
-                title: that.locales["delete_confirm_title"],
+            $.waDialog.confirm({
+                title: `<i class=\"fas fa-exclamation-triangle smaller state-error\"></i> ${that.locales["delete_confirm_title"]}?`,
                 text: that.locales["delete_confirm_text"],
-                button: that.locales["delete_confirm_button"],
-                onConfirm: deleteFunnel
+                success_button_title: that.locales["delete_confirm_button"],
+                success_button_class: 'danger',
+                cancel_button_title: `${that.locales["delete_cancel_button"]}`,
+                cancel_button_class: 'light-gray',
+                onSuccess: deleteFunnel
             });
         }
 

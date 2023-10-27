@@ -1,0 +1,95 @@
+<div class="field-group c-company-add-form-wrapper" id="c-company-add-form-wrapper">
+
+
+    <div class="field">
+        <div class="name">[`Company name`]</div>
+        <div class="value">
+            <input class="long large js-focus-field" type="text" name="contact[company]" placeholder="[`Company name`]" required>
+        </div>
+    </div>
+
+    <div class="field">
+        <div class="name">[`Phone`]</div>
+        <div class="value">
+
+            {$fields = $wa->crm->getContactFields()}
+
+            {function _renderCompanyPhone}
+                <li>
+                    <input class="js-value" type="tel" value="{if !empty($value)}{$value|escape}{/if}" placeholder="[`Phone`]">
+                    <select class="js-ext">
+                        {$_phone_fields = array_merge($fields.phone.ext, ["other" => "[`other`]"])}
+                        {foreach $_phone_fields as $ext_id => $ext_name}
+                            <option value="{$ext_id}" {if !empty($ext) && $ext_id == $ext}selected{/if}>{$ext_name|escape}</option>
+                        {/foreach}
+                    </select>
+                    <a class="inline-link c-delete-link js-remove-phone" href="javascript:void(0);"><b><i>[`delete`]</i></b></a>
+                </li>
+            {/function}
+
+            {capture assign="_phone_template_html"}{_renderCompanyPhone value="" ext=""}{/capture}
+
+            <ul class="menu-v compact c-phone-list js-phone-list">
+                {$_number = ""}
+                {if !empty($call) && !empty($call.plugin_client_number)}
+                    {$_number = $call.plugin_client_number|escape}
+                {/if}
+                {_renderCompanyPhone value="{$_number}" ext=""}
+            </ul>
+
+            <a href="javascript:void(0)" class="small inline-link js-add-phone">
+                <i class="icon10 add"></i>&nbsp;<b>[`Add another`]</b>
+            </a>
+
+        </div>
+    </div>
+
+    {* EMAIL *}
+    <div class="field">
+        {function _renderCompanyEmail}
+            <li>
+                <input class="js-value" type="email" value="{if !empty($value)}{$value|escape}{/if}" placeholder="[`Email`]">
+                <select class="js-ext">
+                    {$_email_fields = array_merge($fields.email.ext, ["other" => "[`other`]"])}
+                    {foreach $_email_fields as $ext_id => $ext_name}
+                        <option value="{$ext_id}" {if !empty($ext) && $ext_id == $ext}selected{/if}>{$ext_name|escape}</option>
+                    {/foreach}
+                </select>
+                <a class="inline-link c-delete-link js-remove-email" href="javascript:void(0);"><b><i>[`delete`]</i></b></a>
+            </li>
+        {/function}
+
+        {capture assign="_email_template_html"}{_renderCompanyEmail value="" ext=""}{/capture}
+
+        <div class="name">
+            <span class="crm-field-name">[`Email`]</span>
+        </div>
+        <div class="value">
+
+            <ul class="menu-v compact c-email-list js-email-list">
+                {if !empty($_emails)}
+                    {foreach $_emails as $_email}
+                        {_renderCompanyEmail value=$_email.value|escape ext=$_email.ext}
+                    {/foreach}
+                {else}
+                    {_renderCompanyEmail value="" ext=""}
+                {/if}
+            </ul>
+
+            <a href="javascript:void(0)" class="small inline-link js-add-email">
+                <i class="icon10 add"></i>&nbsp;<b>[`Add another`]</b>
+            </a>
+
+        </div>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMCompanyAddForm({
+                $wrapper: $("#c-company-add-form-wrapper"),
+                phone_template_html: {$_phone_template_html|trim|strip|json_encode},
+                email_template_html: {$_email_template_html|trim|strip|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

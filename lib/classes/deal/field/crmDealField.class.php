@@ -104,6 +104,21 @@ abstract class crmDealField
         return $value;
     }
 
+    public function isMulti()
+    {
+        return isset($this->options['multi']) && $this->options['multi'];
+    }
+
+    public function isUnique()
+    {
+        return isset($this->options['unique']) && $this->options['unique'];
+    }
+
+    public function isRequired()
+    {
+        return isset($this->options['required']) && $this->options['required'];
+    }
+
     /**
      * Returns name of the field
      *

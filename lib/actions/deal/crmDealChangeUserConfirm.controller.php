@@ -9,8 +9,8 @@ class crmDealChangeUserConfirmController extends crmJsonController
             $this->accessDenied();
         }
 
+        $ui = wa('crm')->whichUI('crm');
         $user_contact_id = $this->getUserContactId();
-
         if ($user_contact_id != $this->getUserId()) {
             // emulated change user
             $updated_deal = array_merge($deal, [
@@ -19,7 +19,7 @@ class crmDealChangeUserConfirmController extends crmJsonController
             if (!$this->hasAccessToDeal($updated_deal)) {
                 $this->response = [
                     'need_confirm' => true,
-                    'html' => $this->renderConfirmDialog($deal, $user_contact_id)
+                    'html' => $this->renderConfirmDialog($deal, $user_contact_id, $ui)
                 ];
                 return;
             }
@@ -49,7 +49,7 @@ class crmDealChangeUserConfirmController extends crmJsonController
         return $this->getCrmRights()->deal($deal) > crmRightConfig::RIGHT_DEAL_VIEW;
     }
 
-    protected function renderConfirmDialog(array $deal, $user_contact_id)
+    public function renderConfirmDialog(array $deal, $user_contact_id, $ui = '1.3')
     {
         $current_deal_user = null;
         if ($deal['user_contact_id']) {
@@ -64,7 +64,8 @@ class crmDealChangeUserConfirmController extends crmJsonController
             $this->notFound(_w('User not found.'));
         }
 
-        $template = wa()->getAppPath('templates/actions/deal/DealChangeUserConfirm.html', 'crm');
+        $actions_path = ($ui === '1.3' ? 'actions-legacy' : 'actions');
+        $template = wa()->getAppPath('templates/'.$actions_path.'/deal/DealChangeUserConfirm.html', 'crm');
         return $this->renderTemplate($template, [
             'deal' => $deal,
             'current_deal_user' => $current_deal_user,

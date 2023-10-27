@@ -29,10 +29,16 @@ class crmEmailSourceWorkerOutcomingStrategy extends crmEmailSourceWorkerStrategy
         if ($conversation) {
             $conversation_id = $conversation['id'];
         } else {
-            $conversation_id = $this->createConversation($customer, $message['subject'], $deal);
+            $conversation_id = $this->createConversation($customer, $message, $deal);
         }
         $mm = new crmMessageModel();
         $mm->addToConversation($message, $conversation_id);
+
+        if ($conversation) {
+            // Если переписка не только что создана, отправляем пуши
+            $message['conversation_id'] = $conversation_id;
+            (new crmPushService)->notifyAboutMessage($customer, $message, $conversation);
+        }
     }
 
     /**

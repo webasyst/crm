@@ -35,12 +35,24 @@ class crmReminderSaveController extends crmJsonController
                 throw new waRightsException();
             }
         }
-        $required = array('content');
+        $required = array('type', 'content', 'due_date', 'due_time', 'deal_id');
+        $countEmpty = true;
         foreach ($required as $r) {
-            if (empty($data[$r])) {
-                $errors[$r] = _w('This field is required');
+            if ($r === 'type') {
+                if ($data[$r] !== "OTHER"){
+                    $countEmpty = false;
+                }
+            }
+            else {
+                if (!empty($data[$r])) {
+                    $countEmpty = false;
+                }
             }
         }
+        if ($countEmpty) {
+            $errors['content'] = _w('At least one of these fields must be filled.');
+        }
+
         if ($data['contact_id'] && $data['contact_id'] < 0) {
             $dm = new crmDealModel();
             if (!$dm->getById(abs($data['contact_id']))) {
@@ -67,20 +79,20 @@ class crmReminderSaveController extends crmJsonController
         if ($data['due_date']) {
             $reminder['due_date'] = date('Y-m-d', strtotime($data['due_date']));
         } else {
-            $reminder['due_date'] = !empty($dt['due_date']) ? $dt['due_date'] : date('Y-m-d', strtotime('+1 day'));
+            $reminder['due_date'] = !empty($dt['due_date']) ? $dt['due_date'] : null;
         }
         if ($data['due_time']) {
             $reminder['due_datetime'] = waDateTime::parse('Y-m-d H:i:s', $reminder['due_date'].' '.$data['due_time'].':00');
         } else {
             $reminder['due_datetime'] = !empty($dt['due_datetime']) ? $dt['due_datetime'] : null;
         }
-        /*
-        if (!$this->getCrmRights()->contactOrDeal($reminder['contact_id'])) {
-            throw new waRightsException();
+        if (empty($reminder['due_date'])) {
+            $reminder['due_date'] = null;
+            $reminder['due_datetime'] = null;
         }
-        */
-        $action = 'reminder_add';
+        $action = 'reminder_update';
         if (!$data['id']) {
+            $action = 'reminder_add';
             $reminder['create_datetime'] = $now;
             $reminder['creator_contact_id'] = wa()->getUser()->getId();
             $id = $reminder['id'] = $rm->insert($reminder);
@@ -99,6 +111,8 @@ class crmReminderSaveController extends crmJsonController
                     'update_datetime' => $now,
                     'content'         => $data['content'],
                 );
+            } elseif ($reminder['due_datetime']) {
+                $reminder['push_sent'] = 0;
             }
             $rm->updateById($id, $reminder);
             $reminder['contact_id'] = $old_reminder['contact_id'];

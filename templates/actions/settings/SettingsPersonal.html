@@ -1,0 +1,82 @@
+<div class="crm-personal-settings-page" id="crm-personal-settings-page">
+
+    <form action="?module=settings&action=personalSave">
+
+        <div class="c-personal-settings-block">
+            <h1 class="c-personal-setting-header c-page-header">
+                [`Personal settings`]
+            </h1>
+            <div class="c-personal-settings-content fields">
+                <div class="fields-group c-personal-settings-counter-settings-content">
+                    <h3>[`App icon counter`] <span class="c-badge badge smallest">1</span></h3>
+                    <ul class="c-options-list menu">
+                        <li>
+                            <label>
+                                <input type="hidden" name="settings[personal][app_counter][new_messages]" value="0">
+                                <span class="wa-checkbox">
+                                    <input type="checkbox" name="settings[personal][app_counter][new_messages]" value="1"
+                                           {if !empty($personal_settings.app_counter.new_messages)}checked=""{/if}>
+                                           <span>
+                                            <span class="icon">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                        </span>
+                                </span> [`New messages`]
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="hidden" name="settings[personal][app_counter][new_deals]" value="0">
+                                <span class="wa-checkbox">
+                                    <input type="checkbox" name="settings[personal][app_counter][new_deals]" value="1"
+                                           {if !empty($personal_settings.app_counter.new_deals)}checked=""{/if}>
+                                           <span>
+                                            <span class="icon">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                        </span>
+                                </span> [`New deals`]
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="hidden" name="settings[personal][app_counter][overdue_reminders]" value="0">
+                                <span class="wa-checkbox">
+                                    <input type="checkbox" name="settings[personal][app_counter][overdue_reminders]" value="1"
+                                           {if !empty($personal_settings.app_counter.overdue_reminders)}checked=""{/if}>
+                                           <span>
+                                            <span class="icon">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                        </span>
+                                </span> [`My overdue reminders`]
+                            </label>
+                        </li>
+
+                    </ul>
+                </div>
+                <div class="c-personal-settings-reminder-settings-content">
+                    {$personal_settings.reminder_settings_html}
+                </div>
+            </div>
+        </div>
+
+        <div class="crm-form-buttons">
+            <div class="crm-submit c-footer-actions js-footer-actions">
+              <button type="submit" class="button js-submit-button">[`Save`]</button>
+                <span class="c-hidden">
+                        <a class="button light-gray" href="{$wa_app_url}settings/">[`Cancel`]</a>
+                    </span>
+            </div>
+        </div>
+
+        <script>
+            ( function($) {
+                new CRMSettingsPersonal({
+                    $wrapper: $('#crm-personal-settings-page')
+                });
+            })(jQuery);
+        </script>
+
+    </form>
+</div>

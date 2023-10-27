@@ -22,41 +22,59 @@ class crmMessageSendReplyController extends crmSendEmailController
      */
     protected $mail;
 
-    public function preExecute()
+    public function execute($message = [])
     {
-        $message = $this->getMessage();
-        if ($message['source_id'] > 0 && $message['transport'] != crmMessageModel::TRANSPORT_EMAIL) {
-            $source = crmSource::factory($message['source_id']);
+        if (empty($message)) {
+            $this->getMessage();
+        } else {
+            $this->message = $message;
+        }
+        if ($this->message['source_id'] > 0 && $this->message['transport'] != crmMessageModel::TRANSPORT_EMAIL) {
+            $source = crmSource::factory($this->message['source_id']);
             $data = $this->prepareData();
-            $result = crmSourceMessageSender::replyToMessage($source, $message, $data);
+            $result = crmSourceMessageSender::replyToMessage($source, $this->message, $data);
+            $id = ifset($result, 'response', 'message_id', 0);
             if ($result['status'] == 'ok') {
-                $this->response = (array)ifset($result['response']);
+                $this->response = (array) ifset($result['response']);
             } else {
-                $this->errors = (array)ifset($result['errors']);
+                $this->errors = (array) ifset($result['errors']);
+                return;
             }
+        } else {
+            $result = $this->send();
+            if (isset($result['errors'])) {
+                $this->errors = $result['errors'];
+                return;
+            }
+
+            $id = $result['id'];
+            $email_message = $result['email_message'];
+            if ($id > 0 && isset($email_message['attachments'])) {
+                $this->getMessageModel()->setAttachments($id, array_keys($email_message['attachments']));
+            }
+            $this->response = [
+                'id' => $id,
+                'message_id' => $email_message['message_id'],
+                'attachment_count' => isset($email_message['attachments']) ? count($email_message['attachments']) : 0
+            ];
+        }
+
+        if (wa()->whichUI('crm') !== '1.3') {
+            $sent_message = $this->getMessageModel()->getMessage($id);
+            $sent_message = $this->workupMessage($sent_message);
+            $view = wa()->getView();
+            $view->assign([
+                'message' => $sent_message
+            ]);
+            $template = wa()->getAppPath('templates/actions/message/MessageConversationId.singleMessage.inc.html', 'crm');
+            $message_html = $view->fetch($template);
+            $this->response['html'] = waUtils::jsonEncode($message_html);
+        }
+
+        if ($this->message['transport'] != crmMessageModel::TRANSPORT_EMAIL) {
             $this->display();
             exit;
         }
-    }
-
-    public function execute()
-    {
-        $result = $this->send();
-        if (isset($result['errors'])) {
-            $this->errors = $result['errors'];
-            return;
-        }
-
-        $id = $result['id'];
-        $email_message = $result['email_message'];
-        if ($id > 0 && isset($email_message['attachments'])) {
-            $this->getMessageModel()->setAttachments($id, array_keys($email_message['attachments']));
-        }
-
-        $this->response = array(
-            'message_id' => $email_message['message_id'],
-            'attachment_count' => isset($email_message['attachments']) ? count($email_message['attachments']) : 0
-        );
     }
 
     protected function getMessage()
@@ -283,5 +301,25 @@ class crmMessageSendReplyController extends crmSendEmailController
         $attached_files = $this->getFileModel()->getFiles($file_ids);
 
         return $attached_files;
+    }
+
+    protected function workupMessage($message)
+    {
+        if (empty($message) || !ifset($message, 'source_id', false) || wa()->whichUI() === '1.3') {
+            return $message;
+        }
+        $source_helper = crmSourceHelper::factory(crmSource::factory($message['source_id']));
+        $res = $source_helper->normalazeMessagesExtras([$message]);
+        return $res ? reset($res) : $message;
+    }
+
+    public function getMessageId()
+    {
+        return ifset($this->response, 'id', 0);
+    }
+
+    public function getError()
+    {
+        return $this->errors;
     }
 }

@@ -20,7 +20,10 @@
                 default_checked_fields: {$default_checked_fields|json_encode},
                 lang: '{substr($wa->locale(), 0, 2)}',
                 messages: {
-                    confirm_delete: "[`Are you sure delete this form?`]"
+                    'connection_failed': '[`Can not connect with the specified parameters to server`]',
+                    'delete_confirm_title': '[`Delete source`]',
+                    'delete_confirm_text': '[`Are you sure?`]',
+                    'delete_confirm_button': '[`Delete`]'
                 }
             });
         })(jQuery);

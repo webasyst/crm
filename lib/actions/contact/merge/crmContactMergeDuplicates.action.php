@@ -2,13 +2,32 @@
 
 class crmContactMergeDuplicatesAction extends crmContactsAction
 {
+    public function preExecute() {
+        if (wa()->whichUI() === '1.3') {
+            parent::preExecute();
+        }
+    }
+
+    public function execute()
+    {
+        parent::execute();
+
+        $iframe = waRequest::get('iframe', 0, waRequest::TYPE_INT);
+        if (!empty($iframe)) {
+            $this->setLayout();
+        }
+        $this->view->assign([
+            'iframe' => $iframe
+        ]);
+    }
+
     public function afterExecute()
     {
         $this->accessDeniedForNotEditRights();
-
         $this->view->assign(array(
             'field' => $this->getField(),
             'page' => $this->getPage(),
+            'limit' => $this->getLimit(),
             'duplicates_data' => $this->search($this->getField(), $this->getOffset(), $this->getLimit())
         ));
     }
@@ -21,7 +40,7 @@ class crmContactMergeDuplicatesAction extends crmContactsAction
         $m = new waModel();
         switch ($field) {
             case 'name':
-                $sql = "SELECT name, name value, COUNT(DISTINCT id) count FROM `wa_contact` 
+                $sql = "SELECT name, name value, COUNT(DISTINCT id) count, GROUP_CONCAT(DISTINCT id SEPARATOR ',') ids FROM `wa_contact`
                     GROUP BY name
                     HAVING count > 1
                     ORDER BY name
@@ -39,7 +58,7 @@ class crmContactMergeDuplicatesAction extends crmContactsAction
 
                 break;
             case 'email':
-                $sql = "SELECT ce.email name, ce.email value, COUNT(DISTINCT ce.contact_id) count FROM `wa_contact_emails` ce
+                $sql = "SELECT ce.email name, ce.email value, COUNT(DISTINCT ce.contact_id) count, GROUP_CONCAT(DISTINCT ce.contact_id SEPARATOR ',') ids FROM `wa_contact_emails` ce
                     JOIN `wa_contact` c ON c.id = ce.contact_id
                     GROUP BY ce.email
                     HAVING count > 1
@@ -58,7 +77,7 @@ class crmContactMergeDuplicatesAction extends crmContactsAction
                 $groups_count = $m->query($sql)->fetchField();
                 break;
             case 'phone':
-                $sql = "SELECT cd.value name, cd.value value, COUNT(DISTINCT cd.contact_id) count FROM `wa_contact_data` cd
+                $sql = "SELECT cd.value name, cd.value value, COUNT(DISTINCT cd.contact_id) count, GROUP_CONCAT(DISTINCT cd.contact_id SEPARATOR ',') ids FROM `wa_contact_data` cd
                     JOIN `wa_contact` c ON c.id = cd.contact_id AND cd.field = 'phone'
                     GROUP BY cd.value
                     HAVING count > 1

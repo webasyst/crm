@@ -21,7 +21,12 @@
 
                 function setHeight() {
                     var $iframe = $(window.frameElement);
-                    $iframe.height( $(document).height() );
+                    setTimeout(function () {
+                        var height = $(document).height();
+
+                        window.parent.document.documentElement.style.setProperty('--invoice-template-height', height + 'px');
+                        $iframe.height(height);
+                    })
                 }
             })(jQuery);
         {/if}

@@ -18,4 +18,21 @@ class crmMessageAttachmentsModel extends crmModel
         $file_ids = array_keys($file_ids);
         return $this->getFileModel()->getFiles($file_ids);
     }
+
+    public function getFilesByMessages($message_ids)
+    {
+        $result = [];
+        if (!is_array($message_ids) || empty($message_ids)) {
+            return $result;
+        }
+        $file_ids = $this->getByField('message_id', $message_ids, 'file_id');
+        $files = $this->getFileModel()->getFiles(array_keys($file_ids));
+        foreach ($file_ids as $_file_id => $_data) {
+            if (!empty($files[$_file_id])) {
+                $result[$_data['message_id']][$_file_id] = $files[$_file_id];
+            }
+        }
+
+        return $result;
+    }
 }

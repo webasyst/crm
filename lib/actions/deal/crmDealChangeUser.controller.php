@@ -38,9 +38,11 @@ class crmDealChangeUserController extends crmJsonController
             $lm->log(
                 $action_id,
                 $deal['id'] * -1,
-                null,
+                $deal['id'],
                 $before_user_name,
-                $after_user_name
+                $after_user_name,
+                null,
+                ['user_id_before' => $before_user->getId(), 'user_id_after' => $after_user->getId()]
             );
             $deal['user_contact_id'] = $user_contact_id;
 

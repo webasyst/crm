@@ -2,7 +2,12 @@
 
 class crmCallModel extends crmModel
 {
+    const DIRECTION_IN = 'IN';
+    const DIRECTION_OUT = 'OUT';
+
     protected $table = 'crm_call';
+
+    protected $call_data = [];
 
     /**
      * Get list OR|AND count of calls
@@ -85,6 +90,19 @@ class crmCallModel extends crmModel
         if (isset($params['user_contact_id'])) {
             $cond[] = "user_contact_id = ".(int)$params['user_contact_id'];
         }
+        if (isset($params['client_contact_id'])) {
+            $cond[] = 'client_contact_id = '.(int) $params['client_contact_id'];
+        }
+        if (isset($params['deal_id'])) {
+            $cond[] = ($params['deal_id'] == 0 ? 'deal_id IS NULL' : 'deal_id='.(int)$params['deal_id']);
+        }
+        /** time: --------[begin-------end]-------now */
+        if (isset($params['create_datetime_begin'])) {
+            $cond[] = "create_datetime >= '".$params['create_datetime_begin']."'";
+        }
+        if (isset($params['create_datetime_end'])) {
+            $cond[] = "create_datetime <= '".$params['create_datetime_end']."'";
+        }
 
         $join = '';
 
@@ -150,12 +168,14 @@ class crmCallModel extends crmModel
                 'record_href' => '',
                 'plugin_icon' => '',
             );
+
+            /** @var crmPluginTelephony $tplugin */
             $tplugin = wa('crm')->getConfig()->getTelephonyPlugins($call['plugin_id']);
             if ($tplugin) {
                 $call['plugin_name'] = $tplugin->getName();
                 $call['plugin_icon'] = $tplugin->getIcon();
                 if ($call['plugin_record_id']) {
-                    $attrs = $tplugin->getRecordHref($call);
+                    $attrs = $tplugin->getRecordHref($call, $tplugin->getId());
                     if (!is_array($attrs)) {
                         $attrs = array(
                             'href' => $attrs,
@@ -202,6 +222,11 @@ class crmCallModel extends crmModel
      */
     public function handleCalls($changed_ids = null)
     {
+        static $lm = null;
+        if ($lm === null) {
+            $lm = new crmLogModel();
+        }
+
         // Make it array(id => id)
         if ($changed_ids !== null) {
             $changed_ids = array_fill_keys($changed_ids, true);
@@ -213,8 +238,35 @@ class crmCallModel extends crmModel
         } catch (Exception $e) {}
 
         try {
-            $this->notifyUsers($changed_ids);
-        } catch (Exception $e) {}
+            $calls_to_notify = $this->notifyUsers($changed_ids);
+        } catch (Exception $e) {
+            $calls_to_notify = [];
+        }
+
+        foreach ($calls_to_notify as $_call_id => $call_to_notify) {
+            $contact_id = ifset($call_to_notify, 'client_contact_id', 0);
+            if (empty($contact_id)) {
+                continue;
+            }
+            if ($call_to_notify['direction'] === self::DIRECTION_IN) {
+                $actor_contact_id = $contact_id;
+            } else {
+                if (empty($call_to_notify['users_to_notify']) || count($call_to_notify['users_to_notify']) != 1) {
+                    $actor_contact_id = null;
+                } else {
+                    $actor_contact_id = reset($call_to_notify['users_to_notify']);
+                    $actor_contact_id = ifset($actor_contact_id, 'id', null);
+                }
+            }
+            $lm->log(
+                'call',
+                empty($call_to_notify['deal_id']) ? $contact_id : -$call_to_notify['deal_id'],
+                $_call_id,
+                null,
+                null,
+                $actor_contact_id
+            );
+        }
     }
 
     /** Updates table, fills in client_contact_id using plugin_client_number */
@@ -232,6 +284,7 @@ class crmCallModel extends crmModel
 
         foreach ($calls as $id => $call) {
             try {
+                /** @var crmPluginTelephony $telephony */
                 $telephony = wa('crm')->getConfig()->getTelephonyPlugins($call['plugin_id']);
                 if (!$telephony) {
                     continue;
@@ -250,10 +303,8 @@ class crmCallModel extends crmModel
 
     public function setCallClient($call_id, $contact_id)
     {
-        static $lm = null;
         static $dm = null;
-        if ($lm === null) {
-            $lm = new crmLogModel();
+        if ($dm === null) {
             $dm = new crmDealModel();
         }
 
@@ -275,8 +326,6 @@ class crmCallModel extends crmModel
         }
 
         $this->updateById($call_id, $upd);
-
-        $lm->log('call', empty($upd['deal_id']) ? $contact_id : -$deal['id'], $call_id, null, null, $contact_id);
     }
 
     /**
@@ -287,7 +336,7 @@ class crmCallModel extends crmModel
     public function notifyUsers($changed_ids)
     {
         if (empty($changed_ids)) {
-            return;
+            return [];
         }
 
         $sql = "SELECT *
@@ -297,7 +346,7 @@ class crmCallModel extends crmModel
         $calls_to_notify = $this->query($sql, array($changed_ids))->fetchAll('id');
 
         if (empty($calls_to_notify)) {
-            return;
+            return [];
         }
 
         // Which users are responsible for which calls
@@ -330,6 +379,8 @@ class crmCallModel extends crmModel
 
         // Update user_contact_id for calls
         $this->updateEmptyUserContactIds($pending + $no_longer_pending, $pbx_users);
+
+        return $calls_to_notify;
     }
 
     public function getUsersToNotify(array &$calls, $pbx_users)
@@ -476,6 +527,13 @@ class crmCallModel extends crmModel
         return $res;
     }
 
+    public function getById($value)
+    {
+        $this->call_data = parent::getById($value);
+
+        return $this->call_data;
+    }
+
     public function updateById($id, $data, $options = null, $return_object = false)
     {
         $res = parent::updateById($id, $data, $options, $return_object);
@@ -492,6 +550,30 @@ class crmCallModel extends crmModel
 
         $asm = new waAppSettingsModel();
         $asm->set('crm', 'call_ts', time());
+
+        if (ifset($field, 'status_id', '') === 'FINISHED' || ifset($data, 'status_id', '') === 'FINISHED') {
+            if (empty($this->call_data) || ($field === 'id' && $this->call_data['id'] != $value)) {
+                $this->call_data = $this->getById((int) $value);
+            }
+            if ($this->call_data['status_id'] !== 'FINISHED' && !empty($this->call_data['user_contact_id'])) {
+                $params = [
+                    'call_id'  => $this->call_data['id'],
+                    'duration' => ifset($data, 'duration', $this->call_data['duration'])
+                ];
+                if (!empty($this->call_data['deal_id'])) {
+                    $params['deal_id'] = $this->call_data['deal_id'];
+                }
+                if (!class_exists('waLogModel')) {
+                    wa('webasyst');
+                }
+                (new waLogModel())->add(
+                    ($this->call_data['direction'] === self::DIRECTION_IN ? 'call_in' : 'call_out'),
+                    $params,
+                    ifempty($this->call_data, 'client_contact_id', null),
+                    $this->call_data['user_contact_id']
+                );
+            }
+        }
 
         return $res;
     }

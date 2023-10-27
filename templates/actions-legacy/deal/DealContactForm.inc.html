@@ -1,0 +1,153 @@
+<div class="c-contact-form-wrapper" id="c-contact-add-form">
+
+    <div class="c-contact-toggle-wrapper">
+        <ul class="c-contact-view-toggle js-contact-view-toggle">
+            <li class="c-toggle js-show-fio" data-mode="fio" style="{if !empty($is_wide)}display: none;{/if}">
+                <a href="javascript:void(0);" class="inline-link">
+                    <i class="icon16 add"></i><b><i>[`Add new contact`]</i></b>
+                </a>
+            </li>
+            <li class="c-toggle is-active" data-mode="name">
+                <a href="javascript:void(0);" class="inline-link">
+                    <i class="icon16 search"></i><b><i>[`Find existing contact`]</i></b>
+                </a>
+            </li>
+        </ul>
+
+        <input class="js-action-field" name="contact_action" type="hidden" value="search">
+    </div>
+
+    <div class="c-fields-wrapper">
+        {*FIO*}
+        <div class="js-fio" style="display: none;">
+            <div class="field-group c-fio-wrapper">
+                {if !$wa->setting('one_name_field')}
+                    <div class="field">
+                        <div class="name">
+                            <span class="">[`First name`]</span>
+                        </div>
+                        <div class="value">
+                            <input class="long js-firstname" type="text" name="contact[firstname]" placeholder="[`First name`]" value="{$contact.firstname|default:""|escape}">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="name">
+                            <span class="">[`Middle name`]</span>
+                        </div>
+                        <div class="value">
+                            <input class="long" type="text" name="contact[middlename]" placeholder="[`Middle name`]" value="{$contact.middlename|default:""|escape}">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="name">
+                            <span class="">[`Last name`]</span>
+                        </div>
+                        <div class="value">
+                            <input class="long" type="text" name="contact[lastname]" placeholder="[`Last name`]" value="{$contact.lastname|default:""|escape}">
+                        </div>
+                    </div>
+                {else}
+                    <div class="field">
+                        <div class="name">
+                            <span class="">[`Name`]</span>
+                        </div>
+                        <div class="value">
+                            <input class="long js-name" type="text" placeholder="{$wa->crm->namePlaceholder()|escape}" name="contact[name]" value="{$contact.name|default:""|escape}">
+                        </div>
+                    </div>
+                {/if}
+            </div>
+        </div>
+
+        {* NAME AUTOCOMPLETE *}
+        <div class="js-combo-name" style="display: block;">
+            <div class="field-group">
+                <div class="field">
+                    <div class="name">[`Contact`]</div>
+                    <div class="value">
+                        <input class="long large bold js-contact-autocomplete" type="text" placeholder="[`Enter name, email or phone`]" value="{$contact.name|default:""|escape}" {if !empty($contact_is_locked)}disabled{/if}>
+                        <input class="js-contact-id-field" type="hidden" name="{$id_field_name|default:"contact[id]"}" value="{$contact.id|default:""}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-group">
+            {* COMPANY *}
+            {if empty($exclude_company_id)}
+                <div class="field">
+                    <div class="name">[`Company`]</div>
+                    <div class="value">
+                        <input class="long js-field js-company-autocomplete" type="text" name="contact[company]" value="{$contact.company|default:""|escape}">
+                        <input class="js-company-id-field" type="hidden" name="contact[company_contact_id]">
+                    </div>
+                </div>
+            {/if}
+
+            {* JOB *}
+            <div class="field">
+                <div class="name">[`Job title`]</div>
+                <div class="value">
+                    <input class="long js-field" type="text" name="contact[jobtitle]" value="{$contact.jobtitle|default:""|escape}">
+                </div>
+            </div>
+
+            {* ROLE *}
+            {if empty($hide_role)}
+                <div class="field">
+                    <div class="name">[`Role label`]</div>
+                    <div class="value">
+                        <input class="long" type="text" name="participant[label]" value="">
+                    </div>
+                </div>
+            {/if}
+        </div>
+
+        <div class="field-group">
+
+            {$_contact_phone = ""}
+            {if !empty($contact.phone)}
+                {foreach $contact->get('phone', 'js') as $_phone}
+                    {$_contact_phone = $_phone.value|escape}
+                    {break}
+                {/foreach}
+            {/if}
+
+            {* PHONE *}
+            <div class="field">
+                <div class="name">[`Phone`]</div>
+                <div class="value">
+                    <input class="long js-field js-phone-field" type="text" name="contact[phone][0][value]" value="{$_contact_phone|default:""}">
+                </div>
+            </div>
+
+            {$_email = ""}
+            {if !empty($contact.email)}
+                {foreach $contact.email as $_email}
+                    {$_contact_email = $_email.value|escape}
+                    {break}
+                {/foreach}
+            {/if}
+
+            {* EMAIL *}
+            <div class="field">
+                <div class="name">[`Email`]</div>
+                <div class="value">
+                    <input class="long js-field js-email-field" type="text" name="contact[email][0][value]" value="{$_contact_email|default:""}">
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMContactAddForm({
+                $wrapper: $("#c-contact-add-form")
+            });
+        })(jQuery);
+    </script>
+</div>

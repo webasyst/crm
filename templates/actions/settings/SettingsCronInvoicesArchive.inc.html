@@ -6,7 +6,7 @@
     {if $_cli_ok}
         <div class="c-is-cli-ok">
             <p>
-                <i class="icon16 yes"></i>
+                <i class="fas fa-check yes text-green"></i>
                 [`<tt>Cron</tt> job required to automatically handle invoices expiration is set up properly.`]
                 {if $_last_cron_time}
                     [`Last execution time:`]
@@ -25,7 +25,7 @@
                 )}
             </p>
 
-            <p class="bold"><code>{$_cron_command}</code></p>
+            <p class="bold mobile-scroll"><code>{$_cron_command}</code></p>
         </div>
     {else}
         <div class="c-is-cli-ok">
@@ -39,7 +39,7 @@
                     )}
                 </p>
 
-                <p class="bold"><code>{$_cron_command}</code></p>
+                <p class="bold mobile-scroll"><code>{$_cron_command}</code></p>
 
             {if $_last_cron_time}
                 <p>[`Last execution time:`] {$_last_cron_time|wa_date:'datetime'}</p>

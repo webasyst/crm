@@ -88,11 +88,14 @@ var CRMNotificationEdit = (function ($) {
 
             $(document).trigger("updateEditorTextarea");
 
-            $.crm.confirm.show({
+            $.waDialog.confirm({
                 title: that.locales["send_confirm_title"],
                 text: getHtml(),
-                button: that.locales["send_confirm_button"],
-                onConfirm: request
+                success_button_title: that.locales["send_confirm_button"],
+                success_button_class: 'warning',
+                cancel_button_title: that.locales["delete_cancel_button"],
+                cancel_button_class: 'light-gray',
+                onSuccess: request
             });
 
             function getHtml() {
@@ -112,33 +115,39 @@ var CRMNotificationEdit = (function ($) {
             function request(dialog) {
                 if (!is_locked) {
                     is_locked = true;
-
                     var href = "?module=settingsNotifications&action=SendTest",
                         $form = that.$form,
                         data = $form.serializeArray();
 
                     data.push({
                         name: 'data[contact]',
-                        value: dialog.$block.find('.js-user-contact').val()
+                        value: $('.dialog').find('.js-user-contact').val()
                     });
-
+                   
                     $.post(href, data, function(response) {
                         if (response.status === "ok") {
-                            dialog.$wrapper.find(".crm-dialog-block").html(that.success_html);
-                            dialog.resize();
-
+                            // dialog.find(".dialog-body").html(that.success_html);
+                            //dialog.resize();
+                            $.waDialog.alert({
+                                //title: "Alert title",
+                                text: that.locales["success_text"],
+                                button_title: that.locales["close_button"],
+                                button_class: 'light-gray',
+                            });
+    
                             setTimeout( function() {
-                                var is_exist = $.contains(document, dialog.$wrapper[0]);
+                                var is_exist = $.contains(document, $('.dialog')[0]);
                                 if (is_exist) {
-                                    dialog.close();
+                                    $('.dialog').remove();
                                 }
                             }, 10000);
                         }
+               
                     }, "json").always( function() {
                         is_locked = false;
+      
                     });
                 }
-
                 return false;
             }
         }
@@ -529,11 +538,14 @@ var CRMNotificationEdit = (function ($) {
         function deleteNotification(event) {
             event.preventDefault();
 
-            $.crm.confirm.show({
-                title: that.locales["delete_confirm_title"],
+            $.waDialog.confirm({
+                title: '<i class=\"fas fa-exclamation-triangle smaller state-error\"></i> ' + that.locales["delete_confirm_title"],
                 text: that.locales["delete_confirm_text"],
-                button: that.locales["delete_confirm_button"],
-                onConfirm: request
+                success_button_title: that.locales["delete_confirm_button"],
+                success_button_class: 'danger',
+                cancel_button_title: that.locales["delete_cancel_button"],
+                cancel_button_class: 'light-gray',
+                onSuccess: request
             });
 
             function request(dialog) {
@@ -574,85 +586,118 @@ var CRMNotificationEdit = (function ($) {
         });
 
         function setActive(green) {
-            var default_class = "green",
-                changed_class = "yellow";
+            var changed_class = "yellow";
 
             if (green) {
                 $submitButton
                     .removeClass(changed_class)
-                    .addClass(default_class);
             } else {
                 $submitButton
-                    .removeClass(default_class)
                     .addClass(changed_class);
             }
         }
-
-
     };
 
     CRMNotificationEdit.prototype.initHelp = function () {
         var that = this,
-            $wrapper = that.$wrapper,
-            $document = $(document),
-            $help = $("#wa-editor-help"),
-            $help_link = $("#wa-editor-help-link");
+            $help_link = $("#wa-editor-help-link"),
+            drawerLoaded = false;
 
-        var listener = function (e) {
-            // auto-off event-handler from global object
-            if ($document.find($wrapper).length <= 0) {
-                $document.off('click', listener);
-                return;
-            }
-            // click outside of help area lead to close help area
-            var $target = $(e.target);
-            if (!$target.is($help) && $help.find($target).length <= 0) {
-                $help.hide();
-            }
-        };
+        $help_link.on('click', function (event) {
+            event.preventDefault();
+            var href = $.crm.app_url +'?module=settings&action=help',
+            data = 'app=crm&key=notification.' + that.notification_event,
+            drawer_html = '';
 
-        $document.on('click', listener);
+        if (drawerLoaded) {
+            that.drawer.show();
+            return false
+        }
+        const drawer_loader = '<div class="flexbox middle width-100 height-100 spinner-wrapper"><div class="spinner custom-p-16"></div></div>'
+        drawer_html = `<div class=\"drawer crm-help\" id=\"\"> <div class=\"drawer-background\"><\/div> <div class=\"drawer-body\"> <a href=\"#\" class=\"drawer-close js-close-drawer\"><i class=\"fas fa-times\"><\/i><\/a> <div class=\"drawer-block\">${drawer_loader}<\/div> <\/div> <\/div> `;
+        that.drawer = $.waDrawer({
+            html: drawer_html,
+            direction: "right",
+            onClose: () => handleWaTabs(false)
+        });
+        $.get(href, data, function (res) {
+            $(".drawer .drawer-block").html(res);
+            handleWaTabs(true)
+            drawerLoaded = true;
+        }, 'html');
 
-        $help_link.on('click', function () {
-            if ($help.is(":visible")) {
-                $help.hide();
-                return false;
-            }
-
-            if ($help.data('loaded.' + that.notification_event)) {
-                $help.show();
-                return false;
-            }
-
-            var url = that.site_app_url + '?module=pages&action=help',
-                data = 'app=crm&key=notification.' + that.notification_event;
-            $help.load(url, data, function () {
-                $help.find('#wa-help-wa').remove();
-                $help.find('#wa-help-wa-content').remove();
-                $help.show();
-                $help.find('ul>li.no-tab>p.bold').hide();
-                $help.data('loaded.' + that.notification_event, true);
-            });
-            return false;
         });
 
-        $help.on('click', "div.fields a.inline-link", function (e) {
-            e.preventDefault();
+        function handleWaTabs(tabEvent) {
+            that.drawerWrapper = $('.drawer');
+            that.drawerContent = that.drawerWrapper.find('.drawer-content');
+            if (tabEvent) {
+                that.drawerWrapper.on('click', "ul.tabs li", toggleWaTabs);
+                that.drawerWrapper.on('click', ".wa-help-vars-item", printVars);
+                that.drawerWrapper.on('click', ".drawer-background", () => that.drawer.hide());
+            }
+            else {
+                that.drawerWrapper.off('click');
+                drawerLoaded = false;
+            }
+        }
 
-            var $el = $(this).find('i'),
-                $body = that.$emailBody;
+        function toggleWaTabs(event) {
+            event.preventDefault();
+            if ($(this).hasClass('selected')) {
+                return false;
+            }
 
+            let idSelected = $(this).attr('id') + '-content';
+            $(this).addClass('selected').siblings().removeClass('selected');
+            let newId = that.drawerContent.find(`#${idSelected}`);
+            newId.siblings().hide();
+            newId.show();
+        }
+
+        function printVars(event) {
+            event.preventDefault();
+            $body = that.$emailBody;
             if (that.transport === 'sms') {
                 $body = that.$smsBody;
             }
-
             var editor = $body.data("wa_editor");
             if (editor) {
-                editor.insert($.trim($el.text()));
-            }
-        });
+                editor.insert($.trim($(this).find('.js-var').text()));
+                that.drawer.hide();
+            } 
+        }
 
     };
+
+   /* CRMNotificationEdit.prototype.initResetTemplate = function () {
+        var that = this,
+            $reset = that.$wrapper.find(".js-reset"),
+            $redactorW = that.$wrapper.find(".js-redactor-wrapper");
+
+        //Activate the reset when press the textarea
+        $redactorW.on('keypress', function () {
+            $reset.removeClass('hidden');
+        });
+
+        //Reset text in js-redactor
+        $reset.on('click', getBasicTemplate);
+
+        function getBasicTemplate() {
+            var data = 'template_id=' + that.template_id,
+                href = "?module=settings&action=templatesReset";
+               // ace = that.ace.getSession();
+            $.post(href, data, function (response) {
+                if (response.status === "ok") {
+                    $('.js-content-body').text(response.data.template);
+                    that.initAce();
+                    that.toggleButton(true);
+                }
+            }, "json").always(function () {
+            });
+            $reset.addClass('hidden');
+        }
+    };*/
 
     return CRMNotificationEdit;
 
@@ -682,39 +727,49 @@ var CRMNotificationStatus = (function ($) {
     CRMNotificationStatus.prototype.initDisableLinks = function () {
         var that = this,
             $wrapper = that.$wrapper,
+            $switchers = $wrapper.find('.js-c-disable-link'),
             xhr = null,
             url = $.crm.app_url + '?module=settingsNotifications&action=status';
 
-        $wrapper.on('click', '.js-c-disable-link', function (e) {
-            e.preventDefault();
-
-            var $link = $(this),
-                $item = $link.closest('.c-notification'),
+        $switchers.each(function () {
+            var $switch_wrapper = $(this),
+                $item = $switch_wrapper.closest('.c-notification'),          
                 id = $item.data('id'),
-                is_disabled = $item.hasClass('c-is-disabled'),
-                $loading = $item.find('.c-loading');
+                $loading = $item.find('.c-loading'),
+                $switch = $switch_wrapper.find("#switch-" + id);
+                //is_disabled = $item.hasClass('c-is-disabled'),
 
-            xhr && xhr.abort();
-            $loading.show();
-
-            xhr = $.post(url, {id: id, status: is_disabled ? 0 : 1})
-                .done(function (r) {
-                    if (r.status !== 'ok') {
-                        return;
+                $switch.waSwitch({
+                    ready: function (wa_switch) {
+                        let $label = wa_switch.$wrapper.siblings('label');
+                        wa_switch.$label = $label;
+                        wa_switch.active_text = $label.data('active-text');
+                        wa_switch.inactive_text = $label.data('inactive-text');
+                    },
+                    change: function(active, wa_switch) {
+                        $loading.show();
+                        wa_switch.disable(true);
+                        xhr && xhr.abort();
+                        xhr = $.post(url, { id: id, status: active ? 0 : 1 })
+                        .done(function (r) {
+                            if (r.status !== 'ok') {
+                                return;
+                            }
+                            if (active) {
+                                wa_switch.$label.text(wa_switch.inactive_text); 
+                                $item.removeClass('c-is-disabled');
+                            } else {
+                                wa_switch.$label.text(wa_switch.active_text);
+                                $item.addClass('c-is-disabled');
+                            }
+                            wa_switch.disable(false);
+                        })
+                        .always(function () {
+                            xhr = null;
+                            $loading.hide();
+                        })
                     }
-                    var is_disabled = r.data.notification.status > 0 ? 0 : 1;
-                    if (is_disabled) {
-                        $link.text(that.messages.enable);
-                        $item.addClass('c-is-disabled');
-                    } else {
-                        $link.text(that.messages.disable);
-                        $item.removeClass('c-is-disabled');
-                    }
-                })
-                .always(function () {
-                    xhr = null;
-                    $loading.hide();
-                })
+                });
         });
     };
 

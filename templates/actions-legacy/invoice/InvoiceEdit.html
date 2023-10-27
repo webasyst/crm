@@ -1,0 +1,332 @@
+{$_title = '[`Invoice`]'}
+
+{$_contact_id = ""}
+{$_contact_name = ""}
+{if !empty($contact)}
+    {$_contact_id = $contact.id}
+    {$_contact_name = $contact->getName()}
+{/if}
+{$_is_admin = $wa->user()->isAdmin($wa->app())}
+{$_can_use_shop = ( !empty($shop_supported) && !empty($has_shop_rights) )}
+
+{$company = reset($companies)}
+{if !empty($invoice.company_id) && !empty($companies[$invoice.company_id])}
+    {$company = $companies[$invoice.company_id]}
+{/if}
+
+{$_locale_string = substr($wa->locale(), 0, 2)}
+{$_is_ru_locale = false}
+{if $_locale_string == "ru"}{$_is_ru_locale = true}{/if}
+{$hidden_input_style = "visibility: hidden;width: 0;min-width: 0;border: 0;padding: 0;"}
+
+<div class="c-invoice-edit-page " id="c-invoice-edit-page">
+
+    <form action="/">
+        <h1 class="c-header">
+            [`Invoice`] [`#`]
+            <input class="c-number js-invoice-number" type="text" name="invoice[number]" placeholder="123" value="{$invoice.number|escape}">
+            [`issued on`]
+            <span>
+                <input class="c-date js-invoice-datepicker" type="text" value="{$invoice.invoice_date|wa_date}">
+                <input name="invoice[invoice_date]" type="hidden" value="{$invoice.invoice_date}">
+            </span>
+        </h1>
+
+        <div class="c-contacts-wrapper">
+            <div class="field">
+                <div class="name">
+                    [`Expires in`]
+                </div>
+                <div class="value">
+                    <input class="js-due-days-field" type="text" name="invoice[due_days]" value="{if !empty($invoice.due_days) && $invoice.due_days > 0}{$invoice.due_days|escape}{/if}" pattern="^\d*$" style="width: 35px; min-width: 1px; text-align: center;">&nbsp;[`days`]
+
+                    <div class="c-due-date-wrapper">
+                        <input class="js-invoice-due-datepicker" value="{$invoice.due_date|wa_date|default:""}" type="text" style="width: 107px; min-width: 1px;"><i class="icon16 calendar js-focus-on-field"></i>
+                        <input name="invoice[due_date]" type="hidden" value="{$invoice.due_date|default:""}">
+                    </div>
+
+                    <a href="javascript:void(0);" class="inline-link small js-clear-due-date" style="{if empty($invoice.due_date)}display: none;{/if}"><b><i>[`clear due date`]</i></b></a>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">[`Company`]</div>
+                <div class="value">
+                    {if $companies}
+                        <select class="js-company-select" name="invoice[company_id]">
+                            {foreach $companies as $_company}
+                                <option value="{$_company.id}"{if $_company.id == $company.id} selected{/if}>
+                                    {$_company.name|escape}
+                                </option>
+                            {/foreach}
+                        </select>
+                    {else}
+                        <span class="small"><i class="icon10 exclamation"></i>[`To add invoices, set up at least one company.`]</span>
+                        <input type="text" name="invoice[company_id]" value="" style="{$hidden_input_style}">
+                    {/if}
+
+                    {if !empty($_is_admin)}
+                        <a href="{$wa_app_url}settings/companies/" class="small" style="margin: 0 0 0 8px;"><i class="icon10 settings" style="vertical-align: baseline; margin: 0 2px 0 0;"></i>[`Company settings`]</a>
+                    {/if}
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">[`Client`]</div>
+                <div class="value">
+                    <div class="c-contact-toggle js-contact-toggle">
+                        {strip}
+                        <input class="js-contact-id" type="text" name="invoice[contact_id]" value="{if !empty($contact)}{$_contact_id}{/if}" style="{$hidden_input_style}">
+                        <span class="bold js-name">{if !empty($contact)}{$_contact_name|escape}{/if}</span>
+                        {/strip}
+                        <a class="inline-link js-change-contact" href="javascript:void(0);"><b><i><span class="js-label" data-change-text="[`change client`]">{if !empty($contact)}[`change client`]{else}[`Set client`]{/if}</span></i></b></a>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">[`Deal`]</div>
+                <div class="value">
+                    <div class="c-deal-toggle js-deal-toggle">
+                    {if $deal}
+                        <span class="bold js-deal-name">{$deal.name|escape}</span>
+                        <a class="inline-link js-change-deal" href="javascript:void(0);"><b><i><span class="js-label-deal" data-change-text="[`прикрепить к другой сделке`]">[`прикрепить к другой сделке`]</span></i></b></a>
+                        <span class="c-change-toggle js-detach-deal" title="[`Отвязать от сделки`]"><i class="icon16 close"></i></span>
+                    {elseif !empty($clean_data.deal)}
+                        {include file="templates/actions-legacy/message/MessageConversation.dealSelector.inc.html"
+                            deal = $clean_data.deal|default:[]
+                            funnels = $clean_data.funnels|default:[]
+                            stages = $clean_data.stages|default:[]
+                            show_save_button = true
+                        inline}
+                    {/if}
+                        <input name="invoice[deal_id]" type="hidden" value="{$invoice.deal_id}">
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">[`Currency`]</div>
+                <div class="value">
+                    <select name="invoice[currency_id]" class="js-currency-field">
+                        {foreach $currencies as $_currency}
+                            <option value="{$_currency.code}" {if $_currency.code == $invoice.currency_id}selected{/if} data-sign="{$_currency.sign}">{$_currency.title}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="c-product-table">
+
+            {function tableRow}
+                <tr>
+                    <td class="c-number">
+                        <span class="c-field js-product-number">{if !empty($_index)}{$_index}{else}1{/if}</span>
+                        <span class="c-remove js-remove-row"><i class="icon16 delete"></i></span>
+                    </td>
+                    <td class="c-name">
+
+                        {* NAME AUTOCOMPLETE *}
+                        <div class="c-name-autocomplete {if !empty($_can_use_shop)}js-name-autocomplete{/if}">
+                            <input class="js-name-field" type="text" placeholder="[`Product or service name`]" value="{$_item.name|escape|default:""}">
+
+                            <ul class="c-hidden-list ui-menu js-hidden-list"></ul>
+
+                            <input type="hidden" class="js-product-field" value="{$_item.product_id|default:""}">
+                        </div>
+
+                    </td>
+                    <td class="c-amount right">
+                        <input class="js-amount-field" type="text" placeholder="1" value="{if !empty($_item.quantity)}{floatval($_item.quantity)}{/if}">
+                    </td>
+                    <td class="c-tax right">
+
+                        {* TAX DROPDOWN *}
+                        {$_is_changed = false}
+                        {if !empty($_item.tax_percent) && !empty($_item.tax_type)}
+                            {if $_item.tax_percent != $invoice.tax_percent || $_item.tax_type != $invoice.tax_type}
+                                {$_is_changed = true}
+                            {/if}
+                        {/if}
+
+                        <div class="c-tax-dropdown js-tax-dropdown {if !empty($_is_changed)}is-changed{/if}">
+                            {if $company}
+                                <input class="c-tax-percent-field js-product-tax-percent" type="text" value="{if !empty($_item.tax_percent) && $_item.tax_type != "NONE"}{floatval($_item.tax_percent)}%{else}[`without`] {$company["tax_name"]}{/if}" readonly>
+                            {/if}
+                            <input class="js-product-tax-type" type="hidden" value="{$_item.tax_type|default:""}">
+                            <ul class="c-hidden-list ui-menu js-hidden-list"></ul>
+                        </div>
+
+                    </td>
+                    <td class="c-price right">
+                        {$_price = ""}
+                        {if !empty($_item.price)}
+                            {$_price = floatval($_item.price)}
+                            {$_price = sprintf('%0.2f', $_price)}
+                            {if $_is_ru_locale}{$_price = str_replace(".", ",", $_price)}{/if}
+                        {/if}
+                        <input class="js-price-field" data-type="price" type="text" placeholder="0,00" value="{$_price}">
+                    </td>
+                    <td class="c-total right">
+                        <span class="c-field js-product-total">0,00</span>
+                    </td>
+                </tr>
+            {/function}
+
+            {capture assign="_row_template_html"}{tableRow}{/capture}
+
+            <table>
+                <thead>
+                    <tr>
+                        <td class="c-number">[`#`]</td>
+                        <td class="c-name">[`Product or service`]</td>
+                        <td class="c-amount right">[`Qty`]</td>
+                        <td class="c-tax right">
+                            <span class="js-tax-header">[`Tax`]</span>
+                        </td>
+                        <td class="c-price right">[`Price`]</td>
+                        <td class="c-total right">[`Amount`]</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {$_index = 1}
+                    {if !empty($invoice.items)}
+                        {foreach $invoice.items as $_item}
+                            {tableRow _item=$_item _index=$_index}
+                            {$_index = $_index + 1}
+                        {/foreach}
+                    {/if}
+                    {tableRow _item=[] _index=$_index}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="right">[`Subtotal`]</td>
+                        <td class="c-total right">
+                            <span class="js-subtotal">0,00</span>
+                        </td>
+                    </tr>
+                    <tr>
+
+                        <td colspan="5" class="right">
+                            <span class="js-empty-tax" style="display: none">[`Tax rules are not set up for the selected company.`]
+                                <a href="#" data-href="{$wa_backend_url}crm/settings/companies/" class="js-empty-tax-link">
+                                    [`Set up`]
+                                </a>
+                            </span>
+                            <select class="js-tax-toggle" title="[`Tax`]">
+                                {* rendered by JS *}
+                            </select>
+                            <input class="js-tax-percent" name="invoice[tax_percent]" type="hidden">
+                            <input class="js-tax-type" name="invoice[tax_type]" type="hidden">
+                            <input class="js-tax-name" name="invoice[tax_name]" type="hidden">
+                        </td>
+                        <td class="c-total right">
+                            <span class="js-tax">0,00</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="right">[`Total`]</td>
+                        <td class="c-total right">
+                            <span class="js-total">0,00</span>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="c-comment-wrapper">
+            <textarea class="js-wysiwyg" name="invoice[comment]" placeholder="[`Type your comment here`]">{$invoice.comment_sanitized}</textarea>
+        </div>
+
+        <footer class="c-actions js-footer-actions">
+            <input class="button green js-submit-button" type="submit" value="{if !empty($invoice.id)}[`Save`]{else}[`Create`]{/if}">
+            <span style="margin: 0 4px;">[`or`]</span>
+            {if empty($invoice.id)}
+                <a href="{$wa_app_url}invoice/" class="inline-link"><b><i>[`cancel`]</i></b></a>
+            {else}
+                <a href="{$wa_app_url}invoice/{$invoice.id}/" class="inline-link js-disable-router"><b><i>[`cancel`]</i></b></a>
+            {/if}
+        </footer>
+
+        <input name="invoice[id]" value="{ifset($invoice.id)}" type="hidden">
+    </form>
+
+    {capture assign="_confirm_dialog_template"}
+        <div class="crm-dialog-wrapper crm-confirm-dialog" id="c-invoice-change-currency-dialog">
+            <div class="crm-dialog-background"></div>
+            <div class="crm-dialog-block">
+                <header class="crm-dialog-header">
+                    <h1>[`Recalculate prices`]</h1>
+                </header>
+                <div class="crm-dialog-content">
+                    <p>[`You have changed the invoice currency.`]<br>[`Recalculate the prices of items at the appropriate rate?`]</p>
+                </div>
+                <footer class="crm-dialog-footer">
+                    <div class="crm-actions">
+                        <input class="button green js-change-currency-with-price" type="button" value="[`Recalculate`]">
+                        <input class="button blue js-change-currency" type="button" value="[`Do not change prices`]">
+                        <span style="margin: 0 4px;">[`or`]</span>
+                        <a class="js-close-dialog js-cancel-dialog" href="javascript:void(0);">[`cancel`]</a>
+                    </div>
+                </footer>
+            </div>
+
+            <script>
+                ( function($) {
+                    var $dialog = $("#c-invoice-change-currency-dialog"),
+                        dialog = $dialog.data("dialog");
+
+                    $dialog.on("click", ".js-change-currency-with-price", function(event) {
+                        event.preventDefault();
+                        dialog.options.changeCurrencyWithPrice();
+                        dialog.close();
+                    });
+
+                    $dialog.on("click", ".js-change-currency", function(event) {
+                        event.preventDefault();
+                        dialog.options.changeCurrency();
+                        dialog.close();
+                    });
+                })(jQuery);
+            </script>
+        </div>
+    {/capture}
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$_title|json_encode});
+
+            var invoice_id = {if !empty($invoice.id)}{$invoice.id}{else}false{/if};
+
+            // set active in sidebar
+            setTimeout( function() {
+                $(document).trigger("viewInvoice", invoice_id);
+            }, 100);
+
+            new CRMInvoiceEdit({
+                $wrapper: $("#c-invoice-edit-page"),
+                companies: {$companies|json_encode},
+                company_id: {if !empty($invoice.company_id)}{$invoice.company_id}{else}false{/if},
+                shop_supported: {if !empty($_can_use_shop)}true{else}false{/if},
+                currencies: {$currencies|json_encode},
+                supported_currencies: {$supported_currencies|default:[]|json_encode},
+                invoice_id : invoice_id,
+                row_template_html: {$_row_template_html|json_encode},
+                confirm_dialog_template: {$_confirm_dialog_template|json_encode},
+                locale: "{if $_is_ru_locale}ru{else}en{/if}",
+                tax: {
+                    name: {$invoice.tax_name|json_encode},
+                    percent: {$invoice.tax_percent|json_encode},
+                    type: {$invoice.tax_type|json_encode}
+                },
+                locales: {
+                    tax: "[`tax`]",
+                    no_tax: "[`without`] %name",
+                    include_tax: "[`including`] %name %value",
+                    append_tax: "%name %value",
+                    empty_contact: "[`Contact is required`]",
+                    deal_detach_title: "[`Detach from deal`]",
+                    deal_detach_text: "[`Вы действительно хотите открепить этот счёт от сделки “<strong>%s</strong>”?`]",
+                    deal_detach_confirm_button: "[`Detach`]"
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

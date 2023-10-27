@@ -2,9 +2,9 @@
 <div class="crm-notification-popup" data-item="message-{$message.id}">
     <div class="c-notify-head">
         {if $message.icon_url}
-            <i class="icon16 userpic20" style="background-image: url({$message.icon_url});"{if isset($message.transport_name)} title="{$message.transport_name|escape}"{/if}></i>
+            <i class="icon size-16 userpic" style="background-image: url({$message.icon_url});"{if isset($message.transport_name)} title="{$message.transport_name|escape}"{/if}></i>
         {else}
-            <i class="icon16 {$message.icon}"></i>
+            <i class="icon fas fa-{$message.icon}"></i>
         {/if}
         <div class="c-notify-title">
             <div class="c-notify-title-left-label">
@@ -24,7 +24,7 @@
                 {$from_formatted}
             </div>
         </div>
-        <i class="icon16 c-notify-close" title="[`Close`]"></i>
+        <i class="icon fas fa-times c-notify-close" title="[`Close`]"></i>
     </div>
     {if $message.conversation_id}
         <a href="{$wa_app_url}message/conversation/{$message.conversation_id}" class="c-notify-link">
@@ -36,7 +36,7 @@
         <div class="c-notify-body">
             {if !empty($contact)}
                 <div class="c-popup-contact">
-                    <i class="icon16 userpic20" style="background-image: url('{$contact.photo_url_20}');"></i>
+                    <i class="icon userpic" style="background-image: url('{$contact.photo_url_20}');"></i>
                     {$contact.name|escape}
                 </div>
             {/if}
@@ -58,7 +58,7 @@
 
             {if !empty($message.attachments)}
                 <div class="c-popup-attachments">
-                    <i class="icon16 attachment"></i>
+                    <i class="icon fas fa-paperclip"></i>
                     {_w('%d attachment', '%d attachments', count($message.attachments))}
                 </div>
             {/if}

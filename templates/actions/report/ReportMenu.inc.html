@@ -29,18 +29,28 @@
     {$_active_type_filter = $types_filter[$_active]}
 {/if}
 
-<li class="c-filter-wrapper is-main">
-    <a class="inline-link" href="javascript:void(0);">
-        <b><i>{$_active_type_filter.name|escape}</i></b>&nbsp;<i class="icon10 darr"></i>
-    </a>
-    <ul class="menu-v without-icons">
-        {foreach $types_filter as $_type}
-            <li class="c-menu-item {if $_active === $_type.id}selected{/if}">
-                <a class="nowrap" href="{$_type.href}">{$_type.name|escape}</a>
-            </li>
-        {/foreach}
-    </ul>
-</li>
+<div class="c-filter-wrapper is-main nowrap">
+    <div class="dropdown" id="dropdown-deal-filter">
+            <button class="dropdown-toggle outlined light-gray" type="button">
+                {$_active_type_filter.name|escape}
+            </button>
+
+        <div class="dropdown-body">
+            <ul class="menu with-icons">
+                {foreach $types_filter as $_type}
+                    <li class="c-menu-item {if $_active === $_type.id}selected{/if}">
+                        <a class="nowrap" href="{$_type.href}">{$_type.name|escape}</a>
+                    </li>
+                {/foreach}
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+    ( function($) {
+        $("#dropdown-deal-filter").waDropdown();
+    })(jQuery);
+</script>
 
 {*
 <ul class="c-view-toggle-wrapper">

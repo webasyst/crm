@@ -43,7 +43,8 @@ abstract class crmEmailSourceSettingsPage extends crmSourceSettingsPage
 
     protected function getTemplate()
     {
-        return 'templates/source/settings/EmailSourceSettings.html';
+        $source_path = wa('crm')->whichUI('crm') === '1.3' ? 'source-legacy' : 'source';
+        return 'templates/'.$source_path.'/settings/EmailSourceSettings.html';
     }
 
     /**

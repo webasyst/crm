@@ -1345,8 +1345,12 @@ var CRMDealsMergePage = ( function($) {
 
                 $.post(href, data, function(response) {
                     var content_uri = $.crm.app_url + "deal/" + getDealId(data) + "/";
-                    $.crm.content.load(content_uri);
-
+                    let iframe = new URLSearchParams(document.location.search).get('iframe');
+                    if (window.parent && iframe) {
+                        window.parent.location = content_uri;
+                    } else {
+                        $.crm.content.load(content_uri);
+                    }
                 }, "json").always( function() {
                     is_locked = false;
                 });

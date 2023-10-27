@@ -1,0 +1,77 @@
+{if !empty($basic_params)}
+    {foreach $basic_params as $_param}
+        {if $_param.type == "COLOR"}
+            <div class="field">
+                <div class="name">{$_param.name}</div>
+                <div class="value">
+                    {$_colors = ["#cc5252","#cc8f52","#cccc52","#52cc52","#52cc8f","#52cccc","#528fcc","#5252cc","#8f52cc","#cc52cc","#cc528f"]}
+                    {$_toggle_color = ifset($company_params[$_param['code']])}
+                    <div class="c-color-section">
+                        <ul class="c-colors">
+                            {strip}
+                                {foreach $_colors as $_color}
+                                    <li class="c-color-wrapper">
+                                        <i class="icon16 color js-set-color {if $_toggle_color == $_color}is-active{/if}" data-color="{$_color|escape}"
+                                           style="background: {$_color|escape};"></i>
+                                    </li>
+                                {/foreach}
+                            {/strip}
+                        </ul>
+                        <div class="c-toggle-wrapper js-toggle-wrapper is-hidden">
+                            <input class="c-field js-color-field" type="text" name="company[invoice_options][{$_param.code}]" value="{ifset($company_params[$_param['code']])}"
+                                   placeholder="{$_param.placeholder}">
+                            <div class="c-toggle-block">
+                                <i class="icon16 color c-toggle js-toggle" style="background: {$_toggle_color};"></i>
+                                <div class="c-color-picker js-color-picker"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {elseif $_param.type == "STRING"}
+            <div class="field">
+                <div class="name">{$_param.name}</div>
+                <div class="value">
+                    <input class="js-string-field" type="text" name="company[invoice_options][{$_param.code}]"
+                           placeholder="{$_param.placeholder}" value="{ifset($company_params[$_param['code']])}" data-code="{$_param.code}">
+                </div>
+            </div>
+        {elseif $_param.type == "NUMBER"}
+            <div class="field">
+                <div class="name">{$_param.name}</div>
+                <div class="value">
+                    <input class="js-number-field" type="number" name="company[invoice_options][{$_param.code}]"
+                           placeholder="{$_param.placeholder}" value="{ifset($company_params[$_param['code']])}" data-code="{$_param.code}">
+                </div>
+            </div>
+        {elseif $_param.type == "IMAGE"}
+            <div class="field">
+                <div class="name">{$_param.name}</div>
+                <div class="value">
+                    <div class="c-image-section js-image-section {if empty($company_params[$_param['code']])}is-empty{/if}" data-code="{$_param.code|escape}">
+
+                        {* IMAGE *}
+                        <div class="c-image-wrapper">
+                            <img class="js-image" src=
+                            "{if !empty($company_params[$_param['code']])}{$photo_path|default:""}{$company_id}.{$_param.code}.{$template_id}.{$company_params[$_param['code']]}?{rand(1,10000)}{/if}"
+                                 alt="">
+                        </div>
+
+                        {* DROPAREA + INPUT *}
+                        <div class="c-drop-area js-drop-area">
+                            <div class="c-drop-hint">{if !empty($_param.placeholder)}{$_param.placeholder}{else}[`Drag-n-drop your image here`]{/if}</div>
+                            <input class="js-field" name="{if !empty($company_params[$_param['code']])}company[invoice_options][images][{$_param.code}]{/if}" type="file"
+                                   title="[`Change image`]" value="">
+                        </div>
+
+                        {* DELETE *}
+                        <span class="c-delete-image js-delete-image" title="[`Delete image`]">
+                            <i class="icon16 times"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        {/if}
+
+    {/foreach}
+{/if}

@@ -208,7 +208,7 @@ var CRMContactsSidebar = (function ($) {
 
     CRMContactsSidebar.prototype.initArchivedToggles = function () {
         var that = this,
-            $wrappers = that.$segmentsLists.find(".c-archived-section");
+            $wrappers = that.$wrapper.find(".js-archived-section");
 
         $wrappers.each(initSection);
 
@@ -216,11 +216,13 @@ var CRMContactsSidebar = (function ($) {
             var $wrapper = $(this);
 
             $wrapper.on("click", ".js-show-list", function() {
-                toggleList(true);
+                $wrapper.find('.js-archive-show-link').hide();
+                $wrapper.find('.js-archive-list').show();
             });
 
             $wrapper.on("click", ".js-hide-list", function() {
-                toggleList(false);
+                $wrapper.find('.js-archive-show-link').show();
+                $wrapper.find('.js-archive-list').hide();
             });
 
             function toggleList(show) {
@@ -261,24 +263,31 @@ CRMContactsSidebar.initCollapsibleSidebar = function() {
     $.each(blocks, function(){
         var status = localStorage.getItem('collapsible_sidebar_'+this);
         if (status == 1) {
-            $("#collapsible-"+this).find(".collapsible").css({"display":"none"});
-            $("#collapsible-"+this).find(".icon16").removeClass("darr").addClass("rarr");
+            $("#collapsible-"+this).find(".js-collapsible").css({"display":"none"});
+            $("#collapsible-"+this).find(".caret .fas")
+                .removeClass('fa-caret-down')
+                .addClass('fa-caret-right');
         }
     });
 
     $(".c-contacts-sidebar").on("click", ".collapse-handler", function () {
-        var block_name = $(this).parents('.block').data('block'),
-            block = $(this).parents('.block'),
-            icon = $(block).find(".icon16"),
-            collapsible = $(block).find(".collapsible");
+        var block_name = $(this).parents('.js-collapse-wrapper').data('block'),
+            block = $(this).parents('.js-collapse-wrapper'),
+            collapsible = $(block).find(".js-collapsible");
 
         if (collapsible.is(':visible')) {
             $(collapsible).css({"display":"none"});
-            $(icon).removeClass("darr").addClass("rarr");
+            $(this).find('[data-fa-i2svg]')
+                .removeClass('fa-caret-down')
+                .addClass('fa-caret-right')
+                .attr('data-icon', 'caret-right');
             updateCollapsibleSidebar(block_name,1);
         } else {
             $(collapsible).css({"display":""});
-            $(icon).removeClass("rarr").addClass("darr");
+            $(this).find('[data-fa-i2svg]')
+                .removeClass('fa-caret-right')
+                .addClass('fa-caret-down')
+                .attr('data-icon', 'caret-down');
             updateCollapsibleSidebar(block_name,0);
         }
     });

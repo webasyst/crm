@@ -5,6 +5,7 @@ class crmDealMergeAction extends crmBackendViewAction
     public function execute()
     {
         $ids = preg_split('~\s*,\s*~', waRequest::request('ids'));
+        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
 
         $allowed_ids = $this->dropUnallowed($ids);
         $dropped_ids_count = count($ids) - count($allowed_ids);
@@ -36,10 +37,15 @@ class crmDealMergeAction extends crmBackendViewAction
 
         $contacts = $this->getContactsByIds(array_keys($contact_ids));
 
+        if (!empty($iframe) && wa('crm')->whichUI('crm') !== '1.3') {
+            $this->setLayout();
+        }
+
         $this->view->assign(array(
-            'dropped_ids_count' => $dropped_ids_count,
+            'iframe'   => $iframe,
             'deals'    => $deals,
             'contacts' => $contacts,
+            'dropped_ids_count' => $dropped_ids_count
         ));
     }
 

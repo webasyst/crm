@@ -9,35 +9,30 @@ class crmDealReopenController extends crmJsonController
     {
         $deal_id = waRequest::post('id', null, waRequest::TYPE_INT);
 
-        $this->validate($deal_id);
+        if (!$deal_id) {
+            throw new waException('Deal not found');
+        }
 
-        $dm = new crmDealModel();
+        $dm = $this->getDealModel();
+        $deal = $dm->getById($deal_id);
+        if (!$deal) {
+            throw new waException('Deal not found');
+        } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
+            $this->accessDenied();
+        } elseif (!in_array($deal['status_id'], ['WON', 'LOST'])) {
+            throw new waRightsException();
+        }
 
+        $lm = new crmLogModel();
+        $action_id = 'deal_reopen';
         $now = date('Y-m-d H:i:s');
-        $dm->updateById($deal_id, array(
+        $crm_log_id = $lm->log($action_id, $deal_id * -1, $deal_id);
+        $dm->updateById($deal_id, [
             'status_id'       => 'OPEN',
             'update_datetime' => $now,
             'closed_datetime' => null,
-        ));
-        $action_id = 'deal_reopen';
+            'crm_log_id'      => $crm_log_id
+        ]);
         $this->logAction($action_id, array('deal_id' => $deal_id));
-        $lm = new crmLogModel();
-        $lm->log($action_id, $deal_id * -1);
-    }
-
-    protected function validate($deal_id)
-    {
-        $dm = new crmDealModel();
-        $deal = $dm->getById($deal_id);
-
-        if (!$deal_id || !$deal) {
-            throw new waException('Deal not found');
-        }
-        if ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
-            $this->accessDenied();
-        }
-        if ($deal['status_id'] != 'WON' && $deal['status_id'] != 'LOST') {
-            throw new waRightsException();
-        }
     }
 }

@@ -35,6 +35,14 @@ class crmDealOwnerDeleteController extends crmJsonController
         $action = 'deal_removeowner';
         $this->logAction($action, array('deal_id' => $deal_id), $owner_id);
         $lm = new crmLogModel();
-        $lm->log($action, $deal_id * -1, $owner_id, $c->getName());
+        $lm->log(
+            $action,
+            $deal_id * -1,
+            $deal_id,
+            $c->getName(),
+            null,
+            null,
+            ['contact_id' => $owner_id]
+        );
     }
 }

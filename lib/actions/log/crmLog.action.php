@@ -17,7 +17,7 @@ class crmLogAction extends crmBackendViewAction
         $lm = new crmLogModel();
         $rm = new crmReminderModel();
         $im = new crmInvoiceModel();
-        list($log, $min_id, $count) = $lm->getLog($id, $filters, $max_id);
+        list($log, $min_id, $count) = $lm->getLog($id, $filters, 0, $max_id);
 
         $actors = $actor_ids = $invoice_ids = array();
 
@@ -137,10 +137,11 @@ class crmLogAction extends crmBackendViewAction
             'crm_app_url'         => wa()->getAppUrl('crm')
         ));
 
+        $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
         if (!$max_id) {
-            $this->setTemplate('templates/actions/log/Log.html');
+            $this->setTemplate('templates/' . $actions_path . '/log/Log.html');
         } else {
-            $this->setTemplate('templates/actions/log/LogTimeline.html');
+            $this->setTemplate('templates/' . $actions_path . '/log/LogTimeline.html');
         }
 
         /**

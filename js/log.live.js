@@ -1,5 +1,6 @@
 var CRMLogLive = ( function($) {
 
+    // TODO: remove
     var ActivityLazyLoading = ( function($) {
 
         ActivityLazyLoading = function(options) {
@@ -672,7 +673,7 @@ var CRMLogLive = ( function($) {
             $wrapper = that.$wrapper.find("#c-activity-section");
 
         setLast();
-
+        // TODO: remove
         new ActivityLazyLoading({
             $wrapper: $wrapper,
             names: {

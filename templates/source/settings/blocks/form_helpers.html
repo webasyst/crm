@@ -4,14 +4,14 @@
     {$block_id = $id|default:$options.id}
     {$class_id = 'crm-form-settings-block-'|cat:$block_id}
     {$wrapper_id = uniqid($class_id)}
-    <div class="crm-form-section {$class_id}" id="{$wrapper_id}">
+    <div class="fields-group crm-form-section {$class_id}" id="{$wrapper_id}">
         <div class="crm-form-section-header">{$options.name|escape}</div>
         <div class="crm-form-section-content">
             <div class="crm-form-toggle-block">
                 {$options.toggle_html|default:''}
             </div>
             <p>{$options.description|default:''}</p>
-            <div class="crm-form-toggle-block-content js-crm-block {if $options.hidden|default:0}hidden{/if}">
+            <div class="crm-form-toggle-block-content js-crm-block {if $options.hidden|default:0}is-hidden{/if}">
                 {$options.html}
             </div>
         </div>
@@ -27,7 +27,7 @@
     {capture assign=script_html}
         <script>
             (function($) {
-                var $toggle = $('#{$toggle_id}');
+               /* var $toggle = $('#{$toggle_id}');
                 $toggle.iButton({
                     labelOn : "",
                     labelOff : "",
@@ -45,17 +45,53 @@
                         $block.trigger('toggled', [false]);
                     }
                 };
-                $toggle.change(handler).trigger('change');
+                $toggle.change(handler).trigger('change');*/
+
+                var $toggle = $('#wrapper-{$toggle_id}');
+                $toggle.waSwitch({
+                ready: function (wa_switch) {
+                    let $label = wa_switch.$wrapper.siblings('label');
+                    wa_switch.$label = $label;
+                    wa_switch.active_text = $label.data('active-text');
+                    wa_switch.inactive_text = $label.data('inactive-text');
+                },
+                change: function(active, wa_switch) {
+                    var $field = $toggle.closest('.crm-form-section'),
+                        $block = $field.find('.js-crm-block');
+
+                    if (active) {
+                        $block.slideDown(350);
+                        $block.find(':input').attr('disabled', false);
+                        $block.trigger('toggled', [true]);
+                        wa_switch.$label.text(wa_switch.active_text);
+                    }
+                    else {
+                        $block.slideUp(350);
+                        $block.find(':input').attr('disabled', true);
+                        $block.trigger('toggled', [false]);
+                        wa_switch.$label.text(wa_switch.inactive_text); 
+                    }
+                }
+            });
+
             })(jQuery);
         </script>
     {/capture}
 
     {capture assign=toggle_html}
-        <input type="hidden" name="{$_name}" value="0"><p>
+        {*<input type="hidden" name="{$_name}" value="0"><p>
         <label class="gray" for="{$toggle_id}">[`Disabled`]</label>
             <input type="checkbox" class="js-ibutton" id="{$toggle_id}" name="{$_name}" value="1"
                {if $_is_checked}checked="checked"{/if}>
-        <label for="{$toggle_id}">[`Enabled`]</label></p>
+        <label for="{$toggle_id}">[`Enabled`]</label></p>*}
+
+        <p>
+            <input type="hidden" name="{$_name}" value="0">
+            <span class="switch smaller" id="wrapper-{$toggle_id}">
+                <input type="checkbox" class="js-ibutton" id="{$toggle_id}" name="{$_name}" value="1" {if $_is_checked} checked{/if}>
+            </span>
+            <label for="{$toggle_id}" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">{if $_is_checked}[`Enabled`]{else}[`Disabled`]{/if}</label>
+        </p>
     {/capture}
 
     {$options.toggle_html = $toggle_html|cat:$script_html}

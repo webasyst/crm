@@ -1,38 +1,35 @@
 {$wrapper_id = uniqid('crm-dialog-edit-field-wrapper-')}
 
 {function localized_name_input_block locale=[] localized_name_value='' is_main_locale='' editable=''}
-    <div class="value crm-local-input-wrapper">
-        <input type="text"
-               name="name[{$locale.id}]"
-               data-error-id="{$locale.id}"
-               value="{ifset($localized_name_value, '')|escape}"
-               {if $is_main_locale}data-main-locale="1"{/if}
-            {if !$editable}disabled="disabled"{/if}>
-        <span class="errormsg"></span>
-        <span class="ellipsis small crm-name-region">{$locale.name_region}</span>
-    </div>
+<li class="crm-local-input-wrapper">
+  <input type="text" name="name[{$locale.id}]" data-error-id="{$locale.id}"
+    value="{ifset($localized_name_value, '')|escape}" {if $is_main_locale}data-main-locale="1" {/if} {if
+    !$editable}disabled="disabled" {/if}>
+  <span class="state-error-hint"></span>
+  <p class="hint ellipsis small crm-name-region">{$locale.name_region}</p>
+</li>
 {/function}
 
-<div class="crm-dialog-wrapper crm-dialog-edit-field-wrapper" id="{$wrapper_id}">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
-        <header class="crm-dialog-header">
-            <h1>{if $field}[`Edit field`]{else}[`New field`]{/if}</h1>
-        </header>
+<div class="dialog crm-dialog-edit-field-wrapper" id="{$wrapper_id}">
+  <div class="dialog-background"></div>
+  <div class="dialog-body">
+    <header class="dialog-header">
+      <h1>{if $field}[`Edit field`]{else}[`New field`]{/if}</h1>
+    </header>
 
-        <form method="post" class="js-field-form-edit" action="{$wa_app_url}?module=settings&action=fieldSave{if $field}&id={$field.id}{/if}">
-            <div class="crm-dialog-content">
-
-                <div class="fields">
-                    <div class="field">
-                        <div class="name">[`Field name`]</div>
-
-                        {localized_name_input_block
-                        locale=$locale
-                        localized_name_value=$field.localized_names[$locale.id]|default:null
-                        editable=!$field || $field.editable
-                        is_main_locale=true
-                        }
+    <form method="post" class="fields js-field-form-edit"
+      action="{$wa_app_url}?module=settings&action=fieldSave{if $field}&id={$field.id}{/if}">
+      <div class="dialog-content">
+          <div class="field">
+            <div class="name">[`Field name`]</div>
+            <div class="value">
+              <ul>
+                {localized_name_input_block
+                locale=$locale
+                localized_name_value=$field.localized_names[$locale.id]|default:null
+                editable=!$field || $field.editable
+                is_main_locale=true
+                }
 
                         {$rest_locales = []}
                         {foreach $other_locales as $loc}
@@ -49,22 +46,20 @@
                         {/foreach}
 
                         {if $rest_locales}
-                            <div class="value">
-                                <ul class="menu-h dropdown animated crm-add-name-another-language-wrapper">
-                                    <li>
-                                        <a href="javascript:void(0)" class="inline-link"><b><i><span class="small">[`Add name in another language`]</span></i></b><i class="icon10 darr"></i></a>
-                                        <ul class="menu-v">
+                            <li class="hint">
+                              <div class="wa-select">
+                                      <select class="crm-add-name-another-language-wrapper">
+                                        <option>[s`Add name in another language`]</option>
                                             {foreach $rest_locales as $loc}
-                                                <li class="crm-add-name-another-language" data-name-region="{$loc.name_region}" data-id="{$loc.id}">
-                                                    <a href="javascript:void(0);"><span class="small">{$loc.name_region}</span></a>
-                                                </li>
+                                            <option class="crm-add-name-another-language" data-name-region="{$loc.name_region}" data-id="{$loc.id}">
+                                              {$loc.name_region}
+                                            </option>
                                             {/foreach}
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
+                                          </select>
+                              </div>
+                              </li>
                         {/if}
-
+                      </ul>
                     </div>
                 </div>
                 <div class="field">
@@ -75,18 +70,20 @@
                         {else}
                             <span>{$field.id|escape}</span>
                         {/if}
-                        <span class="errormsg"></span>
+                        <span class="state-error-hint"></span>
                     </div>
                 </div>
                 <div class="field">
                     <div class="name">[`Type of field`]</div>
                     <div class="value">
                         {if !$field}
-                            <select name="ftype" class="crm-field-type-select">
-                                {foreach $field_types as $ftype => $ftype_str}
-                                    <option value="{$ftype}">{$ftype_str}</option>
-                                {/foreach}
-                            </select>
+                            <div class="wa-select">
+                                <select name="ftype" class="crm-field-type-select">
+                                    {foreach $field_types as $ftype => $ftype_str}
+                                        <option value="{$ftype}">{$ftype_str}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
                         {else}
                             <span>{$field.type_name|default:$field.type}</span>
                         {/if}
@@ -105,25 +102,46 @@
                     <div class="name">[`Applied to`]</div>
                     <div class="value">
                         <label>
-                            <input type="checkbox" name="type[]"
-                                   value="person"
-                                   {if !$field || $field.pStatus != 'disabled'}checked="checked"{/if}
-                                {if $field && $field.type === 'Email'}disabled="disabled"{/if}>
+                            <span class="wa-checkbox">
+                                <input type="checkbox" name="type[]"
+                                       value="person"
+                                       {if !$field || $field.pStatus != 'disabled'}checked="checked"{/if}
+                                    {if $field && $field.type === 'Email'}disabled="disabled"{/if}>
+                                    <span>
+                                        <span class="icon">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    </span>
+                            </span>
                             [`Person`]
                         </label>
                         <br>
                         <label>
-                            <input type="checkbox" name="type[]"
-                                   value="company"
-                                   {if $field && $field.cStatus != 'disabled'}checked="checked"{/if}>
+                            <span class="wa-checkbox">
+                                <input type="checkbox" name="type[]"
+                                       value="company"
+                                       {if $field && $field.cStatus != 'disabled'}checked="checked"{/if}>
+                                       <span>
+                                        <span class="icon">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    </span>
+                            </span>
                             [`Company`]
                         </label>
                         {if !$field || $field.editable}
                             <br>
                             <label>
-                                <input type="checkbox" name="type[]"
-                                       value="deal"
-                                       {if $field && !empty($field.deal_mirror)}checked="checked"{/if}>
+                                <span class="wa-checkbox">
+                                    <input type="checkbox" name="type[]"
+                                           value="deal"
+                                           {if $field && !empty($field.deal_mirror)}checked="checked"{/if}>
+                                           <span>
+                                            <span class="icon">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                        </span>
+                                </span>
                                 [`Deal`]
                             </label>
                         {/if}
@@ -135,7 +153,7 @@
                         <div class="name">[`Address fields`]</div>
                     </div>
                     <div class="field">
-                        <table class="subfields-list zebra">
+                        <table class="subfields-list zebra" id="subfileds-list">
                             <tbody class="ui-sortable">
                             {foreach $cf->getParameter('fields') as $_sf}
                                 {wa_action app="crm" module="settings" action="FieldFormRow" fid=$_sf->getId() f=$_sf parent='address' css_class='field-row editor-off'}
@@ -143,10 +161,10 @@
                             {wa_action app="crm" module="settings" action="FieldFormRow" fid='%FID%' f=null parent='address' css_class='hidden field-row template editor-on just-added'}
                             <tr class="white add-field">
                                 <td class="min-width">&nbsp;</td>
-                                <td class="min-width"><a class="js-add-subfield" href="#"><i class="icon16 add"></i></a>
+                                <td class="min-width"><a class="js-add-subfield" href="#"><i class="fas fa-plus-circle"></i></a>
                                 </td>
-                                <td>
-                                    <a href="javascript:void(0)" class="inline-link js-add-subfield"><b><i>[`Add field`]</i></b></a>
+                                <td colspan="2">
+                                    <a href="#" class="inline-link js-add-subfield">[`Add field`]</a>
                                 </td>
                             </tr>
                             </tbody>
@@ -156,28 +174,26 @@
 
                 <em class="errormsg crm-common-errors"></em>
             </div>
-            <footer class="crm-dialog-footer">
+            <footer class="dialog-footer">
                 <div class="crm-actions">
-                    <div class="c-layout">
+                    <div class="flexbox middle full-width wrap">
                         <div class="c-column">
                             {if !$field || $field.editable}
-                                <input class="button green crm-button js-save" type="submit" value="[`Save`]">
+                                <input class="button crm-button js-save" type="submit" value="[`Save`]">
                             {else}
-                                <input class="button green crm-button js-save" type="submit" value="[`Save`]" disabled="disabled">
+                                <input class="button crm-button js-save" type="submit" value="[`Save`]" disabled="disabled">
                             {/if}
-
-                            <span style="margin: 0 4px;">[`or`]</span>
-                            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                            <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
                         </div>
                         {if $field}
                             <div class="c-column middle right">
                                 {if $field.editable}
-                                    <a href="javascript:void(0);" class="red small float-right crm-field-delete">[`Delete field`]</a>
+                                    <a href="javascript:void(0);" class="red small outlined button crm-field-delete"><i class="fas fa-times-circle"></i> [`Delete field`]</a>
                                 {else}
                                     {if $field.disabled}
-                                        <a href="javascript:void(0);" class="red small float-right crm-field-enable" style="margin-top: 12px;">[`Enable field`]</a>
+                                        <a href="javascript:void(0);" class="green small outlined button crm-field-enable">[`Enable field`]</a>
                                     {else}
-                                        <a href="javascript:void(0);" class="red small float-right crm-field-disable" style="margin-top: 12px;">[`Disable field`]</a>
+                                        <a href="javascript:void(0);" class="orange small outlined button crm-field-disable">[`Disable field`]</a>
                                     {/if}
                                 {/if}
                             </div>

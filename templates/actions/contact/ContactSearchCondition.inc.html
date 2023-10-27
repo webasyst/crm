@@ -141,12 +141,14 @@
         <div class="name">
             {_wp($item.name)|escape}
         </div>
-        <div class="value">
+        <div class="value children">
+            {render_composite_field item=$item conds=$conds id=$id extra=$extra}
+        </div>
+        <div>
             {if empty($not_removable)}
-                <a href="javascript:void(0)" class="killer" title="[`Hide`]" data-id="1"><i class="icon16 delete"></i></a>
+            <a href="javascript:void(0)" class="killer" title="[`Hide`]" data-id="1"><i class="fas fa-trash-alt text-red delete"></i></a>
             {/if}
             <span class="count bold">{if isset($count)}{$count}{/if}</span>
-            {render_composite_field item=$item conds=$conds id=$id extra=$extra}
         </div>
     {else if empty($item.multi)}
         <div class="name">
@@ -170,50 +172,52 @@
                 {else}
                     {$parent_conds = $conds}
                 {/if}
-                <span class="collapse-handler no-uppercase">
-                    {_wp($item.name)|escape}
-                    <i class="icon16 {if !$children_conds}rarr{else}darr{/if}"></i>
+                <span class="collapse-handler cursor-pointer {if !$children_conds}close{else}open{/if}">
+                    <span class="custom-pr-4 ">{_wp($item.name)|escape}</span>
+                    <i class="fas fa-caret-right"></i>
                 </span>
             {else}
                 {_wp($item.name)|escape}
             {/if}
         </div>
         <div class="value">
-            <div class="{if !empty($item['children'])}hide-when-expand{/if}" {if !empty($item['children']) && $children_conds}style="display:none;"{/if}>
-                {if empty($not_removable)}
-                    <a href="javascript:void(0)" class="killer" title="[`Hide`]" data-id="2"><i class="icon16 delete"></i></a>
-                {/if}
-                <span class="count bold">{if isset($count)}{$count}{/if}</span>
+            <div class="flexbox middle wrap {if !empty($item['children'])}hide-when-expand{/if}" {if !empty($item['children']) && $children_conds}style="display:none;"{/if}>
                 {if empty($item['children'])}
                     {render_combobox_field item=$item id=$id conds=$conds}
                 {else}
                     {$it = reset($item['items'])}
                     {render_combobox_field item=$it id=$it.id conds=$parent_conds}
                 {/if}
+                {if empty($not_removable)}
+                <a href="javascript:void(0)" class="custom-pl-16 killer" title="[`Hide`]" data-id="2"><i class="fas fa-trash-alt text-red delete"></i></a>
+                {/if}
+                <span class="count bold">{if isset($count)}{$count}{/if}</span>
             </div>
             {if !empty($item['children'])}
                 {render_children_subfields item=$item conds=$conds show=!empty($children_conds)}
             {/if}
         </div>
     {else}
-        <div class="inline-value">
+        <div class="flexbox middle full-width width-100 nowrap inline-value">
             {if !empty($item.not)}
                 <select name="{$id}.not" class="c-choose-boolean">
                     <option value="">{_w($item.name|escape)}</option>
                     <option value="1" {if !empty($conds['not'])}selected{/if}>{if is_array($item.not) && isset($item.not.name)}{_w($item.not.name|escape)}{else}[`Not`] {_w($item.name|escape)}{/if}</option>
                 </select>
             {else}
-                <span>{_wp($item.name)|escape}</span>
+                <span class="bold">{_wp($item.name)|escape}</span>
             {/if}
+            <div>
             {if empty($not_removable)}
-                <a href="javascript:void(0);" class="killer" title="[`Hide`]" style="margin-top: 0px;" data-id="3"><i class="icon16 delete"></i></a>
+                <a href="javascript:void(0);" class="killer" title="[`Hide`]" data-id="3"><i class="fas fa-trash-alt text-red delete"></i></a>
             {/if}
-            <span class="count bold">{if isset($count)}{$count}{/if}</span>
+                <span class="count bold">{if isset($count)}{$count}{/if}</span>
+            </div>
         </div>
-        <div class="value">
+        <div class="flexbox wrap space-8">
             {if !empty($item.items)}
                 {foreach $item.items as $it_id => $it}
-                    <div class="subfield {if !empty($it.checkbox)}checkbox{/if}">
+                    <div class="field subfield {if !empty($it.checkbox)}checkbox{/if}">
                         <div class="name">{if empty($it.checkbox)}{_wp($it.name)|escape}{/if}</div>
                         <div class="value">
                             {if !empty($it.html)}
@@ -228,7 +232,7 @@
                 {/foreach}
             {else}
                 {if empty($not_removable)}
-                    <a href="javascript:void(0)" class="killer" title="[`Hide`]" data-id="4"><i class="icon16 delete"></i></a>
+                    <a href="javascript:void(0)" class="killer" title="[`Hide`]" data-id="4"><i class="fas fa-trash-alt text-red delete"></i></a>
                 {/if}
             {/if}
         </div>

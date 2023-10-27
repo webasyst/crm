@@ -1,0 +1,443 @@
+{*
+ * This file gets included in various Smarty templates of source and action editors.
+ * Provides a common editor for email templates.
+ *
+ * Expects parameters:
+ * - template: required
+ * - input_name: required
+ * - variables: optional
+ * - to_name: optional
+ * - to_value: optional
+ * - sourcefrom_name: optional
+ * - sourcefrom_set: optional
+ * - cheat_sheet: optional
+ * - cheat_sheet_key: optional
+ * - site_app_url: optional
+ *}
+
+{$input_name = ifset($input_name, '')}
+
+{* Split template into parts *}
+{$template = ifset($template, '')}
+{$parts = explode('{SEPARATOR}', $template, 3)}
+{$body = array_pop($parts)}
+{$subject = array_pop($parts)}
+{$from = array_pop($parts)}
+{$uniqid = uniqid('t')}
+
+{function message_to_variant_li variant=''}
+    {$variants = $message_to_variants}
+    <li>
+        <label>
+            <input type="checkbox" name="{$to_name|escape}[{$variant}]" value="1"{if !empty($to_value[$variant])} checked{/if}>
+            {$variants[$variant]}
+        </label>
+    </li>
+{/function}
+
+<div id="{$uniqid}">
+    <input type="hidden" name="{$input_name|escape}" value="">
+    <input type="hidden" class="hidden-input disable-when-collapsed" name="{$input_name|escape}" value="{$template|escape}">
+
+    {if !empty($to_name)}
+        <div class="field">
+            <div class="name">[`To`]</div>
+            <div class="value">
+                <ul class="menu-v checklist no-click-close c-message-to-selector" data-field-name="{$to_name|escape}" style="margin-top: 0px;">
+                    <li style="min-width: 400px;">
+                        <i class="icon10 darr"></i>
+                        <span class="selected-items c-label" style="cursor:pointer;">[`Select`]</span>
+                        {if $to_value && !is_array($to_value)}
+                            {$to_value = [$to_value => 1]}
+                        {elseif !$to_value}
+                            {$to_value = []}
+                        {/if}
+                        <ul class="menu-v hidden shadowed no-mouseleave c-message-to-variants-list" style="padding:5px;position:absolute;z-index:200;">
+
+                            {foreach $message_to_variants as $variant_id => $variant_name}
+                                <li>
+                                    <label>
+                                        <input type="checkbox" data-id="{$variant_id}" name="{$to_name|escape}[{$variant_id}]" value="1"{if !empty($to_value[$variant_id])} checked{/if}>
+                                        <span class="c-variant-name-text">{$variant_name|escape}</span>
+                                    </label>
+                                </li>
+                            {/foreach}
+
+                            <li class="hr show-if-custom" style="display:none;"></li>
+
+                            {if $to_value}
+                                {foreach $to_value as $val => $name}
+                                    {if !isset($message_to_variants[$val])}
+                                        <li><label>
+                                            <input type="checkbox" name="{$to_name|escape}[{$val|escape}]" value="1" checked>
+                                                <span class="c-variant-name-text">{$name|escape}</span>
+                                        </label></li>
+                                    {/if}
+                                {/foreach}
+                            {/if}
+
+                            <li class="hidden template"><label>
+                                <input type="checkbox" name="{$to_name|escape}[%VALUE%]" value="1" checked disabled>
+                                <span class="val"></span>
+                            </label></li>
+
+                            <li class="hr"></li>
+                            <li>
+                                <input type="text" placeholder="[`Add another recipient`]" style="width:100%;">
+                                <div class="clear-left hint">[`All messages will be sent as blind copies (BCC).`]</div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    {/if}
+
+    <div class="field template-subfield">
+        <div class="name">[`Subject`]</div>
+        <div class="value">
+            <input type="text" value="{$subject|escape}" class="crm-subject-input">
+        </div>
+    </div>
+
+    <div class="field template-subfield" style="margin-top: 40px;">
+        <div class="name">[`Text`]</div>
+        <div class="value">
+            <div class="crm-variables-link-wrapper equal-width" style="border: 1px solid #ccc;">
+
+                <div class="wa-editor-core-wrapper">
+                    <ul class="c-editor-toggle wa-editor-wysiwyg-html-toggle">
+                        <li class="selected">
+                            <a href="#" class="wysiwyg">[`WYSIWYG`]</a>
+                        </li>
+                        <li>
+                            <a href="#" class="html">HTML</a>
+                        </li>
+                    </ul>
+                    <div class="c-editor-wrapper">
+                        <textarea class="body-textarea">{$body|escape}</textarea>
+                    </div>
+                </div>
+
+                {if !empty($variables)}
+                    <a href="javascript:void(0)" class="crm-variables-link inline-link" style="font-size:.8em;"><b><i>[`Variables`]</i></b></a>
+                {elseif !empty($cheat_sheet)}
+                    <div class="wa-dropdown">
+                        <div class="wa-drop-link">
+                            <a href="javascript:void(0)" class="crm-variables-link inline-link js-help-link" style="font-size:.8em;"><b><i>[s`Cheat sheet`]</i></b></a>
+                        </div>
+                        <div class="wa-dropdown-block js-help-block"></div>
+                    </div>
+                {/if}
+
+            </div>
+        </div>
+    </div>
+
+    {if !empty($variables)}
+        <div class="field crm-variables-wrapper">
+            <div class="fields shadowed equal-width">
+                {foreach $variables|default:[] as $k => $v}
+                    <div class="field">
+                        <div class="name"><a href="javascript:void(0)" class="inline-link{if strlen($k) > 35} small{/if}"><b><i>{$k|escape}</i></b></a></div>
+                        {if $v}
+                            <div class="value hint">{$v|escape}</div>
+                        {/if}
+                    </div>
+                {/foreach}
+
+            </div>
+            <div class="clear-left"></div>
+        </div>
+    {/if}
+
+    {if !empty($add_attachments_name)}
+        <div class="field top-padded">
+            <div class="value">
+                <label>
+                    <input type="checkbox" name="{$add_attachments_name|escape}" value="1"{if !empty($add_attachments_set)} checked{/if}>
+                        [`Include attachments`]
+                </label>
+            </div>
+    	</div>
+    {/if}
+
+</div>
+
+<script>
+
+    var wa_url = '{$wa_url}',
+        wa_app = 'crm';
+
+    setTimeout(function() { "use strict";
+
+    var wrapper = $('#{$uniqid}');
+    var from_input = wrapper.find('.from-input:first');
+    var from_select = wrapper.find('.from-select:first');
+    var hidden_input = wrapper.find('.hidden-input:first');
+    var subject_input = wrapper.find('.crm-subject-input:first');
+    var body_textarea = wrapper.find('.body-textarea:first');
+    var variables_link = wrapper.find('.crm-variables-link:first');
+    var variables_wrapper = wrapper.find('.crm-variables-wrapper');
+
+    var delay = 0; // we want controls to show and hide with animation, but only after initialization is finished
+
+    var initEditor = function(el) {
+        el = $(el);
+        el.waEditor({
+            focus: false,
+            buttons: ['formatting', 'bold', 'italic', 'link'],
+            plugins: ['fontcolor', 'fontsize', 'fontfamily'],
+            callbacks: {
+                keydown: function(event) { }, // without this waEditor intercents Ctrl+S event in Redactor
+                change: function () {
+                    el.waEditor('sync');
+                    onChangeHandler();
+                }
+            },
+            lang: "{substr($wa->locale(), 0, 2)}"
+        });
+
+        // Make sure sticky bottom buttons behave correctly when user switches between editors
+        el.closest('.h-editor').find('.html,.wysiwyg').click(function() {
+            $(window).resize();
+        });
+        return el;
+    };
+
+    initEditor(body_textarea);
+
+    var initHelp = function ($wrapper, body_textarea) {
+        var that = this,
+            $document = $(document),
+            $help = $wrapper.find(".js-help-block"),
+            $help_link = $wrapper.find(".js-help-link"),
+            cheat_sheet_key = {$cheat_sheet_key|default:''|json_encode},
+            site_app_url = {$site_app_url|default:''|json_encode};
+
+        var listener = function (e) {
+            // auto-off event-handler from global object
+            if ($document.find($wrapper).length <= 0) {
+                $document.off('click', listener);
+                return;
+            }
+            // click outside of help area lead to close help area
+            var $target = $(e.target);
+            if (!$target.is($help) && $help.find($target).length <= 0) {
+                $help.hide();
+            }
+        };
+
+        $document.on('click', listener);
+
+        $help_link.on('click', function () {
+            if ($help.is(":visible")) {
+                $help.hide();
+                return false;
+            }
+
+            if ($help.data('loaded')) {
+                $help.show();
+                return false;
+            }
+
+            var unique_name = "settings-email-editor-" + (Math.random() + '').slice(2);
+            var url = site_app_url + '?module=pages&action=help',
+                data = 'app=crm&key=' + cheat_sheet_key + '&name=' + unique_name;
+
+            // so system code could set js handlers to links and etc
+            $help.attr('id', 'wa-editor-help-' + unique_name);
+
+            $help.load(url, data, function () {
+                $help.find('#wa-help-wa').remove();
+                $help.find('#wa-help-wa-content').remove();
+                $help.show();
+                $help.find('ul>li.no-tab>p.bold').hide();
+                $help.data('loaded', true);
+            });
+            return false;
+        });
+
+        $help.on('click', "div.fields a.inline-link", function (e) {
+            e.preventDefault();
+            var $el = $(this).find('i');
+            body_textarea.waEditor('insert', $.trim($el.text()));
+        });
+    };
+
+    initHelp(wrapper, body_textarea);
+
+    // Controller for combined selectors (select + input)
+    wrapper.on('change', '.combined-selector select', function() {
+        var select = $(this);
+        var input = select.parent().find('input:text');
+        if (select.val() == '') {
+            input.hide().removeClass('hidden').slideDown(delay);
+            if (select.children('[value="'+input.val().replace(/"/g, '')+'"]').length) {
+                input.val('');
+            }
+        } else {
+            input.hide().val(select.val());
+        }
+    });
+
+    // Initial state for combined selectors
+    wrapper.find('.combined-selector select').change();
+
+    // Variables control
+    variables_link.click(function() {
+        variables_wrapper.slideToggle(delay);
+    });
+
+    (function() {
+        var last_focused = body_textarea[0];
+        body_textarea.add(subject_input).on('focus', function() {
+            last_focused = this;
+        });
+        variables_wrapper.on('click', 'a', function() {
+            var var_name = $(this).text();
+            var var_html = $(this).closest('.field').find('.h-html').html();
+            if ($('.wa-editor-wysiwyg-html-toggle', wrapper).find('.html').closest('li').hasClass('selected')) {
+                var ace = body_textarea.data('ace');
+                ace.insert(var_html ? var_html : var_name);
+            } else {
+                body_textarea.redactor('insert.html', var_html ? var_html : var_name);
+            }
+            return false;
+        });
+    })();
+
+    var onChangeHandler = function() {
+        var result = '';
+        if (from_select.val() == '') {
+            result += from_input.val();
+        }
+        result += '{literal}{SEPARATOR}{/literal}';
+        result += subject_input.val();
+        result += '{literal}{SEPARATOR}{/literal}';
+        result += body_textarea.val();
+        hidden_input.val(result);
+    };
+
+    // When something changes in form, update value in hidden input
+    wrapper.on('beforesubmit change', '.template-subfield input, .template-subfield select, .template-subfield textarea', onChangeHandler);
+
+
+        /** Create a checklist dropdown from ul.menu-h.dropdown (optionally .no-click-close) */
+    var animateChecklist = function(checklist) {
+        // Element to show list of currently selected items
+        var selected_items_span = checklist.find('.selected-items');
+
+        selected_items_span.data('initial_text', '[`Select`]');
+
+        // Click on a closed checklist closes/opens the checklist dropdown
+        selected_items_span.click(function() {
+            var menu = checklist.find('.hidden.menu-v').toggle();
+            if (!menu.hasClass('no-mouseleave') && menu.is(':visible')) {
+                checklist.mouseleave(function() {
+                    checklist.find('.hidden.menu-v').hide();
+                });
+            }
+        });
+
+        // Dropdown checkbox change changes the visible description in selected_items_span
+        $('input:checkbox', checklist[0]).live('change', function() {
+            var str = [];
+            checklist.find('input:checkbox').each(function() {
+                var cb = $(this);
+                if (cb.is(':checked:not(:disabled)')) {
+                    cb.parent().addClass('bold');
+                    str.push($.trim($(this).parent().text()));
+                } else {
+                    cb.parent().removeClass('bold');
+                }
+            });
+            if (str.length > 0) {
+                selected_items_span.text(str.join(', '));
+            } else {
+                selected_items_span.text(selected_items_span.data('initial_text'));
+            }
+            return false;
+        }).change();
+
+        return checklist;
+    };
+
+    {if !empty($to_name)}
+        // Checklist for To: selector
+        (function() {
+            var checklist = wrapper.find('.checklist');
+            var menu = checklist.find('.menu-v');
+            var search_field = checklist.find('input:text');
+
+            animateChecklist(checklist);
+
+            // Autocomplete for contact search
+            search_field.autocomplete({
+                source: '?module=autocomplete',
+                minLength: 3,
+                delay: 300,
+                html: 1,
+                focus: function() {
+                    return false;
+                },
+                select: function(event, ui) {
+                    addLi(ui.item.id, ui.item.name);
+                    search_field.val('').autocomplete('close');
+                    return false;
+                }
+            });
+            search_field.autocomplete('widget').css('z-index', 100500);
+
+            // Enter in search field selects current value
+            search_field.keydown(function(e) {
+                if (e.which == 13 || e.which == 10) {
+                    var val = search_field.val();
+                    if (!val || val.indexOf('@') <= 0) {
+                        return false;
+                    }
+                    addLi(val, val);
+                    search_field.val('').autocomplete('close');
+                    return false;
+                }
+            });
+
+            // Close dropdown on click anywhere
+            var h;
+            $(document).on('click', h = function(e) {
+                if (!wrapper.closest('html').length) {
+                    $(document).off('click', h);
+                    return;
+                }
+                if (!$(e.target).closest(checklist.add(search_field.autocomplete('widget'))).length) {
+                    menu.hide();
+                }
+            });
+
+            updateState();
+
+            function addLi(id, name) {
+                var tmpl = menu.find('li.template');
+                var attr_name = tmpl.find(':checkbox').attr('name').replace('%VALUE%', id);
+
+                var cb2 = menu.find('[name="'+attr_name+'"]');
+                if (cb2.length) {
+                    cb2.prop('checked', true).change();
+                } else {
+                    var li = tmpl.clone().removeClass('hidden template').insertBefore(tmpl);
+                    li.find('.val').text(name);
+                    li.find(':checkbox').prop('disabled', false).attr('name', attr_name).change();
+                    updateState();
+                }
+            }
+
+            function updateState() {
+                if (menu.find(':checkbox:not(:disabled)').length > 3) {
+                    menu.find('.show-if-custom').slideDown();
+                }
+            }
+        })();
+    {/if}
+
+    delay = 200;
+}, 0);</script>

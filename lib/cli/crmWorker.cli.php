@@ -14,6 +14,7 @@ class crmWorkerCli extends waCliController
         // 'email' - is old alias for backward compatibility
         if (!$tasks || isset($tasks['source']) || isset($tasks['sources']) || isset($tasks['email'])) {
             crmSourceWorker::cliRun();
+            crmRemindersPush::cliRun();
         }
 
         if (!$tasks || isset($tasks['birthday']) || isset($tasks['bday'])) {

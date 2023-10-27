@@ -10,12 +10,17 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
 
     public function execute()
     {
+        $invoice_id = waRequest::param('id', null, waRequest::TYPE_INT);
+        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
+        if (!empty($iframe) && wa('crm')->whichUI('crm') !== '1.3') {
+            $this->setLayout();
+        }
+
         if (!wa()->getUser()->getRights('crm', 'manage_invoices')) {
             throw new waRightsException();
         }
 
         // Invoice ID may come from routing, or from parent class
-        $invoice_id = waRequest::param('id', null, waRequest::TYPE_INT);
         if (!$invoice_id) {
             if ($this->invoice_id) {
                 $invoice_id = (int)$this->invoice_id;
@@ -101,6 +106,7 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
         unset($i);
 
         $this->view->assign(array(
+            'iframe'                 => $iframe,
             'invoice'                => $this->invoice,
             'public_url'             => $public_url,
             'show_url'               => $show_url,

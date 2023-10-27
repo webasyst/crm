@@ -1,0 +1,183 @@
+{function name=select n='' o=[] d='' with_empty=true style="" class=""}
+    <select name="{$n|default:''}" style="{$style|default:''}" class="{$class|default:''}">
+        {if $with_empty}
+            <option value=""></option>
+        {/if}
+        {foreach $o as $e}
+            {if isset($e.id)}{$v = $e.id}{else}{$v = $e}{/if}
+            <option value="{$v}" {if $v == $d}selected="selected"{/if}>
+                {if isset($e.name)}{$e.name}{else}{$e}{/if}
+            </option>
+        {/foreach}
+    </select>
+{/function}
+
+<div id="{$uniqid}">
+    {if $id === 'shop.customers.number_of_orders'}
+        <div>
+            <select class="cs-number-of-orders-op" style="min-width: 40px; width: 40px;">
+                <option value=">=" {if $op == '>='}selected="selected"{/if}>&gt;=</option>
+                <option value="<=" {if $op == '<='}selected="selected"{/if}>&lt;=</option>
+            </select>
+            <input value="{$val}" class="numerical short cs-number-of-orders-val" placeholder="0">
+            <input type="hidden" name="{$id}" value="" class="cs-number-of-orders">
+        </div>
+    {else if $id === 'shop.customers.total_spent'}
+        <div>
+            <input name="" data-name="from" value="{$from|default:''}" type="text" class="numerical short cs-total-spent-from" placeholder="0">&mdash;
+            <input name="" data-name="to" value="{$to|default:''}" type="text" class="numerical short cs-total-spent-to" placeholder="∞">
+            <input type="hidden" name="{$id}" value="" class="cs-total-spent">
+            {$currency|default:''}
+        </div>
+    {else if $id === 'shop.customers.last_order_datetime' || $id === 'shop.customers.first_order_datetime'}
+        <div>
+            {if $id === 'shop.customers.last_order_datetime'}
+                {capture "_last_order_options"}
+                    {$d = ''}
+                    {if $mode === 'offset'}
+                        {$d = $val}
+                    {else if $mode === 'date'}
+                        {$d = ':enter_date'}
+                    {/if}
+                    {select o=[['id' => '-30d', 'name' => '[`30 days`]'],
+                            ['id' => '-90d', 'name' => '[`90 days`]'],
+                            ['id' => '-180d', 'name' => '[`180 days`]'],
+                            ['id' => '-365d', 'name' => '[`365 days`]'],
+                            ['id' => ':enter_date', 'name' => '[`Enter date...`]']]
+                        d=$d style="min-width: 40px; width: 100px;" class="cs-last-order-datetime-select"}
+                {/capture}
+                {sprintf('<span>[`Over %s ago`]</span>', $smarty.capture._last_order_options)}
+            {/if}
+            <div class="{if $id === 'shop.customers.last_order_datetime'}hidden{/if} cs-customers-last-order-period" style="margin-top: 10px;">
+                {$d = ''}
+                {if $mode === 'date'}{$d = $val}{/if}
+                <input type="text" class="cs-datepicker cs-customers-last-order-datepicker" value="{$d}" style="width: 120px; min-width: 120px;">
+                {select  o=[['id' => '<=', 'name' => '[`or earlier`]'],
+                        ['id' => '>=', 'name' => '[`or later`]']]
+                    d=$op|default:'' with_empty=false class="cs-last-order-datetime-op" style="width: 80px;"}
+            </div>
+            <input type="hidden" name="{$id}" value="" class="cs-customers-last-order-datetime">
+        </div>
+    {else if $id === 'shop.customers.coupon' || $id === 'shop.customers.referer' || $id === 'shop.customers.storefront' || $id === 'shop.customers.utm_campaign'}
+        <div>{select o=$select_options d=$val n=$id}</div>
+    {/if}
+</div>
+
+<script>
+    $(function() { 'use strict';
+
+        var changeListener = function(el,handler, delegate_context) {
+            var timeout = 150;
+            var timer_id = null;
+            var ns = 'change_listener';
+            var keydown_handler = function() {
+                var item = this;
+                if (timer_id) {
+                    clearTimeout(timer_id);
+                    timer_id = null;
+                }
+                timer_id = setTimeout(function() {
+                    handler.call(item, el);
+                }, timeout);
+            };
+            var change_handler = function() {
+                handler.call(this, el);
+            };
+            if (delegate_context) {
+                el.on('keydown.' + ns, delegate_context, keydown_handler)
+                    .on('change.' + ns, delegate_context, change_handler);
+            } else {
+                el.bind('keydown.' + ns, keydown_handler)
+                    .bind('change.' + ns, change_handler);
+            }
+            return el;
+        };
+
+        (function(block) {
+
+            $('.cs-datepicker', block).datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+            {if $id === 'shop.customers.number_of_orders'}
+                var makeHash = function(val, op) {
+                    return val ? { op: op, val: val } : '';
+                };
+                var op_select = $('.cs-number-of-orders-op', block);
+                var val_input = $('.cs-number-of-orders-val', block);
+                var hidden_input = $('.cs-number-of-orders', block);
+                var changeHandler = function() {
+                    hidden_input.val(JSON.stringify(makeHash(val_input.val(), op_select.val())));
+                };
+                op_select.change(changeHandler);
+                changeListener(val_input, changeHandler);
+                changeHandler();
+            {else if $id === 'shop.customers.total_spent'}
+                var makeHash = function(from_value, to_value) {
+                    if (from_value && to_value) {
+                        return { op: '=', val: from_value + '--' + to_value };
+                    } else if (from_value) {
+                        return { op: '>=', val: from_value };
+                    } else if (to_value) {
+                        return { op: '<=', val: to_value } ;
+                    } else {
+                        return '';
+                    }
+                };
+                var hidden_input = $('.cs-total-spent', block);
+                var from_input = $('.cs-total-spent-from', block);
+                var to_input = $('.cs-total-spent-to', block);
+                var changeHandler = function() {
+                    hidden_input.val(JSON.stringify(makeHash(from_input.val(), to_input.val())));
+                };
+                changeListener(from_input, changeHandler);
+                changeListener(to_input, changeHandler);
+                changeHandler();
+            {else if $id === 'shop.customers.last_order_datetime' || $id === 'shop.customers.first_order_datetime'}
+
+                var makeHash = function(select_val, datepicker_val, op_select_val) {
+                    {if $id === 'shop.customers.last_order_datetime'}
+                        if (select_val === ':enter_date') {
+                            return { op: op_select_val, val: datepicker_val };
+                        } else {
+                            if (select_val) {
+                                return { op: '<=', val: select_val };
+                            } else {
+                                return '';
+                            }
+                        }
+                    {else}
+                        if (datepicker_val) {
+                            return { op: op_select_val, val: datepicker_val };
+                        } else {
+                            return '';
+                        }
+                    {/if}
+                };
+
+                var select = $('.cs-last-order-datetime-select', block);
+                var op_select = $('.cs-last-order-datetime-op', block);
+                var period_block = $('.cs-customers-last-order-period', block);
+                var datepicker = $('.cs-customers-last-order-datepicker', block);
+                var hidden_input = $('.cs-customers-last-order-datetime', block);
+                var changeHandler = function() {
+                    hidden_input.val(JSON.stringify(makeHash(select.val(), datepicker.val(), op_select.val())));
+                };
+
+                select.change(function() {
+                    var val = $(this).val();
+                    if (val === ':enter_date') {
+                        period_block.show().find(':input').attr('disabled', false);
+                    } else {
+                        period_block.hide().hide().find(':input').attr('disabled', true);
+                    }
+                    changeHandler();
+                }).change();
+
+                op_select.change(changeHandler);
+                changeListener(datepicker, changeHandler);
+
+            {/if}
+        })($('#{$uniqid}'));
+    });
+</script>

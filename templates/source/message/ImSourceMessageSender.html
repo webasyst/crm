@@ -23,11 +23,11 @@
 {/if}
 {$subject_formatted = $subject_formatted|default:'[`(no subject)`]'}
 
-<div class="crm-dialog-wrapper {$class} c-message-show-body-dialog" id="{$dialog_id}">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
+<div class="dialog {$class} c-message-show-body-dialog" id="{$dialog_id}">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
         <form method="post">
-            <header class="crm-dialog-header">
+            <header class="dialog-header">
                 <h3>
                     {if !empty($icon_url)}
                         <img src="{$icon_url}" title="{$source.name|escape}" style="width: 16px; margin-top: 2px;">
@@ -51,7 +51,7 @@
                     {/if}
                 </div>
             </header>
-            <div class="crm-dialog-content">
+            <div class="dialog-content">
                 <div class="c-message-info">
                     <div class="js-message-data">
 
@@ -167,12 +167,12 @@
                 <div class="js-errors-place"></div>
             </div>
 
-            <footer class="crm-dialog-footer">
+            <footer class="dialog-footer">
                 <div class="c-layout">
                     <div class="c-column">
                         <div class="c-footer-actions js-dialog-footer">
-                            <input class="button green js-send-button" type="submit" value="[`Send`]">
-                            [`or`] <a href="javascript:void(0);" class="js-cancel-dialog">[`cancel`]</a>
+                            <input class="button js-send-button" type="submit" value="[`Send`]">
+                            <a href="javascript:void(0);" class="button light-grey js-cancel-dialog">[`Cancel`]</a>
                         </div>
                     </div>
             </footer>
@@ -180,11 +180,11 @@
     </div>
 
     {capture assign="_success_html"}
-        <div class="crm-dialog-content" style="min-height: 40px;">
+        <div class="dialog-content" style="min-height: 40px;">
             <p>[`Message sent successfully`]</p>
         </div>
 
-        <footer class="crm-dialog-footer">
+        <footer class="dialog-footer">
             <input class="button gray js-close-dialog" type="button" value="[`Close`]">
         </footer>
     {/capture}
@@ -192,7 +192,7 @@
     <script>
         (function ($) {
         var $body = $(window.top.document).find("body");
-        new CRMDialog({
+        $.waDialog({
             html: $body.find('#{$dialog_id}').show(),
             onOpen: function($wrapper) {
                 new CRMImSourceSendMessageDialog({

@@ -15,17 +15,19 @@
 <div id="{$uniqid}">
     {if $id === 'shop.customers.number_of_orders'}
         <div>
-            <select class="cs-number-of-orders-op" style="min-width: 40px; width: 40px;">
-                <option value=">=" {if $op == '>='}selected="selected"{/if}>&gt;=</option>
-                <option value="<=" {if $op == '<='}selected="selected"{/if}>&lt;=</option>
-            </select>
-            <input value="{$val}" class="numerical short cs-number-of-orders-val" placeholder="0">
+            <div class="wa-select">
+                <select class="cs-number-of-orders-op not-styled" style="min-width: 40px; width: 70px;">
+                    <option value=">=" {if $op == '>='}selected="selected"{/if}>&gt;=</option>
+                    <option value="<=" {if $op == '<='}selected="selected"{/if}>&lt;=</option>
+                </select>
+            </div>
+            <input type="number" value="{$val}" class="numerical short cs-number-of-orders-val" style="text-align: left;" placeholder="0">
             <input type="hidden" name="{$id}" value="" class="cs-number-of-orders">
         </div>
     {else if $id === 'shop.customers.total_spent'}
-        <div>
-            <input name="" data-name="from" value="{$from|default:''}" type="text" class="numerical short cs-total-spent-from" placeholder="0">&mdash;
-            <input name="" data-name="to" value="{$to|default:''}" type="text" class="numerical short cs-total-spent-to" placeholder="∞">
+        <div class="flexbox middle wrap space-4">
+            <input name="" data-name="from" value="{$from|default:''}" type="text" class="numerical short cs-total-spent-from" placeholder="0" style="width: 119px;">&mdash;
+            <input name="" data-name="to" value="{$to|default:''}" type="text" class="custom-ml-4 numerical short cs-total-spent-to" placeholder="∞" style="width: 119px;">
             <input type="hidden" name="{$id}" value="" class="cs-total-spent">
             {$currency|default:''}
         </div>
@@ -39,27 +41,31 @@
                     {else if $mode === 'date'}
                         {$d = ':enter_date'}
                     {/if}
+                    <div class="wa-select">
                     {select o=[['id' => '-30d', 'name' => '[`30 days`]'],
                             ['id' => '-90d', 'name' => '[`90 days`]'],
                             ['id' => '-180d', 'name' => '[`180 days`]'],
                             ['id' => '-365d', 'name' => '[`365 days`]'],
                             ['id' => ':enter_date', 'name' => '[`Enter date...`]']]
-                        d=$d style="min-width: 40px; width: 100px;" class="cs-last-order-datetime-select"}
+                        d=$d style="min-width: 40px; width: 165px;" class="cs-last-order-datetime-select not-styled"}
+                    </div>
                 {/capture}
                 {sprintf('<span>[`Over %s ago`]</span>', $smarty.capture._last_order_options)}
             {/if}
-            <div class="{if $id === 'shop.customers.last_order_datetime'}hidden{/if} cs-customers-last-order-period" style="margin-top: 10px;">
+            <div class="{if $id === 'shop.customers.last_order_datetime'}c-hidden{/if} cs-customers-last-order-period" style="margin-top: 10px;">
                 {$d = ''}
                 {if $mode === 'date'}{$d = $val}{/if}
                 <input type="text" class="cs-datepicker cs-customers-last-order-datepicker" value="{$d}" style="width: 120px; min-width: 120px;">
+                <div class="wa-select">
                 {select  o=[['id' => '<=', 'name' => '[`or earlier`]'],
                         ['id' => '>=', 'name' => '[`or later`]']]
-                    d=$op|default:'' with_empty=false class="cs-last-order-datetime-op" style="width: 80px;"}
+                    d=$op|default:'' with_empty=false class="cs-last-order-datetime-op not-styled" style="width: 140px;"}
+                </div>
             </div>
             <input type="hidden" name="{$id}" value="" class="cs-customers-last-order-datetime">
         </div>
     {else if $id === 'shop.customers.coupon' || $id === 'shop.customers.referer' || $id === 'shop.customers.storefront' || $id === 'shop.customers.utm_campaign'}
-        <div>{select o=$select_options d=$val n=$id}</div>
+        <div class="wa-select">{select o=$select_options d=$val n=$id class="not-styled"}</div>
     {/if}
 </div>
 

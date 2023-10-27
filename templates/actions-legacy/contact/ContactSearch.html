@@ -1,0 +1,434 @@
+
+{$_title = '[`Advanced search`]'}
+{if $segment}
+    {$_title = $segment.name}
+{/if}
+
+{$_button_name = '[`Find`]'}
+{if $segment}
+    {$_button_name = '[`Save`]'}
+{/if}
+
+<div class="block shadowed crm-search-container-wrapper">
+    <div id="c-search-container">
+        <form>
+            <div class="c-search-block" id="c-search-block">
+                <div class="c-layout">
+                    <div class="c-column" style="width: 350px;">
+
+                        <div class="sidebar">
+                            <h2>[`Choose search parameters`]:</h2>
+                            <br>
+                            {foreach $config as $section_id => $cnfg}
+                                <div class="block not-padded collapsable-wrapper" data-id="{$section_id}">
+                                    <h3 class="collapse-handler">
+                                        {_wp($cnfg.name)|escape}
+                                        <i class="icon16 {if empty($sidebar_map[$section_id])}rarr{else}darr{/if}"></i>
+                                    </h3>
+                                    <ul class="menu-v collapsable" {if empty($sidebar_map[$section_id])}style="display:none;"{/if}>
+                                        {foreach $cnfg.items as $id => $item}
+                                            {if empty($item.parent)}
+                                                <li data-id="{$section_id}.{$id}" class="add-condition-item" {if !empty($item.multiple)}data-multiple="1"{/if}>
+                                                    <a href="javascript:void(0);">{_wp($item.name)|escape}</a>
+                                                </li>
+                                            {/if}
+                                        {/foreach}
+                                    </ul>
+                                </div>
+                            {/foreach}
+                        </div>
+
+                    </div>
+                    <div class="c-column">
+
+                        <div class="block double-padded" style="width: auto;">
+                            <div class="content">
+                                <h1>{$_title|escape}</h1>
+                                {foreach $items as $item}
+                                    {include file="./ContactSearchCondition.inc.html"
+                                    item=$item['item']
+                                    count=$item['count']|default:""
+                                    id=$item['item_id']
+                                    conds=$item['conds']
+                                    class="hidden"
+                                    extra=[]
+                                    inline}
+                                {/foreach}
+                                <div id="c-choose-parameters-message" class="align-center" style="{if !empty($items)}display:none;{/if} margin-top: 50px;">
+                                    [`Choose search parameters in the sidebar`]
+                                </div>
+                            </div>
+
+                            <div class="clear"></div>
+
+                            <div class="buttons" id="c-search-buttons" style="margin-top: 50px">
+                                <div class="line">
+                                    <input type="submit" class="button green" value="{$_button_name}">
+                                    <i class="icon16 loading" style="display:none;"></i>
+                                    {if $segment}
+                                        <span>[`or`]</span>
+                                        <a href="{$wa_app_url}contact/segment/{$segment.id}/">[`cancel`]</a>
+                                    {/if}
+                                </div>
+                                <div class="line" id="c-search-message"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="block templates" style="display:none">
+            {if !empty($items)}
+                {foreach $items as $tmpl_item}
+                    {$_id = $tmpl_item['item_id']}
+                    {include file="./ContactSearchCondition.inc.html" id=$_id item=$tmpl_item['item'] conds=[] extra=[]}
+                {/foreach}
+            {/if}
+        </div>
+    </div>
+
+    <div id="c-searching" style="display:none;"><i class="icon16 loading"></i> [`Searching...`]</div>
+    <div id="c-contacts-count-text" style="display:none;"></div>
+
+    <div id="contacts-container" class="tab-content no-border" style="display:none;">
+        <div class="block not-padded contacts-data"></div>
+    </div>
+    <div class="clear"></div>
+
+    {include file="./ContactSearchPeriodDialog.inc.html" inline}
+
+    <script>
+        ( function($) {
+
+            $.crm.title.set({$_title|json_encode});
+
+            $('#wa').addClass('c-search');
+
+            var container = $('#c-search-container');
+            var form = $('#c-search-container').find('form');
+            var getActionUrl = function (action, params) {
+                return $.crm.app_url + '?module=contactSearch&action=' + action + (params ? '&' + params : '');
+            };
+            var getResultUrl = function (hash) {
+                return $.crm.app_url + 'contact/search/result/' + hash;
+            };
+
+            var onCollapse = function() {
+                var wrapper = $(this).closest('.collapsable-wrapper');
+                wrapper.find('.collapsable :input').attr('disabled', true);
+                wrapper.find('.hide-when-expand :input').attr('disabled', false);
+                var block = $(this).closest('.js-field');
+                block.find('.subfield :input').attr('disabled', true);
+                if (block.data('id') === 'contact_info.name') {
+                    block.find('.subfield[data-id$=firstname] input').focus();
+                }
+                $.get(getActionUrl('condition'), {
+                    op: 'collapse_section',
+                    id: wrapper.data('id') }
+                );
+            };
+            var onExpand = function() {
+                var wrapper = $(this).closest('.collapsable-wrapper');
+                wrapper.find('.collapsable :input').attr('disabled', false);
+                wrapper.find('.hide-when-expand :input').attr('disabled', true);
+                var block = $(this).closest('.js-field');
+                block.find('input:first').focus();
+                block.find('.subfield :input').attr('disabled', false);
+                $.get(getActionUrl('condition'), { op: 'expand_section', id: wrapper.data('id') });
+            };
+            var collapse = function(h) {
+                var i = h.find('i');
+                var wrapper = h.closest('.collapsable-wrapper');
+                if (i.hasClass('darr')) {
+                    wrapper.find('.collapsable').hide();
+                    wrapper.find('.hide-when-expand').show();
+                    i.removeClass('darr').addClass('rarr');
+                    onCollapse.call(h);
+                }
+            };
+            var expand = function(h) {
+                var i = h.find('i');
+                var wrapper = h.closest('.collapsable-wrapper');
+                wrapper.find('.collapsable').show();
+                wrapper.find('.hide-when-expand').hide();
+                i.removeClass('rarr').addClass('darr');
+                onExpand.call(h);
+            };
+            $('#c-search-container').off('click', '.collapse-handler').
+                on('click', '.collapse-handler', function() {
+                    if ($(this).find('i').hasClass('darr')) {
+                        collapse($(this));
+                    } else {
+                        expand($(this));
+                    }
+                    return false;
+                });
+
+            var advanced_block = $('#c-search-block');
+            advanced_block.find('.content .collapse-handler').each(function() {
+                var i = $(this).find('i');
+                if (i.hasClass('rarr')) {
+                    onCollapse.call(this);
+                } else {
+                    onExpand.call(this);
+                }
+            });
+
+            $.crm.search.indexBlocks();
+
+            function makeChoosePeriodControl(el)
+            {
+                var start_input = $('<input class="datepicker" style="width:111px;">');
+                var end_input = $('<input class="datepicker" style="width:111px;">');
+                var hidden_input = $('<input type="hidden" name="' + el.data('id') + '">');
+
+                var init_val = el.data('value');
+                var init_op = el.data('op');
+                el.append(start_input).append(' &mdash; ').append(end_input).append(hidden_input);
+                if (init_val) {
+                    init_val = init_val.split('--');
+                    if (init_val[0]) {
+                        if (init_op === '=' || init_op === '>=') {
+                            el.find('.datepicker:eq(0)').val(init_val[0]);
+                        } else if (init_op === '<=') {
+                            el.find('.datepicker:eq(1)').val(init_val[0]);
+                        }
+                    }
+                    if (init_val[1]) {
+                        el.find('.datepicker:eq(1)').val(init_val[1]);
+                    }
+                }
+                el.find('.datepicker')
+                    .change(function() {
+                        var range = [];
+                        if (start_input.datepicker('getDate')) {
+                            range[0] = start_input.val();
+                        }
+                        if (end_input.datepicker('getDate')) {
+                            range[1] = end_input.val();
+                        }
+                        if (range[0] && range[1]) {
+                            hidden_input.val(JSON.stringify({
+                                op: '=',
+                                val: range.join('--')
+                            }));
+                        } else if (range[0]) {
+                            hidden_input.val(JSON.stringify({
+                                op: '>=',
+                                val: range[0]
+                            }));
+                        } else if (range[1]) {
+                            hidden_input.val(JSON.stringify({
+                                op: '<=',
+                                val: range[1]
+                            }));
+                        } else {
+                            hidden_input.val('');
+                        }
+                    })
+                    .keydown(function(e) {
+                        if (e.keyCode === 13) {
+                            $(this).change();
+                            form.trigger('enter');
+                        }
+                    })
+                    .datepicker({
+                        dateFormat: 'yy-mm-dd'
+                    }).change();
+
+            }
+
+            function makeChooseBooleanControl(el)
+            {
+                var name = el.attr('name');
+                el.attr('name', '');
+                var input = $('<input type="hidden" name="' + name + '" value="' + el.val() + '">').insertAfter(el);
+
+                var items = '';
+                el.find('option').each(function() {
+                    items += '<li><a href="javascript:void(0)" class="item" data-value="' + $(this).val() + '">' + $(this).text() + '</a></li>';
+                });
+                var menu = $('<ul class="menu-h dropdown">' +
+                  '<li style="display: inline-block; padding: 0;">' +
+                    '<a href="javascript:void(0);" class="inline-link chooser"><b><i class="chooser-text">' + el.find('option:selected').text() + '</i></b></a>' +
+                    '<ul class="menu-v" style="display:none;">' + items + '</ul>' +
+                  '</li>' +
+                '</ul>')
+                    .find('.chooser').click(function() {
+                        menu.find('.menu-v').toggle();
+                        return false;
+                    }).end()
+                    .find('.item').click(function() {
+                        input.val($(this).data('value'));
+                        menu.find('.menu-v').hide().end()
+                            .find('.chooser-text').text($(this).text());
+                    }).end().insertAfter(el);
+                menu.find('.menu-v').width(el.width());
+                el.hide();
+            }
+
+            $('.add-condition-item', container).click(function() {
+                var self = $(this);
+                if (self.data('loading')) {
+                    return;
+                }
+
+                var id = self.data('id');
+                var multiple = $(this).data('multiple');
+                var item = $('.templates .js-field[data-id="' + id + '"]', container).clone();
+                var prepareItem = function(item) {
+                    $('.content', advanced_block).append(item);
+                    item.find('.combobox').combobox({
+                        url: getActionUrl('values')
+                    });
+                    item.find('.c-choose-period').each(function() {
+                        makeChoosePeriodControl($(this));
+                    }).end().find('.c-choose-boolean').each(function() {
+                        makeChooseBooleanControl($(this));
+                    });
+
+                    $.crm.search.indexBlocks(id);
+                    item.find('input:not(:hidden):not(.datepicker):first').focus();
+                    $('#c-choose-parameters-message').hide();
+
+                    self.trigger('after_load_condition', [id, item]);
+
+                };
+                if (!item.length) {
+                    var  loading = $('<i class="icon16 loading"></i>').appendTo($(this).find('a'));
+                    self.data('loading', 1);
+                    $.get(getActionUrl('condition'), { id: id }, function(html) {
+                        self.data('loading', 0);
+                        var tmp = $('<div></div>').html(html);
+                        item = tmp.children(':first');
+
+                        // cache
+                        $('.templates', container).append(item.clone());
+
+                        prepareItem(item);
+                        tmp.remove();
+                        loading.remove();
+                        $('#c-search-message').hide();
+
+                        if ($('#c-search-block .content .js-field:first').length) {
+                            $('#c-search-buttons').show();
+                        }
+
+                    });
+                } else {
+                    if (multiple) {
+                        item.show();
+                        prepareItem(item);
+                    } else {
+                        var it = $('.js-field[data-id="'+id+'"]', advanced_block);
+                        if (!it.length) {
+                            prepareItem(item);
+                        } else {
+                            it.find('input:not(:hidden):not(.datepicker):first').focus();
+                        }
+                        if ($('#c-search-block .content .js-field:first').length) {
+                            $('#c-search-buttons').show();
+                        }
+                    }
+                    $.get(getActionUrl('condition'), { id: id, op: 'remember' });
+                    $('#c-search-message').hide();
+                }
+                $(this).trigger('select', [id, item]);
+            });
+
+            $('.js-field', advanced_block).each(function() {
+                $(this).show();
+                $(this).find('.combobox').combobox({
+                    url: getActionUrl('values')
+                });
+                $(this).find('.c-choose-period').each(function() {
+                    makeChoosePeriodControl($(this));
+                }).end().find('.c-choose-boolean').each(function() {
+                    makeChooseBooleanControl($(this));
+                });
+            });
+
+            $('#c-search-block').find('.js-field input:not(:hidden):not(.datepicker):first').focus();
+            var block_ids = $.unique($('#c-search-block').find('.js-field').map(function() {
+                return $(this).data('id').split('.')[0];
+            }).toArray());
+            for (var i = 0; i < block_ids.length; i += 1) {
+                expand($('.collapsable-wrapper[data-id="'+block_ids[i]+'"] .collapse-handler'));
+            }
+
+
+            $('.add-condition-item', container).bind('select', function(e, id, block, first) {
+                if (block.data('multiple') || first) {
+                    block.find('.combobox').combobox({
+                        url: getActionUrl('values')
+                    });
+                    if (block.find('.c-choose-period').length) {
+                        block.find('.c-choose-period').each(function() {
+                            makeChoosePeriodControl($(this));
+                        });
+                    }
+                    block.find('input:first').focus();
+                } else {
+                    block.find('input:text:first').select();
+                }
+
+                return false;
+            });
+            form.find('input[type=text]').keydown(function(e) {
+                if (e.keyCode === 13) {
+                    $(this).trigger('enter');
+                }
+            });
+            form.bind('enter', function() {
+                form.trigger('submit');
+            });
+            form.keydown(function(e) {
+                if (e.keyCode === 13) {
+                    return false;
+                }
+            });
+
+            var formSearchHash = function (ignore_encoding) {
+                $.crm.search.indexBlocks();
+                return $.crm.search.serialize(form, undefined, undefined, ignore_encoding);
+            };
+
+            form.submit(function(e) {
+                e.preventDefault();
+                {if $segment}
+                    var hash = formSearchHash(true),
+                        url = $.crm.app_url + '?module=contactSegment&action=save',
+                        data = {$segment|json_encode};
+                    data.hash = hash;
+                    if (data.hash.length <= 0) {
+                        return;
+                    }
+                    $.post(url, data, function () {
+                        $.crm.content.load($.crm.app_url + 'contact/segment/' + data.id + '/');
+                    });
+                {else}
+                    var hash = formSearchHash();
+                    if (hash.length <= 0) {
+                        return;
+                    }
+                    $('#c-search-message').hide();
+                    location.href = getResultUrl(hash);
+                {/if}
+            });
+
+            container.on('click', '.killer', function() {
+                var item = $(this).closest('div.js-field');
+                var id = item.data('id');
+                item.remove();
+                $.crm.search.indexBlocks(id);
+                if (!$('#c-search-block .content .js-field:first').length) {
+                    $('#c-search-buttons').hide();
+                    $('#c-choose-parameters-message').show();
+                }
+                $.get(getActionUrl('condition'), { id: id, op: 'delete' });
+            });
+        })(jQuery);
+    </script>
+</div>

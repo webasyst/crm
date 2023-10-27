@@ -267,7 +267,7 @@ class crmFieldConstructor
             if (strlen($id) === 0) {
                 return array(null, array(array("id_val" => _w('Required field'))));
             }
-            if (preg_match('/[^a-z_0-9]/i', $id)) {
+            if (preg_match('/[^-_a-z0-9]/i', $id)) {
                 return array(
                     null,
                     array(

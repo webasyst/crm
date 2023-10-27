@@ -1,0 +1,137 @@
+<div class="crm-dialog-wrapper c-funnel-dialog" id="c-funnel-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <form action="">
+            <header class="crm-dialog-header">
+                <h1>{if !empty($funnel.id)}[`Edit funnel`]{else}[`Create funnel`]{/if}</h1>
+            </header>
+
+            <div class="crm-dialog-content">
+                <div class="c-funnel-form">
+                    <input class="wide large js-funnel-name" name="funnel[name]" type="text" value="{$funnel.name|escape}" placeholder="[`Funnel name`]" required>
+
+                    <section class="c-color-section">
+                        {$_colors = ["#cc5252","#cc8f52","#cccc52","#52cc52","#52cc8f","#52cccc","#528fcc","#5252cc","#8f52cc","#cc52cc","#cc528f"]}
+                        {$_toggle_color = $_colors[0]}
+                        {if !empty($funnel.color)}
+                            {$_toggle_color = $funnel.color}
+                        {/if}
+
+                        <div class="c-layout">
+                            <div class="c-column middle">
+
+                                <ul class="c-colors">
+                                    {strip}
+                                    {foreach $_colors as $_color}
+                                        <li class="c-color-wrapper">
+                                            <i class="icon16 color js-set-color {if $_toggle_color == $_color}is-active{/if}" data-color="{$_color}" style="background: {$_color};"></i>
+                                        </li>
+                                    {/foreach}
+                                    {/strip}
+                                </ul>
+
+                            </div>
+                            <div class="c-column right">
+
+                                <div class="c-toggle-wrapper js-toggle-wrapper is-hidden">
+                                    <input class="c-field js-color-field" name="funnel[color]" type="text" value="{$_toggle_color}" placeholder="{$_toggle_color}">
+                                    <div class="c-toggle-block">
+                                        <i class="icon16 color c-toggle js-toggle" style="background: {$_toggle_color};"></i>
+                                        <div class="c-color-picker js-color-picker"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <ul class="c-stages js-stages">
+                            {for $i = 1 to 7}
+                                <li class="c-stage">
+                                    <div class="c-ornament">
+                                        <i class="svg-icon funnel" data-color="#f0f0f0"></i>
+                                    </div>
+                                </li>
+                            {/for}
+                        </ul>
+
+                        <input class="js-start-color-field" name="funnel[open_color]" type="hidden">
+                        <input class="js-end-color-field" name="funnel[close_color]" type="hidden">
+                    </section>
+
+                    <section class="c-stages-section">
+                        {function _renderStage}
+                            <li class="c-stage" {if !empty($_stage)}data-id="{$_stage.id}"{/if}>
+                                <i class="icon16 sort c-sort-toggle js-sort-toggle"></i>
+                                <input class="js-name-field" type="text" placeholder="[`Stage name`]" value="{if !empty($_stage)}{$_stage.name|escape}{else}[`New stage`]{/if}" required>
+                                {if empty($_stage.deals_count)}
+                                    <a class="inline-link c-delete-link js-delete-stage" href="javascript:void(0);">
+                                        <i class="icon10 delete"></i>
+                                        <b><i>[`delete`]</i></b>
+                                    </a>
+                                {else}
+                                    <span class="c-delete-link hint">{_w('%d deal in stage', '%d deals in stage', $_stage.deals_count)}</span>
+                                {/if}
+                            </li>
+                        {/function}
+
+                        {capture assign="_stage_template"}{_renderStage _stage=[]}{/capture}
+
+                        <h3>[`Stages`]</h3>
+
+                        <ul class="menu-v compact c-stages-list">
+                            {if !empty($stages)}
+                                {foreach $stages as $_stage}
+                                    {_renderStage _stage=$_stage}
+                                {/foreach}
+                            {else}
+                                {_renderStage _stage=[]}
+                            {/if}
+                        </ul>
+
+                        <div class="c-actions">
+                            <a class="inline-link js-add-stage" href="javascript:void(0);">
+                                <i class="icon16 add"></i>
+                                <b><i>[`Add stage`]</i></b>
+                            </a>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <div class="crm-actions c-layout">
+                    <div class="c-column middle">
+
+                        <input class="button green crm-button" type="submit" value="{if !empty($funnel.id)}[`Save`]{else}[`Create`]{/if}">
+                        <span style="margin: 0 4px;">[`or`]</span>
+                        <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+
+                    </div>
+                    <div class="c-column middle right">
+
+                        {if empty($funnel.deals_count)}
+                            <a class="inline-link js-delete-funnel" href="javascript:void(0);">
+                                <i class="icon16 delete"></i><b><i>[`delete`]</i></b>
+                            </a>
+                        {else}
+                            <span class="hint">{_w('%d deal in funnel', '%d deals in funnel', $funnel.deals_count)}</span>
+                        {/if}
+
+                    </div>
+                </div>
+            </footer>
+
+            <input name="funnel[id]" value="{$funnel.id}" type="hidden" >
+        </form>
+
+        <script>
+            ( function($) {
+                new CRMSettingsFunnel({
+                    $wrapper: $("#c-funnel-dialog"),
+                    funnel_id: "{$funnel.id}",
+                    stage_html: {$_stage_template|json_encode}
+                });
+            })(jQuery);
+        </script>
+    </div>
+</div>

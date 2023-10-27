@@ -1,0 +1,103 @@
+{$_first = [
+    [
+        "id" => "",
+        "name" => ""
+    ]
+]}
+
+{$is_empty_reasons = empty($reasons)}
+
+{$_reasons = array_merge($_first, $reasons)}
+
+{if $lost_reason_freeform}
+    {$_last = [
+        [
+            "id" => "",
+            "name" => "[`Other reason`]..."
+        ]
+    ]}
+    {$_reasons = array_merge($_reasons,$_last)}
+{/if}
+
+{$_deal_ids = []}{foreach $deals as $_deal}{$_deal_ids[] = $_deal.id}{/foreach}
+
+<div class="crm-dialog-wrapper c-deals-close-dialog" id="c-deals-close-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>{_w("Close %d deal", "Close %d deals", count($deals))}</h1>
+        </header>
+
+        <div class="crm-dialog-content">
+
+            {if $dropped_ids_count > 0}
+                <p>
+                    <i class="icon16 exclamation"></i> {_w('%d deal will not be affected by the action due to insufficient access rights', '%d deals will not be affected by the action due to insufficient access rights', $dropped_ids_count)}
+                </p>
+            {/if}
+
+            {if $shop_linked}
+                <p class="small red">
+                    {_w('%d selected deal are linked to Shop-Script orders.', '%d selected deals are linked to Shop-Script orders.', $shop_linked)}<br>
+                    [`Bulk deal close will not affect to corresponding orders.`]<br>
+                    [`Orders will remain unchanged.`]
+                </p>
+            {/if}
+
+            <div class="c-visible">
+                <p>[`Specify the deal closing status.`]</p>
+            </div>
+            <div class="c-deal-form c-hidden">
+                {if $is_empty_reasons}
+                    <span>[`Deal loss reasons are not set up.`]
+                        <a href="{$wa_backend_url}crm/settings/lostReasons/" target="_blank">[`Manage conditions`]</a>
+                    </span>
+                {else}
+                    <form action="">
+
+                        <div class="field">
+                            <div class="name">
+                                [`Lost reason`]
+                            </div>
+                            <div class="value">
+                                <select name="lost_id" class="js-reason-select">
+                                    {foreach $_reasons as $_reason}
+                                        <option value="{$_reason.id}" {if $_reason@first}selected disabled{/if}>{$_reason.name|escape}</option>
+                                    {/foreach}
+                                </select>
+
+                                <div class="line js-reason-text" style="display: none;">
+                                    <input type="text" name="lost_text" value="" placeholder="[`Your lost reason`]">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                {/if}
+            </div>
+        </div>
+
+        <footer class="crm-dialog-footer js-footer-actions">
+            <span class="c-visible">
+                <input class="button green large js-set-won" type="button" value="[`WON`]">
+                <input class="button red large js-show-form" type="button" value="[`LOST`]">
+            </span>
+            <span class="c-hidden">
+                <input class="button red js-set-lost" type="button" value="[`LOST`]" {if $lost_reason_require && $is_empty_reasons}disabled{/if}>
+            </span>
+            <span style="margin: 0 4px;">[`or`]</span>
+            <a class="inline-link js-close-dialog" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+        </footer>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMDealsCloseDialog({
+                $wrapper: $("#c-deals-close-dialog"),
+                deal_ids: {$_deal_ids|json_encode},
+                reason_require: {if $lost_reason_require}true{else}false{/if}
+            });
+        })(jQuery);
+    </script>
+</div>
+
+

@@ -1,0 +1,106 @@
+{$class = 'c-funnel-stages-list'}
+{$id = uniqid($class)}
+
+{$_active_stage = reset($stages)}
+{if !empty($selected_stage) && !empty($stages[$selected_stage])}
+    {$_active_stage = $stages[$selected_stage]}
+{/if}
+
+<div class="{$class}" id="{$id}">
+    <ul class="menu-h dropdown">
+        <li>
+            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                <span class="js-text">
+                    {if !empty($_active_stage.color)}
+                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_stage.color}"></i>
+                    {/if}
+                    <b><i class="js-name">{$_active_stage.name|escape}</i></b>
+                </span>&nbsp;<i class="icon10 darr"></i>
+            </a>
+            <ul class="menu-v with-icons">
+                {strip}
+                {foreach $stages as $_id => $_stage}
+                    <li class="{if isset($selected_stage) && $selected_stage == $_id}selected{/if}">
+                        <a href="javascript:void(0);" data-id="{$_id}">
+                            {if !empty($_stage.color)}
+                                <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color}"></i>
+                            {/if}
+                            <b><i>{$_stage.name|escape}</i></b>
+                        </a>
+                    </li>
+                {/foreach}
+                {/strip}
+            </ul>
+            <input class="js-field js-select-deal-stage" name="deal[stage_id]" type="hidden" value="{$_active_stage.id}">
+        </li>
+    </ul>
+
+    <script>
+        ( function($) {
+            var $wrapper = $("#{$id}"),
+                $visibleLink = $wrapper.find(".js-visible-link"),
+                $field = $wrapper.find(".js-field"),
+                $menu = $wrapper.find(".menu-v");
+
+            $menu.on("click", "a", function () {
+                var $link = $(this);
+                $visibleLink.find(".js-text").html($link.html());
+
+                $menu.find(".selected").removeClass("selected");
+                $link.closest("li").addClass("selected");
+
+                $menu.hide();
+                setTimeout( function() {
+                    $menu.removeAttr("style");
+                }, 200);
+
+                var id = $link.data("id");
+                $field.val(id);
+            });
+
+            {if !empty($fields)}
+                $('.js-ext-fields-section *').prop('required', false).removeClass('error');
+                $('.js-ext-fields-section .c-error').remove();
+
+                {foreach $fields as $field_id => $field}
+                    {if !empty($field.funnels_parameters.required)}
+                        $('[name="deal[params][{$field_id}]"]').prop('required', true).parents('.field').removeClass('c-hidden');
+                    {/if}
+                {/foreach}
+
+                var data = $('.js-ext-fields-section *').serializeArray();
+                for (var i = 0; i < data.length - 1; i++) {
+                    for (var j = i + 1; j < data.length; j++) {
+                        if (data[i].name == data[j].name) {
+                            if (data[i].value == "") {
+                                data.splice(i, 1);
+                            } else if (data[j].value == "") {
+                                data.splice(j, 1);
+                            }
+                        }
+                    }
+                }
+
+                $.each(data, function(index, item) {
+                    var $current_field = $('[name="' + item.name + '"]');
+
+                    var condition = item.value == "" || item.value.trim() == "";
+                    if ($($current_field).prop('required') == false && condition) {
+                        $($current_field).parents('.field').addClass('c-hidden');
+                    }
+                });
+
+                var count_fields = $('.js-ext-fields-section > .c-hidden').not('.js-show-fields-button, .js-hide-fields-button').length;
+                if (count_fields == 0) {
+                    $('.js-show-fields-button, .js-hide-fields-button').hide();
+                } else {
+                    $('.js-ext-fields-section').removeClass('is-extended');
+                    $('.js-show-fields-button, .js-hide-fields-button').removeAttr('style');
+                }
+            {/if}
+
+            $.crm.renderSVG($wrapper);
+
+        })(jQuery);
+    </script>
+</div>

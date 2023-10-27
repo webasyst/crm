@@ -38,7 +38,7 @@ var CRMSettingsFunnels = ( function($) {
 
         function initSetWidth() {
             var $window = $(window),
-                other_w = $section.find(".c-add-wrapper").outerWidth(true);
+                other_w = $section.find(".c-add-wrapper").outerWidth();
 
             setWidth();
 
@@ -54,9 +54,8 @@ var CRMSettingsFunnels = ( function($) {
             }
 
             function setWidth() {
-                var section_w = $section.width(),
-                    max_w = section_w - other_w - 10;
-
+                var section_w = $section.outerWidth(true),
+                    max_w = section_w - other_w - 38;
                 $companies.css("max-width", max_w + "px");
             }
         }
@@ -65,7 +64,7 @@ var CRMSettingsFunnels = ( function($) {
             $.crm.tabSlider({
                 $wrapper: $companies,
                 $slider: $list,
-                $activeSlide: ($activeTab.length ? $activeTab : false )
+                $activeSlide: ($activeTab.length ? $activeTab : false)
             });
         }
 

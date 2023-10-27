@@ -9,96 +9,103 @@
     </script>
 
     {capture assign="settings_content"}
-        <div class="c-column content bordered-left blank block double-padded">
-            {if isset($settings_html) && is_string($settings_html)}
-                {$settings_html}
-            {else}
-                {include file="$settings_template"}
-            {/if}
+        <div class="content bordered-left blank content-mobile-friendly">
+            <div class="article">
+                <div class="article-body">
+                {if isset($settings_html) && is_string($settings_html)}
+                    {$settings_html}
+                {else}
+                    {include file="$settings_template"}
+                {/if}
+                </div>
+            </div>
         </div>
     {/capture}
 
 
     {if $is_admin}
-        <div class="c-layout">
-            <div class="c-column sidebar left250px">
-
-
+        <div class="flexbox">
+            <div class="sidebar blank width-15rem" id="c-sidebar-wrapper">
                 {* SIDEBAR MENU ONLY FOR ADMIN *}
 
                 {$_menu = [
                     [
-                        "icon" => "general",
-                        "name" => "[`General settings`]",
-                        "uri" => "`$wa_app_url`settings/"
+                    "icon" => "fa-user-cog",
+                    "name" => "[`Personal settings`]",
+                    "uri" => "`$wa_app_url`settings/"
                     ],
                     [
-                        "icon" => "companies",
+                    "icon" => "fa-sliders-h",
+                    "name" => "[`General settings`]",
+                    "uri" => "`$wa_app_url`settings/general/"
+                    ],
+                    [
+                        "icon" => "fa-briefcase",
                         "name" => "[`Companies`]",
                         "uri" => "`$wa_app_url`settings/companies/"
                     ],
                     [
-                        "icon" => "templates",
+                        "icon" => "fa-file-alt",
                         "name" => "[`Invoice templates`]",
                         "uri" => "`$wa_app_url`settings/templates/"
                     ],
                     [
-                        "icon" => "currencies",
+                        "icon" => "fa-pound-sign",
                         "name" => "[`Currencies`]",
                         "uri" => "`$wa_app_url`settings/currencies/"
                     ],
                     [
-                        "icon" => "payments",
+                        "icon" => "fa-wallet",
                         "name" => "[`Payment`]",
                         "uri" => "`$wa_app_url`settings/payment/"
                     ],
                     [
-                        "icon" => "countries",
-                        "name" => "[`Countries & Regions`]",
-                        "uri" => "`$wa_app_url`settings/regions/"
-                    ],
-                    [
-                        "icon" => "vaults",
+                        "icon" => "fa-user",
                         "name" => "[`Vaults`]",
                         "uri" => "`$wa_app_url`settings/vaults/"
                     ],
                     [
-                        "icon" => "constructor",
+                        "icon" => "fa-layer-group",
                         "name" => "[`Field constructor`]",
                         "uri" => "`$wa_app_url`settings/field/"
                     ],
                     [
-                        "icon" => "funnels",
+                        "icon" => "fa-filter",
                         "name" => "[`Funnels`]",
                         "uri" => "`$wa_app_url`settings/funnels/"
                     ],
                     [
-                        "icon" => "reasons",
+                        "icon" => "fa-list-ol",
                         "name" => "[`Deal loss reasons`]",
                         "uri" => "`$wa_app_url`settings/lostReasons/"
                     ],
                     [
-                        "icon" => "notifications",
+                        "icon" => "fa-envelope",
                         "name" => "[`Notifications`]",
                         "uri" => "`$wa_app_url`settings/notifications/"
                     ],
                     [
-                        "icon" => "webforms",
+                        "icon" => "fa-th",
                         "name" => "[`Web forms`]",
                         "uri" => "`$wa_app_url`settings/form/"
                     ],
                     [
-                        "icon" => "sources",
-                        "name" => "[`Deal sources`]",
-                        "uri" => "`$wa_app_url`settings/sources/"
+                        "icon" => "fa-at",
+                        "name" => "[`Email`]",
+                        "uri" => "`$wa_app_url`settings/message-sources/email/"
                     ],
                     [
-                        "icon" => "sms",
+                        "icon" => "fa-comment-alt",
+                        "name" => "[`Messengers`]",
+                        "uri" => "`$wa_app_url`settings/message-sources/im/"
+                    ],
+                    [
+                        "icon" => "fa-sms",
                         "name" => "[`SMS`]",
                         "uri" => "`$wa_app_url`settings/sms/"
                     ],
                     [
-                        "icon" => "phone",
+                        "icon" => "fa-phone-alt",
                         "name" => "[`PBX`]",
                         "uri" => "`$wa_app_url`settings/pbx/"
                     ]
@@ -106,7 +113,7 @@
 
                 {if $shop_app_exists}
                     {$_menu[] = [
-                        "icon" => "integration",
+                        "icon" => "fa-dollar-sign",
                         "name" => "[`Shop-Script integration`]",
                         "uri" => "`$wa_app_url`settings/shop/"
                     ]}
@@ -118,21 +125,23 @@
                     {$cron_indicator_icon = "<span class='error indicator inline'>!</span>"}
                 {/if}
                 {$_menu[] = [
-                    "icon" => "clock",
+                    "icon" => "fa-clock",
                     "name" => "[`Cron Jobs`] `$cron_indicator_icon`",
                     "uri" => "`$wa_app_url`settings/cron/",
                     "li_class" => "c-settings-sidebar-cron-job-item"
                 ]}
-
+                <div class="align-center custom-my-12 mobile-only">
+                    <button class="button small circle light-gray js-expand-sidebar"><i class="fas fa-arrow-right"></i></button>
+                </div>
                 <aside class="c-settings-sidebar" id="c-settings-sidebar">
-                    <ul class="menu-v stack with-icons" style="margin: 0;">
+                    <ul class="menu stack with-icons" style="margin: 0;">
                         {foreach $_menu as $_item}
                             <li class="{$_item.li_class|default:''}">
-                                <a href="{$_item.uri}">
+                                <a href="{$_item.uri}"{if !empty($alias) && $_item.uri == $alias} data-alias="{$alias}"{/if}>
                                     {if !empty($_item.icon)}
-                                        <i class="icon16 {$_item.icon}"></i>
+                                        <i class="fas {$_item.icon}"></i>
                                     {/if}
-                                    {$_item.name}
+                                    <span class="c-settings-sidebar-name">{$_item.name}</span>
                                 </a>
                             </li>
                         {/foreach}

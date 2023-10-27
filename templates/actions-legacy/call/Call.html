@@ -1,0 +1,303 @@
+{$_title = "[`Calls`]"}
+
+{$_is_admin = $wa->user()->isAdmin('crm')}
+<div class="c-call-page shadowed" id="c-call-page">
+    <header class="c-call-header">
+        <div class="c-layout">
+
+            <div class="c-column left">
+                <ul class="c-nav-wrapper menu-h dropdown">
+                    <li class="c-page-name"><h2>{$_title}</h2></li>
+                </ul>
+            </div>
+
+            <div class="c-column right">
+                <ul class="c-call-filter menu-h dropdown">
+                    <li class="c-call-filter-name">
+                        <a href="javascript:void(0);" class="inline-link">
+                            <b><i>{$active_filter_direction.name|escape}</b></i>
+                            <i class="icon10 darr"></i>
+                        </a>
+                        <ul class="menu-v right" style="width: 150px;">
+                            {foreach $filter_directions as $_filter_direction}
+                            <li style="padding-left: 8px;">
+                                <a href="{crmHelper::getUrl(["direction" => $_filter_direction.id, "page" => 1])}" style="padding-left: 8px;">
+                                <span>{$_filter_direction.name|escape}</span>
+                                </a>
+                            </li>
+                            {/foreach}
+                        </ul>
+                    </li>
+                    {if !empty($filter_states)}
+                    <li class="c-call-filter-name">
+                        <a href="javascript:void(0);" class="inline-link" style="color: {$active_filter_state.color|escape|default:"inherit"};">
+                            <b><i>{sprintf_wp($active_filter_state.name)|escape}</b></i>
+                            <i class="icon10 darr"></i>
+                        </a>
+                        <ul class="menu-v right" style="width: 150px;">
+                            {foreach $filter_states as $_filter_state}
+                            <li style="padding-left: 8px;">
+                                <a href="{crmHelper::getUrl(["status" => $_filter_state.id, "page" => null])}" style="padding-left: 8px;">
+                                <span style="color: {$_filter_state.color|escape|default:"inherit"};">{sprintf_wp($_filter_state.name)|escape}</span>
+                                </a>
+                            </li>
+                            {/foreach}
+                        </ul>
+                    </li>
+                    {/if}
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div class="c-call-body blank">
+        {if !empty($calls)}
+
+            {function name="_renderContact" _contact=[]}
+                <div class="c-user-wrapper">
+                    <div class="c-layout fixed">
+                        <div class="c-column c-column-image">
+                            {if ($_contact.is_visible)}
+                                <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top">
+                                    <img src="{$_contact.photo_url_32}" alt="{$_contact.name|escape}">
+                                </a>
+                            {else}
+                            <img src="{$_contact.photo_url_32}" alt="{$_contact.name|escape}">
+                            {/if}
+                        </div>
+                        <div class="c-column middle">
+                            {if ($_contact.is_visible)}
+                                <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" title="{$_contact.name|escape}">{$_contact.name|escape}</a>
+                            {else}
+                                {$_contact.name|escape}
+                            {/if}
+
+                            {* jobtitle *}
+                            {if !empty($_contact.jobtitle)}
+                                <span class="c-jobtitle hint">{$_contact.jobtitle|escape}</span>
+
+                                {if !empty($_contact.company)}
+                                    <span class="hint">@</span>
+                                    {if $_contact.company_contact_id > 0}
+                                        <a href="{$wa_app_url}contact/{$_contact.company_contact_id}/">{$_contact.company|escape}</a>
+                                    {else}
+                                        {$_contact.company|escape}
+                                    {/if}
+                                {/if}
+                            {/if}
+
+                            {*<div class="line">*}
+                                {*{if !empty($_contact.tags)}*}
+                                    {*{strip}*}
+                                        {*<ul class="c-tags-list">*}
+                                            {*{foreach $_contact.tags as $_tag}*}
+                                                {*<li>*}
+                                                    {*<a class="c-tag" href="{$wa_app_url}contact/tag/{$_tag.id}/">{$_tag.name|escape}</a>*}
+                                                {*</li>*}
+                                            {*{/foreach}*}
+                                        {*</ul>*}
+                                    {*{/strip}*}
+                                {*{/if}*}
+                            {*</div>*}
+
+                            {*{if !empty($_contact.role_label)}<span class="c-role-tag">{$_contact.role_label|escape}</span>{/if}*}
+                        </div>
+                    </div>
+                </div>
+            {/function}
+
+            <table class="zebra c-calls-table" id="js-calls-table">
+                <thead>
+                    <tr class="white">
+                        <td class="c-column-icon">
+                        </td>
+                        <td class="c-column-date">
+                            <span>[`Date`]</span>
+                        </td>
+                        <td class="c-column-phone">
+                            <span style="margin: 0 0 0 48px;">[`Phone`]</span>
+                        </td>
+                        <td class="c-column-state">
+                            <span>[`State`]</span>
+                        </td>
+                        <td class="c-column-duration"></td>
+                        <td class="c-column-client">
+                            <span>[`Client`]</span>
+                        </td>
+                        <td class="c-column-deal">
+                            <span>[`Deal`]</span>
+                        </td>
+                        <td class="c-column-user">
+                            <span>[`User`]</span>
+                        </td>
+                        <td class="c-column-actions"></td>
+                        <td class="c-column-actions"></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $calls as $_call}
+                        {$_client = false}
+                        {$_user = false}
+                        {$_deal = false}
+                        {$_state = false}
+
+                        {if !empty($_call.client_contact_id) && !empty($contacts[$_call.client_contact_id])}
+                            {$_client = $contacts[$_call.client_contact_id]}
+                        {/if}
+                        {if !empty($_call.user_contact_id) && !empty($contacts[$_call.user_contact_id])}
+                            {$_user = $contacts[$_call.user_contact_id]}
+                        {/if}
+                        {if !empty($_call.deal_id) && !empty($deals[$_call.deal_id])}
+                            {$_deal = $deals[$_call.deal_id]}
+                        {/if}
+                        {if !empty($_call.status_id)}
+                            {$_state = $states[$_call.status_id]}
+                        {/if}
+
+                        <tr class="c-call-wrapper" data-id="{$_call.id|escape}">
+                            <td class="c-column-icon">
+                                {if $_call.plugin_icon}
+                                    <i class="icon16" title="{$_call.plugin_name|escape}" style="background-image: url('{$_call.plugin_icon}'); background-size: 16px 16px;"></i>
+                                {/if}
+                            </td>
+                            <td class="c-column-date">
+                                {if !empty($_call.create_datetime)}
+                                    <span class="nowrap c-date">{$_call.create_datetime|wa_datetime}</span>
+                                {/if}
+                            </td>
+                            <td class="c-column-phone">
+                                <span class="nowrap" title="{if $_call.direction === "IN"}[`incoming`]{else}[`outgoing`]{/if}">
+                                    <i class="icon16 phone"></i>
+                                    <span>{$_call.user_number|escape|default:"[`unknown`]"}</span>
+                                </span>
+                                <span class="nowrap" title="{if $_call.direction === "IN"}[`incoming`]{else}[`outgoing`]{/if}">
+                                    <i class="icon16 {if $_call.direction === "IN"}call-in{else}call-out{/if}"></i>
+                                    {if !empty($_client) && !$contacts[$_call.client_contact_id]['is_visible']}
+                                        <small class="small">[`hidden phone number`]</small>
+                                    {else}
+                                        {$_call.client_number|escape|default:"[`unknown`]"}
+                                    {/if}
+                                </span>
+                            </td>
+                            <td class="c-column-state">
+                                {if !empty($_state)}
+                                    <span class="nowrap c-state" style="color: {$_state.color|escape|default:"inherit"};">{strip}
+                                        {sprintf_wp($_state.name)|escape}
+                                        {if $_state.id == "CONNECTED"}
+                                            <a href="javascript:void(0)" class="c-finish-call js-finish-call">
+                                                <i class="icon16 yes-bw" title="[`Finished`]"></i>
+                                                <i class="icon16 loading" style="display: none;"></i>
+                                            </a>
+                                        {/if}
+                                    {/strip}</span>
+                                {/if}
+                            </td>
+                            <td class="c-column-duration nowrap">
+                                <span class="c-duration">{crmHelper::formatSeconds($_call.duration)}</span>
+                                {crmHelper::getCallRecordLinkHtml($_call)}
+                            </td>
+                            <td class="c-column-client">
+                                <div class="c-single-line">
+                                    {if !empty($_client)}
+                                        {_renderContact _contact=$_client}
+                                    {else}
+                                        <a href="{$wa_app_url}contact/new/?call={$_call.id|default:""|escape}" class="small"><i class="icon10 add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i>[`Create or update contact`]</a>
+                                    {/if}
+                                </div>
+                            </td>
+                            <td class="c-column-deal">
+                                <div class="c-single-line">
+                                    {if !empty($_deal) && $_deal.is_visible}
+
+                                        <div class="c-deal-wrapper">
+                                            {$_funnel = $funnels[$_deal.funnel_id]|default:null}
+                                            {if $_funnel}
+                                                {$_stage = $_funnel.stages[$_deal.stage_id]|default:null}
+                                                {if $_stage}
+                                                    <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                                    <a href="{$wa_app_url}deal/{$_deal.id}/" title="{$_deal.name|escape}">{$_deal.name|escape}</a>
+                                                {else}
+                                                    <a href="{$wa_app_url}deal/{$_deal.id}/" title="{$_deal.name|escape}">{$_deal.name|escape}</a> <span class="hint">[`Stage deleted`]</span>
+                                                {/if}
+                                            {else}
+                                                <a href="{$wa_app_url}deal/{$_deal.id}/" title="{$_deal.name|escape}">{$_deal.name|escape}</a> <span class="hint">[`Funnel deleted`]</span>
+                                            {/if}
+                                        </div>
+                                    {elseif !empty($availble_funnels) && !empty($_client) && $contacts[$_call.client_contact_id]['is_visible'] && empty($_deal)}
+                                        <a href="javascript:void(0);" class="inline-link small js-associate-deal" data-dialog-url="{$wa_app_url}?module=call&action=associateDealDialog&call_id={$_call.id}"><i class="icon10 add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i><b><i>[`Associate with a deal`]</i></b></a>
+                                    {elseif !empty($_deal) && !$_deal.is_visible}
+                                        <span class="small">[`deal is hidden`]</span>
+                                    {/if}
+                                </div>
+                            </td>
+                            <td class="c-column-user">
+                                <div class="c-single-line">
+                                    {if !empty($_user)}{_renderContact _contact=$_user}{/if}
+                                </div>
+                            </td>
+                            <td class="c-column-actions">
+                                {if ifempty($_call.redirect_allowed)}
+                                    <a class="js-redirect-call" href="javascript:void(0);" title="[`Redirect call`]"><i class="icon16 rotate-right"></i></a>
+                                {/if}
+                            </td>
+                            <td class="c-column-actions">
+                                {if !empty($_is_admin)}
+                                    <div class="c-actions-wrapper">
+                                        {$_status_name = ""}{if !empty($_state)}{$_status_name = "<span style='color: {$_state.color|escape|default:"inherit"};'>{$_state.name}</span>"}{/if}
+                                        {$_direction = "[`to`]"}{if $_call.direction === "IN"}{$_direction = "[`from`]"}{/if}
+                                        {$_number = $_call.plugin_client_number|default:"[`unknown`]"}
+                                        {$_delete_confirm_title = sprintf("Delete %s call %s %s", $_status_name, $_direction, $_number)}
+
+                                        <a class="js-delete-call" href="javascript:void(0);" data-title="{$_delete_confirm_title|escape}" title="[`delete`]"><i class="icon16 delete"></i></a>
+                                    </div>
+                                {/if}
+                            </td>
+                        </tr>
+                    {/foreach}
+                </tbody>
+            </table>
+
+        {else}
+
+            <p class="block double-padded">
+                {if $pbx_plugins}
+                    [`No phone calls.`]
+                {else}
+                    [`No PBX plugins installed.`]<br><br>
+
+                    {sprintf_wp(
+                        'To handle phone calls in CRM, install and set up <a href="%s">IP telephony integration plugins</a>.',
+                        "`$wa_app_url`plugins/"
+                    )}
+
+                {/if}
+            </p>
+        {/if}
+
+        {$_url_params = ''}
+        {foreach waRequest::get() as $_k=>$_v}
+            {if $_k != '_' && $_k != 'page' && $_v}
+                {$_url_params = "`$_url_params`&`$_k`=`$_v`"}
+            {/if}
+        {/foreach}
+        {$_url_params = substr($_url_params, 1)}
+
+        {$wa->crm->pager($total_count|default:0, $page, $_url_params)}
+    </div>
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$_title|json_encode});
+
+            new CRMCallPage({
+                $wrapper: $("#c-call-page"),
+                call_ts: {if !empty($call_ts)}{$call_ts|json_encode}{else}false{/if},
+                numbers_assigned: {json_encode(!empty($numbers_assigned))},
+                locales: {
+                    delete_confirm_text: "[`Are you sure?`]",
+                    delete_confirm_button: "[`Delete`]"
+                }
+            });
+
+        })(jQuery);
+    </script>
+</div>

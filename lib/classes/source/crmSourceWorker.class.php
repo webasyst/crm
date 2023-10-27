@@ -46,7 +46,7 @@ abstract class crmSourceWorker
     {
         $sm = new waAppSettingsModel();
 
-        $sm->set('crm', 'source_worker_cli_start', date('Y-m-d H:i:s'));
+        $sm->set('crm', 'source_worker_start', date('Y-m-d H:i:s'));
 
         try {
             self::doAllSourcesWork($options);
@@ -59,7 +59,10 @@ abstract class crmSourceWorker
             waLog::log($message, self::$LOG_FILE);
         }
 
-        $sm->set('crm', 'source_worker_cli_end', date('Y-m-d H:i:s'));
+        $sm->set('crm', 'source_worker_end', date('Y-m-d H:i:s'));
+        if (wa()->getEnv() === 'cli') {
+            $sm->set('crm', 'source_worker_cli_done', date('Y-m-d H:i:s'));
+        }
 
         // temp table cleaning
         $tm = new crmTempModel();
@@ -69,7 +72,7 @@ abstract class crmSourceWorker
     public static function getLastCliRunDateTime()
     {
         $sm = new waAppSettingsModel();
-        return $sm->get('crm', 'source_worker_cli_end');
+        return $sm->get('crm', 'source_worker_cli_done');
     }
 
     public static function isCliOk()

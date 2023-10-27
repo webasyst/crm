@@ -48,12 +48,16 @@ var CRMSettingsPbxPage = ( function($) {
                 $number = $pair.find(".js-number"),
                 name = $name.html();
 
-            $.crm.confirm.show({
+            $.waDialog.confirm({
                 title: that.locales["delete_confirm_title"].replace("%name%", name).replace("%number%", $number.html()),
                 text: that.locales["delete_confirm_text"],
-                button: that.locales["delete_confirm_button"],
-                onConfirm: deleteUser
+                success_button_title: that.locales["delete_confirm_button"],
+                success_button_class: 'danger',
+                cancel_button_title: that.locales["dialog_error_button"],
+                cancel_button_class: 'light-gray',
+                onSuccess: deleteUser
             });
+
 
             function deleteUser() {
                 var user_id = $user.data("id");
@@ -149,6 +153,9 @@ var CRMSettingsPbxPage = ( function($) {
                         if (response.status === "ok") {
                             renderUser(user);
                         }
+                        else {
+                            showErrors(response.errors)
+                        }
                     }).always( function() {
                         is_locked = false;
                     });
@@ -158,7 +165,7 @@ var CRMSettingsPbxPage = ( function($) {
             function renderUser(user) {
                 var $user = $(that.user_template_html);
                 if (user["photo_url"]) {
-                    $user.find(".userpic20").css("background-image", "url(" + user["photo_url"] + ")");
+                    $user.find(".userpic i").css("background-image", "url(" + user["photo_url"] + ")");
                 }
                 $user.find(".js-name").text(user.name);
                 $user.data("id", user.id);
@@ -186,6 +193,18 @@ var CRMSettingsPbxPage = ( function($) {
             }, "json").always( function() {
                 $tr.removeClass('hidden');
             });
+        }
+
+        function showErrors(errors) {
+            $.each(errors, function (index, item) {
+                $.waDialog.alert({
+                    title: that.locales["dialog_error_title"],
+                    text: item,
+                    button_title: that.locales["dialog_error_button"],
+                    button_class: 'warning',
+                });
+                    setTimeout(()=> {$('.js-dialog-close').click();}, 5000)
+                })
         }
     };
 

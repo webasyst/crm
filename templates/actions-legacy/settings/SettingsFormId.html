@@ -1,0 +1,28 @@
+<div class="crm-form-page" id="crm-form-page">
+
+    <div class="block crm-form-content">
+        {include file="./SettingsFormConstructor.inc.html" inline}
+    </div>
+
+    {* dialog section *}
+    {include file="./SettingsFormFieldEdit.inc.html" inline}
+    {include file="./SettingsFormParagraphEdit.inc.html" inline}
+    {include file="./SettingsFormAgreementCheckboxEdit.inc.html" inline}
+
+    <script>
+        (function($) {
+            $.crm.title.set('[`Web forms`]');
+
+            new crmSettingsForm({
+                $wrapper: $("#crm-form-page"),
+                form: {$form|json_encode},
+                available_fields: {$available_fields|json_encode},
+                default_checked_fields: {$default_checked_fields|json_encode},
+                lang: '{substr($wa->locale(), 0, 2)}',
+                messages: {
+                    confirm_delete: "[`Are you sure delete this form?`]"
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

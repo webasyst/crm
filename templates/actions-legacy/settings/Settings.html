@@ -1,0 +1,167 @@
+{$title = "[`Settings`]"}
+
+<div class="c-settings-page shadowed" id="c-settings-page">
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$title|json_encode});
+        })(jQuery);
+    </script>
+
+    {capture assign="settings_content"}
+        <div class="c-column content bordered-left blank block double-padded">
+            {if isset($settings_html) && is_string($settings_html)}
+                {$settings_html}
+            {else}
+                {include file="$settings_template"}
+            {/if}
+        </div>
+    {/capture}
+
+
+    {if $is_admin}
+        <div class="c-layout">
+            <div class="c-column sidebar left250px">
+
+
+                {* SIDEBAR MENU ONLY FOR ADMIN *}
+
+                {$_menu = [
+                    [
+                    "icon" => "vaults",
+                    "name" => "[`Personal settings`]",
+                    "uri" => "`$wa_app_url`settings/"
+                    ],
+                    [
+                        "icon" => "general",
+                        "name" => "[`General settings`]",
+                        "uri" => "`$wa_app_url`settings/general/"
+                    ],
+                    [
+                        "icon" => "companies",
+                        "name" => "[`Companies`]",
+                        "uri" => "`$wa_app_url`settings/companies/"
+                    ],
+                    [
+                        "icon" => "templates",
+                        "name" => "[`Invoice templates`]",
+                        "uri" => "`$wa_app_url`settings/templates/"
+                    ],
+                    [
+                        "icon" => "currencies",
+                        "name" => "[`Currencies`]",
+                        "uri" => "`$wa_app_url`settings/currencies/"
+                    ],
+                    [
+                        "icon" => "payments",
+                        "name" => "[`Payment`]",
+                        "uri" => "`$wa_app_url`settings/payment/"
+                    ],
+                    [
+                        "icon" => "countries",
+                        "name" => "[`Countries & Regions`]",
+                        "uri" => "`$wa_app_url`settings/regions/"
+                    ],
+                    [
+                        "icon" => "vaults",
+                        "name" => "[`Vaults`]",
+                        "uri" => "`$wa_app_url`settings/vaults/"
+                    ],
+                    [
+                        "icon" => "constructor",
+                        "name" => "[`Field constructor`]",
+                        "uri" => "`$wa_app_url`settings/field/"
+                    ],
+                    [
+                        "icon" => "funnels",
+                        "name" => "[`Funnels`]",
+                        "uri" => "`$wa_app_url`settings/funnels/"
+                    ],
+                    [
+                        "icon" => "reasons",
+                        "name" => "[`Deal loss reasons`]",
+                        "uri" => "`$wa_app_url`settings/lostReasons/"
+                    ],
+                    [
+                        "icon" => "notifications",
+                        "name" => "[`Notifications`]",
+                        "uri" => "`$wa_app_url`settings/notifications/"
+                    ],
+                    [
+                        "icon" => "webforms",
+                        "name" => "[`Web forms`]",
+                        "uri" => "`$wa_app_url`settings/form/"
+                    ],
+                    [
+                        "icon" => "email-at",
+                        "name" => "[`Email`]",
+                        "uri" => "`$wa_app_url`settings/message-sources/email/"
+                    ],
+                    [
+                        "icon" => "messengers",
+                        "name" => "[`Messengers`]",
+                        "uri" => "`$wa_app_url`settings/message-sources/im/"
+                    ],
+                    [
+                        "icon" => "sms",
+                        "name" => "[`SMS`]",
+                        "uri" => "`$wa_app_url`settings/sms/"
+                    ],
+                    [
+                        "icon" => "phone",
+                        "name" => "[`PBX`]",
+                        "uri" => "`$wa_app_url`settings/pbx/"
+                    ]
+                ]}
+
+                {if $shop_app_exists}
+                    {$_menu[] = [
+                        "icon" => "integration",
+                        "name" => "[`Shop-Script integration`]",
+                        "uri" => "`$wa_app_url`settings/shop/"
+                    ]}
+                {/if}
+
+                {$cron_indicator_icon = ""}
+                {if !crmSourceWorker::isCliOk() || !crmNotificationBirthdayWorker::isCliOk() || !crmRemindersRecap::isCliOk()
+                    || !crmInvoice::isCliOk() || !crmDeal::isCliOk() || !crmShop::isCliOk()}
+                    {$cron_indicator_icon = "<span class='error indicator inline'>!</span>"}
+                {/if}
+                {$_menu[] = [
+                    "icon" => "clock",
+                    "name" => "[`Cron Jobs`] `$cron_indicator_icon`",
+                    "uri" => "`$wa_app_url`settings/cron/",
+                    "li_class" => "c-settings-sidebar-cron-job-item"
+                ]}
+
+                <aside class="c-settings-sidebar" id="c-settings-sidebar">
+                    <ul class="menu-v stack with-icons" style="margin: 0;">
+                        {foreach $_menu as $_item}
+                            <li class="{$_item.li_class|default:''}">
+                                <a href="{$_item.uri}"{if !empty($alias) && $_item.uri == $alias} data-alias="{$alias}"{/if}>
+                                    {if !empty($_item.icon)}
+                                        <i class="icon16 {$_item.icon}"></i>
+                                    {/if}
+                                    {$_item.name}
+                                </a>
+                            </li>
+                        {/foreach}
+                    </ul>
+                </aside>
+
+            </div>
+            {$settings_content}
+        </div>
+        <script>
+            ( function($) {
+                new CRMSettings({
+                    $wrapper: $("#c-settings-page"),
+                    $sidebar: $("#c-settings-sidebar")
+                });
+            })(jQuery);
+        </script>
+    {else}
+        {$settings_content}
+    {/if}
+
+</div>

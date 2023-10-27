@@ -20,13 +20,12 @@ class crmDealRenameController extends crmJsonController
         if ($deal['name'] !== $name) {
             $this->getDealModel()->updateById($deal['id'], array('name' => $name));
 
-            $action_id = 'deal_edit';
-            $this->logAction($action_id, array('deal_id' => $deal['id']));
+            $this->logAction(crmDealModel::LOG_ACTION_UPDATE, array('deal_id' => $deal['id']));
             $lm = new crmLogModel();
             $lm->log(
-                $action_id,
+                crmDealModel::LOG_ACTION_UPDATE,
                 $deal['id'] * -1,
-                null,
+                $deal['id'],
                 $deal['name'],
                 $name
             );

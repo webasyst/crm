@@ -32,7 +32,13 @@ class crmDealPersonUpdateController extends crmContactSaveController
             $action_id ='deal_contact_change';
             $this->logAction($action_id, array('deal_id' => $deal['id']));
             $lm = new crmLogModel();
-            $lm->log($action_id, $deal['id'] * -1, null, $before->getName(), $after->getName());
+            $lm->log(
+                $action_id,
+                $deal['id'] * -1,
+                $deal['id'],
+                $before->getName(),
+                $after->getName()
+            );
         }
         $after['label'] = ifset($participant['label']);
 

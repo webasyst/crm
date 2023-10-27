@@ -1,0 +1,133 @@
+{$ignore_operations = $ignore_operations|default:false}
+
+{strip}
+
+<ul class="c-user-thumbs-list js-contacts-list" id="c-users-list">
+    {foreach $contacts as $user}
+        {$_can_be_drag = true}
+        {$_user_uri = "`$wa_app_url`contact/`$user.id`/"}
+
+        {$_contact_classes = []}
+        {if $user.is_user >= 1}
+            {$_contact_classes[] = "js-move-user"}
+        {/if}
+        {if !empty($contact_max_id) && $user.id > $contact_max_id}
+            {$_contact_classes[] = "is-highlighted"}
+        {/if}
+        {if !empty($_can_be_drag)}
+            {$_contact_classes[] = "js-move-user"}
+        {/if}
+
+        <li class="c-user-wrapper js-contact-wrapper {$_contact_classes|join:" "}" data-user-id="{$user.id}" data-update-datetime="{$user.update_datetime|default:''}">
+            <div class="c-layout">
+                <div class="c-column c-column-checkbox">
+                    {if !$ignore_operations}
+                        <span class="c-checkbox">
+                            <input type="checkbox" class="js-checkbox" name="contact[]" value="{$user.id}">
+                        </span>
+                    {/if}
+                </div>
+                <div class="c-column c-column-image">
+                    <div class="c-userpic-wrapper">
+                        <a href="{$_user_uri}">
+                            <img class="c-userpic js-userpic" src="{$user.photo_url_50}">
+                        </a>
+                    </div>
+                </div>
+                <div class="c-column middle">
+
+                    <ul class="menu-v">
+                        <li>
+                            <h3 class="c-name">
+                                <a href="{$_user_uri}">
+                                <span class="wa-user-info">
+                                    <span class="user-name">
+                                        {$wa->crm->contactName($user.name)}
+                                    </span>
+                                    {if !empty($user._online_status) && $user._online_status == 'online'}
+                                        {$title = sprintf(_ws('%s is now online'), $user.name|escape)}
+                                        <i class="icon16 status-green-tiny" title="{$title}"></i>
+                                    {/if}
+                                </span>
+                                </a>
+                                {if !empty($user.company) && $user.is_company != 1}
+                                    <span class="c-company">{$user.company|escape}</span>
+                                {/if}
+                            </h3>
+                        </li>
+
+                        {if !empty($user.email)}
+                            <li>
+                                <ul class="menu-h">
+                                    {foreach $user.email as $_email}
+                                        <li>
+                                            <a href="mailto:{$_email|escape}">
+                                                <i class="icon16 email"></i>{$_email|escape}
+                                            </a>
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                            </li>
+                        {/if}
+                        {if !empty($user.phone_format)}
+                            <li>
+                                <ul class="menu-h">
+                                    {foreach $user.phone_format as $_phone}
+                                        <li>
+                                            <i class="icon16 phone"></i>{$_phone}
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                            </li>
+                        {/if}
+                        {if !empty($user.im)}
+                            <li>
+                                <ul class="menu-h">
+                                    {foreach $user.im as $_im}
+                                        <li>
+                                            <i class="icon16 {$_im.ext|escape}"></i>{$_im.value|escape}
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                            </li>
+                        {/if}
+                        {if !empty($user.address_format)}
+                            {foreach $user.address_format as $_address}
+                                <li class="user-address">
+                                    {$_address.address}&nbsp;<em class='hint'>{$_address.ext}</em>
+                                </li>
+                            {/foreach}
+                        {/if}
+                        {if !empty($user.tags)}
+                            <li>
+                                <ul class="menu-h c-tags-list">
+                                    {foreach $user.tags as $_tag}
+                                        <li>
+                                            <a class="c-tag" href="{$wa_app_url}contact/tag/{$_tag.id}/">{$_tag.name|escape}</a>
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                            </li>
+                        {/if}
+                    </ul>
+
+                </div>
+            </div>
+
+            <script>
+                ( function($) {
+                    new CRMThumbContact({
+                        $wrapper: $("#c-users-list .js-contact-wrapper[data-user-id=\"{$user.id}\"]"),
+                        can_be_drag: {if !empty($_can_be_drag)}true{else}false{/if}
+                    });
+                })(jQuery);
+            </script>
+        </li>
+    {/foreach}
+</ul>
+
+{if !$ignore_operations}
+    {include file="./Contact.list.operations.inc.html" inline}
+{/if}
+
+{/strip}

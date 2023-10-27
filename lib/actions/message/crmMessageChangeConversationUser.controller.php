@@ -50,9 +50,11 @@ class crmMessageChangeConversationUserController extends crmJsonController
             $this->getLogModel()->log(
                 $action_id,
                 $deal['id'] * -1,
-                null,
+                $deal['id'],
                 $before_user->getName(),
-                $after_user->getName()
+                $after_user->getName(),
+                null,
+                ['user_id_before' => $before_user->getId(), 'user_id_after' => $after_user->getId()]
             );
         }
 

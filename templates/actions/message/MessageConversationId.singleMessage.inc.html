@@ -1,0 +1,286 @@
+{$current_date = waDateTime::format('date')}
+
+{function name="_renderChatTime" _date='' }
+    {$message_date = waDateTime::format('date', $_date)}
+    {$now = time()}
+    {$your_date = strtotime($_date)}
+    {$datediff = round(($now - $your_date)  / (60 * 60 * 24))}
+    {$now_year = waDateTime::date('Y', $now)}
+    {$chat_date = substr($_date|wa_datetime:'humandatetime', 0, -5)}
+    {$chat_date = str_replace($now_year, '', $chat_date)}
+    {$week_day = date('N', $your_date)}
+
+    {if $datediff > 1 && $datediff < 6}
+        {$week_days = waDateTime::getWeekdayNames()}
+        {$chat_date =$week_days[$week_day]}
+    {/if}
+
+    {if $current_date != $message_date}
+        <div class="c-messages-date-wrapper hint align-center custom-py-8">
+            {$chat_date}
+        </div>
+    {/if}
+
+{/function}
+
+{function _renderMessageBody message = []}
+    {strip}
+        {if !empty($message.body_formatted)}
+            <!-- BODY FORMATTED -->
+            {$body_formatted = $message.body_formatted}
+            {elseif !empty($message.body_sanitized)}
+            <!-- BODY SANITIZED -->
+            {$body_formatted = $message.body_sanitized}
+        {else}
+            <!-- BODY -->
+            {$body_formatted = $message.body|escape|nl2br}
+        {/if}
+
+        <div class="c-message-body">
+            {$body_formatted}
+            {if !empty($message.caption)}
+                {$extra_caption = $message.caption}
+            {/if}
+            {if !empty($message.extras.images)}
+                {$extras_images = $message.extras.images}
+                <div class="c-message-body-images {if $message.extras|@count > 1 || isset($extra_caption) || !empty($message.attachments)}with-caption{/if}">
+                    {foreach $extras_images as $_image}
+                    {if isset($_image.id)}
+                        {$extra_link = "`$wa_app_url`?module=file&action=download&id=`$_image.id`"}
+                    {elseif isset($_image.url)}
+                        {$extra_link = $_image.url}
+                    {/if}
+                    <div class="c-message-body-image">
+                        <a href="{$extra_link}" target="_blank" class="js-disable-router" title="[`Download full-size version`]">
+                            <img class="crm-message-photo" src="{$extra_link}" style="max-width: 100%;">
+                        </a>
+
+                        {if isset($_image.comment)}
+                            <div>
+                                <p>{$_image.comment}</p>
+                            </div>
+                        {/if}
+                    </div>
+
+                    {/foreach}
+                </div>
+            {/if}
+            {if !empty($message.extras.audios)}
+                {$extras_audios = $message.extras.audios}
+                <div class="c-message-body-audios">
+                    {foreach $extras_audios as $_audio}
+                    {if isset($_audio.id)}
+                        {$extra_link = "`$wa_app_url`?module=file&action=download&id=`$_audio.id`"}
+                    {elseif isset($_audio.url)}
+                        {$extra_link = $_audio.url}
+                    {/if}
+                    <div class="c-message-body-audio">
+                        <audio controls="true" src="{$extra_link}">
+                        </audio>
+                    </div>
+                    {/foreach}
+                </div>
+            {/if}
+            {if !empty($message.extras.videos)}
+                {$extras_videos = $message.extras.videos}
+                <div class="c-message-body-videos">
+                    {foreach $extras_videos as $_video}
+                    {if isset($_video.id)}
+                        {$extra_link = "`$wa_app_url`?module=file&action=download&id=`$_video.id`"}
+                    {elseif isset($_video.url)}
+                        {$extra_link = $_video.url}
+                    {/if}
+                    <div class="c-message-body-video">
+                        <video controls="true" width="100%" src="{$extra_link}" playsinline>
+                        </video>
+                    </div>
+                    {/foreach}
+                </div>
+            {/if}
+            {if !empty($message.extras.locations) && isset($map)}
+                {$extras_locations = $message.extras.locations}
+                <div class="c-message-body-locations">
+                    {foreach $extras_locations as $_location}
+                    <div class="c-message-body-location">
+                        {if !empty($_location.point)}
+                        {$extras_loc_map = $_location.point}
+                        {elseif !empty($_location.address)}
+                        {$extras_loc_map = $_location.address}
+                        {/if}
+                        {if !empty($_location.title)}
+                            <div class="c-message-body-location--title">
+                            {$_location.title}
+                            </div>
+                        {/if}
+                        {if !empty($_location.address)}
+                            <div class="c-message-body-location--address hint">
+                            {$_location.address}
+                            </div>
+                        {/if}
+                        {$map->getHTML($extras_loc_map, ['width' => '100%', 'height' => '270px', 'zoom' => 16])}
+                    </div>
+                    {/foreach}
+                </div>
+            {/if}
+
+            {if !empty($message.extras.stickers)}
+                {$extras_stickers = $message.extras.stickers}
+                <div class="c-message-body-stickers">
+                    {foreach $extras_stickers as $_sticker}
+                    {if isset($_sticker.id)}
+                        {$extra_link = "`$wa_app_url`?module=file&action=download&id=`$_sticker.id`"}
+                    {elseif isset($_sticker.url)}
+                        {$extra_link = $_sticker.url}
+                    {/if}
+                    <div class="c-message-body-sticker">
+                        {if $_sticker.ext == 'tgs'}
+                        <tgs-player autoplay loop mode="normal" src="{$extra_link}" style="max-width: 100px">
+                        </tgs-player>
+                        {else}
+                        <a href="{$extra_link}" target="_blank" class="js-disable-router" title="[`Download full-size version`]">
+                            <img class="crm-telegram-plugin-photo" src="{$extra_link}" style="max-width: 100px">
+                        </a>
+                        {/if}
+                    </div>
+                    {/foreach}
+                </div>
+            {/if}
+            {if isset($extra_caption)}
+                <div class="c-message-body-caption">
+                    {$extra_caption}
+                </div>
+            {/if}
+        </div>
+    {/strip}
+{/function}
+
+
+{$current_user_id = $wa->userId()}
+{if $message.transport == 'EMAIL'}
+    {_renderChatTime _date = $message.create_datetime}
+    {$message_date = waDateTime::format('date', $message.create_datetime)}
+    {$current_date = $message_date}
+    {$is_another_user = ($message.direction == 'OUT' && $message.creator_contact_id !== $current_user_id)}
+    <div class="c-message-wrapper js-message-wrapper {if $message.direction == 'IN'}left{else}right{/if}" data-id="{$message.id}">
+        <div class="fields c-message-item {if $message.direction == 'IN'}c-message-in{else}c-message-out{/if} {if $is_another_user}another-user{/if}">
+            <div class="c-message-tail">
+                <svg width="13" height="18" viewBox="0 0 13 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M4.4379 17.0078C4.4379 17.0078 4.70548 9.45488 4.13562 5.87589C3.79545 3.73945 2.30345 2.05672 1.15597 1.04732C0.778405 0.715178 1.00664 0.0465164 1.5065 0.101429C3.67696 0.339867 7.49978 1.09173 10.7859 3.45844C15.6976 6.99592 4.4379 17.0078 4.4379 17.0078Z" fill="white"/>
+                </svg>
+            </div>
+            <div class="flexbox middle nowrap space-8 c-message-header">
+                {if $is_another_user}
+                    <span class="flexbox middle space-4 c-contact">
+                        {$message.from|escape}
+                    </span>
+                {/if}
+
+                {if !empty($message.create_datetime)}
+                    <span class="nowrap c-date hint">
+                        {$message.create_datetime|wa_datetime:'time'}
+                    </span>
+                {/if}
+                <span class="icon cursor-pointer hint js-open-detail-message" data-dialog-url="{$wa_app_url}?module=message&action=bodyDialog&message_id={$message.id}"><i class="fas fa-envelope-open-text"></i></span>
+            </div>
+
+            <div class="c-message-body">
+                {$message.body_sanitized}
+                {*strip_tags($message.subject)|escape*}
+            </div>
+
+            {if $message.attachments}
+                <div class="c-message-attachments">
+                    <ul class="menu c-restored-list c-attachments-list">
+                        {foreach $message.attachments as $a}
+                        {if isset($a.id)}
+                            {$file_link = "?module=file&action=download&id=`$a.id`"}
+                        {elseif isset($a.url)}
+                            {$file_link = $a.url}
+                        {/if}
+                            <li>
+                                <a class="js-disable-router" href="{$file_link}">
+                                    <span class="attachments-icon"><svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3.31445 19.1816H12.6836C14.5732 19.1816 15.5488 18.1885 15.5488 16.29V8.30957C15.5488 7.0791 15.3906 6.5166 14.626 5.73438L10.0293 1.06738C9.28223 0.311523 8.66699 0.135742 7.55957 0.135742H3.31445C1.43359 0.135742 0.449219 1.12891 0.449219 3.03613V16.29C0.449219 18.1885 1.43359 19.1816 3.31445 19.1816ZM3.46387 17.4238C2.62012 17.4238 2.19824 16.9844 2.19824 16.1758V3.1416C2.19824 2.3418 2.62012 1.89355 3.47266 1.89355H7.19922V6.6748C7.19922 7.94922 7.82324 8.56445 9.08887 8.56445H13.7998V16.1758C13.7998 16.9844 13.3779 17.4238 12.5254 17.4238H3.46387ZM9.25586 7.02637C8.88672 7.02637 8.72852 6.86816 8.72852 6.50781V2.12207L13.5625 7.02637H9.25586ZM11.0928 10.8672H4.74707C4.41309 10.8672 4.17578 11.1045 4.17578 11.4121C4.17578 11.7285 4.41309 11.9746 4.74707 11.9746H11.0928C11.4092 11.9746 11.6465 11.7285 11.6465 11.4121C11.6465 11.1045 11.4092 10.8672 11.0928 10.8672ZM11.0928 13.8027H4.74707C4.41309 13.8027 4.17578 14.0488 4.17578 14.3652C4.17578 14.6729 4.41309 14.9102 4.74707 14.9102H11.0928C11.4092 14.9102 11.6465 14.6729 11.6465 14.3652C11.6465 14.0488 11.4092 13.8027 11.0928 13.8027Z" fill="#8E8E93"/>
+                                        </svg></span>
+                                        <span class="attachments-name" title="{$a.name|escape}">{$a.name|escape}</span>
+                                </a>
+                                <span class="c-size hint">{crmHelper::formatFileSize($a.size)}</span>
+                            </li>
+                        {/foreach}
+                    </ul>
+                </div>
+            {/if}
+        </div>
+    </div>
+{elseif $message.transport == 'IM'}
+    {_renderChatTime _date = $message.create_datetime}
+    {$message_date = waDateTime::format('date', $message.create_datetime)}
+    {$current_date = $message_date}
+    {$_contact_name = null}
+    {$is_another_user = ($message.direction == 'OUT' && $message.creator_contact_id !== $current_user_id)}
+    {if $is_another_user}
+        {if isset($message.from_formatted)}
+            {$_contact_name = $message.from_formatted}
+        {else}
+            {$_contact_name = $message.from|escape}
+        {/if}
+    {/if}
+
+    <div class="c-message-wrapper js-message-wrapper {if $message.direction == 'IN'}left{else}right{/if}" data-id="{$message.id}">
+        <div class="fields c-message-item {if $message.direction == 'IN'}c-message-in{else}c-message-out{/if} {if $is_another_user}another-user{/if}">
+            <div class="c-message-tail">
+                <svg width="13" height="18" viewBox="0 0 13 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M4.4379 17.0078C4.4379 17.0078 4.70548 9.45488 4.13562 5.87589C3.79545 3.73945 2.30345 2.05672 1.15597 1.04732C0.778405 0.715178 1.00664 0.0465164 1.5065 0.101429C3.67696 0.339867 7.49978 1.09173 10.7859 3.45844C15.6976 6.99592 4.4379 17.0078 4.4379 17.0078Z" fill="white"/>
+                </svg>
+            </div>
+            <div class="flexbox middle nowrap space-8 c-message-header">
+                {if !empty($_contact_name)}
+                <span class="flexbox middle space-4 c-contact">
+                    {$_contact_name}
+                </span>
+                {/if}
+                {if !empty($message.create_datetime)}
+                <span class="nowrap c-date hint">{$message.create_datetime|wa_datetime:'time'}</span>
+                {/if}
+            </div>
+
+            {_renderMessageBody message = $message}
+
+            {if $message.attachments}
+                <div class="c-message-attachments">
+                    <ul class="menu c-restored-list c-attachments-list">
+                        {foreach $message.attachments as $a}
+                        {if isset($a.id)}
+                            {$file_link = "?module=file&action=download&id=`$a.id`"}
+                        {elseif isset($a.url)}
+                            {$file_link = $a.url}
+                        {/if}
+                        {if isset($a.name)}
+                            {assign var="clean_file_name" value=$a.name|escape}
+                            {assign var="offset_last_dot" value=$clean_file_name|strrpos:"."}
+                            {if $offset_last_dot !== False}
+                                {assign var="name_without_ext" value=$clean_file_name|substr:0:($offset_last_dot)}
+                            {else}
+                                {assign var="name_without_ext" value=$clean_file_name}
+                            {/if}
+                        {/if}
+
+                            <li>
+                                <a class="js-disable-router" href="{$file_link}">
+                                    <span class="attachments-icon"><svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3.31445 19.1816H12.6836C14.5732 19.1816 15.5488 18.1885 15.5488 16.29V8.30957C15.5488 7.0791 15.3906 6.5166 14.626 5.73438L10.0293 1.06738C9.28223 0.311523 8.66699 0.135742 7.55957 0.135742H3.31445C1.43359 0.135742 0.449219 1.12891 0.449219 3.03613V16.29C0.449219 18.1885 1.43359 19.1816 3.31445 19.1816ZM3.46387 17.4238C2.62012 17.4238 2.19824 16.9844 2.19824 16.1758V3.1416C2.19824 2.3418 2.62012 1.89355 3.47266 1.89355H7.19922V6.6748C7.19922 7.94922 7.82324 8.56445 9.08887 8.56445H13.7998V16.1758C13.7998 16.9844 13.3779 17.4238 12.5254 17.4238H3.46387ZM9.25586 7.02637C8.88672 7.02637 8.72852 6.86816 8.72852 6.50781V2.12207L13.5625 7.02637H9.25586ZM11.0928 10.8672H4.74707C4.41309 10.8672 4.17578 11.1045 4.17578 11.4121C4.17578 11.7285 4.41309 11.9746 4.74707 11.9746H11.0928C11.4092 11.9746 11.6465 11.7285 11.6465 11.4121C11.6465 11.1045 11.4092 10.8672 11.0928 10.8672ZM11.0928 13.8027H4.74707C4.41309 13.8027 4.17578 14.0488 4.17578 14.3652C4.17578 14.6729 4.41309 14.9102 4.74707 14.9102H11.0928C11.4092 14.9102 11.6465 14.6729 11.6465 14.3652C11.6465 14.0488 11.4092 13.8027 11.0928 13.8027Z" fill="#8E8E93"/>
+                                        </svg></span>
+                                        <div class="flexbox wrap attachments-name">
+                                            <div class="attachments-name--name">{$name_without_ext}</div>
+                                            <span>.{$a.ext}</span>
+                                        </div>
+                                </a>
+                                <span class="c-size hint">{crmHelper::formatFileSize($a.size)}</span>
+                            </li>
+                        {/foreach}
+                    </ul>
+                </div>
+            {/if}
+        </div>
+    </div>
+{/if}

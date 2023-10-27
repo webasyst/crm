@@ -125,7 +125,7 @@ var CRMSettingsSourceResponsibleBlock = ( function($) {
     CRMSettingsSourceResponsibleBlock.prototype.reload = function (data, afterReload) {
         var that = this,
             $user_info = this.$user_info,
-            $loading = $('<i class="icon16 loading"></i>'),
+            $loading = $('<span class="icon loading"><i class="fas fa-spinner fa-spin"></i></span>'),
             url = that.url;
 
         if ($user_info.is(':visible')) {

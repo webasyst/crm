@@ -2,6 +2,8 @@
 
 class crmReminderModel extends crmModel
 {
+    const POP_UP_MIN = 10;  // minutes;
+
     protected $table = 'crm_reminder';
 
     protected $link_contact_field = array('creator_contact_id', 'contact_id', 'user_contact_id');
@@ -140,7 +142,7 @@ class crmReminderModel extends crmModel
         $pop_up_min = wa()->getUser()->getSettings('crm', 'reminder_pop_up_min');
 
         if ($pop_up_min < 1) {
-            $pop_up_min = 10;
+            $pop_up_min = self::POP_UP_MIN;
         }
 
             $begin_date = date('Y-m-d H:i:s');

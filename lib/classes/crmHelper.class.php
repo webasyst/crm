@@ -252,18 +252,26 @@ class crmHelper
 
     public static function getReminderState($reminder, $ignore_completed = false)
     {
+        $state = 'normal';
         if ($reminder['complete_datetime'] && !$ignore_completed) {
-            $reminder['state'] = 'completed';
-        } elseif ($reminder['due_date'] < date('Y-m-d') || ($reminder['due_datetime'] && $reminder['due_datetime'] < date('Y-m-d H:i:s'))) {
-            $reminder['state'] = 'overdue';
-        } elseif ($reminder['due_date'] == date('Y-m-d') && (!$reminder['due_datetime'] || $reminder['due_datetime'] >= date('Y-m-d H:i:s'))) {
-            $reminder['state'] = 'burn';
-        } elseif ($reminder['due_date'] == date('Y-m-d', strtotime('+1 day'))) {
-            $reminder['state'] = 'actual';
-        } else {
-            $reminder['state'] = 'normal';
+            $state = 'completed';
+        } elseif (!empty($reminder['due_date'])) {
+            if (
+                $reminder['due_date'] < date('Y-m-d')
+                || ($reminder['due_datetime'] && $reminder['due_datetime'] < date('Y-m-d H:i:s'))
+            ) {
+                $state = 'overdue';
+            } elseif (
+                $reminder['due_date'] == date('Y-m-d')
+                && (!$reminder['due_datetime'] || $reminder['due_datetime'] >= date('Y-m-d H:i:s'))
+            ) {
+                $state = 'burn';
+            } elseif ($reminder['due_date'] == date('Y-m-d', strtotime('+1 day'))) {
+                $state = 'actual';
+            }
         }
-        return $reminder['state'];
+
+        return $state;
     }
 
     public static function getDealReminderState($reminder_datetime)
@@ -301,18 +309,7 @@ class crmHelper
      */
     public static function formatFileSize($file_size)
     {
-        $_kb = 1024;
-        $_mb = 1024 * $_kb;
-        if ($file_size <= $_kb) {
-            $file_size = $file_size._w(' B');
-        } else {
-            if ($file_size > $_kb && $file_size < $_mb) {
-                $file_size = round($file_size / $_kb)._w(' KB');
-            } else {
-                $file_size = round($file_size / $_mb, 1)._w(' MB');
-            }
-        }
-        return $file_size;
+        return waFiles::formatSize($file_size, '%d');
     }
 
     /**
@@ -607,6 +604,10 @@ class crmHelper
             $call = reset($calls);
         }
 
+        if (empty($call['record_attrs'])) {
+            return '';
+        }
+
         $attrs = $call['record_attrs'];
         $attrs['id'] = 'c-call-record-'.$call['id'];
         $attrs['title'] = _w('Listen to the recorded conversation');
@@ -614,7 +615,9 @@ class crmHelper
         foreach ($attrs as $key => $value) {
             $attrs[$key] = $key.'="'.htmlspecialchars($value).'"';
         }
-        return '<a '.join(' ', $attrs).'><i class="icon16 play"></i></a>';
+        //$icon = (wa()->whichUI() === '2.0') ? '<i class="fas fa-play"></i>' : '<i class="icon16 play"></i>';
+        $icon = '<i class="icon16 play"></i>';
+        return '<a '.join(' ', $attrs).'>'.$icon.'</a>';
     }
 
     /**

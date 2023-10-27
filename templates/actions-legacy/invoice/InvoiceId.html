@@ -1,0 +1,275 @@
+{$_title = '[`Invoice`]'}
+
+{$invoice.contact = $contact}
+
+<div class="c-invoice-page" id="c-invoice-page" data-id="{$invoice.id}">
+
+    <div class="c-layout">
+        <div class="c-column">
+            <h1 class="c-page-header">
+                [`Invoice`] [`#`]{$invoice.number|escape} [`issued on`] {$invoice.invoice_date|wa_date}
+
+                <!-- plugin hook: 'invoice_info.title_suffix' -->
+                {* @event backend_invoice.%plugin_id%.title_suffix *}
+                {if !empty($backend_invoice)}{foreach $backend_invoice as $_}{ifset($_.title_suffix)}{/foreach}{/if}
+            </h1>
+        </div>
+
+            <div class="c-column middle right">
+                <ul class="menu-h">
+                    <li>
+                        <a class="inline-link " href="{$wa_app_url}invoice/new/{$invoice.id}/" data-action="copy"><i class="icon16 notebooks"></i><b><i>[`Create copy`]</i></b></a>
+                    </li>
+                    {if $invoice.state_id == 'DRAFT' || $invoice.state_id == 'PENDING'}
+                        <li>
+                            <a class="inline-link js-disable-router" href="{$wa_app_url}invoice/{$invoice.id}/edit/" data-action="edit"><i class="icon16 edit"></i><b><i>[`Edit`]</i></b></a>
+                        </li>
+                    {/if}
+                    {if $invoice.state_id == 'PENDING'}
+                        <li>
+                            <a class="inline-link js-change-state" href="javascript:void(0);" data-action="archive"><i class="icon16 archive"></i><b><i>[`Archive`]</i></b></a>
+                        </li>
+                    {elseif $invoice.state_id == 'DRAFT'}
+                        <li>
+                            <a class="inline-link js-delete-invoice" href="javascript:void(0);" data-action="delete"><i class="icon16 delete"></i><b><i>[`Delete`]</i></b></a>
+                        </li>
+                    {/if}
+                    {if $invoice.state_id == 'ARCHIVED'}
+                        <li>
+                            <a class="js-restore-invoice inline-link" href="javascript:void(0);"><i class="icon16 archive-text"></i><b><i>[`Restore`]</i></b></a>
+                        </li>
+                    {/if}
+                </ul>
+            </div>
+    </div>
+
+    <div class="c-details-wrapper">
+        <div class="field-group">
+            <div class="field">
+                <div class="name">[`Created at`]</div>
+                <div class="value">{$invoice.create_datetime|wa_datetime}</div>
+            </div>
+            {if !empty($invoice.due_date)}
+                <div class="field">
+                    <div class="name">[`Valid through`]</div>
+                    <div class="value">{$invoice.due_date|wa_date}</div>
+                </div>
+                {if !crmInvoice::isCliOk()}
+                    <div class="crm-invoices-recap-error" style="margin: 10px 0;">
+                        {include file="templates/actions-legacy/settings/SettingsCronInvoicesArchive.inc.html" inline}
+                    </div>
+                {/if}
+            {/if}
+            <div class="field">
+                <div class="name">[`State`]</div>
+                <div class="value">
+                    {$_state = crmInvoice::getState($invoice.state_id)}
+                    <span class="c-state {strtolower($invoice.state_id)}">{$_state.name|escape|default:$invoice.state_id}</span>
+                </div>
+            </div>
+
+            {if !empty($invoice.creator_contact)}
+                {$_contact = $invoice.creator_contact}
+                {$_exists = $_contact->exists()}
+                {$_userpic = $_contact->getPhoto(32)}
+                {$_contact_name = $wa->crm->contactName($_contact.name)}
+
+                <div class="field">
+                    <div class="name">[`Created by`]</div>
+                    <div class="value">
+                        <div class="c-profile-block c-layout">
+                            {if !empty($_userpic)}
+                                <div class="c-column middle c-column-image">
+                                    {if $_exists}
+                                        <a href="{$wa_app_url}contact/{$_contact.id}/" title="{$_contact_name}">
+                                            <img src="{$_userpic}" class="userpic">
+                                        </a>
+                                    {else}
+                                        <img src="{$_userpic}" class="userpic">
+                                    {/if}
+                                </div>
+                            {/if}
+                            <div class="c-column middle">
+                                {if $_exists}
+                                    <a href="{$wa_app_url}contact/{$_contact.id}/" title="{$_contact_name}">{$_contact_name}</a>
+                                {else}
+                                    <span>{$_contact_name}</span>
+                                {/if}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+
+            {if $show_url}
+                <div class="field">
+                    <div class="name">[`Public link`]</div>
+                    <div class="value">
+                        {if !empty($public_url)}
+                            <a href="{$public_url}" class="small" target="_blank">
+                                <i class="icon10 new-window"></i>
+                                {$public_url}
+                            </a>
+                        {else}
+                            <i class="icon16 exclamation"></i>
+                            [`A CRM settlement is required to publish invoices.`]
+                            <a href="{$wa_backend_url}site/#/routing/">
+                                [`Use Site app to add a settlement for CRM.`]
+                            </a>
+                        {/if}
+                    </div>
+                </div>
+            {/if}
+        </div>
+
+        <div class="field-group">
+
+            <div class="field">
+                <div class="name">[`Company`]</div>
+                <div class="value">{ifempty($invoice.company.name, $invoice.company_id)|escape}</div>
+            </div>
+
+            <div class="field">
+                <div class="name">[`Client`]</div>
+                <div class="value">
+
+                    {$_exists = $contact->exists()}
+                    {$_userpic = $contact->getPhoto(32)}
+                    {$_contact_name = $wa->crm->contactName($contact.name)}
+
+                    <div class="c-profile-block c-layout">
+                        {if !empty($_userpic)}
+                            <div class="c-column middle c-column-image">
+                                {if $_exists}
+                                    <a href="{$wa_app_url}contact/{$contact.id}/">
+                                        <img src="{$_userpic}" class="userpic">
+                                    </a>
+                                {else}
+                                    <img src="{$_userpic}" class="userpic">
+                                {/if}
+                            </div>
+                        {/if}
+                        <div class="c-column middle">
+                            {if $_exists}
+                                <a href="{$wa_app_url}contact/{$contact.id}/">{$_contact_name}</a>
+                            {else}
+                                <span>{$_contact_name}</span>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {if $deal}
+            <div class="field">
+                <div class="name">[`Deal`]</div>
+                <div class="value">
+                    <a href="{$wa_app_url}deal/{$deal.id}/">{$deal.name|escape}</a>
+                </div>
+            </div>
+        {elseif $deal_access_denied}
+            <div class="field">
+                <div class="value hint">
+                    [`Deal not shown due to access rights restrictions.`]
+                </div>
+            </div>
+        {/if}
+        </div>
+
+        <div class="field-group">
+            <div class="field">
+                <div class="name">[`Amount`]</div>
+                <div class="value">
+                    <span class="c-amount">{$invoice.amount|wa_format_amount_currency:$invoice.currency_id}</span>
+                </div>
+            </div>
+
+            {if $invoice.state_id == 'PAID'}
+                <div class="field">
+                    <div class="name">[`Payment date`]</div>
+                    <div class="value">
+                        {$invoice.payment_datetime|wa_date}
+                    </div>
+                </div>
+            {/if}
+        </div>
+
+        {if $transactions}
+            <div class="field-group">
+                <h4 class="heading">[`Payment transactions`]</h4>
+                <table class="c-transactions-table zebra">
+                    {foreach $transactions as $_t}
+                        {$_classes = ["c-transaction"]}
+                        {if $_t.state === "DECLINED"}
+                            {$_classes[] = "is-declined"}
+                        {elseif ($_t.state) === "CAPTURED"}
+                            {$_classes[] = "is-captured"}
+                        {elseif ($_t.state) === "CANCELED"}
+                            {$_classes[] = "is-canceled"}
+                        {elseif ($_t.state) === "REFUNDED"}
+                            {$_classes[] = "is-refunded"}
+                        {elseif ($_t.state) === "AUTH"}
+                            {$_classes[] = "is-auth"}
+                        {/if}
+
+                        <tr class="{$_classes|join:" "}">
+                            <td>{$_t.create_datetime|wa_datetime}</td>
+                            <td>{ifempty($plugins[$_t.plugin].name, $_t.plugin)|escape}</td>
+                            <td>{$_t.amount|wa_format_amount_currency:$_t.currency_id}</td>
+                            <td>{$_t.view_data|escape}</td>
+                            <td>{$_t.state|escape}</td>
+                        </tr>
+                    {/foreach}
+                </table>
+            </div>
+        {/if}
+
+        <!-- plugin hook: 'backend_invoice.info_section' -->
+        {* @event backend_invoice.%plugin_id%.info_section *}
+        {if !empty($backend_invoice)}{foreach $backend_invoice as $_}{ifset($_.info_section)}{/foreach}{/if}
+
+    </div>
+
+    <footer class="c-footer-actions">
+
+        {$_disabled = false}
+        {$_contact = $invoice.contact}
+        {$_exists = $_contact->exists()}
+        {$_disabled = !$_exists}
+
+        {if $invoice.state_id == 'PROCESSING'}
+            <input class="button green js-change-state" type="button" value="[`Accept payment`]" data-action="accept" {if $_disabled}disabled="disabled"{/if}>
+            <input class="button gray js-change-state" type="button" value="[`Refuse payment`]" data-action="refuse" {if $_disabled}disabled="disabled"{/if}>
+        {elseif $invoice.state_id == 'PAID'}
+            <input class="button red js-change-refund" type="button" value="[`Refund`]" data-action="refund" {if $_disabled}disabled="disabled"{/if}>
+            {if $is_cancel_available}
+                <input class="button gray js-change-state" type="button" value="[`Cancel payment`]" data-action="cancel" {if $_disabled}disabled="disabled"{/if}>
+            {/if}
+        {elseif $invoice.state_id == 'PENDING'}
+            <input class="button green js-change-state" type="button" value="[`Mark as paid`]" data-action="paid" {if $_disabled}disabled="disabled"{/if}>
+            <input class="button gray js-change-state" type="button" value="[`Return to draft`]" data-action="draft" {if $_disabled}disabled="disabled"{/if}>
+        {elseif $invoice.state_id == 'DRAFT' && floatval($invoice.amount)}
+            <input class="button green js-change-state" type="button" value="[`Activate`]" data-action="activate" {if $_disabled}disabled="disabled"{/if}>
+        {/if}
+
+        <!-- plugin hook: 'backend_invoice.action_button' -->
+        {* @event backend_invoice.%plugin_id%.action_button *}
+        {if !empty($backend_invoice)}{foreach $backend_invoice as $_}{ifset($_.action_button)}{/foreach}{/if}
+    </footer>
+
+    <script>
+        ( function($) {
+            new CRMInvoicePage({
+                $wrapper: $("#c-invoice-page"),
+                invoice_id: {$invoice.id|json_encode},
+                locales: {
+                    delete_confirm_title: "[`Delete invoice`] [`#`]{$invoice.number|escape}",
+                    delete_confirm_text: "[`Invoice deletion cannot be undone.`]",
+                    delete_confirm_button: "[`Delete`]"
+                }
+            });
+        })(jQuery);
+    </script>
+</div>
+
+{include file="../frontend/FrontendInvoice.html" is_include=true inline}

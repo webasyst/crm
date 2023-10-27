@@ -3,35 +3,45 @@
 <div class="c-payment-page" id="c-payment-page">
     {if !empty($error)}
         {* ERRORS *}
-        <h1><a href="{$_back_uri}" class="back">&larr;&nbsp;{$company.name|escape}</a>&nbsp;[`Error`]</h1>
+        <a href="{$_back_uri}" class="back">&larr;&nbsp;{$company.name|escape}</a>
+        <h1>&nbsp;[`Error`]</h1>
         <span class="errormsg">{$error|escape}</span>
     {else}
-        <form>
+        <form class="c-payment-page-edit">
             {* HEADER *}
-            <header>
-                {if isset($instance.status) && !empty($instance.id)}
-                    <div class="block half-padded float-right">
-                        <ul class="menu-h with-icons">
-                            <li><a href="javascript:void(0);" class="js-delete-payment"><i class="icon16 delete"></i>[`Delete this payment option`]</a></li>
-                        </ul>
-                    </div>
-                {/if}
-
-                <h1><a href="{$_back_uri}" class="back">&larr;&nbsp;{$company.name|escape}</a>&nbsp;{$instance.name|escape}</h1>
+            <header class="custom-mb-16">
+                <div class="flexbox middle full-width">
+                    <a href="{$_back_uri}" class="back">&larr;&nbsp;{$company.name|escape}</a>
+                    {if isset($instance.status) && !empty($instance.id)}
+                        <div class="flexbox middle">
+                            <button href="javascript:void(0);" class="red outlined small js-delete-payment"><i class="fas fa-times-circle delete"></i> [`Delete this payment option`]</button>
+                        </div>
+                    {/if}
+                </div>
+                <h1>{$instance.name|escape}</h1>
             </header>
 
             {* CONTENT *}
-            <section>
+            <section class="fields custom-mb-20">
                 <!-- GENERAL PAYMENT OPTION PARAMS -->
-                <div class="field-group">
+                <div class="fields-group">
                     <div class="field">
                         <div class="name">
                             <label for="s-payment-plugin-status">[`Enabled`]</label>
                         </div>
                         <div class="value">
+                        <label>
                             <input name="payment[id]" type="hidden" value="{$plugin_id|escape}">
                             <input name="payment[plugin]" type="hidden" value="{$instance.plugin|escape}">
-                            <input name="payment[status]" type="checkbox"{if !empty($instance.status)} checked="checked"{/if} id="s-payment-plugin-status" value="1">
+                            <span class="wa-checkbox">
+                                <input name="payment[status]" type="checkbox"{if !empty($instance.status)} checked="checked"{/if} id="s-payment-plugin-status" value="1">
+                                       <span>
+                                        <span class="icon">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    </span>
+                            </span>
+                        </label>
                         </div>
                     </div>
                     <div class="field">
@@ -49,7 +59,7 @@
                         <div class="value">
                             <input name="payment[logo]" type="text" class="long" value="{$instance.logo|default:''|escape}" id="s-payment-plugin-logo">
                             {if !empty($instance.logo)}<img src="{$instance.logo}"  class="s-payment-shipping-logo float-right">{/if}
-                            <p class="hint">{sprintf('[`A collection of payment option icons is available for free: <a href="%s" target="_blank">%s</a> <i class="icon10 new-window"></i>`]','[`https://support.webasyst.com/27128/crm-payment-methods-icons/`]','[`https://support.webasyst.com/27128/crm-payment-methods-icons/`]')}</p>
+                            <p class="hint">{sprintf('[`A collection of payment option icons is available for free at <a href="%s" target="_blank">%s</a>  <i class="fas fa-external-link-alt new-window"></i>`]','[`https://support.webasyst.com/27128/crm-payment-methods-icons/`]','[`https://support.webasyst.com/27128/crm-payment-methods-icons/`]')}</p>
                         </div>
                     </div>
                     <div class="field">
@@ -76,13 +86,13 @@
 
                 <!-- CUSTOM PAYMENT MODULE PARAMS -->
                 {if !empty($payment_html)}
-                    <div class="field-group">
+                    <div class="fields-group custom-payment-html">
                         {$payment_html}
                     </div>
                 {/if}
 
                 {if !empty($guide_html)}
-                    <div class="field-group">
+                    <div class="fields-group custom-guide-html">
                         {$guide_html}
                     </div>
                 {/if}
@@ -90,9 +100,8 @@
 
             {* FOOTER *}
             <footer class="c-footer-actions js-footer">
-                <input type="submit" class="button green" value="[`Save`]">
-                <span style="margin: 0 4px;">[`or`]</span>
-                <a href="{$_back_uri}" class="inline-link"><b><i>[`cancel`]</i></b></a>
+                <input type="submit" class="button yellow" value="[`Save`]">
+                <a href="{$_back_uri}" class="button light-gray"> [`Cancel`]</a>
             </footer>
 
             <input name="payment[company_id]" type="hidden" value="{$company.id}">
@@ -109,8 +118,9 @@
                         confirm_delete_title: "[`Delete`] {if !empty($instance.name)}{$instance.name|escape}{/if}",
                         confirm_delete_text: "[`This will permanently delete this payment option. Are you sure?`]",
                         confirm_delete_button: "[`Delete`]",
-                        saving: '<span class="c-hint"><i class="icon16 loading"></i> [`saving`]...</span>',
-                        saved: '<span class="c-hint"><i class="icon16 yes"></i> [`saved`]</span>'
+                        confirm_cancel_button: " [`Cancel`]",
+                        saving: '<span class="c-hint"> <i class="fas fa-spinner fa-spin loading"></i> [`saving`]...</span>',
+                        saved: '<span class="c-hint"> <i class="fas fa-check-circle"></i> [`saved`]</span>'
                     }
                 });
             })(jQuery);

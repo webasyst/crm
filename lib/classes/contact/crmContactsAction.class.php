@@ -724,3 +724,4 @@ abstract class crmContactsAction extends crmContactViewAction
     }
 
 }
+

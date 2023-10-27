@@ -138,10 +138,13 @@ class crmEmailSourceWorkerIncomingStrategy extends crmEmailSourceWorkerStrategy
         if ($conversation) {
             $conversation_id = $conversation['id'];
         } else {
-            $conversation_id = $this->createConversation($contact, $message['subject'], $deal);
+            $conversation_id = $this->createConversation($contact, $message, $deal);
         }
         $mm = new crmMessageModel();
         $mm->addToConversation($message, $conversation_id);
+        
+        $message['conversation_id'] = $conversation_id;
+        (new crmPushService)->notifyAboutMessage($contact, $message, $conversation);
     }
 
     protected function findConversation(crmContact $contact, $deal)

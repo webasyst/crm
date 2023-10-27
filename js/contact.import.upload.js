@@ -203,7 +203,7 @@ var crmContactImportUpload = (function ($) {
 
             var url = $.crm.app_url + '?module=contactOperation&action=AddToSegments';
             $.get(url, function (html) {
-                var dialog = new CRMDialog({
+                var dialog = $.waDialog({
                     html: html,
                     onOpen: function ($dialog) {
                         new CRMContactsOperationAddToSegments({
@@ -243,6 +243,7 @@ var crmContactImportUpload = (function ($) {
         that.$wrapper = options['$wrapper'];
         that.$form = that.$wrapper.find('form');
         that.processId = null;
+        that.requests = 0;
         that.$loading = that.$wrapper.find('.crm-loading');
         that.timer = null;
         that.messages = options.messages || {};
@@ -259,57 +260,79 @@ var crmContactImportUpload = (function ($) {
             $form = that.$form;
 
         var step = function () {
+            that.timer && clearTimeout(that.timer);
+            that.timer = setTimeout(step, 3000 + (Math.random() - 0.5) * 400);
+            if (!that.processId || that.requests >= 2) {
+                return;
+            }
             $.get(that.url, { processid: that.processId, t: Math.random() },
                 function (response) {
-
-                    that.timer && clearTimeout(that.timer);
-                    that.timer = null;
+                    that.requests--;
 
                     var $progress_bar_val = that.$progress_bar.find('.ui-progressbar-value');
                     $progress_bar_val.stop();
                     $progress_bar_val.clearQueue();
 
-                    if (response.ready) {
-                        that.processId = null;
-
-                        $progress_bar_val.animate({ width: '100%' }, {
+                    if (!that.processId || !response.ready) {
+                        $progress_bar_val.animate({ width: ""+Math.round( response.done * 100.0 / response.total ) + '%' }, {
                             duration: 500,
-                            complete: function () {
-
-                                // tell server to remove temporary files
-                                $.post(that.url, { processid: that.processId, file: 1 }, 'json');
-
-                                if (response.rowsRejected > 0) {
-                                    if (response.rowsAdded <= 0) {
-                                        alert(that.messages.no_imported);
-                                    } else {
-                                        alert(that.messages.some_imported);
-                                    }
-                                } else {
-                                    alert(that.messages.all_imported);
-                                }
-
-                                if (response.rowsAdded > 0) {
-                                    location.href = $.crm.app_url + 'contact/import/result/' + response.timeStart + '/';
-                                } else {
-                                    location.href = $.crm.app_url + 'contact/import/';
-                                }
-                            },
                             queue: false
                         });
 
                         return;
                     }
 
-                    $progress_bar_val.animate({ width: ""+Math.round( response.done * 100.0 / response.total ) + '%' }, {
+                    // Stop sending messengers
+                    var pid = that.processId;
+                    if (!pid) {
+                        return; // race condition is still possible, but not really dangerous
+                    }
+
+                    that.timer && clearTimeout(that.timer);
+                    that.timer = null;
+
+                    $progress_bar_val.animate({ width: '100%' }, {
                         duration: 500,
+                        complete: function () {
+
+                            // tell server to remove temporary files
+                            $.post(that.url, { processid: that.processId, file: 1 }, 'json');
+                            
+                            let alert_text = '';
+
+                            if (response.rowsRejected > 0) {
+                                if (response.rowsAdded <= 0) {
+                                    alert_text = that.messages.no_imported;
+                                } else {
+                                    alert_text = that.messages.some_imported;
+                                }
+                            } else {
+                                alert_text = that.messages.all_imported;
+                            }
+
+                            function redirectFunction() {
+                                if (response.rowsAdded > 0) {
+                                    location.href = $.crm.app_url + 'contact/import/result/' + response.timeStart + '/';
+                                } else {
+                                    location.href = $.crm.app_url + 'contact/import/';
+                                }
+                            }
+
+                            $.waDialog.alert({
+                                text: alert_text,
+                                button_title: that.messages.button,
+                                button_class: 'gray',
+                                onClose: redirectFunction
+                            });
+
+                        },
                         queue: false
                     });
 
-                    that.timer = setTimeout(step, 3000 + (Math.random() - 0.5) * 400);
-
                 },
-                'json');
+                'json'
+            );
+            that.requests++;
         };
 
         $.post(that.url, $form.serializeArray(), function (data) {

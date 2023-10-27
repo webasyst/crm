@@ -1,0 +1,23 @@
+<div class="crm-operations-wrapper js-operations-wrapper">
+    <div class="crm-checkbox-wrapper">
+        <input class="crm-checkbox crm-checkbox-all js-checkbox-all" type="checkbox">
+    </div>
+    <ul class="crm-operations-list menu-h">
+        {$operations = [
+            ['id' => 'add_to_segments', 'icon' => 'add-to-list', 'name' => '[`Add to segments`]'],
+            ['id' => 'export', 'icon' => 'export', 'name' => '[`Export`]'],
+            ['id' => 'merge', 'icon' => 'merge', 'name' => '[`Merge`]'],
+            ['id' => 'delete', 'icon' => 'delete', 'name' => '[`Delete`]'],
+            ['id' => 'exclude_from_list', 'icon' => 'no-bw', 'name' => '[`Exclude from the list`]'],
+            ['id' => 'remove_from_selected_list', 'icon' => 'no-bw', 'name' => '[`Exclude from the list`]'],
+            ['id' => 'assign_tags', 'icon' => 'tags', 'name' => '[`Tags`]'],
+            ['id' => 'assign_responsible', 'icon' => 'user', 'name' => '[`Set the owner`]']
+        ]}
+
+        {foreach $operations as $op}
+            {if $op.id !== 'merge' || $is_admin || $merge_rights }
+                <li class="crm-operation-li" data-id="{$op.id}"{if $op.id == 'remove_from_selected_list'}style="display:none"{/if}><a href="javascript:void(0);" class="crm-operation-link" data-id="{$op.id}"><i class="icon16 {$op.icon}"></i> {$op.name} <span class="crm-count">(1)</span></a></li>
+            {/if}
+        {/foreach}
+    </ul>
+</div>

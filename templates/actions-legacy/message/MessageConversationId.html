@@ -1,0 +1,459 @@
+{$_contact = [
+    'id'   => null,
+    'name' => '[`Deleted contact`]'
+]}
+{if !empty($contacts[$conversation.contact_id])}
+    {$_contact = $contacts[$conversation.contact_id]}
+{/if}
+{$_sender = $contacts[$wa->userId()]}
+
+{$page = waRequest::get('pt', null, waRequest::TYPE_INT)}
+{if $page && $page != 1}{$_page = "?page=`$page`"}{else}{$_page = ''}{/if}
+
+{function name="_renderFromContact" _contact=[]}
+    {if isset($_contact.id)}
+        <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" class="c-contact-link {if !empty($_is_bold)}bold{/if}">
+            <i class="icon16 userpic20" style="background-image: url({$_contact.photo_url_16});" title="{$_contact.name|escape}"></i>{$_contact.name|escape}
+        </a>
+        {if isset($_m.from_formatted)}
+            {$_m.from_formatted}
+        {elseif !empty($_m.from)}
+            <span style="color: #999">&lt;{$_m.from|escape}&gt;</span>
+        {/if}
+    {else}
+        {* TODO: if not $contact.id how we displaying $contact.name? :o *}
+        {$_contact.name|escape}&nbsp;
+        {if !empty($_m.from)}
+            <span style="color: #999">&lt;{$_m.from|escape}&gt;</span>
+        {/if}
+    {/if}
+{/function}
+
+{function name="_renderRecipient" _contact=[]}
+    {if !empty($_contact.name)}
+        {if !empty($_contact.contact_id)}
+            <a href="{$wa_app_url}contact/{$_contact.contact_id}/" target="_top" class="c-contact-link">
+                {if !empty($_contact.photo)}<i class="icon16 userpic20" style="background-image: url({$_contact.photo});" title="{$_contact.name|escape}"></i>{/if}
+                {$_contact.name|escape}
+            </a>
+        {else}
+            {$_contact.name|escape}
+        {/if}
+    {/if}
+
+    {if !empty($_contact.destination)}
+        <span style="color: #999;">&lt;{$_contact.destination|escape}&gt;</span>
+    {elseif !empty($_contact.email)}
+        <span style="color: black;">&lt;{$_contact.email|escape}&gt;</span>
+    {/if}
+{/function}
+
+{function _renderMessageBody message=[]}
+    {strip}
+        {if !empty($message.body_formatted)}
+            <!-- BODY FORMATTED -->
+            {$body_formatted = $message.body_formatted}
+        {elseif !empty($message.body_sanitized)}
+            <!-- BODY SANITIZED -->
+            {$body_formatted = $message.body_sanitized}
+        {else}
+            <!-- BODY -->
+            {$body_formatted = $message.body|escape|nl2br}
+        {/if}
+        <div class="c-message-body">{$body_formatted|default:'[`no message text`]'}</div>
+    {/strip}
+{/function}
+
+<div class="c-message-conversation-page shadowed" id="js-message-conversation-page">
+    {strip}
+    <header class="c-page-header-section">
+        <div class="c-layout">
+            <div class="c-column">
+                <ul class="c-nav-wrapper">
+                    <li>
+                        {$_deal_id = $wa->get('deal_id')}
+                        {if $_deal_id}
+                            <a class="bold js-back-link" href="{$wa_app_url}deal/{$_deal_id}/">&larr; [`Back`]</a>
+                        {else}
+                            <a class="bold js-back-link" href="{$wa_app_url}message/{$_page}">&larr; [`Back`]</a>
+                        {/if}
+                    </li>
+                    <li>
+                        <div class="c-header">{$conversation.summary|escape}</div>
+                    </li>
+                    {if $conversation.type == 'IM'}
+                        <li>
+                            {if $conversation.icon_url}
+                                <i class="icon16 userpic20" style="background-image: url({$conversation.icon_url});"></i>
+                            {else}
+                                <i class="icon16 {$conversation.icon}"></i>
+                            {/if}
+                            {$conversation.transport_name|escape}
+                        </li>
+                    {/if}
+                </ul>
+            </div>
+            <div class="c-column right">
+                <ul class="c-nav-wrapper">
+                    {if $wa->user()->isAdmin('crm') || !$conversation['user_contact_id'] || $conversation['user_contact_id'] == $wa->user()->getId()}
+                        <li>
+                            <a class="inline-link js-delete-conversation" href="javascript:void(0);">
+                                <i class="icon16 delete"></i>[`Delete conversation`]
+                            </a>
+                        </li>
+                    {/if}
+                </ul>
+            </div>
+        </div>
+    </header>
+    {/strip}
+
+    <div class="c-conversation-body">
+        <header class="c-conversation-header-wrapper">
+            <div class="c-conversation-header js-conversation-header">
+                <div class="c-layout">
+                    <div class="c-column c-column-back" style="display: none;">
+                        <a class="c-nav-item bold" href="{$wa_app_url}message/{$_page}">&larr; [`Back`]</a>
+                    </div>
+                    {if $conversation.type == 'IM'}
+                        <div class="c-column c-column-plugin" style="display: none;">
+                            {if $conversation.icon_url}
+                                <i class="icon16 userpic20" style="background-image: url({$conversation.icon_url});"></i>
+                            {else}
+                                <i class="icon16 {$conversation.icon}"></i>
+                            {/if}
+                            {$conversation.transport_name|escape}
+                        </div>
+                    {/if}
+                    <div class="c-column">
+                        {if !empty($contacts[$conversation.contact_id])}
+                            {include file="../message/MessageConversationContact.inc.html" _contact=$contacts[$conversation.contact_id] inline}
+                        {/if}
+
+                        {if $deal}
+                            {if $deal.stage_id && isset($funnel.stages[$deal.stage_id])}
+                                {$_stage = $funnel.stages[$deal.stage_id]}
+                            {else}
+                                {$_stage = null}
+                            {/if}
+
+                            <div class="c-conversation-deal js-conversation-deal">
+                                {if $_stage}
+                                   <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color|escape}" title="{$funnel.name|escape} / {$_stage.name|escape}"></i>
+                                {/if}
+
+                                {if $deal.status_id == "WON"}
+                                    <span class="c-state-wrapper is-won">
+                                        <span class="c-state">
+                                            <span class="c-status">[`WON`]</span> {if !empty($deal.closed_datetime)}<span class="hint">{$deal.closed_datetime|wa_datetime}</span>{/if}
+                                        </span>
+                                    </span>
+                                {elseif $deal.status_id == "LOST"}
+                                    <span class="c-state-wrapper is-lost">
+                                        <span class="c-state">
+                                            <span class="c-status">[`LOST`]</span> {if !empty($deal.closed_datetime)}<span class="hint">{$deal.closed_datetime|wa_datetime}</span>{/if}
+                                        </span>
+                                    </span>
+                                {else}
+                                    {if $_stage}
+                                        <span class="c-state-wrapper" {if !empty($_stage.color)}style="background-color: {$_stage.color};"{/if}>
+                                            <span class="c-state">{$_stage.name|escape}</span>
+                                        </span>
+                                    {else}
+                                        <span class="hint">[`Stage deleted`]</span>
+                                    {/if}
+                                {/if}
+
+                                <a href="{$wa_app_url}deal/{$deal.id}/" class="js-deal-link">{strip_tags($deal.name)|escape}</a>
+
+                                {if $can_edit_conversation}
+                                    <div class="c-actions-wrapper">
+                                        <span class="c-change-toggle js-attach-other-deal" title="[`Attach to another deal`]">
+                                            <i class="icon16 edit"></i>
+                                        </span>
+                                        <span class="c-change-toggle js-detach-deal" title="[`Detach from deal`]">
+                                            <i class="icon16 close"></i>
+                                        </span>
+                                    </div>
+                                {/if}
+                            </div>
+                        {elseif !empty($contacts[$conversation.contact_id]) && !empty($clean_data.deal)}
+                            <div class="c-conversation-deal">
+                                {include file="./MessageConversation.dealSelector.inc.html"
+                                    deal=$clean_data.deal|default:[]
+                                    funnels=$clean_data.funnels|default:[]
+                                    stages=$clean_data.stages|default:[]
+                                    show_save_button=true
+                                inline}
+                            </div>
+                        {/if}
+                    </div>
+                    <div class="c-column right">
+                        <div class="js-responsible-wrapper">
+                            {if !empty($conversation.user_contact_id) && !empty($contacts[$conversation.user_contact_id])}
+                                {include file="../message/MessageConversationContact.inc.html" _contact=$contacts[$conversation.user_contact_id] _type="responsible" inline}
+                            {/if}
+                        </div>
+                        <div class="c-responsible-empty-wrapper js-responsible-empty-wrapper{if !empty($contacts[$conversation.user_contact_id])} hidden{/if}">
+                            <div class="c-visible">
+                                <a class="inline-link js-set-extended" href="javascript:void(0);"><b><i>[`Set the owner`]</i></b></a>
+                            </div>
+                            <div class="c-hidden">
+                                <div style="margin: 0 0 6px;">[`Set the owner`]</div>
+                                <input class="js-responsible-empty-autocomplete" placeholder="[`User name`]" />
+                                <span style="margin: 0 4px;">[`or`]</span>
+                                <a class="inline-link js-unset-extended" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {if $conversation.type == 'EMAIL'}
+            <section class="c-email-conversation-section" id="js-email-conversation-section">
+                <div class="c-messages-list js-messages-list">
+                    {foreach $messages as $_m}
+                        <div class="c-message-wrapper js-message-wrapper" data-id="{$_m.id}">
+                            <div class="c-message-item">
+
+                                <h2 class="c-message-subject">{strip_tags($_m.subject)|escape}</h2>
+
+                                <header class="c-message-header">
+                                    <div class="field">
+                                        <div class="name">[`From`]:</div>
+                                        <div class="value">
+                                            {if !empty($contacts[$_m.creator_contact_id])}
+                                                {_renderFromContact _contact=$contacts[$_m.creator_contact_id] _is_bold=true}
+                                            {else}
+                                                {$_m.from|escape}
+                                            {/if}
+                                        </div>
+                                    </div>
+
+                                    {if !empty($_m.recipients.to)}
+                                        <div class="field">
+                                            <div class="name">[`To`]:</div>
+                                            <div class="value">
+                                                <ul class="menu-v c-restored-list c-to-list">
+                                                    {foreach $_m.recipients.to as $_recipient}
+                                                        <li>{_renderRecipient _contact=$_recipient}</li>
+                                                    {/foreach}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    {/if}
+
+                                    {if !empty($_m.recipients.cc)}
+                                        <div class="field">
+                                            <div class="name">[`Copy`]:</div>
+                                            <div class="value">
+                                                <ul class="menu-v c-restored-list c-copy-list">
+                                                    {foreach $_m.recipients.cc as $_recipient}
+                                                        <li>{_renderRecipient _contact=$_recipient}</li>
+                                                    {/foreach}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    {/if}
+
+                                    {if !empty($_m.recipients.bcc)}
+                                        <div class="field">
+                                            <div class="name">[`BCC`]:</div>
+                                            <div class="value">
+                                                <ul class="menu-v c-restored-list c-copy-list">
+                                                    {foreach $_m.recipients.bcc as $_recipient}
+                                                        <li>{_renderRecipient _contact=$_recipient}</li>
+                                                    {/foreach}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    {/if}
+                                </header>
+
+                                <div class="c-message-body">{$_m.body_sanitized}</div>
+
+                                {if $_m.attachments}
+                                    <div class="c-message-attachments">
+                                        <ul class="menu-v c-restored-list c-attachments-list">
+                                            {foreach $_m.attachments as $a}
+                                                <li>
+                                                    <a class="js-disable-router" href="?module=file&action=download&id={$a.id}">
+                                                        <i class="icon16 attachment"></i>{$a.name|escape}
+                                                    </a>
+                                                    <span class="c-size hint">{crmHelper::formatFileSize($a.size)}</span>
+                                                </li>
+                                            {/foreach}
+                                        </ul>
+                                    </div>
+                                {/if}
+
+                                <div class="c-message-actions">
+                                    {if !empty($_m.create_datetime)}
+                                        <span class="c-text-item">
+                                            {if $_m.direction === "IN"}
+                                                <i class="icon16 import" title="[`incoming`]"></i>
+                                            {else}
+                                                <i class="icon16 message-out" title="[`outgoing`]"></i>
+                                            {/if}
+                                            {$_m.create_datetime|wa_datetime}
+                                        </span>
+                                    {/if}
+
+                                    {if $_m.transport === "EMAIL" || $_m.transport === "SMS"}
+                                        {if $conversation.contact_id && !empty($contacts[$conversation.contact_id])}
+
+                                            <a class="js-message-reply" href="javascript:void(0);" title="[`Reply`]" data-message-id="{$_m.id|escape}"><i class="icon16 rotate-left"></i></a>
+                                        {/if}
+                                        {if $_m.transport === "EMAIL"}
+                                            <a class="js-message-forward" href="javascript:void(0);" title="[`Forward message`]" data-message-id="{$_m.id|escape}"><i class="icon16 rotate-right"></i></a>
+                                        {/if}
+                                    {/if}
+
+                                    {if $_m.original}
+                                        <a class="js-disable-router" href="?module=file&action=downloadEml&id={$_m.id}" title="[`Download original`]"><i class="icon16 download"></i></a>
+                                    {/if}
+                                </div>
+                            </div>
+                        </div>
+                    {/foreach}
+                </div>
+
+                {if $conversation.contact_id && !empty($contacts[$conversation.contact_id])}
+                    <section class="c-reply-section">
+                        <div class="c-reply-form-wrapper js-reply-wrapper">
+
+                            {include file="./MessageConversationId.replyEmail.inc.html" inline}
+
+                        </div>
+                    </section>
+                {/if}
+            </section>
+
+        {elseif $conversation.type == 'IM'}
+            <section class="c-im-conversation-section" id="js-im-conversation-section">
+                <div class="c-messages-list js-messages-list">
+                    {foreach $messages as $_m}
+                        {if isset($_m.from_formatted)}
+                            {$_contact_name = $_m.from_formatted}
+                        {else}
+                            {$_contact_name = $_m.from|escape}
+                        {/if}
+                        {if !empty($contacts[$_m.creator_contact_id])}
+                            {capture assign=_contact_name}{_renderFromContact _contact=$contacts[$_m.creator_contact_id]}{/capture}
+                        {/if}
+
+                        <div class="c-message-wrapper js-message-wrapper {if $_m.direction == 'IN'}left{else}right{/if}" data-id="{$_m.id}">
+                            <div class="c-message-item {if $_m.direction == 'IN'}c-message-in{else}c-message-out{/if}">
+                                <div class="c-message-header">
+                                    <span class="c-contact">{$_contact_name}</span>
+                                    {if !empty($_m.create_datetime)}
+                                        <span class="nowrap c-date hint">{$_m.create_datetime|wa_datetime}</span>
+                                    {/if}
+                                </div>
+
+                                {_renderMessageBody message=$_m}
+
+                                {if $_m.attachments}
+                                    <div class="c-message-attachments">
+                                        <ul class="menu-v c-restored-list c-attachments-list">
+                                            {foreach $_m.attachments as $a}
+                                                <li>
+                                                    <a class="js-disable-router" href="?module=file&action=download&id={$a.id}">
+                                                        <i class="icon16 attachment"></i>{$a.name|escape}
+                                                    </a>
+                                                    <span class="c-size hint">{crmHelper::formatFileSize($a.size)}</span>
+                                                </li>
+                                            {/foreach}
+                                        </ul>
+                                    </div>
+                                {/if}
+                            </div>
+                        </div>
+                    {/foreach}
+                </div>
+
+                {if $conversation.contact_id && !empty($contacts[$conversation.contact_id])}
+                    <section class="c-reply-section">
+                        <div class="c-reply-form-wrapper js-reply-wrapper">
+                            {* RENDER OVERLOADED REPLY FORM *}
+                            {if !empty($conversation.reply_form_html)}
+                                {$conversation.reply_form_html}
+
+                            {* RENDER DEFAULT REPLY FORM *}
+                            {elseif isset($conversation.source.id)}
+                                <form action="">
+                                    <div class="line">
+                                        <textarea class="c-textarea js-textarea" name="body" placeholder="[`Write an answer`]"></textarea>
+                                    </div>
+                                    {* Hidden fields *}
+                                    <input name="deal_id" type="hidden" value="{$conversation.deal_id|default:"none"}" class="js-field js-deal-id">
+                                    <input name="message_id" value="{$conversation.conversation_last_message.id|escape}" type="hidden">
+                                    <input name="contact_id" value="{$_contact.id|escape}" type="hidden">
+                                    <input name="email" value="{$_contact.email[0].value|escape}" type="hidden" class="js-to-email">
+                                    <input name="name" value="" type="hidden" class="js-to-new-name">
+                                    <input name="sender_email" value="{$_sender.email[0].value|escape}" type="hidden" class="js-sender-email">
+                                    <input name="source_email" value="" type="hidden">
+                                    <input name="hash" value="{$hash|default:""}" type="hidden">
+
+                                    {*
+                                    <div class="c-invisible line c-form-actions">
+                                        <div class="c-layout">
+                                            <div class="c-column middle"></div>
+                                            <div class="c-column middle right">
+                                                <input class="button green js-save-button" type="submit" value="[`Reply`]">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    *}
+                                </form>
+                                <script>
+                                    ( function($) {
+                                        new CRMImConversationSection({
+                                            $wrapper: $("#js-im-conversation-section .js-reply-wrapper"),
+                                            send_action_url: {$send_action_url|default:''|json_encode}
+                                        });
+                                    })(jQuery);
+                                </script>
+                            {else}
+                                <div class="c-reply-form-error">[`Source not found`]</div>
+                            {/if}
+                        </div>
+                    </section>
+                {/if}
+            </section>
+        {/if}
+    </div>
+
+    <script>
+        (function ($) {
+            $.crm.title.set("[`Conversation with`] {$_contact.name|escape}");
+
+            {$_locales = [
+                "delete_conversation_title"     => {_w("Delete conversation")},
+                "delete_conversation_button"    => {_w("Delete")},
+                "remove_owner_title"            => {_w("Remove owner")},
+                "remove_owner_text"             => {_w("Remove owner <strong>%s</strong> from the conversation?")},
+                "remove_owner_button"           => {_w("Remove")},
+                "deal_empty"                    => {_w("Empty")},
+                "deal_create"                   => {_w("Create deal")},
+                "deal_select"                   => {_w("Select deal")},
+                "deal_add"                      => {_w("Add deal")},
+                "deal_detach_title"             => {_w("Detach from deal")},
+                "deal_detach_text"              => {_w("Are you sure you want to detach this conversation from the deal “<strong>%s</strong>”?")},
+                "deal_detach_confirm_button"    => {_w("Detach")},
+                "funnel_deleted"                => {_w("Funnel deleted")}
+            ]}
+
+            new CRMMessageConversationPage({
+                $wrapper: $("#js-message-conversation-page"),
+                conversation_id: {$conversation.id},
+                funnel_id: {$funnel.id|default:0},
+                contact_id: {$_contact.id|default:0},
+                last_message_id: {$last_id|default:0},
+                check_interval: {if $conversation.type == 'EMAIL'}300000{else}20000{/if},
+                locales: {$_locales|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

@@ -1,0 +1,96 @@
+{$class_id = 'crm-contact-operation-delete-wrapper'}
+{$wrapper_id = uniqid($class_id)}
+
+{$linked_contacts_count = count($linked_contacts)}
+{$free_contacts_count = count($free_contacts)}
+{$total_count = $linked_contacts_count + $free_contacts_count}
+
+
+<div class="crm-dialog-wrapper {$class_id}" id="{$wrapper_id}">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>{sprintf(_w('Delete contacts (%d)'), $total_count)}</h1>
+            <p>
+                {if $total_count > 0}
+                    [`Contact deletion cannot be undone.`]
+                {else}
+                    [`You have no access rights to delete selected contacts.`]
+                {/if}
+            </p>
+        </header>
+        <div class="crm-dialog-content">
+
+            {if $linked_contacts_count > 0}
+                <p>
+                    <strong style="color:red;">[`IMPORTANT NOTE:`]</strong>
+                    {if $free_contacts_count == 0}
+                        [`All selected contacts have links to other applications.`]
+                    {else}
+                        {sprintf(_w('%d of %d selected contacts shown below have links to other applications.'), $linked_contacts_count, $total_count)}
+                    {/if}
+                    {if !$is_super_admin}
+                        [`Deletion of these contacts is allowed to Administrator only.`]
+                    {else}
+                        [`After deletion of these contacts other applications will refer to not existing contacts.`]
+                    {/if}
+                </p>
+
+                <table class="zebra full-width">
+                    {foreach $linked_contacts as $id => $contact}
+                        {if $is_super_admin}
+                            {foreach $contact.links as $app_id => $app_links}
+                                {foreach $app_links as $link}
+                                    <tr>
+                                        <td class="min-width">
+                                            <i class="icon16 userpic20" style="background-image: url('{wa_backend_url()}?action=photo&id={$id}&size=20');"></i>
+                                        </td>
+                                        <td>{$contact.name|escape}</td>
+                                        <td>{$apps[$app_id].name}/{$link.role|truncate:50|escape}</td>
+                                        <td>
+                                            {_w("%d link", "%d links", $link.links_number)}
+                                        </td>
+                                    </tr>
+                                {/foreach}
+                            {/foreach}
+                        {else}
+                            <tr>
+                                <td class="min-width"><img src="{wa_backend_url()}?action=photo&id={$id}&size=20" width="20" height="20"></td>
+                                <td>{$contact.name|escape}</td>
+                            </tr>
+                        {/if}
+                    {/foreach}
+                </table>
+
+            {/if}
+
+        </div>
+        <footer class="crm-dialog-footer">
+            {if !$is_super_admin && $free_contacts_count == 0}
+                <input class="button gray js-close-dialog" type="button" value="[`Close`]">
+            {else}
+                {if !$is_super_admin && $linked_contacts_count > 0}
+                    <input class="button red crm-delete" type="button" value="{sprintf(_w('Delete %d of %d selected'), $free_contacts_count, $total_count)}">
+                {else}
+                    <input class="button red crm-delete" type="button" value="[`Delete anyway`]">
+                {/if}
+                <i class="icon16 loading crm-loading" style="display: none; margin-top: 7px;"></i>
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+            {/if}
+        </footer>
+    </div>
+
+    <script>
+        $(function () {
+            new CRMContactsOperationDelete({
+                '$wrapper': $('#{$wrapper_id}'),
+                'contact_ids': {$free_contacts|json_encode},
+                'is_super_admin': {$is_super_admin|json_encode},
+                'context': {$context|json_encode},
+                'is_contact_page': {if $wa->get('is_contact_page')}1{else}0{/if},
+            })
+        });
+    </script>
+
+</div>

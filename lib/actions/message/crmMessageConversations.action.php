@@ -1,0 +1,38 @@
+<?php
+
+class crmMessageConversationsAction extends crmBackendViewAction
+{
+    public function execute()
+    {
+        $listAction = new crmMessageListByConversationAction();
+        $listAction->execute();
+        $conversation_id = waRequest::param('id', null, waRequest::TYPE_INT);
+        $view_param = waRequest::get('view', null, waRequest::TYPE_STRING);
+        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
+
+        if (!empty($iframe) && wa()->whichUI('crm') !== '1.3') {
+            $this->setLayout();
+            $backend_assets = wa('crm')->event('backend_assets');
+        }
+
+        if (empty($conversation_id)) {
+            $conversations = $this->view->getVars('conversations');
+            if (!empty($conversations)) {
+                $conversation = reset($conversations);
+                $conversation_id = $conversation['id'];
+            }
+        }
+        if (!empty($conversation_id)) {
+            waRequest::setParam('id', $conversation_id);
+            $conversationAction = new crmMessageConversationIdAction();
+            $conversationAction->execute();
+        }
+
+        $this->view->assign(array(
+            'active_conv'    => $conversation_id,
+            'view_param'     => $view_param,
+            'iframe'         => $iframe,
+            'backend_assets' => ifset($backend_assets, []),
+        ));
+    }
+}

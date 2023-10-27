@@ -80,9 +80,8 @@ var CRMSettingsCompanies = ( function($) {
             }
 
             function setWidth() {
-                var section_w = $section.width(),
-                    max_w = section_w - other_w - 10;
-
+                var section_w = $section.outerWidth(true),
+                    max_w = section_w - other_w - 38;
                 $companies.css("max-width", max_w + "px");
             }
         }
@@ -91,7 +90,7 @@ var CRMSettingsCompanies = ( function($) {
             $.crm.tabSlider({
                 $wrapper: $companies,
                 $slider: $list,
-                $activeSlide: ($activeTab.length ? $activeTab : false )
+                $activeSlide: ($activeTab.length ? $activeTab : false)
             });
         }
 
@@ -341,7 +340,7 @@ var CRMSettingsCompanies = ( function($) {
                 $.ajax({
                     url: href,
                     data: formData,
-                    dataType: "json",
+                    dataType: 'json',
                     processData: false,
                     contentType: false,
                     type: 'POST',
@@ -463,14 +462,20 @@ var CRMSettingsCompanies = ( function($) {
                     };
 
                 $.post(href, data, function(html) {
-                    new CRMDialog({
+                   $.waDialog({
                         html: html,
-                        options: {
-                            onDelete: function() {
+                      /*  options: {
+                            onDelete: function(dialog_instance) {
+                                console.log('delete');
                                 var content_uri = $.crm.app_url + "settings/companies/";
                                 $.crm.content.load(content_uri);
+                                dialog.close();
+                            },
+                            onSuccess: function() {
+                                console.log('Success');
+                                dialog.close();
                             }
-                        }
+                        }*/
                     });
                 }).always( function() {
                     is_locked = false;
@@ -485,10 +490,10 @@ var CRMSettingsCompanies = ( function($) {
             $cancel = that.$footer.find(".js-edit-actions");
 
         if (is_changed) {
-            $button.addClass("yellow").removeClass("green");
+            $button.addClass("yellow");
             $cancel.show();
         } else {
-            $button.removeClass("yellow").addClass("green");
+            $button.removeClass("yellow");
             $cancel.hide();
         }
     };
@@ -497,6 +502,9 @@ var CRMSettingsCompanies = ( function($) {
         var that = this,
             $wrapper = that.$wrapper.find(".c-templates-section"),
             $optionSection = $wrapper.find(".js-template-options-wrapper"),
+            $templates = $wrapper.find(".c-templates-slider"),
+            $list = $wrapper.find(".c-templates-list"),
+            $activeTab = $list.find(".js-template-wrapper.is-active");
             xhr = false;
 
         initTemplatesToggle();
@@ -844,178 +852,15 @@ var CRMSettingsCompanies = ( function($) {
         }
 
         function initSlider() {
-            var Slider = ( function($) {
-
-                Slider = function(options) {
-                    var that = this;
-
-                    // DOM
-                    that.$wrapper = options["$wrapper"];
-                    that.$slider = options["$slider"];
-                    that.$activeSlide = ( options["$activeSlide"] || false);
-
-                    // VARS
-
-                    // DYNAMIC VARS
-                    that.type_class = false;
-                    that.left = 0;
-                    that.wrapper_w = false;
-                    that.slider_w = false;
-
-                    // INIT
-                    that.initClass();
-                };
-
-                Slider.prototype.initClass = function() {
-                    var that = this,
-                        $window = $(window);
-
-                    // INIT
-
-                    that.detectSliderWidth();
-                    //
-                    that.initStartPosition();
-
-                    // EVENTS
-
-                    $window.on("resize", onResize);
-                    //
-                    that.$wrapper.on("click", ".c-slider-arrow", function(event) {
-                        event.preventDefault();
-                        var $link = $(this);
-                        if ($link.hasClass("left")) {
-                            that.moveSlider( false );
-                        }
-                        if ($link.hasClass("right")) {
-                            that.moveSlider( true );
-                        }
-                    });
-
-                    // FUNCTIONS
-
-                    function onResize() {
-                        var is_exist = $.contains(document, that.$wrapper[0]);
-                        if (is_exist) {
-                            var is_change = ( that.wrapper_w !== that.$wrapper.outerWidth() );
-                            if (is_change) {
-                                that.reset();
-                            }
-                        } else {
-                            $window.off("resize", onResize);
-                        }
-                    }
-                };
-
-                Slider.prototype.initStartPosition = function() {
-                    var that = this,
-                        start_left = 0;
-
-                    if (that.$activeSlide.length) {
-                        var slide_w = that.$activeSlide.outerWidth(),
-                            delta = Math.floor(Math.abs(that.$wrapper.offset().left - that.$activeSlide.offset().left));
-
-                        if (delta + slide_w > that.wrapper_w) {
-                            start_left = delta - 40;
-                        }
-                    }
-
-                    if (start_left) {
-                        that.start_left = start_left;
-                        that.moveSlider(true, start_left);
-                    } else {
-                        that.showArrows();
-                    }
-                };
-
-                Slider.prototype.detectSliderWidth = function() {
-                    var that = this;
-
-                    that.wrapper_w = that.$wrapper.outerWidth();
-                    that.slider_w = that.$slider.outerWidth();
-                };
-
-                Slider.prototype.showArrows = function() {
-                    var that = this;
-
-                    if (that.left >= 0) {
-                        if (that.wrapper_w < that.slider_w) {
-                            setType("type-1");
-                        } else {
-                            setType();
-                        }
-                    } else {
-                        if (that.wrapper_w < (that.slider_w - Math.abs(that.left) ) ) {
-                            setType("type-2");
-                        } else {
-                            setType("type-3");
-                        }
-                    }
-
-                    function setType( type_class ) {
-                        if (that.type_class) {
-                            that.$wrapper.removeClass(that.type_class);
-                        }
-                        if (type_class) {
-                            that.$wrapper.addClass(type_class);
-                            that.type_class = type_class;
-                        }
-                    }
-                };
-
-                Slider.prototype.setLeft = function( left ) {
-                    var that = this;
-
-                    if (!(Math.abs(left) > 0)) {
-                        left = 0;
-                    }
-
-                    that.$slider.css({
-                        "-webkit-transform": "translate(" + (left ? left + "px" : 0) + ", 0)",
-                        "transform": "translate(" + (left ? left + "px" : 0) + ", 0)"
-                    });
-
-                    that.left = left;
-                };
-
-                Slider.prototype.moveSlider = function(right, left) {
-                    var that = this,
-                        step = ( left ? left : parseInt(that.wrapper_w/2) ),
-                        delta = (that.slider_w - that.wrapper_w),
-                        new_left = 0;
-
-                    if (delta > 0) {
-                        new_left = Math.abs(that.left) + ( right ? step : -step );
-                        if (new_left > delta ) {
-                            new_left = delta;
-                        } else if (new_left < 0) {
-                            new_left = 0;
-                        }
-                    }
-
-                    that.setLeft(-new_left);
-                    that.showArrows();
-                };
-
-                Slider.prototype.reset = function() {
-                    var that = this;
-
-                    //
-                    that.setLeft(0);
-                    //
-                    that.detectSliderWidth();
-                    //
-                    that.showArrows();
-                };
-
-                return Slider;
-
-            })($);
-
-            new Slider({
-                $wrapper: $wrapper.find(".c-templates-slider"),
-                $slider: $wrapper.find(".c-templates-list")
+            $.crm.tabSlider({
+                $wrapper: $templates,
+                $slider: $list,
+                $activeSlide: ($activeTab.length ? $activeTab : false)
             });
         }
+
+
+
     };
 
     return CRMSettingsCompanies;
@@ -1131,6 +976,7 @@ var CRMCompanyDeleteDialog = ( function($) {
                     }
                 }, "json").always( function() {
                     is_locked = false;
+                    that.dialog.close();
                 });
             }
         }

@@ -20,7 +20,9 @@ class crmContactOperationExportProcessController extends waLongActionController
             'export_fields_name' => $this->getRequest()->request('export_fields_name'),
 
             // not export empty columns flag
-            'not_export_empty_columns' => $this->getRequest()->request('not_export_empty_columns')
+            'not_export_empty_columns' => $this->getRequest()->request('not_export_empty_columns'),
+
+            'filename' => wa()->getTempPath('contact/'.$this->processId.'.csv', 'crm')
         );
 
         $this->exporter = $this->getExporter($this->getHash());
@@ -112,10 +114,9 @@ class crmContactOperationExportProcessController extends waLongActionController
         ));
     }
 
-
     /** Return file to browser */
-    protected function finish($filename) {
-
+    protected function finish($filename)
+    {
         if (!$this->getRequest()->get('file') && !$this->getRequest()->post('file')) {
             // lost messenger
             echo json_encode(array(
@@ -124,8 +125,18 @@ class crmContactOperationExportProcessController extends waLongActionController
                 'progress' => $this->isDone() ? 100 : $this->getExporter()->getCurrentProgress()
             ));
             return false;
+        } elseif (wa()->whichUI('crm') == '1.3') {
+            waFiles::readfile($filename, 'exported_contacts.csv', false);
+        } else {
+            waFiles::copy($filename, $this->data['filename']);
+            echo json_encode([
+                'processId' => $this->processId,
+                'ready' => true,
+                'progress' => $this->isDone() ? 100 : $this->getExporter()->getCurrentProgress(),
+                'file' => basename($this->data['filename'])
+            ]);
         }
-        waFiles::readfile($filename, 'exported_contacts.csv', false);
+
         return true;
     }
 
@@ -139,7 +150,20 @@ class crmContactOperationExportProcessController extends waLongActionController
             $contact_ids = crmHelper::dropNotPositive($contact_ids);
             return 'id/' . join(',', $contact_ids);
         }
-        return trim((string)$this->getRequest()->request('hash'));
+
+        $hash = trim((string)$this->getRequest()->request('hash'));
+        $split = explode('/', $hash);
+        if (isset($split[0], $split[1]) && $split[0] === 'responsible') {
+            if ($split[1] === 'me') {
+                $hash = 'search/crm_user_id='.wa()->getUser()->getId();
+            } elseif ($split[1] === 'no') {
+                $hash = 'search/crm_user_id?=NULL';
+            } else {
+                $hash = 'search/crm_user_id='.intval($split[1]);
+            }
+        }
+
+        return $hash;
     }
 
     /**

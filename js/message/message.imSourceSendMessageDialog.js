@@ -74,7 +74,7 @@ var CRMImSourceSendMessageDialog = ( function($) {
             e.preventDefault();
 
             var xhr = null,
-                $loading = $('<i class="icon16 loading" style="vertical-align: baseline; margin: 0 4px; position: relative; top: 3px;"></i>')
+                $loading = $('<span class="icon size-16"><i class="fas fa-spinner wa-animation-spin custom-mr-4"></i></span>')
             $button.attr('disabled', true).after($loading);
 
             function onAlways() {
@@ -89,13 +89,13 @@ var CRMImSourceSendMessageDialog = ( function($) {
                     return;
                 }
 
-                that.$wrapper.find(".crm-dialog-block").html(that.success_html);
+                that.$wrapper.find(".dialog-body").html(that.success_html);
                 that.dialog.resize();
 
-                var auto_close_timer = null,
-                    old_close_func = that.dialog.onClose;
+                var auto_close_timer = null;
+                    //old_close_func = that.dialog.onClose;
                 that.dialog.onClose = function() {
-                    old_close_func();
+                    //old_close_func();
                     auto_close_timer && clearTimeout(auto_close_timer);
                     auto_close_timer = null;
                     that.crm.content.reload();

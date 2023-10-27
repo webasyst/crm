@@ -36,7 +36,7 @@ class crmDealSaveController extends crmJsonController
             $deal = $dm->getById($post_deal['id']);
         }
 
-        $deal_id = $this->saveDeal($post_deal);
+        $deal_id = $this->saveDeal($post_deal, $deal);
 
         if (!empty($post_deal['contact_id'])) {
             $this->getDealModel()->updateParticipant($deal_id, $post_deal['contact_id'], 'contact_id', ifset($post_participant['label']));
@@ -104,7 +104,7 @@ class crmDealSaveController extends crmJsonController
         $deal['params'] = $params;
     }
 
-    public function saveDeal($deal)
+    public function saveDeal($deal, $before_deal = [])
     {
         $dm = new crmDealModel();
         $fm = new crmFunnelModel();
@@ -152,7 +152,7 @@ class crmDealSaveController extends crmJsonController
         }
 
         if (!empty($deal['expected_date'])) {
-            $deal['expected_date'] = date('Y-m-d H:i:s', strtotime($deal['expected_date']));
+            $deal['expected_date'] = date('Y-m-d', strtotime($deal['expected_date']));
         }
         $deal['description'] = (string)ifset($deal['description']);
 
@@ -169,7 +169,7 @@ class crmDealSaveController extends crmJsonController
             // $deal = $dm->getById($deal['id']);
             $action = crmDealModel::LOG_ACTION_ADD;
         } else {
-            $dm->update($deal['id'], $deal);
+            $dm->update($deal['id'], $deal, $before_deal);
             $action = crmDealModel::LOG_ACTION_UPDATE;
         }
         $this->logAction($action, array('deal_id' => $deal['id']));

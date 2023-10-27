@@ -65,7 +65,6 @@ class crmDealChangeValueController extends crmJsonController
 
     protected function addLog($deal_id, $value, $modified_value, $value_type)
     {
-        $action_id = 'deal_edit';
         $deal = $this->getDeal($deal_id);
 
         switch ($value_type) {
@@ -83,12 +82,12 @@ class crmDealChangeValueController extends crmJsonController
                 break;
         }
 
-        $this->logAction($action_id, array('deal_id' => $deal_id));
+        $this->logAction(crmDealModel::LOG_ACTION_UPDATE, array('deal_id' => $deal_id));
         $lm = new crmLogModel();
         $lm->log(
-            $action_id,
+            crmDealModel::LOG_ACTION_UPDATE,
             $deal['id'] * -1,
-            null,
+            $deal['id'],
             $value,
             $modified_value
         );

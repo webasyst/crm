@@ -1,0 +1,69 @@
+{$_title = "[`Web forms`]"}
+
+<div class="crm-form-page" id="crm-form-page">
+
+    <h1 class="c-page-header">{$_title}</h1>
+
+
+    <div class="c-forms-body">
+
+        <div class="crm-forms-sidebar">
+            {if $forms}
+                <ul class="menu-v c-form-list">
+                    {foreach $forms as $_form}
+                        <li data-id="{$_form.id}" class="c-form-item">
+                            <a href="{$wa_app_url}settings/form/{$_form.id}/" style="display: inline;">
+                                <img src="{$wa_app_static_url}img/source/source-form.png" alt="">
+                                <span class='c-name'>{$_form.name|escape}</span>
+                            </a>
+                            {if !empty($_form.funnel)}
+                                {$_funnel_name = $_form.funnel.name|escape}
+                                {$_funnel_color = $_form.funnel.color}
+                                <i class="icon16 funnel-state svg-icon" data-color="{$_funnel_color}" title="{$_funnel_name}"></i>
+                                {if !empty($_form.stage)}
+                                    {$stage_id = $_form.stage.id}
+                                    {$_stage_name = $_form.stage.name|escape}
+                                    {$_stage_color = $_form.funnel.stages[$stage_id].color}
+                                    <span class="c-state" style="background: {$_stage_color}">{$_stage_name}</span>
+                                {/if}
+                            {/if}
+                        </li>
+                    {/foreach}
+                </ul>
+            {else}
+                <div class="block">
+                    <p>[`Forms are used to set up customer subscription on your website.`]</p>
+                    <p>[`Create a form, publish it on your website, and visitors will be able to subscribe themselves.`]</p>
+                </div>
+            {/if}
+
+            <ul class="menu-v">
+                <li>
+                    <a href="{$wa_app_url}settings/form/new/" class="crm-add-new-form-link"><i class="icon16 add"></i>[`New form`]</a>
+                </li>
+            </ul>
+
+            <hr>
+
+            <div class="field-group">
+                <div class="field">
+                    <div class="name"><i class="icon16 settings"></i>[`Captcha settings`]</div>
+                    <div class="value">
+                        <a href="{$captcha_settings_url}">[`Select a captcha in system settings`]</a>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <script>
+        ( function($) {
+            $.crm.title.set("{$_title}");
+            new CRMSettingsForms({
+                $wrapper: $('#crm-form-page')
+            });
+        })(jQuery);
+    </script>
+</div>

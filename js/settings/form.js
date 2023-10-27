@@ -11,6 +11,7 @@ var crmSettingsForm = (function ($) {
         that.$confirmation_checkbox = that.$wrapper.find('.crm-confirmation-checkbox');
         that.$confirmation_enable_text = that.$wrapper.find('.crm-confirmation-enable-text');
         that.$email_confirm_block = that.$wrapper.find('.crm-form-email-confirm-block');
+        that.$back_button = that.$wrapper.find('.crm-form-header .js-back-button');
 
 
         that.$create_deal_block_wrapper = that.$wrapper.find('.crm-form-settings-block-form_create_deal');
@@ -18,7 +19,7 @@ var crmSettingsForm = (function ($) {
 
         that.$button = that.$form.find('[type=submit]');
         that.$delete_link = that.$wrapper.find('.crm-delete-form-link');
-        that.$copy = that.$wrapper.find('.js-copy.icon16');
+        that.$copy = that.$wrapper.find('.js-copy');
         that.$iframe_textarea = that.$wrapper.find('.crm-iframe-code');
 
         that.$available_deal_related_field = getDealRelatedFields();
@@ -80,24 +81,32 @@ var crmSettingsForm = (function ($) {
         that.renderDealDescription();
 
         that.bindEvents();
+        that.initIButtons();    
         that.initAddNewFieldLink();
         that.initAvailableFields();
         that.initDeleteFieldLinks();
         that.initPreviewButton();
         that.initFormWidthInput();
-        that.initStickyButton();
         that.initFields();
         that.initSubmit();
         that.initDeleteLink();
         that.initSortable();
-        that.initIButtons();
         that.initTextEditor();
         that.initCopySmartyHelper();
         that.initIframeTextarea();
         that.initMessagesBlock();
         that.initCancelLink();
         that.initBlocks();
+        that.initBackButton();
     };
+
+    crmSettingsForm.prototype.initBackButton = function () {
+        var that = this;
+        that.$back_button.on('click', function (e) {
+            e.preventDefault();
+            history.back();
+        })
+    }
 
     crmSettingsForm.prototype.renderDealDescription = function (field) {
         var that = this,
@@ -135,16 +144,6 @@ var crmSettingsForm = (function ($) {
 
     crmSettingsForm.prototype.bindEvents = function () {
         var that = this;
-
-        that.$confirmation_checkbox.on('change', function () {
-            var $el = $(this);
-            if ($el.is(':checked')) {
-                that.$email_confirm_block.slideDown(200);
-            } else {
-                that.$email_confirm_block.slideUp(200);
-            }
-        });
-
 
         // Watch for input changes
         that.$form.on('change', 'input,textarea,select', function(e) {
@@ -215,9 +214,9 @@ var crmSettingsForm = (function ($) {
         var that = this;
         status = status !== undefined ? status : true;
         if (status) {
-            that.$button.removeClass('green').addClass('yellow');
+            that.$button.addClass('yellow');
         } else {
-            that.$button.removeClass('yellow').addClass('green');
+            that.$button.removeClass('yellow');
         }
         that.changed = status;
     };
@@ -271,25 +270,6 @@ var crmSettingsForm = (function ($) {
         });
     };
 
-    crmSettingsForm.prototype.initStickyButton = function () {
-        var that = this;
-
-        that.$wrapper.find('.crm-form-buttons').sticky({
-            fixed_css: { bottom: 0, 'z-index': 100 },
-            fixed_class: 'sticky-bottom-shadow',
-            showFixed: function(e) {
-                e.element.css('min-height', e.element.height());
-                e.fixed_clone.empty().append(e.element.children());
-            },
-            hideFixed: function(e) {
-                e.fixed_clone.children().appendTo(e.element);
-            },
-            updateFixed: function(e, o) {
-                this.width(e.element.width());
-            }
-        });
-    };
-
     crmSettingsForm.prototype.initTextEditor = function () {
         var that = this,
             $text = that.$form.find('[name="form[params][confirm_mail_body]"]');
@@ -297,6 +277,7 @@ var crmSettingsForm = (function ($) {
             focus: false,
             buttons: ['formatting', 'bold', 'italic', 'link'],
             plugins: ['fontcolor', 'fontsize', 'fontfamily'],
+            minHeight: 200,
             callbacks: {
                 keydown: function(event) { }, // without this waEditor intercents Ctrl+S event in Redactor
                 change: function () {
@@ -615,12 +596,14 @@ var crmSettingsForm = (function ($) {
                         $status.show().fadeOut(500);
                         $.crm.content.load($.crm.app_url + 'settings/form/' + r.data.form.id);
                     })
-                    .error(function () {
+                    .fail(function () {
                         that.showValidateErrors({ '': that.messages['unknown_server_error']/*'Unknown server error'*/ });
                     })
                     .always(function () {
                         $loading.hide();
-                        that.$button.prop('disabled', false);
+                        setTimeout(function () {
+                            that.$button.prop('disabled', false);
+                        }, 1500);
                     });
         });
     };
@@ -666,19 +649,32 @@ var crmSettingsForm = (function ($) {
 
     crmSettingsForm.prototype.initDeleteLink = function () {
         var that = this;
+        var messages = that.messages || {};
         that.$delete_link.click(function (e) {
             e.preventDefault();
-            if (!confirm(that.messages.confirm_delete)) {
-                return;
-            }
-            $.post(
-                $.crm.app_url + '?module=settings&action=formDelete',
-                { id: that.form.id },
-                function () {
-                    $.crm.content.load($.crm.app_url + 'settings/form');
+
+            $.crm.confirm.show({
+
+                title: messages['delete_confirm_title'],
+                text: messages['delete_confirm_text'],
+                button: messages['delete_confirm_button'],
+
+                onConfirm: function() {
+                    var $dialog_wrapper = $('.crm-confirm-dialog'),
+                        $loading = $dialog_wrapper.find('.crm-loading').show(),
+                        $button = $dialog_wrapper.find('.js-confirm-dialog').attr('disabled', true);
+
+                    $.post($.crm.app_url + '?module=settings&action=formDelete',
+                    { id: that.form.id },)
+                        .always(function () {
+                            $.crm.content.load($.crm.app_url + 'settings/form');
+                            $loading.hide();
+                            $button.attr('disabled', false);
+                        });
+                    return false;
                 }
-            );
-        });
+            });
+        })
     };
 
     crmSettingsForm.prototype.initSortable = function () {
@@ -744,7 +740,8 @@ var crmSettingsForm = (function ($) {
         }
 
         if (id === 'email') {
-            that.disableIButton(that.$confirmation_checkbox).attr('checked', false).trigger('change');
+            that.disableIButton(that.$confirmation_checkbox);
+            that.$confirmation_checkbox.attr('disabled', true);
             that.$confirmation_enable_text.show();
 
             // always delete password
@@ -833,6 +830,7 @@ var crmSettingsForm = (function ($) {
         if (id === 'email') {
             that.$confirmation_enable_text.hide();
             that.enableIButton(that.$confirmation_checkbox);
+            that.$confirmation_checkbox.attr('disabled', false);
             // check password field
             var password_field = that.getAvailableField('password');
             if (password_field && password_field.checked <= 0) {
@@ -904,11 +902,43 @@ var crmSettingsForm = (function ($) {
 
     crmSettingsForm.prototype.initIButtons = function() {
         var that = this;
-        that.$wrapper.find(".js-ibutton").each( function() {
-            that.initIButton($(this));
+        that.$wrapper.find("#js-ibutton").each( function() {
+            if ($(this).data('iButtonInit')) {
+                return $(this);
+            }
+            that.$switch = $(this).waSwitch({
+                ready: function (wa_switch) {
+                    let $label = wa_switch.$wrapper.siblings('label');
+                    wa_switch.$label = $label;
+                    wa_switch.active_text = $label.data('active-text');
+                    wa_switch.inactive_text = $label.data('inactive-text');
+                },
+                change: function(active, wa_switch) {
+                    
+                    if (active) {
+                        if (that.$switch.has(that.$confirmation_checkbox).length){
+                            that.$email_confirm_block.slideDown(300);
+                            that.$confirmation_checkbox.attr('checked', true);
+                        }
+                    wa_switch.$label.text(wa_switch.active_text);
+                    }
+                    else {
+                        if (that.$switch.has(that.$confirmation_checkbox).length){
+                            that.$email_confirm_block.slideUp(300);
+                            that.$confirmation_checkbox.attr('checked', false);
+                        }
+                     wa_switch.$label.text(wa_switch.inactive_text); 
+                    }
+                }
+            });
+          //  that.initIButton($(this));
         });
     };
-
+    /*
+    CRMSettingsShop.prototype.initToggle = function() {
+        $("#toggle-menu").waToggle();
+    }*/
+/*
     crmSettingsForm.prototype.initIButton = function ($input) {
         if ($input.data('iButtonInit')) {
             return $input;
@@ -919,13 +949,18 @@ var crmSettingsForm = (function ($) {
             classContainer: "c-ibutton ibutton-container mini"
         }).data('iButtonInit', 1);
     };
-
-    crmSettingsForm.prototype.disableIButton = function ($ibutton) {
-        return this.initIButton($ibutton).iButton('disable', true);
+*/
+    crmSettingsForm.prototype.disableIButton = function () {
+        var that = this;
+        var switcher = that.$switch.waSwitch("switch");
+        switcher.set(false);
+        switcher.disable(true);
     };
 
-    crmSettingsForm.prototype.enableIButton = function ($ibutton) {
-        return this.initIButton($ibutton).iButton('disable', false);
+    crmSettingsForm.prototype.enableIButton = function () {
+        var that = this;
+        var switcher = that.$switch.waSwitch("switch");
+        switcher.disable(false);
     };
 
     crmSettingsForm.prototype.initCopySmartyHelper = function () {
@@ -934,16 +969,18 @@ var crmSettingsForm = (function ($) {
         that.$copy.on('click', function () {
             var $self = $(this),
                 value = $self.data('content'),
-                $temp = $('<input>');
+                $temp = $('<input>'),
+                copyIcon = '<i class="fas fa-copy"></i>',
+                yesIcon = '<i class="fas fa-check-circle"></i>';
 
             $("body").append($temp);
             $temp.val(value).select();
             document.execCommand("copy");
             $temp.remove();
 
-            $self.removeClass('stack').addClass('yes');
+            $self.html(yesIcon);
             setTimeout(function () {
-                $self.removeClass('yes').addClass('stack');
+                $self.html(copyIcon);
             }, 2000);
         });
     };

@@ -20,7 +20,8 @@ class crmSendEmailDialogAction extends crmBackendViewAction
     public function __construct($params = null)
     {
         parent::__construct($params);
-        $this->setTemplate('templates/actions/message/MessageSendEmailDialog.html');
+        $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
+        $this->setTemplate('templates/' . $actions_path . '/message/MessageSendEmailDialog.html');
 
         $user_contact = $this->getUserContact();
 

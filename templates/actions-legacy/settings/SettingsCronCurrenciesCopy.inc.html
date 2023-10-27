@@ -1,0 +1,49 @@
+{$_cron_command = "php {$root_path}cli.php crm worker currencies_copy"}
+{$_last_cron_time = crmShop::getLastCliRunDateTime()}
+{$_cli_ok = crmShop::isCliOk()}
+
+<section class="c-settings-cron-section {if $_cli_ok}is-set{/if}">
+    {if $_cli_ok}
+        <div class="c-is-cli-ok">
+            <p>
+                <i class="icon16 yes"></i>
+                [`<tt>Cron</tt> job required for currencies copy is set up properly.`]
+                {if $_last_cron_time}
+                    [`Last execution time:`]
+                    {$_last_cron_time|wa_date:'datetime'}
+                {/if}
+            </p>
+
+            <p>
+                {sprintf_wp(
+                'The following <tt>cron</tt> job command is currently in use (%ssetting up a cron job%s):',
+                sprintf(
+                '<a href="%s" target="_blank">',
+                _w('https://developers.webasyst.com/installation/tips/cron/')
+                ),
+                '</a>'
+                )}
+            </p>
+
+            <p class="bold"><code>{$_cron_command}</code></p>
+        </div>
+    {else}
+        <div class="c-is-cli-ok">
+            <p>
+                [`<tt>Cron</tt> job required for currencies copy.`]
+            </p>
+            <p>
+                {sprintf_wp(
+                'Please set up a <tt>cron</tt> job (<a href="%s" target="_blank">view instructions</a>) using the command specified below in your web-hosting control panel:',
+                _w('https://developers.webasyst.com/installation/tips/cron/')
+                )}
+            </p>
+
+            <p class="bold"><code>{$_cron_command}</code></p>
+
+            {if $_last_cron_time}
+                <p>[`Last execution time:`] {$_last_cron_time|wa_date:'datetime'}</p>
+            {/if}
+        </div>
+    {/if}
+</section>

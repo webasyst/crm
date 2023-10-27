@@ -29,7 +29,7 @@ var crmSettingsFormFieldEditDialog = (function ($) {
             construct($wrapper, dialog);
         };
 
-        new CRMDialog(options);
+        $.waDialog(options);
     };
 
     crmSettingsFormFieldEditDialog.prototype.initClass = function () {
@@ -134,7 +134,7 @@ var crmSettingsFormFieldEditDialog = (function ($) {
 
     crmSettingsFormFieldEditDialog.prototype.setFormChanged = function () {
         var that = this;
-        that.$button.removeClass('green').addClass('yellow');
+        that.$button.addClass('yellow');
     };
 
     return crmSettingsFormFieldEditDialog;

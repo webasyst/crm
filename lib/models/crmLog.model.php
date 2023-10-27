@@ -19,6 +19,17 @@ class crmLogModel extends crmModel
     const OBJECT_TYPE_EMAIL = 'EMAIL';
     const OBJECT_TYPE_MESSAGE = 'MESSAGE';
     const OBJECT_TYPE_ORDER_LOG = 'ORDER_LOG';
+    const OBJECT_TYPE_ORDER = 'ORDER';
+
+    private function fillFunnelStages()
+    {
+        if (!empty($this->stages)) {
+            return;
+        }
+        $this->funnels = (new crmFunnelModel)->getAllFunnels();
+        $this->stages = (new crmFunnelStageModel)->select('*')->order('funnel_id, number')->fetchAll('id');
+        crmHelper::getFunnelStageColors($this->funnels, $this->stages);
+    }
 
     public function add($data)
     {
@@ -40,11 +51,53 @@ class crmLogModel extends crmModel
         $data['actor_contact_id'] = (int)$data['actor_contact_id'];
         $data['contact_id'] = (int)ifset($data['contact_id']);
 
-        return $this->insert($data);
+        $log_id = $this->insert($data);
+
+        // Update wa_contact crm_last_log_id & crm_last_log_datetime
+        $contact_id = $data['contact_id'];
+        if ($contact_id < 0) {
+            $deal_id = -1 * $contact_id;
+            $contact_id = $this->query(
+                "SELECT contact_id FROM crm_deal WHERE id=i:id",
+                ['id' => $deal_id]
+            )->fetchField();
+
+            $this->exec(
+                'UPDATE crm_deal
+                SET last_log_id = i:log_id, last_log_datetime = s:log_datetime
+                WHERE id = i:deal_id',
+                [
+                    'deal_id'      => $deal_id,
+                    'log_id'       => $log_id,
+                    'log_datetime' => $data['create_datetime']
+                ]
+            );
+        }
+
+        if ($contact_id > 0) {
+            $this->exec("UPDATE wa_contact
+                SET crm_last_log_id=i:log_id, crm_last_log_datetime=s:log_datetime
+                WHERE id=i:contact_id",
+                [
+                    'contact_id' => $contact_id,
+                    'log_id' => $log_id,
+                    'log_datetime' => $data['create_datetime'],
+                ]
+            );
+        }
+
+        return $log_id;
     }
 
-    public function log($action, $contact_id = null, $object_id = null, $before = null, $after = null, $actor_contact_id = null)
-    {
+    public function log(
+        $action,
+        $contact_id = null,
+        $object_id = null,
+        $before = null,
+        $after = null,
+        $actor_contact_id = null,
+        $params = []
+    ) {
         if (preg_match('/^([^_]+)_/', $action, $m)) {
             $object_type = strtoupper(ifempty($m[1], $m[0]));
         } else {
@@ -56,13 +109,14 @@ class crmLogModel extends crmModel
         }
         $data = array(
             'create_datetime'  => date('Y-m-d H:i:s'),
-            'actor_contact_id' => $actor_contact_id ? $actor_contact_id : wa()->getUser()->getId(),
+            'actor_contact_id' => $actor_contact_id !== null ? $actor_contact_id : wa()->getUser()->getId(),
             'action'           => $action,
             'contact_id'       => $contact_id,
             'object_id'        => $object_id,
             'object_type'      => $object_type,
             'before'           => $before,
             'after'            => $after,
+            'params'           => (empty($params) ? null : json_encode($params))
         );
         return $this->add($data);
     }
@@ -87,13 +141,8 @@ class crmLogModel extends crmModel
             $limit = ifempty($list_params['limit'], 50);
             $log = $this->select('*')->where($condition)->order('id DESC')->limit((int)$limit)->fetchAll('id');
         }
-        $fm = new crmFunnelModel();
-        $fsm = new crmFunnelStageModel();
 
-        $this->funnels = $fm->getAllFunnels();
-        $this->stages = $fsm->select('*')->order('funnel_id, number')->fetchAll('id');
-        crmHelper::getFunnelStageColors($this->funnels, $this->stages);
-
+        $this->fillFunnelStages();
         return $this->explainLog($log, 'live');
     }
 
@@ -172,16 +221,14 @@ class crmLogModel extends crmModel
         return $chart;
     }
 
-    public function getLog($id, $selected_filters, $max_id = 0, $limit = 50)
+    public function getLog($id, $selected_filters, $min_id = 0, $max_id = 0, $limit = 50, $options = [])
     {
         $dm = new crmDealModel();
         $dpm = new crmDealParticipantsModel();
 
         $id = intval($id);
-
-        $context = $id > 0 ? 'contact' : 'deal';
-
-        $condition1 = "contact_id=$id";
+        $context = ($id >= 0 ? 'contact' : 'deal');
+        $condition1 = (empty($id) ? '1=1' : "contact_id=$id");
         $condition2 = " AND action <> 'reminder_add'";
 
         if ($id > 0) {
@@ -207,12 +254,11 @@ class crmLogModel extends crmModel
                 ));
 
                 $deals = $this->deals;
-                $fm = new crmFunnelModel();
-                $fsm = new crmFunnelStageModel();
-                $this->funnels = $fm->getAllFunnels();
-                $this->stages = $fsm->select('*')->order('funnel_id, number')->fetchAll('id');
-                crmHelper::getFunnelStageColors($this->funnels, $this->stages);
+                $this->fillFunnelStages();
             }
+        }
+        if ($min_id) {
+            $condition1 .= ' AND id > '.(int) $min_id;
         }
         if ($max_id) {
             $condition1 .= ' AND id < '.(int)$max_id;
@@ -246,6 +292,9 @@ class crmLogModel extends crmModel
         if (!empty($selected_filters['order_log']['is_active']) && crmShop::canExplainOrderLog()) {
             $objects[] = self::OBJECT_TYPE_ORDER_LOG;
         }
+        if (!empty($selected_filters['actor_contact_id'])) {
+            $condition1 .= ' AND actor_contact_id='.$selected_filters['actor_contact_id'];
+        }
 
         if ($objects) {
             $condition2 .= " AND object_type IN('".join("','", $objects)."')";
@@ -253,14 +302,17 @@ class crmLogModel extends crmModel
         if ($context == 'deal') {
             $condition1 .= " AND action <> 'deal_add'";
         }
+        if (!crmShop::canExplainOrderLog()) {
+            $condition2 .= " AND object_type <> '".self::OBJECT_TYPE_ORDER_LOG."'";
+        }
         $condition1 .= " AND action NOT LIKE 'deal_order_%'";
 
         $log = $this->select('SQL_CALC_FOUND_ROWS *')->where($condition1.$condition2)->order('id DESC')->limit((int)$limit)->fetchAll('id');
-        $count = $this->query('SELECT FOUND_ROWS()')->fetchField();
+        $count = (int) $this->query('SELECT FOUND_ROWS()')->fetchField();
         $min_id = $this->select('MIN(id) mid')->where($condition1.$condition2)->fetchField('mid');
         reset($log);
 
-        $log = $this->explainLog($log, $context, $deals);
+        $log = $this->explainLog($log, $context, $deals, $options);
 
         return array($log, $min_id, $count);
     }
@@ -270,7 +322,7 @@ class crmLogModel extends crmModel
         return $this->getConstants('OBJECT_TYPE_');
     }
 
-    private function getMessages($message_ids)
+    private function getMessages($message_ids, $options)
     {
         if (!$message_ids) {
             return array();
@@ -281,11 +333,7 @@ class crmLogModel extends crmModel
         $select = array();
         $fields = array_keys($mm->getMetadata());
         foreach ($fields as $field_id) {
-            if ($field_id !== 'body') {
-                $select[] = "`{$field_id}`";
-            } else {
-                $select[] = "IF(`transport` = 'SMS', `body`, '') AS `body`";
-            }
+            $select[] = "`{$field_id}`";
         }
 
         $select = join(',', $select);
@@ -293,11 +341,32 @@ class crmLogModel extends crmModel
         $where = 'id IN (:ids)';
         $bind = array('ids' => $message_ids);
         $messages = $mm->select($select)->where($where, $bind)->fetchAll('id');
+
+        $sources = [];
+        if (ifset($options['add_messenger_sources'])) {
+            // Get info about messengers
+            $im_source_ids = array_column(array_filter($messages, function ($m) {
+                return $m['source_id'] > 0 && $m['transport'] === crmMessageModel::TRANSPORT_IM;
+            }), 'source_id');
+            $sources = $this->getImSources($im_source_ids);
+        }
+
         foreach ($messages as $m) {
             // Mark all messages unread
             $messages[$m['id']]['read'] = 0;
             // Add all empty params array
             $messages[$m['id']]['params'] = array();
+            if (ifset($options['handle_message_body'])) {
+                // Sanitize body
+                $sanitizer = new crmHtmlSanitizer();
+                $messages[$m['id']]['body_sanitized'] = $sanitizer->sanitize($m['body']);
+                // Plain-text body
+                $messages[$m['id']]['body_plain'] = $sanitizer->toPlainText($m['body']);
+            }
+            // Add source (messenger) info
+            if (ifset($m['source_id']) && isset($sources[$m['source_id']])) {
+                $messages[$m['id']]['source'] = $sources[$m['source_id']];
+            }
         }
         unset($m);
 
@@ -328,7 +397,26 @@ class crmLogModel extends crmModel
         return $messages;
     }
 
-    private function explainLog($log, $context, $deals = null)
+    private function getImSources($source_ids)
+    {
+        if (empty($source_ids)) {
+            return [];
+        }
+        $sources = $this->getSourceModel()->getByField(['id' => $source_ids, 'type' => 'IM'], true);
+
+        return array_reduce($sources, function ($result, $el) {
+            if (!empty($el['provider'])) {
+                $el['icon_url'] = wa()->getAppStaticUrl('crm/plugins/' . $el['provider'] . '/img', true) . $el['provider'].'.png';
+                $plugin = crmSourcePlugin::factory($el['provider'])
+                    and $source = $plugin->factorySource($el['id'])
+                    and $el += $source->getFontAwesomeBrandIcon();
+            }
+            $result[$el['id']] = $el;
+            return $result;
+        }, []);
+    }
+
+    public function explainLog($log, $context, $deals = null, $options = [])
     {
         $rm = new crmReminderModel();
         $nm = new crmNoteModel();
@@ -370,6 +458,9 @@ class crmLogModel extends crmModel
                 $order_log_ids[$l['object_id']] = 1;
             }
 
+            if ($l['actor_contact_id'] > 0) {
+                $contact_ids[$l['actor_contact_id']] = 1;
+            }
             if ($l['contact_id'] > 0) {
                 $contact_ids[$l['contact_id']] = 1;
             } else {
@@ -389,7 +480,7 @@ class crmLogModel extends crmModel
 
         $messages = array();
         if ($message_ids) {
-            $messages = $this->getMessages(array_keys($message_ids));
+            $messages = $this->getMessages(array_keys($message_ids), $options);
         }
 
         $files = array();
@@ -408,6 +499,10 @@ class crmLogModel extends crmModel
                 'id' => array_keys($call_ids),
                 'check_rights' => 2
             ));
+            $contact_ids += array_fill_keys(array_merge(
+                array_column($calls, 'client_contact_id'),
+                array_column($calls, 'user_contact_id')
+            ), 1);
         }
 
         foreach ($reminders as $r) {
@@ -443,6 +538,7 @@ class crmLogModel extends crmModel
         }
 
         if ($deal_ids) {
+            $this->fillFunnelStages();
             if ($deals) {
                 $this->deals = array_intersect_key($deals, $deal_ids);
                 $deal_ids = array_diff_key($deal_ids, $deals);
@@ -458,19 +554,24 @@ class crmLogModel extends crmModel
             }
         }
 
+        $orders = $order_log = [];
+        if ($order_log_ids && $can_explain_shop_order_log) {
+            $olm = new shopOrderLogModel();
+            $order_log = $olm->getLogById(array_keys($order_log_ids));
+            shopOrderLogModel::explainLog($order_log);
+            $order_ids = array_column($order_log, 'order_id');
+            $orders = (new shopOrderModel)->getByField(['id' => $order_ids], 'id');
+            foreach ($orders as $o) {
+                $contact_ids[$o['contact_id']] = 1;
+            }
+        }
+
         $contacts = array();
         if ($contact_ids) {
             $contacts_collection = new crmContactsCollection('id/'.join(',', array_keys($contact_ids)), array(
                 'check_rights' => true,
             ));
-            $contacts = $contacts_collection->getContacts('id,name');
-        }
-
-        $order_log = array();
-        if ($order_log_ids && $can_explain_shop_order_log) {
-            $olm = new shopOrderLogModel();
-            $order_log = $olm->getLogById(array_keys($order_log_ids));
-            shopOrderLogModel::explainLog($order_log);
+            $contacts = $contacts_collection->getContacts('id,name,photo');
         }
 
         $rights = new crmRights();
@@ -478,11 +579,18 @@ class crmLogModel extends crmModel
         $view = wa()->getView();
         $old_view_vars = $view->getVars();
         $view->clearAllAssign();
+        $app_url = rtrim(wa()->getRootUrl(true), '/') . '/' . wa()->getConfig()->getBackendUrl() . '/crm/';
 
         foreach ($log as $id => &$l) {
+            if (!empty($contacts[$l['actor_contact_id']])) {
+                $l['actor'] = $contacts[$l['actor_contact_id']];
+            }
+            if ($l['contact_id'] > 0 && !empty($contacts[$l['contact_id']])) {
+                $l['contact'] = $contacts[$l['contact_id']];
+            }
             $l['link'] = '';
             $l['action_name'] = isset($logs[$l['action']]['name']) ? _w($logs[$l['action']]['name']) : $l['action'];
-            if (stripos($l['action'], 'reminder_') === 0) {
+            if ($l['object_type'] == self::OBJECT_TYPE_REMINDER) {
                 $l['content'] = $l['object_id'] && isset($reminders[$l['object_id']]['content'])
                     ? $reminders[$l['object_id']]['content'] : null;
                 $l['rights'] = !empty($reminders[$l['object_id']])
@@ -496,7 +604,7 @@ class crmLogModel extends crmModel
                 } else {
                     $l['object_id'] = null;
                 }
-            } elseif (stripos($l['action'], 'note_') === 0) {
+            } elseif ($l['object_type'] == self::OBJECT_TYPE_NOTE) {
                 $l['content'] = $l['object_id'] && isset($notes[$l['object_id']]['content'])
                     ? $notes[$l['object_id']]['content'] : null;
                 if (!empty($notes[$l['object_id']])) {
@@ -507,19 +615,22 @@ class crmLogModel extends crmModel
                 } else {
                     $l['object_id'] = null;
                 }
-            } elseif (stripos($l['action'], 'file_') === 0) {
+            } elseif ($l['object_type'] == self::OBJECT_TYPE_FILE) {
                 $l['file_size'] = $l['name'] = null;
                 if (!empty($files[$l['object_id']])) {
 
                     $f = $files[$l['object_id']];
+                    $f['url'] = $app_url . '?module=file&action=download&id=' . $l['object_id'];
 
                     $l['name'] = $f['name'];
                     $path = $f['path'];
                     $l['file_size'] = file_exists($path) ? filesize($path) : 0;
 
-                    if ($f['contact_id'] < 0) {
+                    if ($f['contact_id'] < 0 && $context != 'deal') {
                         $l['deal'] = $this->getDeal(abs($f['contact_id']));
                     }
+
+                    $l['file'] = $f;
                 } else {
                     $l['object_id'] = null;
                 }
@@ -551,7 +662,7 @@ class crmLogModel extends crmModel
                         $l['inline_html'] .= '&lt;'._w('No owner').'&gt;';
                     }
                 }
-            } elseif (stripos($l['action'], 'message_') === 0) {
+            } elseif ($l['object_type'] == self::OBJECT_TYPE_MESSAGE) {
                 if (!empty($messages[$l['object_id']])) {
                     $m = $messages[$l['object_id']];
 
@@ -568,6 +679,7 @@ class crmLogModel extends crmModel
                         $to = $to_formatted;
                         if (!empty($contacts[$m['contact_id']]['name'])) {
                             $to = htmlspecialchars($contacts[$m['contact_id']]['name']) . ' <span class="c-message-to">' . $to . '</span>';
+                            $m['contact'] = $contacts[$m['contact_id']];
                         }
 
                         $l['inline_html'] = '<i class="icon16 export-blue" title="'._w('outgoing').'"></i> '.sprintf_wp(
@@ -613,28 +725,40 @@ class crmLogModel extends crmModel
                         }
                     }
 
+                    $l['message'] = $m;
                     if ($m['deal_id'] && $context != 'deal') {
                         $l['deal'] = $this->getDeal($m['deal_id']);
                     }
                 } else {
                     $l['object_id'] = null;
                 }
-            } elseif (stripos($l['action'], 'call') === 0) {
+            } elseif ($l['object_type'] == self::OBJECT_TYPE_CALL) {
                 if (!empty($calls[$l['object_id']])) {
                     $c = $calls[$l['object_id']];
-
                     $phone = crmHelper::formatCallNumber($c);
+                    $c['client_phone_formatted'] = $phone;
+                    $c['contact'] = ifset($contacts, $c['client_contact_id'], null);
+                    $c['user'] = ifset($contacts, $c['user_contact_id'], null);
+                    $l['call'] = $c;
 
                     if (empty($c['direction']) || $c['direction'] == 'IN') {
-                        $l['inline_html'] = '<i class="icon16 import"></i> '.sprintf_wp(
-                                'Incoming call from %s.',
-                                $phone
-                            );
+                        if ($c['status_id'] == 'VOICEMAIL') {
+                            $l['content'] = sprintf_wp('Voice mail from %s.', $phone);
+                        } elseif ($c['status_id'] == 'DROPPED') {
+                            $l['content'] = sprintf_wp('Missed call from %s.', $phone);
+                        } else {
+                            $l['content'] = sprintf_wp('Incoming call from %s.', $phone);
+                        }
+                        $l['inline_html'] = '<i class="icon16 import"></i> '.$l['content'];
                     } else {
-                        $l['inline_html'] = '<i class="icon16 export-blue"></i> '.sprintf_wp(
-                                'Outgoing call to %s.',
-                                $phone
-                            );
+                        if ($c['status_id'] == 'VOICEMAIL') {
+                            $l['content'] = sprintf_wp('Voice mail to %s.', $phone);
+                        } elseif ($c['status_id'] == 'DROPPED') {
+                            $l['content'] = sprintf_wp('No answer from %s.', $phone);
+                        } else {
+                            $l['content'] = sprintf_wp('Outgoing call to %s.', $phone);
+                        }
+                        $l['inline_html'] = '<i class="icon16 export-blue"></i> '.$l['content'];
                     }
                     $status = wa('crm')->getConfig()->getCallStates($c['status_id']);
                     $l['inline_html'] .= ' '.sprintf_wp(
@@ -648,6 +772,20 @@ class crmLogModel extends crmModel
                             );
                     }
 
+                    if ($c['status_id'] == 'CONNECTED') {
+                        $l['action_name'] = _w('talking');
+                    } elseif ($c['status_id'] == 'PENDING') {
+                        $l['action_name'] = _w('waiting for reply');
+                    } elseif ($c['status_id'] == 'VOICEMAIL') {
+                        $l['action_name'] = _w('left a voice message');
+                    } elseif ($c['status_id'] == 'DROPPED') {
+                        if ($c['direction'] == 'IN') {
+                            $l['action_name'] = _w('missed call');
+                        } else {
+                            $l['action_name'] = _w('no reply');
+                        }
+                    }
+
                     // if no access, no link
                     if (!empty($c['has_access']) && !empty($c['record_attrs'])) {
                         $l['inline_html'] .= ' ' . crmHelper::getCallRecordLinkHtml($c);
@@ -659,9 +797,38 @@ class crmLogModel extends crmModel
                 } else {
                     $l['object_id'] = null;
                 }
+            } elseif ($l['object_type'] == self::OBJECT_TYPE_INVOICE) {
+                if (!empty($invoices[$l['object_id']])) {
+                    $l['invoice'] = $invoices[$l['object_id']];
+                }
             } elseif ($l['object_type'] == self::OBJECT_TYPE_ORDER_LOG) {
                 if (isset($order_log[$l['object_id']])) {
                     $l['order_log_item'] = $order_log[$l['object_id']];
+
+                    if (isset($l['order_log_item']['order_id']) && isset($orders[$l['order_log_item']['order_id']])) {
+                        $l['order'] = $orders[$l['order_log_item']['order_id']];
+                        $l['order']['number'] = shopHelper::encodeOrderId($l['order']['id']);
+                        if ($l['order']['contact_id'] > 0 && !empty($contacts[$l['order']['contact_id']])) {
+                            $l['order']['contact'] = $contacts[$l['order']['contact_id']];
+                            if (empty($l['contact'])) {
+                                $l['contact'] = $l['order']['contact'];
+                            }
+                            if (empty($l['contact_id'])) {
+                                $l['contact_id'] = $l['order']['contact_id'];
+                            }
+                        }
+                    }
+                    if (isset($l['order_log_item']['action']) && $l['order_log_item']['action'] instanceof shopWorkflowAction) {
+                        $action_name = _wd('shop', $l['order_log_item']['action']->getOption('log_record'));
+                        $l['action_name'] = empty($action_name) ? $l['order_log_item']['action']->getName() : $action_name;
+                        if (ifset($l['order_log_item']['text'])) {
+                            $sanitizer = new crmHtmlSanitizer();
+                            $l['content'] = $sanitizer->toPlainText($l['order_log_item']['text']);
+                        }
+                    } elseif (ifset($l['order_log_item']['text'])) {
+                        $sanitizer = new crmHtmlSanitizer();
+                        $l['action_name'] = $sanitizer->toPlainText($l['order_log_item']['text']);
+                    }
                 }
             }
 

@@ -1,6 +1,6 @@
 <?php
 class crmInvoiceTemplatesRenderAction extends crmViewAction
-{
+{    
     public function execute()
     {
         $invoice_template_id = waRequest::request('template_id', null, 'int');
@@ -36,5 +36,16 @@ class crmInvoiceTemplatesRenderAction extends crmViewAction
                 'invoice_id'          => $invoice_id
             ))
         ));
+    }
+
+    public function preExecute()
+    {
+        $this::checkSkipUpdateLastPage();
+        parent::preExecute();
+    }
+
+    public static function checkSkipUpdateLastPage()
+    {
+        waRequest::setParam('skip_update_last_page', '1');
     }
 }

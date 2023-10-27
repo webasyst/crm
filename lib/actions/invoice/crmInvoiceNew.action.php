@@ -7,6 +7,13 @@ class crmInvoiceNewAction extends crmInvoiceViewAction
 {
     public function execute()
     {
+        $contact_id = waRequest::get('contact', null, waRequest::TYPE_INT);
+        $deal_id = waRequest::request('deal_id', null, waRequest::TYPE_INT);
+        $iframe =  waRequest::get('iframe', 0, waRequest::TYPE_INT);
+        if (!empty($iframe) && wa('crm')->whichUI('crm') !== '1.3') {
+            $this->setLayout();
+        }
+
         if (!wa()->getUser()->getRights('crm', 'manage_invoices')) {
             throw new waRightsException();
         }
@@ -25,9 +32,8 @@ class crmInvoiceNewAction extends crmInvoiceViewAction
 
         $curm = new crmCurrencyModel();
         $currencies = $curm->getAll('code');
-
-        $deal_id = waRequest::request('deal_id', null, waRequest::TYPE_INT);
-        $contact = $deal = null;
+        $contact = null;
+        $deal = null;
         if ($deal_id) {
             $dm = new crmDealModel();
             $deal = $dm->getById($deal_id);
@@ -79,12 +85,13 @@ class crmInvoiceNewAction extends crmInvoiceViewAction
                 }
             }
 
-        } elseif ($contact_id = waRequest::get('contact', null, waRequest::TYPE_INT)) {
+        } elseif ($contact_id) {
             $contact = new waContact($contact_id);
         }
         $invoice['currency_id'] = $invoice['currency_id'] ? $invoice['currency_id'] : $this->getConfig()->getCurrency();
 
         $this->view->assign(array(
+            'iframe'                => $iframe,
             'invoice'               => $invoice,
             'companies'             => $companies,
             'company'               => $company,

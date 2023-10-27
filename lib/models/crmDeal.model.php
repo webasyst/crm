@@ -39,15 +39,12 @@ class crmDealModel extends crmModel
     const STATUS_WON = 'WON';
     const STATUS_LOST = 'LOST';
 
-    public function addParticipants($deal_id, $participant, $role, $label = null)
+    public function addParticipants($deal, $participant, $role, $label = null)
     {
-        $deal_id = (int)$deal_id;
-        if ($deal_id <= 0) {
-            return false;
+        if (empty($deal['id']) || is_numeric($deal)) {
+            $deal = $this->getById($deal);
         }
-
-        $deal = $this->getById($deal_id);
-        if (!$deal) {
+        if (!$deal || $deal['id'] <= 0) {
             return false;
         }
 
@@ -255,22 +252,25 @@ class crmDealModel extends crmModel
         $dsm->open($id, $deal['stage_id']);
 
         $deal['id'] = $id;
-        $d = array('deal' => $deal); // $this->workup($deal)
+
+        $crm_log_id = $this->getLogModel()->add(array(
+            'actor_contact_id' => $deal['creator_contact_id'],
+            'contact_id'       => -$id,
+            'object_id'        => $id,
+            'object_type'      => crmLogModel::OBJECT_TYPE_DEAL,
+            'action'           => self::LOG_ACTION_ADD,
+        ));
+        $params = [
+            'deal'       => $deal,
+            'crm_log_id' => $crm_log_id
+        ];
 
         /**
          * @event deal_create
          * @param array $deal
          * @return bool
          */
-        wa('crm')->event('deal_create', $d);
-
-        $this->getLogModel()->add(array(
-            'actor_contact_id' => $deal['creator_contact_id'],
-            'contact_id'       => -$id,
-            'object_id'        => null,
-            'object_type'      => crmLogModel::OBJECT_TYPE_DEAL,
-            'action'           => self::LOG_ACTION_ADD,
-        ));
+        wa('crm')->event('deal_create', $params);
 
         $files = ifset($deal['files']);
         $this->attachFiles($id, $files);
@@ -382,10 +382,11 @@ class crmDealModel extends crmModel
      * @param $id
      * @param $deal  Fields of deal-record + special keys
      *   - 'params' - array[]string key => value map of params
+     * @param $before_deal
      * @return bool
      * @throws waException
      */
-    public function update($id, $deal)
+    public function update($id, $deal, $before_deal = [])
     {
         if (isset($deal['currency_id'])) {
             $currency = $this->getCurrencyInfo($deal['currency_id']);
@@ -393,14 +394,60 @@ class crmDealModel extends crmModel
             $deal['currency_rate'] = $currency['rate'];
         }
 
+        if (empty($before_deal)) {
+            $before_deal = $this->getDeal($id, false, true);
+        }
+
+        $log_data = [];
+        $before_params = ifset($before_deal, 'params', $this->getParams($id));
+        $after_params = ifset($deal['params']);
+        unset($deal['params']);
+
+        //gorizontal data
+        foreach ($deal as $_field => $_value) {
+            if (
+                $_field != 'description'
+                && !empty($before_deal[$_field])
+                && $_value != $before_deal[$_field]
+            ) {
+                $log_data[] = [
+                    'field'  => $_field,
+                    'before' => $before_deal[$_field],
+                    'after'  => $_value
+                ];
+            }
+        }
+
+        //vertical data
+        foreach (array_keys($before_params + $after_params) as $_param_name) {
+            if (
+                isset($before_params[$_param_name], $after_params[$_param_name])
+                && $before_params[$_param_name] == $after_params[$_param_name]
+                || crmDealFields::get($_param_name)->getType() == 'Text'
+            ) {
+                continue;
+            }
+            $log_data[] = [
+                'field'  => $_param_name,
+                'before' => ifset($before_params, $_param_name, null),
+                'after'  => ifset($after_params, $_param_name, null)
+            ];
+        }
+
         if (!$this->updateById($id, $deal)) {
             return false;
         }
 
-        $params = ifset($deal['params']);
-        $this->setParams($id, $params);
-
-        $this->getLogModel()->log(self::LOG_ACTION_UPDATE, -$id);
+        $this->setParams($id, $after_params);
+        $this->getLogModel()->log(
+            self::LOG_ACTION_UPDATE,
+            -$id,
+            $id,
+            null,
+            null,
+            null,
+            $log_data
+        );
 
         return $id;
     }
@@ -422,6 +469,8 @@ class crmDealModel extends crmModel
         }
 
         $event_data = array('deal' => $data + $deal);
+        $event_data['crm_log_id'] = ifempty($data, 'crm_log_id', 0);
+        unset($data['crm_log_id']);
 
         if (!empty($data['stage_id']) && $deal['stage_id'] != $data['stage_id']) {
             $dsm = new crmDealStagesModel();
@@ -447,7 +496,10 @@ class crmDealModel extends crmModel
         } elseif (!empty($data['status_id']) && $data['status_id'] == 'OPEN' && $deal['status_id'] != 'OPEN') {
             $dsm = new crmDealStagesModel();
             $dsm->open($id, $deal['stage_id']);
-            $event_data = array('deal' => $deal);
+            $event_data = [
+                'deal'       => $deal,
+                'crm_log_id' => $event_data['crm_log_id']
+            ];
             /**
              * @event deal_restore
              * @param array $deal
@@ -496,12 +548,10 @@ class crmDealModel extends crmModel
         foreach ($deal['files'] as $file) {
             $replace_img_src[$file['id']] = "{$app_url}deal/{$id}/?module=file&action=download&id={$file['id']}";
         }
-        $deal['description_sanitized'] = crmHtmlSanitizer::work(
-            $deal['description'],
-            array(
-                'replace_img_src' => $replace_img_src
-            )
-        );
+
+        $sanitizer = new crmHtmlSanitizer([ 'replace_img_src' => $replace_img_src ]);
+        $deal['description_sanitized'] = $sanitizer->sanitize($deal['description']);
+        $deal['description_plain'] = $sanitizer->toPlainText($deal['description']);
 
         if ($with_participants) {
             $participants = $this->getParticipantsModel()->getParticipants($deal['id']);
@@ -523,6 +573,7 @@ class crmDealModel extends crmModel
                     'value_formatted' => $sources['name'],
                 );
                 if ($sources['type'] == "IM") {
+                    $deal['fields']['source']['provider'] = $sources['provider'];
                     $deal['fields']['source']['icon'] = wa()->getAppStaticUrl('crm/plugins/' . $sources['provider'] . '/img', true) . $sources['provider'].'.png';
                 }
             }
@@ -746,6 +797,8 @@ class crmDealModel extends crmModel
             } elseif ($params['sort'] == 'funnel_id' || $params['sort'] == 'stage_id') {
                 $sort_join = 'JOIN crm_funnel_stage fs ON fs.id=d.stage_id';
                 $sort = array('d.funnel_id', 'd.status_id', 'fs.number');
+            } elseif ($params['sort'] === 'last_action') {
+                $sort = 'IFNULL(last_log_datetime, update_datetime)';
             } elseif (!empty($table_fields[$params['sort']])) {
                 $sort = $this->escapeField($params['sort']);
                 $sort = 'd.'.$sort;
@@ -924,6 +977,9 @@ class crmDealModel extends crmModel
         }
         if (!empty($params['end_date'])) {
             $filter_conditions .= " AND d.closed_datetime <= '".$this->escape($params['end_date'])."'";
+        }
+        if (isset($params['deal_ids']) && is_array($params['deal_ids'])) {
+            $filter_conditions .= (empty($params['deal_ids']) ? " AND d.id = 0" : " AND d.id IN (".$this->escape(implode(',', $params['deal_ids'])).")");
         }
 
         // WHERE: filter by fields
@@ -1490,5 +1546,29 @@ class crmDealModel extends crmModel
             }
         }
         return $deal;
+    }
+
+    /**
+     * @param $search
+     * @param $options
+     * @return array
+     */
+    public function searchDeal($search, $user_contact_id = null)
+    {
+        try {
+            $search = $this->escape($search);
+            $condition = (empty($user_contact_id) ? '1=1' : 'cd.user_contact_id = '.$user_contact_id);
+
+            return $this->query("
+                SELECT cd.* FROM {$this->getTableName()} cd
+                JOIN wa_contact wc ON cd.contact_id = wc.id 
+                WHERE $condition AND cd.name LIKE ? OR wc.name LIKE ?
+            ", [
+                "%$search%",
+                "%$search%"
+            ])->fetchAll('id');
+        } catch (waException $_exception) {
+            return [];
+        }
     }
 }

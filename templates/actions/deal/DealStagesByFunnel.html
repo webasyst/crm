@@ -7,41 +7,46 @@
 {/if}
 
 <div class="{$class}" id="{$id}">
-    <ul class="menu-h dropdown">
-        <li>
-            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
-                <span class="js-text">
+    <div class="dropdown-wrapper">
+        <div class="dropdown" id="dropdown-stage-filter">
+            <button class="dropdown-toggle light-gray js-visible-link" type="button">
+                <span class="js-text flexbox space-4 align-left">
                     {if !empty($_active_stage.color)}
-                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_stage.color}"></i>
+                        {*<i class="icon16 funnel-state svg-icon" data-color="{$_active_stage.color}"></i>*}
+                        <i class="fas fa-circle custom-pr-4" style="color: {$_active_stage.color}"></i>
                     {/if}
-                    <b><i class="js-name">{$_active_stage.name|escape}</i></b>
-                </span>&nbsp;<i class="icon10 darr"></i>
-            </a>
-            <ul class="menu-v with-icons">
-                {strip}
-                {foreach $stages as $_id => $_stage}
-                    <li class="{if isset($selected_stage) && $selected_stage == $_id}selected{/if}">
-                        <a href="javascript:void(0);" data-id="{$_id}">
-                            {if !empty($_stage.color)}
-                                <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color}"></i>
-                            {/if}
-                            <b><i>{$_stage.name|escape}</i></b>
-                        </a>
-                    </li>
-                {/foreach}
-                {/strip}
-            </ul>
+                    <span class="js-name">{$_active_stage.name|escape}</span>
+                </span>
+            </button>
+            <div class="dropdown-body">
+                <ul class="menu with-icons">
+                    {strip}
+                    {foreach $stages as $_id => $_stage}
+                        <li class="{if isset($selected_stage) && $selected_stage == $_id}selected{/if}">
+                            <a class="flexbox space-4" href="javascript:void(0);" data-id="{$_id}">
+                                {if !empty($_stage.color)}
+                                    <i class="fas fa-circle" style="color: {$_stage.color}"></i>
+                                    {*<i class="icon16 funnel-state svg-icon" data-color="{$_stage.color}"></i>*}
+                                {/if}
+                                {$_stage.name|escape}
+                            </a>
+                        </li>
+                    {/foreach}
+                    {/strip}
+                </ul>
+            </div>
             <input class="js-field js-select-deal-stage" name="deal[stage_id]" type="hidden" value="{$_active_stage.id}">
-        </li>
-    </ul>
+        </div>
+    </div>
 
     <script>
         ( function($) {
             var $wrapper = $("#{$id}"),
                 $visibleLink = $wrapper.find(".js-visible-link"),
+                $dropdown = $wrapper.find("#dropdown-stage-filter"),
                 $field = $wrapper.find(".js-field"),
-                $menu = $wrapper.find(".menu-v");
-
+                $menu = $wrapper.find(".menu");
+            $dropdown.waDropdown();
             $menu.on("click", "a", function () {
                 var $link = $(this);
                 $visibleLink.find(".js-text").html($link.html());
@@ -49,10 +54,10 @@
                 $menu.find(".selected").removeClass("selected");
                 $link.closest("li").addClass("selected");
 
-                $menu.hide();
+                /*$menu.hide();
                 setTimeout( function() {
                     $menu.removeAttr("style");
-                }, 200);
+                }, 200);*/
 
                 var id = $link.data("id");
                 $field.val(id);
@@ -99,7 +104,7 @@
                 }
             {/if}
 
-            $.crm.renderSVG($wrapper);
+           // $.crm.renderSVG($wrapper);
 
         })(jQuery);
     </script>

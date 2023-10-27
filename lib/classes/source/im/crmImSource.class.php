@@ -62,6 +62,9 @@ abstract class crmImSource extends crmSource
 
         $mm = new crmMessageModel();
         $mm->addToConversation($message, $conversation['id'], $update);
+
+        $message['conversation_id'] = $conversation['id'];
+        (new crmPushService)->notifyAboutMessage(null, $message, $conversation);
     }
 
     /**
@@ -79,14 +82,14 @@ abstract class crmImSource extends crmSource
             )
         );
         if ($message['direction'] == crmMessageModel::DIRECTION_IN) {
-            $normalized_responsible_contact_id = $this->getNormalizedResponsibleContactId();
-            $data['user_contact_id'] = $normalized_responsible_contact_id > 0 ? $normalized_responsible_contact_id : null;
-            if (!$data['user_contact_id'] && $message['contact_id']) {
-                $cm = new waContactModel();
-                $crm_user_id = $cm->select('crm_user_id')->where('id = ?', $message['contact_id'])->fetchField();
-                if ($crm_user_id > 0) {
-                    $data['user_contact_id'] = $crm_user_id;
-                }
+            $cm = new waContactModel();
+            $crm_user_id = $cm->select('crm_user_id')->where('id = ?', $message['contact_id'])->fetchField();
+            if ($crm_user_id > 0) {
+                $data['user_contact_id'] = $crm_user_id;
+            } else {
+                $normalized_responsible_contact_id = $this->getNormalizedResponsibleContactId();
+                $data['user_contact_id'] = $normalized_responsible_contact_id > 0 ? $normalized_responsible_contact_id : null;
+
             }
         }
         $id = $this->getConversationModel()->add($data, crmConversationModel::TYPE_IM);

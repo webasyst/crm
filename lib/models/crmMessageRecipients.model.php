@@ -106,7 +106,7 @@ class crmMessageRecipientsModel extends crmModel
      * @param array $message_ids
      * @return array
      */
-    public function getRecipientsByMessages($message_ids, $type = null)
+    public function getRecipientsByMessages($message_ids, $type = null, $key = null)
     {
         $condition = '';
         if ($type) {
@@ -116,7 +116,7 @@ class crmMessageRecipientsModel extends crmModel
                 FROM {$this->table}
                 WHERE message_id IN('".join("','", $this->escape($message_ids))."') $condition";
 
-        $result = $this->query($sql)->fetchAll();
+        $result = $this->query($sql)->fetchAll($key);
         if (!$result) {
             return array();
         }

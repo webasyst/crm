@@ -22,12 +22,18 @@ var CRMSettingsShop = ( function($) {
     CRMSettingsShop.prototype.initClass = function () {
         var that = this;
         //
-        that.initSubmit();
+        that.initToggle();
         //
+        that.initSubmit();
+        // 
         that.initStoreToggle();
         //
         that.initFooterToggle();
     };
+
+    CRMSettingsShop.prototype.initToggle = function() {
+        $("#toggle-menu").waToggle();
+    }
 
     CRMSettingsShop.prototype.initStoreToggle = function() {
         var that = this,
@@ -35,23 +41,28 @@ var CRMSettingsShop = ( function($) {
 
         $wrappers.each(function () {
             var $wrapper = $(this),
-                $toggle = $wrapper.find(".js-ibutton");
+                $toggle = $wrapper.find("#c-storefront-switch");
 
-            $toggle.iButton({
-                labelOn: "",
-                labelOff: "",
-                classContainer: "c-ibutton ibutton-container mini"
-            });
+                $toggle.waSwitch({
+                    ready: function (wa_switch) {
+                        let $label = wa_switch.$wrapper.siblings('label');
+                        wa_switch.$label = $label;
+                        wa_switch.active_text = $label.data('active-text');
+                        wa_switch.inactive_text = $label.data('inactive-text');
+                    },
+                    change: function(active, wa_switch) {
+                        var $block = $toggle.closest('.c-storefront').find('.c-storefront-params-block'); 
+                        if (active) {
+                        wa_switch.$label.text(wa_switch.active_text);
+                        $block.slideDown(300);
+                        }
+                        else {
+                         wa_switch.$label.text(wa_switch.inactive_text); 
+                         $block.slideUp(300);
+                        }
+                    }
+                });
 
-            $toggle.on("change", function() {
-                var $block = $toggle.closest('.c-storefront').find('.c-storefront-params-block');
-                var is_checked = ( $toggle.attr("checked") === "checked" );
-                if (is_checked) {
-                    $block.show();
-                } else {
-                    $block.hide();
-                }
-            });
         });
     };
 
@@ -61,9 +72,9 @@ var CRMSettingsShop = ( function($) {
             $button = that.$button,
             $loading = $form.find('.c-loading'),
             url = $form.attr('action');
+
         $form.submit(function (e) {
             e.preventDefault();
-
             $loading.show();
             $button.attr('disabled', true);
 
@@ -91,10 +102,10 @@ var CRMSettingsShop = ( function($) {
 
         function toggle(changed) {
             if (changed) {
-                $button.removeClass("green").addClass("yellow");
+                $button.addClass("yellow");
                 $footer.addClass(active_class);
             } else {
-                $button.removeClass("yellow").addClass("green");
+                $button.removeClass("yellow");
                 $footer.removeClass(active_class);
             }
         }
@@ -126,12 +137,18 @@ var CRMSettingsShopWorkflowPage = ( function($) {
         //
         $.crm.renderSVG(that.$wrapper);
         //
+        that.initToggle();
+        //
         that.initTabs();
         //
         that.initFooterToggle();
         //
         that.initSubmit();
     };
+
+    CRMSettingsShopWorkflowPage.prototype.initToggle = function() {
+        $("#toggle-menu").waToggle();
+    }
 
     CRMSettingsShopWorkflowPage.prototype.initTabs = function() {
         var that = this,
@@ -149,8 +166,8 @@ var CRMSettingsShopWorkflowPage = ( function($) {
         //
 
         function initSetWidth() {
-            var $window = $(window),
-                other_w = $section.find(".c-add-wrapper").outerWidth(true);
+            var $window = $(window);
+               // other_w = $section.find(".c-add-wrapper").outerWidth();
 
             setWidth();
 
@@ -167,7 +184,7 @@ var CRMSettingsShopWorkflowPage = ( function($) {
 
             function setWidth() {
                 var section_w = $section.width(),
-                    max_w = section_w - other_w - 10;
+                    max_w = section_w;
 
                 $funnels.css("max-width", max_w + "px");
             }
@@ -207,10 +224,10 @@ var CRMSettingsShopWorkflowPage = ( function($) {
 
         function toggle(changed) {
             if (changed) {
-                $button.removeClass("green").addClass("yellow");
+                $button.addClass("yellow");
                 $footer.addClass(active_class);
             } else {
-                $button.removeClass("yellow").addClass("green");
+                $button.removeClass("yellow");
                 $footer.removeClass(active_class);
             }
         }
@@ -226,7 +243,6 @@ var CRMSettingsShopWorkflowPage = ( function($) {
 
         function onSubmit(event) {
             event.preventDefault();
-
             var formData = getData();
 
             if (formData.errors.length) {
@@ -284,10 +300,14 @@ var CRMSettingsShopWorkflowPage = ( function($) {
         }
 
         function request(data) {
+
             if (!is_locked) {
                 is_locked = true;
-
-                var href = $.crm.app_url + "?module=settings&action=shopWorkflowSave";
+ 
+                var href = $.crm.app_url + "?module=settings&action=shopWorkflowSave",
+                    $form = that.$form,
+                    $loading = $form.find('.c-loading');
+                    $loading.show();
 
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
@@ -297,6 +317,7 @@ var CRMSettingsShopWorkflowPage = ( function($) {
                     }
                 }, "json").always( function() {
                     is_locked = false;
+                    $loading.hide();
                 });
             }
         }

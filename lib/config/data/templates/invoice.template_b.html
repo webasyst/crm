@@ -35,7 +35,7 @@
     </header>
 
     <section class="c-info-section c-layout fixed">
-        <h1 class="line">[`Invoice`]: <span class="c-header" {if !empty($_color)}style="color: {$_color};"{/if}>[`#`]{$invoice.number|escape}</span> [`issued on`] <span class="c-header" {if !empty($_color)}style="color: {$_color};"{/if}>{$invoice.invoice_date|wa_date}</span></h1>
+        <h1 class="line">[`Invoice`]: <span class="c-header" {if !empty($_color)}style="color: {$_color|escape};"{/if}>[`#`]{$invoice.number|escape}</span> [`issued on`] <span class="c-header" {if !empty($_color)}style="color: {$_color|escape};"{/if}>{$invoice.invoice_date|wa_date}</span></h1>
         <p class="line">
             {strip}
                 [`Provider`]:
@@ -52,7 +52,7 @@
                 {$customer.name|escape}
             {/if}
             {$_city = $customer->get('address:city', 'default')}
-            {if $_city}{$_city}{/if}
+            {if $_city}{$_city|escape}{/if}
         </p>
         {if !empty($invoice.due_date)}
             <p class="line">{$invoice.due_date|wa_date}</p>
@@ -63,12 +63,12 @@
         <table>
             <thead>
             <tr>
-                <td class="c-header c-number" {if !empty($_color)}style="color: {$_color};"{/if}>№</td>
-                <td class="c-header c-name" {if !empty($_color)}style="color: {$_color};"{/if}>[`Product or service`]</td>
-                <td class="c-header c-amount right" {if !empty($_color)}style="color: {$_color};"{/if}>[`Qty`]</td>
-                <td class="c-header c-price right" {if !empty($_color)}style="color: {$_color};"{/if}>[`Price`]</td>
-                <td class="c-header c-tax right" {if !empty($_color)}style="color: {$_color};"{/if}>{$invoice.tax_name}</td>
-                <td class="c-header c-total right" {if !empty($_color)}style="color: {$_color};"{/if}>[`Amount`]</td>
+                <td class="c-header c-number" {if !empty($_color)}style="color: {$_color|escape};"{/if}>№</td>
+                <td class="c-header c-name" {if !empty($_color)}style="color: {$_color|escape};"{/if}>[`Product or service`]</td>
+                <td class="c-header c-amount right" {if !empty($_color)}style="color: {$_color|escape};"{/if}>[`Qty`]</td>
+                <td class="c-header c-price right" {if !empty($_color)}style="color: {$_color|escape};"{/if}>[`Price`]</td>
+                <td class="c-header c-tax right" {if !empty($_color)}style="color: {$_color|escape};"{/if}>{$invoice.tax_name}</td>
+                <td class="c-header c-total right" {if !empty($_color)}style="color: {$_color|escape};"{/if}>[`Amount`]</td>
             </tr>
             </thead>
             <tbody>
@@ -141,7 +141,7 @@
 
     {if !empty($invoice.comment)}
         <div class="c-comment-wrapper">
-            <div class="c-header" {if !empty($_color)}style="color: {$_color};"{/if}>[`Comment`]</div>
+            <div class="c-header" {if !empty($_color)}style="color: {$_color|escape};"{/if}>[`Comment`]</div>
             <p>{$invoice.comment|default:""}</p>
         </div>
     {/if}

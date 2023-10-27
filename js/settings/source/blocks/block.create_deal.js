@@ -34,11 +34,11 @@ var CRMSettingsSourceCreateDealBlock = ( function($) {
     CRMSettingsSourceCreateDealBlock.prototype.initClass = function() {
         var that = this;
         that.$funnel.on('change' + that.ns, function () {
-            var $li = that.$stage.closest('li');
-            var $item = $li.find('.js-visible-link .js-text');
-            $li.find('.menu-v.with-icons').remove();
+            var $li = that.$stage.closest('.dropdown');
+            var $item = $li.find('.js-visible-link');
+            $li.find('.menu.with-icons').remove();
             $item.find('.funnel-state').remove();
-            $item.prepend('<i class="icon16 loading">');
+            $item.prepend('<span class="icon size-16"><i class="fas fa-spinner fa-spin"></i></span>');
             that.reload();
         });
         that.initFunnelsSelect();
@@ -50,12 +50,12 @@ var CRMSettingsSourceCreateDealBlock = ( function($) {
             $wrapper = that.$wrapper.find(".js-funnels-list"),
             $visibleLink = $wrapper.find(".js-visible-link"),
             $field = $wrapper.find(".js-field"),
-            $menu = $wrapper.find(".menu-v");
+            $menu = $wrapper.find(".menu");
 
         $menu.on("click", "a", function () {
             var $link = $(this);
 
-            $visibleLink.find(".js-text").html($link.html());
+            $visibleLink.html($link.html());
 
             $menu.find(".selected").removeClass("selected");
             $link.closest("li").addClass("selected");
@@ -69,7 +69,7 @@ var CRMSettingsSourceCreateDealBlock = ( function($) {
             $field.val(id).trigger("change");
         });
 
-        $.crm.renderSVG($wrapper);
+        //$.crm.renderSVG($wrapper);
     };
 
     CRMSettingsSourceCreateDealBlock.prototype.initStagesSelect = function() {
@@ -77,11 +77,11 @@ var CRMSettingsSourceCreateDealBlock = ( function($) {
             $wrapper = that.$wrapper.find(".js-stages-list"),
             $visibleLink = $wrapper.find(".js-visible-link"),
             $field = $wrapper.find(".js-field"),
-            $menu = $wrapper.find(".menu-v");
+            $menu = $wrapper.find(".menu");
 
         $menu.on("click", "a", function () {
             var $link = $(this);
-            $visibleLink.find(".js-text").html($link.html());
+            $visibleLink.html($link.html());
 
             $menu.find(".selected").removeClass("selected");
             $link.closest("li").addClass("selected");
@@ -95,7 +95,7 @@ var CRMSettingsSourceCreateDealBlock = ( function($) {
             $field.val(id).trigger("change");
         });
 
-        $.crm.renderSVG($wrapper);
+        //$.crm.renderSVG($wrapper);
     };
 
     CRMSettingsSourceCreateDealBlock.prototype.reload = function () {

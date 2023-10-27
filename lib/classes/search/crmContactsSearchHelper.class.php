@@ -22,7 +22,20 @@ class crmContactsSearchHelper
                 }
             }
             $data = array_merge(self::getRawConfig(), $event_result);
-            self::$config = $data;
+            if ($data) {
+                $items = [];
+                $enabled = [
+                    'contact_info',
+                    'activity'
+                ];
+                $user = wa()->getUser();
+                foreach ($data as $app_name => $_item) {
+                    if (in_array($app_name, $enabled) || $user->getRights($app_name)) {
+                        $items[$app_name] = $_item;
+                    }
+                }
+                self::$config = $items;
+            }
         }
 
         $data = self::$config;

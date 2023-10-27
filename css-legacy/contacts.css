@@ -1,0 +1,72 @@
+ul.c-tags-list {
+  margin: 0;
+  padding: 0;
+}
+ul.c-tags-list li {
+  display: inline-block;
+  vertical-align: top;
+  margin: 2px;
+  padding: 0;
+}
+ul.c-tags-list li .c-tag {
+  display: inline-block;
+  padding: 2px 4px;
+  margin: 0;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 2px;
+  font-size: 0.8em;
+  line-height: 1.2em;
+  word-wrap: break-word;
+  background: #f0f0f0;
+  color: #666;
+}
+.c-users-list {
+  margin: 0;
+  padding: 0;
+}
+.c-users-list .c-user-wrapper {
+  list-style: none;
+  text-align: center;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.c-users-list .c-user-wrapper .c-user-block {
+  line-height: 18px;
+}
+.c-users-list .c-user-wrapper .c-user-block .c-userpic-wrapper {
+  font-size: 0;
+  line-height: 0;
+  max-width: 144px;
+  margin: 0 auto 2px;
+}
+.c-users-list .c-user-wrapper .c-user-block .c-userpic-wrapper .c-userpic {
+  width: 100%;
+  height: auto;
+  border-radius: 50%;
+}
+.c-users-list .c-user-wrapper .c-user-block .c-name {
+  word-wrap: break-word;
+  margin: 0 0 6px;
+}
+.c-users-list .c-user-wrapper .c-user-block .c-name .user-badge {
+  margin: 6px 2px 0;
+}
+.c-users-list .c-user-wrapper .c-user-block .c-job {
+  margin: 6px 0 0;
+  font-size: 90%;
+  line-height: 1.3em;
+}
+.c-users-list .c-user-wrapper .c-user-block .c-login {
+  color: #bebfc5;
+  margin: 6px 0 0;
+}
+.c-users-list .c-user-wrapper .c-user-block .c-company {
+  display: block;
+  color: #aaa;
+  margin: 0;
+  font-weight: normal;
+}

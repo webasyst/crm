@@ -1,0 +1,29 @@
+{$class_id = 'crm-contact-operation-exclude-from-list-wrapper'}
+{$wrapper_id = uniqid($class_id)}
+
+<div class="crm-dialog-wrapper {$class_id}" id="{$wrapper_id}">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>[`Exclude from list`]</h1>
+        </header>
+        <div class="crm-dialog-content">
+            <div class="crm-start-block">
+                <p>
+                    {sprintf(_w('%d selected contact will be excluded from list “%s”', '%d selected contacts will be excluded from list “%s”', $count, false), $count, $segment.name|escape)}
+                </p>
+            </div>
+            <div class="crm-process-block" style="display: none;">
+                <p>
+                    [`Excluding now. Please wait...`]<i class="icon16 loading"></i>
+                </p>
+            </div>
+        </div>
+        <footer class="crm-dialog-footer">
+            <input class="button green js-save" type="button" value="[`Start exclude`]">
+            <i class="icon16 loading crm-loading" style="display: none;"></i>
+            <span style="margin: 0 4px;">[`or`]</span>
+            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+        </footer>
+    </div>
+</div>

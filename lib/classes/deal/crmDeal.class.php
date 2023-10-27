@@ -139,7 +139,13 @@ class crmDeal
                 'contact_id = -'.(int)$deal_id.' AND complete_datetime IS NULL'
             )->order('due_date, ISNULL(due_datetime), due_datetime')->limit(1)->fetchAssoc();
             if ($reminder) {
-                $reminder_datetime = $reminder['due_datetime'] ? $reminder['due_datetime'] : ($reminder['due_date'].' 23:59:59');
+                if (!empty($reminder['due_datetime'])) {
+                    $reminder_datetime = $reminder['due_datetime'];
+                } elseif (!empty($reminder['due_date'])) {
+                    $reminder_datetime = $reminder['due_date'].' 23:59:59';
+                } else {
+                    $reminder_datetime = null;
+                }
                 $dm->updateById($deal_id, array('reminder_datetime' => $reminder_datetime));
             } else {
                 $dm->updateById($deal_id, array('reminder_datetime' => null));
@@ -195,33 +201,37 @@ class crmDeal
         if (waConfig::get('is_template')) {
             return;
         }
+        $lm = new crmLogModel();
         $dm = new crmDealModel();
         $now = date('Y-m-d H:i:s');
 
         if ($action == 'WON') {
-            $dm->updateById($deal_id, array(
-                'status_id' => 'WON',
-            ));
-            $action_id = 'deal_won';
+            $action_id  = 'deal_won';
+            $crm_log_id = $lm->log($action_id, $deal_id * -1, $deal_id);
+            $dm->updateById($deal_id, [
+                'status_id'         => 'WON',
+                'closed_datetime'   => $now,
+                'update_datetime'   => $now,
+                'reminder_datetime' => null,
+                'crm_log_id'        => $crm_log_id
+            ]);
         } else {
+            $action_id  = 'deal_lost';
+            $crm_log_id = $lm->log($action_id, $deal_id * -1, $deal_id);
             $dlm = new crmDealLostModel();
             if ($lost_id && !$lost_text && ($lost = $dlm->getById($lost_id))) {
                 $lost_text = $lost['name'];
             }
-            $dm->updateById($deal_id, array(
-                'status_id' => 'LOST',
-                'lost_id'   => $lost_id,
-                'lost_text' => $lost_text,
-            ));
-            $action_id = 'deal_lost';
+            $dm->updateById($deal_id, [
+                'status_id'         => 'LOST',
+                'lost_id'           => $lost_id,
+                'lost_text'         => $lost_text,
+                'closed_datetime'   => $now,
+                'update_datetime'   => $now,
+                'reminder_datetime' => null,
+                'crm_log_id'        => $crm_log_id
+            ]);
         }
-        $dm->updateById($deal_id, array(
-            'closed_datetime'   => $now,
-            'update_datetime'   => $now,
-            'reminder_datetime' => null,
-        ));
-        $lm = new crmLogModel();
-        $lm->log($action_id, $deal_id * -1);
         crmHelper::logAction($action_id, array('deal_id' => $deal_id));
 
         $rm = new crmReminderModel();
@@ -246,7 +256,15 @@ class crmDeal
         foreach ($deal_stages as $d) {
             $dsm->updateById($d['deal_stage_id'], array('overdue_datetime' => date('Y-m-d H:i:s')));
 
-            $params = array('deal' => $d);
+            $crm_log_id = (new crmLogModel())->log(
+                'deal_stage_overdue',
+                -1 * ifset($d, 'id', 0)
+            );
+            $params = [
+                'deal'       => $d,
+                'crm_log_id' => $crm_log_id
+            ];
+
             /**
              * @event deal_stage_overdue
              * @param array $params

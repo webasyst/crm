@@ -1,0 +1,26 @@
+<div class="crm-dialog-wrapper c-deal-change-workflow-dialog" id="c-deal-change-workflow-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>[`Order`] {$order_number} — {$action_name}</h1>
+        </header>
+
+        <div class="crm-dialog-content">{$html}</div>
+
+        <footer class="crm-dialog-footer">
+            <div class="crm-actions">
+                <input class="button green js-submit-dialog-button" type="button" value="[`Submit`]">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="js-close-dialog js-cancel-dialog" href="javascript:void(0);">[`cancel`]</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMDealChangeWorkflowDialog({
+                $wrapper: $("#c-deal-change-workflow-dialog")
+            });
+        })(jQuery);
+    </script>
+</div>

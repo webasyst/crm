@@ -9,7 +9,7 @@
         </p>
 
         <p class="red bold">
-            <i class="icon16 exclamation"></i> [`Without a <tt>cron</tt> job set up, new mail is captured and deals are executed only as long as you keep CRM open in your browser.`]
+            <i class="fas fa-exclamation exclamation text-orange"></i> [`Without a <tt>cron</tt> job set up, new mail is captured and deals are executed only as long as you keep CRM open in your browser.`]
         </p>
 
         <p>{sprintf_wp(
@@ -17,7 +17,7 @@
             _w('https://developers.webasyst.com/installation/tips/cron/')
             )}</p>
 
-        <p class="bold"><code>{$_cron_command}</code></p>
+        <p class="bold mobile-scroll"><code>{$_cron_command}</code></p>
 
         {if $_last_cron_time}
             <p>[`Last execution time:`] {$_last_cron_time|wa_date:'datetime'}</p>
@@ -26,7 +26,7 @@
 
     <div class="c-cron-ok-block {if $_cli_ok}c-is-cli-ok{/if}">
         <p>
-            <i class="icon16 yes"></i>
+            <i class="fas fa-check yes text-green"></i>
             [`<tt>Cron</tt> job required for automated email capture and execution of deals is set up properly.`]
             [`Last execution time:`]
             {$_last_cron_time|wa_date:'datetime'}
@@ -38,6 +38,6 @@
             '</a>'
             )}</p>
 
-        <p class="bold"><code>{$_cron_command}</code></p>
+        <p class="bold mobile-scroll"><code>{$_cron_command}</code></p>
     </div>
 </section>

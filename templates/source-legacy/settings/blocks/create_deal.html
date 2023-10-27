@@ -1,0 +1,26 @@
+{include file="./helpers.html" inline}
+
+{$namespace = $namespace|default:''}
+
+{capture assign=html}
+    {$class_id = 'js-deal-section'}
+    {$wrapper_id = uniqid($class_id)}
+    <section class="c-deal-section {$class_id}" id="{$wrapper_id}">
+        <div class="crm-fields">
+            {include file="./create_deal.inc.html"
+                _inc_options=[
+                    'id' => $id,
+                    'class_id' => $class_id,
+                    'wrapper_id' => $wrapper_id
+                ]
+            inline}
+        </div>
+</section>
+{/capture}
+
+{render_optional_block options=[
+    'name' => '[`Create deal`]',
+    'checkbox_name' => {input_name id='params|create_deal'},
+    'is_checked' => $source.params.create_deal|default:'',
+    'html' => $html
+]}

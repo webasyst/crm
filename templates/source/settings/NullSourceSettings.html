@@ -12,16 +12,18 @@
             {$source.provider|default:''|escape}
         {/if}
     </h1>
-    <p class="red bold">
-        <p>
-            <i class="icon16 exclamation"></i>
-            [`No settings page for this source`]
-        </p>
-    </p>
+    <div class="alert small custom-mt-16 custom-mb-4">
+        <div class="flexbox space-8">
+            <span class=""><i class="fas fa-exclamation-triangle text-red"></i></span>
+            <div class="wide">                  
+                <span>[`No settings page for this source`]</span>
+            </div>
+        </div>
+    </div>
     <div class="">
         {if $source.id > 0}
             <input type="button" class="button red js-c-delete-source" value="[`Delete this source`]"> [`or`]
-            <a class="inline-link" href="{$wa_app_url}settings/sources/"><b><i>[`cancel`]</i></b></a>
+            <a class="inline-link" href="{$wa_app_url}settings/sources/">[`cancel`]</a>
         {else}
             <a class="button gray" href="{$wa_app_url}settings/sources/">[`Cancel`]</a>
         {/if}

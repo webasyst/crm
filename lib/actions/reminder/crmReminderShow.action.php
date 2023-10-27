@@ -11,6 +11,10 @@ class crmReminderShowAction extends crmReminderAction
 
         parent::execute();
 
-        $this->setTemplate('templates/actions/reminder/Reminder.html');
+        if (wa('crm')->whichUI('crm') === '1.3') {
+            $this->setTemplate('templates/actions-legacy/reminder/Reminder.html');
+        } else {
+            $this->setTemplate('templates/actions/reminder/Reminder.html');
+        }
     }
 }

@@ -2,8 +2,7 @@
 {$_is_admin = $wa->user()->isAdmin('crm')}
 
 {include file="./MessageListHelper.inc.html" inline}
-
-<div class="c-messages-page shadowed js-messages-page" id="c-messages-page">
+<div class="c-messages-conversation-list shadowed js-messages-conversation-list" id="c-messages-conversation-list">
     <label id="js-crm-message-page"></label>
     <header class="c-messages-header">
         <div class="c-layout">
@@ -105,15 +104,11 @@
                 <div class="c-is-cli-ok" style="text-align: center;">
                     <p class="bold">[`No message sources configured.`]</p>
                     <p>
-                        {if $is_admin}
-                        {sprintf_wp(
-                        'To receive and handle messages from clients %sset up a message source%s',
-                        sprintf('<a href="%s">', "`$crm_app_url`settings/sources/email/"),'</a>'
-                        )}
-                        {else}
-                        {sprintf_wp(
-                        'To receive and handle messages from clients %sset up a message source%s','',''
-                        )}
+                        [`To receive and handle messages from clients set up a message source`]
+                        {if $_is_admin}
+                            <br>
+                            <a href="{$crm_app_url}settings/message-sources/email/">[`Email`]</a>
+                            <a href="{$crm_app_url}settings/message-sources/im/">[`Messengers`]</a>
                         {/if}
                     </p>
                 </div>
@@ -311,7 +306,7 @@
             $.crm.title.set({$_title|json_encode});
 
             new CRMMessagesPage({
-                $wrapper: $("#c-messages-page"),
+                $wrapper: $("#c-messages-conversation-list"),
                 page: "{if !empty($page) && $page > 1}{$page}{/if}",
                 view: "all",
                 locales: {

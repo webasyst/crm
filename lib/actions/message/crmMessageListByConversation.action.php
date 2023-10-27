@@ -2,6 +2,8 @@
 
 class crmMessageListByConversationAction extends crmBackendViewAction
 {
+    const USERPIC = 32;
+
     public function execute()
     {
         $mm = new crmMessageModel();
@@ -10,8 +12,19 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         $asm = new waAppSettingsModel();
 
         $page = waRequest::request('page', null, waRequest::TYPE_INT);
+        $page_of_item = waRequest::request('pt', null, waRequest::TYPE_INT);
+        $contact_id = waRequest::request('contact', null, waRequest::TYPE_INT);
+        $deal_id = waRequest::request('deal', null, waRequest::TYPE_INT);
 
-        $list_params['check_rights'] = true;
+        $list_params = [
+            'check_rights' => true,
+            'contact_id'   => $contact_id,
+            'limit'        => crmConfig::ROWS_PER_PAGE,
+            'offset'       => max(0, $page - 1) * crmConfig::ROWS_PER_PAGE
+        ];
+        if (wa()->whichUI('crm') !== '1.3') {
+            $list_params['deal_id'] = $deal_id;
+        }
 
         // prepare filters
         $this->prepareFilterByResponsible($list_params);
@@ -19,17 +32,16 @@ class crmMessageListByConversationAction extends crmBackendViewAction
 
         wa()->getUser()->setSettings("crm", "messages_max_id", $mm->countByResponsible("messages_max_id"));
 
-        $list_params['limit'] = crmConfig::ROWS_PER_PAGE;
-        $list_params['offset'] = max(0, $page - 1) * $list_params['limit'];
-
         $total_count = 0;
 
         $conversations = $cm->getList($list_params, $total_count);
         $this->workup($conversations);
 
-
         $deal_ids = array();
         $contact_ids = array();
+        if (!empty($contact_id)) {
+            $contact_ids[$contact_id] = $contact_id;
+        }
         $last_message_id = 0;
         foreach ($conversations as $c) {
             if ($c['deal_id']) {
@@ -44,28 +56,46 @@ class crmMessageListByConversationAction extends crmBackendViewAction
             exit;
         }
 
-        //
-
-
         // Get Deals
         $deals = $this->getDeals($deal_ids);
 
         // Get Sources
         $cs = new crmSourceModel();
         $active_sources = $cs->select("*")->where("type IN ('".crmSourceModel::TYPE_EMAIL."','".crmSourceModel::TYPE_IM."') AND disabled=0")->fetchAll();
+        $pages_count = ceil($total_count / $list_params['limit']);
+        $current_page = ceil($list_params['offset'] / $list_params['limit']) + 1;
+        $contacts = $this->getContacts($contact_ids);
+
+        $contact = [];
+        if ($contact_id && isset($contacts[$contact_id])) {
+            $email = $contacts[$contact_id]->getFirst('email');
+            $socialnetwork = $contacts[$contact_id]->getFirst('socialnetwork');
+            $contact = [
+                'name'    => $contacts[$contact_id]->getName(),
+                'userpic' => rtrim(wa()->getConfig()->getHostUrl(), '/').$contacts[$contact_id]->getPhoto(self::USERPIC),
+                'email'   => ifempty($email, 'value', ''),
+                'im'      => ifempty($socialnetwork, 'value', '')
+            ];
+        }
 
         $this->view->assign(array(
             'conversations'             => $conversations,
             'list_params'               => $list_params,
-            'contacts'                  => $this->getContacts($contact_ids),
+            'contacts_all'              => $contacts,
+            'contacts'                  => $contacts,
+            'contact'                   => $contact,
             'deals'                     => $deals,
             'funnels'                   => $this->getFunnels($deals),
             'total_count'               => $total_count,
             'page'                      => $page,
+            'pages_count'               => $pages_count,
+            'current_page'              => $current_page,
+            'page_of_item'              => $page_of_item,        
             'available_funnel'          => $fm->getAvailableFunnel(),
             'message_ts'                => $asm->get('crm', 'message_ts'),
             'active_sources'            => $active_sources,
             'crm_app_url'               => wa()->getAppUrl('crm'),
+            'site_url'                  => wa()->getRootUrl(true),
             'last_message_id'           => $last_message_id,
         ));
 

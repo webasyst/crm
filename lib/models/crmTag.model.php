@@ -9,9 +9,13 @@ class crmTagModel extends crmModel
     const CLOUD_MAX_OPACITY = 100;
     const CLOUD_MIN_OPACITY = 30;
 
-    public function getCloud($key = null, $limit = 0)
+    public function getCloud($key = null, $limit = 0, $tag_names = [])
     {
-        $query = $this->where('count > 0');
+        if (empty($tag_names)) {
+            $query = $this->where('count > 0');
+        } else {
+            $query = $this->where("count > 0 AND name IN (?)", $tag_names);
+        }
         if ($limit) {
             $query->order('count DESC');
             $query->limit((int)$limit);
@@ -43,6 +47,7 @@ class crmTagModel extends crmModel
                     $tag['size'] = ceil((self::CLOUD_MAX_SIZE + self::CLOUD_MIN_SIZE) / 2);
                     $tag['opacity'] = number_format(self::CLOUD_MAX_OPACITY, 2, '.', '');
                 }
+                /* Кажется это нигде не используется
                 if (strpos($tag['name'], '/') !== false) {
                     $tag['uri_name'] = explode('/', $tag['name']);
                     $tag['uri_name'] = array_map('urlencode', $tag['uri_name']);
@@ -50,9 +55,18 @@ class crmTagModel extends crmModel
                 } else {
                     $tag['uri_name'] = urlencode($tag['name']);
                 }
+                */
             }
             unset($tag);
         }
+        return $tags;
+    }
+
+    public function getCloudFast($key = null)
+    {
+        $query = $this->where('count > 0');
+        $query->order('name');
+        $tags = $query->fetchAll($key);
         return $tags;
     }
 
@@ -63,6 +77,17 @@ class crmTagModel extends crmModel
     public function getPopularTags($limit = 10)
     {
         return $this->getAllOrderedAndLimited('count DESC', $limit, 'id');
+    }
+
+    /**
+     * @param int $limit
+     * @return array
+     */
+    public function getPopularTagsSort($limit = 10)
+    {
+        $tags = $this->getAllOrderedAndLimited('count DESC', $limit, 'id');
+        uasort($tags, function($a, $b) { return mb_strtolower($a['name'])>mb_strtolower($b['name']); });
+        return $tags;
     }
 
     /**

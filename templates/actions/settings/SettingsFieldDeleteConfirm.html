@@ -2,20 +2,20 @@
 
 <style>
     .crm-delete-field-confirm-dialog-wrapper .error-text { color: red; font-weight: bold; }
-    .crm-delete-field-confirm-dialog-wrapper .crm-dialog-block { min-width: 600px; }
+    .crm-delete-field-confirm-dialog-wrapper .dialog-body { min-width: 600px; }
 </style>
 
-<div class="crm-dialog-wrapper crm-delete-field-confirm-dialog-wrapper" id="{$wrapper_id}">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
-        <header class="crm-dialog-header">
-            <h1>[`Delete field`]</h1>
+<div class="dialog crm-delete-field-confirm-dialog-wrapper" id="{$wrapper_id}">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <header class="dialog-header">
+            <h1>[`Delete field`] {$name|escape}</h1>
         </header>
 
         <form method="post" action="{$wa_app_url}?module=settings&action=fieldDelete">
-            <div class="crm-dialog-content">
+            <div class="dialog-content">
                 {if !$count}
-                    <p>[`No data in the field`] {$name}.</p>
+                    <p>[`No data in the field`]</p>
                     <p>[`Deleting this field will not cause a loss of any contact information.`]</p>
                 {else}
                     <p class="error-text">{_w(
@@ -31,11 +31,10 @@
                 <em class="errormsg"></em>
             </div>
 
-            <footer class="crm-dialog-footer">
+            <footer class="dialog-footer">
                 <div class="crm-actions">
                     <input class="button red crm-button" type="submit" value="[`Delete field`]">
-                    <span style="margin: 0 4px;">[`or`]</span>
-                    <a class="crm-cancel" href="javascript:void(0);">[`cancel`]</a>
+                    <a class="button light-gray crm-cancel" href="javascript:void(0);">[`Cancel`]</a>
                     <input type="hidden" name="id" value="{$id}">
                     {$wa->csrf()}
                 </div>

@@ -7,9 +7,9 @@ class crmContactIdAction extends crmBackendViewAction
     /**
      * @throws waRightsException
      */
-    public function execute()
+    public function execute($contact_id_ext = null)
     {
-        $contact_id = waRequest::param('id', null, waRequest::TYPE_INT);
+        $contact_id = ($contact_id_ext ?: waRequest::param('id', null, waRequest::TYPE_INT));
         if (!$contact_id) {
             $this->redirect(wa()->getUrl());
         }
@@ -17,6 +17,9 @@ class crmContactIdAction extends crmBackendViewAction
         $rights = new crmRights();
         $contact = new waContact($contact_id);
 
+        if ($contact_id_ext && !$contact->exists()) {
+            return;
+        }
         if (!$rights->contactVaultId($contact['crm_vault_id'])) {
             $this->redirect(wa()->getUrl());
         }
@@ -94,7 +97,6 @@ class crmContactIdAction extends crmBackendViewAction
             'is_sms_configured'  => $this->isSMSConfigured(),
             'duplicate_counters' => $duplicate_counters
         ));
-
     }
 
     protected function getContactTabs($contact_id)

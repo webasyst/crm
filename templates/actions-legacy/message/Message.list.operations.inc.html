@@ -1,0 +1,23 @@
+<div class="crm-operations-wrapper js-operations-wrapper">
+    <ul class="crm-operations-list menu-h">
+        {$delete_title = $delete_title|default:'[`Delete`]'}
+        {$operations = [
+        ['id' => 'associate', 'icon' => 'add-to-list', 'name' => '[`Associate with a deal`]'],
+        ['id' => 'detach', 'icon' => 'no', 'name' => '[`Detach from deals`]'],
+        ['id' => 'read', 'icon' => 'archive', 'name' => '[`Mark messages as read`]'],
+        ['id' => 'unread', 'icon' => 'archive-text', 'name' => '[`Mark messages as unread`]'],
+        ['id' => 'delete', 'icon' => 'delete', 'name' => $delete_title]
+        ]}
+        <li class="crm-operation-li crm-checkbox-wrapper">
+            <input class="crm-checkbox crm-checkbox-all js-checkbox-all" type="checkbox">
+        </li>
+    {foreach $operations as $op}
+        {if $op.id === 'associate'}{continue}{/if}
+        <li class="crm-operation-li" data-id="{$op.id}">
+            <a href="javascript:void(0);" class="crm-operation-link" data-id="{$op.id}">
+                <i class="icon16 {$op.icon}"></i> {$op.name} <span class="crm-count">(1)</span>
+            </a>
+        </li>
+    {/foreach}
+    </ul>
+</div>

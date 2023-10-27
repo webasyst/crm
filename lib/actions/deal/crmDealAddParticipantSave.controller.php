@@ -35,11 +35,18 @@ class crmDealAddParticipantSaveController extends crmJsonController
         $c = new waContact($contact_id);
 
         if ($dm->addParticipants($deal_id, array($contact_id), crmDealParticipantsModel::ROLE_CLIENT, ifset($participant['label']))) {
-
             $action = 'deal_addcontact';
             $this->logAction($action, array('deal_id' => $deal_id), $contact_id);
             $lm = new crmLogModel();
-            $lm->log($action, $deal_id * -1, $contact_id, null, $c->getName());
+            $lm->log(
+                $action,
+                $deal_id * -1,
+                $deal_id,
+                null,
+                $c->getName(),
+                null,
+                ['contact_id' => $contact_id]
+            );
         } else {
             $this->error();
         }

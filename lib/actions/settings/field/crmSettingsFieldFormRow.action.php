@@ -72,6 +72,7 @@ class crmSettingsFieldFormRowAction extends waViewAction
         $this->view->assign('f', $f);
         $this->view->assign('fid', $fid);
         $this->view->assign('form', $form);
+        $this->view->assign('default_value');
         $this->view->assign('parent', $parent);
         $this->view->assign('prefix', $prefix);
         $this->view->assign('uniqid', str_replace('.', '-', 'f'.uniqid('f', true)));

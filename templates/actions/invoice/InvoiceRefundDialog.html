@@ -1,12 +1,12 @@
-<div class="crm-dialog-wrapper c-invoice-refund-dialog" id="js-invoice-refund-dialog">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
+<div class="dialog c-invoice-refund-dialog" id="js-invoice-refund-dialog">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
         <form>
-            <header class="crm-dialog-header">
+            <header class="dialog-header">
                 <h1>[`Refund payment for invoice`] [`#`]{$invoice.number|escape}</h1>
             </header>
 
-            <div class="crm-dialog-content" style="min-height: 100px;">
+            <div class="dialog-content" style="min-height: 100px;">
                 <p>[`Operation can not be undone.`]</p>
 
                 <!-- plugin hook: 'backend_invoice_refund' -->
@@ -19,10 +19,9 @@
                 <input type="hidden" name="action" value="refund">
             </div>
 
-            <footer class="crm-dialog-footer">
-                <input class="button red" type="submit" value="[`Refund`]">
-                <span style="margin: 0 4px;">[`or`]</span>
-                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+            <footer class="dialog-footer">
+                <button class="button red js-submit-button" type="submit">[`Refund`]</button>
+                <button class="button light-gray js-close-dialog" type="button">[`Cancel`]</button>
             </footer>
         </form>
     </div>

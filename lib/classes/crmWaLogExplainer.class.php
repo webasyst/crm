@@ -109,6 +109,9 @@ class crmWaLogExplainer
 
             if ($this->isSentMessageOutLogItem($log_item)) {
                 $log_item['params_html'] = $this->buildSentMessageOutExplanation($log_item, $subject_contact_str);
+            } elseif (in_array($log_item['action'], ['call_in', 'call_out'])) {
+                $log_item['action_name'] = sprintf($log_item['action_name'], ifset($log_item, 'params', 'duration', '0'));
+                $log_item['params_html'] = $subject_contact_str;
             } else {
                 $log_item['params_html'] = $subject_contact_str;
             }

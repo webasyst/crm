@@ -70,10 +70,10 @@ var CRMContactImportPage = (function ($) {
 
     CRMContactImportPage.prototype.initViewToggle = function() {
         var that = this,
-            active_class = "is-active",
+            active_class_content = "is-active",
             $toggleW = that.$wrapper.find(".js-view-toggle"),
-            $activeToggle = $toggleW.find("." + active_class);
-
+            active_content_data = $toggleW.find(".selected").data("content");
+          
         $toggleW.on("click", ".c-toggle", setToggle);
 
         function setToggle(event) {
@@ -81,18 +81,12 @@ var CRMContactImportPage = (function ($) {
 
             var $toggle = $(this),
                 content_id = $toggle.data("content"),
-                is_active = $toggle.hasClass(active_class);
-
+                is_active = content_id === active_content_data;
+                console.log(event.target)
             if (is_active) {
                 return false;
             } else {
-                // clear
-                if ($activeToggle.length) {
-                    $activeToggle.removeClass(active_class);
-                }
-                // render link
-                $toggle.addClass(active_class);
-                $activeToggle = $toggle;
+                active_content_data = content_id;
                 // render content
                 showContent(content_id);
             }
@@ -100,15 +94,15 @@ var CRMContactImportPage = (function ($) {
 
         function showContent(content_id) {
             // clear
-            that.$wrapper.find(".js-toggle-content." + active_class).removeClass(active_class);
+            that.$wrapper.find(".js-toggle-content." + active_class_content).removeClass(active_class_content);
             // render
             var $content = that.$wrapper.find(".js-toggle-content[data-content=\"" + content_id + "\"]");
             if ($content.length) {
-                $content.addClass(active_class);
+                $content.addClass(active_class_content);
             }
         }
     };
 
     return CRMContactImportPage;
 
-})(jQuery);
+})(jQuery); 

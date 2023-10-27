@@ -34,7 +34,7 @@ var CRMReasonsPage = ( function($) {
         //
         that.initSubmit();
 
-        that.$form.on("change", "input", function() {
+        that.$form.on("input change", function() {
             that.toggleButton(true);
         });
     };
@@ -107,7 +107,7 @@ var CRMReasonsPage = ( function($) {
 
                 var saving = that.locales.saving,
                     $loading = $(saving);
-                that.$footer.append($loading);
+                that.$submitButton.append($loading);
 
                 var href = "?module=settings&action=lostReasonsSave",
                     data = getData($form);
@@ -119,7 +119,7 @@ var CRMReasonsPage = ( function($) {
 
                         var saved = that.locales.saved,
                             $saved = $(saved);
-                        that.$footer.append($saved);
+                        that.$submitButton.append($saved);
 
                         that.toggleButton(false);
 
@@ -184,7 +184,6 @@ var CRMReasonsPage = ( function($) {
 
         if (set_active) {
             $button
-                .removeClass("green")
                 .addClass("yellow");
 
             $actions.show();
@@ -192,7 +191,6 @@ var CRMReasonsPage = ( function($) {
         } else {
             $button
                 .removeClass("yellow")
-                .addClass("green");
 
             $actions.hide();
         }

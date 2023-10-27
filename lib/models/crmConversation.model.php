@@ -162,6 +162,14 @@ class crmConversationModel extends crmModel
             $responsible_contact_id = (int)$params['responsible'];
             $condition[] = "c.user_contact_id={$responsible_contact_id}";
         }
+        // client filter
+        if (isset($params['contact_id'])) {
+            $condition[] = 'c.contact_id='.(int) $params['contact_id'];
+        }
+        // deal filter
+        if (isset($params['deal_id'])) {
+            $condition[] = 'c.deal_id='.abs($params['deal_id']);
+        }
 
         // need check rights
         $check_rights = !empty($params['check_rights']);
@@ -318,10 +326,13 @@ class crmConversationModel extends crmModel
         unset($l);
 
         $source_ids = array();
+        $is_ui2 = wa()->whichUI() === '2.0';
         foreach ($list as &$item) {
 
             $item['icon_url'] = null;
             $item['icon'] = 'exclamation';
+            $item['icon_fa'] = 'exclamation-circle';
+            $item['icon_color'] = '#BB64FF';
             $item['transport_name'] = _w('Unknown');
 
             if ($item['source_id'] > 0) {
@@ -329,9 +340,11 @@ class crmConversationModel extends crmModel
             }
             if ($item['type'] == crmMessageModel::TRANSPORT_EMAIL) {
                 $item['icon'] = 'email';
+                $item['icon_fa'] = 'envelope';
                 $item['transport_name'] = 'Email';
             } elseif ($item['type'] == crmMessageModel::TRANSPORT_SMS) {
                 $item['icon'] = 'mobile';
+                $item['icon_fa'] = 'mobile';
                 $item['transport_name'] = 'SMS';
             }
         }
@@ -351,7 +364,7 @@ class crmConversationModel extends crmModel
              * @var crmSourceHelper $source_helper
              */
             $source_helper = $source_helpers[$item['source_id']];
-            $res = $source_helper->workupConversation($item);
+            $res = $source_helper->workupConversationInList($item);
             $item = $res ? $res : $item;
         }
         unset($item);

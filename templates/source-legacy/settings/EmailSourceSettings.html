@@ -1,0 +1,134 @@
+<div class="c-settings-source-page" id="c-settings-source-page">
+    <form class="crm-source-settings-form">
+
+        <h1 class="c-page-header">
+            <img src="{$icon_url}">
+            {if $source.id <= 0}[`New email source`]{else}{$source.name|escape}{/if}
+        </h1>
+
+        <div class="c-fields-section">
+
+            {$connection_settings_block|default:''}
+
+            <div class="field"><hr></div>
+
+            <div class="field">
+                <div class="name crm-section">[`Spam control`]</div>
+                <div class="value">
+                    <input type="hidden" name="source[params][antispam]" value="0">
+
+                    <p>
+                        <label class="gray" for="antispam-checkbox">[`Disabled`]</label>
+                        <input type="checkbox" name="source[params][antispam]" class="js-crm-block-toggle js-ibutton" id="antispam-checkbox" value="1" {if !empty($source.params.antispam)}checked="checked"{/if}>
+                        <label for="antispam-checkbox">[`Enabled`]</label>
+                    </p>
+
+                    <p class="large-hint">
+                        [`Every time you receive a message from an unknown email address which is not yet stored in your Contacts database, an automatic notification will be sent to the sender's address.`]
+                        [`This notification contains a special link which must be clicked to confirm the sending of the first request. You may also add extra instructions for your clients to the notification text.`]
+                    </p>
+                </div>
+                <div class="collapsed-hidden value js-crm-block" style="display: none;">
+                    <div class="fields narrow-vars crm-email-template-editor-wrapper c-spam-control-editor-wrapper">
+                        {include
+                            file="../../actions/settings/SettingsEmailEditor.inc.html"
+                            input_name='source[params][antispam_mail_template]'
+                            variables=$antispam_template_vars
+                            template=$source.params.antispam_mail_template
+                        }
+                        <div class="c-hint hint">[`Variable &#123;CONFIRM_URL&#125; must be present in the text of your message template shown above. It will be replaced in the outgoing message with a confirmation URL that your client should click to confirm registration.`]</div>
+                    </div>
+
+                    <div class="clear"></div>
+
+                    <div class="c-after-antispam-block">
+                        <p>[`After successful confirmation`]</p>
+
+                        <div class="field c-after-antispam-line">
+                            <div class="name">
+                                <label>
+                                    <input type="radio" name="source[params][after_antispam_confirm]" value="redirect" {if isset($source.params.after_antispam_confirm) && $source.params.after_antispam_confirm === 'redirect'}checked="checked"{/if}>
+                                    [`Redirect to URL`]
+                                </label>
+                            </div>
+                            <div class="value">
+                                <input type="text" name="source[params][after_antispam_confirm_url]" value="{$source.params.after_antispam_confirm_url|default:''}" placeholder="http://">
+                            </div>
+                        </div>
+
+                        <div class="field c-after-antispam-line">
+                            <div class="name">
+                                <label>
+                                    <input type="radio" name="source[params][after_antispam_confirm]" value="text" {if empty($source.params.after_antispam_confirm) || $source.params.after_antispam_confirm !== 'redirect'}checked="checked"{/if}> [`Display text`]
+                                </label>
+                            </div>
+                            <div class="value">
+                                <textarea name="source[params][after_antispam_confirm_text]">{$source.params.after_antispam_confirm_text|default:'[`Confirmed`]'}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field"><hr></div>
+
+            <div class="field">
+                <div class="name crm-section">[`Messages`]</div>
+                <div class="value crm-messages-wrapper" style="padding-top:1px;">
+                    {$messages_block}
+                </div>
+            </div>
+
+            <div class="field"><hr></div>
+
+            {$blocks.with_contact|default:''}
+
+            <div class="field"><hr></div>
+
+            {$blocks.create_deal|default:''}
+
+            <div class="field"><hr></div>
+
+            {$blocks.responsible|default:''}
+
+            <div class="crm-form-buttons">
+                <div class="c-layout">
+                    <div class="c-column">
+                        <input type="submit" class="button green" value="[`Save`]">
+                        <span style="margin: 0 4px;">[`or`]</span>
+                        <a class="inline-link" href="{$wa_app_url}settings/message-sources/email/"><b><i>[`cancel`]</i></b></a>
+                        <i class="icon16 loading crm-loading" style="display:none"></i>
+                        <span class="crm-success-status" style="display: none;"> [`Saved`] <i class="icon16 yes"></i>
+                    </span>
+                    </div>
+                    {if $source.id > 0}
+                        <div class="c-column middle right">
+                            <div class="crm-delete-link-wrapper">
+                                <a href="javascript:void(0);" class="inline-link crm-delete-source-link"><i class="icon16 delete"></i><b><i>[`Delete this source`]</i></b></a>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" name="source[id]" value="{$source.id}">
+        <input type="hidden" name="source[type]" value="{$source.type}">
+        <input type="hidden" name="source[params][check_interval]" value="57">
+    </form>
+
+    <script>
+        ( function($) {
+            new CRMSettingsSourceEmail({
+                $wrapper: $("#c-settings-source-page"),
+                source: {$source|json_encode},
+                messages: {
+                    'connection_failed': '[`Can not connect with the specified parameters to server`]',
+                    'delete_confirm_title': '[`Delete source`]',
+                    'delete_confirm_text': '[`Are you sure?`]',
+                    'delete_confirm_button': '[`Delete`]'
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

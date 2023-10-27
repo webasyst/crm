@@ -2158,7 +2158,7 @@ var CRMContactResponsibleDialog = ( function($) {
                     return false;
                 }
 
-                var $loading = $('<i class="icon16 loading" style="vertical-align: middle; margin: 0;"></i>');
+                var $loading = $('<span class="icon loading"><i class="fas fa-spinner wa-animation-spin"></i></span>');
                     $loading.appendTo(that.$submitButton.parent());
 
                 that.$submitButton.attr("disabled", true);
@@ -2220,7 +2220,7 @@ var CRMContactResponsibleDialog = ( function($) {
             var href = $.crm.app_url + "?module=contact&action=responsibleSave",
                 data = getData();
 
-            var $loading = $('<i class="icon16 loading" style="vertical-align: middle; margin: 0;"></i>');
+            var $loading = $('<span class="icon loading"><i class="fas fa-spinner wa-animation-spin"></i></span>');
                 $loading.appendTo(that.$submitButton.parent());
 
             that.$submitButton.attr("disabled", true);
@@ -2355,9 +2355,9 @@ var CRMContactResponsibleDialog = ( function($) {
             $button = that.$submitButton;
 
         if (is_changed) {
-            $button.removeClass("green").addClass("yellow");
+            $button.addClass("yellow");
         } else {
-            $button.removeClass("yellow").addClass("green");
+            $button.removeClass("yellow");
         }
     };
 
@@ -2435,7 +2435,7 @@ var CRMContactAccessDialog = ( function($) {
                     return false;
                 }
 
-                var $loading = $('<i class="icon16 loading" style="vertical-align: middle; margin: 0;"></i>');
+                var $loading = $('<span class="icon loading"><i class="fas fa-spinner wa-animation-spin"></i></span>');
                 $loading.appendTo(that.$submitButton.parent());
 
                 that.$submitButton.attr("disabled", true);
@@ -2874,6 +2874,7 @@ var CRMContactUpdateDialog = ( function($) {
         // DOM
         that.$wrapper = options["$wrapper"];
         that.$form = that.$wrapper.find("form");
+        that.$dialog = that.$wrapper.data("dialog");
         that.$footer = that.$wrapper.find(".js-dialog-footer");
         that.$submitButton = that.$wrapper.find(".js-submit-button");
 
@@ -2997,8 +2998,7 @@ var CRMContactUpdateDialog = ( function($) {
 
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
-                        var content_uri = $.crm.app_url + "contact/" + response.data.id + "/";
-                        $.crm.content.load(content_uri);
+                       that.$dialog.close();
                     } else {
                         showErrors(response.errors);
                     }
@@ -3075,7 +3075,7 @@ var CRMContactAddCompanyContactDialog = ( function($) {
             },
             select: function(event, ui) {
                 that.$company_id_input.val(ui.item.id);
-                $selected_company.html('<i class="icon16 userpic20" style="background-image: url('+ ui.item.photo_url +');"></i>').append($("<span />").text(ui.item.name)).removeClass('hidden');
+                $selected_company.html('<i class="icon userpic size-20" style="background-image: url('+ ui.item.photo_url +');"></i>').append($("<span />").text(ui.item.name)).removeClass('hidden');
                 that.$company_name_input.addClass('hidden');
                 return false;
             }
@@ -3115,7 +3115,7 @@ var CRMContactAddCompanyContactDialog = ( function($) {
         });
 
         function submit() {
-            var $loading = $('<i class="icon16 loading" style="vertical-align: middle; margin-left: 6px;"></i>'),
+            var $loading = $('<span class="icon loading"><i class="fas fa-spinner wa-animation-spin"></i></span>'),
                 href = $.crm.app_url + "?module=contact&action=addCompanyContactSave",
                 data = that.$form.serializeArray();
 

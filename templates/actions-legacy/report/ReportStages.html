@@ -1,0 +1,253 @@
+{*{$charts_data = '{"charts":[{"name":"min by stages","data":[{"stage_id":38,"value":12864,"over_text":"2 pcs."},{"stage_id":37,"value":0,"over_text":""},{"stage_id":36,"value":24,"over_text":"1 pcs."},{"stage_id":35,"value":0,"over_text":""}],"exists":true},{"name":"overdue now","data":[{"stage_id":38,"value":0,"base_text":"","over_text":"","sub_text":""},{"stage_id":37,"value":0,"base_text":"","over_text":"","sub_text":""},{"stage_id":36,"value":0,"base_text":"","over_text":"","sub_text":""},{"stage_id":35,"value":0,"base_text":"","over_text":"","sub_text":""}],"exists":false}],"stages":[{"id":"38","funnel_id":"8","name":"\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u044d\u0442\u0430\u043f","number":"0","limit_hours":null,"color":"#FFBCB5"},{"id":"37","funnel_id":"8","name":"\u0422\u0440\u0435\u0442\u0438\u0439 \u044d\u0442\u0430\u043f","number":"1","limit_hours":"48","color":"#E28E8B"},{"id":"36","funnel_id":"8","name":"\u0424\u0442\u043e\u0440\u043e\u0439 \u044d\u0442\u0430\u043f","number":"2","limit_hours":"240","color":"#C66161"},{"id":"35","funnel_id":"8","name":"\u041f\u0435\u0440\u0432\u044b\u0439 \u044d\u0442\u0430\u043f","number":"3","limit_hours":null,"color":"#AA3438"}]}'}*}
+{*{$charts_data = $charts_data|json_decode:true}*}
+
+{$_title = "[`Deal stages`]"}
+
+{* DATE *}
+{$filter_dates = [
+    "30" => [
+        "id" => "30",
+        "uri" => crmHelper::getUrl(["timeframe" => 30, "start" => null, "end" => null]),
+        "name" => _w('Last %d day', 'Last %d days', 30),
+        "group_by" => "days",
+        "timeframe" => 30
+    ],
+    "90" => [
+        "id" => "90",
+        "uri" => crmHelper::getUrl(["timeframe" => 90, "start" => null, "end" => null]),
+        "name" => _w('Last %d day', 'Last %d days', 90),
+        "group_by" => "days",
+        "timeframe" => 90
+    ],
+    "365" => [
+        "id" => "365",
+        "uri" => crmHelper::getUrl(["timeframe" => 365, "start" => null, "end" => null]),
+        "name" => _w('Last %d day', 'Last %d days', 365),
+        "group_by" => "months",
+        "timeframe" => 365
+    ],
+    "all" => [
+        "id" => "all",
+        "uri" => crmHelper::getUrl(["timeframe" => "all", "start" => null, "end" => null]),
+        "name" => "[`All time`]",
+        "group_by" => "months",
+        "timeframe" => "all"
+    ],
+    "custom" => [
+        "id" => "custom",
+        "uri" => "javascript:void(0);",
+        "name" => "[`Select dates...`]",
+        "group_by" => "",
+        "timeframe" => "custom"
+    ]
+]}
+
+{if $timeframe && !empty($filter_dates[$timeframe])}
+    {$selected_filter_date = $filter_dates[$timeframe]}
+{else}
+    {$selected_filter_date = reset($filter_dates)}
+{/if}
+
+<div class="c-report-page shadowed" id="c-report-page">
+    <div class="blank">
+
+        <header class="c-report-header">
+            <form>
+            <div class="c-layout">
+                <div class="c-column">
+                    <ul class="c-nav-wrapper menu-h dropdown">
+                        {strip}
+
+                        {include file="./ReportMenu.inc.html" _active='stages' inline}
+
+                        {* FUNNELS *}
+                        {if $funnel}
+                        <li class="c-filter-wrapper">
+                            <a class="inline-link" href="javascript:void(0);">
+                                {if !empty($funnel.color)}
+                                <i class="icon16 funnel-state svg-icon" data-color="{$funnel.color}"></i>
+                                {/if}
+                                <b><i>{$funnel.name|escape}</i></b>&nbsp;<i class="icon10 darr"></i>
+                            </a>
+                            <ul class="menu-v with-icons">
+                                {foreach $funnels as $_funnel}
+                                <li class="{if $funnel.id == $_funnel.id}selected{/if}">
+                                    {if isset($_funnel.deal_count)}
+                                    <span class="count">{$_funnel.deal_count}</span>
+                                    {/if}
+                                    <a href="{crmHelper::getUrl("funnel", $_funnel.id)}">
+                                    {if !empty($_funnel.color)}
+                                    <i class="icon16 funnel-state svg-icon" data-color="{$_funnel.color}"></i>
+                                    {/if}
+                                    {$_funnel.name|escape}
+                                    </a>
+                                </li>
+                                {/foreach}
+                            </ul>
+                        </li>
+                        {/if}
+
+                        {* USERS *}
+                        <li class="c-filter-wrapper">
+                            <a class="inline-link" href="javascript:void(0);">
+                                {if !empty($users[$user_id].photo_url_16)}
+                                    <i class="icon16 userpic20" style="background-image: url({$users[$user_id].photo_url_16})"></i>
+                                {/if}
+                                <b><i>{$wa->crm->contactName($users[$user_id].name)}</i></b>&nbsp;<i class="icon10 darr"></i>
+                            </a>
+                            <ul class="menu-v with-icons">
+                                {foreach $users as $_contact}
+                                <li class="t-menu-item {if $user_id === $_contact.id}selected{/if}">
+                                    <a href="{crmHelper::getUrl('user', $_contact.id)}">
+                                    {if !empty($_contact.photo_url_16)}
+                                        <i class="icon16 userpic20" style="background-image: url({$_contact.photo_url_16})"></i>
+                                    {/if}
+                                    {$wa->crm->contactName($_contact.name)}
+                                    </a>
+                                </li>
+                                {/foreach}
+                            </ul>
+                        </li>
+                        {/strip}
+                    </ul>
+
+                    {* need for generation uri, "custom" timeframe *}
+                    <input name="user" type="hidden" value="{$user_id}">
+                </div>
+                <div class="c-column right">
+                    <div class="c-dates-filter js-dates-filter">
+                        <ul class="c-nav-wrapper menu-h dropdown">
+                            <li class="c-filter-wrapper c-hidden-part js-hidden-part {if $timeframe == "custom"}is-shown{/if}">
+                                <div class="c-filter-text">
+                                    [` from`]
+                                    <input class="js-datepicker" type="text" value="{$start_date|wa_date}" style="width:100px;" data-selector="js-start-field">
+                                    <input class="js-start-field" name="start" type="hidden" value="{$start_date}">
+                                    [` to`]
+                                    <input class="js-datepicker" type="text" value="{$end_date|wa_date}" style="width:100px;" data-selector="js-end-field">
+                                    <input class="js-end-field" name="end" type="hidden" value="{$end_date}">
+
+                                    {if !empty($charts_data)}
+                                        <select name="groupby" class="js-group-field">
+                                            <option value="days" {if $chart_params.group_by == "days"}selected{/if}>[`by day`]</option>
+                                            <option value="months" {if $chart_params.group_by == "months"}selected{/if}>[`by month`]</option>
+                                        </select>
+                                    {/if}
+
+                                    <input type="submit" value="[`Apply`]">
+                                </div>
+                            </li>
+                            <li class="c-filter-wrapper">
+                                <a class="inline-link" href="javascript:void(0);">
+                                    <b><i class="js-link-text">{$selected_filter_date.name|escape}</i></b>&nbsp;<i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v with-icons js-list right">
+                                    {foreach $filter_dates as $_date}
+                                        <li class="js-toggle {if $selected_filter_date.id == $_date.id}selected{/if}" data-timeframe="{$_date.timeframe}">
+                                            <a href="{$_date.uri}">{$_date.name|escape}</a>
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            {if !empty($charts_data)}<input type="hidden" name="chart" value="1">{/if}
+
+            </form>
+        </header>
+
+        <div class="c-report-page-content block double-padded">
+
+            <section class="c-header-section">
+                <h1 class="c-page-header">
+                    {if !empty($total.closed_count)}
+                        {capture name="closed_deals_count"}%d <span class="gray" style="font-weight: normal;">%s</span>{/capture}
+                        {sprintf(
+                            $smarty.capture.closed_deals_count,
+                            $total.closed_count,
+                            _w('deal closed.', 'deals closed.', $total.closed_count)
+                        )}
+                    {/if}
+                    {if !empty($total.sec_avg)}
+                        <span class="gray" style="font-weight: normal;">[`Average deal lifetime: `]</span>
+                        {$total.sec_avg} [`days`].
+                    {/if}
+                </h1>
+            </section>
+
+            {if !empty($charts_data.stages)}
+                <section class="c-stage-graph-section js-stage-graph-section">
+                    <h3>[`Deals count in stages now`]</h3>
+                    {if !empty($charts_data.charts[0][0].exists)}
+                        <div class="c-graph-wrapper js-graph-wrapper-1">
+                            <div class="c-graph js-graph"></div>
+                        </div>
+                    {else}
+                        <div class="c-empty-chart">[`There are no data for report.`]</div>
+                    {/if}
+
+                    <div class="c-stages-wrapper">
+                        <ul class="c-stages-list">
+                            {foreach $charts_data.stages as $_stage}
+                                <li class="c-stage-item">
+                                    <div class="c-stage-block">
+                                        <i class="svg-icon funnel" data-color="{$_stage.color|default:"#ddd"}"></i>
+                                        <span class="c-name">
+                                            {$_stage.name|escape}
+                                        </span>
+                                    </div>
+                                </li>
+                            {/foreach}
+                        </ul>
+                    </div>
+
+                    {if !empty($charts_data.charts[1].exists)}
+                        <div class="c-graph-wrapper js-graph-wrapper-2">
+                            <div class="c-graph js-graph"></div>
+                        </div>
+                    {else}
+                        <div class="c-empty-chart">[`There are no data for report.`]</div>
+                    {/if}
+
+                    <h3>[`Average timeout for deal in stage`]</h3>
+                </section>
+            {else}
+                <div class="c-empty-message">[`There are no stages.`]</div>
+            {/if}
+
+        </div>
+    </div>
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$_title|json_encode});
+            $.crm.renderSVG("#c-report-page");
+
+            new CRMReportPage({
+                $wrapper: $("#c-report-page"),
+                funnel_id: {if !empty($funnel.id)}{$funnel.id}{else}false{/if},
+                funnel_color: {$funnel.color|default:"#aaa"|json_encode},
+                stages_data: {if !empty($charts_data)}{$charts_data|json_encode}{else}false{/if},
+                group_by: {if !empty($chart_params.group_by)}{$chart_params.group_by|json_encode}{else}false{/if},
+                locales: {
+                    months: [
+                        "{_ws('January', 'January')}",
+                        "{_ws('February', 'February', 1)}",
+                        "{_ws('March', 'March')}",
+                        "{_ws('April', 'April')}",
+                        "{_ws('May', 'May')}",
+                        "{_ws('June', 'June')}",
+                        "{_ws('July', 'July')}",
+                        "{_ws('August', 'August')}",
+                        "{_ws('September', 'September')}",
+                        "{_ws('October', 'October')}",
+                        "{_ws('November', 'November')}",
+                        "{_ws('December', 'December')}"
+                    ]
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

@@ -145,7 +145,7 @@
 
                                 {if !empty($_info.courier)}
                                     <h3 class="c-courier-name">
-                                        <a href="{$_info.shop_app_url}#/orders/search/params.courier_id={$_info.courier.id}/">{$_info.courier.name|escape}</a>
+                                        <a href="{$_info.shop_app_url}#/orders/{if isset($_info.courier.enabled)}search/params.courier_id={else}courier_contact_id={/if}{$_info.courier.id}/">{$_info.courier.name|escape}</a>
                                     </h3>
                                 {/if}
 

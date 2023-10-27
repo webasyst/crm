@@ -1,0 +1,148 @@
+<div class="c-settings-shop-workflow-page" id="js-settings-shop-workflow-page">
+    <h1 class="c-page-header">[`Shop-Script integration`]</h1>
+
+    {strip}
+    <ul class="c-view-toggle-wrapper">
+        <li>
+            <a href="{$wa_app_url}settings/shop/">[`Automatic deal creation`]</a>
+        </li>
+        <li class="is-active">
+            <a href="{$wa_app_url}settings/shop/workflow/">[`Workflow-Funnel synchronization`]</a>
+        </li>
+    </ul>
+    {/strip}
+
+    {if !$supported}
+        <p>{sprintf_wp('You need Shop-Script version %s or newer for CRM integration.', $min_version)}</p>
+
+    {else}
+        {* HEADER *}
+        <header class="c-funnels-section">
+            {* FUNNELS *}
+            <div class="c-funnels-tabs js-funnels-tabs">
+                <div class="c-funnels-wrapper">
+                    <ul class="tabs c-funnels-list">
+                        {if empty($funnel.id)}
+                            {$_new_funnel = [
+                            "0" => [
+                            "id" => false,
+                            "name" => "[`New funnel`]",
+                        "color" => "#f0f0f0"
+                        ]
+                        ]}
+                            {$funnels = $_new_funnel + $funnels}
+                        {/if}
+
+                        {foreach $funnels as $_funnel}
+                            {$_is_selected = ($funnel.id == $_funnel.id)}
+                            <li class="c-funnel {if $_is_selected}selected{/if}" data-id="{$_funnel.id|default:""}">
+                                <a class="c-link" href="{if !$_is_selected}{$wa_app_url}settings/shop/workflow/?funnel_id={$_funnel.id}{else}javascript:void(0);{/if}">
+                                    <i class="icon16 color" style="background: {$_funnel.color}"></i>
+                                    <span class="c-name">{$_funnel.name|escape}</span>
+                                </a>
+                            </li>
+                        {/foreach}
+                    </ul>
+                    <span class="c-action right" title="[`Next`]"></span>
+                    <span class="c-action left" title="[`Before`]"></span>
+                </div>
+                {*<div class="c-add-wrapper">*}
+                {*<a href="{$wa_app_url}settings/funnels/new/"><i class="icon16 add"></i> [`Add new funnel`]</a>*}
+                {*</div>*}
+            </div>
+        </header>
+
+        <section class="c-funnel-section">
+            <form>
+                {*
+                <div class="field-group">
+                    <h4 class="heading">[`CRM &rarr; Shop-Script`]</h4>
+
+                    {if !empty($funnel.stages)}
+                        <ul class="menu-v">
+                            {$_prev_stage_name = false}
+                            {foreach $funnel.stages as $_stage_id => $_stage}
+                                {if empty($_prev_stage_name)}
+                                    {$_prev_stage_name = $_stage.name}
+                                    {continue}
+                                {else}
+                                    {if !empty($_stage.id)}
+                                        {$_stage_name = "{$_prev_stage_name|escape}&nbsp;&rarr;&nbsp;{$_stage.name|escape}"}
+                                    {else}
+                                        {$_stage_name = $_stage.name|escape}
+                                    {/if}
+                                    {$_prev_stage_name = $_stage.name}
+                                {/if}
+
+                                <li>
+                                    <div class="c-stage-line">
+                                        <span class="c-name">{$_stage_name}</span>
+                                        <select name="crm_stages[{$_stage_id}]">
+                                            <option value="">[`No action`]</option>
+                                            {foreach $shop_actions as $_action_id => $_action}
+                                                <option value="{$_action_id}" {if $_action_id == ifset($settings["stage:`$_stage_id`_`$funnel.id`"])}selected{/if}>
+                                                    {$_action.name|escape}
+                                                </option>
+                                            {/foreach}
+                                        </select>
+                                    </div>
+                                </li>
+
+                            {/foreach}
+                        </ul>
+                    {/if}
+                </div>
+                *}
+
+                <div class="field-group">
+                    {*<h4 class="heading">[`Shop-Script &rarr; CRM`]</h4>*}
+                    {if !empty($shop_actions)}
+                        <ul class="menu-v">
+                            <li>
+                                <div class="c-stage-line">
+                                    <span class="c-name gray"><b>[`Shop-Script order actions`]</b></span>
+                                    <span class="c-value gray"><b>[`CRM deal stages`]</b></span>
+                                </div>
+                            </li>
+                            {foreach $shop_actions as $_action_id => $_action}
+                                <li>
+                                    <div class="c-stage-line">
+                                        <span class="c-name">{$_action.name|escape}</span>
+                                        <select name="shop_actions[{$_action_id}]">
+                                            <option value="">[`No action`]</option>
+                                            {foreach $funnel.stages as $_stage_id => $_stage}
+                                                <option value="{$_stage_id}" {if $_stage_id == ifset($settings["shop:`$_action_id`_`$funnel.id`"])}selected{/if}>
+                                                    {$_stage.name|escape}
+                                                </option>
+                                            {/foreach}
+                                        </select>
+                                    </div>
+                                </li>
+                            {/foreach}
+                        </ul>
+                    {/if}
+                </div>
+
+                <div class="js-errors-place"></div>
+
+                <div class="c-footer-actions js-footer-actions">
+                    <input class="button green js-submit-button" type="submit" value="[`Save`]">
+                    <span class="c-hidden">
+                        <span style="margin: 0 4px;">[`or`]</span>
+                        <a href="{$wa_app_url}settings/shop/workflow/?funnel_id={$funnel.id}">[`cancel`]</a>
+                    </span>
+                </div>
+
+                <input type="hidden" name="funnel_id" value="{$funnel.id}">
+            </form>
+        </section>
+
+        <script>
+            (function($) {
+                new CRMSettingsShopWorkflowPage({
+                    $wrapper: $("#js-settings-shop-workflow-page")
+                });
+            })(jQuery);
+        </script>
+    {/if}
+</div>

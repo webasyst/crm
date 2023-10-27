@@ -59,7 +59,7 @@ class crmShopOrder_actionHandler extends waEventHandler
      */
     public function execute(&$params, $event_name = null)
     {
-        if (empty($params['order_id']) || !crmConfig::isShopSupported()) {
+        if (empty($params['order_id']) || !crmShop::isIntegrationSupported(crmShop::INTEGRATION_ANY)) {
             return;
         }
 
@@ -72,15 +72,12 @@ class crmShopOrder_actionHandler extends waEventHandler
         }
 
         try {
-
             $this->setModels();
-
             if (!$this->getOrder($params['order_id'])) {
                 return;
             }
 
             if ($shop_action === 'create' || $shop_action === 'edit') {
-
                 // deal to which attach created order (by design posted from embedded order form in deal page)
                 $crm_deal = wa()->getRequest()->post('crm_deal');
 
@@ -103,7 +100,6 @@ class crmShopOrder_actionHandler extends waEventHandler
                     // update deal (order already attached)
                     $this->updateDeal($deal['id']);
                 }
-
             }
 
             // find deal with current order attached to
@@ -120,10 +116,9 @@ class crmShopOrder_actionHandler extends waEventHandler
             $this->logDealStage($shop_action);
 
             // log shop order action
-            if (isset($params['id']) && $deal) {
+            if (isset($params['id'])) {
                 $this->logOrderAction($params['id'], $shop_action);
             }
-
         } catch (waException $e) {
         }
     }
@@ -163,9 +158,11 @@ class crmShopOrder_actionHandler extends waEventHandler
             self::$log_model->log(
                 'deal_step',
                 $this->deal['id'] * -1,
-                null,
+                $this->deal['id'],
                 ifset($this->deal['stage']['name']),
-                $this->stage['name']
+                $this->stage['name'],
+                null,
+                ['stage_id_before' => $this->deal['stage']['id'], 'stage_id_after' => $stage['id']]
             );
         } else {
             // WON, LOST
@@ -264,7 +261,7 @@ class crmShopOrder_actionHandler extends waEventHandler
                 'closed_datetime' => null,
             )
         );
-        self::$log_model->log('deal_reopen', $deal['id'] * -1);
+        self::$log_model->log('deal_reopen', $deal['id'] * -1, $deal['id']);
     }
 
     /**
@@ -352,17 +349,20 @@ class crmShopOrder_actionHandler extends waEventHandler
             return false;
         }
         $deal = $this->getDeal();
-        if (!$deal) {
-            return false;
+        if ($deal) {
+            $contact_id = $this->deal['id'] * -1;
+        } else {
+            $contact_id = ifempty($order, 'contact_id', 0);
         }
         $log_item = self::$shop_order_log_model->getById($log_id);
         self::$log_model->add(array(
-            'action' => $action,
-            'contact_id' => $this->deal['id'] * -1,
-            'object_id' => $log_id,
-            'object_type' => crmLogModel::OBJECT_TYPE_ORDER_LOG,
+            'action'           => $action,
+            'contact_id'       => $contact_id,
+            'object_id'        => $log_id,
+            'object_type'      => crmLogModel::OBJECT_TYPE_ORDER_LOG,
             'actor_contact_id' => $log_item['contact_id'] > 0 ? $log_item['contact_id'] : 0
         ));
+        return true;
     }
 
     /**

@@ -1,0 +1,381 @@
+{function form_field_html field=[] is_template=0}
+    {$captionplace = $field.captionplace|default:'left'}
+    {if $field.id === '!horizontal_rule' || $field.id === '!paragraph'}
+        {$captionplace = 'none'}
+    {/if}
+
+    <div class="crm-form-field {if $captionplace !== 'left'}crm-caption-style-{$captionplace}{/if} {if $is_template}crm-form-field-template{/if}"
+        data-id="{$field.id}"
+        data-checked="{$field.checked|default:0}">
+            <div class="crm-form-field-line crm-form-field-1st-line">
+                <div class="crm-form-field-col crm-sorting-col">
+                    <i class="icon16 sort"></i>
+                </div>
+                <div class="crm-form-field-col crm-caption-col">
+                    <span class="crm-caption">
+                        {if isset($field.caption)}
+                            {$field.caption|escape}
+                        {else}
+                            {$field.name|escape}
+                        {/if}
+                        {if !empty($field.required) && $field.id !== '!captcha'} *{/if}
+                    </span>
+                </div>
+                <div class="crm-form-field-col crm-input-col">
+                    <div class="c-field-wrapper">{if $field.id !== '!agreement_checkbox'}{$field.html}{/if}</div>
+                </div>
+                <div class="crm-form-field-col crm-delete-col">
+                    <a href="javascript:void(0);" class="crm-delete-field-link"><i class="icon16 delete"></i></a>
+                </div>
+            </div>
+            <div class="crm-form-field-line crm-form-field-2st-line">
+                <div class="crm-form-field-col crm-sorting-col">
+                    <i class="icon16 sort"></i>
+                </div>
+                <div class="crm-form-field-col crm-input-col">
+                    <div class="c-field-wrapper">{$field.html}</div>
+                </div>
+                <div class="crm-form-field-col crm-delete-col">
+                    <a href="javascript:void(0);" class="crm-delete-field-link"><i class="icon16 delete"></i></a>
+                </div>
+            </div>
+    </div>
+{/function}
+
+{function form_available_field field=[] classes=[] disabled=false}
+    {$_is_contact_field = $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT}
+    <li data-id="{$field.id}"
+        data-form-field-type="{$field.form_field_type}"
+        {if $_is_contact_field}
+            data-person-enabled="{if $field.person_enabled}1{else}0{/if}"
+            data-company-enabled="{if $field.company_enabled}1{else}0{/if}"
+        {/if}
+        class="crm-form-field {if (!$field.is_multi && $field.checked > 0) || $disabled}crm-disabled{/if} {$classes|join:' '}">
+            <a href="javascript:void(0)">{$field.name|escape}{if $field.required_always|default:''} *{/if}</a>
+            {if $field.id === 'password'}
+                <span class="hint">
+                    [`Allows your subscriber to create a password for further authorization on your site and log in to their customer portal. Requires Email field in the form.`]
+                </span>
+            {/if}
+    </li>
+{/function}
+
+<form method="post" action="{$wa_app_url}?module=settings&action=formSave{if $form.id > 0}&id={$form.id}{/if}" class="crm-form-settings-form">
+    <div class="crm-form-header">
+        <input type="text" name="form[name]" value="{if $form.id > 0}{$form.name|escape}{else}[`New form`]{/if}" placeholder="[`Form name`]" class="crm-name-input">
+    </div>
+
+    <div class="crm-common-errors-block"></div>
+
+    <div class="crm-form-body">
+        <div class="crm-form-constructor">
+            <div class="crm-form-preview-block" style="width: {$form.params.formwidth|default:400}px">
+                <div class="crm-form-fields-block shadowed">
+                    <div class="crm-form-fields">
+
+                        {$_checked_fields = $form.params.fields}
+                        {foreach $_checked_fields as $field}
+                            {form_field_html field=$field}
+                        {/foreach}
+
+                        {foreach $available_fields as $field_id => $field}
+                            {form_field_html field=$field is_template=1}
+                        {/foreach}
+                    </div>
+
+                    <div class="crm-add-new-field-wrapper">
+                        <a href="javascript:void(0)" class="inline-link crm-add-new-field-link small">
+                            <i class="icon10 add"></i> [`Add fields`]
+                        </a>
+
+                        <ul class="menu-v crm-available-fields" style="display: none;">
+
+                            {$_available_field_rendered_map = []}
+
+                            {* CONTACT FIELDS ENABLED FOR PERSON *}
+                            {foreach $available_fields as $field_id => $field}
+                                {$_is_contact_field = $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT}
+                                {if $_is_contact_field && $field['id'] !== 'password' && $field.person_enabled}
+                                    {form_available_field field=$field}
+                                    {$_available_field_rendered_map[$field.id] = true}
+                                {/if}
+                            {/foreach}
+
+                            {* RENDER PASSWORD FIELD *}
+                            {$_password = $available_fields.password|default:null}
+                            {if $_password}
+                                {form_available_field
+                                    field=$_password
+                                    disabled=$available_fields.email.checked <= 0}
+                                {$_available_field_rendered_map[$_password.id] = true}
+                            {/if}
+
+                            {* CONTACT FIELDS EXCLUSIVELY ENABLED FOR COMPANY *}
+                            {$_exclusive_company_fields_exist = false}
+                            {capture assign="_exclusive_company_fields_html"}
+                                {foreach $available_fields as $field_id => $field}
+                                    {$_is_contact_field = $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT}
+                                    {if $_is_contact_field && $field['id'] !== 'password' && !$field.person_enabled && $field.company_enabled}
+                                        {form_available_field
+                                            field=$field
+                                            disabled=$available_fields.company.checked <= 0}
+                                        {$_available_field_rendered_map[$field.id] = true}
+                                        {$_exclusive_company_fields_exist = true}
+                                    {/if}
+                                {/foreach}
+                            {/capture}
+
+                            {if $_exclusive_company_fields_exist}
+                                <li class="crm-form-field crm-top-bordered crm-disabled crm-hint js-hint-about-deal-fields">
+                                    <span class="hint">
+                                        [`To make company-only fields available, first add the “Company” field to the form.`]
+                                    </span>
+                                </li>
+                                {$_exclusive_company_fields_html}
+                            {/if}
+
+                            <li class="crm-form-field crm-top-bordered crm-disabled crm-hint js-hint-about-deal-fields">
+                                <span class="hint">
+                                    {sprintf('[`Select “%s” in “%s” section below to make these fields available for adding to the form.`]', '[`Enabled`]', '[`Create deal`]')}
+                                </span>
+                            </li>
+
+                            {* RENDER !DEAL_DESCRIPTION FIELD *}
+                            {$_deal_description = $available_fields['!deal_description']|default:null}
+                            {if $_deal_description}
+                                {form_available_field
+                                    field=$_deal_description
+                                    disabled=empty($form.params.create_deal)}
+                                {$_available_field_rendered_map[$_deal_description.id] = true}
+                            {/if}
+
+                            {* RENDER DEALS-FIELDS *}
+                            {foreach $available_fields as $field_id => $field}
+                                {if $field.form_field_type === crmFormConstructor::FIELD_TYPE_DEAL}
+                                    {form_available_field
+                                        field=$field
+                                        disabled=empty($form.params.create_deal)}
+                                    {$_available_field_rendered_map[$field.id] = true}
+                                {/if}
+                            {/foreach}
+
+                            {* RENDER !DEAL_ATTACHMENTS FIELD *}
+                            {$_deal_attachments = $available_fields['!deal_attachments']|default:null}
+                            {if $_deal_attachments}
+                                {form_available_field
+                                    field=$_deal_attachments
+                                    classes=['crm-top-bordered']
+                                    disabled=empty($form.params.create_deal)}
+                                {$_available_field_rendered_map[$_deal_attachments.id] = true}
+                            {/if}
+
+                            {* RENDER REST FIELDS *}
+                            {$_classes = ['crm-top-bordered']}
+                            {foreach $available_fields as $field_id => $field}
+                                {if empty($_available_field_rendered_map[$field.id])}
+                                    {form_available_field field=$field classes=$_classes}
+                                    {$_available_field_rendered_map[$field.id] = true}
+                                    {$_classes = []}
+                                {/if}
+                            {/foreach}
+
+                        </ul>
+
+                    </div>
+
+                    <div class="crm-submit-button-wrapper">
+                        <div class="crm-submit-button-wrapper-on-hover">
+                            <input class="crm-form-preview-submit-button" type="button" value="{$form.params.button_caption|escape|default:'[`Sign up`]'}">
+                            <input class="crm-form-preview-submit-button-caption-input" name="form[params][button_caption]" type="text" value="{$form.params.button_caption|escape|default:'[`Sign up`]'}" style="display: none">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="crm-form-width-wrapper">
+                    <input class="crm-form-width-input" type="text" value="{$form.params.formwidth|default:400}" name="form[params][formwidth]"/>
+                    <div class="crm-form-width-label">[`Form width (200-600px)`]</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="crm-form-section">
+            <div class="crm-form-section-header">
+                [`After form submission`]
+            </div>
+            <div class="crm-form-section-content">
+                <p>[`This setting will redirect clients to any specified URL or display any text message after the form is submitted.`]</p>
+                <p>[`After successful submission:`]</p>
+
+                <div class="field">
+                    <div class="name">
+                        <label>
+                            <input type="radio" name="form[params][after_submit]"{if !empty($form.params.after_submit) && $form.params.after_submit == 'redirect'} checked{/if} value="redirect">
+                            [`Redirect to URL`]
+                        </label>
+                    </div>
+                    <div class="value">
+                        <input type="text" name="form[params][redirect_after_submit]" value="{$form.params.redirect_after_submit|default:''}" placeholder="http://" style="min-width: 400px;">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="name">
+                        <label>
+                            <input type="radio" name="form[params][after_submit]" {if empty($form.params.after_submit) || $form.params.after_submit == 'html'} checked{/if} value="html">
+                            [`Display text instead of the form`]
+                        </label>
+                    </div>
+                    <div class="value">
+                        <textarea name="form[params][html_after_submit]" class="equal-width" style="min-width: 400px;">{$form.params.html_after_submit|escape|default:'[`Thanks for subscribing!`]'}</textarea>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="crm-form-section">
+            <div class="crm-form-section-header">
+                [`Confirm registration`]
+            </div>
+            <div class="crm-form-section-content">
+                {$email_checked = $available_fields.email.checked > 0}
+
+                <p>
+                    <label class="gray" for="js-ibutton-2">[`Disabled`]</label>
+                    <input type="checkbox" class="crm-confirmation-checkbox js-ibutton" id="js-ibutton-2" name="form[params][confirm_mail]" value="1" {if isset($form.params.confirm_mail) && $email_checked} checked{/if} {if !$email_checked}disabled="disabled"{/if}>
+                    <label for="js-ibutton-2">[`Enabled`]</label>
+                </p>
+
+                <span class="crm-confirmation-enable-text" {if $email_checked}style="display: none;"{/if}>
+                    [`To enable this option, your form must contain Email field.`]
+                </span>
+                <p>[`An automatic notification will be sent to a subscriber‘s email address, with a special link to be clicked for a client to confirm registration. You may add extra instructions for your clients to the notification text.`]</p>
+
+                <div class="crm-form-email-confirm-block" {if !isset($form.params.confirm_mail) || !$email_checked}style="display: none;" {/if}>
+                    <div class="crm-fields">
+                        <div class="crm-field">
+                            <div class="crm-name">[`Subject`]</div>
+                            <div class="crm-value">
+                                <input type="text" name="form[params][confirm_mail_subject]" value="{$form.params.confirm_mail_subject|escape|default:'[`Please confirm your email`]'}" class="crm-subject-input">
+                            </div>
+                        </div>
+                        <div class="crm-field">
+                            <div class="crm-name">[`Text`]</div>
+                            <div class="crm-value">
+                                <div class="wa-editor-core-wrapper">
+                                    <ul class="c-editor-toggle wa-editor-wysiwyg-html-toggle">
+                                        <li class="selected">
+                                            <a href="#" class="wysiwyg">[`WYSIWYG`]</a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="html">HTML</a>
+                                        </li>
+                                    </ul>
+                                    <div class="c-editor-wrapper">
+                                        {$default_txt = _w('Please follow this link to confirm your registration:')|cat:
+                                        ' <a href="{CONFIRM_URL}">{CONFIRM_URL}</a>.':"\n":
+                                        _w('Thank you!')}
+                                        <textarea name="form[params][confirm_mail_body]">{$form.params.confirm_mail_body|escape|default:$default_txt}</textarea>
+                                    </div>
+                                </div>
+                                <div class="hint c-hint">
+                                    [`Variable &#123;CONFIRM_URL&#125; must be present in the text of your message template shown above. It will be replaced in the outgoing message with a confirmation URL that your client should click to confirm registration.`]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="crm-after-auth-block">
+                        <p>[`After successful confirmation`]</p>
+
+                        <div class="crm-line field">
+                            <div class="name">
+                                <label>
+                                    <input type="radio" name="form[params][after_antispam_confirm]" value="redirect" {if isset($form.params.after_antispam_confirm) && $form.params.after_antispam_confirm === 'redirect'}checked="checked"{/if}>
+                                    [`Redirect to URL`]
+                                </label>
+                            </div>
+                            <div class="value">
+                                <input type="text" name="form[params][after_antispam_confirm_url]" value="{$form.params.after_antispam_confirm_url|default:''}" placeholder="http://">
+                            </div>
+                        </div>
+
+                        <div class="crm-line field">
+                            <div class="name">
+                                <label>
+                                    <input type="radio" name="form[params][after_antispam_confirm]" value="text" {if empty($form.params.after_antispam_confirm) || $form.params.after_antispam_confirm !== 'redirect'}checked="checked"{/if}>  [`Display text`]
+                                </label>
+                            </div>
+                            <div class="value">
+                                <textarea name="form[params][after_antispam_confirm_text]">{$form.params.after_antispam_confirm_text|default:'[`Confirmed`]'}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        {$blocks.form_with_contact|default:''}
+        {$blocks.form_create_deal|default:''}
+        {$blocks.form_responsible|default:''}
+
+        <div class="crm-form-section">
+            <div class="crm-form-section-header">
+                [`Messages`]
+            </div>
+            <div class="crm-form-section-content">
+                {$messages_block}
+            </div>
+        </div>
+
+        {if $form.id}
+            <div class="crm-form-section">
+                <div class="crm-form-section-header">
+                    [`Publication`]
+                </div>
+                <div class="crm-form-section-content">
+                    <p class="large-hint">[`To publish this form on your website use this code:`]
+                        {if $form.id > 0}
+                            <tt class="crm-smarty-helper"><strong>{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}</strong></tt>
+                            <i class="icon16 stack crm-copy js-copy" data-content="{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}" title="[`Copy to clipboard`]"></i>
+                        {else}
+                            <strong>[`Will be available after saving`]</strong>
+                        {/if}
+                    </p>
+                </div>
+                <div class="crm-form-section-content">
+                    <p class="large-hint">[`To publish the form on external site use this code:`]
+                        <a class="inline-link crm-iframe-code-block-toggle" href="javascript:void(0);"><b><i>iframe</i></b></a>
+                    </p>
+                    <textarea class="crm-iframe-code small" style="display: none;" readonly><iframe frameborder="0" src="{$frontend_form_iframe_url}" id="wa-crm-iframe" name="wa-crm-iframe" marginheight="0" marginwidth="0" scrolling="no" style="width:100%; height:50px;"></iframe><script type="text/javascript" src="{$app_static_url}js/iframeResizer.min.js"></script><script type="text/javascript">iFrameResize({ heightCalculationMethod:'max' });</script></textarea>
+                </div>
+            </div>
+        {/if}
+
+        <div class="crm-form-buttons">
+            <div class="c-layout">
+                <div class="c-column">
+                    {$wa->csrf()}
+                    <input type="submit" class="button green" value="[`Save`]">
+                    <span style="margin: 0 4px;">[`or`]</span>
+                    <a class="inline-link js-c-cancel-link" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                    <i class="icon16 loading crm-loading" style="display:none"></i>
+                    <span class="crm-success-status" style="display: none;">
+                        [`Saved`] <i class="icon16 yes"></i>
+                    </span>
+                </div>
+                {if $form.id > 0}
+                    <div class="c-column middle right">
+                        <div class="crm-delete-link-wrapper">
+                            <a href="javascript:void(0);" class="inline-link crm-delete-form-link"><i class="icon16 delete"></i><b><i>[`Delete this form`]</i></b></a>
+                        </div>
+                    </div>
+                {/if}
+            </div>
+        </div>
+    </div>
+</form>

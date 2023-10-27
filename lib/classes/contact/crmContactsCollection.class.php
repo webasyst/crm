@@ -178,14 +178,18 @@ class crmContactsCollection extends waContactsCollection
             $fields = wa('crm')->getConfig()->getContactFields();
         }
 
-        $contacts = parent::getContacts($fields, $offset, $limit);
         $fields_ar = array();
         foreach (explode(',', $fields) as $field) {
             $field = trim($field);
             if ($field) {
+                if ($field === 'birthday') {
+                    $fields .= ',birth_day,birth_month,birth_year';
+                }
                 $fields_ar[] = $field;
             }
         }
+        $contacts = parent::getContacts($fields, $offset, $limit);
+
         return $this->workupContacts($contacts, $fields_ar);
     }
 
@@ -220,18 +224,32 @@ class crmContactsCollection extends waContactsCollection
             }
             unset($contact);
         }
+        if (isset($fields['birthday'])) {
+            foreach ($contacts as &$contact) {
+                $contact['birthday'] = [
+                    'data' => [
+                        'year'  => ifset($contact, 'birth_year', null),
+                        'month' => ifset($contact, 'birth_month', null),
+                        'day'   => ifset($contact, 'birth_day', null)
+                    ]
+                ];
+            }
+            unset($contact);
+        }
 
-        if (!empty($this->options['full_email_info'])) {
+        if (!empty($this->options['full_email_info']) && (isset($fields['email']) || isset($fields['*']))) {
             $cem = new waContactEmailsModel();
             $emails = $cem->select('*')->where('contact_id IN (:ids)', array('ids' => $contact_ids))->fetchAll();
-            foreach ($emails as $email) {
-                $contact_id = $email['contact_id'];
-                $sort = $email['sort'];
-                unset($email['contact_id'], $email['sort'], $email['id']);
-                $contacts[$contact_id]['email'] = (array)ifset($contacts[$contact_id]['email']);
-                $contacts[$contact_id]['email'][$sort] = $email;
+            if ($emails) {
+                foreach ($emails as $email) {
+                    $contact_id = $email['contact_id'];
+                    $sort = $email['sort'];
+                    unset($email['contact_id'], $email['sort'], $email['id']);
+                    $contacts[$contact_id]['email'] = (array)ifset($contacts[$contact_id]['email']);
+                    $contacts[$contact_id]['email'][$sort] = $email;
+                }
+                $contacts[$contact_id]['email'] = array_values($contacts[$contact_id]['email']);
             }
-            $contacts[$contact_id]['email'] = array_values($contacts[$contact_id]['email']);
         }
 
         return $contacts;
@@ -267,6 +285,14 @@ class crmContactsCollection extends waContactsCollection
 
     public function orderBy($field, $order = 'ASC')
     {
+        if ($field === 'crm_last_log_datetime') {
+            if (strtolower(trim($order)) !== 'asc') {
+                $order = 'DESC';
+            }
+            $this->order_by = 'IFNULL(c.crm_last_log_datetime, c.create_datetime) ' . $order;
+            return $this->order_by;
+        }
+        
         if (!$field || $field == '~data' || $field[0] != '~' || false === strpos($field, '.')) {
             return parent::orderBy($field, $order);
         }
@@ -282,5 +308,35 @@ class crmContactsCollection extends waContactsCollection
         }
 
         $this->order_by = $field." ".$order;
+        return $this->order_by;
+    }
+
+    protected function getTableAlias($table)
+    {
+        $alias = parent::getTableAlias($table);
+        $alias = trim($alias, '(');
+
+        return $alias;
+    }
+
+    public function setHash($hash)
+    {
+        parent::setHash($hash);
+        if (is_string($hash) && strpos($hash, 'contact_info.phone') !== false) {
+            $phone_prefix = wa('crm')->getConfig()->getPhoneTransformPrefix();
+            if (!empty($phone_prefix['input_code']) && !empty($phone_prefix['output_code'])) {
+                $explode_hash = explode('&', $this->hash[1]);
+                foreach ($explode_hash as &$_hash) {
+                    if (strpos($_hash, 'contact_info.phone') === 0) {
+                        $h = explode('=', $_hash);
+                        $h[1] = ltrim($h[1], $phone_prefix['input_code']);
+                        $h[1] = ltrim($h[1], '+'.$phone_prefix['output_code']);
+                        $_hash = $h[0].'='.$h[1];
+                        $this->hash[1] = implode('&', $explode_hash);
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

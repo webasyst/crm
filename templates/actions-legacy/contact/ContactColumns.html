@@ -1,0 +1,54 @@
+{strip}
+
+{function _renderItem _item=[]}
+    {if !empty($_item)}
+        <li class="c-item js-item">
+            <i class="icon16 sort c-toggle"></i>
+            <label>
+                <input class="c-field" type="checkbox" name="column[{$_item.full_column_id}]" value="1" {if $_item.checked}checked="checked"{/if}>
+                <span class="c-name">{$_item.text}</span>
+            </label>
+        </li>
+    {else}
+        <li class="c-item is-locked">
+            <i class="icon16 sort c-toggle"></i>
+            <label>
+                <input class="c-field" type="checkbox" checked="checked" disabled>
+                <span class="c-name">[`Contact name`]</span>
+            </label>
+        </li>
+    {/if}
+{/function}
+
+<div class="c-contact-columns-dialog" id="c-contact-columns-dialog">
+    <form>
+        <ul class="menu-v c-active-list js-active-list">
+            {_renderItem}
+            {foreach $columns as $_item}
+                {if !empty($_item.checked)}{_renderItem _item=$_item}{/if}
+            {/foreach}
+        </ul>
+
+        <ul class="menu-v c-unactive-list js-unactive-list">
+            {foreach $columns as $_item}
+                {if empty($_item.checked)}{_renderItem _item=$_item}{/if}
+            {/foreach}
+        </ul>
+
+        <footer class="c-footer-actions">
+            <input class="button green" type="submit" value="[`Save`]">
+            <span style="margin: 0 4px;">[`or`]</span>
+            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+        </footer>
+    </form>
+
+    <script>
+        ( function($) {
+            new CRMContactsColumnsDialog({
+                $wrapper: $("#c-contact-columns-dialog")
+            });
+        })(jQuery);
+    </script>
+</div>
+
+{/strip}

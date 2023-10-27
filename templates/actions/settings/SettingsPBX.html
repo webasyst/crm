@@ -26,16 +26,16 @@
         {else}
 
             <p>[`For each phone number, select users who will see pop-up notifications on incoming calls to that number, with information about calling clients.`]</p>
-
+            <div class="table-scrollable-x">
             <table class="js-pairs-table light">
 
                 {function name="_renderUser"}
                     <li class="c-user-wrapper" data-id="{$_user.id|default:""}">
-                        <i class="icon16 userpic20" style="background-image: url({$_user.photo_url_16|default:""}); margin-right: 0;"></i>
+                        <span class="icon userpic"><i style="background-image: url({$_user.photo_url_16|default:""}); margin-right: 0;"></i></span>
                         <span class="js-name">{$_user.name|escape|default:""}</span>
                         {if !$not_exist}
                             <a class="small inline-link c-delete-link js-user-delete" href="javascript:void(0);">
-                                <i class="icon10 close"></i> <b><i>[`delete`]</i></b>
+                                <i class="fas fa-times-circle close"></i> [`delete`]</b>
                             </a>
                         {/if}
                     </li>
@@ -48,30 +48,30 @@
 
                     <tr class="c-pair-wrapper" data-plugin-id="{$_pair.plugin_id|escape}" data-number="{$_pair.number|escape}" {if $_pair.not_exist}style="opacity: 0.5"{/if}>
                         <td class="c-column-icon">
-                            <i class="icon16" title="{$_pair.plugin_name|escape}" style="background-image: url('{$_pair.plugin_icon|default:""}'); background-size: 16px 16px;"></i>
+                           <span class="icon size-16"><i class="icon16" title="{$_pair.plugin_name|escape}" style="background-image: url('{$_pair.plugin_icon|default:""}'); background-size: 16px 16px;"></i></span> 
                         </td>
                         <td class="c-column-number">
                             <span class="js-number">{$_pair.number_label|escape}</span>
                             {if $_pair.not_exist}<div class="c-not-exist">[`Number does not exist`]</div>{/if}
                         </td>
                         <td class="c-column-users">
-                            <ul class="menu-v c-users-list js-users-list">
+                            <ul class="list c-users-list js-users-list">
                                 {foreach $_pair.users as $_id => $_user}{_renderUser _user=$_user not_exist=$_pair.not_exist}{/foreach}
                             </ul>
 
                             {if $_pair.not_exist}
                                 <div class="c-user-delete-number">
-                                    <a href="javascript:void(0);" class="js-delete-pbx-num inline-link"><i class="icon16 delete"></i><b><i>[`Delete number`]</i></b></a>
+                                    <a href="javascript:void(0);" class="js-delete-pbx-num inline-link text-red">
+                                        <i class="fas fa-trash-alt delete"></i> [`Delete number`]</a>
                                 </div>
                             {else}
                                 <div class="c-user-add-wrapper js-user-add-wrapper">
                                     <div class="c-visible">
-                                        <a href="javascript:void(0);" class="js-show-combobox inline-link"><i class="icon16 add"></i><b><i>[`Add user`]</i></b></a>
+                                        <a href="javascript:void(0);" class="button small rounded light-gray js-show-combobox nowrap"><i class="fas fa-plus-circle text-green add"></i> [`Add user`]</a>
                                     </div>
                                     <div class="c-hidden">
-                                        <input class="js-autocomplete">
-                                        <span style="margin: 0 4px;">[`or`]</span>
-                                        <a href="javascript:void(0);" class="inline-link js-hide-combobox"><b><i>[`cancel`]</i></b></a>
+                                        <input type="text" class="js-autocomplete">
+                                        <a href="javascript:void(0);" class="button light-gray small js-hide-combobox">[`Cancel`]</a>
                                     </div>
                                 </div>
                             {/if}
@@ -79,6 +79,7 @@
                     </tr>
                 {/foreach}
             </table>
+            </div>
         {/if}
 
     {/if}
@@ -91,9 +92,12 @@
                 locales: {
                     delete_confirm_title: '[`Remove “%name%” from recipients of %number%?`]',
                     delete_confirm_text: "[`Are you sure?`]",
-                    delete_confirm_button: "[`Delete`]"
+                    delete_confirm_button: "[`Delete`]",
+                    dialog_error_title: "[`Error`]",
+                    dialog_error_button: "[`Close`]"
                 }
             });
         })(jQuery);
     </script>
+ 
 </div>

@@ -34,18 +34,20 @@ class crmDealMoveController extends crmJsonController
             $this->response['dialog_html'] = null;
         }
 
-        $dm->updateById($deal_id, array(
-            'update_datetime' => date('Y-m-d H:i:s'),
-            'stage_id' => $stage_id,
-        ));
-        $this->logAction('deal_step', array('deal_id' => $deal_id));
-        $lm = new crmLogModel();
-        $lm->log(
+        $crm_log_id = $this->getLogModel()->log(
             'deal_step',
             $deal_id * -1,
-            null,
+            $deal_id,
             ifset($before_stage['name']),
-            $after_stage['name']
+            $after_stage['name'],
+            null,
+            ['stage_id_before' => $before_stage['id'], 'stage_id_after' => $after_stage['id']]
         );
+        $dm->updateById($deal_id, [
+            'stage_id'        => $stage_id,
+            'update_datetime' => date('Y-m-d H:i:s'),
+            'crm_log_id'      => $crm_log_id
+        ]);
+        $this->logAction('deal_step', array('deal_id' => $deal_id));
     }
 }

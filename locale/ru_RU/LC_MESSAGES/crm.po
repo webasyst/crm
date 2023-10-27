@@ -12,7 +12,7 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
 "Language: ru_RU\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.4.3\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -90,6 +90,9 @@ msgstr "Зарегистрирован"
 
 msgid "All users"
 msgstr "Все пользователи"
+
+msgid "All employees"
+msgstr "Все сотрудники"
 
 msgid "Who can see %s profile and timeline:"
 msgstr "Кому видны профиль и хронология %s:"
@@ -193,6 +196,9 @@ msgstr "Нет сотрудников."
 msgid "Add employee"
 msgstr "Добавить сотрудника"
 
+msgid "More information"
+msgstr "Подробная информация"
+
 msgid "Full contact info"
 msgstr "Полные контактные данные"
 
@@ -286,8 +292,8 @@ msgstr[0] "%d контакт не будет объединен по указа�
 msgstr[1] "%d контакта не будут объединены по указанным выше причинам."
 msgstr[2] "%d контактов не будут объединены по указанным выше причинам."
 
-msgid "Duplicates are the contacts actually representing the same person or company though existing as two or more separate records in your database. This may happen if you use multiple scenarios to collect your contacts, e.g. sign up on your site, mailing subscription, adding contacts in the backend, and etc. Whatever reasons cause duplicates appearance, they are undesirable as do not allow to gather under the same unique account a client's profile, their activities and communication history. Merging duplicates resolves this problem. Two or more contact records will be merged in one. Contact information (phone numbers, email address, and etc.) will be consolidated as well as links from other apps (Shop, Helpdesk, Mailer, and etc.) will be modified to refer the only unique contact left after merging."
-msgstr "Дубликаты &mdash; это контакты, которые фактически является одной персоной или компанией, но существуют в базе данных в виде двух или более отдельных записей. Обычно дубликаты появляются при использовании разных способов добавления контактов: регистрация на сайте, подписка на рассылки, добавление контакта в бекенде и т. д. Каковы бы ни были причины появления дубликатов, они нежелательны, потому что не позволяют собрать в едином месте профиль клиента, историю его действия и взаимодействия с ним. Функция объединения дубликатов решает эту проблему. Несколько записей о контактах будут объединены в одну. Будет объединена контактная информация (телефоны, email-адреса и т. д.) и будут исправлены ссылки на контакт из других приложений («Магазин», «Поддержка», «Рассылки» и т. д.) таким образом, что будут ссылаться на единственный контакт, который останется после объединения."
+msgid "Duplicates are the contacts actually representing the same person or company though existing as two or more separate records in your database. This may happen if you use multiple scenarios to collect your contacts, e.g. sign up on your site, mailing subscription, adding contacts in the backend, and etc. Whatever reasons cause duplicates appearance, they are undesirable as do not allow to gather under the same unique account a client's profile, their activities and communication history. Merging duplicates resolves this problem. Two or more contact records will be merged in one. Contact information (phone numbers, email address, and etc.) will be consolidated as well as links from other apps (Shop-Script, Helpdesk, Mailer, etc.) will be modified to refer the only unique contact left after merging."
+msgstr "Дубликаты &mdash; это контакты, которые фактически являются одной персоной или компанией, но существуют в базе данных в виде двух или более отдельных записей. Обычно дубликаты появляются при использовании разных способов добавления контактов: регистрация на сайте, подписка на рассылки, добавление контакта в бекенде и т. д. Каковы бы ни были причины появления дубликатов, они нежелательны, потому что не позволяют собрать в едином месте профиль клиента, историю его действий и вашего взаимодействия с ним. Функция объединения дубликатов решает эту проблему: несколько записей о контактах будут объединены в одну. Будет объединена контактная информация (телефонные номера, email-адреса и т. д.) и будут исправлены ссылки на контакт из других приложений (Shop-Script, «Поддержка», «Рассылки» и т. д.) таким образом, что будут ссылаться на единственный контакт, который останется после объединения."
 
 msgid "Search duplicates by"
 msgstr "Искать дубликаты по"
@@ -330,9 +336,9 @@ msgstr "Дубликаты не найдены."
 
 msgid "<strong>%d duplicate group</strong> found."
 msgid_plural "<strong>%d duplicate groups</strong> found."
-msgstr[0] "найдена <strong>%d группа дубликатов</strong>."
-msgstr[1] "найдены <strong>%d группы дубликатов</strong>."
-msgstr[2] "найдено <strong>%d групп дубликатов</strong>."
+msgstr[0] "Найдена <strong>%d группа дубликатов</strong>."
+msgstr[1] "Найдены <strong>%d группы дубликатов</strong>."
+msgstr[2] "Найдено <strong>%d групп дубликатов</strong>."
 
 msgid "All groups include <strong>%d contact</strong>."
 msgid_plural "All groups include <strong>%d contacts</strong>."
@@ -589,8 +595,17 @@ msgstr "Удалить контакт"
 msgid "Transfer ownership"
 msgstr "Передача прав"
 
+msgid "Owner profile"
+msgstr "Профиль ответственного"
+
+msgid "Client profile"
+msgstr "Профиль клиента"
+
 msgid "Remove owner"
 msgstr "Удалить ответственного"
+
+msgid "Detach responsible"
+msgstr "Отвязать ответственного"
 
 msgid "User name"
 msgstr "Имя пользователя"
@@ -633,6 +648,9 @@ msgstr "Дата закрытия"
 
 msgid "Reopen deal"
 msgstr "Переоткрыть сделку"
+
+msgid "Open deal"
+msgstr "Открыть сделку"
 
 msgid "Won"
 msgstr "Выигранные"
@@ -922,6 +940,18 @@ msgstr "от"
 msgid "Incoming call from %s."
 msgstr "Входящий звонок от %s."
 
+msgid "Voice mail from %s."
+msgstr "Голосовая почта от %s."
+
+msgid "Missed call from %s."
+msgstr "Пропущенный звонок от %s."
+
+msgid "Voice mail to %s."
+msgstr "Голосовая почта на %s."
+
+msgid "No answer from %s."
+msgstr "Звонок без ответа на %s."
+
 msgid " to"
 msgstr "по"
 
@@ -976,8 +1006,14 @@ msgstr "Добавить напоминание"
 msgid "Show all %d completed reminder"
 msgid_plural "Show all %d completed reminders"
 msgstr[0] "Показать %d выполненное напоминание"
-msgstr[1] "Показать все %d выполненные напоминания"
+msgstr[1] "Показать все %d выполненных напоминания"
 msgstr[2] "Показать все %d выполненных напоминаний"
+
+msgid "%d completed reminder"
+msgid_plural "%d completed reminders"
+msgstr[0] "%d выполненное напоминание"
+msgstr[1] "%d выполненных напоминания"
+msgstr[2] "%d выполненных напоминаний"
 
 msgid "set time"
 msgstr "выбрать время"
@@ -990,6 +1026,9 @@ msgstr "очистить время"
 
 msgid "Assign another user"
 msgstr "Назначить другому пользователю"
+
+msgid "Assign another"
+msgstr "Назначить другого"
 
 msgid "Choose a user"
 msgstr "Выбрать пользователя"
@@ -1417,6 +1456,18 @@ msgstr "Добавить способ оплаты"
 msgid "Browse payment plugins..."
 msgstr "Поиск плагинов оплаты...."
 
+msgid "Search by contacts and deals"
+msgstr "Поиск по контактам и сделкам"
+
+msgid "Search by names, deals and dates"
+msgstr "Поиск по именам, сделкам и датам"
+
+msgid "Search by customer names"
+msgstr "Поиск по именам клиентов"
+
+msgid "Сontact or deal"
+msgstr "Контакт или сделка"
+
 msgid "Multiple instances of every payment option with custom settings can be created."
 msgstr "Можно добавить несколько одинаковых способов оплаты, но выбрать для них разные настройки."
 
@@ -1444,7 +1495,7 @@ msgstr "Название способа оплаты"
 msgid "Logo URL"
 msgstr "URL логотипа"
 
-msgid "A collection of payment option icons is available for free: <a href=\"%s\" target=\"_blank\">%s</a> <i class=\"icon10 new-window\"></i>"
+msgid "A collection of payment option icons is available for free at <a href=\"%s\" target=\"_blank\">%s</a> <i class=\"icon10 new-window\"></i>"
 msgstr "Бесплатная коллекция иконок способов оплаты доступна по адресу <a href=\"%s\" target=\"_blank\">%s</a> <i class=\"icon10 new-window\"></i>"
 
 msgid "https://support.webasyst.com/27128/crm-payment-methods-icons/"
@@ -1666,6 +1717,9 @@ msgstr "неправильный номер"
 msgid "Notes"
 msgstr "Заметки"
 
+msgid "Notes and files"
+msgstr "Заметки и файлы"
+
 msgid "All types"
 msgstr "Все типы"
 
@@ -1748,7 +1802,7 @@ msgid "Page:"
 msgstr "Страница:"
 
 msgid "no name"
-msgstr "без названия"
+msgstr "без имени"
 
 msgid "Any discount coupon"
 msgstr "Любой купон на скидку"
@@ -1818,6 +1872,9 @@ msgstr "добавил сделку"
 
 msgid "changed stage"
 msgstr "изменил этап"
+
+msgid "changed funnel"
+msgstr "изменил воронку"
 
 msgid "added contact to a deal"
 msgstr "добавил контакт к сделке"
@@ -2155,6 +2212,9 @@ msgstr "Напишите сообщение"
 msgid "Start typing a name"
 msgstr "Начните вводить имя"
 
+msgid "Start typing a title"
+msgstr "Начните вводить название"
+
 msgid "Edit recipient"
 msgstr "Изменить получателя"
 
@@ -2172,6 +2232,9 @@ msgstr "Изменить получателя"
 
 msgid "Select deal"
 msgstr "Выберите сделку"
+
+msgid "Do not relate to deal"
+msgstr "Не привязаны к сделке"
 
 msgid "Create new"
 msgstr "Создать новую"
@@ -2314,6 +2377,9 @@ msgstr "Для каждого телефонного номера выберит
 msgid "Add email source"
 msgstr "Добавить email-источник"
 
+msgid "Add messenger"
+msgstr "Добавить мессенджер"
+
 msgid "Personally"
 msgstr "Индивидуально"
 
@@ -2394,6 +2460,12 @@ msgstr "Сообщения"
 
 msgid "No messages"
 msgstr "Нет сообщений"
+
+msgid "Reminders not added"
+msgstr "Напоминания не добавлены"
+
+msgid "User has no chats"
+msgstr "У пользователя нет чатов"
 
 msgid "via"
 msgstr "через"
@@ -2494,6 +2566,9 @@ msgstr "Email-источник сделок"
 msgid "Source not found"
 msgstr "Источник сделок не найден"
 
+msgid "Deal source disabled"
+msgstr "Источник сделок отключен"
+
 msgid "Change deal stage"
 msgstr "Изменение этапа сделки"
 
@@ -2559,6 +2634,9 @@ msgstr "что?"
 
 msgid "Extended contact data"
 msgstr "Дополнительные данные контакта"
+
+msgid "Additional contact and transaction fields"
+msgstr "Дополнительные поля контактов и сделок"
 
 msgid "Hide extended fields"
 msgstr "Скрыть дополнительные поля"
@@ -2704,6 +2782,9 @@ msgstr "Новый входящий звонок"
 msgid "Any type"
 msgstr "Все типы"
 
+msgid "All reminders"
+msgstr "Все напоминания"
+
 msgid "Show my reminders only"
 msgstr "Показывать только мои напоминания"
 
@@ -2772,6 +2853,9 @@ msgstr "Поле"
 
 msgid "Terms description"
 msgstr "Описание условий"
+
+msgid "Term"
+msgstr "Срок"
 
 msgid "Checked by default"
 msgstr "Отмечено по умолчанию"
@@ -3010,6 +3094,9 @@ msgstr "После успешной установки плагина испол
 msgid "Dropped"
 msgstr "Сброшено"
 
+msgid "Reset"
+msgstr "Сбросить"
+
 msgid "Redirected"
 msgstr "Переадресовано"
 
@@ -3018,6 +3105,9 @@ msgstr "Завершено"
 
 msgid "Voicemail"
 msgstr "Автоответчик"
+
+msgid "Direction"
+msgstr "Направление"
 
 msgid "Any state"
 msgstr "Все статусы"
@@ -3568,6 +3658,9 @@ msgstr "Задание <tt>cron</tt> для автоматического пе�
 msgid "<tt>Cron</tt> job required for sending greetings to customers is set up properly."
 msgstr "Задание <tt>cron</tt> для рассылки поздравлений клиентам настроено."
 
+msgid "Customers"
+msgstr "Покупатели"
+
 msgid "Copy Shop-Script currency settings"
 msgstr "Копировать настройки валют из Shop-Script"
 
@@ -3814,6 +3907,9 @@ msgstr "Изменить компанию"
 msgid "To receive and handle messages from clients %sset up a message source%s"
 msgstr "Чтобы получать и обрабатывать сообщения от клиентов необходимо %sнастроить источники сообщений%s"
 
+msgid "To receive and handle messages from clients set up a message source"
+msgstr "Чтобы получать и обрабатывать сообщения от клиентов необходимо настроить источники сообщений"
+
 msgid "Write SMS to %s"
 msgstr "Написать SMS на %s"
 
@@ -4000,8 +4096,8 @@ msgstr "Установить плагины интеграции с мессен
 msgid "Operations"
 msgstr "Операции"
 
-msgid "Select Webasyst default captcha or Google reCAPTCHA"
-msgstr "Выбрать стандартную капчу Webasyst или Google reCAPTCHA"
+msgid "Select a captcha in system settings"
+msgstr "Выбрать капчу в системных настройках"
 
 msgid "Captcha settings"
 msgstr "Настройки капчи"
@@ -4153,6 +4249,9 @@ msgstr "Выберите ниже «%s» в разделе «%s», чтобы э
 msgid "New call"
 msgstr "Новый звонок"
 
+msgid "New message from %s"
+msgstr "Новое сообщение от %s"
+
 msgid "No open deals"
 msgstr "Нет открытых сделок"
 
@@ -4178,7 +4277,7 @@ msgid "Are you sure you want to delete all selected conversations?"
 msgstr "Вы действительно хотите удалить все выбранные переписки?"
 
 msgid "Detach from deal"
-msgstr "Открепить от сделки"
+msgstr "Отвязать от сделки"
 
 msgid "Detach"
 msgstr "Открепить"
@@ -4476,3 +4575,165 @@ msgstr "Пользователь с ограниченными правами д
 
 msgid "This profile is not available for editing."
 msgstr "Профиль недоступен для редактирования."
+
+msgid "PBX number not found"
+msgstr "Номер АТС не найден"
+
+msgid "User already added to PBX number"
+msgstr "Этот пользователь уже добавлен"
+
+msgid "%s changed"
+msgstr "Изменено: %s"
+
+msgid "%s added"
+msgstr "Добавлено: %s"
+
+msgid "%s removed"
+msgstr "Удалено: %s"
+
+msgid "Search results"
+msgstr "Результаты поиска"
+
+msgid "Your file is too large. You need to increase the file upload size limit in the PHP configuration."
+msgstr "Размер файла превышает заданные ограничения. Необходимо увеличить допустимый размер загружаемого файла в конфигурации PHP."
+
+msgid "call"
+msgstr "звонок"
+
+msgid "To handle phone calls in CRM, install and set up <a class=\"js-disable-router\" href=\"%s\" target=\"_top\" >IP telephony integration plugins</a>."
+msgstr "Чтобы работать с телефонными звонками в CRM, установите и настройте <a class=\"js-disable-router\" href=\"%s\" target=\"_top\" >плагины для интеграции с IP-телефонией</a>."
+
+msgid "Download"
+msgstr "Скачать"
+
+msgid "A collection of payment option icons is available for free at <a href=\"%s\" target=\"_blank\">%s</a>  <i class=\"fas fa-external-link-alt new-window\"></i>"
+msgstr "Коллекция иконок способов оплаты доступна бесплатно по адресу <a href=\"%s\" target=\"_blank\">%s</a>  <i class=\"fas fa-external-link-alt new-window\"></i>"
+
+msgid "Message sources"
+msgstr "Источники сообщений"
+
+msgid "<strong>id</strong>: block ID.<br><strong>$params</strong>: associative array of additional parameters passed to a block (example: <code>['myparam' => 100]</code>). A parameter is available by its name as a Smarty variable within a block (example: <code>$myparam</code>)."
+msgstr "<strong>id</strong>: ID блока.<br><strong>$params</strong>: ассоциативный массив дополнительных параметров, передаваемых в блок (пример: <code>['myparam' => 100]</code>). Параметр доступен по его имени в виде переменной Smarty в содержимом блока (пример: <code>$myparam</code>)."
+
+msgid "Сancel"
+msgstr "Отмена"
+
+msgid "Payment was authorized on %s."
+msgstr "Оплата была подтверждена %s."
+
+msgid "Payment authorized"
+msgstr "Оплата подтверждена"
+
+msgid "(no name)"
+msgstr "(без названия)"
+
+msgid "Show more groups"
+msgstr "Показать ещё группы"
+
+msgid "talking"
+msgstr "разговаривает"
+
+msgid "waiting for reply"
+msgstr "ожидает ответа"
+
+msgid "left a voice message"
+msgstr "оставил голосовое сообщение"
+
+msgid "missed call"
+msgstr "пропущен звонок"
+
+msgid "no reply"
+msgstr "не дозвонился"
+
+msgid "<section data-role=\"c-email-signature\"><p><br></p><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>"
+msgstr "<section data-role=\"c-email-signature\"><p><br></p><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: написал:</p><blockquote>:BODY:</blockquote>"
+
+msgid "Video"
+msgstr "Видео"
+
+msgid "Audio"
+msgstr "Аудио"
+
+msgid "Sticker"
+msgstr "Стикер"
+
+msgid "Geolocation"
+msgstr "Геолокация"
+
+msgid "updated reminder"
+msgstr "обновил напоминание"
+
+msgid "deleted reminder"
+msgstr "удалил напоминание"
+
+msgid "Invoice archived"
+msgstr "Счёт отправлен в архив"
+
+msgid "Invoice restored to draft"
+msgstr "Счёт возвращён в черновики"
+
+msgid "Invoice deleted"
+msgstr "Счёт удалён"
+
+msgid "Invoice paid"
+msgstr "Счёт оплачен"
+
+msgid "Invoice payment canceled"
+msgstr "Оплата счёта отменена"
+
+msgid "Invoice payment refunded"
+msgstr "Выполнен возврат оплаты счёта"
+
+msgid "Invoice restored"
+msgstr "Счёт восстановлен"
+
+msgid "Invoice edited"
+msgstr "Счёт отредактирован"
+
+msgid "incoming call %s sec."
+msgstr "входящий звонок %s сек."
+
+msgid "outgoing call  %s sec."
+msgstr "исходящий звонок %s сек."
+
+msgid "Year"
+msgstr "Год"
+
+msgid "Month"
+msgstr "Месяц"
+
+msgid "Day"
+msgstr "День"
+
+msgid "Last action"
+msgstr "Последнее действие"
+
+msgid "No responsible"
+msgstr "Без ответственного"
+
+msgid "Recent & favorite"
+msgstr "Недавние и избранные"
+
+msgid "Loading groups"
+msgstr "Загрузка групп"
+
+msgid "of %d group"
+msgid_plural "of %d groups"
+msgstr[0] "из %d группы"
+msgstr[1] "из %d групп"
+msgstr[2] "из %d групп"
+
+msgid "Download full-size version"
+msgstr "Загрузить в полном размере"
+
+msgid "Select file"
+msgstr "Выберите файл"
+
+msgid "Please correct errors in the data"
+msgstr "Пожалуйста, исправьте ошибки в данных"
+
+msgid "The data contains unknown fields"
+msgstr "В данных присутствуют неизвестные поля"
+
+msgid "Please fill in the required fields"
+msgstr "Пожалуйста, заполните обязательные поля"

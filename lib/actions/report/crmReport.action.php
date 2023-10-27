@@ -69,7 +69,8 @@ class crmReportAction extends crmBackendViewAction
 
         $funnels = $fm->getAllFunnels();
         if (!$funnels) {
-            $this->setTemplate('templates/actions/deal/DealNoFunnel.html');
+            $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
+            $this->setTemplate('templates/' . $actions_path . '/deal/DealNoFunnel.html');
             return;
         }
         if (waRequest::get('chart')) {
@@ -101,7 +102,7 @@ class crmReportAction extends crmBackendViewAction
                 "all" => array(
                     "id"           => 'all',
                     "name"         => _wp("All responsibles"),
-                    "photo_url_16" => wa()->getRootUrl()."wa-content/img/userpic20.jpg"
+                    "photo_url_16" => wa()->whichUI() === '2.0' ? wa()->getRootUrl()."wa-content/img/userpic.svg" : wa()->getRootUrl()."wa-content/img/userpic20.jpg"
                 )
             ) + $users;
         if ($user_id !== null && !empty($users[$user_id])) {
@@ -116,7 +117,8 @@ class crmReportAction extends crmBackendViewAction
 
         $condition = is_numeric($funnel_id) ? ("funnel_id=".intval($funnel_id)) : 1;
         $list_params = $this->getListParams();
-        $tag_cloud = $this->getTagModel()->getCloud();
+        $tag_cloud = wa()->whichUI() === '2.0' ? $this->getTagModel()->getCloudFast() : $this->getTagModel()->getCloud();
+        $popular_cloud = $this->getTagModel()->getPopularTagsSort(15);
         $active_deal_tag = $this->getActiveDealTag($tag_cloud, $list_params);
         $stages = $fsm->select('*')->where($condition)->order('number')->fetchAll('id');
 
@@ -202,6 +204,7 @@ class crmReportAction extends crmBackendViewAction
             'charts'          => $charts,
             'active_deal_tag' => $active_deal_tag,
             'tag_cloud'       => $tag_cloud,
+            'popular_cloud'       => $popular_cloud,
             "active_fields"   => $active_fields,
             "fields"          => $deal_fields,
         ));

@@ -39,6 +39,7 @@ var CRMReportPage = ( function($) {
         }
         //
         that.initDateFilter();
+        that.initTagsFilter();
 
         function getTestData() {
             var stages = [getState(1), getState(2), getState(3), getState(4)];
@@ -129,6 +130,21 @@ var CRMReportPage = ( function($) {
             }
         }
     };
+
+    CRMReportPage.prototype.initTagsFilter = function() {
+        var that = this,
+            $wrapper = that.$wrapper.find(".js-tags-filter"),
+            $show_all_btn = $wrapper.find(".js-show-all"),
+            $popular_part = $wrapper.find(".js-popular-tags-part"),
+            $hidden_part = $wrapper.find(".js-hidden-tags-part");
+            $show_all_btn.on('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                $popular_part.remove();
+                $show_all_btn.remove();
+                $hidden_part.slideDown(300);
+            })
+    }
 
     CRMReportPage.prototype.initDateFilter = function() {
         var that = this,

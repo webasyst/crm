@@ -30,14 +30,13 @@ class crmDealChangeAmountController extends crmJsonController
                 'currency_rate' => $currency['rate'],
             ));
 
-            $action_id = 'deal_edit';
-            $this->logAction($action_id, array('deal_id' => $deal['id']));
+            $this->logAction(crmDealModel::LOG_ACTION_UPDATE, array('deal_id' => $deal['id']));
             $lm = new crmLogModel();
             if ($deal['amount'] !== $amount) {
                 $lm->log(
-                    $action_id,
+                    crmDealModel::LOG_ACTION_UPDATE,
                     $deal['id'] * -1,
-                    null,
+                    $deal['id'],
                     $deal['amount'] ? waCurrency::format('%{s}', $deal['amount'], $deal['currency_id']) : null,
                     $amount ? waCurrency::format('%{s}', $amount, $currency_id) : null
                 );

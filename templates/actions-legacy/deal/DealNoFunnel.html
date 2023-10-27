@@ -1,0 +1,21 @@
+<style>
+.c-deals-page .no-funnels { padding: 100px; text-align: center; }
+</style>
+
+<div class="c-deals-page shadowed" id="c-funnel-page">
+    <main class="c-deals-board">
+        <div class="no-funnels block">
+            <h1>[`One-time configuration required`]</h1>
+            <p>[`Please set up at least one funnel before using Deals section.`]</p>
+            {if $wa->user()->isAdmin('crm')}
+                <p>
+                    <a href="?module=deal&action=noFunnel&create=1" class="button green">[`Create automatically`]</a>
+                    [`or`]
+                    <a href="{$wa_app_url}settings/funnels/">[`proceed to manual set up`]</a>
+                </p>
+            {else}
+                <p>[`Full application rights are required to proceed.`]</p>
+            {/if}
+        </div>
+    </main>
+</div>

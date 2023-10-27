@@ -40,19 +40,32 @@ class crmAutocompleteSidebarController extends crmAutocompleteController
             $res[$deal_id]['tags'] = isset($res[$deal_id]['tags']) ? $res[$deal_id]['tags'].' '.$tag : $tag;
         }
         if ($res) {
-            $deals = $dm->select('id, name')->where("id IN(".join(",", array_keys($res)).")")->limit($this->limit)->fetchAll('id');
+            $deals = $dm->getList([
+                'id'           => array_keys($res),
+                'limit'        => $this->limit,
+                'check_rights' => true
+            ]);
         }
         $out = array();
         foreach ($res as $deal_id => $r) {
+            if (empty($deals[$deal_id])) {
+                continue;
+            }
             $label = isset($r['name']) ? $this->prepare($r['name'], $term_safe) : $this->prepare(ifset($deals[$deal_id]['name']), $term_safe);
+            $deal_name = ifset($r, 'name', $deals[$deal_id]['name']);
             if (!empty($r['tags'])) {
                 $label .= ' <i class="icon16 tags"></i>'.$r['tags'];
             }
+            $label_string = (wa()->whichUI() === '2.0') ? '<div class = "c-layout-deal"><span class="icon flag"><i class="fas fa-flag"></i></span><span class = "c-layout-deal-name">'.$label.'</span></div>' : '<div class = "c-layout inline"><div class = "c-column" style = "width: 16px;padding: 0 4px 0 0;"><i class = "icon16 funnel" style = "margin: 0; top: 0;"></i></div><div class = "c-column middle">'.$label.'</div></div>';
+
             $out[] = array(
-                'label' => '<div class = "c-layout inline"><div class = "c-column" style = "width: 16px;padding: 0 4px 0 0;"><i class = "icon16 funnel" style = "margin: 0; top: 0;"></i></div><div class = "c-column middle">'.$label.'</div></div>',
-                'link'  => 'deal/'.$deal_id.'/'
+                'label' => $label_string,
+                'link'  => 'deal/'.$deal_id.'/',
+                'name' => $deal_name,
+                'id' => $deal_id
             );
         }
+
         return $out;
     }
 

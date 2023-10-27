@@ -1,0 +1,118 @@
+{$deal = $deal|default:[]}
+{$funnels = $funnels|default:[]}
+{$stages = $stages|default:[]}
+
+<div class="c-layout inline js-deal-selector-control-wrapper" style="display: none;">
+    <div class="c-column middle gray" style="padding-right: 8px;">[`Deal`]:</div>
+    <div class="c-column">
+        <span class="js-created-deal hidden"></span>
+        <form class="deal-form">
+            <div class="c-deal-value js-deal-value">
+                <span class="c-deal-name c-deal-name-hidden js-deal-name">
+                    <input class="c-deal-name-input js-deal-name-input" type="text" name="deal[name]" autocomplete="off" placeholder="[`Type a deal name`]" />
+                    <a title="[`Cancel creation`]" class="c-remove-deal js-remove-deal">x</a>
+                </span>
+                <div class="c-select-deal js-select-deal">
+                    <ul class="menu-h dropdown js-deals-dropdown hidden">
+                        <li>
+                            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                <span class="js-text"><b><i>[`Empty`]</i></b></span>&nbsp;<i class="icon10 darr"></i>
+                            </a>
+                            <ul class="menu-v with-icons c-deals-list js-deals-list">
+                                <li class="js-create-new-deal">
+                                    <a href="javascript:void(0);">
+                                        <span class="js-text"><b><i>[`Create new`]</i></b></span>
+                                    </a>
+                                </li>
+                                <li class="c-empty-deal c-empty-deal-hidden js-empty-deal">
+                                    <a href="javascript:void(0);">
+                                        <span class="js-text"><b><i>[`Empty`]</i></b></span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <input class="js-field js-deal-id" name="deal[id]" type="hidden" value="none">
+                        </li>
+                    </ul>
+                    <a href="javascript:void(0);" class="inline-link js-create-new-deal js-create-new-deal-link hidden">
+                        <span class="js-text"><b><i>[`Create new`]</i></b></span>
+                    </a>
+                </div>
+
+                <div class="c-select-funnel hidden js-select-funnel-wrapper">
+                    {$_active_funnel = reset($funnels)}
+                    {if !empty($deal.funnel_id) && !empty($funnels[$deal.funnel_id])}
+                        {$_active_funnel = $funnels[$deal.funnel_id]}
+                    {/if}
+
+                    <div class="c-funnels-list" id="c-funnels-list">
+                        <ul class="menu-h dropdown">
+                            <li>
+                                <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                    <span class="js-text">
+                                        {if !empty($_active_funnel.color)}
+                                            <i class="icon16 funnel-state svg-icon" data-color="{$_active_funnel.color}"></i>
+                                        {/if}
+                                        <b><i class="js-name">{$_active_funnel.name|escape}</i></b>
+                                    </span>&nbsp<i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v with-icons">
+                                    {strip}
+                                        {foreach $funnels as $_funnel}
+                                            <li class="{if $deal.funnel_id == $_funnel.id}selected{/if}">
+                                                <a href="javascript:void(0);" data-id="{$_funnel.id|escape}">
+                                                    {if !empty($_funnel.color)}
+                                                        <i class="icon16 funnel-state svg-icon" data-color="{$_funnel.color|escape}"></i>
+                                                    {/if}
+                                                    <b><i>{$_funnel.name|escape}</i></b>
+                                                </a>
+                                            </li>
+                                        {/foreach}
+                                    {/strip}
+                                </ul>
+                                <input class="js-field js-select-deal-funnel" name="deal[funnel_id]" type="hidden" value="{$_active_funnel.id|escape}">
+                            </li>
+                        </ul>
+
+                        <script>
+                            ( function($) {
+                                var $wrapper = $("#c-funnels-list"),
+                                    $visibleLink = $wrapper.find(".js-visible-link"),
+                                    $field = $wrapper.find(".js-field"),
+                                    $menu = $wrapper.find(".menu-v");
+
+                                $menu.on("click", "a", function () {
+                                    var $link = $(this);
+                                    $visibleLink.find(".js-text").html($link.html());
+
+                                    $menu.find(".selected").removeClass("selected");
+                                    $link.closest("li").addClass("selected");
+
+                                    $menu.hide();
+                                    setTimeout( function() {
+                                        $menu.removeAttr("style");
+                                    }, 200);
+
+                                    var id = $link.data("id");
+                                    $field.val(id).trigger("change");
+                                });
+
+                                $.crm.renderSVG($wrapper);
+
+                            })(jQuery);
+                        </script>
+                    </div>
+
+                    <div class="js-select-stage-wrapper" style="display: inline-block; vertical-align: top; padding-top: 3px;">
+                        {include file="templates/actions-legacy/deal/DealStagesByFunnel.html" selected_stage=$deal.stage_id inline}
+                    </div>
+                </div>
+            </div>
+
+            {$show_save_button = $show_save_button|default:false}
+            {if $show_save_button}
+                <i class="icon16 disk js-save-deal hidden" style="cursor: pointer; margin-top: 2px; margin-left: -13px;"></i>
+            {/if}
+
+        </form>
+    </div>
+</div>

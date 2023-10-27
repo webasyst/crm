@@ -1,0 +1,389 @@
+{$_is_company = false}
+{$_type = waRequest::request("type", false)}
+{if !empty($_type) && $_type === "company"}
+    {$_is_company = true}
+{/if}
+
+{$_title = "[`Add person`]"}
+{if !empty($_is_company)}
+    {$_title = "[`Add company`]"}
+{/if}
+
+<div class="c-new-contact-page shadowed" id="c-new-contact-page">
+    <div class="block blank double-padded">
+
+        <header class="c-page-header">
+            <div class="c-layout">
+                <div class="c-column">
+
+                    <h1>
+                        {$_title|escape}
+                        <span class="c-text">
+                            <span style="margin: 0 4px;">[`or`]</span>
+
+                            {$_params = []}
+                            {if !empty($call)}{$_params[] = "call={$call.id}"}{/if}
+                            {if !empty($is_extended)}{$_params[] = "?extended=true"}{/if}
+
+                            {if !empty($_is_company)}
+                                <a href="{$wa_app_url}contact/new/{if !empty($_params)}?{$_params|join:"&"}{/if}">[`Add person`]</a>
+                            {else}
+                                <a href="{$wa_app_url}contact/new/?type=company{if !empty($_params)}&{$_params|join:"&"}{/if}">[`Add company`]</a>
+                            {/if}
+
+                            {if empty($_is_company) && !empty($call) && !empty($call.plugin_client_number) && $can_edit}
+                                <span style="margin: 0 4px;">[`or`]</span>
+                                <a class="inline-link js-show-update-dialog" href="javascript:void(0);"><b><i>[`Update existing contact`]</i></b></a>
+                            {/if}
+                        </span>
+                    </h1>
+
+                </div>
+                <div class="c-column middle right">
+
+                    <div class="c-header-actions">
+                        <i class="icon16 settings js-show-personal-settings-dialog" title="[`Personal settings`]"></i>
+                    </div>
+
+                </div>
+            </div>
+        </header>
+
+        <section class="c-contact-section js-contact-section {if !empty($is_extended)}is-extended{/if}">
+            <form class="c-general-form">
+                {if !empty($_is_company)}
+                    {include file="./Contact.companyAddForm.html" inline}
+                    <input type="hidden" name="contact[is_company]" value="1">
+                {else}
+                    {include file="./ContactForm.inc.html" hide_role=true inline}
+                {/if}
+
+                <input type="hidden" name="call" value="{$call.id|default:''}">
+            </form>
+
+            {if !empty($extended_fields)}
+                <div class="c-contact-toggle">
+                    <div class="field">
+                        <div class="name"></div>
+                        <div class="value">
+                            <div class="c-visible">
+                                <a class="inline-link js-extended-toggle" href="javascript:void(0);">
+                                    <i class="icon16 down"></i><b><i>[`Extended contact data`]</i></b>
+                                </a>
+                            </div>
+                            <div class="c-hidden">
+                                <a class="inline-link js-extended-toggle" href="javascript:void(0);">
+                                    <i class="icon16 up"></i><b><i>[`Hide extended fields`]</i></b>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="c-contact-extended-fields">
+                    {include file="./ContactNew.extendedFields.inc.html" extended_fields=$extended_fields use_form=true inline}
+                </div>
+            {/if}
+        </section>
+
+        <section class="c-access-section js-access-section">
+            <div class="c-js-access-section-toggle">
+                <label class="gray" for="js-ibutton-1">[`Manage access `]</label>
+                <input type="checkbox" class="js-ibutton" id="js-ibutton-1">
+                {*<label for="js-ibutton-1"></label>*}
+            </div>
+
+            <div class="c-access-form-wrapper">
+                <form>
+                    <div class="crm-dialog-content c-contact-access-dialog">
+                        <p>[`Who can see profile and timeline`]</p>
+
+                        <ul class="c-options-list js-options-list menu-v">
+                            <li class="c-option is-active">
+                                <label class="c-label">
+                                    <input class="js-option-field" type="radio" name="access" value="all" checked> [`All users`]
+                                </label>
+                            </li>
+                            {if $vaults_count|default:0 > 0}
+                                <li class="c-option">
+                                <label class="c-label">
+                                    <input class="js-option-field" type="radio" name="access" value="vaults" > [`Only users with access to vault`]
+                                </label>
+
+                                <div class="c-option-inline-content">
+                                    {$_active_vault = reset($vaults)}
+                                    <ul class="menu-h dropdown c-vaults-toggle js-vault-toggle">
+                                        <li>
+                                            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                                <span class="js-text">
+                                                    <i class="icon16 color" style="background: {$_active_vault.color|default:"transparent"|escape};"></i>
+                                                    <b><i class="js-name">{$_active_vault.name|escape}</i></b>
+                                                </span>&nbsp;
+                                                <i class="icon10 darr"></i>
+                                            </a>
+                                            <ul class="menu-v with-icons">
+                                                {strip}
+                                                {foreach $vaults as $_vault}
+                                                <li class="">
+                                                    <a href="javascript:void(0);" data-id="{$_vault.id}">
+                                                        <i class="icon16 color" style="background: {$_vault.color|default:"transparent"|escape};"></i>
+                                                        <b><i>{$_vault.name|escape}</i></b>
+                                                    </a>
+                                                </li>
+                                                {/foreach}
+                                                {/strip}
+                                            </ul>
+                                            <input class="js-field" type="hidden" value="">
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            {/if}
+                            <li class="c-option">
+                                <label class="c-label">
+                                    <input class="js-option-field" type="radio" name="access" value="owners"> [`Selected users only`]
+                                </label>
+
+                                <div class="c-option-content">
+                                    <ul class="c-owners-list js-owners-list menu-v">
+
+                                        {function name="_renderOwner"}
+                                        {if empty($_owner)}
+                                        {$_owner = [
+                                        "id" => "%id%",
+                                        "name" => "%name%",
+                                        "photo_url" => "%photo_url%"
+                                        ]}
+                                        {/if}
+
+                                        <li class="c-owner c-owner-new-page" data-id="{$_owner.id}">
+                                            <span>
+                                                <i class="icon16 userpic20" style="background-image: url({$_owner.photo_url});"></i>
+                                                <span class="c-name">{$_owner.name|escape}</span>
+                                            </span>
+                                            <i class="icon16 delete c-delete js-delete-owner" title="[`remove`]"></i>
+                                        </li>
+                                        {/function}
+
+                                        {capture assign="_ownerTemplate"}{_renderOwner _owner=[]}{/capture}
+
+                                        <li>
+                                            <i class="icon16 add" style="vertical-align: baseline; margin: 0; position: relative; top: 2px;"></i>
+                                            <input type="text" class="bold js-autocomplete" name="owner[autocomplete]" placeholder="[`Start typing user name...`]">
+                                        </li>
+
+                                        {foreach $owners as $_owner}{_renderOwner _owner=$_owner}{/foreach}
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="c-segments-section js-segments-section">
+            <div class="c-segments-toggle">
+                <label class="gray" for="js-ibutton-2">[`Add to segments`]</label>
+                <input type="checkbox" class="js-ibutton" id="js-ibutton-2">
+            </div>
+
+            <div class="c-segments-form-wrapper">
+                <form>
+                    {foreach ['shared' => '[`Shared segments`]', 'my' => '[`My segments`]'] as $shared_type => $block_name}
+                    {if $segments[$shared_type]}
+                    <div class="block">
+                        <h5 class="heading">{$block_name}:</h5>
+                        <ul class="menu-v">
+                            {foreach $segments[$shared_type] as $segment}
+                            <li data-id="{$segment.id}" class="c-segment-item">
+                                <label>
+                                    <input type="checkbox" name="segment[]"
+                                           value="{$segment.id}"
+                                           {if $segment.checked}checked="checked"{/if}
+                                    {if $segment.disabled}disabled="disabled"{/if}>
+                                    <span class="c-name-wrapper">
+                                                {if !empty($segment.icon_path)}
+                                                    <i class="icon16 userpic20" style="background: url({$segment.icon_path}); border-radius: 0;"></i>
+                                                {elseif !empty($segment.icon)}
+                                                    <i class="icon16 {$segment.icon}"></i>
+                                                {/if}
+                                                <span class="c-name">{$segment.name|escape}</span>
+                                            </span>
+                                </label>
+                            </li>
+                            {/foreach}
+                        </ul>
+                    </div>
+                    {/if}
+                    {/foreach}
+                </form>
+            </div>
+        </section>
+
+        {if !empty($available_funnel)}
+        <section class="c-deal-section js-deal-section">
+            <div class="c-deal-toggle">
+                <label class="gray" for="js-ibutton-3">[`Create deal`]</label>
+                <input type="checkbox" class="js-ibutton" id="js-ibutton-3">
+            </div>
+
+            <div class="c-deal-form-wrapper">
+                <form>
+                    <div class="field-group">
+                        <div class="field">
+                            <div class="name bold">[`Deal name`]</div>
+                            <div class="value">
+                                <input class="bold large" type="text" name="deal[name]" value="" placeholder="[`Deal name`]">
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="name">[`Funnel`]</div>
+                            <div class="value">
+
+                                {$_active_funnel = reset($funnels)}
+                                {if !empty($funnel)}{$_active_funnel = $funnel}{/if}
+                                {$_active_stage = reset($_active_funnel.stages)}
+
+                                {function name="_renderStage"}
+                                {if empty($_stage)}
+                                {$_stage = [
+                                "id" => "%id%",
+                                "name" => "%name%",
+                                "color" => "%color%"
+                                ]}
+                                {/if}
+
+                                <li class="{if $_active_stage.id == $_stage.id}selected{/if}">
+                                    <a href="javascript:void(0);" data-id="{$_stage.id}">
+                                        {if !empty($_stage.color)}
+                                        <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color}"></i>
+                                        {/if}
+                                        <b><i>{$_stage.name|escape}</i></b>
+                                    </a>
+                                </li>
+                                {/function}
+
+                                {capture assign="_stage_template_html"}{_renderStage _stage=[]}{/capture}
+
+                                <div class="c-funnels-list js-funnels-list">
+                                    <ul class="menu-h dropdown">
+                                        <li>
+                                            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                                <span class="js-text">
+                                                    {if !empty($_active_funnel.color)}
+                                                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_funnel.color}"></i>
+                                                    {/if}
+                                                    <b><i class="js-name">{$_active_funnel.name|escape}</i></b>
+                                                </span>&nbsp;<i class="icon10 darr"></i>
+                                            </a>
+                                            <ul class="menu-v with-icons">
+                                                {strip}
+                                                {foreach $funnels as $_funnel}
+                                                <li class="{if $_active_funnel.id == $_funnel.id}selected{/if}">
+                                                    <a href="javascript:void(0);" data-id="{$_funnel.id}">
+                                                        {if !empty($_funnel.color)}
+                                                        <i class="icon16 funnel-state svg-icon" data-color="{$_funnel.color}"></i>
+                                                        {/if}
+                                                        <b><i>{$_funnel.name|escape}</i></b>
+                                                    </a>
+                                                </li>
+                                                {/foreach}
+                                                {/strip}
+                                            </ul>
+                                            <input class="js-field" name="deal[funnel_id]" type="hidden" value="{$_active_funnel.id}">
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="c-funnel-stages-list js-funnel-stages-list">
+                                    <ul class="menu-h dropdown">
+                                        <li>
+                                            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                                <span class="js-text">
+                                                    {if !empty($_active_stage.color)}
+                                                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_stage.color}"></i>
+                                                    {/if}
+                                                    <b><i class="js-name">{$_active_stage.name|escape}</i></b>
+                                                </span>&nbsp;<i class="icon10 darr"></i>
+                                            </a>
+                                            <ul class="menu-v with-icons">
+                                                {strip}{foreach $_active_funnel.stages as $_id => $_stage}{_renderStage _stage=$_stage}{/foreach}{/strip}
+                                            </ul>
+                                            <input class="js-field" name="deal[stage_id]" type="hidden" value="{$_active_stage.id}">
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="name">[`Estimated amount`]</div>
+                            <div class="value">
+                                <input class="c-amount-field numerical" type="text" name="deal[amount]" min="0" maxlength="15" step="any" value="0">
+                                <select name="deal[currency_id]" class="crm-estimated-amount-currency-select">
+                                    {foreach $currencies as $_cur}
+                                    <option value="{$_cur.code}" {if $currency === $_cur.code}selected="selected"{/if}>{$_cur.code}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="name">[`Estimated close date`]</div>
+                            <div class="value">
+                                <span class="c-datepicker-wrapper js-datepicker-wrapper">
+                                    <input class="c-datepicker js-datepicker" type="text" value="">
+                                    <input type="hidden" name="deal[expected_date]" value="">
+                                    <i class="icon16 calendar js-icon"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="c-wysiwyg-wrapper">
+                                <textarea class="js-wysiwyg" name="deal[description]" placeholder="[`Description`]"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+        {/if}
+
+        <section class="c-errors-section js-errors-section"></section>
+
+        <footer class="c-page-footer">
+            <input class="button green js-submit-form" type="button" value="[`Create`]">
+            <span style="margin: 0 4px;">[`or`]</span>
+            <a href="{$wa_app_url}">[`cancel`]</a>
+        </footer>
+    </div>
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$_title|escape|json_encode});
+
+            new CRMNewContactPage({
+                $wrapper: $("#c-new-contact-page"),
+                call_id: {if !empty($call)}{$call.id|json_encode}{else}false{/if},
+                funnels: {$funnels|json_encode},
+                contact_data: {if !empty($contact_data)}{$contact_data|json_encode}{else}false{/if},
+                {if !empty($available_funnel)}stage_template_html: {$_stage_template_html|json_encode},{/if}
+                is_extended: {if !empty($is_extended)}true{else}false{/if},
+                locales: {
+                    empty_contact_name: "[`Contact name required`]",
+                    empty_deal_name: "[`Deal name required`]"
+                },
+                extended_fields: {if $extended_fields}{json_encode($extended_fields)}{else}{}{/if},
+            });
+
+            new CRMContactAccessDialogNew({
+                $wrapper: $(".crm-dialog-content"),
+                owners: {if !empty($owners)}{$owners|array_values|json_encode}{else}[]{/if},
+                owner_template_html: " \r\n <li class=\"c-owner c-owner-new-page\" data-id=\"%id%\">\r\n <span>\r\n <i class=\"icon16 userpic20\" style=\"background-image: url(%photo_url%);\"><\/i>\r\n <span class=\"c-name\">%name%<\/span>\r\n <\/span>\r\n <i class=\"icon16 delete c-delete js-delete-owner\" title=\"\u0443\u0434\u0430\u043b\u0438\u0442\u044c\"><\/i>\r\n <\/li>\r\n "
+            });
+
+        })(jQuery);
+    </script>
+</div>

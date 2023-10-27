@@ -71,7 +71,8 @@ class crmReportStagesAction extends crmBackendViewAction
 
         $funnels = $fm->getAllFunnels();
         if (!$funnels) {
-            $this->setTemplate('templates/actions/deal/DealNoFunnel.html');
+            $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
+            $this->setTemplate('templates/' . $actions_path . '/deal/DealNoFunnel.html');
             return;
         }
         if ($funnel_id && isset($funnels[$funnel_id])) {
@@ -89,7 +90,7 @@ class crmReportStagesAction extends crmBackendViewAction
                 "all" => array(
                     "id"           => 'all',
                     "name"         => _wp("All responsibles"),
-                    "photo_url_16" => wa()->getRootUrl()."wa-content/img/userpic20.jpg"
+                    "photo_url_16" => wa()->whichUI() === '2.0' ? wa()->getRootUrl()."wa-content/img/userpic.svg" : wa()->getRootUrl()."wa-content/img/userpic20.jpg"
                 )
             ) + $users;
         if ($user_id !== null && !empty($users[$user_id])) {

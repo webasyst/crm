@@ -5,7 +5,11 @@ class crmSidebarAction extends crmViewAction
     public function execute()
     {
         $this->sidebar();
-        $this->setTemplate('templates/actions/Sidebar.html');
+        if (wa('crm')->whichUI('crm') === '1.3') {
+            $this->setTemplate('templates/actions-legacy/Sidebar.html');
+        } else {
+            $this->setTemplate('templates/actions/Sidebar.html');
+        }
     }
 
     public function sidebar()
@@ -20,12 +24,12 @@ class crmSidebarAction extends crmViewAction
         $rm = new crmReminderModel();
 
         $reminders_state = 'normal';
-        $counts = $rm->getUsersCounts($user->getId());
-        if (!empty($counts['due_count'])) {
+        $reminders_counts = $rm->getUsersCounts($user->getId());
+        if (!empty($reminders_counts['due_count'])) {
             $reminders_state = 'overdue';
-        } elseif (!empty($counts['burn_count'])) {
+        } elseif (!empty($reminders_counts['burn_count'])) {
             $reminders_state = 'burn';
-        } elseif (!empty($counts['actual_count'])) {
+        } elseif (!empty($reminders_counts['actual_count'])) {
             $reminders_state = 'actual';
         }
         $can_manage_invoices = $user->getRights('crm', 'manage_invoices');
@@ -38,19 +42,22 @@ class crmSidebarAction extends crmViewAction
         $this->view->assign(array(
             'contacts_count'      => $wcm->countAll(), // $collection->count(),
             'contacts_new_count'  => $contact_max_id ? $wcm->select('COUNT(*) cnt')->where("id > $contact_max_id")->fetchField('cnt') : 0,
-
-            'reminders_count'     => $rm->select('COUNT(*) cnt')->where(
-                'complete_datetime IS NULL AND user_contact_id = '.(int)$user->getId()
-            )->fetchField('cnt'),
-            'reminders_new_count' => $reminder_max_id ? $rm->select('COUNT(*) cnt')->where(
-                "complete_datetime IS NULL AND id > $reminder_max_id AND user_contact_id=".(int)$user->getId()
-            )->fetchField('cnt') : 0,
+            'reminders_count'     => ifset($reminders_counts, 'count', 0),
             'reminders_state'     => $reminders_state,
+            'reminders_due_count' => ifset($reminders_counts, 'due_count', 0) + ifset($reminders_counts, 'burn_count', 0),
             'recent'              => $this->getRecent(),
             'can_manage_invoices' => $can_manage_invoices,
             'recent_block_hidden' => $user->getSettings("crm", "sidebar_recent_block_hidden", "0"),
+            'is_reload'           => boolval(waRequest::get('reload', 0, waRequest::TYPE_INT))
         ));
 
+        if (wa('crm')->whichUI('crm') === '1.3') {
+            $this->view->assign([
+                'reminders_new_count' => $reminder_max_id ? $rm->select('COUNT(*) cnt')->where(
+                    "complete_datetime IS NULL AND id > $reminder_max_id AND user_contact_id=".(int)$user->getId()
+                )->fetchField('cnt') : 0,
+            ]);
+        }
 
         if ($can_manage_invoices) {
             $this->view->assign(array(

@@ -4,6 +4,11 @@ class crmMessageWriteNewDialogAction extends crmSendEmailDialogAction
 {
     public function execute()
     {
+        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
+        if (!empty($iframe) && wa('crm')->whichUI('crm') !== '1.3') {
+            $this->setLayout();
+        }
+
         $dm = new crmDealModel();
         $fm = new crmFunnelModel();
         $fsm = new crmFunnelStageModel();
@@ -12,9 +17,11 @@ class crmMessageWriteNewDialogAction extends crmSendEmailDialogAction
         if (!$funnel) {
             throw new waRightsException();
         }
-        $stage_id = $fsm->select('id')->where(
-            'funnel_id = '.(int)$funnel['id']
-        )->order('number')->limit(1)->fetchField('id');
+        $stage_id = $fsm->select('id')
+            ->where('funnel_id = ?', (int) $funnel['id'])
+            ->order('number')
+            ->limit(1)
+            ->fetchField('id');
 
         // Just empty deal, for new message
         $now = date('Y-m-d H:i:s');
@@ -34,6 +41,7 @@ class crmMessageWriteNewDialogAction extends crmSendEmailDialogAction
         $stages = $fsm->getStagesByFunnel($funnels[$deal['funnel_id']]);
 
         $this->view->assign(array(
+            'iframe'          => $iframe,
             'recipients'      => [],
             'participants'    => [],
             'deal'            => $deal,

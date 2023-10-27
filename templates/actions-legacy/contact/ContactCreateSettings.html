@@ -1,0 +1,45 @@
+<div class="crm-dialog-wrapper c-contact-create-settings" id="c-contact-create-settings">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <form>
+            <header class="crm-dialog-header">
+                <h1>[`Personal settings`]</h1>
+            </header>
+
+            <div class="crm-dialog-content">
+                <ul class="menu-v">
+                    <li>
+                        <label>
+                            <input type="radio" name="setting[type]" value="dialog" {if $type === "dialog"}checked{/if}> [`Open dialog for contact creation`]
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" name="setting[type]" value="page" {if $type === "page"}checked{/if}> [`Open extended form for contact creation`]
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="hidden" name="setting[not_responsible]" value="1">
+                            <input type="checkbox" name="setting[not_responsible]" value="0" {if $not_responsible !== "1"}checked{/if}> [`Set me as owner when I create a contact`]
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <input class="button green js-submit-button" type="submit" value="[`Save`]">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+            </footer>
+        </form>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMContactCreateSettings({
+                $wrapper: $("#c-contact-create-settings")
+            });
+        })(jQuery);
+    </script>
+</div>

@@ -3,76 +3,43 @@
     {$_photo = $_contact->getPhoto(50)}
     {$_jobtitle = $_contact->get('jobtitle')}
     {$_company = $_contact->get('company')}
-    <div class="c-conversation-member{if !empty($_class)} {$_class}{/if}">
-        <div class="c-layout">
+    <div class="flexbox middle c-conversation-member{if !empty($_class)} {$_class}{/if}">
+        <a class="button light-gray flexbox space-12 profile" href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top">
             {if !empty($_photo)}
-                <div class="c-column c-image-column">
-                    <div class="c-image">
-                        <i class="icon50" style="background-image: url({$_photo});"></i>
-                    </div>
-                </div>
+            <span class="c-column c-image-column">
+                <i class="icon size-16 rounded" style="background-image: url({$_photo});"></i>
+            </span>
             {/if}
-            <div class="c-column middle">
-                <ul class="menu-v compact">
-                    <li class="c-name-line">
-                        <a class="c-name" href="{$wa_app_url}contact/{$_contact.id}/" style="display: inline; padding: 0; margin: 0;">{$_contact.name|escape}</a>
-                    </li>
-
-                    {if !empty($_jobtitle) || !empty($_company)}
-                        <li>
-                            {if !empty($_jobtitle)}{$_jobtitle|escape}{/if}
-                            {if !empty($_jobtitle) && !empty($_company)}@{/if}
-                            {if !empty($_company)}{$_company|escape}{/if}
-                        </li>
-                    {/if}
-
-                    {$_emails = $_contact->get('email')}
-                    {if !empty($_emails)}
-                        {foreach $_emails as $_e}
-                            {if !empty($_e.value)}
-                                <li class="nowrap">
-                                    <a href="javascript:void(0);" class="js-show-message-dialog" data-email="{$_e.value|escape}" data-id="{$_contact.id}" style="display: inline; padding: 0; margin: 0;">
-                                        <i class="icon16 email"></i>{$_e.value|escape} {if $_e.ext}({_ws($_e.ext)}){/if}
-                                    </a>
-                                </li>
-                            {/if}
-                        {/foreach}
-                    {/if}
-                </ul>
-            </div>
-        </div>
+            <span class="c-name-line">
+                [`Owner profile`]
+            </span>
+        </a>
 
         {if isset($_type) && $_type == 'responsible' && ($_is_admin || $_contact.id == $wa->user()->getId())}
-            <div class="c-actions-wrapper">
-                <span class="c-change-toggle js-show-combobox" title="[`Transfer ownership`]">
-                    <i class="icon16 edit"></i>
+            <div class="flexbox wrap space-12 c-actions-wrapper">
+                <span class="button light-gray c-change-toggle js-show-combobox" title="[`Transfer ownership`]">
+                    <i class="fas fa-pen text-gray edit"></i> [`Transfer ownership`]
                 </span>
-                <span class="c-change-toggle js-remove-owner" title="[`Clear ownership`]">
-                    <i class="icon16 close"></i>
+                <span class="button light-gray c-change-toggle js-remove-owner" title="[`Clear ownership`]">
+                    <i class="fas fa-times-circle text-red close"></i> [`Remove owner`]
                 </span>
             </div>
             <div class="c-owner-toggle js-owner-toggle">
-                <h3 class="c-header">[`Transfer ownership`]</h3>
+                <h5 class="c-header custom-mt-12">[`Transfer ownership`]</h5>
                 <input class="js-owner-autocomplete" type="text" name="some_name" placeholder="[`User name`]">
-                <span style="margin: 0 4px;">[`or`]</span>
-                <a class="inline-link js-hide-combobox" href="javascript:void(0);">
-                    <b>
-                        <i>[`cancel`]</i>
-                    </b>
-                </a>
+                <a class="js-hide-combobox" href="javascript:void(0);">[`Cancel`]</a>
             </div>
         {/if}
     </div>
 {else}
     <div class="c-responsible-select-wrapper js-responsible-select-wrapper">
         <div class="c-visible">
-            <a class="inline-link js-set-extended" href="javascript:void(0);"><b><i>[`Set the owner`]</i></b></a>
+            <a class="js-set-extended" href="javascript:void(0);">[`Set the owner`]</a>
         </div>
         <div class="c-hidden">
             <div style="margin: 0 0 6px;">[`Set the owner`]</div>
             <input class="js-responsible-autocomplete" placeholder="[`User name`]"/>
-            <span style="margin: 0 4px;">[`or`]</span>
-            <a class="inline-link js-unset-extended" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+            <a class="js-unset-extended" href="javascript:void(0);">[`Cancel`]</a>
         </div>
     </div>
 {/if}

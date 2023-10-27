@@ -120,4 +120,9 @@ class crmContactOperationAction extends crmBackendViewAction
         }
         return $context;
     }
+
+    public static function checkSkipUpdateLastPage()
+    {
+        waRequest::setParam('skip_update_last_page', '1');
+    }
 }

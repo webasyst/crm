@@ -6,5 +6,6 @@ class crmSourceEmailWorkerController extends crmJsonController
     {
         session_write_close();
         crmSourceWorker::cliRun();
+        crmRemindersPush::cliRun();
     }
 }

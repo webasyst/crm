@@ -3,13 +3,61 @@
 {$segment.icon = $segment.icon|default:'contact'}
 {$segment.type = $segment.type|default:crmSegmentModel::TYPE_CATEGORY}
 
-<div class="crm-dialog-wrapper crm-contact-segment-list-edit-wrapper" id="{$wrapper_id}">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
+{$icons_array = [
+    "folder" => "<i class=\"fas fa-folder\"></i>",
+    "search" => "<i class=\"fas fa-search\"></i>",
+    "user" => "<i class=\"fas fa-user\"></i>",
+    "blog" => "<i class=\"fas fa-file-image\"></i>",
+    "notebook" => "<i class=\"fas fa-file\"></i>",
+    "lock" => "<i class=\"fas fa-lock\"></i>",
+    "lock-unlocked" => "<i class=\"fas fa-lock-open\"></i>",
+    "broom" => "<i class=\"icon custom-mr-0\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#clean\"></use></svg></i>",
+    "star" => "<i class=\"fas fa-star\"></i>",
+    "livejournal" => "<i class=\"fas fa-pencil-alt\"></i>",
+    "contact" => "<i class=\"fas fa-users\"></i>",
+    "lightning" => "<i class=\"fas fa-bolt\"></i>",
+    "light-bulb" => "<i class=\"fas fa-lightbulb\"></i>",
+    "pictures" => "<i class=\"fas fa-images\"></i>",
+    "reports" => "<i class=\"fas fa-chart-bar\"></i>",
+    "books" => "<i class=\"fas fa-book\"></i>",
+    "marker" => "<i class=\"fas fa-map-marker-alt\"></i>",
+    "lens" => "<i class=\"icon custom-mr-0\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#lens\"></use></svg></i>",
+    "alarm-clock" => "<i class=\"icon custom-mr-0\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#alarm\"></use></svg></i>",
+    "animal-monkey" => "<i class=\"icon custom-mr-0\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#monkey\"></use></svg></i>",
+    "anchor" => "<i class=\"fas fa-anchor\"></i>",
+    "bean" => "<i class=\"icon custom-mr-0\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#coffee-beans\"></use></svg></i>",
+    "car" => "<i class=\"fas fa-car\"></i>",
+    "disk" => "<i class=\"fas fa-save\"></i>",
+    "cookie" => "<i class=\"fas fa-cookie\"></i>",
+    "burn" => "<i class=\"fas fa-radiation-alt\"></i>",
+    "clapperboard" => "<i class=\"icon custom-mr-0\"><svg><use xlink:href=\"{$wa_url}wa-apps/blog/img/sprites/icons.svg?v={$wa->version()}#clapper\"></use></svg></i>",
+    "bug" => "<i class=\"fas fa-bug\"></i>",
+    "clock" => "<i class=\"fas fa-clock\"></i>",
+    "cup" => "<i class=\"fas fa-coffee\"></i>",
+    "home" => "<i class=\"fas fa-home\"></i>",
+    "fruit" => "<i class=\"fas fa-apple-alt\"></i>",
+    "luggage" => "<i class=\"fas fa-briefcase\"></i>",
+    "guitar" => "<i class=\"fas fa-guitar\"></i>",
+    "smiley" => "<i class=\"fas fa-grin\"></i>",
+    "sport-soccer" => "<i class=\"fas fa-futbol\"></i>",
+    "target" => "<i class=\"fas fa-bullseye\"></i>",
+    "medal" => "<i class=\"fas fa-award\"></i>",
+    "phone" => "<i class=\"fas fa-phone\"></i>",
+    "store" => "<i class=\"fas fa-store\"></i>",
+    "basket" => "<i class=\"fas fa-shopping-basket\"></i>",
+    "pencil" => "<i class=\"fas fa-pen-alt\"></i>",
+    "lifebuoy" => "<i class=\"fas fa-life-ring \"></i>",
+    "screen" => "<i class=\"fas fa-tablet-alt\"></i>",
+    "noname" => "<i class=\"fas fa-user-friends\"></i>"
+]}
+
+<div class="dialog crm-contact-segment-list-edit-wrapper" id="{$wrapper_id}">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
 
         <form method="post" action="{$wa_app_url}?module=contactSegment&action=save{if $segment.id > 0}&id={$segment.id}{/if}">
 
-            <header class="crm-dialog-header">
+            <header class="dialog-header">
                 <h1>{strip}
                     {if $segment.id > 0}
                         [`Edit segment`]
@@ -19,7 +67,7 @@
                 {/strip}</h1>
             </header>
 
-            <div class="crm-dialog-content">
+            <div class="dialog-content" style="max-height: 69vh;">
 
                 <div class="fields">
 
@@ -38,17 +86,16 @@
                                 <div class="value">
                                     <label class="crm-access-label">
                                         <input type="radio" name="type" value="{crmSegmentModel::TYPE_CATEGORY}" checked="checked"> [`Static list`]
-                                        <i class="icon16 contact"></i>
+                                        <i class="fas fa-users"></i>
                                         <span class="hint">[`manually selected contacts`]</span>
                                     </label>
                                     <label class="crm-access-label">
                                         <input type="radio" name="type" value="{crmSegmentModel::TYPE_SEARCH}"> [`Dynamic filter`]
-                                        <i class="icon16 folder-dynamic"></i>
+                                        <i class="fas fa-filter"></i>
                                         <span class="hint">[`advanced search results`]</span>
                                     </label>
                                 </div>
                             </div>
-                            <hr>
                         {else}
                             <input type="hidden" name="type" value="{crmSegmentModel::TYPE_SEARCH}">
                         {/if}
@@ -57,10 +104,16 @@
                     <div class="field crm-icons-block">
                         <div class="name">[`Icon`]</div>
                         <div class="value">
-                            <ul class="menu-h">
+                            <ul class="chips">
                                 {foreach $icons as $icon}
                                     <li data-icon="{$icon}" {if $icon == $segment.icon}class="selected"{/if}>
-                                        <a href="javascript:void(0)"><i class="icon16 {$icon}"></i></a>
+                                        <a href="javascript:void(0)">
+                                            {if array_key_exists($icon, $icons_array)}
+                                                    {$icons_array[$icon]}
+                                                {else}
+                                                    {$icons_array['noname']}
+                                                {/if}
+                                        </a>
                                     </li>
                                 {/foreach}
                             </ul>
@@ -107,7 +160,7 @@
                 </div>
             </div>
 
-            <footer class="crm-dialog-footer">
+            <footer class="dialog-footer">
                 <div class="c-layout">
                     <div class="c-column">
                         {if $segment.id > 0}
@@ -115,21 +168,20 @@
                         {else}
                             <input class="button green crm-button" type="submit" value="[`Create`]">
                         {/if}
-                        <i class="icon16 loading crm-loading" style="display: none;"></i>
-                        <span style="margin: 0 4px;">[`or`]</span>
+                        <span class="icon loading crm-loading" style="display: none"><i class="fas fa-spinner wa-animation-spin speed-1000"></i></span>
 
                         {* Default close link, need in all cases except one, see below comment *}
-                        <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                        <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
 
                         {* This link special treated in double-dialog case, see CRMContactsOperationAddToSegments class *}
-                        <a class="crm-cancel-link" href="javascript:void(0);" style="display: none;">[`cancel`]</a>
-                        <i class="icon16 loading crm-cancel-loading" style="display: none;"></i>
+                        <a class="button light-gray crm-cancel-link" href="javascript:void(0);" style="display: none;">[`Cancel`]</a>
+                        <span class="icon loading crm-cancel-loading" style="display: none"><i class="fas fa-spinner wa-animation-spin speed-1000"></i></span>
                     </div>
                     <div class="c-column middle right">
                         {* Delete segment link, see CRMContactSegmentEdit *}
                         {if $segment.id > 0}
-                            <a class="crm-delete-link" href="javascript:void(0);">
-                                <i class="icon16 delete"></i>[`Delete segment`]
+                            <a class="button red crm-delete-link" href="javascript:void(0);">
+                                <i class="fas fa-trash"></i>[`Delete segment`]
                             </a>
                         {/if}
                     </div>

@@ -1,0 +1,288 @@
+{$_title = "[`Create notification`]"}
+{if !empty($notification.id)}
+    {$_title = "[`Edit notification`]"}
+{/if}
+
+<!-- plugin hook: 'backend_settings_notification_edit.top' -->
+{* @event backend_settings_notification_edit.%plugin_id%.top *}
+{if !empty($backend_settings_notification_edit)}
+    {foreach $backend_settings_notification_edit as $_}{ifset($_.top)}{/foreach}
+{/if}
+
+{$_back_uri = "{$wa_app_url}settings/notifications/"}
+<div class="c-notification-page" id="c-notification-page">
+    <div class="c-layout">
+        <div class="c-column">
+            <h1 class="c-page-header"><a href="{$_back_uri}" class="back">&larr;&nbsp;[`Notifications`]</a>&nbsp;{$_title}</h1>
+        </div>
+        {if !empty($notification.id)}
+            <div class="c-column middle right">
+                <a class="inline-link js-remove-notification" href="javascript:void(0);"><i class="icon16 delete"></i><b><i>[`Delete notification`]</i></b></a>
+            </div>
+        {/if}
+    </div>
+
+    <form action="">
+
+        {* EVENT *}
+        <div class="field">
+            <div class="name">[`Event`]</div>
+            <div class="value">
+                {if empty($notification.id)}
+                    <select name="data[event]" class="js-event-toggle" required>
+                        <option selected disabled>[`Choose event`]</option>
+                        {foreach $events as $_value => $_name}
+                            <option value="{$_value}">{$_name|escape}</option>
+                        {/foreach}
+                    </select>
+                {else}
+                    {$notification.event}
+                    <input name="data[event]" type="hidden" value="{$notification.event}">
+                {/if}
+            </div>
+        </div>
+
+        <section class="c-notification-section field-group js-fields-group" style="{if empty($notification.id)}display: none;{/if}">
+
+            {* COMPANY *}
+            {$_is_invoice_event = substr($notification.event|default:'', 0, 8) === 'invoice.'}
+            {if empty($notification.id) || $_is_invoice_event}
+                <div class="field">
+                    <div class="name">[`Company`]</div>
+                    <div class="value">
+                        <select name="data[company_id]" class="js-event-company" {if empty($notification.id)}style="display: none" disabled="disabled"{/if}>
+                            <option selected>[`Any company`]</option>
+                            {foreach $companies as $_company}
+                                <option value="{$_company.id}" {if $notification.company_id == $_company.id}selected="selected"{/if}>{$_company.name|escape}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+            {/if}
+
+            {* NAME *}
+            <div class="field">
+                <div class="name">[`Notification name`]</div>
+                <div class="value">
+                    <input class="js-notification-name" type="text" name="data[name]" value="{$notification.name|escape}" placeholder="[`Name`]" required>
+                </div>
+            </div>
+
+            {* STATUS *}
+            <div class="field">
+                <div class="name">[`Enabled`]</div>
+                <div class="value">
+                    <input type="checkbox" name="data[status]" {if !empty($notification) && $notification.status}checked{/if}>
+                </div>
+            </div>
+
+            {* TRANSPORT *}
+            <div class="field">
+                <div class="name">[`Transport`]</div>
+                <div class="value no-shift">
+                    {if empty($notification.id)}
+                        <ul class="menu-v compact" style="margin: 0;">
+                            {foreach $transports as $_transport_id => $_transport}
+                                {$_is_active = false}
+                                {if !empty($notification.transport)}
+                                    {if $notification.transport == $_transport_id}
+                                        {$_is_active = true}
+                                    {/if}
+                                {elseif $_transport@first}
+                                    {$_is_active = true}
+                                {/if}
+                                <li>
+                                    <label>
+                                        <input class="js-transport-toggle" type="radio" name="data[transport]" value="{$_transport_id}" {if $_is_active}checked{/if}>
+                                        <i class="icon16 {if !empty($_transport.icon)}{$_transport.icon}{/if}"></i>
+                                        <span class="c-name">{$_transport.name}</span>
+                                    </label>
+                                </li>
+                            {/foreach}
+                        </ul>
+                    {else}
+                        {$_transport = $transports[$notification.transport]|default:[]}
+                        {if !empty($_transport.icon)}
+                            <i class="icon16 {$_transport.icon}"></i>
+                        {/if}
+                        <span class="c-name">{$_transport.name|default:'[`Unknown`]'}</span>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="name">[`Recipient`]</div>
+                <div class="value">
+                    <select name="data[recipient]" id="" class='js-recipient-list'>
+                        {$_found_recipient = false}
+                        {foreach $recipients as $key => $item}
+                            {$_found_recipient = $_found_recipient || $notification['recipient'] == $key}
+                            <option value="{$key}" {if $notification['recipient'] == $key}selected{/if}
+                                    {if $notification.event == 'customer.birthday' && $key == 'responsible'}disabled{/if}>{$item['name']}</option>
+                        {/foreach}
+                    </select>
+
+                    {$_recipient_email_value = ''}
+                    {if !$_found_recipient && $notification.id > 0 && $notification.transport === 'email'}
+                        {$_recipient_email_value = $notification.recipient}
+                    {/if}
+
+                    <input name="data[recipient]" type="email" placeholder="email@example.com" value="{$_recipient_email_value}" class="c-recipient-content" data-id="email" disabled>
+
+
+                    {$_recipient_phone_value = ''}
+                    {if !$_found_recipient && $notification.id > 0 && $notification.transport === 'sms'}
+                        {$_recipient_phone_value = $notification.recipient}
+                    {/if}
+
+                    <input name="data[recipient]" type="text" placeholder="+1 555 000-00-00" value="{$_recipient_phone_value}" class="c-recipient-content" data-id="sms" required disabled>
+                </div>
+            </div>
+
+            <div class="field js-senders-block" style="display: none">
+                <div class="name">[`Sender`]</div>
+                <div class="value">
+                    <select name="data[sender]" class='js-sender-list' disabled>
+                        {foreach $senders as $key => $item}
+                            <option value="{$key}" {if $notification['sender'] == {$key} || ($notification['sender'] != 'system' && {$key} == 'specified')}selected{/if}>{$item['name']|escape}</option>
+                        {/foreach}
+                    </select>
+                    <input name="data[sender_name]" type="text" placeholder="[`John Doe`]" class="c-sender-header c-sender-header-name js-specified-sender-name" disabled>
+                    <input name="data[sender]" type="email" placeholder="email@example.com" class="c-sender-header c-sender-header-email js-specified-sender-email" required disabled>
+                </div>
+            </div>
+
+            <div class="field js-sms-senders-block" style="display: none">
+                <div class="name">[`Sender`]</div>
+                <div class="value">
+                    <select name="data[sender]" class='js-sms-sender-list' disabled>
+                        {foreach $sms_senders as $key => $item}
+                            <option value="{$key}" {if $notification['sender'] == {$key} || ($notification['sender'] != 'system' && {$key} == 'specified')}selected{/if}>{$item['name']|escape}</option>
+                        {/foreach}
+                    </select>
+                    <input name="data[sender]" type="text" class="c-sender-header js-specified-sms-sender" required disabled>
+                </div>
+            </div>
+
+            {* BODY *}
+
+            {* for email *}
+            {if empty($notification.id) || $notification.transport == crmNotificationModel::TRANSPORT_EMAIL}
+                <div class="c-transport-content {if !empty($notification.id)}is-active{/if}" data-id="email">
+                    <div class="field">
+                        <div class="name">
+                            [`Email subject`]
+                        </div>
+                        <div class="value">
+                            <input class="js-notification-subject" type="text" name="data[subject]" placeholder="[`Email subject`]" value="{$notification.subject}" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">
+                            [`Email body`]
+                        </div>
+                        <div class="value">
+                            <div class="c-redactor-wrapper js-redactor-wrapper ace bordered">
+                                <textarea class="js-email-body" name="data[body]">{$notification.body}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+
+
+            {* for phone *}
+            {if empty($notification.id) || $notification.transport == crmNotificationModel::TRANSPORT_SMS}
+                <div class="c-transport-content {if !empty($notification.id)}is-active{/if}" data-id="sms">
+                    <div class="field">
+                        <div class="name">
+                            [`SMS content`]
+                        </div>
+                        <div class="value">
+                            <div class="c-redactor-wrapper js-redactor-wrapper ace bordered">
+                                <textarea class="js-sms-body" name="data[body]">{$notification.body}</textarea>
+                            </div>
+                            <span class="hint">[`Max 300 chars.`]</span>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+
+            <footer class="c-footer-actions js-footer-actions">
+                <div class="c-footer-block js-footer-block">
+                    <div class="c-layout fixed">
+                        <div class="c-column middle">
+                            <input class="button green js-submit-button" type="submit" value="{if empty($notification.id)}[`Create`]{else}[`Save`]{/if}">
+                            <span>[`or`]</span>
+                            <a href="{$_back_uri}" class="inline-link"><b><i>[`cancel`]</i></b></a>
+                        </div>
+                        <div class="c-column middle right">
+                            <a class="inline-link js-send-test" href="javascript:void(0);">
+                                <b><i>[`Test notification`]</i></b>
+                            </a>
+
+                            {include file='./SettingsNotificationsHelp.inc.html' inline}
+
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+        </section>
+        <input name="data[id]" type="hidden" value="{$notification.id}">
+    </form>
+
+    {capture assign="_dialog_template"}
+        <div class="field">
+            <div class="name">[`Send to`]:</div>
+            <div class="value"><input type="text" class="js-user-contact" value=""></div>
+        </div>
+    {/capture}
+
+    {capture assign="_success_html"}
+        <div class="crm-dialog-content" style="min-height: 40px;">
+            <p>[`Message sent successfully`]</p>
+        </div>
+
+        <footer class="crm-dialog-footer">
+            <input class="button gray js-close-dialog" type="button" value="[`Close`]">
+        </footer>
+    {/capture}
+
+    <script>
+        (function ($) {
+            $.crm.title.set({$_title|json_encode});
+
+            new CRMNotificationEdit({
+                $wrapper: $("#c-notification-page"),
+                notification: {$notification|default:null|json_encode},
+                notifications: {$notifications|json_encode},
+                recipients: {$recipients|json_encode},
+                locales: {
+                    saving: '<span class="c-hint"><i class="icon16 loading"></i> [`saving`]...</span>',
+                    saved: '<span class="c-hint"><i class="icon16 yes"></i> [`saved`]</span>',
+                    delete_confirm_title: "[`Delete notification`]",
+                    delete_confirm_text: "[`This will permanently delete this notification. Are you sure?`]",
+                    delete_confirm_button: "[`Delete`]",
+                    correct_email: "[`Please enter a valid Email`]",
+                    send_confirm_title: "[`Send test notification`]",
+                    send_confirm_button: "[`Send test`]"
+                },
+                site_app_url: {$site_app_url|json_encode},
+                sender: {$notification.sender|json_encode},
+                user_data: {
+                    email: {ifset($user_email, 'value', '')|json_encode},
+                    phone: {ifset($user_phone, 'value', '')|json_encode}
+                },
+                dialog_template: {$_dialog_template|json_encode},
+                success_html: {$_success_html|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>
+
+<!-- plugin hook: 'backend_settings_notification_edit.bottom' -->
+{* @event backend_settings_notification_edit.%plugin_id%.bottom *}
+{if !empty($backend_settings_notification_edit)}
+    {foreach $backend_settings_notification_edit as $_}{ifset($_.bottom)}{/foreach}
+{/if}

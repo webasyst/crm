@@ -11,8 +11,8 @@
                             {strip}
                                 {foreach $_colors as $_color}
                                     <li class="c-color-wrapper">
-                                        <i class="icon16 color js-set-color {if $_toggle_color == $_color}is-active{/if}" data-color="{$_color|escape}"
-                                           style="background: {$_color|escape};"></i>
+                                        <span class="c-color-item color js-set-color {if $_toggle_color == $_color}is-active{/if}" data-color="{$_color|escape}"
+                                           style="background: {$_color|escape};"></span>
                                     </li>
                                 {/foreach}
                             {/strip}
@@ -21,7 +21,7 @@
                             <input class="c-field js-color-field" type="text" name="company[invoice_options][{$_param.code}]" value="{ifset($company_params[$_param['code']])}"
                                    placeholder="{$_param.placeholder}">
                             <div class="c-toggle-block">
-                                <i class="icon16 color c-toggle js-toggle" style="background: {$_toggle_color};"></i>
+                                <span class="c-color-item color c-toggle js-toggle" style="background: {$_toggle_color};"></span>
                                 <div class="c-color-picker js-color-picker"></div>
                             </div>
                         </div>

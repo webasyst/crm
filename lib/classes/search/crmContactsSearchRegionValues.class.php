@@ -6,7 +6,8 @@ class crmContactsSearchRegionValues
      * @var waCountryModel
      */
     private $model;
-        
+    protected $conds;
+
     private $default_options = array(
         'limit' => 10,
         'offset' => 0,
@@ -18,10 +19,10 @@ class crmContactsSearchRegionValues
     public function __construct($conds = null) {
         $this->model = new waRegionModel();
         $this->conds = $conds;
-        
+
     }
 
-    private function mixOptions($options, $default_options) 
+    private function mixOptions($options, $default_options)
     {
         $options = array_merge($default_options, $options);
         if (is_array($options['order'])) {
@@ -29,11 +30,11 @@ class crmContactsSearchRegionValues
         }
         return $options;
     }
-    
+
     public function getValues($options)
     {
         $options = $this->mixOptions($options, $this->default_options);
-        $sql_t = "SELECT 
+        $sql_t = "SELECT
             IF(r.name IS NOT NULL, r.name, dr.value) AS name,
             IF(r.code IS NOT NULL, r.code, dr.value) AS value,
             r.country_iso3,
@@ -42,29 +43,29 @@ class crmContactsSearchRegionValues
         JOIN `wa_contact_data` dc ON dr.contact_id = dc.contact_id
         LEFT JOIN `wa_region` r ON r.code = dr.value AND r.country_iso3 = dc.value
         WHERE dr.field = 'address:region' AND dc.field = 'address:country' :autocomplete
-        GROUP BY 
+        GROUP BY
             IF(r.name IS NOT NULL, r.name, dr.value),
             IF(r.code IS NOT NULL, r.code, dr.value),
             r.country_iso3
         ORDER BY :order
         LIMIT :offset, :limit";
-        
+
         if (!empty($options['autocomplete']['term'])) {
             $sql_t = str_replace(
-                ':autocomplete', 
-                "AND (dr.value LIKE '%{$options['autocomplete']['term']}%' OR r.name LIKE '%{$options['autocomplete']['term']}%')", 
+                ':autocomplete',
+                "AND (dr.value LIKE '%{$options['autocomplete']['term']}%' OR r.name LIKE '%{$options['autocomplete']['term']}%')",
                 $sql_t
             );
         } else {
             $sql_t = str_replace(':autocomplete',  '',  $sql_t);
         }
-        
+
         $sql = str_replace(
-            array(':order', ':offset', ':limit'), 
-            array($options['order'], $options['offset'], $options['limit']), 
+            array(':order', ':offset', ':limit'),
+            array($options['order'], $options['offset'], $options['limit']),
             $sql_t
         );
-        
+
         $values = $this->model->query($sql)->fetchAll();
         $wa_url = wa_url();
         foreach ($values as &$v) {
@@ -74,12 +75,12 @@ class crmContactsSearchRegionValues
             }
         }
         return $values;
-    }    
+    }
 
     public function count($options)
     {
         $sql_t = "SELECT COUNT(DISTINCT value)
-            FROM wa_contact_data 
+            FROM wa_contact_data
             WHERE field = 'address:region' :autocomplete";
         $term = $this->model->escape(ifset($options['autocomplte']['term'], ''), 'like');
         if ($term) {
@@ -89,12 +90,12 @@ class crmContactsSearchRegionValues
         }
         return $this->model->query($sql)->fetchField();
     }
-    
+
     public function limit()
     {
         return $this->default_options['limit'];
     }
-    
+
     public function getHighlightTerm($conds)
     {
         if ($conds && is_string($conds)) {
@@ -120,10 +121,10 @@ class crmContactsSearchRegionValues
                 return $conds;
             }
         }
-        
+
         return false;
     }
-    
+
     public function extra($conds)
     {
         $extra = array();
@@ -143,7 +144,7 @@ class crmContactsSearchRegionValues
                 $extra['icon'] = wa_url() . 'wa-content/img/country/'.$region['country_iso3'].'.gif';
             }
         }
-        
+
         return $extra;
     }
 }

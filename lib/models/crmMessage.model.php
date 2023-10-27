@@ -324,7 +324,14 @@ class crmMessageModel extends crmModel
 
             $action = self::LOG_ACTION_SENT;
             $lm = new crmLogModel();
-            $log_item_id = $lm->log($action, $contact_id, $id, null, null, ifset($data['creator_contact_id']));
+            if (empty($data['event']) && empty($data['crm_log_id'])) {
+                $log_item_id = $lm->log($action, $contact_id, $id, null, null, ifset($data['creator_contact_id']));
+            } else {
+                $lm->updateById(
+                    $data['crm_log_id'],
+                    ['params' => json_encode(['message_id' => $id])]
+                );
+            }
 
             if ($wa_log || is_array($wa_log)) {
 
@@ -389,12 +396,9 @@ class crmMessageModel extends crmModel
         $replace_img_src = array();
         $app_url = wa()->getAppUrl('crm');
         foreach ($message['attachments'] as $attachment) {
-            if ($message['deal_id'] > 0) {
-                $src = "{$app_url}deal/{$message['deal_id']}/?module=file&action=download&id={$attachment['id']}";
-                $replace_img_src[$attachment['id']] = $src;
-            }
+            $src = "{$app_url}?module=file&action=download&id={$attachment['id']}";
+            $replace_img_src[$attachment['id']] = $src;
         }
-        unset($a);
 
         $message['body_sanitized'] = crmHtmlSanitizer::work(
             $message['body'],
@@ -406,6 +410,40 @@ class crmMessageModel extends crmModel
         $message['params'] = $this->getMessageParamsModel()->get($message['id']);
 
         return $message;
+    }
+
+    /**
+     * Получение дополнений к сообщениям и обогащение сообщений этими данными
+     *
+     * @param $messages
+     * @return array
+     * @throws waException
+     */
+    public function getExtMessages($messages)
+    {
+        if (!is_array($messages) || empty($messages)) {
+            return [];
+        }
+        $message_ids = array_column($messages, 'id');
+        $message_attachments = $this->getMessageAttachmentsModel()->getFilesByMessages($message_ids);
+        $message_recipients = $this->getMessageRecipientsModel()->getRecipientsByMessages($message_ids, null, 'message_id');
+        $message_params = $this->getMessageParamsModel()->get($message_ids);
+        foreach ($messages as &$_message) {
+            $_message['attachments'] = ifset($message_attachments, $_message['id'], []);
+            $_message['recipients'] = ifset($message_recipients, $_message['id'], []);
+            $replace_img_src = [];
+            $app_url = wa()->getAppUrl('crm');
+            foreach ($_message['attachments'] as $attachment) {
+                $src = "{$app_url}?module=file&action=download&id={$attachment['id']}";
+                $replace_img_src[$attachment['id']] = $src;
+            }
+            $_message += [
+                'body_sanitized' => crmHtmlSanitizer::work($_message['body'], ['replace_img_src' => $replace_img_src]),
+                'params'         => ifset($message_params, $_message['id'], [])
+            ];
+        }
+
+        return $messages;
     }
 
     /**

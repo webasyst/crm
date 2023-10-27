@@ -1,0 +1,133 @@
+{$_title = "[`Deals merge`]"}
+
+<div class="c-deals-merge-page shadowed" id="c-deals-merge-page">
+    <div class="block double-padded blank">
+        <form>
+            <h1 class="c-page-header">{$_title}</h1>
+
+            {if $dropped_ids_count > 0}
+                <p>
+                    <i class="icon16 exclamation"></i> {_w('%d deal will not be affected by the action due to insufficient access rights', '%d deals will not be affected by the action due to insufficient access rights', $dropped_ids_count)}
+                </p>
+            {/if}
+
+            <p>
+                [`Choose a master deal that will be retained after merging.`]
+                [`Other deals will be deleted during this merging operation.`]
+            </p>
+
+            <ul class="c-deals-list">
+                {foreach $deals as $_deal}
+                    {$_contact = ifset($contacts[$_deal.contact_id], false)}
+
+                    <li class="c-deal js-deal">
+                        <div class="c-layout">
+                            <div class="c-column middle c-column-field">
+                                <input class="c-field js-field" type="radio" name="master_id" value="{$_deal.id}">
+                            </div>
+                            <div class="c-column middle">
+                                <div class="line">
+                                    <a href="{$wa_app_url}deal/{$_deal.id}/" class="bold no-underline">{$_deal.name|escape}</a>
+                                    <span class="c-active-text">—&nbsp;[`Selected as the main deal`]</span>
+                                </div>
+                                <div class="line">
+
+                                    <i class="icon16 funnel-state svg-icon" data-color="{$_deal.funnel.color}" style="margin: 0;" title="{$_deal.funnel.name|escape}"></i>
+
+                                    {if $_deal.status_id == "WON"}
+                                        <span class="c-state-wrapper is-won">
+                                            <span class="c-state">
+                                                <span class="c-status">{$_deal.status_id}</span>
+                                                {if !empty($_deal.closed_datetime)}<span class="hint">{$_deal.closed_datetime|wa_datetime}</span>{/if}
+                                            </span>
+                                        </span>
+                                    {elseif $_deal.status_id == "LOST"}
+                                        <span class="c-state-wrapper is-lost">
+                                            <span class="c-state">
+                                                <span class="c-status">{$_deal.status_id}</span>
+                                                {if !empty($_deal.closed_datetime)}<span class="hint">{$_deal.closed_datetime|wa_datetime}</span>{/if}
+                                            </span>
+                                        </span>
+                                    {else}
+                                        <span class="c-state-wrapper" style="background-color: {$_deal.stage.color};">
+                                            <span class="c-state">{$_deal.stage.name|escape}</span>
+                                        </span>
+                                    {/if}
+                                </div>
+                                <div class="line">
+                                    {if !empty($_contact)}
+                                        <div class="c-contact">
+                                            <div class="c-layout fixed">
+                                                <div class="c-column c-image-column">
+                                                    <div class="c-image">
+                                                        <i class="icon32" style="background-image: url({$_contact->getPhoto(32)})"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="c-column middle">
+                                                    <ul class="menu-v compact">
+                                                        <li style="line-height: 16px;">
+                                                            {* name *}
+                                                            <a class="c-name" href="{$wa_app_url}contact/{$_contact.id}/" style="display: inline; padding: 0; margin: 0;">
+                                                                {$wa->crm->contactName($_contact.name)}
+                                                                {if $_contact.id == $wa->userId()}([`me`]){/if}
+                                                            </a>
+
+                                                            {* role *}
+                                                            {if !empty($_contact.label)}<span class="c-role-tag">{$_contact.label|escape}</span>{/if}
+
+                                                            {* jobtitle *}
+                                                            {if !empty($_contact.jobtitle)}
+                                                                <div>
+                                                                    <span class="c-jobtitle hint">{$_contact.jobtitle|escape}</span>
+                                                                </div>
+                                                            {/if}
+
+                                                            {$_event = $_contact->getEvent()}
+                                                            {if !empty($_event)}
+                                                                {$_styles = []}
+                                                                {if !empty($_event.bg_color)}
+                                                                    {$_styles[] = "background: `$_event.bg_color`;"}
+                                                                {/if}
+                                                                {if !empty($_event.font_color)}
+                                                                    {$_styles[] = "color: `$_event.font_color`;"}
+                                                                {/if}
+
+                                                                <div class="line">
+                                                                    <span class="c-status" {if !empty($_styles)}style="{$_styles|join:""}"{/if} title="">{$_event.summary}</span>
+                                                                </div>
+                                                            {/if}
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {/if}
+                                </div>
+                            </div>
+                        </div>
+                        <input name="slave_ids[]" value="{$_deal.id}" type="hidden">
+                    </li>
+                {/foreach}
+            </ul>
+
+            <footer class="c-footer-actions">
+                <input class="button green js-submit-button" type="submit" value="[`Merge`]" disabled>
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a href="{$wa_app_url}deal/">[`cancel`]</a>
+            </footer>
+        </form>
+    </div>
+
+    <script>
+        ( function($) {
+            var $wrapper = $("#c-deals-merge-page");
+
+            $.crm.title.set("{$_title}");
+            $.crm.renderSVG($wrapper);
+
+            new CRMDealsMergePage({
+                $wrapper: $wrapper
+            });
+        })(jQuery);
+    </script>
+</div>

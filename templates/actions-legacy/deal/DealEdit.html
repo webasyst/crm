@@ -1,0 +1,289 @@
+{$_back_url = "{$wa_app_url}deal/"}
+{if !empty($deal.id)}
+    {$_back_url = "{$wa_app_url}deal/{$deal.id}/"}
+{/if}
+
+{$_is_new_deal = empty($deal.id)}
+
+<div class="c-deal-edit-page shadowed" id="c-deal-edit-page">
+    <header class="c-deal-header block not-padded">
+        <ul class="c-nav-wrapper menu-h dropdown">
+            <li>
+                <a href="{$_back_url}" class="bold">
+                    &larr;
+                    {if !empty($deal.id)}
+                        {$deal.name|escape}
+                    {else if !empty($funnels[$deal.funnel_id])}
+                        {$funnels[$deal.funnel_id].name|escape}
+                    {else}
+                        [`Back`]
+                    {/if}
+                </a>
+            </li>
+        </ul>
+    </header>
+    <main class="c-deal-board">
+        <div class="block blank double-padded">
+
+            <div class="c-deal-edit-form-wrapper">
+                <h1>{if !empty($deal.id)}[`Edit deal`]{else}[`New deal`]{/if}</h1>
+
+                {if !empty($deal.shop_order_number)}
+                    <p class="small">
+                        {sprintf_wp('This deal is linked to Shop-Script order %s', $deal.shop_order_number)}<br>
+                        [`Any deal changes will not affect the order.`]
+                    </p>
+                {/if}
+
+                <form method="post" action="" id="js-deal-edit-form">
+
+                    <div class="field-group">
+                        <div class="field">
+                            <div class="name bold">[`Deal name`]</div>
+                            <div class="value">
+                                <input class="bold long large" type="text" name="deal[name]" value="{$deal.name|escape}" placeholder="[`Deal name`]" required>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="name">[`Funnel`]</div>
+                            <div class="value">
+
+                                {$_active_funnel = reset($funnels)}
+                                {if !empty($deal.funnel_id) && !empty($funnels[$deal.funnel_id])}
+                                    {$_active_funnel = $funnels[$deal.funnel_id]}
+                                {/if}
+
+                                <div class="c-funnels-list" id="c-funnels-list">
+                                    <ul class="menu-h dropdown">
+                                        <li>
+                                            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                                <span class="js-text">
+                                                    {if !empty($_active_funnel.color)}
+                                                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_funnel.color}"></i>
+                                                    {/if}
+                                                    <b><i class="js-name">{$_active_funnel.name|escape}</i></b>
+                                                </span>&nbsp;<i class="icon10 darr"></i>
+                                            </a>
+                                            <ul class="menu-v with-icons">
+                                                {strip}
+                                                    {foreach $funnels as $_funnel}
+                                                        <li class="{if $deal.funnel_id == $_funnel.id}selected{/if}">
+                                                            <a href="javascript:void(0);" data-id="{$_funnel.id}">
+                                                                {if !empty($_funnel.color)}
+                                                                    <i class="icon16 funnel-state svg-icon" data-color="{$_funnel.color}"></i>
+                                                                {/if}
+                                                                <b><i>{$_funnel.name|escape}</i></b>
+                                                            </a>
+                                                        </li>
+                                                    {/foreach}
+                                                {/strip}
+                                            </ul>
+                                            <input class="js-field js-select-deal-funnel" name="deal[funnel_id]" type="hidden" value="{$_active_funnel.id}">
+                                        </li>
+                                    </ul>
+
+                                    <script>
+                                        ( function($) {
+                                            var $wrapper = $("#c-funnels-list"),
+                                                $visibleLink = $wrapper.find(".js-visible-link"),
+                                                $field = $wrapper.find(".js-field"),
+                                                $menu = $wrapper.find(".menu-v");
+
+                                            $menu.on("click", "a", function () {
+                                                var $link = $(this);
+                                                $visibleLink.find(".js-text").html($link.html());
+
+                                                $menu.find(".selected").removeClass("selected");
+                                                $link.closest("li").addClass("selected");
+
+                                                $menu.hide();
+                                                setTimeout( function() {
+                                                    $menu.removeAttr("style");
+                                                }, 200);
+
+                                                var id = $link.data("id");
+                                                $field.val(id).trigger("change");
+                                            });
+
+                                            $.crm.renderSVG($wrapper);
+
+                                        })(jQuery);
+                                    </script>
+                                </div>
+
+                                <div class="js-select-stage-wrapper" style="display: inline-block;">
+                                    {include file="templates/actions-legacy/deal/DealStagesByFunnel.html" selected_stage=$deal.stage_id inline}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="name">[`Owner`]</div>
+                            <div class="value">
+
+                                {* USER *}
+                                <div class="c-contact-wrapper js-contact-owner-wrapper">
+                                    <div class="c-contact js-user">
+                                        {$_userpic = $assign_to_user->getPhoto(16)}
+                                        {if !empty($_userpic)}
+                                            <i class="icon16 userpic20" style="background-image: url({$_userpic});"></i>
+                                        {/if}
+                                        <span class="c-name">{$assign_to_user.name|escape}</span>
+                                        <a class="inline-link js-show-combobox" href="javascript:void(0);"><b><i>[`Assign another user`]</i></b></a>
+                                    </div>
+                                    <div class="c-combobox">
+                                        <input class="js-autocomplete" type="text" value="" placeholder="[`Choose a user`]">
+                                        <a class="inline-link js-hide-combobox" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                                    </div>
+                                    <input class="js-field" type="hidden" name="deal[user_contact_id]" value="{$assign_to_user.id}">
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="name">[`Estimated amount`]</div>
+                            <div class="value">
+                                <input class="c-amount-field numerical" type="text" name="deal[amount]" min="0" maxlength="15" step="any" value="{floatval($deal.amount)}">
+                                <select name="deal[currency_id]" class="crm-estimated-amount-currency-select">
+                                    {foreach $currencies as $_cur}
+                                        <option value="{$_cur.code}" {if $deal.currency_id == $_cur.code}selected="selected"{/if}>{$_cur.code}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field c-estimated-close-date-field">
+                            <div class="name">[`Estimated close date`]</div>
+                            <div class="value">
+                                <span class="c-datepicker-wrapper js-datepicker-wrapper">
+                                    <input class="c-datepicker js-datepicker" type="text" value="{$deal.expected_date|wa_date}">
+                                    <input type="hidden" name="deal[expected_date]" value="{$deal.expected_date}">
+                                    <i class="icon16 calendar js-icon"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="c-wysiwyg-wrapper">
+                                <textarea class="js-wysiwyg" name="deal[description]" placeholder="[`Deal description`]">{$deal.description_sanitized|escape}</textarea>
+                            </div>
+                        </div>
+
+                        {if !empty($deal.fields)}
+                            <section class="c-ext-fields-section js-ext-fields-section">
+                                {$count_filled_fields = $deal.fields|count}
+                                {foreach $deal.fields as $field_id => $field}
+                                    {if !empty($field.value_formatted) || !empty($field.funnels_parameters.required)}
+                                        {$count_filled_fields = $count_filled_fields - 1}
+                                    {/if}
+                                {/foreach}
+                                {$display_block = "style='display: block'"}
+                                {if empty($count_filled_fields)}
+                                    {$display_block = "style='display: none'"}
+                                {/if}
+                                <div class="field c-visible js-show-fields-button" {$display_block}>
+                                    <div class="name"></div>
+                                    <div class="value">
+
+                                        <a href="javascript:void(0);" class="inline-link js-ext-fields-toggle">
+                                            <i class="icon16 down"></i><b><i class="c-link-text">[`Extended deal data`]</i></b>
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <div class="field c-hidden js-hide-fields-button">
+                                    <div class="name"></div>
+                                    <div class="value">
+
+                                        <a href="javascript:void(0);" class="inline-link js-ext-fields-toggle">
+                                            <i class="icon16 up"></i><b><i class="c-link-text">[`Hide extended fields`]</i></b>
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                {foreach $deal.fields as $field_id => $field}
+                                    {$_is_zero_digit = $field.value === 0 || $field.value === '0'}
+                                    {$_is_empty_value = empty($field.value) && !$_is_zero_digit}
+                                    <div class="field {if ($_is_empty_value && empty($field.funnels_parameters.required)) && empty($field.funnels_parameters.required)}c-hidden{/if}">
+                                        <div class="name">{$field.name|escape}</div>
+                                        <div class="value">{$field.html}</div>
+                                    </div>
+                                {/foreach}
+                            </section>
+                        {/if}
+                    </div>
+
+                    {$wa->csrf()}
+                    {if !empty($deal.id)}
+                        <input type="hidden" name="deal[id]" value="{$deal.id}">
+                    {/if}
+                </form>
+
+                <div class="field-group">
+                    {if empty($deal.id) || empty($contact)}
+                        {$_contact_is_locked = false}
+                        {if !empty($contact)}
+                            {$_contact_is_locked = true}
+                        {/if}
+                        <form>
+                            {include file="./DealContactForm.inc.html" id_field_name="deal[contact_id]" contact=$contact hide_form=true contact_is_locked=$_contact_is_locked is_wide=true inline}
+                        </form>
+                    {elseif !empty($contact)}
+                        <div class="c-contact-block js-contact-block">
+                            {strip}
+                                <ul class="c-view-toggle-wrapper js-view-toggle" style="text-align: left;">
+                                    <li class="c-toggle {if empty($_is_new_deal)}is-active{/if}" data-id="edit">[`Edit contact data`]</li>
+                                    <li class="c-toggle {if !empty($_is_new_deal)}is-active{/if}" data-id="replace">[`Switch to another contact`]</li>
+                                </ul>
+                            {/strip}
+
+                            <div class="c-view-content js-view-content">
+                                <div class="c-hidden c-hidden-edit {if empty($_is_new_deal)}is-active{/if}">
+                                    <form>
+                                        {include file="../contact/ContactForm.inc.html" contact=$contact disabled=!$can_edit_contact inline}
+                                    </form>
+                                </div>
+                                <div class="c-hidden c-hidden-replace {if !empty($_is_new_deal)}is-active{/if}">
+                                    <form>
+                                        {include file="./DealContactForm.inc.html" id_field_name="deal[contact_id]" contact=[] is_wide=true inline}
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
+
+                    <div class="js-errors-place"></div>
+                </div>
+
+                <div class="crm-actions">
+                    <input class="button green js-submit-button" type="button" value="{if !empty($deal.id)}[`Save`]{else}[`Create`]{/if}">
+                    <span style="margin: 0 4px;">[`or`]</span>
+                    <a href="{$_back_url}">[`cancel`]</a>
+                    <i class="icon16 loading" style="display: none;"></i>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        ( function($) {
+            new CRMDealEdit({
+                $wrapper: $("#c-deal-edit-page"),
+                deal_id: {if !empty($deal.id)}{$deal.id|json_encode}{else}false{/if},
+                contact_mode: {if empty($deal.id) || empty($contact)}"replace"{else}"edit"{/if},
+                urls: {
+                    owner_autocomplete: "{$wa_app_url}?module=autocomplete&type=user"
+                },
+                can_edit_contact: {$can_edit_contact|json_encode},
+                locales: {
+                    empty_name: "[`Client contact data required`]",
+                    bad_amount: "[`Invalid value`]"
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

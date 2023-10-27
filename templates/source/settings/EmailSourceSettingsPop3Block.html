@@ -1,14 +1,16 @@
 {$block_id = uniqid('c-source-settings-pop3-block')}
 <div class="c-source-settings-pop3-block c-connection-settings-block" id="{$block_id}">
     <div class="field">
-        <p class="large-hint">
-            [`Set up an email address to receive messages and deal requests.`]
-            [`Please specify an existing email address; it may be hosted on any mail server; e.g., in a popular mail service such as Gmail, Yahoo!, etc., and must be accessible for connection via POP3 protocol.`]
-        </p>
-        <p class="large-hint">
-            [`<strong>IMPORTANT NOTE:</strong> It is recommended that you specify an email account which was specially created for use by the CRM app.`]
-            [`After you configure and save this source, all messages from the specified email account will be downloaded into CRM and will be <strong>deleted from your mail server!</strong>`]
-        </p>
+        <div class="flexbox vertical middle">
+            <p class="large-hint">
+                [`Set up an email address to receive messages and deal requests.`]
+                [`Please specify an existing email address; it may be hosted on any mail server; e.g., in a popular mail service such as Gmail, Yahoo!, etc., and must be accessible for connection via POP3 protocol.`]
+            </p>
+            <p class="large-hint">
+                [`<strong>IMPORTANT NOTE:</strong> It is recommended that you specify an email account which was specially created for use by the CRM app.`]
+                [`After you configure and save this source, all messages from the specified email account will be downloaded into CRM and will be <strong>deleted from your mail server!</strong>`]
+            </p>
+        </div>
     </div>
     <div class="field" style="margin-top: 20px">
         <div class="value">
@@ -81,15 +83,24 @@
             <div class="field">
                 <div class="value c-test-connection-button-block" style="display: none;">
                     <input type="button" class="c-test-connection-button" value="[`Test connection`]">
-                    <i class="icon16 loading c-loading" style="display: none;"></i>
-                    <span class="c-test-connection-fail-message" style="display: none;">
-                    <i class="icon16 cross"></i>
-                    <span>[`Connection to POP3-server failed`]</span>
-                </span>
-                    <span class="c-test-connection-success-message" style="display: none;">
-                    <i class="icon16 yes"></i>
-                    <span>[`POP3-server connected successfully`]</span>
-                </span>
+                    <span class="icon loading c-loading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></span>
+                    
+                    <div class="alert small custom-mt-16 custom-mb-4 c-test-connection-fail-message" style="display: none;">
+                        <div class="flexbox space-8">
+                            <span class=""><i class="fas fa-exclamation-triangle text-orange"></i></span>
+                            <div class="wide">                  
+                                <span>[`Connection to POP3-server failed`]</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert small custom-mt-16 custom-mb-4 c-test-connection-success-message" style="display: none;">
+                        <div class="flexbox space-8">
+                            <span class=""><i class="fas fa-check-circle text-green yes"></i></span>
+                            <div class="wide">                  
+                                <span>[`POP3-server connected successfully`]</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

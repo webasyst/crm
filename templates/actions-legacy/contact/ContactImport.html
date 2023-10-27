@@ -1,0 +1,117 @@
+{$title = $title|default:'[`Contacts`]'}
+
+{$iframe_name = uniqid('crm-import-iframe-')}
+
+<div class="c-contacts-page shadowed" id="c-contacts-page">
+    <div class="c-layout fixed">
+        <div class="c-column sidebar left250px">
+            <div id="js-aside-block">
+                {include file="./Contact.sidebar.html" inline}
+            </div>
+        </div>
+        <div class="c-column content bordered-left blank block double-padded">
+
+            <div class="crm-block c-contacts-import-page" id="c-contacts-import-page">
+
+                <h1 class="c-page-header">[`Import contacts`]</h1>
+
+                {strip}
+                    <ul class="c-view-toggle-wrapper js-view-toggle">
+                        <li class="c-toggle is-active" data-content="csv">[`Import from file`]</li>
+                        <li class="c-toggle" data-content="text">[`Import from text`]</li>
+                    </ul>
+                {/strip}
+
+                <iframe name="{$iframe_name}" style="display: none;"></iframe>
+
+                <ul class="c-content-list">
+                    <li class="c-toggle-content js-toggle-content is-active" data-content="csv">
+                        <form class="crm-import-form" target="{$iframe_name}" action="{$wa_app_url}?module=contact&action=importUploadData" method="post" enctype="multipart/form-data">
+                            <p>[`Import from CSV or TXT file`]</p>
+                            <div class="field">
+                                <div class="name">[`Encoding`]</div>
+                                <div class="value">
+                                    <select name="encoding">
+                                        {foreach $encoding as $v => $e}
+                                            <option value="{$v}"{if $v=="utf-8"} selected="selected"{/if}>{$e}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <div class="name">[`Separator:`]</div>
+                                <div class="value">
+                                    <select name="separator">
+                                        {foreach waCSV::$delimiters as $_sep}
+                                            <option value="{$_sep[0]}">{_ws($_sep[1])}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <div class="name">[`File`]</div>
+                                <div class="value">
+                                    <input type="file" name="csv">
+                                </div>
+                            </div>
+
+                            <div class="c-actions-wrapper">
+                                <input class="button green" type="submit" value="[`Import`]" disabled>
+                                <i class="icon16 loading crm-loading" style="display: none"></i>
+                            </div>
+
+                            {$wa->csrf()}
+                            <input type="hidden" name="type" value="2">
+                        </form>
+                    </li>
+                    <li class="c-toggle-content js-toggle-content" data-content="text">
+                        <form class="crm-import-form" target="{$iframe_name}" action="{$wa_app_url}?module=contact&action=importUploadData" method="post" enctype="multipart/form-data">
+                            <div class="line">
+                                <p>
+                                    [`Copy and paste or simply type in names and other contact data for import.`]
+                                    [`Fields must be delimited by comma (,), semicolon (;) or tab. Different contacts on separate lines.`]
+                                    [`sample:`]
+                                </p>
+                                <p class="hint">[`John, Smith, john@domain.com`]<br />[`Sue, Miller, sue@domain.com`]</p>
+                            </div>
+
+                            <div class="line">
+                                <textarea name="content"></textarea>
+                            </div>
+
+                            <div class="line">
+                                <select name="separator" class="c-separator">
+                                    {foreach waCSV::$delimiters as $_sep}
+                                        <option value="{$_sep[0]}">{_w($_sep[1])}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+
+                            <div class="c-actions-wrapper">
+                                <input class="button green" type="submit" value="[`Import`]" disabled>
+                                <i class="icon16 loading crm-loading" style="display: none"></i>
+                            </div>
+
+                            {$wa->csrf()}
+                            <input type="hidden" name="type" value="1">
+                        </form>
+                    </li>
+                </ul>
+
+                <script>
+                    ( function($) {
+                        new CRMContactImportPage({
+                            $wrapper: $("#c-contacts-import-page")
+                        });
+                    })(jQuery);
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$title|json_encode});
+        })(jQuery);
+    </script>
+</div>

@@ -9,6 +9,7 @@ class crmDialogConfirmAction extends crmViewAction
             'text'      => waRequest::post('text', _w('Are you sure?')),
             'ok_button' => waRequest::post('ok_button', 'OK'),
         ));
-        $this->setTemplate('templates/actions/DialogConfirm.html');
+        $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
+        $this->setTemplate('templates/' . $actions_path . '/DialogConfirm.html');
     }
 }

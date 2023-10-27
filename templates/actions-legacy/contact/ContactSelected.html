@@ -1,0 +1,50 @@
+{if $method == 'get'}
+    <div class="block double-padded"><i class="icon16 loading"></i></div>
+    <script>(function() { "use strict";
+        var href = window.location.href,
+            data = sessionStorage.getItem("selected_contacts");
+
+        $.post(href, { selected_ids: data }, function(html) {
+            if (html) {
+                $(document).find('#c-content-block').html(html);
+            }
+        });
+    })();</script>
+{else}
+    {include file="./Contact.html"
+        editable_name=false
+    inline}
+
+    {* ↓ Key for js ↓ *}
+    <div id="contact_selected_page"></div>
+    {* ↑ Key for js ↑ *}
+
+    <script>
+        (function () {
+            var $all_contacts_link = $(document).find('.all-contacts-link'),
+                $selected_contacts_link = $(document).find('.js-selected-contacts'),
+                $selectes_countacts_counter = $selected_contacts_link.find('.count'),
+                $contacts_list = $(document).find('.js-contacts-list');
+
+            $all_contacts_link.removeClass('selected');
+            $selected_contacts_link.addClass('selected');
+
+            // Update array with selected contacts and counter in contacts.sidebar
+            var // In page
+                $collection = $contacts_list.find('.js-contact-wrapper'),
+                // In sessionStorage
+                selected_contacts = sessionStorage.getItem("selected_contacts"),
+                selected_count = JSON.parse(selected_contacts).length;
+
+            if ($collection.length !== selected_count) {
+                $selectes_countacts_counter.text($collection.length); // update counter in sidebar
+
+                var ids_on_page = $collection.map(function () {
+                    return $(this).data('user-id');
+                }).toArray();
+                sessionStorage.setItem('selected_contacts', JSON.stringify(ids_on_page));
+            }
+
+        })();
+    </script>
+{/if}

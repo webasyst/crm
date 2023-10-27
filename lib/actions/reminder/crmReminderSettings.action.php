@@ -26,7 +26,7 @@ class crmReminderSettingsAction extends crmBackendViewAction
             'reminder_disable_assign'  => 0,
             'reminder_daily'           => 'today',
             'reminder_pop_up_disabled' => 0,
-            'reminder_pop_up_min'      => 10
+            'reminder_pop_up_min'      => crmReminderModel::POP_UP_MIN
         );
 
         foreach ($arrSetting as $key => $value) {
@@ -34,10 +34,11 @@ class crmReminderSettingsAction extends crmBackendViewAction
         }
 
         $this->view->assign(array(
-            'groups'    => $groups,
-            'settings'  => $arrSetting,
-            'root_path' => $this->getConfig()->getRootPath() . DIRECTORY_SEPARATOR,
-            'is_dialog' => $this->is_dialog
+            'groups'     => $groups,
+            'settings'   => $arrSetting,
+            'root_path'  => $this->getConfig()->getRootPath() . DIRECTORY_SEPARATOR,
+            'is_dialog'  => $this->is_dialog,
+            'pop_up_min' => crmReminderModel::POP_UP_MIN
         ));
     }
 

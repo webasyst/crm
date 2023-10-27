@@ -13,8 +13,9 @@ class crmShopBackend_customers_listHandler extends waEventHandler
         $hash = $params['hash'];
         $url = wa()->getRootUrl(true).wa()->getConfig()->getBackendUrl()."/crm/contact/search/result/";
 
-        if (strpos($hash, 'search/') === 0) {
-
+        if ($hash !== 'all') {
+            return null;
+        } elseif (strpos($hash, 'search/') === 0) {
             // sanitize
             $hash = trim(trim(str_replace('search/', '', $hash)), '/');
 

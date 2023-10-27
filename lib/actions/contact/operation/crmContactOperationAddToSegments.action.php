@@ -27,10 +27,16 @@ class crmContactOperationAddToSegmentsAction extends crmContactOperationAction
             'type' => 'category',
             'archived' => 0
         ));
-
+        $fa_segment_icons = crmSegmentModel::getIcons(wa()->whichUI('crm'));
         foreach ($segments as &$segment) {
             $segment['checked'] = false;
             $segment['disabled'] = !$this->getCrmRights()->canEditSegment($segment);
+            if (empty($segment['icon_path']) && !in_array($segment['icon'], $fa_segment_icons)) {
+                $segment['icon'] = ($segment['type'] === 'search' ? 'filter' : 'user-friends');
+            }
+            if (!empty($segment['icon_path'])) {
+                $segment['icon'] = null;
+            }
         }
         unset($segment);
 
@@ -58,6 +64,7 @@ class crmContactOperationAddToSegmentsAction extends crmContactOperationAction
                 $splintered['shared'][$segment['id']] = $segment;
             }
         }
+
         return $splintered;
     }
 }

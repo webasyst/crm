@@ -5,7 +5,7 @@
     <div class="crm-sms-settings-fields-block">
         <form action="?module=settings&action=smsSave" method="post">
 
-            <div class="">
+            <div class="fields">
                 {if count($sms_adapters)}
 
                     <p>
@@ -14,7 +14,7 @@
                         {sprintf('[`<a href="%s" target="_blank">See documentation</a> for details.`]', '[`https://support.webasyst.com/22505/crm-sms-notifications/`]')}
                     </p>
 
-                    <div class="field-group">
+                    <div class="fields-group">
                         <div class="field">
                             <div class="name">[s`National direct-dialing code (NDD)`]</div>
 
@@ -28,7 +28,8 @@
                                     [s`The NDD, if specified, will be replaced with the country code in website visitors’ phone numbers.`]
                                 </div>
                             </div>
-
+                          </div>
+                        <div class="field">
                             <div class="name">[s`Country code`]</div>
                             <div class="value">
                                 {$_output_code = $_phone_transform_prefix['output_code']|default:''}
@@ -41,13 +42,15 @@
                     </div>
 
                     {foreach $sms_adapters as $i => $a}
-                        <div class="field-group">
-                            <div class="field">
+                        <div class="fields-group">
+                            <!--<div class="field">
                                 <div class="name">[`Name`]</div>
                                 <div class="value">
                                     <strong><i class="icon16" style="background-image: url('{$a.icon}');"></i>{$a.name}</strong><br>
                                 </div>
-                            </div>
+                            </div>-->
+                            <input name="sms[{$i}][adapter]" type="hidden" value="{$a.id}">
+                            <h3>{if $a.icon}<span class="icon middle size-16"><img src="{$a.icon}" alt=""></span> {/if}{$a.name}</h3>
 
                             <div class="field">
                                 <div class="name">{if isset($a.controls.from.title)}{$a.controls.from.title}{else}[`Sender IDs`]{/if}</div>
@@ -68,7 +71,13 @@
                                         <div class="value">
                                             {if ifset($v.control_type) == 'checkbox'}
                                                 <input type="hidden" name="sms[{$i}][{$k}]" value="">
-                                                <input type="checkbox" name="sms[{$i}][{$k}]" value="1" {if !empty($a.config[$k])}checked{/if}>
+                                                <span class="wa-checkbox"><input type="checkbox" name="sms[{$i}][{$k}]" value="1" {if !empty($a.config[$k])}checked{/if}>
+                                                    <span>
+                                                        <span class="icon">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                    </span>
+                                                </span>
                                             {else}
                                                 <input type="text" name="sms[{$i}][{$k}]" value="{if !empty($a.config[$k])}{$a.config[$k]|escape}{/if}">
                                             {/if}
@@ -93,12 +102,12 @@
             </div>
 
             {if count($sms_adapters)}
-                <div class="crm-form-buttons">
+                <div class="crm-form-buttons custom-mt-20">
                     <div class="crm-submit">
-                        <input class="button green" type="submit" name="" value="[`Save`]">
-                        <i class="icon16 loading crm-loading" style="display: none;"></i>
+                        <input class="button" type="submit" name="" value="[`Save`]">
+                        <i class="fas fa-spinner fa-spin crm-loading" style="display: none;"></i>
                         <span class="crm-success-status" style="display: none;">
-                            [`Saved`] <i class="icon16 yes crm-yes-status"></i>
+                            [`Saved`] <i class="fas fa-check-circle crm-yes-status"></i>
                         </span>
                     </div>
                 </div>
@@ -123,7 +132,11 @@
         }).always(function() {
             $submit.prop('disabled', false);
             $loading.hide();
+            $submit.removeClass('yellow');
         });
     });
+        $form.on('input change', function () {
+            let $submit = $form.find(':submit').addClass('yellow');
+        });
 
 });</script>

@@ -9,7 +9,7 @@ var CRMSettingsTemplate = (function ($) {
         that.$paramsSection = that.$wrapper.find(".c-params-section");
         that.$param_list = that.$paramsSection.find(".c-params-list");
         that.$textarea = that.$wrapper.find(".js-content-body");
-
+        that.$loading_icon = $('<span class="c-notice"><i class="fas fa-spinner wa-animation-spin speed-1000"></i></span>');
         // VARS
         that.preview_dialog_template = options.preview_dialog_template;
         that.site_app_url = options.site_app_url;
@@ -19,16 +19,19 @@ var CRMSettingsTemplate = (function ($) {
         that.locales = options["locales"];
         that.company_count = options["company_count"];
 
-        // INIT
-        that.initClass();
+        that.ace = null,
+            // INIT
+            that.initClass();
     };
 
     CRMSettingsTemplate.prototype.initClass = function () {
         var that = this;
         //
         that.initHelp();
+
+        that.initTabs();
         //
-        that.initBody();
+        that.initAce();
         //
         that.initSave();
         //
@@ -39,16 +42,58 @@ var CRMSettingsTemplate = (function ($) {
         that.initPreviewIframe();
         //
         that.initIDAutoFiller();
-        //
-        setTimeout( function() {
-            that.initElasticFooter();
-        }, 300);
-        //
+
         that.$form.on("change", "input, select, textarea", function () {
+            that.toggleButton(true);
+        });
+        that.$form.on('input change', function () {
             that.toggleButton(true);
         });
         //
         that.initResetTemplate();
+    };
+
+    CRMSettingsTemplate.prototype.initTabs = function () {
+        var that = this,
+            $section = that.$wrapper.find(".c-tabs-wrapper"),
+            $companies = that.$wrapper.find(".c-companies-wrapper"),
+            $list = $companies.find(".c-companies-list"),
+            $activeTab = $list.find(".c-company.selected");
+
+            initSetWidth();
+            initSlider();
+
+            function initSetWidth() {
+                var $window = $(window),
+                    other_w = $section.find(".c-add-wrapper").outerWidth();
+    
+                setWidth();
+    
+                $window.on("resize refresh", onResize);
+    
+                function onResize() {
+                    var is_exist = $.contains(document, $section[0]);
+                    if (is_exist) {
+                        setWidth();
+                    } else {
+                        $window.off("resize refresh", onResize);
+                    }
+                }
+    
+                function setWidth() {
+                    var section_w = $section.outerWidth(true),
+                        max_w = section_w - other_w - 38;
+                    $companies.css("max-width", max_w + "px");
+                }
+            }
+
+            function initSlider() {
+                $.crm.tabSlider({
+                    $wrapper: $companies,
+                    $slider: $list,
+                    $activeSlide: ($activeTab.length ? $activeTab : false)
+                });
+            }
     };
 
     CRMSettingsTemplate.prototype.initResetTemplate = function () {
@@ -64,17 +109,20 @@ var CRMSettingsTemplate = (function ($) {
         //Reset text in js-redactor
         $reset.on('click', getBasicTemplate);
 
-            function getBasicTemplate() {
-                var data = 'template_id=' + that.template_id,
-                    href = "?module=settings&action=templatesReset";
-                $.post(href, data, function (response) {
-                    if (response.status === "ok") {
-                        $('.js-content-body').text(response.data.template);
-                        that.initBody();
-                    }
-                }, "json").always(function () {
-                });
-            }
+        function getBasicTemplate() {
+            var data = 'template_id=' + that.template_id,
+                href = "?module=settings&action=templatesReset";
+               // ace = that.ace.getSession();
+            $.post(href, data, function (response) {
+                if (response.status === "ok") {
+                    $('.js-content-body').text(response.data.template);
+                    that.initAce();
+                    that.toggleButton(true);
+                }
+            }, "json").always(function () {
+            });
+            $reset.addClass('hidden');
+        }
     };
 
     CRMSettingsTemplate.prototype.initIDAutoFiller = function () {
@@ -96,13 +144,12 @@ var CRMSettingsTemplate = (function ($) {
                     $code_value = that.parents('tr').find('.js-code-field'),
                     get_attr = $code_value.hasClass('auto-filler'),
                     $submit = $form.find('[type="submit"]'),
-                    $loading = $code_value.next('.loading');
+                    $loading = $code_value.next('.fa-spinner');
 
                 if ($submit.prop('disabled') || !get_attr) {
                     return;
                 }
-
-                $loading = $loading.length ? $loading : $('<i class="icon16 loading"></i>');
+                $loading = $loading.length ? $loading : $('<span class="c-notice"><i class="fas fa-spinner wa-animation-spin speed-1000"></i></span>');
                 $loading.insertAfter($code_value);
 
                 $submit.prop('disabled', true);
@@ -116,14 +163,14 @@ var CRMSettingsTemplate = (function ($) {
                         }
                         transliterateTimer && clearTimeout(transliterateTimer);
                         $submit.prop('disabled', false);
-                        $loading.remove();
+                        $('.fa-spinner').remove();
                     };
                     xhr = $.post($.crm.app_url + '?module=settings&action=fieldTransliterate',
-                        {'name[]': name_value},
+                        { 'name[]': name_value },
                         function (r) {
                             clear();
                             if (r.status === 'ok') {
-                                if(get_attr) {
+                                if (get_attr) {
                                     $code_value.val(r.data);
                                 }
                             }
@@ -175,7 +222,6 @@ var CRMSettingsTemplate = (function ($) {
                 $copies.addClass('error').parent().append($('<span class="errormsg">').text(locales['validate_copies']));
                 return;
             }
-
         }
 
         //check errors in c-param_list
@@ -196,13 +242,13 @@ var CRMSettingsTemplate = (function ($) {
         function showConfirm(event) {
             event.preventDefault();
 
-            if (that.company_count){
-                var dialog = $.crm.alert.show({
+            if (that.company_count) {
+                var dialog = $.waDialog.alert({
                     text: that.locales["success_text"],
-                    button: that.locales["success_button"]
+                    button_title: that.locales["success_button"]
                 });
 
-                setTimeout( function() {
+                setTimeout(function () {
                     var is_exist = $.contains(document, dialog.$wrapper[0]);
                     if (is_exist) {
                         dialog.close();
@@ -210,11 +256,14 @@ var CRMSettingsTemplate = (function ($) {
                 }, 10000);
 
             } else {
-                $.crm.confirm.show({
-                    title: that.locales["delete_confirm_title"],
+                $.waDialog.confirm({
+                    title: '<i class=\"fas fa-exclamation-triangle smaller state-error\"></i> ' + that.locales["delete_confirm_title"],
                     text: that.locales["delete_confirm_text"],
-                    button: that.locales["delete_confirm_button"],
-                    onConfirm: deleteTemplate
+                    success_button_title: that.locales["delete_confirm_button"],
+                    success_button_class: 'danger',
+                    cancel_button_title: that.locales["success_button"],
+                    cancel_button_class: 'light-gray',
+                    onSuccess: deleteTemplate
                 });
             }
         }
@@ -239,13 +288,16 @@ var CRMSettingsTemplate = (function ($) {
 
     CRMSettingsTemplate.prototype.initSave = function () {
         var that = this,
-            is_locked = false;
-
+            is_locked = false,
+            $button = that.$wrapper.find(".js-template-save-button");
+        $loading = that.$loading_icon;
         that.$form.on("submit", onSubmit);
 
         function onSubmit(event) {
             event.preventDefault();
             $(document).trigger("updateEditorTextarea");
+
+            $loading.insertAfter($button);
 
             var validate = that.validate();
             if (!validate) {
@@ -266,6 +318,9 @@ var CRMSettingsTemplate = (function ($) {
             var href = "?module=settings&action=templatesSave";
             $.post(href, data, function (response) {
                 if (response.status === "ok") {
+                    $('.fa-spinner').remove();
+                    var $saved = $('<span class="c-notice"><i class="fas fa-check"></i></span>');
+                    $saved.insertAfter($button);
                     var content_uri = $.crm.app_url + "settings/templates/" + response.data.id + "/";
                     $.crm.content.load(content_uri);
                 }
@@ -309,21 +364,19 @@ var CRMSettingsTemplate = (function ($) {
 
         if (set_active) {
             $button
-                .removeClass("green")
                 .addClass("yellow");
 
             $actions.show();
 
         } else {
             $button
-                .removeClass("yellow")
-                .addClass("green");
+                .removeClass("yellow");
 
             $actions.hide();
         }
     };
 
-    CRMSettingsTemplate.prototype.initBody = function () {
+    CRMSettingsTemplate.prototype.initAce = function () {
         var that = this,
             $redactorW = that.$wrapper.find(".js-redactor-wrapper");
 
@@ -356,9 +409,9 @@ var CRMSettingsTemplate = (function ($) {
                 }
             });
 
-            setTimeout(function() {
+            setTimeout(function () {
                 var editor = $redactor.data("wa_editor");
-                editor.on("input", function() {
+                editor.on("input", function () {
                     that.toggleButton(true);
                 });
             }, 100);
@@ -370,67 +423,92 @@ var CRMSettingsTemplate = (function ($) {
                     $textarea.val(data).trigger("change");
                 }
             });
-        });
-    };
+        }); 
+    }
 
     CRMSettingsTemplate.prototype.initHelp = function () {
         var that = this,
-            $wrapper = that.$wrapper,
-            $document = $(document),
-            $help = $("#wa-editor-help"),
-            $help_link = $("#wa-editor-help-link");
+            //$help = $("#wa-editor-help"),
+            $help_link = $("#wa-editor-help-link"),
+            drawerLoaded = false;
 
-        var listener = function (e) {
-            // auto-off event-handler from global object
-            if ($document.find($wrapper).length <= 0) {
-                $document.off('click', listener);
-                return;
+        $help_link.on('click', function (event) {
+            event.preventDefault();
+
+            var href = $.crm.app_url +'?module=settings&action=help',
+                data = 'app=crm&key=invoice' + '&invoice_template_id=' + that.template_id,
+                drawer_html = '';
+
+            if (drawerLoaded) {
+                that.drawer.show();
+                return false
             }
-            // click outside of help area lead to close help area
-            var $target = $(e.target);
-            if (!$target.is($help) && $help.find($target).length <= 0) {
-                $help.hide();
+            const drawer_loader = '<div class="flexbox middle width-100 height-100 spinner-wrapper"><div class="spinner custom-p-16"></div></div>';
+            drawer_html = `<div class=\"drawer crm-help\" id=\"\"> <div class=\"drawer-background\"><\/div> <div class=\"drawer-body\"> <a href=\"#\" class=\"drawer-close js-close-drawer\"><i class=\"fas fa-times\"><\/i><\/a> <div class=\"drawer-block\">${drawer_loader}<\/div> <\/div> <\/div> `;
+            that.drawer = $.waDrawer({
+                html: drawer_html,
+                direction: "right",
+                onClose: () => handleWaTabs(false)
+            });
+            $.get(href, data, function (res) {
+                $(".drawer .drawer-block").html(res);
+                handleWaTabs(true);
+                drawerLoaded = true;
+            }, 'html');
+
+            /*   drawer.find('#wa-help-wa').remove();
+                 drawer.find('#wa-help-wa-content').remove();
+                // drawer.show();
+                 drawer.find('ul>li.no-tab>p.bold').hide();
+                 drawer.data('loaded', true);
+                 */
+        });
+
+        function handleWaTabs(tabEvent) {
+            that.drawerWrapper = $('.drawer');
+            that.drawerContent = that.drawerWrapper.find('.drawer-content');
+            if (tabEvent) {
+                that.drawerWrapper.on('click', "ul.tabs li", toggleWaTabs);
+                that.drawerWrapper.on('click', ".wa-help-vars-item", printVars);
+                that.drawerWrapper.on('click', ".drawer-background", () => that.drawer.hide());
             }
-        };
+            else {
+                that.drawerWrapper.off('click');
+                drawerLoaded = false;
+            }
+        }
 
-        $document.on('click', listener);
-
-        $help_link.on('click', function () {
-            if ($help.is(":visible")) {
-                $help.hide();
+        function toggleWaTabs(event) {
+            event.preventDefault();
+            if ($(this).hasClass('selected')) {
                 return false;
             }
 
-            var url = that.site_app_url + '?module=pages&action=help',
-                data = 'app=crm&key=invoice' + '&invoice_template_id=' + that.template_id;
-            $help.load(url, data, function () {
-                $help.find('#wa-help-wa').remove();
-                $help.find('#wa-help-wa-content').remove();
-                $help.show();
-                $help.find('ul>li.no-tab>p.bold').hide();
-                $help.data('loaded', true);
-            });
-            return false;
-        });
+            let idSelected = $(this).attr('id') + '-content';
+            $(this).addClass('selected').siblings().removeClass('selected');
+            let newId = that.drawerContent.find(`#${idSelected}`);
+            newId.siblings().hide();
+            newId.show();
+        }
 
-        $help.on('click', "div.fields a.inline-link", function (e) {
-            e.preventDefault();
-
-            var $el = $(this).find('i'),
-                $body = that.$textarea;
-
+        function printVars(event) {
+            event.preventDefault();
+            $body = that.$textarea;
             var editor = $body.data("wa_editor");
             if (editor) {
-                editor.insert($.trim($el.text()));
-            }
-        });
-
+                editor.insert($.trim($(this).find('.js-var').text()));
+                that.toggleButton(true);
+                const $reset = that.$wrapper.find(".js-reset-template");
+                $reset.removeClass('hidden');
+                that.drawer.hide();
+            } 
+        }
     };
 
     CRMSettingsTemplate.prototype.initPreviewIframe = function () {
         var that = this;
 
-        that.$wrapper.on("click", ".js-show-preview", function(event) {
+        that.$wrapper.on("click", ".js-show-preview", function (event) {
             event.preventDefault();
             showDialog();
         });
@@ -441,88 +519,14 @@ var CRMSettingsTemplate = (function ($) {
             //Disable cancel button
             that.toggleButton(false);
 
-            new CRMDialog({
+            $.waDialog({
                 html: that.preview_dialog_template,
                 onOpen: function ($wrapper) {
-                    $wrapper.find("#js-preview-content").val( that.$textarea.val() );
+                    $wrapper.find("#js-preview-content").val(that.$textarea.val());
                     $wrapper.find(".js-preview-form").trigger("submit");
                 }
             });
-        }
-    };
 
-    CRMSettingsTemplate.prototype.initElasticFooter = function() {
-        var that = this;
-
-        // DOM
-        var $window = $(window),
-            $wrapper = that.$wrapper,
-            $header = $wrapper.find(".js-footer-block"),
-            $dummy = false,
-            is_set = false;
-
-        var active_class = "is-fixed-to-bottom";
-
-        var header_o, header_w, header_h;
-
-        clear();
-
-        $window.on("scroll", useWatcher);
-        $window.on("resize", onResize);
-
-        onScroll();
-
-        function useWatcher() {
-            var is_exist = $.contains(document, $header[0]);
-            if (is_exist) {
-                onScroll();
-            } else {
-                $window.off("scroll", useWatcher);
-            }
-        }
-
-        function onScroll() {
-            var scroll_top = $window.scrollTop(),
-                use_scroll = header_o.top + header_h > scroll_top + $window.height();
-
-            if (use_scroll) {
-                if (!is_set) {
-                    is_set = true;
-                    $dummy = $("<div />");
-
-                    $dummy.height(header_h).insertAfter($header);
-
-                    $header
-                        .css("left", header_o.left)
-                        .width(header_w)
-                        .addClass(active_class);
-                }
-
-            } else {
-                clear();
-            }
-        }
-
-        function onResize() {
-            clear();
-            $window.trigger("scroll");
-        }
-
-        function clear() {
-            if ($dummy && $dummy.length) {
-                $dummy.remove();
-            }
-            $dummy = false;
-
-            $header
-                .removeAttr("style")
-                .removeClass(active_class);
-
-            header_o = $header.offset();
-            header_w = $header.outerWidth();
-            header_h = $header.outerHeight();
-
-            is_set = false;
         }
     };
 

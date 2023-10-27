@@ -3,23 +3,24 @@
 {function render_sources type=''}
     {$_sources = $sources[$type]|default:[]}
     {if !empty($_sources)}
-    <ul class="menu-v c-sources-list">
+    <ul class="menu c-sources-list">
         {foreach $_sources as $_source}
             {$_is_email = ($_source.type === crmSourceModel::TYPE_EMAIL)}
             {$_is_im = ($_source.type === crmSourceModel::TYPE_IM)}
             <li class="c-source {if $_source.disabled}c-is-disabled{/if}" data-id="{$_source.id}">
 
-                <div class="c-layout inline">
+                <div class="flexbox middle full-width">
                     <div class="c-column">
-                        <div class="c-source-details">
+                        <div class="flexbox middle space-8 c-source-details">
                             <a class="{if $_source.type === crmSourceModel::TYPE_FORM}js-c-web-form-link{/if}" href="{if !empty($_source.backend_url)}{$_source.backend_url}{else}{$wa_app_url}settings/sources/{$_source.id}/{/if}">
-                                <img class="{if $_source.type === crmSourceModel::TYPE_IM}c-source-im-icon{else}c-source-icon{/if}" src="{$_source.icon_url}"><span class="c-source-name">{$_source.name|escape}</span>
+                               <span class="c-source-icon-wrapper"><img class="{if $_source.type === crmSourceModel::TYPE_IM}c-source-im-icon{else}c-source-icon{/if}" src="{$_source.icon_url}"></span>
+                                <span class="c-source-name">{$_source.name|escape}</span>
                             </a>
 
                             {if !empty($_source.funnel)}
                                 {$funnel_name = $_source.funnel.name|escape}
                                 {$funnel_color = $_source.funnel.color}
-                                <i class="icon16 funnel-state svg-icon" data-color="{$funnel_color}" title="{$funnel_name}"></i>
+                                <span class="icon size-16"><i class="fas fa-circle funnel-state" style="color: {$funnel_color}" title="{$funnel_name}"></i></span>
 
                                 {if !empty($_source.stage)}
                                     {$stage_id = $_source.stage.id}
@@ -36,9 +37,14 @@
                     </div>
                     {if $_is_email || $_is_im}
                         <div class="c-column">
-                            <span class="c-disable-link-wrapper">
-                                <a class="js-c-disable-link c-disable-link" href="javascript:void(0);">{if $_source.disabled}[`enable`]{else}[`disable`]{/if}</a>
-                                <i class="icon16 loading c-loading" style="display: none"></i>
+                            <span class="flexbox middle space-8 wrap c-disable-link-wrapper">
+                                <span class="icon size-16 loading c-loading" style="display: none"><i class="fas fa-spinner fa-spin"></i></span>
+                                <div class="switch-with-text js-c-disable-link">
+                                    <label for="switch-im-input" data-active-text="[`enable`]" data-inactive-text="[`disable`]">{if $_source.disabled}[`enable`]{else}[`disable`]{/if}</label>
+                                    <span class="switch" id="switch-{$_source.id}">
+                                        <input type="checkbox" name="" id="switch-im-input" {if !$_source.disabled}checked{/if}>
+                                    </span>
+                                </div>
                             </span>
                         </div>
                     {/if}
@@ -50,7 +56,7 @@
     {else}
         {if $type === crmSourceModel::TYPE_EMAIL}
             <div class="block">
-                <p>[`Set up an email address to receive messages and deal requests.`]</p>
+                <p style="line-height: 32px;">[`Set up an email address to receive messages and deal requests.`]</p>
             </div>
         {/if}
         {if $type === crmSourceModel::TYPE_FORM}
@@ -68,20 +74,20 @@
 
 {function render_forms}
     {if !empty($forms)}
-        <ul class="menu-v c-sources-list">
+        <ul class="menu c-sources-list">
             {foreach $forms as $_form}
                 <li class="c-source">
-                    <div class="c-layout inline">
+                    <div class="flexbox middle full-width">
                         <div class="c-column">
-                            <div class="c-source-details">
+                            <div class="flexbox middle space-8 c-source-details">
                                 <a class="s-c-web-form-link" href="{$wa_app_url}settings/form/{$_form.id}/">
-                                    <img class="c-source-icon" src="{$wa_app_static_url}img/source/source-form.png" alt="">
+                                    <span class="c-source-icon-wrapper"><img class="c-source-icon" src="{$wa_app_static_url}img/source/source-form.png" alt=""></span>
                                     <span class='c-name'>{$_form.name|escape}</span>
                                 </a>
                                 {if !empty($_form.funnel)}
                                     {$_funnel_name = $_form.funnel.name|escape}
                                     {$_funnel_color = $_form.funnel.color}
-                                    <i class="icon16 funnel-state svg-icon" data-color="{$_funnel_color}" title="{$_funnel_name}"></i>
+                                    <span class="icon size-16"><i class="fas fa-circle funnel-state" style="color: {$_funnel_color}" title="{$_funnel_name}"></i></span>
                                     {if !empty($_form.stage)}
                                         {$stage_id = $_form.stage.id}
                                         {$_stage_name = $_form.stage.name|escape}
@@ -97,7 +103,7 @@
         </ul>
     {else}
         <div class="block">
-            <p>[`Create a form and publish it on your website for visitors to easily initiate new deals.`]</p>
+            <p class="custom-pt-12 custom-pb-16">[`Create a form and publish it on your website for visitors to easily initiate new deals.`]</p>
         </div>
     {/if}
 {/function}
@@ -105,7 +111,7 @@
 {function render_plugin_source_links type=''}
     {foreach $plugins as $plugin}
         {if $type == $plugin.source.type}
-            <li><a href="{$wa_app_url}settings/sources/{$plugin.id}/"><i class="icon16 add"></i> {sprintf('[`Add %s source`]', $plugin.name|escape)}</a></li>
+            <li><a href="{$wa_app_url}settings/sources/{$plugin.id}/">{sprintf('[`Add %s source`]', $plugin.name|escape)}</a></li>
         {/if}
     {/foreach}
 {/function}
@@ -137,15 +143,31 @@
                     <a href="javascript:void(0);" class="c-tab-link">[`Messengers`]</a>
                 </li>
             </ul>
-            <div class="tab-content">
+            <div class="tab-content custom-pt-12">
                 <div class="block c-tab-content" data-type="email" style="display: none;">
 
                     {render_sources type=crmSourceModel::TYPE_EMAIL}
-
-                    <ul class="menu-v">
-                        <li><a href="{$wa_app_url}settings/sources/email/"><i class="icon16 add"></i> [`Add email source`]</a></li>
-                        {render_plugin_source_links type=crmSourceModel::TYPE_EMAIL}
-                    </ul>
+                    <div class="dropdown custom-pt-16" id="dropdown-email-source">
+                        <button class="dropdown-toggle button small rounded light-gray"><i class="fas fa-plus-circle text-green add"></i> [`Add email source`]</button>
+                        <div class="dropdown-body">
+                            <ul class="menu">
+                                <li><a href="{$wa_app_url}settings/sources/email/">[`Add email source`]</a></li>
+                                {render_plugin_source_links type=crmSourceModel::TYPE_EMAIL}
+                            </ul>
+                        </div>
+                    </div>
+                    <script>
+                        ( function($) {
+                            $("#dropdown-email-source").waDropdown(
+                                {      ready: function(dropdown) {
+                                        dropdown.$wrapper.find("a").on('click', function() {
+                                            dropdown.$wrapper.find(".dropdown-toggle .svg-inline--fa").removeClass('fa-plus-circle text-green').addClass('fa-spinner fa-spin')
+                                        })
+                                    }
+                                }
+                            );
+                        })(jQuery);
+                    </script>
 
                     {$_cli_ok = crmEmailSourceWorker::isCliOk()}
 
@@ -159,13 +181,33 @@
                 </div>
                 <div class="block c-tab-content" data-type="form" style="display: none;">
                     {render_forms}
-                    <a class="js-c-web-form-link" href="{$wa_app_url}settings/form/new/"><i class="icon16 add"></i> [`Add a web form`]</a>
+                    <a class="button small rounded light-gray js-c-web-form-link" href="{$wa_app_url}settings/form/new/"><i class="fas fa-plus-circle text-green add"></i> [`Add a web form`]</a>
+ 
                 </div>
                 <div class="block c-tab-content" data-type="im" style="display: none;">
                     {render_sources type=crmSourceModel::TYPE_IM}
 
                     {capture assign=links}
-                        <ul class="menu-v">{render_plugin_source_links type=crmSourceModel::TYPE_IM}</ul>
+                    <div class="dropdown custom-pt-4" id="dropdown-im-source">
+                        <button class="dropdown-toggle button small rounded light-gray"><i class="fas fa-plus-circle text-green add"></i> [`Add messenger`]</button>
+                        <div class="dropdown-body">
+                            <ul class="menu">
+                                {render_plugin_source_links type=crmSourceModel::TYPE_IM}
+                            </ul>
+                            </div>
+                        </div>
+                        <script>
+                            ( function($) {
+                                $("#dropdown-im-source").waDropdown(
+                                    {      ready: function(dropdown) {
+                                        dropdown.$wrapper.find("a").on('click', function() {
+                                            dropdown.$wrapper.find(".dropdown-toggle .svg-inline--fa").removeClass('fa-plus-circle text-green').addClass('fa-spinner fa-spin')
+                                        })
+                                    }
+                                }
+                                );
+                            })(jQuery);
+                        </script>
                     {/capture}
                     {capture assign=help}
                         <div class="block">

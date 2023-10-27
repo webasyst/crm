@@ -2,11 +2,11 @@
 {$dialog_id = uniqid($class)}
 
 <div class="{$class}-container">
-    <div class="crm-dialog-wrapper {$class}" id="{$dialog_id}">
-        <div class="crm-dialog-background"></div>
-        <div class="crm-dialog-block">
+    <div class="dialog {$class}" id="{$dialog_id}">
+        <div class="dialog-background"></div>
+        <div class="dialog-body">
             <form>
-                <header class="crm-dialog-header">
+                <header class="dialog-header">
                     <h2>
                         [`Redirect call`]
                         {if $call.direction == "IN"}
@@ -22,7 +22,7 @@
                     </h2>
                 </header>
 
-                <div class="crm-dialog-content">
+                <div class="dialog-content">
                     <div class="field">
                         <div class="name js-field-name">[`Select number`]</div>
                         <div class="value">
@@ -31,7 +31,7 @@
                                 <label class="c-candidate"{if $candidate.not_exist} style="opacity: 0.5"{/if}>
                                     <input type="radio" name="redirect[to]" value="{$candidate.number|escape}"{if $candidate.not_exist} disabled{/if}>
                                     {if $call.plugin_icon}
-                                        <i class="icon16" title="{$call.plugin_name|escape}" style="background-image: url('{$call.plugin_icon|escape}'); background-size: 16px 16px;"></i>
+                                        <i class="icon" title="{$call.plugin_name|escape}" style="background-image: url('{$call.plugin_icon|escape}'); background-size: 16px 16px;"></i>
                                     {/if}
                                     {$candidate.number_label|escape}
                                     {if $candidate.not_exist}<span style="font-size: smaller; margin-left: 6px;">[`Number does not exist`]</span>{/if}
@@ -39,7 +39,7 @@
                                     <div class="c-users-list">
                                         {foreach $candidate.users as $_user}
                                             <div class="c-contact c-tel-user">
-                                                <i class="icon16 userpic20" style="background-image: url('{$_user.photo_url_16}');"></i>
+                                                <i class="icon userpic" style="background-image: url('{$_user.photo_url_16}');"></i>
                                                 {$_user.name|escape}
                                             </div>
                                         {/foreach}
@@ -63,14 +63,13 @@
                     <div class="js-errors-place"></div>
                 </div>
 
-                <footer class="crm-dialog-footer">
+                <footer class="dialog-footer">
                     <input type="hidden" name="call_id" value="{$call.id}" class="js-call-id"/>
                     <input type="hidden" name="number_type" class="js-number-type"/>
                     <input type="hidden" name="number" class="js-number"/>
                     <div class="c-footer-actions js-dialog-footer">
                         <input class="button js-submit" type="submit" value="[`Redirect`]" disabled>
-                        <span style="margin: 0 4px;">[`or`]</span>
-                        <a class="js-close-dialog js-cancel-dialog" href="javascript:void(0);">[`cancel`]</a>
+                        <a class="button light-gray js-close-dialog js-cancel-dialog" href="javascript:void(0);">[`Cancel`]</a>
                     </div>
                 </footer>
             </form>
@@ -79,7 +78,7 @@
         <script>
             ( function($) {
                 var $body = $(window.top.document).find("body");
-                new CRMDialog({
+                $.waDialog({
                     html: $body.find('#{$dialog_id}').show(),
                     onOpen: function($wrapper) {
                         new CRMCallRedirectDialog({

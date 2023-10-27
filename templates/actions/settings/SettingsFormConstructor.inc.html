@@ -9,7 +9,7 @@
         data-checked="{$field.checked|default:0}">
             <div class="crm-form-field-line crm-form-field-1st-line">
                 <div class="crm-form-field-col crm-sorting-col">
-                    <i class="icon16 sort"></i>
+                    <i class="fas fa-grip-vertical text-light-gray sort"></i>
                 </div>
                 <div class="crm-form-field-col crm-caption-col">
                     <span class="crm-caption">
@@ -25,18 +25,18 @@
                     <div class="c-field-wrapper">{if $field.id !== '!agreement_checkbox'}{$field.html}{/if}</div>
                 </div>
                 <div class="crm-form-field-col crm-delete-col">
-                    <a href="javascript:void(0);" class="crm-delete-field-link"><i class="icon16 delete"></i></a>
+                    <a href="javascript:void(0);" class="crm-delete-field-link text-red"><i class="fas fa-trash-alt delete"></i></a>
                 </div>
             </div>
             <div class="crm-form-field-line crm-form-field-2st-line">
                 <div class="crm-form-field-col crm-sorting-col">
-                    <i class="icon16 sort"></i>
+                    <i class="fas fa-grip-vertical text-light-gray sort"></i>
                 </div>
                 <div class="crm-form-field-col crm-input-col">
                     <div class="c-field-wrapper">{$field.html}</div>
                 </div>
                 <div class="crm-form-field-col crm-delete-col">
-                    <a href="javascript:void(0);" class="crm-delete-field-link"><i class="icon16 delete"></i></a>
+                    <a href="javascript:void(0);" class="crm-delete-field-link text-red"><i class="fas fa-trash-alt delete"></i></a>
                 </div>
             </div>
     </div>
@@ -60,17 +60,24 @@
     </li>
 {/function}
 
+{$_back_uri = "{$wa_app_url}settings/form/"}
+
 <form method="post" action="{$wa_app_url}?module=settings&action=formSave{if $form.id > 0}&id={$form.id}{/if}" class="crm-form-settings-form">
+    
     <div class="crm-form-header">
-        <input type="text" name="form[name]" value="{if $form.id > 0}{$form.name|escape}{else}[`New form`]{/if}" placeholder="[`Form name`]" class="crm-name-input">
+        <div class="flexbox middle">
+            <a href="{$_back_uri}" class="icon size-32 back js-back-button cursor-pointer custom-mr-8"><i class="icon fas fa-arrow-left"></i></a>
+            <input type="text" name="form[name]" value="{if $form.id > 0}{$form.name|escape}{else}[`New form`]{/if}" placeholder="[`Form name`]" class="crm-name-input">
+        </div>
+        
     </div>
 
     <div class="crm-common-errors-block"></div>
 
-    <div class="crm-form-body">
-        <div class="crm-form-constructor">
+    <div class="crm-form-body fields">
+        <div class="crm-form-constructor fields-group">
             <div class="crm-form-preview-block" style="width: {$form.params.formwidth|default:400}px">
-                <div class="crm-form-fields-block shadowed">
+                <div class="crm-form-fields-block shadowed blank">
                     <div class="crm-form-fields">
 
                         {$_checked_fields = $form.params.fields}
@@ -84,11 +91,11 @@
                     </div>
 
                     <div class="crm-add-new-field-wrapper">
-                        <a href="javascript:void(0)" class="inline-link crm-add-new-field-link small">
-                            <i class="icon10 add"></i> [`Add fields`]
+                        <a href="javascript:void(0)" class="button small rounded light-gray crm-add-new-field-link small">
+                            <i class="fas fa-plus-circle text-green add"></i> [`Add fields`]
                         </a>
 
-                        <ul class="menu-v crm-available-fields" style="display: none;">
+                        <ul class="menu crm-available-fields" style="display: none;">
 
                             {$_available_field_rendered_map = []}
 
@@ -200,7 +207,7 @@
             </div>
         </div>
 
-        <div class="crm-form-section">
+        <div class="crm-form-section fields-group">
             <div class="crm-form-section-header">
                 [`After form submission`]
             </div>
@@ -211,7 +218,7 @@
                 <div class="field">
                     <div class="name">
                         <label>
-                            <input type="radio" name="form[params][after_submit]"{if !empty($form.params.after_submit) && $form.params.after_submit == 'redirect'} checked{/if} value="redirect">
+                            <span class="wa-radio"><input type="radio" name="form[params][after_submit]"{if !empty($form.params.after_submit) && $form.params.after_submit == 'redirect'} checked{/if} value="redirect"><span></span></span>
                             [`Redirect to URL`]
                         </label>
                     </div>
@@ -223,7 +230,7 @@
                 <div class="field">
                     <div class="name">
                         <label>
-                            <input type="radio" name="form[params][after_submit]" {if empty($form.params.after_submit) || $form.params.after_submit == 'html'} checked{/if} value="html">
+                            <span class="wa-radio"><input type="radio" name="form[params][after_submit]" {if empty($form.params.after_submit) || $form.params.after_submit == 'html'} checked{/if} value="html"><span></span></span>
                             [`Display text instead of the form`]
                         </label>
                     </div>
@@ -235,7 +242,7 @@
             </div>
         </div>
 
-        <div class="crm-form-section">
+        <div class="crm-form-section fields-group">
             <div class="crm-form-section-header">
                 [`Confirm registration`]
             </div>
@@ -243,9 +250,10 @@
                 {$email_checked = $available_fields.email.checked > 0}
 
                 <p>
-                    <label class="gray" for="js-ibutton-2">[`Disabled`]</label>
-                    <input type="checkbox" class="crm-confirmation-checkbox js-ibutton" id="js-ibutton-2" name="form[params][confirm_mail]" value="1" {if isset($form.params.confirm_mail) && $email_checked} checked{/if} {if !$email_checked}disabled="disabled"{/if}>
-                    <label for="js-ibutton-2">[`Enabled`]</label>
+                    <span class="switch smaller" id="js-ibutton">
+                        <input type="checkbox" class="crm-confirmation-checkbox" id="js-ibutton-2" name="form[params][confirm_mail]" value="1" {if isset($form.params.confirm_mail) && $email_checked} checked{/if} {if !$email_checked}disabled="disabled"{/if}>
+                    </span>
+                    <label for="js-ibutton-2" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">[`Enabled`]</label>
                 </p>
 
                 <span class="crm-confirmation-enable-text" {if $email_checked}style="display: none;"{/if}>
@@ -264,8 +272,8 @@
                         <div class="crm-field">
                             <div class="crm-name">[`Text`]</div>
                             <div class="crm-value">
-                                <div class="wa-editor-core-wrapper">
-                                    <ul class="c-editor-toggle wa-editor-wysiwyg-html-toggle">
+                                <div class="wa-editor-core-wrapper not-blank">
+                                    <ul class="tabs overflow-dropdown wa-editor-wysiwyg-html-toggle bordered-bottom custom-ml-8 small">
                                         <li class="selected">
                                             <a href="#" class="wysiwyg">[`WYSIWYG`]</a>
                                         </li>
@@ -293,7 +301,7 @@
                         <div class="crm-line field">
                             <div class="name">
                                 <label>
-                                    <input type="radio" name="form[params][after_antispam_confirm]" value="redirect" {if isset($form.params.after_antispam_confirm) && $form.params.after_antispam_confirm === 'redirect'}checked="checked"{/if}>
+                                    <span class="wa-radio"><input type="radio" name="form[params][after_antispam_confirm]" value="redirect" {if isset($form.params.after_antispam_confirm) && $form.params.after_antispam_confirm === 'redirect'}checked="checked"{/if}><span></span></span>
                                     [`Redirect to URL`]
                                 </label>
                             </div>
@@ -305,7 +313,7 @@
                         <div class="crm-line field">
                             <div class="name">
                                 <label>
-                                    <input type="radio" name="form[params][after_antispam_confirm]" value="text" {if empty($form.params.after_antispam_confirm) || $form.params.after_antispam_confirm !== 'redirect'}checked="checked"{/if}>  [`Display text`]
+                                    <span class="wa-radio"><input type="radio" name="form[params][after_antispam_confirm]" value="text" {if empty($form.params.after_antispam_confirm) || $form.params.after_antispam_confirm !== 'redirect'}checked="checked"{/if}><span></span></span> [`Display text`]
                                 </label>
                             </div>
                             <div class="value">
@@ -323,7 +331,7 @@
         {$blocks.form_create_deal|default:''}
         {$blocks.form_responsible|default:''}
 
-        <div class="crm-form-section">
+        <div class="crm-form-section fields-group">
             <div class="crm-form-section-header">
                 [`Messages`]
             </div>
@@ -333,7 +341,7 @@
         </div>
 
         {if $form.id}
-            <div class="crm-form-section">
+            <div class="crm-form-section fields-group">
                 <div class="crm-form-section-header">
                     [`Publication`]
                 </div>
@@ -341,7 +349,7 @@
                     <p class="large-hint">[`To publish this form on your website use this code:`]
                         {if $form.id > 0}
                             <tt class="crm-smarty-helper"><strong>{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}</strong></tt>
-                            <i class="icon16 stack crm-copy js-copy" data-content="{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}" title="[`Copy to clipboard`]"></i>
+                            <span class="icon crm-copy js-copy" data-content="{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}" title="[`Copy to clipboard`]"><i class="fas fa-copy"></i></span>
                         {else}
                             <strong>[`Will be available after saving`]</strong>
                         {/if}
@@ -349,30 +357,34 @@
                 </div>
                 <div class="crm-form-section-content">
                     <p class="large-hint">[`To publish the form on external site use this code:`]
-                        <a class="inline-link crm-iframe-code-block-toggle" href="javascript:void(0);"><b><i>iframe</i></b></a>
+                        <a class="inline-link crm-iframe-code-block-toggle" href="javascript:void(0);">iframe</a>
                     </p>
                     <textarea class="crm-iframe-code small" style="display: none;" readonly><iframe frameborder="0" src="{$frontend_form_iframe_url}" id="wa-crm-iframe" name="wa-crm-iframe" marginheight="0" marginwidth="0" scrolling="no" style="width:100%; height:50px;"></iframe><script type="text/javascript" src="{$app_static_url}js/iframeResizer.min.js"></script><script type="text/javascript">iFrameResize({ heightCalculationMethod:'max' });</script></textarea>
                 </div>
             </div>
         {/if}
 
-        <div class="crm-form-buttons">
-            <div class="c-layout">
+        <div class="bottombar sticky custom-mt-20 crm-form-buttons">
+            <div class="custom-px-20 custom-py-16 blank c-layout">
                 <div class="c-column">
                     {$wa->csrf()}
-                    <input type="submit" class="button green" value="[`Save`]">
-                    <span style="margin: 0 4px;">[`or`]</span>
-                    <a class="inline-link js-c-cancel-link" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
-                    <i class="icon16 loading crm-loading" style="display:none"></i>
+                    <input type="submit" class="button" value="[`Save`]">
+                    <a class="button light-gray js-c-cancel-link" href="javascript:void(0);">[`Cancel`]</a>
+                    <span class="crm-loading" style="display: none;">
+                    <i class="fas fa-spinner fa-spin loading"></i>
+                    </span>
                     <span class="crm-success-status" style="display: none;">
-                        [`Saved`] <i class="icon16 yes"></i>
+                        [`Saved`] <i class="fas fa-check-circle yes"></i>
                     </span>
                 </div>
                 {if $form.id > 0}
                     <div class="c-column middle right">
                         <div class="crm-delete-link-wrapper">
-                            <a href="javascript:void(0);" class="inline-link crm-delete-form-link"><i class="icon16 delete"></i><b><i>[`Delete this form`]</i></b></a>
+                            <a href="javascript:void(0);" class="button gray outlined crm-delete-form-link">
+                                <i class="fas fa-times-circle delete"></i> [`Delete this form`]
+                            </a>
                         </div>
+
                     </div>
                 {/if}
             </div>

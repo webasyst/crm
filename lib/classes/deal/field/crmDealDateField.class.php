@@ -11,7 +11,8 @@ class crmDealDateField extends crmDealField
 
     public function validate($value)
     {
-        $validator = new waDateValidator();
+        /** @var waValidator $validator */
+        $validator = ifset($this->options, 'validators', new waDateValidator());
         if ($validator->isValid($value)) {
             return array();
         }

@@ -53,7 +53,7 @@ class crmReminderSettingsSaveController extends crmJsonController
         $data = array_merge($default_settings, $reminder_settings);
 
         if ($data['setting'] === 'groups') {
-            $groups = is_array($data['groups']) ? $data['groups'] : array();
+            $groups = (array) ifset($data, 'groups', []);
             $groups = waUtils::toIntArray($groups);
             $data['setting'] = join(",", $groups);
             unset($data['groups']);

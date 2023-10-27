@@ -10,9 +10,9 @@ class crmDealFunnelAction extends crmDealListAction
         parent::execute();
     }
 
-    protected function getListParams()
+    protected function getListParams($api = false)
     {
-        $list_params = parent::getListParams();
+        $list_params = parent::getListParams($api);
 
         unset($list_params['stage_id']);
         $list_params['status_id'] = 'OPEN';

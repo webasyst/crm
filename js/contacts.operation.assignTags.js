@@ -98,6 +98,7 @@ var CRMContactsOperationAssignTags = (function ($) {
                 $loading.hide();
                 $button.attr('disabled', false);
                 $.crm.content.reload();
+                that.dialog.close();
             };
 
             var step = function (offset) {

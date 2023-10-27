@@ -18,7 +18,7 @@ var CRMSettingsForms = ( function($) {
     CRMSettingsForms.prototype.initClass = function () {
         var that = this;
         //
-        $.crm.renderSVG(that.$wrapper);
+       // $.crm.renderSVG(that.$wrapper);
     };
 
     return CRMSettingsForms;

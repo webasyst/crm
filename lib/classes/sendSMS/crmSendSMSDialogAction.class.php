@@ -6,7 +6,8 @@ class crmSendSMSDialogAction extends crmBackendViewAction
     {
         parent::__construct($params);
 
-        $this->setTemplate('templates/actions/message/MessageSendSMSDialog.html');
+        $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
+        $this->setTemplate('templates/' . $actions_path . '/message/MessageSendSMSDialog.html');
     }
 
     public function preExecute()

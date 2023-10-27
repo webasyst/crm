@@ -1,12 +1,12 @@
-<div class="crm-dialog-wrapper crm-settings-form-edit-field-wrapper" data-template="1" style="display: none;">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
-        <header class="crm-dialog-header">
+<div class="dialog crm-settings-form-edit-field-wrapper" data-template="1" style="display: none;">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <header class="dialog-header">
             <h1>[`Field settings`]</h1>
         </header>
 
         <form>
-            <div class="crm-dialog-content">
+            <div class="dialog-content">
                 <div class="block fields">
                     <div class="field crm-field-id">
                         <div class="name">[`Field`]</div>
@@ -21,9 +21,9 @@
                     <div class="field crm-field-captionplace">
                         <div class="name">[`Label placement`]</div>
                         <div class="value">
-                            <label><input type="radio" name="params[captionplace]" value="left" checked="checked"> [`left from field`]</label><br>
-                            <label><input type="radio" name="params[captionplace]" value="above"> [`above of the field`]</label><br>
-                            <label><input type="radio" name="params[captionplace]" value="none"> [`hide`]</label><br>
+                            <label><span class="wa-radio"><input type="radio" name="params[captionplace]" value="left" checked="checked"><span></span></span> [`left from field`]</label><br>
+                            <label><span class="wa-radio"><input type="radio" name="params[captionplace]" value="above"><span></span></span> [`above of the field`]</label><br>
+                            <label><span class="wa-radio"><input type="radio" name="params[captionplace]" value="none"><span></span></span> [`hide`]</label><br>
                         </div>
                     </div>
 
@@ -33,14 +33,14 @@
                             <div class="crm-redactors-radio-block">
                                 <div class="crm-redactors-radio-column">
                                     <label>
-                                        <input type="radio" name="params[redactor]" value="" checked disabled>
+                                        <span class="wa-radio"><input type="radio" name="params[redactor]" value="" checked disabled><span></span></span>
                                         [`Plain text`]
                                         <img src="{$wa_app_static_url}img/plain-text-icon.png" class="crm-redactor-image">
                                     </label>
                                 </div>
                                 <div class="crm-redactors-radio-column">
                                     <label>
-                                        <input type="radio" name="params[redactor]" value="1" disabled>
+                                        <span class="wa-radio"><input type="radio" name="params[redactor]" value="1" disabled><span></span></span>
                                         [`Redactor`]
                                         <img src="{$wa_app_static_url}img/redactor-icon.png" class="crm-redactor-image">
                                     </label>
@@ -68,17 +68,22 @@
                             <label for="fcrm-field-param-required">[`Required`]</label>
                         </div>
                         <div class="value">
-                            <label><input type="checkbox" id="fcrm-field-param-required" name="params[required]"> </label>
+                            <label><span class="wa-checkbox"><input type="checkbox" id="fcrm-field-param-required" name="params[required]">
+                                <span>
+                                    <span class="icon">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                </span>
+                            </span> </label>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <footer class="crm-dialog-footer">
+            <footer class="dialog-footer">
                 <div class="crm-actions">
-                    <input class="button green crm-button js-some-action" type="submit" value="[`Apply`]">
-                    <span style="margin: 0 4px;">[`or`]</span>
-                    <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                    <input class="button crm-button js-some-action" type="submit" value="[`Apply`]">
+                    <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
                 </div>
             </footer>
         </form>

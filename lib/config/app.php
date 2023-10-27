@@ -2,14 +2,9 @@
 return array(
     'name'     => /*_w*/('CRM'),
     'description' => /*_w*/('Webasyst CRM is excellent for managing your clients database and sales.'),
-    'icon'     =>
-        array(
-            24 => 'img/crm24.png',
-            48 => 'img/crm48.png',
-            96 => 'img/crm96.png',
-        ),
+    'icon'     => 'img/crm.png',
     'sash_color' => '#e63a24',
-    'version'  => '1.4.20',
+    'version'  => '2.0.0',
     'vendor'   => 'webasyst',
     'plugins'  => true,
     'rights'   => true,
@@ -20,4 +15,5 @@ return array(
     'payment_plugins'  => true,
     'sms_plugins'      => true,
     'frontend'         => true,
+    'ui' => '1.3,2.0',
 );

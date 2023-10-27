@@ -1,0 +1,44 @@
+<div class="c-settings-source-page" id="c-settings-null-source-page">
+    <h1 class="c-page-header">
+        {if $icon_url}
+            <img src="{$icon_url}">
+        {/if}
+        {if $source.id > 0}
+            {$source.name|escape}
+            {if !empty($source.provider)}
+                <span class="small gray">({$source.provider|default:''|escape})</span>
+            {/if}
+        {else}
+            {$source.provider|default:''|escape}
+        {/if}
+    </h1>
+    <p class="red bold">
+        <p>
+            <i class="icon16 exclamation"></i>
+            [`No settings page for this source`]
+        </p>
+    </p>
+    <div class="">
+        {if $source.id > 0}
+            <input type="button" class="button red js-c-delete-source" value="[`Delete this source`]"> [`or`]
+            <a class="inline-link" href="{$wa_app_url}settings/sources/"><b><i>[`cancel`]</i></b></a>
+        {else}
+            <a class="button gray" href="{$wa_app_url}settings/sources/">[`Cancel`]</a>
+        {/if}
+    </div>
+    {if $source.id > 0}
+        <script>
+            (function($) {
+                $('#c-settings-null-source-page .js-c-delete-source').click(function () {
+                    CRMSettingsSources.deleteSource({$source.id|json_encode}, {
+                        messages: {
+                            delete_confirm_title: '[`Delete source`]',
+                            delete_confirm_text: '[`Are you sure?`]',
+                            delete_confirm_button: '[`Delete`]'
+                        }
+                    });
+                });
+            })(jQuery);
+        </script>
+    {/if}
+</div>

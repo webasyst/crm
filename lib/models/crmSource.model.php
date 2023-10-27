@@ -148,7 +148,7 @@ class crmSourceModel extends crmModel
     {
         $types = $this->getTypes();
         if (!isset($types[$type])) {
-            $type = key($types);
+            $type = 'NULL';
         }
         $source = $this->getEmptyRow();
         $source['type'] = $type;
@@ -225,7 +225,9 @@ class crmSourceModel extends crmModel
         $sources_params = $this->getSourceParamsModel()->get(array_keys($sources));
         $all_icons = $this->getIcons();
         foreach ($sources as &$source) {
-            $source['icon_url'] = wa()->getAppStaticUrl('crm', true).'img/source/'.$all_icons[$source['type']];
+            $source['icon_url'] = isset($all_icons[$source['type']]) 
+                ? wa()->getAppStaticUrl('crm', true).'img/source/'.$all_icons[$source['type']]
+                : '';
             $source['backend_url'] = '';
             if ($source['type'] === self::TYPE_FORM) {
                 $form_id = ifset($sources_params[$source['id']]['form_id']);

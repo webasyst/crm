@@ -1,13 +1,13 @@
 {$class_id = 'crm-contact-operation-assign-tags-wrapper'}
 {$wrapper_id = uniqid($class_id)}
 
-<div class="crm-dialog-wrapper {$class_id}" id="{$wrapper_id}">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
-        <header class="crm-dialog-header">
+<div class="dialog {$class_id}" id="{$wrapper_id}">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <header class="dialog-header">
             <h1>[`Assign tags`]</h1>
         </header>
-        <div class="crm-dialog-content">
+        <div class="dialog-content">
             <div class="crm-tags-input-block">
                 {$_tags = []}
                 {foreach $contact_tags as $tag}
@@ -17,22 +17,24 @@
             </div>
             <div class="crm-popular-tags-block">
                 {if $popular_tags}
-                    <ul class="crm-popular-tags menu-h">
+                    <ul class="small chips tags mobile-friendly crm-popular-tags">
                         <li class="crm-title">[`Popular tags`]</li>
                         {foreach $popular_tags as $tag}
                             <li class="crm-popular-tag-item">
-                                <a href="javascript:void(0);" class="crm-popular-tag-item-link inline-link"><b><i>{$tag.name|escape}</i></b></a>
+                                <a href="javascript:void(0);" class="crm-popular-tag-item-link">
+                                    <i class="fas fa-hashtag"></i>
+                                    <span>{$tag.name|escape}</span>
+                                </a>
                             </li>
                         {/foreach}
                     </ul>
                 {/if}
             </div>
         </div>
-        <footer class="crm-dialog-footer">
-            <input class="button green js-save" type="button" value="[`Assign`]">
-            <i class="icon16 loading crm-loading" style="display: none;"></i>
-            <span style="margin: 0 4px;">[`or`]</span>
-            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+        <footer class="dialog-footer">
+            <input class="button js-save" type="submit" value="[`Assign`]">
+            <span class="icon size-16 loading crm-loading" style="display: none;"><i class="fas fa-spinner wa-animation-spin custom-mr-4"></i></span>
+            <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
         </footer>
     </div>
     <script>

@@ -1,0 +1,158 @@
+{$wrapper_id = uniqid('crm-contact-segment-list-edit-wrapper-')}
+
+{$segment.icon = $segment.icon|default:'contact'}
+{$segment.type = $segment.type|default:crmSegmentModel::TYPE_CATEGORY}
+
+<div class="crm-dialog-wrapper crm-contact-segment-list-edit-wrapper" id="{$wrapper_id}">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+
+        <form method="post" action="{$wa_app_url}?module=contactSegment&action=save{if $segment.id > 0}&id={$segment.id}{/if}">
+
+            <header class="crm-dialog-header">
+                <h1>{strip}
+                    {if $segment.id > 0}
+                        [`Edit segment`]
+                    {else}
+                        [`Create segment`]
+                    {/if}
+                {/strip}</h1>
+            </header>
+
+            <div class="crm-dialog-content">
+
+                <div class="fields">
+
+
+                    <div class="field">
+                        <div class="name">[`Name`]</div>
+                        <div class="value">
+                            <input type="text" value="{$segment.name|escape}" class="crm-name-input" name="name">
+                        </div>
+                    </div>
+
+                    {if $segment.id <= 0}
+                        {if $segment.type === crmSegmentModel::TYPE_CATEGORY}
+                            <div class="field">
+                                <div class="name"></div>
+                                <div class="value">
+                                    <label class="crm-access-label">
+                                        <input type="radio" name="type" value="{crmSegmentModel::TYPE_CATEGORY}" checked="checked"> [`Static list`]
+                                        <i class="icon16 contact"></i>
+                                        <span class="hint">[`manually selected contacts`]</span>
+                                    </label>
+                                    <label class="crm-access-label">
+                                        <input type="radio" name="type" value="{crmSegmentModel::TYPE_SEARCH}"> [`Dynamic filter`]
+                                        <i class="icon16 folder-dynamic"></i>
+                                        <span class="hint">[`advanced search results`]</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <hr>
+                        {else}
+                            <input type="hidden" name="type" value="{crmSegmentModel::TYPE_SEARCH}">
+                        {/if}
+                    {/if}
+
+                    <div class="field crm-icons-block">
+                        <div class="name">[`Icon`]</div>
+                        <div class="value">
+                            <ul class="menu-h">
+                                {foreach $icons as $icon}
+                                    <li data-icon="{$icon}" {if $icon == $segment.icon}class="selected"{/if}>
+                                        <a href="javascript:void(0)"><i class="icon16 {$icon}"></i></a>
+                                    </li>
+                                {/foreach}
+                            </ul>
+                            <input type="hidden" name="icon" value="{$segment.icon}">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="name">[`Access`]</div>
+                        <div class="value">
+                            <label class="crm-access-label"><input type="radio" name="shared" value="0" {if $segment.shared == "0"}checked="checked"{/if}> [`only me`]</label>
+                            <label class="crm-access-label"><input type="radio" name="shared" value="1" {if $segment.shared == "1"}checked="checked"{/if}> [`all users`]</label>
+                        </div>
+                    </div>
+
+                    {if $segment.id > 0}
+                        <div class="field crm-description">
+                            {if $segment.type === crmSegmentModel::TYPE_SEARCH}
+                                <p>[`This list is the search result:`]
+                                    <a href="{$wa_app_url}contact/search/segment/{$segment.id}/{if $segment.search_info.hash}{$segment.search_info.hash|urlencode}/{/if}">{$segment.search_info.title}</a>
+                                    {if $segment.contact_id && $segment.contact_id !== '0'}
+                                        <br>[`Created by`] {$segment.contact.name|escape}, {$segment.create_datetime|wa_date:'humandatetime'}
+                                    {/if}
+                                </p>
+                            {elseif ($segment.type === 'category')}
+                                {if $segment.system_id}
+                                    <p>
+                                        [`This list is based on a category transferred from the standard version of the Contacts app.`]
+                                        {sprintf('[`Contact entries in this category are created and updated automatically by the %s app.`]', $segment.app_name|default:'')}
+                                    </p>
+                                {elseif $segment.app_id}
+                                    <p>
+                                        {sprintf('[`This list is based on a category created in the %s app.`]', $segment.app_name|default:'')}
+                                        {sprintf('[`To change settings or delete this category use appropriate tools of the %s app.`]', $segment.app_name|default:'')}
+                                    </p>
+                                {else}
+                                    [`This list consists of selected contacts. To add/remove contacts use “Actions with selected” menu.`]
+                                    <br>[`Created by`] {$segment.contact.name|escape}, {$segment.create_datetime|wa_date:'humandatetime'}
+                                {/if}
+                            {/if}
+                        </div>
+                    {/if}
+
+                </div>
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <div class="c-layout">
+                    <div class="c-column">
+                        {if $segment.id > 0}
+                            <input class="button green crm-button" type="submit" value="[`Save`]">
+                        {else}
+                            <input class="button green crm-button" type="submit" value="[`Create`]">
+                        {/if}
+                        <i class="icon16 loading crm-loading" style="display: none;"></i>
+                        <span style="margin: 0 4px;">[`or`]</span>
+
+                        {* Default close link, need in all cases except one, see below comment *}
+                        <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+
+                        {* This link special treated in double-dialog case, see CRMContactsOperationAddToSegments class *}
+                        <a class="crm-cancel-link" href="javascript:void(0);" style="display: none;">[`cancel`]</a>
+                        <i class="icon16 loading crm-cancel-loading" style="display: none;"></i>
+                    </div>
+                    <div class="c-column middle right">
+                        {* Delete segment link, see CRMContactSegmentEdit *}
+                        {if $segment.id > 0}
+                            <a class="crm-delete-link" href="javascript:void(0);">
+                                <i class="icon16 delete"></i>[`Delete segment`]
+                            </a>
+                        {/if}
+                    </div>
+                </div>
+            </footer>
+
+            <input type="hidden" name="hash" value="{if $segment.type === crmSegmentModel::TYPE_SEARCH}{$segment.search_info.hash}{/if}">
+
+        </form>
+    </div>
+
+    <script>
+        $(function () {
+            new CRMContactSegmentEdit({
+                '$wrapper': $('#{$wrapper_id}'),
+                'segment': {$segment|json_encode},
+                'messages': {
+                    'delete_confirm_title': '[`Delete segment?`]',
+                    'delete_confirm_text': '<p>[`Do you really want to delete this list?`]</p><p>[`Contacts will NOT be deleted.`]</p>',
+                    'delete_button': '[`Delete`]'
+                }
+            });
+        });
+    </script>
+
+</div>

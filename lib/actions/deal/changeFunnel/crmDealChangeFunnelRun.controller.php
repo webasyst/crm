@@ -46,17 +46,30 @@ class crmDealChangeFunnelRunController extends crmJsonController
         $all_stages = $fsm->getAll('id');
 
         foreach ($deals as $d) {
+            $params = [];
             if ($d['funnel_id'] == $funnel_id) {
                 $action_id = 'deal_step';
                 $before = ifempty($all_stages[$d['stage_id']]['name'], $d['stage_id']);
                 $after = $stage['name'];
+                $params = [
+                    'stage_id_before' => ifempty($all_stages[$d['stage_id']]['id'], $d['stage_id']),
+                    'stage_id_after' => $stage['id']
+                ];
             } else {
                 $action_id = 'deal_move';
                 $before = ifempty($all_funnels[$d['funnel_id']]['name'], $d['funnel_id']).'/'
                     .ifempty($all_stages[$d['stage_id']]['name'], $d['stage_id']);
                 $after = $funnel['name'].'/'.$stage['name'];
             }
-            $lm->log($action_id, $d['id'] * -1, null, $before, $after);
+            $lm->log(
+                $action_id,
+                $d['id'] * -1,
+                $d['id'],
+                $before,
+                $after,
+                null,
+                $params
+            );
 
             $data = array(
                 'funnel_id' => $funnel_id,

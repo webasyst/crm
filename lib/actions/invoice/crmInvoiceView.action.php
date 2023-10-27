@@ -10,7 +10,10 @@ abstract class crmInvoiceViewAction extends crmBackendViewAction
     {
         parent::__construct($params);
 
-        if (!waRequest::request('content_only', null, waRequest::TYPE_INT)) {
+        if (
+            !waRequest::request('content_only', null, waRequest::TYPE_INT)
+            && !waRequest::request('iframe', null, waRequest::TYPE_INT)
+        ) {
             $action = new crmInvoiceSidebarAction();
 
             $this->view->assign(array(
@@ -23,8 +26,13 @@ abstract class crmInvoiceViewAction extends crmBackendViewAction
 
     protected function getTemplate()
     {
-        if (!waRequest::request('content_only', null, waRequest::TYPE_INT)) {
-            return 'templates/actions/invoice/Invoice.html';
+        $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
+
+        if (
+            !waRequest::request('content_only', null, waRequest::TYPE_INT)
+            && !waRequest::request('iframe', null, waRequest::TYPE_INT)
+        ) {
+            return 'templates/' . $actions_path . '/invoice/Invoice.html';
         } else {
             return parent::getTemplate();
         }

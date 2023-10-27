@@ -68,6 +68,14 @@ class crmDealContactDeleteController extends crmJsonController
         $action = 'deal_removecontact';
         $this->logAction($action, array('deal_id' => $deal_id), $contact_id);
         $lm = new crmLogModel();
-        $lm->log($action, $deal_id * -1, $contact_id, $contact_name);
+        $lm->log(
+            $action,
+            $deal_id * -1,
+            $deal_id,
+            $contact_name,
+            null,
+            null,
+            ['contact_id' => $contact_id]
+        );
     }
 }

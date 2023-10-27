@@ -2,13 +2,33 @@
 
 class crmContactMergeAction extends crmContactsAction
 {
+    public function preExecute() {
+        if (wa()->whichUI() === '1.3') {
+            parent::preExecute();
+        }
+    }
+
+    public function execute()
+    {
+        parent::execute();
+
+        $iframe = waRequest::get('iframe', 0, waRequest::TYPE_INT);
+        if (!empty($iframe)) {
+            $this->setLayout();
+        }
+        $this->view->assign([
+            'iframe' => $iframe
+        ]);
+    }
+
     public function afterExecute()
     {
         $this->accessDeniedForNotEditRights();
 
         $ids = $this->getIds();
         if (!$ids) {
-            $this->redirect(wa()->getAppUrl('crm') . 'contact/merge/duplicates/');
+            $iframe = waRequest::get('iframe', 0, waRequest::TYPE_INT);
+            $this->redirect(wa()->getAppUrl('crm').'?module=contactMergeDuplicates'.(empty($iframe) ? '' : '&iframe=1'));
             return;
         }
 

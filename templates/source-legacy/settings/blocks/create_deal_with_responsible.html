@@ -1,0 +1,21 @@
+{include file="./helpers.html" inline}
+
+{$class_id = 'js-deal-section'}
+{$wrapper_id = uniqid($class_id)}
+<section class="c-deal-section {$class_id}" id="{$wrapper_id}">
+    <div class="crm-fields">
+        {include file="./create_deal.inc.html"
+            _inc_options=[
+                'id' => $id,
+                'class_id' => $class_id,
+                'wrapper_id' => $wrapper_id,
+                'name' => '[`Funnel`]'
+            ]
+        inline}
+        {include file="./responsible.inc.html"
+            _inc_options=[
+                'name' => '[`Owner`]'
+            ]
+        inline}
+    </div>
+</section>

@@ -1,0 +1,205 @@
+{$wrapper_id = uniqid('crm-dialog-edit-field-wrapper-')}
+
+{function localized_name_input_block locale=[] localized_name_value='' is_main_locale='' editable=''}
+    <div class="value crm-local-input-wrapper">
+        <input type="text"
+               name="name[{$locale.id}]"
+               data-error-id="{$locale.id}"
+               value="{$localized_name_value|escape}"
+               {if $is_main_locale}data-main-locale="1"{/if}
+            {if !$editable}disabled="disabled"{/if}>
+        <span class="errormsg"></span>
+        <span class="ellipsis small crm-name-region">{$locale.name_region}</span>
+    </div>
+{/function}
+
+<div class="crm-dialog-wrapper crm-dialog-edit-field-wrapper" id="{$wrapper_id}">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>{if $field}[`Edit field`]{else}[`New field`]{/if}</h1>
+        </header>
+
+        <form method="post" class="js-field-form-edit" action="{$wa_app_url}?module=settings&action=fieldSave{if $field}&id={$field.id}{/if}">
+            <div class="crm-dialog-content">
+
+                <div class="fields">
+                    <div class="field">
+                        <div class="name">[`Field name`]</div>
+
+                        {localized_name_input_block
+                        locale=$locale
+                        localized_name_value=$field.localized_names[$locale.id]|default:null
+                        editable=!$field || $field.editable
+                        is_main_locale=true
+                        }
+
+                        {$rest_locales = []}
+                        {foreach $other_locales as $loc}
+                            {$localized_name = $field.localized_names[$loc.id]|default:null}
+                            {if $localized_name}
+                                {localized_name_input_block
+                                locale=$loc
+                                localized_name_value=$localized_name
+                                editable=!$field || $field.editable
+                                }
+                            {else}
+                                {$rest_locales[] = $loc}
+                            {/if}
+                        {/foreach}
+
+                        {if $rest_locales}
+                            <div class="value">
+                                <ul class="menu-h dropdown animated crm-add-name-another-language-wrapper">
+                                    <li>
+                                        <a href="javascript:void(0)" class="inline-link"><b><i><span class="small">[`Add name in another language`]</span></i></b><i class="icon10 darr"></i></a>
+                                        <ul class="menu-v">
+                                            {foreach $rest_locales as $loc}
+                                                <li class="crm-add-name-another-language" data-name-region="{$loc.name_region}" data-id="{$loc.id}">
+                                                    <a href="javascript:void(0);"><span class="small">{$loc.name_region}</span></a>
+                                                </li>
+                                            {/foreach}
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        {/if}
+
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">[`Field ID`]</div>
+                    <div class="value">
+                        {if !$field}
+                            <input type="text" name="id_val" data-error-id="id_val" value="">
+                        {else}
+                            <span>{$field.id|escape}</span>
+                        {/if}
+                        <span class="errormsg"></span>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">[`Type of field`]</div>
+                    <div class="value">
+                        {if !$field}
+                            <select name="ftype" class="crm-field-type-select">
+                                {foreach $field_types as $ftype => $ftype_str}
+                                    <option value="{$ftype}">{$ftype_str}</option>
+                                {/foreach}
+                            </select>
+                        {else}
+                            <span>{$field.type_name|default:$field.type}</span>
+                        {/if}
+                    </div>
+                </div>
+
+                <div class="field crm-values-textarea-wrapper" {if !$field || !isset($field.options)}style="display: none;"{/if}>
+                    <div class="name">[`List items`]</div>
+                    <div class="value" data-field-value="Menu">
+                            <textarea name="select_field_value" placeholder="[`Enter each new item on new line`]"
+                                      {if $field && !$field.editable}disabled="disabled"{/if}>{$field.options|default:[]|join:"\n"}</textarea>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="name">[`Applied to`]</div>
+                    <div class="value">
+                        <label>
+                            <input type="checkbox" name="type[]"
+                                   value="person"
+                                   {if !$field || $field.pStatus != 'disabled'}checked="checked"{/if}
+                                {if $field && $field.type === 'Email'}disabled="disabled"{/if}>
+                            [`Person`]
+                        </label>
+                        <br>
+                        <label>
+                            <input type="checkbox" name="type[]"
+                                   value="company"
+                                   {if $field && $field.cStatus != 'disabled'}checked="checked"{/if}>
+                            [`Company`]
+                        </label>
+                        {if !$field || $field.editable}
+                            <br>
+                            <label>
+                                <input type="checkbox" name="type[]"
+                                       value="deal"
+                                       {if $field && !empty($field.deal_mirror)}checked="checked"{/if}>
+                                [`Deal`]
+                            </label>
+                        {/if}
+                    </div>
+                </div>
+
+                {if $field && !empty($field.id) && $field.type == 'Address' && !$field.disabled}
+                    <div class="field">
+                        <div class="name">[`Address fields`]</div>
+                    </div>
+                    <div class="field">
+                        <table class="subfields-list zebra">
+                            <tbody class="ui-sortable">
+                            {foreach $cf->getParameter('fields') as $_sf}
+                                {wa_action app="crm" module="settings" action="FieldFormRow" fid=$_sf->getId() f=$_sf parent='address' css_class='field-row editor-off'}
+                            {/foreach}
+                            {wa_action app="crm" module="settings" action="FieldFormRow" fid='%FID%' f=null parent='address' css_class='hidden field-row template editor-on just-added'}
+                            <tr class="white add-field">
+                                <td class="min-width">&nbsp;</td>
+                                <td class="min-width"><a class="js-add-subfield" href="#"><i class="icon16 add"></i></a>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" class="inline-link js-add-subfield"><b><i>[`Add field`]</i></b></a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                {/if}
+
+                <em class="errormsg crm-common-errors"></em>
+            </div>
+            <footer class="crm-dialog-footer">
+                <div class="crm-actions">
+                    <div class="c-layout">
+                        <div class="c-column">
+                            {if !$field || $field.editable}
+                                <input class="button green crm-button js-save" type="submit" value="[`Save`]">
+                            {else}
+                                <input class="button green crm-button js-save" type="submit" value="[`Save`]" disabled="disabled">
+                            {/if}
+
+                            <span style="margin: 0 4px;">[`or`]</span>
+                            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                        </div>
+                        {if $field}
+                            <div class="c-column middle right">
+                                {if $field.editable}
+                                    <a href="javascript:void(0);" class="red small float-right crm-field-delete">[`Delete field`]</a>
+                                {else}
+                                    {if $field.disabled}
+                                        <a href="javascript:void(0);" class="red small float-right crm-field-enable" style="margin-top: 12px;">[`Enable field`]</a>
+                                    {else}
+                                        <a href="javascript:void(0);" class="red small float-right crm-field-disable" style="margin-top: 12px;">[`Disable field`]</a>
+                                    {/if}
+                                {/if}
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            </footer>
+        </form>
+
+        <script>
+            $(function () {
+                new crmSettingsFieldEdit({
+                    field: {$field|json_encode},
+                    '$wrapper': $('#{$wrapper_id}'),
+                    'locales': {
+                        'delete_subfield_title': '[`Delete field`]',
+                        'delete_subfield_text': '[`This will remove field and all its data from all existing contacts. Are you sure?`]',
+                        'delete_subfield_button': '[`Delete`]',
+                        'field_is_required': {"[`This field is required.`]"|json_encode}
+                    }
+                });
+            });
+        </script>
+    </div>
+</div>

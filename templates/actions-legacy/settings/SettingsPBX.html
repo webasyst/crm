@@ -1,0 +1,99 @@
+<div class="c-settings-pbx-page" id="js-settings-pbx-page">
+    {if empty($pbx_plugins)}
+
+        <h1 class="c-page-header">[`PBX`]</h1>
+        <p>[`No PBX plugins installed.`]</p>
+        <p>
+            {sprintf_wp(
+                'Install and set up <a href="%s">IP telephony integration plugins</a>.',
+                "`$wa_app_url`plugins/"
+            )}
+        </p>
+        <p class="hint">[`Once telephony plugin is properly set up, use this section to configure pop-up notifications on incoming calls with information about calling clients.`]</p>
+
+    {else}
+        <div class="c-page-header c-layout">
+            <div class="c-column">
+                <h1 class="c-page-header">[`PBX`]</h1>
+            </div>
+        </div>
+
+        {if empty($pairs)}
+
+            <p>[`PBX plugins are not configured.`]</p>
+            <p class="hint">[`Once telephony plugin is properly set up, use this section to configure pop-up notifications on incoming calls with information about calling clients.`]</p>
+
+        {else}
+
+            <p>[`For each phone number, select users who will see pop-up notifications on incoming calls to that number, with information about calling clients.`]</p>
+
+            <table class="js-pairs-table light">
+
+                {function name="_renderUser"}
+                    <li class="c-user-wrapper" data-id="{$_user.id|default:""}">
+                        <i class="icon16 userpic20" style="background-image: url({$_user.photo_url_16|default:""}); margin-right: 0;"></i>
+                        <span class="js-name">{$_user.name|escape|default:""}</span>
+                        {if !$not_exist}
+                            <a class="small inline-link c-delete-link js-user-delete" href="javascript:void(0);">
+                                <i class="icon10 close"></i> <b><i>[`delete`]</i></b>
+                            </a>
+                        {/if}
+                    </li>
+                {/function}
+
+                {capture assign="_user_template_html"}{_renderUser _user=[] not_exist=false}{/capture}
+
+                {foreach $pairs as $_pair}
+                    {if empty($_pair.plugin_id) || empty($_pair.number_label)}{continue}{/if}
+
+                    <tr class="c-pair-wrapper" data-plugin-id="{$_pair.plugin_id|escape}" data-number="{$_pair.number|escape}" {if $_pair.not_exist}style="opacity: 0.5"{/if}>
+                        <td class="c-column-icon">
+                            <i class="icon16" title="{$_pair.plugin_name|escape}" style="background-image: url('{$_pair.plugin_icon|default:""}'); background-size: 16px 16px;"></i>
+                        </td>
+                        <td class="c-column-number">
+                            <span class="js-number">{$_pair.number_label|escape}</span>
+                            {if $_pair.not_exist}<div class="c-not-exist">[`Number does not exist`]</div>{/if}
+                        </td>
+                        <td class="c-column-users">
+                            <ul class="menu-v c-users-list js-users-list">
+                                {foreach $_pair.users as $_id => $_user}{_renderUser _user=$_user not_exist=$_pair.not_exist}{/foreach}
+                            </ul>
+
+                            {if $_pair.not_exist}
+                                <div class="c-user-delete-number">
+                                    <a href="javascript:void(0);" class="js-delete-pbx-num inline-link"><i class="icon16 delete"></i><b><i>[`Delete number`]</i></b></a>
+                                </div>
+                            {else}
+                                <div class="c-user-add-wrapper js-user-add-wrapper">
+                                    <div class="c-visible">
+                                        <a href="javascript:void(0);" class="js-show-combobox inline-link"><i class="icon16 add"></i><b><i>[`Add user`]</i></b></a>
+                                    </div>
+                                    <div class="c-hidden">
+                                        <input class="js-autocomplete">
+                                        <span style="margin: 0 4px;">[`or`]</span>
+                                        <a href="javascript:void(0);" class="inline-link js-hide-combobox"><b><i>[`cancel`]</i></b></a>
+                                    </div>
+                                </div>
+                            {/if}
+                        </td>
+                    </tr>
+                {/foreach}
+            </table>
+        {/if}
+
+    {/if}
+
+    <script>
+        ( function($) {
+            new CRMSettingsPbxPage({
+                $wrapper: $("#js-settings-pbx-page"),
+                user_template_html: {$_user_template_html|default:''|json_encode},
+                locales: {
+                    delete_confirm_title: '[`Remove “%name%” from recipients of %number%?`]',
+                    delete_confirm_text: "[`Are you sure?`]",
+                    delete_confirm_button: "[`Delete`]"
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

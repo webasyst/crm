@@ -63,9 +63,11 @@ class crmDealChangeResponsibleRunController extends crmJsonController
             $lm->log(
                 $action_id,
                 $d['id'] * -1,
-                null,
+                $d['id'],
                 $before_user->getName(),
-                $contact->getName()
+                $contact->getName(),
+                null,
+                ['user_id_before' => $before_user->getId(), 'user_id_after' => $contact->getId()]
             );
         }
         $this->logAction($action_id, _w('Mass action'), $contact->getId());

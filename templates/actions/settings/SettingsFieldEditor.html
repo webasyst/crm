@@ -43,7 +43,7 @@
 
 <div class="show-in-readonly" style="margin-right: 40px;">
     {if $f->getParameter('options')}
-    <ul class="menu-v compact small with-icons read-only-items-list hide-when-field-disabled" style="max-width:200px;">
+    <ul class="menu-v menu compact small with-icons read-only-items-list hide-when-field-disabled" style="max-width:200px;">
         {foreach $f->getOptions() as $value => $label}
         <li>{$label|escape}</li>
         {/foreach}
@@ -59,9 +59,15 @@
         <div class="field hidden option template">
             <div class="name insert-option-name-here"></div>
             <div class="value">
-                <ul class="menu-v" style="margin-top:0">
+                <ul class="menu-v menu" style="margin-top:0">
                     <li class="field-checkbox template" style="display:none"><label>
-                        <input type="checkbox">{* JS assigns attrs at dialog creation time: name = option name, value = field id *}
+                        <span class="wa-checkbox"><input type="checkbox">{* JS assigns attrs at dialog creation time: name = option name, value = field id *}
+                            <span>
+                                <span class="icon">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                            </span>
+                        </span>
                         <span class="field-name">{* JS inserts field name here *}</span>
                         <span class="hidden hint">[`Required`]</span>
                     </label></li>

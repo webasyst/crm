@@ -1,0 +1,64 @@
+{function name="_renderRecipient" _contact=[]}
+{strip}
+{if $_contact.contact_id}
+<a href="{$wa_app_url}contact/{$_contact.contact_id}/" target="_top" class="contact-link">
+    <img src="{$_contact.photo}" alt="{$_contact.name|escape}" class="contact-photo">&nbsp;
+    {$_contact.name|escape}&nbsp;
+</a>
+&lt;{$_contact.email|escape}&gt;
+{elseif !$_contact.contact_id && $_contact.name}
+&nbsp;<span style="color: black">{$_contact.name|escape}</span> &lt;{$_contact.email|escape}&gt;
+{else}
+&nbsp;<span style="color: black">{$_contact.email|escape}</span>
+{/if}
+{/strip}
+{/function}
+    {if ifset($recipients)}
+    <div class="c-log-msg-cc">
+        [`Copy`]: <span class="c-log-msg-cc-list">{foreach $recipients as $_recipient}{_renderRecipient _contact=$_recipient}{if !$_recipient@last},{/if}{/foreach}</span>
+    </div>
+    {/if}
+
+<div class="line" id="c-log-msg-body-{$message.id}">
+    {if !empty($message.body_formatted)}
+        {$body_formatted = $message.body_formatted}
+    {elseif !empty($message.body_sanitized)}
+        {$body_formatted = $message.body_sanitized}
+    {else}
+        {$body_formatted = $message.body|escape}
+    {/if}
+
+    {$body_formatted}
+</div>
+
+{if $message.attachments}
+    <div class="line">
+        <ul class="menu-v c-attachments-list">
+            {foreach $message.attachments as $a}
+                <li>
+                    <i class="icon16 attachment" style="margin-right: 6px;"></i>
+                    <a class="js-disable-router" href="?module=file&action=download&id={$a.id}">{$a.name|escape}</a>
+                    <span class="c-size hint">{crmHelper::formatFileSize($a.size)}</span>
+                </li>
+            {/foreach}
+        </ul>
+    </div>
+{/if}
+
+{strip}
+    <div class="c-message-actions">
+        {if $message.transport === "EMAIL"}
+            <a class="small js-reply" href="javascript:void(0);" title="[`Reply`]"><i class="icon16 rotate-left"></i></a>
+            <a class="small js-forward" href="javascript:void(0);" title="[`Forward message`]"><i class="icon16 rotate-right"></i></a>
+        {/if}
+        {if $message.original}
+            <a class="small js-disable-router" href="?module=file&action=downloadEml&id={$message.id}" title="[`Download original`]"><i class="icon16 download"></i></a>
+        {/if}
+        {if $message.transport === "IM"}
+            <a class="small js-reply" href="javascript:void(0);" title="[`Reply`]"><i class="icon16 rotate-left"></i></a>
+        {/if}
+        {if $message.transport === crmMessageModel::TRANSPORT_IM || $message.transport === crmMessageModel::TRANSPORT_EMAIL && $message.conversation_id}
+            <a href="{$wa_app_url}message/conversation/{$message.conversation_id}" class="small js-open-conversation" style="padding: 13px 10px 12px;">[`open conversation`]</a>
+        {/if}
+    </div>
+{/strip}

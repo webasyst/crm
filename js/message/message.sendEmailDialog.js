@@ -37,6 +37,7 @@ var CRMSendEmailDialog = ( function($) {
         that.action = options["action"];
         that.deal_id = options["deal_id"];
         that.is_admin = options["is_admin"];
+        that.iframe = options["iframe"];
 
         that.app_url = options["crm_app_url"] || (that.crm && that.crm.app_url);
 
@@ -83,7 +84,22 @@ var CRMSendEmailDialog = ( function($) {
             that.initSelectDeal();
         }
         //
-        that.dialog.resize();
+        !that.iframe && that.dialog.resize();
+
+        if (that.iframe) {
+            console.log($(window.parent).width());
+            if ($(window.parent).width() < 760) {
+                $('.dialog .dialog-content', window.parent.document).css('padding',  '0 0.75rem')
+            }
+           
+            that.$wrapper.on('click', '.js-close-dialog', function(e){
+                e.preventDefault();
+                $('.dialog iframe', window.parent.document)[0].dispatchEvent(new Event('close'));
+                destroyRedactor(that.$textarea);
+            })
+        }
+
+
     };
 
     CRMSendEmailDialog.prototype.getFilesController = function() {
@@ -93,9 +109,9 @@ var CRMSendEmailDialog = ( function($) {
         if (!$wrapper.length) { return false; }
 
         // DOM
-        var $dropArea = $wrapper.find(".js-drop-area"),
-            $dropText = $wrapper.find(".js-drop-text"),
-            $fileField = $wrapper.find(".js-drop-field"),
+        var $dropArea = that.$wrapper.find(".js-drop-area"),
+           // $dropText = $wrapper.find(".js-drop-text"),
+            $fileField = that.$wrapper.find(".js-drop-field"),
             $uploadList = $wrapper.find(".c-upload-list"),
             file_template_html = that.file_template_html;
 
@@ -152,7 +168,7 @@ var CRMSendEmailDialog = ( function($) {
 
             $uploadList.prepend($uploadItem);
 
-            that.dialog.resize();
+            !that.iframe && that.dialog.resize();
 
             return $uploadItem;
         }
@@ -172,7 +188,6 @@ var CRMSendEmailDialog = ( function($) {
         }
 
         function uploadFiles(data, callback) {
-            var is_locked = false;
 
             var afterUploadFiles = ( callback ? callback : function() {} );
 
@@ -187,10 +202,11 @@ var CRMSendEmailDialog = ( function($) {
             }
 
             function uploadFile(file_item) {
-                is_locked = true;
+                that.is_locked = true;
 
                 var $file = file_item.$file,
                     $bar = $file.find(".js-bar"),
+                    $success_icon = $bar.find(".js-progress-success-icon"),
                     $status = $file.find(".js-status");
 
                 $file.addClass("is-upload");
@@ -198,21 +214,18 @@ var CRMSendEmailDialog = ( function($) {
                 if (that.max_upload_size > file_item.file.size) {
                     request();
                 } else {
-                    $status.addClass("errormsg").text( that.locales["file_size"] );
-                    $file.find(".c-progress-wrapper").remove();
-                    is_locked = false;
-                    setTimeout( function() {
-                        if ($.contains(document, $file[0])) {
-                            $file.remove();
-                            upload_file_count -= 1;
-                            if (upload_file_count <= 0) {
-                                afterUploadFiles();
-                            }
-                        }
-                    }, 2000);
-                }
+                    $status.addClass("errormsg")
+                    $file.removeClass("is-upload");
+                    that.is_locked = false;
+                    var $submitButton = that.$form.find(".js-submit-button"),
+                        $dropField = that.$form.find(".js-drop-field"),
+                        $submitLoader = that.$form.find(".submit-loader");
 
-                //
+                        $submitButton.attr("disabled", false);
+                        $dropField.attr("disabled", false);
+                        $submitLoader.remove();
+                        that.$form.find('button').prop("disabled", false);
+                }
 
                 function request() {
                     var formData = new FormData();
@@ -242,14 +255,16 @@ var CRMSendEmailDialog = ( function($) {
                             var xhr = new window.XMLHttpRequest();
                             xhr.upload.addEventListener("progress", function(event){
                                 if (event.lengthComputable) {
-                                    var percent = parseInt( (event.loaded / event.total) * 100 ),
-                                        color = getColor(percent);
+                                    var percent = parseInt( (event.loaded / event.total) * 100 );
+                                        //color = getColor(percent);
 
-                                    $bar
-                                        .css("background-color", color)
-                                        .width(percent + "%");
+                                    $bar.css('--progress-value', percent);
+                                    if (percent === 100) {
+                                        $bar.css('background', 'transparent');
+                                        $success_icon.show(); 
+                                    }
 
-                                    $status.text(percent + "%");
+                                    //$status.text(percent + "%");
                                 }
                             }, false);
                             return xhr;
@@ -261,7 +276,7 @@ var CRMSendEmailDialog = ( function($) {
                         processData: false,
                         type: 'POST',
                         success: function(data){
-                            $status.text( $status.data("success") );
+                            //$status.text( $status.data("success") );
                             setTimeout( function() {
                                 if ($.contains(document, $file[0])) {
                                     $file.remove();
@@ -273,7 +288,7 @@ var CRMSendEmailDialog = ( function($) {
                             }, 2000);
                         }
                     }).always( function () {
-                        is_locked = false;
+                        that.is_locked = false;
                     });
                 }
 
@@ -294,11 +309,11 @@ var CRMSendEmailDialog = ( function($) {
         function onHover(event) {
             event.preventDefault();
             $dropArea.addClass(hover_class);
-            $dropText.text( $dropText.data("hover") );
+           // $dropText.text( $dropText.data("hover") );
             clearTimeout(hover_timeout);
             hover_timeout = setTimeout( function () {
                 $dropArea.removeClass(hover_class);
-                $dropText.text( $dropText.data("default") );
+               // $dropText.text( $dropText.data("default") );
             }, 100);
         }
 
@@ -312,6 +327,13 @@ var CRMSendEmailDialog = ( function($) {
             $textarea = that.$textarea,
             dialog_height = 0;
 
+            if (!that.iframe) {
+            that.dialog.onClose = function() {
+            //old_close_func(arguments);
+                destroyRedactor($textarea);
+            }
+            };
+
         that.crm.initWYSIWYG($textarea, {
             allowedAttr: [ ['section', 'data-role'] ],
             callbacks: {
@@ -323,31 +345,26 @@ var CRMSendEmailDialog = ( function($) {
             $textarea.redactor('code.set', that.body);
         }
 
-        var old_close_func = that.dialog.onClose;
-
-        that.dialog.onClose = function() {
-            old_close_func(arguments);
-            destroyRedactor($textarea);
-        };
+        //var old_close_func = that.dialog.onClose;
 
         function onChange() {
-            var _dialog_height = that.dialog.$block.height(),
+            var _dialog_height = (that.iframe ? 0 : that.dialog.$block.height()),
                 use_resize = (!dialog_height || dialog_height !== _dialog_height);
 
             if (use_resize) {
                 dialog_height = _dialog_height;
-                that.dialog.resize();
+                !that.iframe && that.dialog.resize();
             }
         }
     };
 
     CRMSendEmailDialog.prototype.initSendMessage = function() {
         var that = this,
-            is_locked = false,
             $to_email = that.$wrapper.find('.js-to-email'),
             $contact_id = that.$to_id,
             new_contact_name = that.$wrapper.find('.js-to-new-name');
 
+        that.is_locked = false;
         that.$form.on("submit", function(event) {
             event.preventDefault();
 
@@ -367,14 +384,17 @@ var CRMSendEmailDialog = ( function($) {
                 return false;
             }
 
-            if (!is_locked) {
-                is_locked = true;
+            if (!that.is_locked) {
+                that.is_locked = true;
 
                 var $submitButton = that.$form.find(".js-submit-button"),
-                    $loading = $('<i class="icon16 loading" style="vertical-align: baseline; margin: 0 4px; position: relative; top: 3px;"></i>');
+                    $dropField = that.$form.find(".js-drop-field"),
+                    $loading = $('<span class="icon size-16 submit-loader"><i class="fas fa-spinner wa-animation-spin custom-mr-4"></i></span>');
 
-                $submitButton.removeClass("blue").attr("disabled", true);
+                $submitButton.attr("disabled", true);
                 $loading.insertAfter($submitButton);
+                $dropField.attr("disabled", true);
+                that.$form.find('button').prop("disabled", true);
 
                 var data = [
                     {
@@ -444,24 +464,25 @@ var CRMSendEmailDialog = ( function($) {
                 .done(function(response) {
                     if (response.status === "ok") {
                         destroyRedactor(that.$textarea);
-                        that.$wrapper.find(".crm-dialog-block").html(that.success_html);
-                        that.dialog.resize();
+                        that.$wrapper.find(".dialog-body").html(that.success_html);
+                        !that.iframe && that.dialog.resize();
 
-                        var auto_close_timer = null,
-                            old_close_func = that.dialog.onClose;
-
-                        that.dialog.onClose = function() {
-                            old_close_func();
-                            auto_close_timer && clearTimeout(auto_close_timer);
-                            auto_close_timer = null;
-                            that.crm.content.reload();
-                        };
+                        var auto_close_timer = null;
+                        // var old_close_func = that.dialog.onClose;
+                        if (!that.iframe) {
+                            that.dialog.onClose = function() {
+                                //old_close_func();
+                                    auto_close_timer && clearTimeout(auto_close_timer);
+                                    auto_close_timer = null;
+                                    that.crm.content.reload();
+                                }
+                            };
 
                         auto_close_timer = setTimeout(function () {
-                            that.dialog.close();
+                            that.iframe ? $('.dialog iframe', window.parent.document)[0].dispatchEvent(new Event('close')) : that.dialog.close();
                         }, 2500);
                     } else {
-                        that.dialog.close();
+                        !that.iframe && that.dialog.close();
 
                         if (!$.isEmptyObject(response.errors)) {
                             onFail(response.errors);
@@ -471,18 +492,17 @@ var CRMSendEmailDialog = ( function($) {
                     }
                 })
                 .always(function () {
-                    is_locked = false;
+                    that.is_locked = false;
                 })
                 .fail(function (response) {
                     onFail({}, response);
-                    that.dialog.close();
+                    !that.iframe && that.dialog.close();
                 });
         }
     };
 
     CRMSendEmailDialog.prototype.initPersonalSettingsDialog = function() {
-        var that = this,
-            is_locked = false;
+        var that = this;
 
         that.$wrapper.on("click", ".js-show-personal-settings-dialog", function(event) {
             event.preventDefault();
@@ -490,14 +510,14 @@ var CRMSendEmailDialog = ( function($) {
         });
 
         function showDialog() {
-            if (!is_locked) {
-                is_locked = true;
+            if (!that.is_locked) {
+                that.is_locked = true;
 
                 var href = that.crm.app_url + "?module=email&action=personalSettingsDialog",
                     data = {};
 
                 $.post(href, data, function(html) {
-                    new CRMDialog({
+                    $.waDialog({
                         html: html,
                         options: {
                             onSave: function(data) {
@@ -508,7 +528,7 @@ var CRMSendEmailDialog = ( function($) {
                         }
                     });
                 }).always( function() {
-                    is_locked = false;
+                    that.is_locked = false;
                 });
             }
         }
@@ -550,8 +570,8 @@ var CRMSendEmailDialog = ( function($) {
                 var item = ui.item,
                     criteria = item.criteria || {},
                     email = criteria.email || item.email,
-                    data = '<i class="icon16 userpic20" style="background-image: url('+ item.photo_url +');"></i> <b>' +
-                                    item.name + '</b> <span style="color: #999;">&lt;' + email + '&gt;</span>';
+                    data = '<i class="icon userpic" style="background-image: url('+ item.photo_url +');"></i>' +
+                                    item.name + ' <span style="color: #999;">&lt;' + email + '&gt;</span>';
                 addToContact(item.id, email, data);
                 return false;
             }
@@ -586,7 +606,7 @@ var CRMSendEmailDialog = ( function($) {
             $deal_field.addClass('hidden');
             $select_funnel.addClass('hidden');
             $deals_list.html($create_new_deal);
-            $visible_link.html('<b><i>'+ that.locales['deal_select'] +'</i></b>');
+            $visible_link.html(''+ that.locales['deal_select'] +'');
             $to_email.val("");
             $to_new_name.val("");
             $to_id.val("").trigger('change');
@@ -673,7 +693,7 @@ var CRMSendEmailDialog = ( function($) {
         }
 
         function addToContact(id, email, html) {
-            $to_name.prepend('<div class="c-email-to-user js-email-to-user">' + html + ' <a title="'+ that.locales["change_recipient"] +'" class="c-remove-to-email js-remove-to-email">x</a></div>');
+            $to_name.prepend('<div class="c-email-to-user js-email-to-user">' + html + ' <a title="'+ that.locales["change_recipient"] +'" class="c-remove-to-email js-remove-to-email text-gray"><i class="icon fas fa-times-circle delete"></i></a></div>');
             $deal_field.removeClass('hidden');
             $to_input.addClass('hidden').val("");
             $to_email.val(email);
@@ -704,7 +724,6 @@ var CRMSendEmailDialog = ( function($) {
     CRMSendEmailDialog.prototype.initEmailCopy = function() {
         var that = this,
             $wrapper = that.$wrapper.find('.email-copy-wrapper'),
-            $link_icon = that.$wrapper.find('.js-email-copy-link-icon'),
             $copy_area = $wrapper.find('.email-copy-area'),
             $copy_text = $copy_area.find('.email-copy-text'),
             $copy_input = $copy_area.find('.email-copy-input'),
@@ -721,7 +740,7 @@ var CRMSendEmailDialog = ( function($) {
             },
             select: function(event, ui) {
                 var item = ui.item,
-                    data = '<i class="icon16 userpic20" style="background-image: url('+ item.photo_url +');"></i><b>'+ item.name +'</b>',
+                    data = '<i class="icon userpic" style="background-image: url('+ item.photo_url +');"></i>'+ item.name,
                     criteria = item.criteria || {};
                 addToCC(item.id, criteria.email || item.email, data);
                 $copy_input.val("");
@@ -738,14 +757,15 @@ var CRMSendEmailDialog = ( function($) {
 
         that.$wrapper.on('click', '.js-email-copy-link, .email-copy-text-collapsed', function(e) {
             e.preventDefault();
+            var $link_icon = that.$wrapper.find('.js-email-copy-link-icon');
             $wrapper.toggleClass('email-copy-wrapper-block');
             if ($wrapper.is(':visible')) {
-                $link_icon.removeClass('rarr').addClass('darr');
+                $link_icon.removeClass('fa-caret-right').addClass('fa-caret-down');
                 $copy_input.focus();
 
                 $wrapper_collapsed.removeClass('email-copy-wrapper-collapsed-block'); // Close collapsed, if openig CC editor
             } else {
-                $link_icon.removeClass('darr').addClass('rarr');
+                $link_icon.removeClass('fa-caret-down').addClass('fa-caret-right');
 
                 if ($('.email-copy-text-collapsed').children().length) {
                     $wrapper_collapsed.addClass('email-copy-wrapper-collapsed-block');
@@ -888,7 +908,7 @@ var CRMSendEmailDialog = ( function($) {
             $(this).addClass('c-empty-deal-hidden');
             $select_funnel.addClass('hidden');
             $deals_list.find('li').removeClass('selected');
-            $visible_link.html('<b><i>'+ that.locales['deal_empty'] +'</i></b>');
+            $visible_link.html(that.locales['deal_empty']);
             deal_id.val('none');
         });
 
@@ -925,7 +945,7 @@ var CRMSendEmailDialog = ( function($) {
                             $deals_list.prepend(renderDeals(deal,response.data.funnels[deal.funnel_id]));
                         });
                         //
-                        $.crm.renderSVG(that.$wrapper);
+                        //$.crm.renderSVG(that.$wrapper);
                     }
                 }, "json");
             }
@@ -945,7 +965,7 @@ var CRMSendEmailDialog = ( function($) {
         });
 
         function renderDeals(deal,funnel) {
-            return '<li><a href="javascript:void(0);" class="js-deal-item" data-deal-id="'+ deal.id +'"><span class="js-text"><i class="icon16 funnel-state svg-icon" data-color="'+ funnel.stages[deal.stage_id].color +'"></i><b><i>'+ deal.name +'</i></b></span></a></li>';
+            return '<li><a href="javascript:void(0);" class="js-deal-item" data-deal-id="'+ deal.id +'"><span class="js-text flexbox"><i class="fas fa-circle funnel-state" style="color: '+ funnel.stages[deal.stage_id].color +'"></i><span class="flexbox">'+ deal.name +'</span></span></a></li>';
         }
     };
 

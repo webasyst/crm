@@ -1,0 +1,237 @@
+{strip}
+
+{$_locale_string = substr($wa->locale(), 0, 2)}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
+
+    {* CSS *}
+    {/strip}{$wa->css()}
+    <link href="{$wa_app_static_url}js-legacy/jquery/jquery-ui.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}js-legacy/timepicker/jquery.timepicker.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}js-legacy/imgareaselect/imgareaselect-default.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_url}wa-content/js/farbtastic/farbtastic.css?v={$wa->version(true)}" rel="stylesheet">
+    <link href="{$wa_app_static_url}js-legacy/crmDialog/crmDialog.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}js-legacy/crmElastic/elastic.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}css-legacy/crm.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_url}wa-content/js/redactor/2/redactor.css?v{$wa->version(true)}" rel="stylesheet">
+    <link href="{$wa_url}wa-content/css/wa/design.css?{$wa->version()}" rel="stylesheet">
+    <link href="{$wa_url}wa-content/js/jquery-plugins/jquery-tagsinput/jquery.tagsinput.css" rel="stylesheet">
+    <link href="{$wa_url}wa-content/js/jquery-plugins/ibutton/jquery.ibutton.min.css" rel="stylesheet">
+
+    {wa_js file="js-legacy/min/vendor.min.js"}
+        {$wa_url}wa-content/js/jquery/jquery-1.11.1.min.js
+        {$wa_url}wa-content/js/jquery/jquery-migrate-1.2.1.min.js
+        {$wa_app_static_url}js-legacy/jquery/jquery-ui.min.js
+        {$wa_url}wa-content/js/jquery-ui/jquery.ui.progressbar.min.js
+        {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
+        {$wa_url}wa-content/js/farbtastic/farbtastic.js
+        {$wa_app_static_url}js-legacy/timepicker/jquery.timepicker.min.js
+        {$wa_app_static_url}js-legacy/imgareaselect/jquery.imgareaselect.min.js
+        {$wa_url}wa-content/js/d3/d3.min.js
+        {$wa_url}wa-content/js/redactor/2/redactor.min.js
+        {$wa_url}wa-content/js/ace/ace.js
+        {$wa_url}wa-content/js/jquery-wa/wa.elrte.ace.js
+        {$wa_url}wa-content/js/jquery-plugins/jquery-tagsinput/jquery.tagsinput.min.js
+        {$wa_url}wa-content/js/jquery-plugins/ibutton/jquery.ibutton.min.js
+        {$wa_url}wa-content/js/jquery-wa/editor2.js
+    {/wa_js}{strip}
+        
+    <script src="{$wa_url}wa-content/js/fontawesome/fontawesome-all.min.js?v={$wa->version(true)}"></script>
+
+    {if $_locale_string != 'en'}
+        <script src="{$wa_app_static_url}js-legacy/jquery/i18n/datepicker-{$_locale_string}.js?v={$wa->version()}"></script>
+        <script src="{$wa_url}wa-content/js/redactor/2/{$_locale_string}.js?v{$wa->version(true)}"></script>
+    {/if}
+
+    {/strip}
+    {wa_js file="js-legacy/min/crm.min.js"}
+        {$wa_app_static_url}js-legacy/jquery.shiftSelectable.js
+        {$wa_app_static_url}js-legacy/crmDialog/crmDialog.js
+        {$wa_app_static_url}js-legacy/crmElastic/elastic.js
+        {$wa_app_static_url}js-legacy/jquery.sticky.js
+        {$wa_app_static_url}js-legacy/crm.js
+        {$wa_app_static_url}js-legacy/crm.autocomplete.js
+        {$wa_app_static_url}js-legacy/sidebar.js
+        {$wa_app_static_url}js-legacy/deal.js
+        {$wa_app_static_url}js-legacy/deal.close.js
+        {$wa_app_static_url}js-legacy/deal.edit.js
+        {$wa_app_static_url}js-legacy/deal.changeClient.js
+        {$wa_app_static_url}js-legacy/deals.js
+        {$wa_app_static_url}js-legacy/deals.export.js
+        {$wa_app_static_url}js-legacy/deal.operation.assignTags.js
+        {$wa_app_static_url}js-legacy/invoice.js
+        {$wa_app_static_url}js-legacy/invoices.js
+        {$wa_app_static_url}js-legacy/reminder.form.edit.js
+        {$wa_app_static_url}js-legacy/reminders.js
+        {$wa_app_static_url}js-legacy/log.live.js
+        {$wa_app_static_url}js-legacy/call.js
+        {$wa_app_static_url}js-legacy/call.associateDealDialog.js
+        {$wa_app_static_url}js-legacy/call.initContactDialog.js
+        {$wa_app_static_url}js-legacy/call.redirectDialog.js
+        {$wa_app_static_url}js-legacy/message/message.deleteLink.mixin.js
+        {$wa_app_static_url}js-legacy/message/message.js
+        {$wa_app_static_url}js-legacy/message/message.conversation.js
+        {$wa_app_static_url}js-legacy/message/messages.operations.js
+        {$wa_app_static_url}js-legacy/message/message.sendEmailDialog.js
+        {$wa_app_static_url}js-legacy/message/message.sendSmsDialog.js
+        {$wa_app_static_url}js-legacy/message/message.imSourceMessageDialog.js
+        {$wa_app_static_url}js-legacy/message/message.imSourceSendMessageDialog.js
+        {$wa_app_static_url}js-legacy/contact.js
+        {$wa_app_static_url}js-legacy/contacts.js
+        {$wa_app_static_url}js-legacy/contacts.sidebar.js
+        {$wa_app_static_url}js-legacy/contacts.operations.js
+        {$wa_app_static_url}js-legacy/contacts.operation.addToSegments.js
+        {$wa_app_static_url}js-legacy/contacts.operation.excludeFromSegment.js
+        {$wa_app_static_url}js-legacy/contacts.operation.export.js
+        {$wa_app_static_url}js-legacy/contacts.operation.assignTags.js
+        {$wa_app_static_url}js-legacy/contacts.operation.assignResponsible.js
+        {$wa_app_static_url}js-legacy/contacts.operation.delete.js
+        {$wa_app_static_url}js-legacy/contact.segment.edit.js
+        {$wa_app_static_url}js-legacy/contact.segment.addContacts.js
+        {$wa_app_static_url}js-legacy/contact.add.js
+        {$wa_app_static_url}js-legacy/contact.import.js
+        {$wa_app_static_url}js-legacy/contact.import.upload.js
+        {$wa_app_static_url}js-legacy/contact.merge.duplicates.js
+        {$wa_app_static_url}js-legacy/contact.merge.js
+        {$wa_app_static_url}js-legacy/contact.merger.js
+        {$wa_app_static_url}js-legacy/report/reports.js
+        {$wa_app_static_url}js-legacy/search/search.js
+        {$wa_app_static_url}js-legacy/search/jquery.combobox.js
+        {$wa_app_static_url}js-legacy/search/period.dialog.js
+        {$wa_app_static_url}js-legacy/settings/settings.js
+        {$wa_app_static_url}js-legacy/settings/companies.js
+        {$wa_app_static_url}js-legacy/settings/currencies.js
+        {$wa_app_static_url}js-legacy/settings/funnel.js
+        {$wa_app_static_url}js-legacy/settings/funnels.js
+        {$wa_app_static_url}js-legacy/settings/field.js
+        {$wa_app_static_url}js-legacy/settings/field.edit.js
+        {$wa_app_static_url}js-legacy/settings/field.edit.subfield.values.js
+        {$wa_app_static_url}js-legacy/settings/field.delete.confirm.js
+        {$wa_app_static_url}js-legacy/settings/source/sources.js
+        {$wa_app_static_url}js-legacy/settings/source/email.js
+        {$wa_app_static_url}js-legacy/settings/source/email.connectionTestBlock.js
+        {$wa_app_static_url}js-legacy/settings/source/im.js
+        {$wa_app_static_url}js-legacy/settings/source/blocks/block.with_contact.js
+        {$wa_app_static_url}js-legacy/settings/source/blocks/block.create_deal.js
+        {$wa_app_static_url}js-legacy/settings/source/blocks/block.responsible.js
+        {$wa_app_static_url}js-legacy/settings/forms.js
+        {$wa_app_static_url}js-legacy/settings/form.js
+        {$wa_app_static_url}js-legacy/settings/form.field.edit.js
+        {$wa_app_static_url}js-legacy/settings/form.paragraph.edit.js
+        {$wa_app_static_url}js-legacy/settings/form.agreement_checkbox.edit.js
+        {$wa_app_static_url}js-legacy/settings/general.js
+        {$wa_app_static_url}js-legacy/settings/personal.js
+        {$wa_app_static_url}js-legacy/settings/notifications.js
+        {$wa_app_static_url}js-legacy/settings/payments.js
+        {$wa_app_static_url}js-legacy/settings/reasons.js
+        {$wa_app_static_url}js-legacy/settings/regions.js
+        {$wa_app_static_url}js-legacy/settings/vaults.js
+        {$wa_app_static_url}js-legacy/settings/messagesBlock.js
+        {$wa_app_static_url}js-legacy/settings/shop.js
+        {$wa_app_static_url}js-legacy/settings/pbx.js
+        {$wa_app_static_url}js-legacy/settings/templates.js
+        {$wa_app_static_url}js-legacy/emailPersonalSettings.js
+    {/wa_js}{strip}
+
+
+    {capture assign="_confirm_template"}{include file="../actions-legacy/DialogConfirm.html"}{/capture}
+
+    {capture assign="_alert_template"}{include file="../actions-legacy/DialogAlert.html"}{/capture}
+
+    {* CRM CORE *}
+    <script>
+        {* need for editor2.js *}
+        var wa_app = "{$wa->app()}";
+
+        ( function($) {
+            {* need for waEditorAceInit *}
+            window.wa_url = {$wa_url|json_encode};
+            {* lang for wysiwyg *}
+            $.crm.lang = {$_locale_string|json_encode};
+            {* need for redirects or url generation *}
+            $.crm.app_url = {$wa_app_url|json_encode};
+            {* need for redirects or url generation *}
+            $.crm.backend_url = {$wa_backend_url|json_encode};
+            {* Controls debug output *}
+            $.crm.is_debug = {$wa->debug()|json_encode};
+            {* for set doc.title *}
+            $.crm.title.pattern = "%s — {$wa->accountName(false)|escape:'javascript'}";
+            {* for confirm dialog *}
+            $.crm.confirm.template = {$_confirm_template|json_encode};
+            {* for alert dialog *}
+            $.crm.alert.template = {$_alert_template|json_encode};
+            {* general locales *}
+            $.crm.locales = {
+                "unsaved_dialog_title": "[`There are unsaved changes`]",
+                "unsaved_dialog_text": "[`Unsaved changes will be lost if you leave this page now. Are you sure?`]",
+                "unsaved_dialog_button": "[`Leave`]",
+                "close": "[`Close`]"
+            };
+            {* Background email worker *}
+            {* 2 minutes *}
+            $.crm.runBackgroundWorker({
+                url: $.crm.app_url + '?module=source&action=emailWorker&background_process=1',
+                delay: 120000
+            });
+
+        })(jQuery);
+    </script>
+
+    {* @event backend_assets.%plugin_id% *}
+    {foreach $backend_assets as $item}
+        {$item}
+    {/foreach}
+
+    {$wa->js()}
+
+</head>
+<body>
+
+<div id="wa">
+    {* HEADER *}
+    {$wa->header()}
+
+    {*APP*}
+    <div id="wa-app">
+        <div class="c-main-wrapper" id="c-main-wrapper">
+
+            {* SIDEBAR *}
+            {if empty($hide_sidebar)}
+                <section class="c-sidebar-wrapper sidebar left200px" id="c-sidebar-wrapper">
+                    {$sidebar}
+                </section>
+            {/if}
+
+            {* CONTENT *}
+            <section class="c-content-wrapper">
+                <div class="c-content-block" id="c-content-block">
+                    {$content}
+                </div>
+                <script>
+                    ( function($) {
+                        /* Main content router */
+                        $.crm.content = new ContentRouter({
+                            $content: $("#c-content-block")
+                        });
+                    })(jQuery);
+                </script>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        ( function($) {
+            $.crm.is_page_loaded = true;
+            $.get('?module=cronjobsStart');
+            })(jQuery);
+    </script>
+</div>
+
+</body>
+</html>
+
+{/strip}

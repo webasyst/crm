@@ -94,7 +94,7 @@ class crmReportInvoicesAction extends crmBackendViewAction
                 "all" => array(
                     "id"           => 'all',
                     "name"         => _wp("All responsibles"),
-                    "photo_url_16" => wa()->getRootUrl()."wa-content/img/userpic20.jpg"
+                    "photo_url_16" => wa()->whichUI() === '2.0' ? wa()->getRootUrl()."wa-content/img/userpic.svg" : wa()->getRootUrl()."wa-content/img/userpic20.jpg"
                 )
             ) + $users;
         if ($user_id != 'all') {

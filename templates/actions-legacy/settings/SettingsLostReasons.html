@@ -1,0 +1,75 @@
+<div class="c-reasons-page" id="c-reasons-page">
+    <form>
+        <h1 class="c-page-header">[`Deal loss reasons`]</h1>
+
+        <ul class="menu-v">
+            <li>
+                <label>
+                    <input type="checkbox" name="lost_reason_require" {if !empty($lost_reason_require)}checked{/if}>
+                    <span>[`Request a reason for lost deals`]</span>
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input class="js-free-field" type="checkbox" name="lost_reason_freeform" {if !empty($lost_reason_freeform)}checked{/if}>
+                    <span>[`Allow entering free-form reasons in addition to predefined options`]</span>
+                </label>
+            </li>
+        </ul>
+
+        <section class="c-reasons-section">
+            {function _renderReason}
+                <li class="c-reason" {if !empty($_reason)}data-id="{$_reason.id}"{/if}>
+                    <i class="icon16 sort c-sort-toggle js-sort-toggle"></i>
+                    <input class="js-name-field" type="text" placeholder="[`Reason name`]" value="{if !empty($_reason)}{$_reason.name|escape}{else}[`New reason`]{/if}" required>
+                    <select class="js-funnel-id-field">
+                        <option value="0">[`All funnels`]</option>
+                        {foreach $_funnels as $_funnel}
+                            <option value="{$_funnel.id}" {if isset($_reason.funnel_id) && $_reason.funnel_id == $_funnel.id}selected{/if}>{$_funnel.name|escape:"html"}</option>
+                        {/foreach}
+                    </select>
+                    <a class="inline-link c-delete-link js-delete-reason" href="javascript:void(0);">
+                        <i class="icon10 delete"></i>
+                        <b><i>[`delete`]</i></b>
+                    </a>
+                </li>
+            {/function}
+
+            {capture assign="_reason_template_html"}{_renderReason _reason=[] _funnels=$funnels}{/capture}
+
+            <ul class="menu-v compact c-reasons-list js-reasons-list">
+                {foreach $reasons as $_reason}
+                    {_renderReason _reason=$_reason _funnels=$funnels}
+                {/foreach}
+            </ul>
+
+            <div class="c-actions">
+                <a class="inline-link js-add-reason" href="javascript:void(0);">
+                    <i class="icon16 add"></i>
+                    <b><i>[`Add reason`]</i></b>
+                </a>
+            </div>
+        </section>
+
+        <div class="c-footer-actions js-footer-actions">
+            <input class="button green js-submit-button" type="submit" value="[`Save`]">
+            <span class="js-hidden-actions" style="display: none;">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a href="{$wa_app_url}settings/lostReasons/" class="inline-link"><b><i>[`cancel`]</i></b></a>
+            </span>
+        </div>
+    </form>
+
+    <script>
+        ( function($) {
+            new CRMReasonsPage({
+                $wrapper: $("#c-reasons-page"),
+                reason_template_html: {$_reason_template_html|json_encode},
+                locales: {
+                    saving: '<span class="c-hint"><i class="icon16 loading"></i> [`saving`]...</span>',
+                    saved: '<span class="c-hint"><i class="icon16 yes"></i> [`saved`]</span>'
+                }
+            });
+        })(jQuery);
+    </script>
+</div>

@@ -1,0 +1,250 @@
+{$_classes = []}
+
+{$_has_big_image = false}
+{$_show_extended_info = false}
+{$_can_change_contact_owner = false}
+{$_can_change_owner = false}
+{$_can_remove_contact = false}
+{$_show_status = false}
+
+{$_role_id = $role_id|default:"CLIENT"}
+
+{if empty($type)}
+    {$_can_remove_contact = true}
+
+{elseif $type == "contact_owner"}
+    {$_classes[] = "is-leader"}
+    {$_has_big_image = true}
+    {$_show_extended_info = true}
+    {$_can_change_contact_owner = true}
+
+{elseif $type == "owner"}
+    {$_show_status = true}
+    {$_can_change_owner = !empty($can_manage_responsible)}
+
+    {if empty($contact.label)}
+        {$contact.label = "[`Owner`]"}
+    {/if}
+
+    {$_role_id = 'USER'}
+
+{elseif $type == "contact_participant"}
+    {$_classes[] = "is-contact-participant"}
+    {$_has_big_image = true}
+    {if $_role_id === 'CLIENT'}
+        {$_show_extended_info = true}
+    {/if}
+    {$_can_remove_contact = true}
+{/if}
+
+{$_counters = $counters|default:[]}
+
+{$can_edit_deal = $can_edit_deal|default:false}
+
+<div class="c-contact {$_classes|join:" "}" data-id="{$contact.id}" data-type="{if !empty($type)}{$type}{/if}" data-role-id="{$_role_id}">
+    <div class="c-layout fixed">
+        <div class="c-column c-image-column">
+            <div class="c-image">
+                {if !empty($_has_big_image)}
+                    <i class="icon50" style="background-image: url({$contact->getPhoto(50)})"></i>
+                {else}
+                    <i class="icon32" style="background-image: url({$contact->getPhoto(32)})"></i>
+                {/if}
+            </div>
+        </div>
+        <div class="c-column middle">
+            <ul class="menu-v compact">
+                <li style="line-height: 16px;">
+                    {* online *}
+                    {if $_show_status}
+                        {$_online = $contact->getStatus()}
+                        {if $_online == "online"}
+                            <i class="icon16 status-green-tiny" title="{$wa->crm->contactName($contact.name)}" style="margin: 0;"></i>
+                        {/if}
+                    {/if}
+
+                    {* name *}
+                    <a class="c-name" href="{$wa_app_url}contact/{$contact.id}/" style="display: inline; padding: 0; margin: 0;">
+                        {$wa->crm->contactName($contact.name)}
+                        {if $contact.id == $wa->userId()}([`me`]){/if}
+                    </a>
+
+                    {if !empty($is_registered)}
+                        <i class="icon10 lock" title="[`Registered client`]" style="margin-top: 4px;"></i>
+                    {/if}
+
+                    {* role *}
+                    {if !empty($contact.label)}<span class="c-role-tag">{$contact.label|escape}</span>{/if}
+
+                    <div>
+                        {if !empty($_counters.order_counters[$contact.id])}
+                            <em class="hint">{$_counters.order_counters[$contact.id]}.</em>
+                        {/if}
+
+                        {if !empty($_counters.deal_counters[$contact.id])}
+                            <em class="hint">{$_counters.deal_counters[$contact.id]}.</em>
+                        {/if}
+                    </div>
+
+                    {* jobtitle *}
+                    {if !empty($contact.jobtitle)}
+                        <div>
+                            <span class="c-jobtitle hint">{$contact.jobtitle|escape}</span>
+                        </div>
+                    {/if}
+
+                    {if $_show_status}
+                        {$_event = $contact->getEvent()}
+                        {if !empty($_event)}
+                            {$_styles = []}
+                            {if !empty($_event.bg_color)}
+                                {$_styles[] = "background: `$_event.bg_color`;"}
+                            {/if}
+                            {if !empty($_event.font_color)}
+                                {$_styles[] = "color: `$_event.font_color`;"}
+                            {/if}
+
+                            <div class="line">
+                                <span class="c-status" {if !empty($_styles)}style="{$_styles|join:""}"{/if} title="">{$_event.summary}</span>
+                            </div>
+                        {/if}
+                    {/if}
+                </li>
+
+                {if !empty($_show_extended_info)}
+
+                    {if $contact.company && (empty($contact_company) || $contact_company != $contact.company)}
+                        {if $contact.company_contact_id && !empty($contacts[$contact.company_contact_id].photo_url_16)}
+                            {$_logo = $contacts[$contact.company_contact_id].photo_url_16}
+                        {else}
+                            {$_logo = "`$wa_url`wa-content/img/company96@2x.jpg"}
+                        {/if}
+
+                        <li>
+                            {if $contact.company_contact_id}
+                                <a class="s-company-name" href="{$wa_app_url}contact/{$contact.company_contact_id}/" style="display: inline; padding: 0; margin: 0;">
+                                    <i class="icon16 userpic20" style="background-image: url({$_logo})"></i>
+                                    {$contact.company|escape}
+                                </a>
+                            {else}
+                                <span class="s-company-name">
+                                    <i class="icon16 userpic20" style="background-image: url({$_logo})"></i>
+                                    {$contact.company|escape}
+                                </span>
+                            {/if}
+                        </li>
+                    {/if}
+
+                    {if !empty($tags[$contact.id])}
+                        {$_tags = $tags[$contact.id]}
+                        {if !empty($_tags)}
+                            {strip}
+                                <li>
+                                    <ul class="c-tags-list">
+                                        {foreach $tags[$contact.id] as $_id => $_name}
+                                            <li>
+                                                <a class="c-tag" href="{$wa_app_url}contact/tag/{$_id}/">{$_name|escape}</a>
+                                            </li>
+                                        {/foreach}
+                                    </ul>
+                                </li>
+                            {/strip}
+                        {/if}
+                    {/if}
+
+                    {$_city = $contact->get('address:city', 'default')}
+                    {if !empty($_city)}
+                        <li>
+                            <span class="c-city">
+                                <i class="icon16 marker"></i> {$_city|escape}
+                            </span>
+                        </li>
+                    {/if}
+
+                    {$_phones_formatted = $contact->get('phone', 'value')}
+                    {$_phones = $contact->get('phone')}
+                    {if !empty($_phones_formatted)}
+                        {foreach $_phones_formatted as $_i => $_p}
+                            {if !empty($_p)}
+                                {$_phone_number = $_phones[$_i]["value"]|default:""|escape}
+                                {$_phone_status = $_phones[$_i]["status"]|default:""}
+                                <li>
+                                    <a class="c-phone{if $is_init_call} js-show-call-dialog{/if}" href="{if $is_init_call}javascript:void(0);{else}tel:+{$_phone_number}{/if}" data-phone="{$_phone_number}" data-id="{$contact.id}" style="display: inline; padding: 0; margin: 0;">
+                                        {if $_phone_status == waContactDataModel::STATUS_CONFIRMED}
+                                            <i class="icon16 phone-confirmed" title="[`Confirmed`]"></i>
+                                        {else}
+                                            <i class="icon16 phone"></i>
+                                        {/if}
+                                        <span class="c-value {if $_phone_status == waContactDataModel::STATUS_CONFIRMED}c-confirmed{/if}">
+                                            {$_p|escape}
+                                        </span>
+                                    </a>
+                                    {if $_phones.$_i.ext}<em class="hint">{_ws($_phones.$_i.ext)}</em>{/if}
+                                    {if $is_sms_configured}
+                                        <a class="js-show-send-sms-dialog" href="javascript:void(0);" style="display: inline;" data-id="{$contact.id}" data-phone="{$_phone_number}"><i class="icon16 sms"></i>[`SMS`]</a>
+                                    {/if}
+                                </li>
+                            {/if}
+                        {/foreach}
+                    {/if}
+
+                    {$_emails = $contact->get('email')}
+                    {if $_emails}
+                        {foreach $_emails as $_e}
+                            {if !empty($_e.value)}
+                                {$_e_status = $_e.status|default:''}
+                                <li>
+                                    <a class="c-email{if $type == "contact_owner" || $type == "contact_participant"} js-show-message-dialog{/if}" href="javascript:void(0);" data-email="{$_e.value|escape}" data-id="{$contact.id}" style="display: inline; padding: 0; margin: 0;">
+                                        {if $_e_status == waContactEmailsModel::STATUS_CONFIRMED}
+                                            <i class="icon16 email-confirmed" title="[`Confirmed`]"></i>
+                                        {else}
+                                            <i class="icon16 email"></i>
+                                        {/if}
+                                        <span class="c-value {if $_e_status == waContactEmailsModel::STATUS_CONFIRMED}c-confirmed{/if}">
+                                            {$_e.value|escape}
+                                        </span>
+                                    </a>
+                                    {if $_e.ext}<em class="hint">{_ws($_e.ext)}</em>{/if}
+                                </li>
+                            {/if}
+                        {/foreach}
+                    {/if}
+                {/if}
+            </ul>
+        </div>
+    </div>
+
+    {if $can_edit_deal}
+        {if !empty($_can_remove_contact) || !empty($_can_change_contact_owner) || !empty($_can_change_owner)}
+            <div class="c-actions-wrapper">
+                {if !empty($_can_change_contact_owner)}
+                    <span class="c-change-toggle js-edit-company-owner">
+                        <i class="icon16 edit"></i>
+                    </span>
+                {/if}
+                {if !empty($_can_change_owner)}
+                    <span class="c-change-toggle js-show-combobox" title="[`Transfer ownership`]">
+                        <i class="icon16 edit"></i>
+                    </span>
+                    <span class="c-change-toggle js-remove-owner" title="[`Remove owner`]">
+                        <i class="icon16 close"></i>
+                    </span>
+                {/if}
+                {if !empty($_can_remove_contact)}
+                    <span class="c-remove-link js-remove-contact" title="[`Remove contact`]">
+                        <i class="icon16 close"></i>
+                    </span>
+                {/if}
+            </div>
+        {/if}
+    {/if}
+
+    {if !empty($_can_change_owner)}
+        <div class="c-owner-toggle js-owner-toggle">
+            <h3 class="c-header">[`Transfer ownership`]</h3>
+            <input class="js-owner-autocomplete" type="text" name="some_name" placeholder="[`User name`]">
+            <span style="margin: 0 4px;">[`or`]</span>
+            <a class="inline-link js-hide-combobox" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+        </div>
+    {/if}
+</div>

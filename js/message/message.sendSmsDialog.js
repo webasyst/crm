@@ -28,6 +28,7 @@ var CRMSendSmsDialog = ( function($) {
         that.crm = getCRM();
         that.action = options["action"];
         that.locales = options["locales"] || {};
+        that.iframe = options["iframe"];
 
         that.app_url = options["crm_app_url"] || (that.crm && that.crm.app_url);
 
@@ -46,7 +47,15 @@ var CRMSendSmsDialog = ( function($) {
         //
         that.initSendMessage();
         //
-        that.dialog.resize();
+        !that.iframe && that.dialog.resize();
+
+        if (that.iframe) {
+            that.$wrapper.on('click', '.js-close-dialog', function(e){
+                e.preventDefault();
+                $('.dialog iframe', window.parent.document)[0].dispatchEvent(new Event('close'));
+                
+            })
+        }
     };
 
     CRMSendSmsDialog.prototype.initSenderSelector = function() {
@@ -75,26 +84,36 @@ var CRMSendSmsDialog = ( function($) {
                 is_locked = true;
 
                 var $submitButton = that.$form.find(".js-submit-button"),
-                    $loading = $('<i class="icon16 loading" style="vertical-align: baseline; margin: 0 4px; position: relative; top: 3px;"></i>');
+                    $loading = $('<span class="icon loading"><i class="fas fa-spinner wa-animation-spin"></i></span>');
 
-                $submitButton.removeClass("blue").attr("disabled", true);
+                $submitButton.attr("disabled", true);
                 $loading.insertAfter($submitButton);
 
                 var href = that.send_action_url,
                     data = that.$form.serializeArray();
 
+                function closeIframeDialog() {
+                    $('.dialog iframe', window.parent.document)[0].dispatchEvent(new Event('close'));
+                }
+
+
                 var onFail = function(log_object) {
 
                     var title = that.locales.send_error_title || "Send error",
                         text = that.locales.send_error_text || "Can't send sms message",
-                        $error_html = $(that.error_html).find('.js-error-text').text(text).end();
-
-
-                    $.crm.alert.show({
-                        title: title,
-                        text: $error_html.get(0).outerHTML,
-                        button_class: 'red'
-                    });
+                        $error_html = $(that.error_html).find('.js-error-text').text(text);
+                        //console.log($error_html.html())
+                        if (that.iframe) {
+                            that.$wrapper.find(".dialog-body").html(that.error_html).find('.js-error-text').text(text);
+                        }
+                    if (!that.iframe) {
+                        $.crm.alert.show({
+                            title: title,
+                            text: $error_html.get(0).outerHTML,
+                            button_class: 'red'
+                        });
+                    }
+              
 
                     if (log_object) {
                         console.error(log_object);
@@ -103,12 +122,12 @@ var CRMSendSmsDialog = ( function($) {
 
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
-                        that.$wrapper.find(".crm-dialog-block").html(that.success_html);
-                        that.dialog.resize();
+                        that.$wrapper.find(".dialog-body").html(that.success_html);
+                        !that.iframe && that.dialog.resize();
 
                         var auto_close_timer = null,
                             old_close_func = that.dialog.onClose;
-                        that.dialog.onClose = function() {
+                            that.dialog.onClose = function() {
                             old_close_func();
                             auto_close_timer && clearTimeout(auto_close_timer);
                             auto_close_timer = null;
@@ -116,18 +135,18 @@ var CRMSendSmsDialog = ( function($) {
                         };
 
                         auto_close_timer = setTimeout(function () {
-                            that.dialog.close();
+                            that.iframe ? closeIframeDialog() : that.dialog.close();
                         }, 2500);
                     } else {
-                        that.dialog.close();
+                        !that.iframe && that.dialog.close();
                         onFail(response.errors || {});
                     }
                 }, "json")
                     .always( function () {
                         is_locked = false;
                     })
-                    .error(function (response) {
-                        that.dialog.close();
+                    .fail(function (response) {
+                        !that.iframe && that.dialog.close();
                         onFail(response);
                     });
             }

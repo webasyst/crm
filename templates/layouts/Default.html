@@ -17,13 +17,14 @@
     <link href="{$wa_app_static_url}js/crmDialog/crmDialog.css?v={$wa->version()}" rel="stylesheet">
     <link href="{$wa_app_static_url}js/crmElastic/elastic.css?v={$wa->version()}" rel="stylesheet">
     <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}css/crm2.css?v={$wa->version()}" rel="stylesheet">
     <link href="{$wa_url}wa-content/js/redactor/2/redactor.css?v{$wa->version(true)}" rel="stylesheet">
-    <link href="{$wa_url}wa-content/css/wa/design.css?{$wa->version()}" rel="stylesheet">
+    <!--<link href="{$wa_url}wa-content/css/wa/design.css?{$wa->version()}" rel="stylesheet">-->
     <link href="{$wa_url}wa-content/js/jquery-plugins/jquery-tagsinput/jquery.tagsinput.css" rel="stylesheet">
     <link href="{$wa_url}wa-content/js/jquery-plugins/ibutton/jquery.ibutton.min.css" rel="stylesheet">
 
     {wa_js file="js/min/vendor.min.js"}
-        {$wa_url}wa-content/js/jquery/jquery-1.11.1.min.js
+        {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
         {$wa_url}wa-content/js/jquery/jquery-migrate-1.2.1.min.js
         {$wa_app_static_url}js/jquery/jquery-ui.min.js
         {$wa_url}wa-content/js/jquery-ui/jquery.ui.progressbar.min.js
@@ -35,12 +36,16 @@
         {$wa_url}wa-content/js/redactor/2/redactor.min.js
         {$wa_url}wa-content/js/ace/ace.js
         {$wa_url}wa-content/js/jquery-wa/wa.elrte.ace.js
+        {$wa_url}wa-content/js/jquery-wa/wa.js
         {$wa_url}wa-content/js/jquery-plugins/jquery-tagsinput/jquery.tagsinput.min.js
         {$wa_url}wa-content/js/jquery-plugins/ibutton/jquery.ibutton.min.js
         {$wa_url}wa-content/js/jquery-wa/editor2.js
     {/wa_js}{strip}
-        
+
+
+    
     <script src="{$wa_url}wa-content/js/fontawesome/fontawesome-all.min.js?v={$wa->version(true)}"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@0.4.0/dist/tgs-player.js"></script>
 
     {if $_locale_string != 'en'}
         <script src="{$wa_app_static_url}js/jquery/i18n/datepicker-{$_locale_string}.js?v={$wa->version()}"></script>
@@ -124,10 +129,10 @@
         {$wa_app_static_url}js/settings/form.paragraph.edit.js
         {$wa_app_static_url}js/settings/form.agreement_checkbox.edit.js
         {$wa_app_static_url}js/settings/general.js
+        {$wa_app_static_url}js/settings/personal.js
         {$wa_app_static_url}js/settings/notifications.js
         {$wa_app_static_url}js/settings/payments.js
         {$wa_app_static_url}js/settings/reasons.js
-        {$wa_app_static_url}js/settings/regions.js
         {$wa_app_static_url}js/settings/vaults.js
         {$wa_app_static_url}js/settings/messagesBlock.js
         {$wa_app_static_url}js/settings/shop.js
@@ -168,7 +173,8 @@
                 "unsaved_dialog_title": "[`There are unsaved changes`]",
                 "unsaved_dialog_text": "[`Unsaved changes will be lost if you leave this page now. Are you sure?`]",
                 "unsaved_dialog_button": "[`Leave`]",
-                "close": "[`Close`]"
+                "close": "[`Close`]",
+                "cancel": "[`Cancel`]"
             };
             {* Background email worker *}
             {* 2 minutes *}
@@ -187,6 +193,33 @@
 
     {$wa->js()}
 
+    <script>
+        window.appState = {
+            baseUrl: '{$wa_app_url}',
+            apiEndpoint: '{$wa_url}api.php',
+            token: '{$spa_api_token}',
+            lang: '{$spa_locale}',
+            can_init_call: {$can_init_call},
+            is_sms_configured: {$is_sms_configured},
+            is_email_configured: {$is_email_configured},
+            contact_list_columns: {$contact_list_columns},
+            contact_list_sort: {$contact_list_sort},
+            deal_list_filter: {$deal_list_filter},
+            deal_list_sort: {$deal_list_sort},
+            user: {
+                id: {$wa->user()->getID()},
+                name: '{$wa->user()->getName()|escape:"javascript"}',
+                userpic: '{$wa->user()->getPhoto(64)}'
+            },
+            counters: {
+                contacts: {
+                    {* update in sidebar template *}
+                    total: 0
+                }
+            }
+        };
+    </script>
+
 </head>
 <body>
 
@@ -195,38 +228,45 @@
     {$wa->header()}
 
     {*APP*}
-    <div id="wa-app">
-        <div class="c-main-wrapper" id="c-main-wrapper">
+    <div id="wa-app" class="flexbox wrap-mobile">
 
             {* SIDEBAR *}
             {if empty($hide_sidebar)}
-                <section class="c-sidebar-wrapper sidebar left200px" id="c-sidebar-wrapper">
+            <div class="sidebar-main-wrapper">
+                <div class="sidebar rail width-adaptive overflow-visible flexbox mobile-friendly c-sidebar-wrapper" id="c-sidebar-wrapper">
                     {$sidebar}
-                </section>
+                </div>
+            </div>
             {/if}
 
             {* CONTENT *}
-            <section class="c-content-wrapper">
-                <div class="c-content-block" id="c-content-block">
-                    {$content}
-                </div>
-                <script>
-                    ( function($) {
-                        /* Main content router */
-                        $.crm.content = new ContentRouter({
-                            $content: $("#c-content-block")
-                        });
-                    })(jQuery);
-                </script>
-            </section>
-        </div>
+            <div class="content blank c-shadowed-content">
+                <div id="c-spaContainer-block"></div>
+                <div id="c-content-block">{$content}</div>
+            </div>
+            <script>
+                (function($) {
+                    const $content = $("#c-content-block");
+                    const $spaContainer = $('#c-spaContainer-block');
+
+                    /* Teleport SPA to the correct block */
+                    if ($content.find("#app").length)
+                    $content.contents().detach().appendTo($spaContainer);
+
+                    /* Main content router */
+                    $.crm.content = new ContentRouter({
+                        $content: $content,
+                        $spaContainer: $spaContainer
+                    });
+                })(jQuery);
+            </script>
     </div>
 
     <script>
         ( function($) {
             $.crm.is_page_loaded = true;
             $.get('?module=cronjobsStart');
-            })(jQuery);
+        })(jQuery);
     </script>
 </div>
 

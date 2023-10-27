@@ -6,12 +6,12 @@
 {/if}
 
 <div class="c-payments-page s-settings-form" id="c-payments-page">
-
-    <h1 class="c-page-header">[`Payment`]</h1>
+    <header class="c-companies-header">
+        <h1 class="c-page-header">[`Payment`]</h1>
 
     {strip}
-    <header class="c-companies-header">
-        <div class="c-tabs-wrapper">
+  
+        <div class="c-tabs-wrapper flexbox wrap middle full-width">
             <div class="c-companies-wrapper">
                 <ul class="tabs c-companies-list">
                     {foreach $companies as $_company}
@@ -23,38 +23,38 @@
                         </li>
                     {/foreach}
                 </ul>
-                <span class="c-action right" title="[`Next`]"></span>
-                <span class="c-action left" title="[`Before`]"></span>
+                <span class="c-action right" title="[`Next`]"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
+                <span class="c-action left" title="[`Before`]"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
             </div>
 
             <div class="c-add-wrapper">
-                <a href="{$wa_app_url}settings/companies/new/"><i class="icon16 add"></i> [`Add new company`]</a>
+                <a class="button small rounded light-gray" href="{$wa_app_url}settings/companies/new/"><i class="fas fa-plus-circle text-green add"></i> [`Add new company`]</a>
             </div>
         </div>
     </header>
     {/strip}
 
     {if $company}
-        <section class="c-payment-section block">
+        <section class="fields c-payment-section block">
 
             {* HEADER *}
             <header class="c-payments-header c-layout">
                 <div class="c-column middle">
                 </div>
-                <div class="c-column right">
-                    <ul class="menu-h with-icons dropdown">
-                        <li>
-                            <a href="javascript:void();" class="inline-link js-action"><i class="icon16 add"></i><b><i>[`Add payment option`]</i></b><i class="icon16 darr"></i></a>
-                            <ul class="menu-v with-icons right js-plugins-dropdown">
+                <div class="c-column right custom-pt-16 custom-pb-4">
+                    <div class="dropdown">
+                        <button class="dropdown-toggle button yellow js-action" type="button"><i class="fas fa-plus-circle add"></i> [`Add payment option`]</button>
+                        <div class="dropdown-body">
+                            <ul class="menu js-plugins-dropdown">
                                 {foreach $plugins as $_id => $plugin}
                                     {$_is_installed = in_array($_id, $_installed_plugins)}
 
                                     <li style="{if $_is_installed}display: none;{/if}" data-plugin="{$_id}">
                                         <a class="js-add-payment" href="{$wa_app_url}settings/payment/add/{$company.id}/{$_id}/">
                                             {if empty($plugin.icon.16)}
-                                                {crmHelper::getIcon('ss payment-bw')}
+                                            <i class="fas fa-money-check-alt icon" style="font-size: 1rem"></i>
                                             {else}
-                                                {crmHelper::getIcon($plugin.icon.16)}
+                                            <span class="icon middle size-16"><img src="{$plugin.icon.16}" alt=""></span>
                                             {/if}
                                             {$plugin.name|escape}
                                         </a>
@@ -66,60 +66,62 @@
                                         <a href="{$wa_backend_url}installer/#/plugins/wa-plugins/payment/"
                                            style="text-align: center;" id="c-browse-plugins">[`Browse payment plugins...`]</a>
                                         <br>
-                                        <span class="hint align-center">[`Multiple instances of every payment option with custom settings can be created.`]</span>
+                                        <div class="hint align-center custom-m-8">[`Multiple instances of every payment option with custom settings can be created.`]</div>
                                     </li>
                                 {/if}
                             </ul>
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
                 </div>
             </header>
 
             {* TABLE *}
-            <div class="c-payments-list">
-                <table class="zebra js-payments-table">
-                    <tbody>
-                    {foreach $instances as $id => $plugin}
-                        {$_edit_url = "{$wa_app_url}settings/payment/{$id}/?company={$_company.id}"}
+            <div class="fields-group c-payments-list">
+                <div class="table-scrollable-x">
+                    <table class="js-payments-table">
+                        <tbody>
+                        {foreach $instances as $id => $plugin}
+                            {$_edit_url = "{$wa_app_url}settings/payment/{$id}/?company={$_company.id}"}
 
-                        <tr data-id="{$id}">
-                            <td class="min-width"><i class="icon16 sort js-sort-toggle"></i></td>
-                            <td class="min-width">
-                                {if !empty($plugin.logo)}
-                                    <img src="{$plugin.logo}" class="s-payment-shipping-logo">
-                                {elseif !empty($plugin.img)}
-                                    <img src="{$plugin.img}" class="s-payment-shipping-logo">
-                                {/if}
-                            </td>
-                            <td>
-                                <h3 class="large{if empty($plugin.status)} gray{/if}">
-                                    <span class="js-name">{$plugin.name|escape}</span>
-                                    {if empty($plugin.status)}([`disabled`]){/if}
-                                </h3>
-                                <p class="hint">{strip_tags($plugin.description)}</p>
-                            </td>
-                            <td>
-                                <ul class="menu-h with-icons" style="text-align:right;">
-                                    <li>
-                                        <a href="{$_edit_url}" class="nowrap"><i class="icon16 settings"></i>[`Configure`]</a>
-                                    </li>
-                                    <li>
-                                        <a class="nowrap js-action js-delete-payment" href="javascript:void(0);" data-payment-id="{$id}" data-plugin="{$plugin.plugin|escape}">
-                                            <i class="icon16 delete"></i>[`Delete`]
-                                        </a>
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>
-                    {foreachelse}
-                        <tr>
-                            <td>
-                                <em class="gray">[`No payment options are defined.`]</em>
-                            </td>
-                        </tr>
-                    {/foreach}
-                    </tbody>
-                </table>
+                            <tr data-id="{$id}">
+                                <td class="min-width"><i class="fas fa-grip-vertical text-gray sort js-sort-toggle"></i></td>
+                                <td class="min-width">
+                                    {if !empty($plugin.logo)}
+                                        <img src="{$plugin.logo}" class="s-payment-shipping-logo">
+                                    {elseif !empty($plugin.img)}
+                                        <img src="{$plugin.img}" class="s-payment-shipping-logo">
+                                    {/if}
+                                </td>
+                                <td>
+                                    <h3 class="custom-mb-0 large{if empty($plugin.status)} gray{/if}">
+                                        <span class="js-name">{$plugin.name|escape}</span>
+                                        {if empty($plugin.status)}([`disabled`]){/if}
+                                    </h3>
+                                    <p class="hint">{strip_tags($plugin.description)}</p>
+                                </td>
+                                <td>
+                                    <div class="flexbox space-16 full-width with-icons" style="text-align:right;">
+                                        <div>
+                                            <a href="{$_edit_url}" class="button smaller rounded light-gray nowrap"><i class="fas fa-cog text-blue settings"></i> [`Configure`]</a>
+                                        </div>
+                                        <div>
+                                            <a class="button smaller rounded light-gray nowrap js-action js-delete-payment" href="javascript:void(0);" data-payment-id="{$id}" data-plugin="{$plugin.plugin|escape}">
+                                                <i class="fas fa-trash-alt text-red delete"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {foreachelse}
+                            <tr>
+                                <td>
+                                    <em class="gray">[`No payment options are defined.`]</em>
+                                </td>
+                            </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -133,7 +135,8 @@
                     locales: {
                         confirm_delete_title: "[`Delete %payment`]",
                         confirm_delete_text: "[`This will permanently delete this payment option. Are you sure?`]",
-                        confirm_delete_button: "[`Delete`]"
+                        confirm_delete_button: "[`Delete`]",
+                        confirm_cancel_button: " [`Cancel`]"
                     }
                 });
 

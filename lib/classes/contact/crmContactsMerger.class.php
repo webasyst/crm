@@ -297,7 +297,7 @@ class crmContactsMerger
      */
     protected function setCredentials($master, $credentials)
     {
-        if ($master['password']) {
+        if ($master['password'] || empty($credentials)) {
             return;
         }
 
@@ -434,6 +434,7 @@ class crmContactsMerger
          * @var waContactField[] $data_fields
          */
         $data_fields = waContactFields::getAll('enabled');
+        $contact_model = new waContactModel();
 
         // just in case through away password
         if (isset($data_fields['password'])) {
@@ -443,19 +444,34 @@ class crmContactsMerger
         // loop
         foreach ($contacts_data as $id => $info) {
 
-            foreach ($data_fields as $f => $field) {
-                if (empty($info[$f])) {
+            foreach ($info as $f => $val) {
+                if (empty($val)) {
                     continue;
                 }
+                $field = ifempty($data_fields, $f, null);
 
-                if ($field->isMulti()) {
-                    $this->addMultiFieldValues($master, $f, $info[$f]);
+                if ($field && $field->isMulti()) {
+                    $this->addMultiFieldValues($master, $f, $val);
                     $check_duplicates[$f] = true;
-                } else {
-                    // Field does not allow multiple values.
-                    // Set value if no value yet.
+                } else if ($field) {
+                    // Known contact field does not allow multiple values
                     if (!$master[$f]) {
-                        $master[$f] = $info[$f];
+                        $master[$f] = $val;
+                    }
+                } else if ($f != '_online_status' && !$contact_model->fieldExists($f)) {
+                    // unknown contact field from wa_contact_data
+                    if (is_array($val)) {
+                        if (isset($val['value'])) {
+                            $val = $val['value'];
+                        } else {
+                            $val = reset($val);
+                            if (is_array($val) && isset($val['value'])) {
+                                $val = $val['value'];
+                            }
+                        }
+                    }
+                    if (is_scalar($val) && !$master[$f]) {
+                        $master[$f] = $val;
                     }
                 }
             }

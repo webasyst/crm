@@ -1,18 +1,23 @@
 <?php
 
-class crmMessageConversationIdAction extends crmBackendViewAction
+class crmMessageConversationIdAction extends crmBackendViewAction //crmContactIdAction
 {
-    /**
-     * @var array
-     */
+    const MESSAGE_PER_PAGE = 10;
+
+    /** @var array */
     protected $conversation;
 
-    public function execute()
+    public function execute($contact_id = null)
     {
         // before exceptions
         wa('crm')->getConfig()->setLastVisitedUrl('message/');
-        
-        $conversation_id = waRequest::param('id', null, waRequest::TYPE_INT);
+
+        $old_message_id = waRequest::param('old_message_id', waRequest::get('old_message_id', null, waRequest::TYPE_INT), waRequest::TYPE_INT);
+        $conversation_id = waRequest::param('id', waRequest::get('id', null, waRequest::TYPE_INT), waRequest::TYPE_INT);
+        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
+
+        $is_ui13 = (wa()->whichUI('crm') === '1.3');
+
         $conversation = $this->getConversation($conversation_id);
         if (!$conversation_id || !$conversation) {
             $this->notFound(_w('Conversation not found'));
@@ -27,9 +32,21 @@ class crmMessageConversationIdAction extends crmBackendViewAction
             $deal = null;
         }
 
-        $messages = $mm->select('*')->where('conversation_id=?', (int)$conversation_id)->order('create_datetime')->fetchAll('id');
-
-        $contact_ids = $message_ids = array();
+        if ($is_ui13) {
+            $messages = $mm->select('*')
+                ->where('conversation_id = ?', (int) $conversation_id)
+                ->order('create_datetime')
+                ->fetchAll('id');
+        } else {
+            $query = $mm->select('*')->where('conversation_id = ?', (int) $conversation_id);
+            if ($old_message_id > 0) {
+                $query->where('id < ?', $old_message_id);
+            }
+            $messages = $query->order('create_datetime DESC')->limit(self::MESSAGE_PER_PAGE)->fetchAll('id');
+            ksort($messages);
+        }
+        $contact_ids = [];
+        $message_ids = [];
         $last_id = null;
 
         // collect source IDs for IN EMAIL messages
@@ -41,8 +58,8 @@ class crmMessageConversationIdAction extends crmBackendViewAction
         }
         $source_emails = $this->getSourceEmailAddresses($source_ids);
 
+        $messages = $mm->getExtMessages($messages);
         foreach ($messages as &$m) {
-            $m = $mm->getMessage($m);
             $message_ids[$m['id']] = $m['id'];
             if ($m['contact_id']) {
                 $contact_ids[$m['contact_id']] = intval($m['contact_id']);
@@ -79,23 +96,25 @@ class crmMessageConversationIdAction extends crmBackendViewAction
         $contacts = $this->getContacts($contact_ids);
 
         // Add userpic for recipients
-        foreach ($recipients as $r) {
-            if ($conversation['type'] == 'EMAIL' && is_numeric($r['destination'])) {
-                continue;
-            }
-            if (isset($contacts[$r['contact_id']])) {
-                $r['photo'] = $contacts[$r['contact_id']]['photo_url_16'];
-            } else {
-                $r['photo'] = null;
-            }
-            if ($r['type'] == 'TO') { // && $r['destination'] == $messages[$r['message_id']]['to']
-                $messages[$r['message_id']]['recipients']['to'][$r['destination']] = $r;
-            } elseif ($r['type'] == 'CC') {
-                $messages[$r['message_id']]['recipients']['cc'][$r['destination']] = $r;
-            } elseif ($r['type'] == 'BCC') {
-                $messages[$r['message_id']]['recipients']['bcc'][$r['destination']] = $r;
-            } elseif ($r['type'] == 'FROM') {
-                $messages[$r['message_id']]['recipients']['from'][$r['destination']] = $r;
+        if ($is_ui13) {
+            foreach ($recipients as $r) {
+                if ($conversation['type'] == crmMessageModel::TRANSPORT_EMAIL && is_numeric($r['destination'])) {
+                    continue;
+                }
+                if (isset($contacts[$r['contact_id']])) {
+                    $r['photo'] = $contacts[$r['contact_id']]['photo_url_16'];
+                } else {
+                    $r['photo'] = null;
+                }
+                if ($r['type'] == 'TO') { // && $r['destination'] == $messages[$r['message_id']]['to']
+                    $messages[$r['message_id']]['recipients']['to'][$r['destination']] = $r;
+                } elseif ($r['type'] == 'CC') {
+                    $messages[$r['message_id']]['recipients']['cc'][$r['destination']] = $r;
+                } elseif ($r['type'] == 'BCC') {
+                    $messages[$r['message_id']]['recipients']['bcc'][$r['destination']] = $r;
+                } elseif ($r['type'] == 'FROM') {
+                    $messages[$r['message_id']]['recipients']['from'][$r['destination']] = $r;
+                }
             }
         }
 
@@ -111,10 +130,12 @@ class crmMessageConversationIdAction extends crmBackendViewAction
 
         $can_edit_conversation = $this->getCrmRights()->canEditConversation($conversation);
 
+        $messages = $this->workupMessages($conversation, $messages);
         $this->view->assign(array(
             'recipients'      => [],
             'participants'    => [],
-            'messages'        => $this->workupMessages($conversation, $messages),
+            'iframe'          => $iframe,
+            'messages'        => $messages,
             'conversation'    => $conversation,
             'deal'            => $deal,
             'clean_data'      => ifempty($clean_data),
@@ -130,12 +151,37 @@ class crmMessageConversationIdAction extends crmBackendViewAction
         ));
 
         if ($conversation['type'] == crmConversationModel::TYPE_EMAIL) {
+            $source_is_disabled = true;
+            foreach ($active_sources as $active_source) {
+                if ($active_source['type'] == crmConversationModel::TYPE_EMAIL) {
+                    $source_is_disabled = false;
+                    break;
+                }
+            }
             $this->view->assign(array(
+                'subject' => $this->getSubject(),
                 'body' => $this->getBody(),
+                'source_is_disabled' => $source_is_disabled
             ));
+        } else {
+            $this->view->assign([
+                'source_is_disabled' => !in_array($conversation['source_id'], array_column($active_sources, 'id'))
+            ]);
         }
 
-        wa('crm')->getConfig()->setLastVisitedUrl('message/');
+        if (!$is_ui13) {
+            /*
+            if ($page == 1) {
+                parent::execute($conversation['contact_id']);
+            }
+            */
+            $extras = array_column($messages, 'extras');
+            if (!empty($extras) && !empty(array_column($extras, 'locations'))) {
+                try {
+                    $this->view->assign('map', wa()->getMap());
+                } catch (waException $ex) {}
+            }
+        }
     }
 
     protected function getConversation($conversation_id)
@@ -165,19 +211,23 @@ class crmMessageConversationIdAction extends crmBackendViewAction
     {
         $conversation['icon_url'] = null;
         $conversation['icon'] = 'exclamation';
+        $conversation['icon_fa'] = 'exclamation-circle';
         $conversation['transport_name'] = _w('Unknown');
 
         if ($conversation['type'] == crmMessageModel::TRANSPORT_EMAIL) {
             $conversation['icon'] = 'email';
+            $conversation['icon_fa'] = 'envelope';
             $conversation['transport_name'] = 'Email';
         } elseif ($conversation['type'] == crmMessageModel::TRANSPORT_SMS) {
             $conversation['icon'] = 'mobile';
+            $conversation['icon_fa'] = 'mobile';
             $conversation['transport_name'] = 'SMS';
         }
         if ($conversation['source_id']) {
             $source_helper = crmSourceHelper::factory(crmSource::factory($conversation['source_id']));
             $res = $source_helper->workupConversation($conversation);
             $conversation = $res ? $res : $conversation;
+            $conversation['features'] = $source_helper->getFeatures();
         }
 
         // In the last message, we store only the last incoming message.
@@ -200,8 +250,13 @@ class crmMessageConversationIdAction extends crmBackendViewAction
             return $messages;
         }
         $source_helper = crmSourceHelper::factory(crmSource::factory($conversation['source_id']));
-        $res = $source_helper->workupMessagesInConversation($conversation, $messages);
-        $messages = $res ? $res : $messages;
+        if (wa()->whichUI() === '1.3') {
+            $res = $source_helper->workupMessagesInConversation($conversation, $messages);
+            $messages = $res ? $res : $messages;
+        } else {
+            $res = $source_helper->normalazeMessagesExtras($messages);
+            $messages = $res ? $res : $messages;
+        }
         return $messages;
     }
 
@@ -284,6 +339,18 @@ class crmMessageConversationIdAction extends crmBackendViewAction
         );
     }
 
+    protected function getSubject()
+    {
+        $message = $this->conversation['conversation_last_message'];
+        $subject = trim(ifset($message, 'subject', ''));
+        $prefix  = substr($subject, 0, 3);
+        if (strtolower($prefix) !== 're:') {
+            $subject = "Re: $subject";
+        }
+
+        return $subject;
+    }
+    
     protected function getBody()
     {
         $message = $this->conversation['conversation_last_message'];
@@ -295,7 +362,7 @@ class crmMessageConversationIdAction extends crmBackendViewAction
         } catch (waException $e) {
             $name = _w('Deleted contact');
         }
-        $text = _w('<p><br></p></b><br><section data-role="c-email-signature">:SIGNATURE:</section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>');
+        $text = _w('<section data-role="c-email-signature"><p><br></p><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>');
         $text = str_replace(':MESSAGE_TIME:', wa_date('datetime', $create_datetime), $text);
         $text = str_replace(':CLIENT:', $name, $text);
         $text = str_replace(':BODY:', $body, $text);

@@ -6,10 +6,10 @@ var CRMPageMessagesOperations = (function ($) {
         // DOM
         that.$wrapper = options["$wrapper"];
         that.$bar = that.$wrapper.find(".js-operations-wrapper");
-        that.$list = that.$wrapper.find('#js-messages-table');
-        that.$list_header = that.$list.find('.js-list-header');
-        that.$checkbox_all = that.$wrapper.find('.js-checkbox-all');
-        that.$content = that.$wrapper.find(".js-messages-page");
+        //that.$list = that.$wrapper.find('#js-messages-table');
+        //that.$list_header = that.$list.find('.js-list-header');
+        //that.$checkbox_all = that.$wrapper.find('.js-checkbox-all');
+        that.$content = that.$wrapper.find(".js-messages-conversation-list");
 
         // VARS
         that.page = options.page || 1;
@@ -44,13 +44,13 @@ var CRMPageMessagesOperations = (function ($) {
     CRMPageMessagesOperations.prototype.initClass = function () {
         var that = this;
         //
-        that.initCheckboxAll();
+        //that.initCheckboxAll();
         //
-        that.initOperations();
+        //that.initOperations();
         //
-        that.initItemCheckbox();
+        //that.initItemCheckbox();
 
-        that.initElasticHeader();
+       // that.initElasticHeader();
     };
 
     CRMPageMessagesOperations.prototype.initElasticHeader = function() {

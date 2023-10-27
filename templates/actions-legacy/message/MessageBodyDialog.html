@@ -1,0 +1,326 @@
+{strip}
+    {function name="_renderFromContact" _contact=[]}
+        {if isset($_contact.id)}
+            <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" class="c-contact-link">
+                <img src="{$_contact.photo_url_16}" alt="{$_contact.name|escape}" class="c-contact-photo">&nbsp;
+                {$_contact.name|escape}
+            </a>
+            {if !empty($message.from)}
+                <span style="color: #999">&lt;{$message.from|escape}&gt;</span>
+            {/if}
+        {else}
+            {$_contact.name|escape}&nbsp;
+            {if !empty($message.from)}
+                <span style="color: #999">&lt;{$message.from|escape}&gt;</span>
+            {/if}
+        {/if}
+    {/function}
+
+    {function name="_renderToRecipient" recipient=[]}
+        {if $recipient.contact_id > 0}
+            <a href="{$wa_app_url}contact/{$recipient.contact_id}/" target="_top" class="c-contact-link">
+                <img src="{$recipient.photo_url_16}" alt="{$recipient.name|escape}" class="c-contact-photo">&nbsp;
+                {$recipient.name|escape}
+            </a>
+            <span style="color: #999">&lt;{$recipient.destination|escape}&gt;</span>
+        {else}
+            {$recipient.name|escape}&nbsp;
+            <span style="color: #999">&lt;{$recipient.destination|escape}&gt;</span>
+        {/if}
+    {/function}
+
+    {function name="_renderRecipient" _contact=[]}
+        {if $_contact.contact_id}
+            <a href="{$wa_app_url}contact/{$_contact.contact_id}/" target="_top" class="c-contact-link">
+                <img src="{$_contact.photo}" alt="{$_contact.name|escape}" class="c-contact-photo">&nbsp;
+                {$_contact.name|escape}
+            </a>
+            {if isset($_contact.destination)}
+                <span style="color: #999">&lt;{$_contact.destination|escape}&gt;</span>
+            {/if}
+        {elseif !$_contact.contact_id && $_contact.name}
+            {$_contact.name|escape}&nbsp;
+            {if isset($_contact.destination)}
+                <span style="color: #999">&lt;{$_contact.destination|escape}&gt;</span>
+            {/if}
+        {elseif isset($_contact.email)}
+            <span style="color: black">{$_contact.destination|escape}</span>
+        {/if}
+    {/function}
+
+    <div class="crm-dialog-wrapper c-message-show-body-dialog" id="js-message-show-body-dialog">
+        <div class="crm-dialog-background"></div>
+        <div class="crm-dialog-block">
+            <header class="crm-dialog-header">
+                <h2>{strip_tags($message.subject)|escape}</h2>
+
+                <div class="c-message-actions">
+                    {if !empty($message.create_datetime)}
+                        <span class="c-text-item">
+                            {if $message.direction === "IN"}
+                                <i class="icon16 import" title="[`incoming`]"></i>
+                            {else}
+                                <i class="icon16 message-out" title="[`outgoing`]"></i>
+                            {/if}
+                            {$message.create_datetime|wa_datetime}
+                        </span>
+                    {/if}
+
+                    {if $message.direction === crmMessageModel::DIRECTION_IN}
+                        <a class="js-message-reply" href="javascript:void(0);" title="[`Reply`]"
+                            data-message-id="{$message.id|escape}"><i class="icon16 rotate-left"></i></a>
+
+
+                        {if $message.transport == crmMessageModel::TRANSPORT_EMAIL}
+                            <a class="js-message-forward" href="javascript:void(0);" title="[`Forward message`]"
+                               data-message-id="{$message.id|escape}"><i class="icon16 rotate-right"></i></a>
+                        {/if}
+
+                    {/if}
+
+                    {if $message.original}
+                        <a class="js-disable-router" href="?module=file&action=downloadEml&id={$message.id}"
+                            title="[`Download original`]"><i class="icon16 download"></i></a>
+                    {/if}
+                    
+                    {if $message.transport === crmMessageModel::TRANSPORT_IM || $message.transport === crmMessageModel::TRANSPORT_EMAIL && $message.conversation_id}
+                        <a href="{$wa_app_url}message/conversation/{$message.conversation_id}" class="small" style="padding: 13px 10px 12px;">[`open conversation`]</a>
+                    {/if}
+                </div>
+            </header>
+            <div class="crm-dialog-content">
+                <div class="c-message-info">
+                    <div class="js-message-data">
+                        <div class="field">
+                            <div class="name">[`From`]</div>
+                            <div class="value">{_renderFromContact _contact=$from}</div>
+                        </div>
+
+                        {if !empty($message.to)}
+                            <div class="field">
+                                <div class="name">[`To`]</div>
+                                <div class="value">
+                                    <ul class="c-to-list">
+                                        {foreach $to_list as $_recipient}
+                                            <li>{_renderToRecipient recipient=$_recipient|default:0}</li>
+                                        {/foreach}
+                                    </ul>
+                                </div>
+                            </div>
+                        {/if}
+
+                        {if !empty($recipients)}
+                            <div class="field">
+                                <div class="name">[`Copy`]</div>
+                                <div class="value">
+                                    <ul class="c-copy-list">
+                                        {foreach $recipients as $_recipient}
+                                            {if $_recipient.type !== crmMessageRecipientsModel::TYPE_TO}
+                                                <li>{_renderRecipient _contact=$_recipient}</li>
+                                            {/if}
+                                        {/foreach}
+                                    </ul>
+                                </div>
+                            </div>
+                        {/if}
+
+                        {if !empty($deal)}
+                            <div class="field">
+                                <div class="name">[`Deal`]</div>
+                                <div class="value">
+                                    {if !empty($deal.id)}
+                                        {$_funnel = $funnel[$deal.funnel_id]|default:null}
+                                        {if $_funnel}
+                                            {$_stage = $_funnel.stages[$deal.stage_id]|default:null}
+                                            {if $_stage}
+                                                <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                                <a href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
+                                            {else}
+                                                [`Stage deleted`]
+                                            {/if}
+                                        {else}
+                                            [`Funnel deleted`]
+                                        {/if}
+                                    {elseif !empty($deal.name)}
+                                        <span style="color: #999;">{strip_tags($deal.name)|escape}</span>
+                                    {/if}
+                                </div>
+                            </div>
+                        {elseif !empty($clean_data)}
+                            <div class="field">
+                                <div class="name" style="padding-top: 3px;">[`Deal`]</div>
+                                <div class="value">
+                                    <span class="js-created-deal hidden" style="padding-top: 3px;"></span>
+                                    <form class="deal-form">
+                                        {$deal = $clean_data.deal}
+                                        {$funnels = $clean_data.funnels}
+                                        {$stages = $clean_data.stages}
+                                        <div class="c-deal-value js-deal-value">
+                                            <span class="c-deal-name c-deal-name-hidden js-deal-name">
+                                                <input class="c-deal-name-input js-deal-name-input" type="text" name="deal[name]" autocomplete="off" placeholder="[`Type a deal name`]" />
+                                                <a title="[`Cancel creation`]" class="c-remove-deal js-remove-deal">x</a>
+                                            </span>
+                                            <div class="c-select-deal js-select-deal">
+                                                <ul class="menu-h dropdown js-deals-dropdown">
+                                                    <li>
+                                                        <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                                            <span class="js-text"><b><i>[`Empty`]</i></b></span>&nbsp;<i class="icon10 darr"></i>
+                                                        </a>
+                                                        <ul class="menu-v with-icons js-deals-list">
+                                                            <li class="js-create-new-deal">
+                                                                <a href="javascript:void(0);">
+                                                                    <span class="js-text"><b><i>[`Create new`]</i></b></span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="c-empty-deal c-empty-deal-hidden js-empty-deal">
+                                                                <a href="javascript:void(0);">
+                                                                    <span class="js-text"><b><i>[`Empty`]</i></b></span>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                        <input class="js-field js-deal-id" name="deal[id]" type="hidden" value="none">
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                            <div class="c-select-funnel hidden js-select-funnel-wrapper">
+                                                {$_active_funnel = reset($funnels)}
+                                                {if !empty($deal.funnel_id) && !empty($funnels[$deal.funnel_id])}
+                                                    {$_active_funnel = $funnels[$deal.funnel_id]}
+                                                {/if}
+
+                                                <div class="c-funnels-list" id="c-funnels-list">
+                                                    <ul class="menu-h dropdown">
+                                                        <li>
+                                                            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                                                <span class="js-text">
+                                                                    {if !empty($_active_funnel.color)}
+                                                                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_funnel.color}"></i>
+                                                                    {/if}
+                                                                    <b><i class="js-name">{$_active_funnel.name|escape}</i></b>
+                                                                </span>&nbsp<i class="icon10 darr"></i>
+                                                            </a>
+                                                            <ul class="menu-v with-icons">
+                                                                {strip}
+                                                                    {foreach $funnels as $_funnel}
+                                                                        <li class="{if $deal.funnel_id == $_funnel.id}selected{/if}">
+                                                                            <a href="javascript:void(0);" data-id="{$_funnel.id|escape}">
+                                                                                {if !empty($_funnel.color)}
+                                                                                    <i class="icon16 funnel-state svg-icon" data-color="{$_funnel.color|escape}"></i>
+                                                                                {/if}
+                                                                                <b><i>{$_funnel.name|escape}</i></b>
+                                                                            </a>
+                                                                        </li>
+                                                                    {/foreach}
+                                                                {/strip}
+                                                            </ul>
+                                                            <input class="js-field js-select-deal-funnel" name="deal[funnel_id]" type="hidden" value="{$_active_funnel.id|escape}">
+                                                        </li>
+                                                    </ul>
+
+                                                    <script>
+                                                        ( function($) {
+                                                            var $wrapper = $("#c-funnels-list"),
+                                                                $visibleLink = $wrapper.find(".js-visible-link"),
+                                                                $field = $wrapper.find(".js-field"),
+                                                                $menu = $wrapper.find(".menu-v");
+
+                                                            $menu.on("click", "a", function () {
+                                                                var $link = $(this);
+                                                                $visibleLink.find(".js-text").html($link.html());
+
+                                                                $menu.find(".selected").removeClass("selected");
+                                                                $link.closest("li").addClass("selected");
+
+                                                                $menu.hide();
+                                                                setTimeout( function() {
+                                                                    $menu.removeAttr("style");
+                                                                }, 200);
+
+                                                                var id = $link.data("id");
+                                                                $field.val(id).trigger("change");
+                                                            });
+
+                                                            $.crm.renderSVG($wrapper);
+
+                                                        })(jQuery);
+                                                    </script>
+                                                </div>
+
+                                                <div class="js-select-stage-wrapper" style="display: inline-block; vertical-align: top; padding-top: 3px;">
+                                                    {include file="templates/actions-legacy/deal/DealStagesByFunnel.html" selected_stage=$deal.stage_id inline}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <i class="icon16 disk js-save-deal hidden" style="cursor: pointer; margin-top: 2px; margin-left: -13px;"></i>
+                                    </form>
+                                </div>
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+
+                <div class="c-message-body js-message-body">
+                    <p>{$message.body_sanitized}</p>
+                    {if $message.attachments}
+                        <div class="c-attachments-block">
+                            <ul class="menu-v c-attachments-list">
+                                {foreach $message.attachments as $a}
+                                    <li>
+                                        <i class="icon16 attachment" style="margin-right: 8px;"></i>
+                                        <a class="js-disable-router" href="?module=file&action=download&id={$a.id}">{$a.name|escape}</a><span class="c-size hint">{crmHelper::formatFileSize($a.size)}</span>
+                                    </li>
+                                {/foreach}
+                            </ul>
+                        </div>
+                    {/if}
+                </div>
+
+                <div class="js-errors-place"></div>
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <div class="c-layout">
+                    <div class="c-column">
+                        <div class="c-footer-actions js-dialog-footer">
+                            <input class="button js-close-dialog" type="button" value="[`Close`]">
+                        </div>
+                    </div>
+                    {if $is_admin}
+                    <div class="c-column middle right">
+                        <a href="javascript:void(0);" class="inline-link js-delete-message" style="color:red;"><b><i>[`Delete message`]</i></b></a>
+                    </div>
+                    {/if}
+            </footer>
+        </div>
+
+        <script>
+            (function ($) {
+
+                var $dialog = $("#js-message-show-body-dialog");
+
+                new CRMMessagesPage({
+                    $wrapper: $dialog,
+                    app_url: "{$wa_app_url}",
+                    is_dialog: true
+                });
+
+                {if $is_admin}
+                    new CRMMessageBodyDialog({
+                        $wrapper: $dialog,
+                        contact_id: {if $message.direction === 'IN'}{$from.id|default:0}{else}{$to.id|default:0}{/if},
+                        message: {$message|json_encode},
+                        locales: {
+                            delete: "[`Delete`]",
+                            delete_message: "[`Delete message`]",
+                            delete_message_text: "{$delete_message_text}",
+                            deal_empty: "[`Empty`]",
+                            deal_create: "[`Create deal`]",
+                            deal_add: "[`Add deal`]"
+                        }
+                    });
+                {/if}
+            })(jQuery);
+        </script>
+    </div>
+{/strip}

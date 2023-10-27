@@ -118,10 +118,11 @@ class crmLogLiveAction extends crmBackendViewAction
             'selected_filter_action' => $selected_filter_action,
             'can_manage_invoices'    => wa()->getUser()->getRights('crm', 'manage_invoices'),
         ));
+        $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
         if (!$list_params['max_id']) {
-            $this->setTemplate('templates/actions/log/LogLive.html');
+            $this->setTemplate('templates/' . $actions_path . '/log/LogLive.html');
         } else {
-            $this->setTemplate('templates/actions/log/LogLiveTimeline.html');
+            $this->setTemplate('templates/' . $actions_path . '/log/LogLiveTimeline.html');
         }
         wa('crm')->getConfig()->setLastVisitedUrl('live/');
     }

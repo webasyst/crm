@@ -1,0 +1,124 @@
+{$_title = "[`Message sources`]"}
+{if $source_type === 'email'}
+    {$_title = "[`Email`]"}
+{elseif $source_type === 'im'}
+    {$_title = "[`Messengers`]"}
+{/if}
+
+{function render_sources}
+    {if !empty($sources)}
+        <ul class="menu-v c-sources-list">
+            {foreach $sources as $_source}
+                <li class="c-source {if $_source.disabled}c-is-disabled{/if}" data-id="{$_source.id}">
+                    <div class="c-layout inline">
+                        <div class="c-column">
+                            <div class="c-source-details">
+                                <a href="{if !empty($_source.backend_url)}{$_source.backend_url}{else}{$wa_app_url}settings/message-source/{$_source.id}/{/if}">
+                                    <img class="{if $_source.type === crmSourceModel::TYPE_IM}c-source-im-icon{else}c-source-icon{/if}" src="{$_source.icon_url}"><span class="c-source-name">{$_source.name|escape}</span>
+                                </a>
+
+                                {if !empty($_source.funnel)}
+                                    {$funnel_name = $_source.funnel.name|escape}
+                                    {$funnel_color = $_source.funnel.color}
+                                    <i class="icon16 funnel-state svg-icon" data-color="{$funnel_color}" title="{$funnel_name}"></i>
+
+                                    {if !empty($_source.stage)}
+                                        {$stage_id = $_source.stage.id}
+                                        {$stage_name = $_source.stage.name|escape}
+                                        {$stage_color = $_source.funnel.stages[$stage_id].color}
+                                        <span class="c-state" style="background: {$stage_color}">{$stage_name}</span>
+                                    {/if}
+                                {/if}
+                                <span class="c-hidden">([`disabled`])</span>
+                            </div>
+                        </div>
+                        <div class="c-column">
+                        <span class="c-disable-link-wrapper">
+                            <a class="js-c-disable-link c-disable-link" href="javascript:void(0);">{if $_source.disabled}[`enable`]{else}[`disable`]{/if}</a>
+                            <i class="icon16 loading c-loading" style="display: none"></i>
+                        </span>
+                        </div>
+                    </div>
+                </li>
+            {/foreach}
+        </ul>
+    {else}
+        {if $source_type === 'email'}
+            <div class="block">
+                <p>[`Set up an email address to receive messages and deal requests.`]</p>
+            </div>
+        {elseif $source_type === 'im'}
+            <div class="block">
+                <p>[`Set up connection to instant messengers to receive deal requests and messages.`]</p>
+            </div>
+        {/if}
+    {/if}
+{/function}
+
+{function render_plugin_source_links type=''}
+    {foreach $plugins as $plugin}
+        {if $type == $plugin.source.type}
+            <li><a href="{$wa_app_url}settings/message-source/{$plugin.id}/"><i class="icon16 add"></i> {sprintf('[`Add %s source`]', $plugin.name|escape)}</a></li>
+        {/if}
+    {/foreach}
+{/function}
+
+<div class="c-settings-sources-page" id="c-settings-sources-page">
+    <h1 class="c-page-header">{$_title}</h1>
+    <div class="">
+        <div class="block c-source-lists">
+            {if $source_type === 'email'}
+            {render_sources}
+            <div class="block" data-type="email">
+                <ul class="menu-v">
+                    <li><a href="{$wa_app_url}settings/message-source/email/"><i class="icon16 add"></i> [`Add email source`]</a></li>
+                    {render_plugin_source_links type=crmSourceModel::TYPE_EMAIL}
+                </ul>
+
+                {$_cli_ok = crmEmailSourceWorker::isCliOk()}
+
+                {if !$_cli_ok}
+                    <div style="margin-top: 20px;">
+                        {include file="./SettingsCronEmailSource.inc.html" inline}
+                    </div>
+                {/if}
+            </div>
+            {elseif $source_type === 'im'}
+            <div class="block" data-type="im">
+                {render_sources}
+
+                {$cnt = 0}
+                {foreach $plugins as $plugin}
+                    {if $plugin.source.type == crmSourceModel::TYPE_IM}
+                        {$cnt = $cnt + 1}
+                    {/if}
+                {/foreach}
+                {if $cnt > 0}
+                    <ul class="menu-v">
+                        {render_plugin_source_links type=crmSourceModel::TYPE_IM}
+                    </ul>
+                {else}
+                    <div class="block">
+                        <a href="{$wa_app_url}plugins/">[`Install messenger integration plugins.`]</a>
+                    </div>
+                {/if}
+            </div>
+            {/if}
+        </div>
+
+    </div>
+
+    <script>
+        (function ($) {
+            $.crm.title.set("{$_title}");
+            new CRMSettingsSources({
+                $wrapper: $("#c-settings-sources-page"),
+                messages: {
+                    'disable': '[`disable`]',
+                    'enable': '[`enable`]'
+                },
+                source_type: '{$source_type|escape}'
+            });
+        })(jQuery);
+    </script>
+</div>

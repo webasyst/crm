@@ -17,6 +17,7 @@ var CRMCallInitContactDialog = ( function($) {
         that.call_id = 0;
         that.call_ready = options['call_ready'];
         that.locales = options['locales'];
+        that.iframe = options["iframe"];
 
         // DYNAMIC VARS
 
@@ -33,6 +34,14 @@ var CRMCallInitContactDialog = ( function($) {
         } else {
             that.selectExtensionNumber();
             that.submit();
+        }
+
+        if (that.iframe) {
+            that.$wrapper.on('click', '.js-close-dialog', function(e){
+                e.preventDefault();
+                $('.dialog iframe', window.parent.document)[0].dispatchEvent(new Event('close'));
+                
+            })
         }
     };
 
@@ -81,7 +90,7 @@ var CRMCallInitContactDialog = ( function($) {
     CRMCallInitContactDialog.prototype.initCall = function() {
         var that = this;
 
-        var $loading = $('<i class="icon16 loading" style="vertical-align: middle; margin-left: 6px;"></i>'),
+        var $loading = $('<span class="icon size-16 loading"><i class="fas fa-spinner fa-spin"></i></span>'),
             href = $.crm.app_url + "?module=call&action=initNew",
             data = that.$form.serializeArray();
 
@@ -98,7 +107,7 @@ var CRMCallInitContactDialog = ( function($) {
                 }
             })
             .fail(function () {
-                that.dialog.close();
+                that.iframe? $('.dialog iframe', window.parent.document)[0].dispatchEvent(new Event('close')) : that.dialog.close();
             })
             .always(function () {
                 that.$call_button.prop('disabled', false);
@@ -113,7 +122,7 @@ var CRMCallInitContactDialog = ( function($) {
         var that = this,
             call_id = that.call_id,
             $close_button = '<input class="button js-close-dialog" type="submit" value="'+ that.locales['Close'] +'">',
-            $status_pending = '<div class="c-call-pending">'+ that.locales['call_pending'] +'<i class="icon16 loading" style="vertical-align: middle; margin-left: 6px;"></i></div>',
+            $status_pending = '<div class="c-call-pending">'+ that.locales['call_pending'] +'<span class="icon size-16 loading custom-pl-8"><i class="fas fa-spinner fa-spin"></i></span></div>',
             $status_connected = '<div style="color: #00ff00;">'+ that.locales['call_connected'] +'</div>',
             $status_finished = '<div style="color: #5159c3;">'+ that.locales['call_finished'] +'</div>';
 
@@ -133,8 +142,14 @@ var CRMCallInitContactDialog = ( function($) {
                         clearInterval(intervalID);
                         that.$content.html($status_finished);
                         setTimeout(function () {
-                            that.dialog.close();
-                            $.crm.content.reload();
+                            if (that.iframe) {
+                                $('.dialog iframe', window.parent.document)[0].dispatchEvent(new Event('close'))
+                            } 
+                            else {
+                                that.dialog.close();
+                                $.crm.content.reload();
+                            }
+
                         }, 3000);
                         console.log(res.errors.message);
                     }
@@ -147,8 +162,13 @@ var CRMCallInitContactDialog = ( function($) {
                         that.$content.html($status_finished);
                         clearInterval(intervalID);
                         setTimeout(function () {
-                            that.dialog.close();
-                            $.crm.content.reload();
+                            if (that.iframe) {
+                                $('.dialog iframe', window.parent.document)[0].dispatchEvent(new Event('close'))
+                            } 
+                            else {
+                                that.dialog.close();
+                                $.crm.content.reload();
+                            }
                         }, 3000);
                     }
                 } catch (e) {

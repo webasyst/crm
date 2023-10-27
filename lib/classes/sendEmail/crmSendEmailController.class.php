@@ -11,9 +11,10 @@ abstract class crmSendEmailController extends crmJsonController
                 'errors' => $errors
             );
         }
-
         $email_message = $this->formEmailMessage($data);
-
+        if (empty($email_message['conversation_id'])) {
+            $email_message['conversation_id'] = $this->getConversationId();
+        }
         $send_result = $this->sendEmailMessage($email_message);
         $id = $send_result['id'];
 
@@ -80,7 +81,6 @@ abstract class crmSendEmailController extends crmJsonController
         if (!($contact instanceof waContact)) {
             $contact = null;
         }
-
         $to = null;
         if (!empty($msg['email'])) {
             $to = $msg['email'];
@@ -96,7 +96,6 @@ abstract class crmSendEmailController extends crmJsonController
                 )
             );
         }
-
         $from = waMail::getDefaultFrom();
         if (!empty($msg['from'])) {
             $from = $msg['from'];
@@ -109,7 +108,6 @@ abstract class crmSendEmailController extends crmJsonController
             foreach ((array)ifset($msg['reply_to']) as $reply_to_email => $reply_to_name) {
                 $m->addReplyTo($reply_to_email, $reply_to_name);
             }
-
             // Attachments
             foreach ((array)ifset($msg['attachments']) as $file) {
                 $m->addAttachment($file['path'], $file['name']);
@@ -128,7 +126,7 @@ abstract class crmSendEmailController extends crmJsonController
             }
 
             // To
-            $m->setTo($to, $msg['contact']->getName());
+            $m->setTo($to, $contact->getName());
 
             // Cc
             $msg['cc'] = (array)ifset($msg['cc']);
@@ -142,24 +140,20 @@ abstract class crmSendEmailController extends crmJsonController
             } else {
                 $m->generateId();
             }
-
             // In-reply-to
             if (!empty($msg['in_reply_to'])) {
                 $m->getHeaders()->addIdHeader('In-Reply-To', $msg['in_reply_to']);
             }
-
             // References
             if (!empty($msg['references']) && is_array($msg['references'])) {
                 $m->getHeaders()->addIdHeader('References', $msg['references']);
             }
-            
-            $success = (bool)$m->send();
-
+            $success = (bool) $m->send();
             if (!$success) {
                 return array(
                     'id' => 0,
                     'details' => array(
-                        'error_msg' => ''   // unknown and unreachable from this point error :( Explore mail.log
+                        'error_msg' => 'Unknown error. Explore mail.log'   // unknown and unreachable from this point error :( Explore mail.log
                     )
                 );
             }
@@ -186,7 +180,7 @@ abstract class crmSendEmailController extends crmJsonController
         $id = $mm->fix(array(
             'transport'  => crmMessageModel::TRANSPORT_EMAIL,
             'direction'  => crmMessageModel::DIRECTION_OUT,
-            'contact_id' => $msg['contact']->getId(),
+            'contact_id' => $contact->getId(),
             'subject'    => $msg['subject'],
             'body'       => $msg['body'],
             'from'       => $from,
@@ -204,9 +198,9 @@ abstract class crmSendEmailController extends crmJsonController
         );
 
         $recipient = array(
-            'contact_id' => $msg['contact']->getId(),
+            'contact_id' => $contact->getId(),
             'email'      => $to,
-            'name'       => $msg['contact']->getName(),
+            'name'       => $contact->getName(),
         );
 
         $this->getMessageRecipientsModel()->setEmailRecipient($id, $creator, crmMessageRecipientsModel::TYPE_FROM);
@@ -214,7 +208,7 @@ abstract class crmSendEmailController extends crmJsonController
         $this->getMessageRecipientsModel()->setEmailRecipients($id, $msg['cc'], crmMessageRecipientsModel::TYPE_CC);
 
         // Add conversation
-        $this->addConversation($id);
+        $this->addConversation($id, ifset($msg, 'conversation_id', null));
 
         return array(
             'id' => $id,
@@ -373,6 +367,20 @@ abstract class crmSendEmailController extends crmJsonController
         return $cc;
     }
 
+    /**
+     * @return int|null
+     */
+    protected function getConversationId()
+    {
+        $conversation_id = $this->getParameter('conversation_id');
+        if (!$conversation_id && $message_id = (int) $this->getParameter('message_id')) {
+            $_message = $this->getMessageModel()->getById($message_id);
+            $conversation_id = (int) ifset($_message, 'conversation_id', $conversation_id);
+        }
+
+        return $conversation_id;
+    }
+
     protected function getContactNames($contact_ids)
     {
         $contact_ids = crmHelper::toIntArray($contact_ids);
@@ -416,7 +424,7 @@ abstract class crmSendEmailController extends crmJsonController
         return ifset($source['email'], false);
     }
 
-    protected function addConversation($message_id)
+    protected function addConversation($message_id, $conversation_id = null)
     {
         $message = $this->getMessageModel()->getMessage($message_id);
         if (!$message) {
@@ -429,59 +437,63 @@ abstract class crmSendEmailController extends crmJsonController
             $deal = $this->getDealModel()->getDeal($message['deal_id']);
         }
 
-        // If there is a deal - look for it
-        if ($deal && $message['deal_id']) {
-            $conversation = $this->getConversationModel()->getByField(array(
-                'deal_id'   => (int)$deal['id'],
-                'type'      => crmConversationModel::TYPE_EMAIL,
-                'is_closed' => 0,
-            ));
-        } else {
-            $conversation = $this->getConversationModel()->getByField(array(
-                'contact_id' => (int)$message['contact_id'],
-                'deal_id'    => null, // We are looking for conversation without a deal!
-                'type'       => crmConversationModel::TYPE_EMAIL,
-                'is_closed'  => 0,
-            ));
+        if (empty($conversation_id)) {
+            // If there is a deal - look for it
+            if ($deal && $message['deal_id']) {
+                $conversation = $this->getConversationModel()->getByField(array(
+                    'deal_id'   => (int)$deal['id'],
+                    'type'      => crmConversationModel::TYPE_EMAIL,
+                    'is_closed' => 0,
+                ));
+            } else {
+                $conversation = $this->getConversationModel()->getByField(array(
+                    'contact_id' => (int)$message['contact_id'],
+                    'deal_id'    => null, // We are looking for conversation without a deal!
+                    'type'       => crmConversationModel::TYPE_EMAIL,
+                    'is_closed'  => 0,
+                ));
+            }
+            $conversation_id = ifset($conversation, 'id', null);
         }
 
-        if (!empty($conversation)) {
-            $this->getConversationModel()->update($conversation['id'], [
+        if (empty($conversation_id)) {
+            // Find source ID (of EMAIL type)
+            $source_id = 0;
+            if ($deal && !empty($deal['source_id'])) {
+                if ((int)$deal['source_id'] > 0) {
+                    $source_id = (int)$deal['source_id'];
+                    // must be EMAIL type, otherwise conversation will be with broken relation invariants in DB
+                    $is_email_source = !!$this->getSourceModel()->getByField(array(
+                        'id' => $source_id,
+                        'type' => crmSourceModel::TYPE_EMAIL
+                    ));
+                    if (!$is_email_source) {
+                        $source_id = 0;
+                    }
+                }
+            }
+            $data = array(
+                'source_id'       => $source_id,
+                'contact_id'      => $message['contact_id'],
+                'deal_id'         => ifempty($message['deal_id']),
+                'summary'         => ifset($message['subject']),
+                'last_message_id' => $message['id'],
+                'count'           => 1,
+            );
+            $conversation_id = $this->getConversationModel()->add($data, crmConversationModel::TYPE_EMAIL);
+        } else {
+            $this->getConversationModel()->update($conversation_id, [
                 'last_message_id' => $message['id'],
                 'count' => '+1',
             ]);
 
-            $this->getMessageModel()->updateById($message['id'], array('conversation_id' => $conversation['id']));
+            $this->getMessageModel()->updateById($message['id'], array('conversation_id' => $conversation_id));
             $this->getMessageReadModel()->setRead($message['id'], $message['creator_contact_id']);
+
+            $message['conversation_id'] = $conversation_id;
+            (new crmPushService)->notifyAboutMessage(null, $message, ifset($conversation));
             return;
         }
-
-        // Find source ID (of EMAIL type)
-        $source_id = 0;
-        if ($deal && !empty($deal['source_id'])) {
-            if ((int)$deal['source_id'] > 0) {
-                $source_id = (int)$deal['source_id'];
-                // must be EMAIL type, otherwise conversation will be with broken relation invariants in DB
-                $is_email_source = !!$this->getSourceModel()->getByField(array(
-                    'id' => $source_id,
-                    'type' => crmSourceModel::TYPE_EMAIL
-                ));
-                if (!$is_email_source) {
-                    $source_id = 0;
-                }
-            }
-        }
-
-        $data = array(
-            'source_id'  => $source_id,
-            'contact_id' => $message['contact_id'],
-            'deal_id'    => ifempty($message['deal_id']),
-            'summary'    => ifset($message['subject']),
-            'last_message_id' => $message['id'],
-            'count'      => 1,
-        );
-
-        $conversation_id = $this->getConversationModel()->add($data, crmConversationModel::TYPE_EMAIL);
 
         $this->getMessageModel()->updateById($message['id'], array('conversation_id' => $conversation_id));
         $this->getMessageReadModel()->setRead($message['id'], $message['creator_contact_id']);

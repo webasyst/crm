@@ -11,10 +11,9 @@ var CRMCallAssociateDealDialog = ( function($) {
         that.$deal_funnel = that.$form.find('.js-select-deal-funnel');
         that.$deal_stage = that.$form.find('.js-select-deal-stage');
         that.$deal_id = that.$form.find('.js-deal-id');
-
         // VARS
-        that.dialog = that.$wrapper.data("dialog");
-
+      //  that.dialog = $('.dialog').data('dialog');
+        
         // DYNAMIC VARS
 
         // INIT
@@ -23,8 +22,6 @@ var CRMCallAssociateDealDialog = ( function($) {
 
     CRMCallAssociateDealDialog.prototype.initClass = function() {
         var that = this;
-
-        $.crm.renderSVG(that.$wrapper);
         //
         that.initSelectDeal();
         //
@@ -33,7 +30,7 @@ var CRMCallAssociateDealDialog = ( function($) {
 
     CRMCallAssociateDealDialog.prototype.initSelectDeal = function() {
         var that = this,
-            $visible_link = that.$form.find('.js-select-deal .js-visible-link .js-text'),
+            $visible_link = that.$form.find('.js-select-deal .js-visible-link'),
             $select_funnel = that.$form.find('.js-select-funnel'),
             $deals_list = that.$form.find('.js-deals-list'),
             $deal_name_field = that.$form.find('.js-deal-name-field');
@@ -62,12 +59,12 @@ var CRMCallAssociateDealDialog = ( function($) {
             that.$deal_id.val($(this).data('deal-id'));
         });
 
-        $deals_list.on('click', function () {
+        /*$deals_list.on('click', function () {
             $deals_list.hide();
             setTimeout( function() {
                 $deals_list.removeAttr("style");
             }, 200);
-        });
+        });*/
 
         //
         that.$form.on('change', '.js-select-deal-funnel', function() {
@@ -102,7 +99,7 @@ var CRMCallAssociateDealDialog = ( function($) {
         });
 
         function submit() {
-            var $loading = $('<i class="icon16 loading" style="vertical-align: middle; margin-left: 6px;"></i>'),
+            var $loading = $('<span class="icon size-16 loading"><i class="fas fa-spinner fa-spin"></i></span>'),
                 href = $.crm.app_url + "?module=call&action=associateDealSave",
                 data = that.$form.serializeArray();
 
@@ -111,7 +108,10 @@ var CRMCallAssociateDealDialog = ( function($) {
 
             $.post(href, data, function(res){
                 if (res.status === "ok") {
+                   // that.$wrapper.hide();
                     $.crm.content.reload();
+                    $('.dialog.c-call-associate-deal').data('dialog').close();
+                  //  that.dialog.close();
                 } else {
                     that.$submit.prop('disabled', false);
                     $loading.remove();

@@ -1,0 +1,70 @@
+<div class="crm-dialog-wrapper c-deal-change-client-dialog" id="c-deal-change-client-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <header class="crm-dialog-header">
+            <h1>{$title}</h1>
+
+            {strip}
+                {if $contact->exists()}
+                    <ul class="c-view-toggle-wrapper js-view-toggle">
+                        <li class="c-toggle is-active" data-id="1">[`Edit contact data`]</li>
+                        <li class="c-toggle" data-id="2">[`Switch to another contact`]</li>
+                    </ul>
+                {/if}
+            {/strip}
+        </header>
+
+        <div class="crm-dialog-content">
+            {if $contact->exists()}
+                <div class="c-hidden c-hidden-1 is-active">
+                    <form>
+                        {include file="../contact/ContactForm.inc.html" contact=$contact disabled=!$can_edit_contact inline}
+                        {* hack for HTML 5 Validation *}
+                        <input type="submit" value="[`Submit`]" style="display: none;">
+                    </form>
+                </div>
+                <div class="c-hidden c-hidden-2">
+                    <form>
+                        {include file="./DealContactForm.inc.html" contact=[] inline}
+                    </form>
+                </div>
+            {else}
+                <form>
+                    {include file="./DealContactForm.inc.html" contact=[] inline}
+                </form>
+            {/if}
+            <div class="js-errors-place"></div>
+        </div>
+
+        <footer class="crm-dialog-footer">
+            {if $contact->exists()}
+                <div class="c-hidden c-hidden-1 is-active">
+                    <input class="button green js-save-changed-data" type="button" value="[`Save`]">
+                    <span style="margin: 0 4px;">[`or`]</span>
+                    <a class="inline-link js-close-dialog" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                </div>
+                <div class="c-hidden c-hidden-2">
+                    <input class="button green js-switch-contact" type="button" value="[`Switch`]">
+                    <span style="margin: 0 4px;">[`or`]</span>
+                    <a class="inline-link js-close-dialog" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                </div>
+            {else}
+                <input class="button green js-switch-contact" type="button" value="[`Save`]">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="inline-link js-close-dialog" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+            {/if}
+        </footer>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMDealChangeClient({
+                $wrapper: $("#c-deal-change-client-dialog"),
+                contact_id: {if !empty($contact.id)}{$contact.id}{else}false{/if},
+                deal_id: {if !empty($deal.id)}{$deal.id}{else}false{/if},
+                type: {$type|json_encode},
+                can_edit_contact: {$can_edit_contact|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

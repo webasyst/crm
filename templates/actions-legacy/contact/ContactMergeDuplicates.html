@@ -1,0 +1,126 @@
+<div class="c-contacts-page shadowed" id="c-contacts-page">
+    <div class="c-layout fixed">
+        <div class="c-column sidebar left250px">
+            <div id="js-aside-block">
+                {include file="./Contact.sidebar.html" inline}
+            </div>
+        </div>
+        <div class="c-column content bordered-left blank">
+            <div id="js-content-block">
+
+                <div class="block double-padded c-contact-merge-page" id="c-contact-merge-page">
+                    <h1 class="c-page-header">[`Merge duplicates`]</h1>
+                    <div class="tab-content">
+                        <p>
+                            [`Duplicates are the contacts actually representing the same person or company though existing as two or more separate records in your database. This may happen if you use multiple scenarios to collect your contacts, e.g. sign up on your site, mailing subscription, adding contacts in the backend, and etc. Whatever reasons cause duplicates appearance, they are undesirable as do not allow to gather under the same unique account a client's profile, their activities and communication history. Merging duplicates resolves this problem. Two or more contact records will be merged in one. Contact information (phone numbers, email address, and etc.) will be consolidated as well as links from other apps (Shop-Script, Helpdesk, Mailer, etc.) will be modified to refer the only unique contact left after merging.`]
+                        </p>
+
+                        {if $field}
+                            <a class="crm-new-search-link no-underline bold" {if !$duplicates_data.items || !$field}style="display:none;"{/if} href="{$wa_app_url}contact/merge/duplicates/">[`New search`]</a>
+
+                            {if $duplicates_data.items}
+                                <div class="">
+                                    <div style="padding: 10px 0 0;">
+                                        <span class="crm-search-duplicates-message">
+                                            {if $duplicates_data.groups_count > 1}
+                                                {_w("<strong>%d duplicate group</strong> found.", "<strong>%d duplicate groups</strong> found.", $duplicates_data.groups_count)}
+                                                {_w("All groups include <strong>%d contact</strong>.", "All groups include <strong>%d contacts</strong>.", $duplicates_data.contacts_count)}
+                                            {else}
+                                                {_w("<strong>%d duplicate group</strong> found.", "<strong>%d duplicate groups</strong> found.", $duplicates_data.groups_count)}
+                                                {_w("This group includes <strong>%d contact</strong>.", "This group includes <strong>%d contacts</strong>.", $duplicates_data.contacts_count)}
+                                            {/if}
+                                        </span>
+                                        {if $duplicates_data.groups_count > 1}
+                                            <a href="javascript:void(0);" class="inline-link float-right crm-auto-merge-duplicates-link"><b><i>[`Merge all groups automatically`]</i></b></a>
+                                        {/if}
+                                    </div>
+
+                                    {if $duplicates_data.groups_count > 1}
+                                        <div class="crm-auto-merge-duplicates-start-text">
+                                            <p>
+                                                [`As a master contact in every group we will choose contact with the latest creation date. Other contacts will be deleted during this merging operation. Contact info from the contacts to be deleted, except unique fields, will be added to master contact. Links to deleted contacts from other applications will be updated to link to master contact.`]
+                                            </p>
+                                            <p>
+                                                <span class="crm-attention-message">[`<strong>IMPORTANT NOTE:</strong> Merging operation is irreversible.`]</span>
+                                                <span class="crm-done-message">[`Merging complete.`]</span>
+                                                <input type="button" class="crm-auto-merge-duplicates-start button red float-right" value="[`Start auto merging`]">
+                                                <input type="button" class="crm-auto-merge-duplicates-break button blue float-right" value="[`Pause merging`]">
+                                                <input type="button" class="crm-auto-merge-duplicates-resume button red float-right" value="[`Resume merging`]">
+                                            </p>
+                                        </div>
+                                        <div class="crm-auto-merge-duplicates-progress" style="display: none;">
+                                            <span class="crm-text"></span>
+                                            <i class="icon16 loading crm-loading"></i>
+                                        </div>
+                                    {/if}
+
+                                    <table class="zebra bottom-bordered crm-duplicates-table js-duplicates-table">
+                                        <tbody>
+                                        {foreach $duplicates_data.items as $dupl}
+                                            <tr class="crm-mergeduplicates-row">
+                                                <td style="width:50%;">{$dupl.name|escape}</td>
+                                                <td style="width: 1px; white-space: nowrap;">{_w('%d duplicate', '%d duplicates', $dupl.count)}</td>
+                                                <td style="width:50%;">
+                                                    <a href="{$wa_app_url}contact/merge/?ids={$dupl.ids|escape}" class="crm-merge" data-field-value="{$dupl.value|escape}">[`Merge this group`]</a>
+                                                </td>
+                                            </tr>
+                                        {/foreach}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {$url_params = ''}
+                                {if strlen($field) > 0}
+                                    {$url_params = 'field='|cat:$field}
+                                {/if}
+                                {$wa->crm->pager($duplicates_data.groups_count|default:0, $page, $url_params)}
+                            {else}
+                                <p>[`Duplicates not found.`]</p>
+                            {/if}
+                        {/if}
+
+                        {if !$duplicates_data.items || !$field}
+                            <form class="crm-search-duplicates-form" >
+                                <p>
+                                    [`Search duplicates by`]
+                                    <select class="crm-search-duplicates-by-field">
+                                        <option value="email" {if $field === 'email'}selected{/if}>[`Email`]</option>
+                                        <option value="name" {if $field === 'name'}selected{/if}>[`Full person name`]</option>
+                                        <option value="phone" {if $field === 'phone'}selected{/if}>[`Phone`]</option>
+                                    </select>
+                                </p>
+
+                                <div class="buttons" style="margin-top: 10px;">
+                                    <input type="submit" class="button green" value="[`Start search`]">
+                                    <i class="icon16 loading" style="display:none;"></i>
+                                </div>
+                            </form>
+                        {else}
+                            <input class="crm-search-duplicates-by-field" type="hidden" value="{$field}">
+                        {/if}
+
+                        <div class="clear-left"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {if !$wa->get('no_js')}
+
+        {$_locale = [
+            'progress' => sprintf(_w("Processed %s%% (%s of %s group(s))"), ":percentage:", ":count:", ":total_count:"),
+            'done' => _w('Done')
+        ]}
+
+        <script>
+            ( function($) {
+                new CRMContactsMergePage({
+                    $wrapper: $("#c-contact-merge-page"),
+                    groups_count: {$duplicates_data.groups_count|json_encode},
+                    messages: {$_locale|json_encode}
+                });
+            })(jQuery);
+        </script>
+    {/if}
+</div>

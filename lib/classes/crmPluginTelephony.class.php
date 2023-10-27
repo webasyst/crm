@@ -6,6 +6,13 @@
  */
 abstract class crmPluginTelephony
 {
+    protected $plugin_config;
+
+    public function __construct($plugin_config)
+    {
+        $this->plugin_config = $plugin_config;
+    }
+
     /**
      * List all possible numbers that can appear as crm_call.plugin_user_number
      * This is used in Settings -> PBX screen to assign numbers to backend users.
@@ -159,13 +166,6 @@ abstract class crmPluginTelephony
         // override
     }
 
-    protected $plugin_config;
-
-    public function __construct($plugin_config)
-    {
-        $this->plugin_config = $plugin_config;
-    }
-
     public function getId()
     {
         return $this->plugin_config['id'];
@@ -197,5 +197,15 @@ abstract class crmPluginTelephony
     {
         $ppm = new crmPbxParamsModel();
         return $ppm;
+    }
+
+    /**
+     * @param $plugin_call_id
+     * @param $plugin_record_id
+     * @return null
+     */
+    public function getRecordUrl($plugin_call_id, $plugin_record_id)
+    {
+        return null;
     }
 }

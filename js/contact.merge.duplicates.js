@@ -29,60 +29,22 @@ var CRMContactsMergePage = ( function($) {
         //
         that.initSubmit();
         //
-        that.initMergeLinks();
-        //
         that.initAutoMerge();
+        //
+        that.initGroupMergeLinks();
     };
 
     CRMContactsMergePage.prototype.initSubmit = function() {
         var that = this,
             $form = that.$form;
 
-        $form.submit(function (e) {
+        $form.on("submit", function (e) {
             e.preventDefault();
+            $(this).find('.js-icon').remove().end()
+                   .find('.js-loading').show();
             var field = that.$merge_field.val();
-            location.href = $.crm.app_url + 'contact/merge/duplicates/?field=' + field;
+            location.href = $.crm.app_url +'?module=contactMergeDuplicates&field='+ field +($.crm.iframe ? '&iframe=1' : '');
         });
-    };
-
-    CRMContactsMergePage.prototype.initMergeLinks = function() {
-        var that = this,
-            $wrapper = that.$wrapper,
-            is_locked = false;
-
-        $wrapper.on("click", ".js-merge-button", merge);
-
-        function merge(event) {
-            event.preventDefault();
-
-            var $link = $(this),
-                $loading = $link.parent().find('.loading').css('opacity', 1),
-                field = $wrapper.find('.crm-search-duplicates-by-field').val();
-
-            if (!is_locked) {
-                is_locked = true;
-
-                var href = $.crm.app_url + "?module=contact&action=mergeDuplicatesGetContacts",
-                    data = {
-                        field: field,
-                        value: $link.attr("data-field-value") // not using data(fieldValue) cause of implicit type casting (i.e. 01 -> 1)
-                    };
-
-                $.post(href, data, function(response) {
-                    if (response.status == "ok") {
-                        if (response.data.contacts) {
-                            $.crm.storage.set('crm/merge/field', field);
-                            var content_uri = $.crm.app_url + "contact/merge/?ids=" + response.data.contacts.join(',');
-                            $.crm.content.load(content_uri);
-                        }
-                    }
-                }, "json").always( function() {
-                    $loading.css('opacity', 0);
-                    is_locked = false;
-                });
-            }
-        }
-
     };
 
     CRMContactsMergePage.prototype.initAutoMerge = function() {
@@ -99,10 +61,10 @@ var CRMContactsMergePage = ( function($) {
             df = null,
             in_pause = false;
 
-        $link.click( function(e) {
+        $link.on("click", function(e) {
             e.preventDefault();
-            $auto_merge_block.show();
-            $start_button.show();
+            $auto_merge_block.toggle();
+            $start_button.toggle();
         });
 
         var setProgressMessage = function (count, total_count) {
@@ -278,6 +240,21 @@ var CRMContactsMergePage = ( function($) {
         setProgressMessage(0, that.groups_count);
 
     };
+
+    CRMContactsMergePage.prototype.initGroupMergeLinks = function() {
+        var that = this;
+        let iframe = new URLSearchParams(document.location.search).get('iframe');
+        if (window.parent && iframe) {
+            that.$table.find(".js-merge-group-link").on("click", function (e) {
+                e.preventDefault();
+                if (window.parent.history && window.parent.history.pushState) {
+                    window.parent.history.pushState({ reload: true }, '', this.href);
+                } else {
+                    window.parent.location.href = this.href;
+                }
+            });
+        }
+    }
 
     return CRMContactsMergePage;
 

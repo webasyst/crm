@@ -1,0 +1,34 @@
+<div class="crm-dialog-wrapper c-deal-participant-add-dialog" id="c-deal-participant-add-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+
+        <form method="post" action="{$wa_app_url}?module=deal&action=addParticipantSave&id=">
+
+            <header class="crm-dialog-header">
+                <h1>[`Add contact`]</h1>
+            </header>
+
+            <div class="crm-dialog-content">
+                {include file="./DealContactForm.inc.html" inline}
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <input class="button green js-some-action" type="submit" value="[`Save`]">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+            </footer>
+
+            <input type="hidden" name="id" value="{$deal.id}">
+            {$wa->csrf()}
+        </form>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMDealParticipantAdd({
+                $wrapper: $("#c-deal-participant-add-dialog"),
+                deal_id: {if !empty($deal.id)}{$deal.id}{else}false{/if}
+            });
+        })(jQuery);
+    </script>
+</div>

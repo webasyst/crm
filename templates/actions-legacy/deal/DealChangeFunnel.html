@@ -1,0 +1,123 @@
+{$_active_funnel = reset($funnels)}
+{if !empty($funnel)}{$_active_funnel = $funnel}{/if}
+{$_active_stage = reset($_active_funnel.stages)}
+
+{function name="_renderStage"}
+    {if empty($_stage)}
+        {$_stage = [
+            "id" => "%id%",
+            "name" => "%name%",
+            "color" => "%color%"
+        ]}
+    {/if}
+
+    <li class="{if $_active_stage.id == $_stage.id}selected{/if}">
+        <a href="javascript:void(0);" data-id="{$_stage.id}">
+            {if !empty($_stage.color)}
+                <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color}"></i>
+            {/if}
+            <b><i>{$_stage.name|escape}</i></b>
+        </a>
+    </li>
+{/function}
+
+{capture assign="_stage_template_html"}{_renderStage _stage=[]}{/capture}
+
+<div class="crm-dialog-wrapper c-deals-change-funnel-dialog" id="c-deals-change-funnel-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+        <form action="">
+            <header class="crm-dialog-header">
+                <h1>[`Change funnel / stage`]</h1>
+            </header>
+
+            <div class="crm-dialog-content">
+
+                {if $dropped_ids_count > 0}
+                    <p>
+                        <i class="icon16 exclamation"></i> {_w('%d deal will not be affected by the action due to insufficient access rights', '%d deals will not be affected by the action due to insufficient access rights', $dropped_ids_count)}
+                    </p>
+                {/if}
+
+                {_w("Move %d deal to", "Move %d deals to", count($deal_ids) )}
+
+                <div class="c-funnels-list js-funnels-list">
+                    <ul class="menu-h dropdown">
+                        <li>
+                            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                <span class="js-text">
+                                    {if !empty($_active_funnel.color)}
+                                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_funnel.color}"></i>
+                                    {/if}
+                                    <b><i class="js-name">{$_active_funnel.name|escape}</i></b>
+                                </span>&nbsp;<i class="icon10 darr"></i>
+                            </a>
+                            <ul class="menu-v with-icons">
+                                {strip}
+                                    {foreach $funnels as $_funnel}
+                                        <li class="{if $_active_funnel.id == $_funnel.id}selected{/if}">
+                                            <a href="javascript:void(0);" data-id="{$_funnel.id}">
+                                                {if !empty($_funnel.color)}
+                                                    <i class="icon16 funnel-state svg-icon" data-color="{$_funnel.color}"></i>
+                                                {/if}
+                                                <b><i>{$_funnel.name|escape}</i></b>
+                                            </a>
+                                        </li>
+                                    {/foreach}
+                                {/strip}
+                            </ul>
+                            <input class="js-field" name="funnel_id" type="hidden" value="{$_active_funnel.id}">
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="c-funnel-stages-list js-funnel-stages-list">
+                    <ul class="menu-h dropdown">
+                        <li>
+                            <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
+                                <span class="js-text">
+                                    {if !empty($_active_stage.color)}
+                                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_stage.color}"></i>
+                                    {/if}
+                                    <b><i class="js-name">{$_active_stage.name|escape}</i></b>
+                                </span>&nbsp;<i class="icon10 darr"></i>
+                            </a>
+                            <ul class="menu-v with-icons">
+                                {strip}{foreach $_active_funnel.stages as $_id => $_stage}{_renderStage _stage=$_stage}{/foreach}{/strip}
+                            </ul>
+                            <input class="js-field" name="stage_id" type="hidden" value="{$_active_stage.id}">
+                        </li>
+                    </ul>
+                </div>
+
+                {if $shop_linked}
+                    <p></p>
+                    <p class="small red">
+                        {_w('%d selected deal are linked to Shop-Script orders.', '%d selected deals are linked to Shop-Script orders.', $shop_linked)}<br>
+                        [`Bulk stage change will not affect to corresponding orders.`]<br>
+                        [`Orders will remain unchanged.`]
+                    </p>
+                {/if}
+
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <input class="button green" type="submit" value="[`Change`]">
+                <span style="margin: 0 4px;">[`or`]</span>
+                <a class="inline-link js-close-dialog" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+            </footer>
+
+            <input name="deal_ids" type="hidden" value="{$deal_ids|join:","}">
+        </form>
+    </div>
+
+    <script>
+        ( function($) {
+            new CRMDealsChangeFunnelDialog({
+                $wrapper: $("#c-deals-change-funnel-dialog"),
+                funnels: {$funnels|json_encode},
+                stage_template_html: {$_stage_template_html|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

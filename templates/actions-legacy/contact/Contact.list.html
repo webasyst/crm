@@ -1,0 +1,346 @@
+<div class="c-contacts-table-page block double-padded">
+    <div class="c-contacts-header c-layout">
+        <div class="c-column">
+
+            <h1><span class="crm-contact-list-name {if !empty($editable_name)}editable js-name-editable{/if}">{$title|escape}</span></h1>
+
+        </div>
+        <div class="c-column right">
+
+            <div class="block half-padded">
+
+                {if $context.type === 'segment' || $context.type === 'search'}
+                    <ul class="menu-h dropdown" style="display: inline-block; vertical-align: top;">
+                        {if $context.type === 'segment' && (!empty($can_edit) || !empty($can_archive) || !empty($can_edit))}
+                            <li>
+                                <a href="javascript:void(0);" class="inline-link"><b><i>[`Actions`]</i></b> <i class="icon10 darr"></i></a>
+                                <ul class="menu-v with-icons js-segment-actions-list">
+                                    {if !empty($can_edit)}
+                                        <li class="crm-segment-edit-li">
+                                            <a href="javascript:void(0);" class="js-show-edit-dialog">
+                                                <i class="icon16 settings"></i>
+                                                <span class="c-name">[`Settings`]</span>
+                                            </a>
+                                        </li>
+                                        {if $context.info.type === crmSegmentModel::TYPE_CATEGORY}
+                                            <li class="crm-segment-add-contacts-li">
+                                                <a href="javascript:void(0);" class="js-segment-add-contacts">
+                                                    <i class="icon16 add-to-list"></i>
+                                                    <span class="c-name">[`Add contacts to segment`]</span>
+                                                </a>
+                                            </li>
+                                        {/if}
+                                        {if $context.info.type === crmSegmentModel::TYPE_SEARCH}
+                                            <li class="crm-segment-edit-condition">
+                                                {$search_hash = str_replace('crmSearch/', '', $context.info.hash)}
+                                                <a href="{$wa_app_url}contact/search/segment/{$segment.id}/{if $context.info.hash}{$search_hash|urlencode}/{/if}">
+                                                    <i class="icon16 folder-dynamic"></i>
+                                                    <span class="c-name">[`Edit filter conditions`]</span>
+                                                </a>
+                                            </li>
+                                        {/if}
+                                    {/if}
+                                    {if !empty($can_archive)}
+                                        <li class="crm-segment-archive-li {if $segment.archived}archived{else}not-archived{/if}">
+                                            <a href="javascript:void(0);" class="js-show-archive-dialog">
+                                                <span class="c-text c-archive">
+                                                    <i class="icon16 archive-text"></i> [`Restore from archive`]
+                                                </span>
+
+                                                <span class="c-text c-not-archive">
+                                                    <i class="icon16 archive"></i> [`Move to archive`]
+                                                </span>
+
+                                                <span class="c-text c-loading">
+                                                    <i class="icon16 loading"></i> [`Move to archive`]
+                                                </span>
+                                            </a>
+                                        </li>
+                                    {/if}
+                                    {if !empty($can_edit)}
+                                        <li>
+                                            <a class="js-show-delete-confirm" href="javascript:void(0);">
+                                                <i class="icon16 delete"></i>
+                                                <span class="c-name">[`Delete segment`]</span>
+                                            </a>
+                                        </li>
+                                    {/if}
+                                </ul>
+                            </li>
+                        {elseif $context.type === 'search'}
+                            <li><a href="{$wa_app_url}contact/search/{crmHelper::urlEncodeSlashes($context.info.hash|urlencode)}">[`Change search conditions`]</a></li>
+                            <li><a href="javascript:void(0);" data-hash="{$context.info.hash}" class="crm-create-filter-link">[`Save as filter`]</a></li>
+                        {/if}
+                    </ul>
+                {/if}
+
+                <ul class="menu-h" style="display: inline-block; vertical-align: top;">
+                    <li>
+                        <div class="c-contacts-columns-section js-contacts-columns-section">
+                            <a class="inline-link js-show-contact-columns-dialog" href="javascript:void(0);">
+                                <i class="icon16 sort" style="transform: rotate(90deg); margin: 0;"></i>
+                                <b><i>[`Columns`]</i></b>
+                            </a>
+                            <div class="c-hidden-content js-load-here">
+                                <i class="icon16 loading"></i>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <a href="{crmHelper::getUrl("view", "thumbs")}"><i class="icon16 view-thumbs" style="margin: 0;"></i></a>
+                    </li>
+                    <li>
+                        <a href="{crmHelper::getUrl("view", "thumb-list")}"><i class="icon16 view-thumb-list" style="margin: 0;"></i></a>
+                    </li>
+                    <li class="selected">
+                        <a href="{crmHelper::getUrl("view", "list")}"><i class="icon16 view-table" style="margin: 0;"></i></a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    {function get_sortable_link txt='' id=''}
+        {$_asc = null}
+        {if $sort == $id}
+            {if !$asc}{$_asc = '1'}{else}{$_asc = '0'}{/if}
+        {/if}
+        {$_url = crmHelper::getUrl(['sort' => $id, 'asc' => $_asc])}
+        <a href="{$_url}" title="[`sort by column`]">{$txt|escape} {if $sort == $id}<i class="icon10 {if $asc}uarr{else}darr{/if}"></i>{/if}</a>
+    {/function}
+
+    {function name="_renderWidthToggle" column=[]}
+    {strip}
+        <div class="c-width-toggle-wrapper js-width-toggle-wrapper"
+             data-column-id="{$column.column_id|default:''}"
+             data-sub-column-id="{$column.sub_column_id|default:''}"
+             data-full-column-id="{$column.full_column_id|default:''}">
+            <ul class="c-toggle-list">
+                {if $column.width == "s"}
+                    <li class="c-toggle is-active" data-id="s"><i class="icon16 toggle-left"></i></li>
+                    <li class="c-toggle js-set-width" data-id="m"><i class="icon16 toggle-right"></i></li>
+
+                {elseif $column.width == "m"}
+                    <li class="c-toggle js-set-width" data-id="s"><i class="icon16 toggle-left"></i></li>
+                    <li class="c-toggle js-set-width" data-id="l"><i class="icon16 toggle-right"></i></li>
+
+                {elseif $column.width == "l"}
+                    <li class="c-toggle js-set-width" data-id="m"><i class="icon16 toggle-left"></i></li>
+                    <li class="c-toggle is-active" data-id="l"><i class="icon16 toggle-right"></i></li>
+                {/if}
+            </ul>
+        </div>
+    {/strip}
+    {/function}
+
+    {$_column_width_classes = [ 's' => 'is-small', 'm' => 'is-middle', 'l' => 'is-large' ]}
+
+    {if !empty($contacts)}
+        <section class="c-contacts-table-section js-contacts-section">
+
+            {* BODY *}
+            <div class="c-contacts-table-wrapper js-slider-wrapper">
+                <table class="c-contacts-table js-contacts-table js-contacts-list js-slider-body zebra single-lined">
+                    <tbody>
+                        {foreach $contacts as $_contact}
+                            {$_user_uri = "`$wa_app_url`contact/`$_contact.id`/"}
+                            <tr class="c-contact-wrapper js-contact-wrapper js-move-user {if $contact_max_id && $_contact.id > $contact_max_id}highlighted{/if}" data-user-id="{$_contact.id}">
+                                <td class="c-column c-column-1">
+                                    <div class="c-column-area">
+                                        <span class="c-checkbox"><input class="js-checkbox" type="checkbox" name="contact[]" value="{$_contact.id}"></span>
+                                    </div>
+                                </td>
+                                <td class="c-column c-column-2">
+                                    <div class="c-column-area">
+
+                                        <div class="c-layout">
+                                            {if !empty($_contact.photo_url_32)}
+                                                <div class="c-column middle" style="width: 32px; padding-right: 4px;">
+                                                    <i class="icon32 userpic" style="background-image: url({$_contact.photo_url_32})"></i>
+                                                </div>
+                                            {/if}
+                                            <div class="c-column middle">
+                                                <a href="{$_user_uri}" class="c-name">{$wa->crm->contactName($_contact.name)}</a>
+                                            </div>
+                                        </div>
+
+                                        <i class="shortener"></i>
+                                    </div>
+                                </td>
+                                <td class="c-column c-column-3 min-width">
+                                    <div class="c-column-area">
+                                        {if !empty($_contact._online_status) && $_contact._online_status == 'online'}
+                                            {$title = sprintf(_ws('%s is now online'), $_contact.name|escape)}
+                                            <i class="icon16 status-green-tiny" title="{$title}"></i>
+                                        {/if}
+                                    </div>
+                                </td>
+                                <td class="c-column c-column-4">
+                                    <div class="c-column-area">
+                                        {if !empty($_contact.tags)}
+                                            <ul class="c-tags-list">
+                                                {foreach $_contact.tags as $_tag}
+                                                    <li>
+                                                        <a class="c-tag" href="{$wa_app_url}contact/tag/{$_tag.id}/">{$_tag.name|escape}</a>
+                                                    </li>
+                                                {/foreach}
+                                            </ul>
+                                        {/if}
+                                        <i class="shortener"></i>
+                                    </div>
+                                </td>
+
+                                {$_col_number = 5}
+                                {foreach $columns_order as $_order}
+
+                                    {$_column_width = $_order.width}
+                                    {$_is_composite = $_order.is_composite}
+                                    {$_column_id = $_order.column_id}
+                                    {$_full_column_id = $_order.full_column_id}
+
+                                    {$_width_class = $_column_width_classes[$_column_width]|default:'m'}
+
+                                    {if $_is_composite}
+                                        {$_sub_column_id = $_order.sub_column_id}
+                                        <td class="c-column c-column-{$_col_number}">
+                                            {$values = $_contact['columns'][$_column_id][$_sub_column_id]}
+                                            {if !is_array($values)}
+                                                {$values = [$values]}
+                                            {/if}
+                                            <div class="c-column-area {$_width_class}"
+                                                 data-column-id="{$_column_id}"
+                                                 data-sub-column-id="{$_sub_column_id}"
+                                                 data-full-column-id="{$_full_column_id}">
+                                                    {foreach $values as $value}
+                                                        {$value|escape}
+                                                    {/foreach}
+                                                    <i class="shortener"></i>
+                                            </div>
+                                        </td>
+                                        {$_col_number = $_col_number + 1}
+                                    {else}
+                                        <td class="c-column c-column-{$_col_number}">
+                                            {$values = $_contact['columns'][$_column_id]}
+                                            {if !is_array($values)}
+                                                {$values = [$values]}
+                                            {/if}
+
+                                            <div class="c-column-area {$_width_class}"
+                                                data-column-id="{$_column_id}"
+                                                data-full-column-id="{$_full_column_id}">
+                                                    {foreach $values as $value}
+                                                        {$value|escape}
+                                                    {/foreach}
+                                                    <i class="shortener"></i>
+                                            </div>
+                                        </td>
+                                        {$_col_number = $_col_number + 1}
+                                    {/if}
+                                {/foreach}
+
+                            </tr>
+                        {/foreach}
+                    </tbody>
+                </table>
+                <script>
+                    ( function($) {
+                        var $users = $(".js-contacts-table .js-move-user");
+                        $users.each( function() {
+                            new CRMTableContact({
+                                $wrapper: $(this),
+                                can_be_drag: true
+                            });
+                        });
+                    })(jQuery);
+                </script>
+            </div>
+
+            {* HEADER *}
+            <div class="c-header-table-wrapper js-header-table-wrapper">
+                <table class="c-contacts-table c-header-table js-header-table zebra single-lined">
+                    <thead>
+                        <tr class="c-list-header white">
+                            <td class="c-column c-column-1">
+                                <div class="c-column-area">
+                                    <input type="checkbox" class="crm-checkbox crm-checkbox-all js-checkbox-all">
+                                </div>
+                            </td>
+                            <td class="c-column c-column-2">
+                                <div class="c-column-area">
+                                    {get_sortable_link txt='[`Contact`]' id='name'}
+                                </div>
+                            </td>
+                            <td class="c-column c-column-3">
+                                <div class="c-column-area"></div>
+                            </td>
+                            <td class="c-column c-column-4">
+                                <div class="c-column-area"></div>
+                            </td>
+
+                            {$_col_number = 5}
+                            {foreach $columns_order as $_order}
+
+                                {$_column_width = $_order.width}
+                                {$_is_composite = $_order.is_composite}
+                                {$_column_id = $_order.column_id}
+                                {$_full_column_id = $_order.full_column_id}
+
+                                {$_width_class = $_column_width_classes[$_column_width]|default:'m'}
+
+                                {$_column = $columns[$_column_id]}
+
+                                {if $_is_composite}
+                                    {$_sub_column_id = $_order.sub_column_id}
+                                    {$_sub_column = $columns[$_column_id]['sub_columns'][$_sub_column_id]}
+
+                                    <td class="c-column c-column-{$_col_number}">
+                                        <div class="c-column-area {$_width_class}"
+                                             data-column-id="{$_column_id}"
+                                             data-sub-column-id="{$_sub_column_id}"
+                                             data-full-column-id="{$_full_column_id}">
+                                                {$_column.name|escape} &mdash; {$_sub_column.name|escape}
+                                                {_renderWidthToggle column=$_order}
+                                        </div>
+                                    </td>
+                                    {$_col_number = $_col_number + 1}
+
+                                {else}
+
+                                    {$is_sortable = $_column.is_sortable|default:false}
+
+                                    <td class="c-column c-column-{$_col_number}">
+                                        <div class="c-column-area {$_width_class}"
+                                            data-column-id="{$_column_id}"
+                                            data-full-column-id="{$_full_column_id}">
+                                                {if $is_sortable}{get_sortable_link txt=$_column.name id=$_column.id}{else}{$_column.name|escape}{/if}
+                                                {_renderWidthToggle column=$_order}
+                                        </div>
+                                    </td>
+                                    {$_col_number = $_col_number + 1}
+
+                                {/if}
+                            {/foreach}
+
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+
+            {*need to render after table (z-index)*}
+            {include file="./Contact.list.operations.inc.html" inline}
+
+            {strip}
+                <ul class="c-arrows-wrapper js-arrows-wrapper">
+                    <li class="c-slider-arrow left js-arrow-left" title="&larr;"></li>
+                    <li class="c-slider-arrow right js-arrow-right" title="&rarr;"></li>
+                </ul>
+            {/strip}
+
+            <div class="c-hint-wrapper hint"></div>
+        </section>
+
+        {$wa->crm->pager($total_count|default:0, $page, '', $limit)}
+    {/if}
+    <p class="c-description c-no-contacts{if !empty($contacts)} hidden{/if}">[`No contacts.`]</p>
+</div>

@@ -1,0 +1,455 @@
+{strip}
+
+{$_title = '[`Deals`]'}
+
+<div class="c-deals-page shadowed" id="c-funnel-page">
+    {* HEADER *}
+    <header class="c-deals-header">
+        <div class="c-layout">
+            <div class="c-column left">
+
+                {if $funnels}
+                    <ul class="c-nav-wrapper menu-h dropdown">
+                        <li class="c-add-wrapper">
+                            <a href="{$wa_app_url}deal/new/" class="bold c-add-link"><i class="icon16 add"></i>[`New deal`]</a>
+                        </li>
+
+                        {* TYPE FILTER *}
+                        {if $funnel}
+                            <li class="c-filter-wrapper">
+                                <a class="inline-link" href="{crmHelper::getUrl("funnel", $funnel.id)}">
+                                    {if !empty($funnel.color)}
+                                        <i class="icon16 funnel-state svg-icon" data-color="{$funnel.color}"></i>
+                                    {/if}
+                                    <b><i>{$funnel.name|escape}</i></b>&nbsp;<i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v with-icons">
+                                    {foreach $funnels as $_funnel}
+                                        <li class="{if $funnel.id == $_funnel.id}selected{/if}">
+                                            {if isset($_funnel.deal_count)}
+                                                <span class="count">{$_funnel.deal_count}</span>
+                                            {/if}
+                                            <a href="?funnel={$_funnel.id}">
+                                                {if !empty($_funnel.color)}
+                                                    <i class="icon16 funnel-state svg-icon" data-color="{$_funnel.color}"></i>
+                                                {/if}
+                                                {$_funnel.name|escape}
+                                            </a>
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                            </li>
+                        {/if}
+
+                        {* USERS *}
+                        <li class="c-filter-wrapper">
+                            <a class="inline-link" href="{crmHelper::getUrl("user", $selected_filter_contact.id)}">
+                                {if !empty($selected_filter_contact.photo_url_16)}
+                                    <i class="icon16 userpic20" style="background-image: url({$selected_filter_contact.photo_url_16})"></i>
+                                {/if}
+                                <b><i>{$wa->crm->contactName($selected_filter_contact.name)}</i></b>&nbsp;<i class="icon10 darr"></i>
+                            </a>
+                            <ul class="menu-v with-icons">
+                                {foreach $filter_contacts as $_contact}
+                                    <li class="t-menu-item {if $selected_filter_contact.id === $_contact.id}selected{/if}">
+                                        <a href="{crmHelper::getUrl("user", $_contact.id)}">
+                                            {if !empty($_contact.photo_url_16)}
+                                                <i class="icon16 userpic20" style="background-image: url({$_contact.photo_url_16})"></i>
+                                            {/if}
+                                            {$wa->crm->contactName($_contact.name)}
+                                        </a>
+                                    </li>
+                                {/foreach}
+                            </ul>
+                        </li>
+
+                        {* REMINDERS *}
+                        <li class="c-filter-wrapper c-reminders-filter" id="js-reminders-filter">
+                            <a class="inline-link" href="javascript:void(0);">
+                                {if !empty($selected_filter_reminders)}
+                                    {foreach $selected_filter_reminders as $_filter}
+                                        <i class="{$_filter.icon_class}" title="{$_filter.name}"></i>
+                                    {/foreach}
+                                {else}
+                                    <b><i>[`Filter`]</i></b>
+                                {/if}
+                                &nbsp;<i class="icon10 darr"></i>
+                            </a>
+                            <ul class="menu-v with-icons js-hidden-list">
+                                {foreach $filter_reminders as $_filter}
+                                    <li class="c-item {if !empty($filter_reminders[$_filter.id])}selected{/if}" data-id="{$_filter.id|escape}">
+                                        <label>
+                                            <div class="c-layout fixed">
+                                                <div class="c-column middle" style="width: 40px; text-align: center;">
+                                                    <input class="js-checkbox" type="checkbox" {if !empty($selected_filter_reminders[$_filter.id])}checked{/if}>
+                                                    <i class="{$_filter.icon_class}" title="{$_filter.name}"></i>
+                                                </div>
+                                                <div class="c-column middle">
+                                                    {$_filter.name|escape}
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </li>
+                                {/foreach}
+
+                                {if !empty($selected_filter_reminders) && count($selected_filter_reminders) !== count($filter_reminders)}
+                                    <li class="c-item js-show-all">
+                                        <a href="javascript:void(0);">[`Show all`]</a>
+                                    </li>
+                                {/if}
+
+                                <li class="c-item js-buttons" style="display: none;">
+                                    <div class="c-layout">
+                                        <div class="c-column middle">
+                                            <input class="js-submit" type="button" value="[`Apply`]">
+                                        </div>
+                                        <div class="c-column middle right">
+                                            <a class="inline-link js-revert hint" href="javascript:void(0);"><b><i>[`Cancel`]</i></b></a>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+
+                            <script>
+                                ( function($) {
+                                    new CRMDealRemindersFilter({
+                                        $wrapper: $("#js-reminders-filter"),
+                                        filters: {$filter_reminders|json_encode},
+                                        selected_filters: {$selected_filter_reminders|json_encode},
+                                        redirect_uri: "{crmHelper::getUrl("reminder", "none")}"
+                                    });
+                                })(jQuery);
+                            </script>
+                        </li>
+
+                        {* TAGS *}
+                        <li class="c-filter-wrapper c-tags-filter {if empty($tag_cloud)}is-locked{/if}">
+                            <a class="inline-link" href="javascript:void(0);">
+                                <i class="icon16 tags"></i>
+                                <b><i>{if !empty($active_deal_tag)}{$active_deal_tag.name|escape}{else}[`Tag`]{/if}</i></b>
+                                {if !empty($tag_cloud)}&nbsp;<i class="icon10 darr"></i>{/if}
+                            </a>
+                            {if !empty($tag_cloud)}
+                                <ul class="menu-v with-icons" style="width: 250px;">
+                                    {if !empty($active_deal_tag)}
+                                        <li>
+                                            <a href="{crmHelper::getUrl("tag", 'all')}">[`Show all`]</a>
+                                        </li>
+                                    {/if}
+
+                                    <li class="c-tags-wrapper">
+                                        {foreach $tag_cloud as $_tag}
+                                            <a class="{if !empty($active_deal_tag) && $active_deal_tag.id === $_tag.id}selected{/if}" href="{crmHelper::getUrl("tag", {$_tag.id})}" style="font-size: {$_tag.size}%; opacity: {$_tag.opacity};">
+                                                {$_tag.name|escape}
+                                            </a>
+                                        {/foreach}
+                                    </li>
+                                </ul>
+                            {/if}
+                        </li>
+
+                        {* FIELDS *}
+                        {foreach $fields as $_field}
+                            <li class="c-filter-wrapper c-fields-filter {if empty($fields)}is-locked{/if}">
+                                <a class="inline-link" href="javascript:void(0);">
+                                    <b>
+                                        <i>
+                                            {if !empty($active_fields[$_field.id])}
+                                                {$active_fields[$_field.id]|escape}
+                                            {else}
+                                                {$_field.name|escape}
+                                            {/if}
+                                        </i>
+                                    </b>
+                                    {if !empty($_field)}&nbsp;<i class="icon10 darr"></i>{/if}
+                                </a>
+                                {if !empty($_field)}
+                                    <ul class="menu-v with-icons" style="width: 250px;">
+                                        {if !empty($active_fields[$_field.id])}
+                                            <li class="t-menu-item">
+                                                <a href="{crmHelper::getUrl({'field-'|cat:$_field.id}, null)}">[`Show all`]</a>
+                                            </li>
+                                        {/if}
+                                        {foreach $_field.options as $field_key => $field_option}
+                                            <li class="t-menu-item {if !empty($active_fields[$_field.id]) && $active_fields[$_field.id] == $field_option}selected{/if}">
+                                                <a href="{crmHelper::getUrl({'field-'|cat:$_field.id}, {$field_key})}">{$field_option}</a>
+                                            </li>
+                                        {/foreach}
+                                    </ul>
+                                {/if}
+                            </li>
+                        {/foreach}
+
+                    </ul>
+                {/if}
+
+            </div>
+            <div class="c-column right">
+
+                <ul class="c-view-toggle menu-h">
+                    <li class="selected">
+                        <a href="{crmHelper::getUrl("view", "thumbs")}" title="[`Kanban board`]"><i class="icon16 view-thumbs"></i></a>
+                    </li>
+                    <li class="">
+                        <a href="{crmHelper::getUrl("view", "list")}" title="[`List view`]"><i class="icon16 view-table"></i></a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </header>
+
+    {* CONTENT *}
+    <main class="c-deals-board">
+        {if $funnel}
+            <div class="c-funnel-table" id="c-funnel-table">
+                <header class="c-table-header" id="js-funnel-header">
+                    {foreach $funnel.stages as $_stage}
+                        <div class="c-item-wrapper">
+                            <div class="c-item-block" style="{if !empty($_stage.color)}background-color: {$_stage.color}; border-color: {$_stage.color};{/if}">
+                                <div class="c-name" title="{$_stage.name|escape}">{$_stage.name|escape}</div>
+                                <div class="c-price">
+                                    {if $_stage.amount}{$_stage.amount|wa_format_amount_currency:$funnel.currency_id}{/if}
+                                </div>
+                            </div>
+                        </div>
+                    {/foreach}
+                </header>
+
+                {if $funnels}
+                    <div class="c-table-content js-table-content">
+
+                        {if $deals}
+
+                            {function name="_renderTags" _tags=[]}
+                                <ul class="c-tags-list">
+                                    {foreach $_tags as $_t}
+                                        <li>
+                                            <a class="c-tag" href="{$wa_app_url}deal/?tag={$_t.id}">{$_t.name|escape}</a>
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                            {/function}
+
+                            {foreach $funnel.stages as $_stage}
+                                <div class="c-state-row js-drop-area js-state-column" data-id="{$_stage.id}" data-name="{$_stage.name|escape}">
+                                    {foreach $_stage.deals as $_deal}
+                                        {$_now = date('Y-m-d H:i:s')}
+                                        {$_contact = ifempty($_deal.contact, [])}
+                                        {if !empty($_contact)}
+                                            {$_photo = $_contact->getPhoto(32)}
+                                        {/if}
+
+                                        {$_deal_classes = []}
+                                        {if $_deal.reminder_datetime && $_deal.reminder_datetime < $_now}
+                                            {$_deal_classes[] = "overdue"}
+                                        {/if}
+                                        {if $_deal.id > $deal_max_id}
+                                            {$_deal_classes[] = "highlighted"}
+                                        {/if}
+
+                                        {$_is_open = false}
+                                        {if $_deal.status_id == "OPEN"}
+                                            {$_is_open = true}
+                                        {/if}
+
+                                        {$_order_id = crmShop::getEncodedOrderId($_deal)}
+                                        {$_shop_order = $deals[$_deal.id].shop_order|default:[]}
+
+                                        <div class="c-deal-wrapper js-deal-wrapper {$_deal_classes|join:" "}"
+                                                data-id="{$_deal.id}" data-name="{$_deal.name|truncate:255|escape}"
+                                                data-open="{if $_is_open}open{/if}"
+                                                data-shop-order="{$_order_id|default:""|escape}"
+                                                data-can-delete="{if $_deal.can_delete}1{else}0{/if}">
+                                            <header class="c-header">
+                                                <div class="c-layout">
+                                                    {if !empty($_photo)}
+                                                        <div class="c-column" style="width: 32px; padding-right: 8px;">
+                                                            <a href="{$wa_app_url}deal/{$_deal.id}/">
+                                                                <i class="icon32" style="background-image: url({$_photo});" title="{$_contact.name|default:''|escape}"></i>
+                                                            </a>
+                                                        </div>
+                                                    {/if}
+                                                    <div class="c-column middle">
+                                                        <a href="{$wa_app_url}deal/{$_deal.id}/">
+                                                            <span class="c-name">{$_deal.name|truncate:255|escape}</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </header>
+                                            {if !empty($_contact)}
+                                                <div class="line c-contact">{$wa->crm->contactName($_contact.name)}</div>
+                                            {/if}
+
+                                            {if !empty($deal_tags[$_deal.id])}
+                                                <div class="line">
+                                                    {$_tags = $deal_tags[$_deal.id]}
+                                                    {if count($_tags) > 1}
+                                                        {_renderTags _tags=$_tags}
+                                                    {/if}
+                                                </div>
+                                            {/if}
+
+                                            <div class="c-deal-footer line c-layout">
+
+                                                <div class="c-column">
+
+                                                    <div class="c-layout inline">
+                                                        <div class="c-column middle nowrap">
+                                                            {if !empty($_deal.source)}
+                                                                {if ($_deal.source.type) == 'FORM'}
+                                                                    {assign var="field_type" value="text"}
+                                                                {elseif ($_deal.source.type) == 'EMAIL'}
+                                                                    {assign var="field_type" value="email"}
+                                                                {elseif ($_deal.source.type) == 'SHOP'}
+                                                                    {assign var="field_type" value=""}
+                                                                {/if}
+                                                                {if ($_deal.source.type) == 'IM'}
+                                                                    <i class="icon16" style="background-image: url('{$_deal.source.icon}'); background-size: contain;" title="{$_deal.source.name}"></i>
+                                                                {else if !empty($field_type)}
+                                                                    <i class="icon16 {$field_type}" title="{$_deal.source.name}"></i>
+                                                                {/if}
+                                                            {/if}
+                                                            {if $_deal.status_id == 'OPEN'}
+                                                                {if empty($_deal.reminder_datetime)}
+                                                                    <i class="icon16 exclamation" title="[`No reminders assigned`]"></i>
+                                                                {else}
+                                                                    <i class="c-reminder-marker {$_deal.reminder_state|default:""}" title="{$_deal.reminder_title|default:""}"></i>
+                                                                {/if}
+                                                                {if !empty($deals[$_deal.id].message_unread)}
+                                                                    <span class="c-message-icon" title="[`Unread messages`]"><i class="icon16 email"></i></span>
+                                                                {/if}
+                                                            {/if}
+
+                                                            {if !empty($_shop_order)}
+                                                                {if $_shop_order.id > 0}
+                                                                    <i class="icon16 userpic20" style="background-image: url('{$wa_url}wa-apps/shop/img/shop.png');"></i>
+                                                                {/if}
+                                                            {/if}
+                                                        </div>
+
+                                                        {if !empty($deal_tags[$_deal.id])}
+                                                            <div class="c-column middle">
+                                                                {$_tags = $deal_tags[$_deal.id]}
+                                                                {if count($_tags) < 2}{_renderTags _tags=$_tags}{/if}
+                                                            </div>
+                                                        {/if}
+                                                    </div>
+
+                                                </div>
+                                                <div class="c-column middle right">
+                                                    {if !empty($_shop_order)}
+                                                        {if $_shop_order.id > 0 && $_shop_order.paid_date}
+                                                            <span class="c-paid-order-stamp" title="{sprintf('[`Order was paid on %s`]', $_shop_order.paid_date|wa_date:'humandate')}"><span class="c-inner-stamp"></span><span class="c-text">[`Paid`]</span></span>
+                                                        {/if}
+                                                    {/if}
+
+                                                    <div class="c-price {if $_deal.amount < 0}red{/if}">
+                                                        {if $_deal.amount != 0}
+                                                            {$_deal.original_amount|wa_format_amount_currency:$_deal.original_currency_id}
+                                                        {/if}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="c-drag-toggle js-drag-toggle"></div>
+
+                                            <div class="c-loading">
+                                                <i class="icon16 loading"></i>
+                                            </div>
+
+                                            <div class="c-deal-actions">
+                                                <input class="js-check-deal" type="checkbox" title="[`Select deal`]">
+                                            </div>
+                                        </div>
+                                    {/foreach}
+                                </div>
+                            {/foreach}
+
+                        {elseif $is_deals_limit}
+                            <div class="c-information-block">
+                                <div class="c-image-wrapper">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="c-text-wrapper">
+                                    <h2>[`Kanban board deal quantity limit exceeded.`]</h2>
+                                    <p>{_w('This section can display a maximum of %d deal.', 'This section can display a maximum of %d deals.', $max_kanban_deals)} {_w('You have now %d deal.', 'You have now %d deals.', $total_count)}</p>
+                                </div>
+                            </div>
+                        {else}
+
+                            <div class="c-contacts-page">
+                                <p class="c-description c-no-contacts">
+                                    [`No deals found for given conditions`]
+                                </p>
+                            </div>
+
+                        {/if}
+
+                    </div>
+                {else}
+                    <div class="block double-padded">
+                        <h1 class="c-page-header">[`Welcome to your new funnel!`]</h1>
+                        <p><a href="{$wa_app_url}deal/new/">[`Start by creating your first deal`]</a></p>
+                    </div>
+                {/if}
+
+                <header class="c-actions-header is-hidden" id="js-actions-header">
+                    <div class="c-actions-wrapper">
+                        <div class="c-layout">
+                            <div class="c-column middle c-column-checkbox">
+                                <input class="c-checkbox-all js-checkbox-all" type="checkbox" name="">
+                            </div>
+                            <div class="c-column">
+                                <ul class="c-actions-list menu-h">
+                                    <li class="c-action">
+                                        <a href="javascript:void(0);" class="c-link js-deals-export"><i class="icon16 export"></i> [`Export`] (<span class="c-count js-count"></span>)</a>
+                                    </li>
+                                    <li class="c-action">
+                                        <a href="javascript:void(0);" class="c-link js-deals-merge"><i class="icon16 merge"></i> [`Merge`] (<span class="c-count js-count"></span>)</a>
+                                    </li>
+                                    <li class="c-action">
+                                        <a href="javascript:void(0);" class="c-link js-deals-change-responsible"><i class="icon16 user"></i> [`Change the owner`] (<span class="c-count js-count"></span>)</a>
+                                    </li>
+                                    <li class="c-action">
+                                        <a href="javascript:void(0);" class="c-link js-deals-change-funnel"><i class="icon16 funnel"></i> [`Change funnel / stage`] (<span class="c-count js-count"></span>)</a>
+                                    </li>
+                                    <li class="c-action">
+                                        <a href="javascript:void(0);" class="c-operation-link js-deals-set-tags"><i class="icon16 tags"></i> [`Tags`] (<span class="c-count js-count"></span>)</a>
+                                    </li>
+                                    <li class="c-action">
+                                        <a href="javascript:void(0);" class="c-link js-deals-close"><i class="icon16 yes-bw"></i> [`Close`] (<span class="c-count js-open-count"></span>)</a>
+                                    </li>
+
+                                    <li class="c-action">
+                                        <a href="javascript:void(0);" class="c-link js-deals-delete"><i class="icon16 delete"></i> [`Delete`] (<span class="c-count js-count"></span>)</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            </div>
+        {/if}
+
+    </main>
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$_title|json_encode});
+            $.crm.renderSVG("#c-funnel-page");
+
+            new CRMDealsFunnel({
+                $wrapper: $("#c-funnel-page"),
+                funnel_id: {if !empty($funnel)}{$funnel.id|json_encode}{else}false{/if},
+                locales: {
+                    delete_confirm_title: "[`Delete %s deals`]",
+                    delete_confirm_text: "<p>[`Contacts of deal participants will not be deleted.`]<br>[`Deal deletion cannot be undone.`]</p>",
+                    delete_confirm_button: "[`Delete`]"
+                }
+            });
+        })(jQuery);
+    </script>
+</div>
+
+{/strip}

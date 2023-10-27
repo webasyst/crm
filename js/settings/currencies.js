@@ -121,23 +121,19 @@ var CRMSettingsCurrencies = (function ($) {
                 if (!is_locked) {
                     is_locked = true;
 
-                    var href = "?module=dialogConfirm",
-                        data = {
-                            title: that.locales["confirm_delete_title"].replace("%currency_name", currency_title),
-                            text: that.locales["confirm_delete_text"],
-                            ok_button: that.locales["confirm_delete_button"]
-                        };
-
-                    $.post(href, data, function (html) {
-                        new CRMDialog({
-                            html: html,
-                            onConfirm: function () {
-                                remove();
-                            }
-                        });
-                    }).always(function () {
-                        is_locked = false;
-                    })
+                $.waDialog.confirm({
+                    title: '<i class=\"fas fa-exclamation-triangle smaller state-error\"></i> ' + that.locales["confirm_delete_title"].replace("%currency_name", currency_title),
+                    text: that.locales["confirm_delete_text"],
+                    success_button_title: that.locales["confirm_delete_button"],
+                    success_button_class: 'danger',
+                    cancel_button_title: that.locales["confirm_cancel_button"],
+                    cancel_button_class: 'light-gray',
+                    onSuccess: function() {
+                        remove();
+                    }
+                });
+                
+                is_locked = false;
                 }
             }
 
@@ -206,87 +202,72 @@ var CRMSettingsCurrencies = (function ($) {
         }
     };
 
-    CRMSettingsCurrencies.prototype.initShopToggle = function() {
+    CRMSettingsCurrencies.prototype.initShopToggle = function () {
         var that = this,
-            $toggle = that.$wrapper.find(".js-shop-currency-toggle"),
-            is_locked = false;
+            $toggle_input = that.$wrapper.find(".js-shop-currency-toggle"),
+            $switch = that.$wrapper.find("#shop-currency-switch");
+        is_locked = false;
+        if (!$toggle_input.length) { return false; }
+        var use_shop_available = ($toggle_input.data("use-shop") || false);
 
-        if (!$toggle.length) { return false; }
+        $switch.waSwitch({
+            change: function (active, wa_switch) {
+                if (!is_locked) {
+                    if (active) {
+                        if (use_shop_available) {
 
-        // VARS
-        var use_shop_available = ( $toggle.data("use-shop") || false );
+                            $.waDialog.confirm({
+                                title: '<i class=\"fas fa-exclamation-triangle smaller state-error\"></i> ' + that.locales["confirm_shop_title"],
+                                text: that.locales["confirm_shop_text"],
+                                success_button_title: that.locales["confirm_shop_button"],
+                                success_button_class: 'danger',
+                                cancel_button_title: `${that.locales["confirm_cancel_button"]}`,
+                                cancel_button_class: 'light-gray',
+                                onSuccess: function() {
+                                    useShopCurrencies(true);
+                                },
+                                onCancel: unsetToggle,
+                            });
+
+                        } else {
+                            showConvertDialog();
+                        }
+                    } else {
+                        useShopCurrencies(false);
+                    }
+                }
+            }
+        });
+
+        var switcher = $switch.waSwitch("switch");
 
         // EVENTS
-        $toggle.on('change', function() {
-            if (!is_locked) { onChange(); }
-        });
-
-        // INITS
-        $toggle.iButton({
-            labelOn : "",
-            labelOff : "",
-            classContainer: "c-ibutton ibutton-container mini"
-        });
+        function unsetToggle() {
+            switcher.set(false);
+        }
 
         // FUNCTIONS
 
-        function onChange() {
-            var is_active = ( $toggle.attr("checked") === "checked" );
-            if (is_active) {
-
-                if (use_shop_available) {
-                    $.crm.confirm.show({
-                        title: that.locales["confirm_shop_title"],
-                        text: that.locales["confirm_shop_text"],
-                        button: that.locales["confirm_shop_button"],
-                        onConfirm: function() {
-                            useShopCurrencies(true);
-                        },
-                        onCancel: unsetToggle
-                    });
-
-                } else {
-
-                    showConvertDialog();
-                }
-
-            } else {
-
-                useShopCurrencies(false);
-            }
-        }
-
-        function unsetToggle() {
-            if (!is_locked) {
-                is_locked = true;
-                $toggle.iButton("toggle", false);
-                is_locked = false;
-            }
-        }
-
         function showConvertDialog() {
 
-            var dialog = new CRMDialog({
+            var dialog = $.waDialog({
                 html: that.copy_shop_currencies_dialog_html
             });
 
             var $form = dialog.$wrapper.find("form");
 
-            $form.on("submit", function(event) {
+            $form.on("submit", function (event) {
                 event.preventDefault();
-
                 if (!is_locked) {
                     is_locked = true;
-                    $toggle.attr("disabled", true);
 
                     var href = "?module=settings&action=currenciesShopCopy",
                         data = $form.serializeArray();
 
-                    $.post(href, data, function() {
+                    $.post(href, data, function () {
                         $.crm.content.reload();
 
-                    }).always( function() {
-                        $toggle.iButton("disable");
+                    }).always(function () {
                         is_locked = false;
                     });
                 }
@@ -295,20 +276,19 @@ var CRMSettingsCurrencies = (function ($) {
             $form.on("click", ".js-cancel-button", unsetToggle);
         }
 
-        function useShopCurrencies( use ) {
+        function useShopCurrencies(use) {
             if (!is_locked) { // && use_shop_available
                 is_locked = true;
-                $toggle.attr("disabled", true);
 
                 var href = "?module=settings&action=currenciesShopCopy",
                     data = (!use ? { disable: 1 } : {});
 
-                $.post(href, data, function(response) {
+                $.post(href, data, function (response) {
                     $.crm.content.reload();
 
-                }).always( function() {
+                }).always(function () {
                     // $toggle.attr("disabled", false);
-                    $toggle.iButton("disable");
+
                     is_locked = false;
                 });
             }
@@ -332,7 +312,7 @@ var CRMSettingsCurrencies = (function ($) {
                     data = {};
 
                 $.post(href, data, function (html) {
-                    new CRMDialog({
+                    $.waDialog({
                         html: html,
                         options: {
                             onChange: function (code) {
@@ -359,9 +339,9 @@ var CRMSettingsCurrencies = (function ($) {
 
         that.$wrapper.on("click", ".js-cancel", setDefault);
 
-        that.$wrapper.on("keyup", ".js-rate", function(event) {
+        that.$wrapper.on("keyup", ".js-rate", function (event) {
             var key = event.keyCode,
-                is_enter = ( key === 13 );
+                is_enter = (key === 13);
 
             if (is_enter) {
                 $(this).closest(".c-currency").find(".js-save-currency").trigger("click");
@@ -511,8 +491,8 @@ var CRMSettingsCurrenciesPrimary = (function ($) {
             event.preventDefault();
 
             var code = that.$toggle.val(),
-                is_changed = (code !== that.currency_code);
 
+                is_changed = (code !== that.currency_code);
             if (is_changed) {
                 if (!is_locked) {
                     is_locked = true;

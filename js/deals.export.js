@@ -12,8 +12,8 @@ var CRMDealsExport = (function ($) {
         // VARS
         that.ids = options.ids || [];
         that.url = $.crm.app_url + '?module=dealExport&action=process';
-        that.dialog = that.$wrapper.data('dialog');
-
+        that.$dialog_parent = window.parent.$('.dialog');
+        that.$dialog_parent_close = that.$dialog_parent.find('.dialog-close');
         // DYNAMIC VARS
 
         // INIT
@@ -41,6 +41,7 @@ var CRMDealsExport = (function ($) {
         $cancel.click(function (e) {
             e.preventDefault();
             process && process.cancel();
+            that.$dialog_parent_close[0].click();
         });
     };
 
@@ -52,6 +53,7 @@ var CRMDealsExport = (function ($) {
             timer = null,
             requests = 0,
             post_data = {};
+        let $progress_bar = that.$wrapper.find('.progressbar-inner');
 
         post_data.separator = $wrapper.find('[name=separator]').val();
         post_data.encoding = $wrapper.find('[name=encoding]').val();
@@ -61,6 +63,8 @@ var CRMDealsExport = (function ($) {
 
         // Sends messenger and delays next messenger in 3 seconds
         var process = function () {
+            that.$wrapper.find('.dialog-footer--visible').addClass('hidden');
+
             timer && clearTimeout(timer);
             timer = setTimeout(process, 3200);
             if (!processId || requests >= 2) {
@@ -69,6 +73,8 @@ var CRMDealsExport = (function ($) {
             post_data.processId = processId;
             $.post(url, post_data,
                 function (response) {
+                    let progress = response.progress || 0;
+                    $progress_bar.width(progress +'%') && $progress_bar.find('.progressbar-text').text(progress +'%');
                     requests--;
 
                     if (!processId || !response.ready) {
@@ -85,18 +91,14 @@ var CRMDealsExport = (function ($) {
                     timer = null;
                     processId = null;
 
-                    that.$download_file_form
-                        .attr('action', that.url + '&processId=' + pid)
-                        .appendTo('body')
-                        .submit(function () {
-                            setTimeout(function () {
-                                // back form to its place
-                                that.$download_file_form.appendTo(that.$wrapper.find('.crm-dialog-content'));
-                                that.dialog.close();
-                            }, 200);
-                        })
-                        .submit();
-
+                    let _csrf = that.$download_file_form.find('input[name="_csrf"]').val();
+                    let file_val = that.$download_file_form.find('input[name="file"]').val();
+                    $.post(that.url +'&processId='+ pid, {'processId': that.pid, '_csrf': _csrf, 'file': file_val}, function (response) {
+                        var response_obj = JSON.parse(response);
+                        var url_download = that.url +'?module=dealExport&action=download&file='+ response_obj.file;
+                        that.$wrapper.find('.js-download').attr('href', url_download);
+                    });
+                    that.$wrapper.find('.dialog-footer--hidden').removeClass('hidden');
                 },
                 'json'
             );
@@ -111,6 +113,8 @@ var CRMDealsExport = (function ($) {
             if (!data.processId) {
                 alert('Error processing request.');
             }
+            let progress = data.progress || 0;
+            $progress_bar.width(progress +'%') && $progress_bar.find('.progressbar-text').text(progress +'%');
             processId = data.processId;
             process();
         }, 'json');

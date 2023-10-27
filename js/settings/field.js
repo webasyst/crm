@@ -23,7 +23,7 @@ var crmSettingsField = (function ($) {
             href = $.crm.app_url + "?module=settings&action=fieldSaveSort",
             item_index,
             xhr = false,
-            $block = that.$wrapper.find('.crm-other-fields');
+            $block = that.$wrapper.find('.js-other-fields');
 
         $block.sortable({
             handle: '.sort',
@@ -73,7 +73,7 @@ var crmSettingsField = (function ($) {
             }
 
             xhr = $.post(href, { id: $el.data('id') || null }, function(html) {
-                new CRMDialog({
+                $.waDialog({
                     html: html
                 })
             });

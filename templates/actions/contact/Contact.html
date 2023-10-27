@@ -7,28 +7,21 @@
 {$sort = $sort|default:'name'}
 {$asc  = $asc|default:false}
 
-<div class="c-contacts-page shadowed" id="c-contacts-page">
-    <div class="c-layout fixed">
-        <div class="c-column sidebar left250px js-sidebar">
-            <div id="js-aside-block">
-                {include file="./Contact.sidebar.html" inline}
-            </div>
-        </div>
-        <div class="c-column content bordered-left blank">
-            <div id="js-content-block">
-                {if $view == "thumbs"}
-                    {include file="./Contact.thumbs.html" inline}
-                {elseif $view == "thumb-list"}
-                    {include file="./Contact.thumb-list.html" inline}
-                {else}
-                    {include file="./Contact.list.html" inline}
-                {/if}
-            </div>
-        </div>
-
-        {include file="./ContactOperationDeleteCheckingDialog.inc.html" inline}
-
+<div class="flexbox c-contacts-page" id="c-contacts-page">
+    
+    {include file="./Contact.sidebar.html" inline}
+    
+    <div class="content blank">
+        {if $view == "thumbs"}
+            {include file="./Contact.thumbs.html" inline}
+        {elseif $view == "thumb-list"}
+            {include file="./Contact.thumb-list.html" inline}
+        {else}
+            {include file="./Contact.list.html" inline}
+        {/if}
     </div>
+    {include file="./ContactOperationDeleteCheckingDialog.inc.html" inline}
+</div>
 
     <script>
         ( function($) {
@@ -51,4 +44,4 @@
             });
         })(jQuery);
     </script>
-</div>
+

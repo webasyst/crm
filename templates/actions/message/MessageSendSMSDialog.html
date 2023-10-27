@@ -1,23 +1,54 @@
+{if $iframe}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
+
+    {* CSS *}
+    {$wa->css()}
+    <link href="{$wa_app_static_url}js/jquery/jquery-ui.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}css/crm2.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_url}wa-content/js/redactor/2/redactor.css?v{$wa->version(true)}" rel="stylesheet">
+
+    {wa_js file="js/min/vendor.min.js"}
+        {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
+        {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
+        {$wa_url}wa-content/js/jquery-wa/wa.js
+    {/wa_js}
+
+    {wa_js file="js/min/crm.min.js"}
+        {$wa_app_static_url}js/crmDialog/crmDialog.js
+        {$wa_app_static_url}js/crm.js
+        {$wa_app_static_url}js/message/message.sendSmsDialog.js
+    {/wa_js}
+
+    {$wa->js()}
+
+</head>
+<body>
+{/if}
+
 {$class = 'c-send-sms-dialog'}
 {$dialog_id = uniqid($class)}
 
-<div class="{$class}-container">
-    <div class="crm-dialog-wrapper {$class}" id="{$dialog_id}" style="display: none;">
-        <div class="crm-dialog-background"></div>
-        <div class="crm-dialog-block">
+    <div class="{if $iframe}iframe-style {else}dialog {/if} {$class}" id="{$dialog_id}" >
+        <div class="dialog-background"></div>
+        <div class="dialog-body">
             <form>
-                <header class="crm-dialog-header">
+                <header class="dialog-header">
                     <h1>
                         {sprintf(_w("Write SMS to %s"), $phone_formatted)}
                     </h1>
                 </header>
 
-                <div class="crm-dialog-content">
-                    <div class="c-message-form-wrapper">
+                <div class="dialog-content">
+                    <div class="fields c-message-form-wrapper">
 
                         <div class="field">
                             <div class="name">[`Sender`]</div>
-                            <div class="value">
+                            <div class="value" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                 <select name="from" class="js-sms-sender-list">
                                     {foreach $sms_senders as $key => $item}
                                         <option value="{$key}">{$item['name']|escape}</option>
@@ -33,7 +64,7 @@
                                 <div class="c-layout">
                                     <div class="c-column">
                                         <span class="c-user-name">
-                                            <i class="icon16 userpic20" style="background-image: url({waContact::getPhotoUrl($contact.id, $contact.photo, 20)|escape});"></i>
+                                            <i class="icon userpic userpic-20 size-20" style="background-image: url({waContact::getPhotoUrl($contact.id, $contact.photo, 20)|escape});"></i>
                                             {$contact.name|escape}
 
                                             <input type="hidden" name="contact_id" value="{$contact.id}">
@@ -52,14 +83,9 @@
                                     {if $_funnel}
                                         {$_stage = $stages[$deal.stage_id]|default:null}
                                         {if $_stage}
-                                            <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                            <i class="fas fa-circle funnel-state svg-icon" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
                                             <a href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
-                                            <script>
-                                                ( function($) {
-                                                    var $wrapper = $(".js-message-deal");
-                                                    $.crm.renderSVG($wrapper);
-                                                })(jQuery);
-                                            </script>
+            
                                         {else}
                                             [`Stage deleted`]
                                         {/if}
@@ -71,9 +97,9 @@
                             </div>
                         {/if}
 
-                        <div class="field">
+                        <div class="field textarea-class">
                             <div class="name">[`Text`]</div>
-                            <div class="value">
+                            <div class="value ">
                                 <textarea name="text" class="wide js-send-sms-textarea" value="" placeholder="[`Type SMS here`]" required></textarea>
                             </div>
                         </div>
@@ -81,10 +107,9 @@
                     </div>
                 </div>
 
-                <footer class="crm-dialog-footer">
-                    <input class="button blue js-submit-button" type="submit" value="[`Send SMS`]">
-                    <span style="margin: 0 4px;">[`or`]</span>
-                    <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                <footer class="dialog-footer">
+                    <input class="button js-submit-button" type="submit" value="[`Send SMS`]">
+                    <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
                 </footer>
 
                 <input name="hash" value="{$hash|default:""}" type="hidden">
@@ -92,17 +117,17 @@
         </div>
 
         {capture assign="_success_html"}
-            <div class="crm-dialog-content" style="min-height: 40px;">
+            <div class="dialog-content" style="min-height: 40px;">
                 <p>[`Message sent successfully`]</p>
             </div>
 
-            <footer class="crm-dialog-footer">
-                <input class="button gray js-close-dialog" type="button" value="[`Close`]">
+            <footer class="dialog-footer">
+                <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
             </footer>
         {/capture}
 
         {capture assign="_error_html"}
-            <div>
+            <div class="dialog-content" style="min-height: 40px;">
                 <p class="js-error-text"></p>
                 {if $wa->user()->isAdmin()}
                     <p class="js-technical-info-block js-unknown-error">
@@ -112,7 +137,11 @@
                 {else}
                     <p>{_ws('Please refer to your system administrator.')}</p>
                 {/if}
+
             </div>
+            <footer class="dialog-footer">
+                <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
+            </footer>
         {/capture}
 
     </div>
@@ -124,10 +153,10 @@
 
     <script>
         ( function($) {
-            var $body = $(window.top.document).find("body");
-            new CRMDialog({
-                html: $body.find('#{$dialog_id}').show(),
-                onOpen: function() {
+           // var $body = $(window.top.document).find("body");
+          //  $.waDialog({
+               // html: $body.find('#{$dialog_id}').show(),
+               // onOpen: function() {
                     new CRMSendSmsDialog({
                         $wrapper: $('#{$dialog_id}'),
                         success_html: {$_success_html|json_encode},
@@ -135,11 +164,15 @@
                         hash: {$hash|json_encode},
                         send_action_url: {$send_action_url|default:''|json_encode},
                         app_url: {"`$wa_backend_url`crm/"|json_encode},
-                        locales: {$_locales|json_encode}
+                        locales: {$_locales|json_encode},
+                        iframe: {$iframe}
                     });
-                }
-            });
+             //   }
+           // });
         })(jQuery);
     </script>
 
-</div>
+{if $iframe}
+</body>
+</html>
+{/if}

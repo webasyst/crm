@@ -156,6 +156,19 @@ abstract class crmSource
         }
         return wa()->getAppStaticUrl('crm', true) . 'img/source/' . $icon;
     }
+    
+    /**
+     * Returns Font Awesome icon name from fab scope and color
+     * as array with keys icon_fab & icon_color
+     * @return array
+     */
+    public function getFontAwesomeBrandIcon()
+    {
+        return [
+            'icon_fab' => null,
+            'icon_color' => null,
+        ];
+    }
 
     /**
      * @return string
@@ -879,8 +892,9 @@ abstract class crmSource
         if (!isset($deal['name'])) {
             $deal['name'] = $this->getName();
         }
-
-        $deal['user_contact_id'] = $this->getNormalizedResponsibleContactId();
+        $cm = new waContactModel();
+        $crm_user_id = $cm->select('crm_user_id')->where('id = ?', $deal['contact_id'])->fetchField();
+        $deal['user_contact_id'] = ($crm_user_id > 0 ? $crm_user_id : $this->getNormalizedResponsibleContactId());
         $deal['user_contact_id'] = $deal['user_contact_id'] > 0 ? $deal['user_contact_id'] : null;
 
         $deal['source_id'] = $this->getId();

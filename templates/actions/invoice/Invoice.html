@@ -32,89 +32,92 @@
 {/if}
 {$_active_sort = $_sort_array[$sort]}
 
-<div class="c-invoices-page shadowed" id="c-invoices-page">
-    <div class="sidebar left300px">
-        <div class="" id="js-aside-block">
-
-            <div class="c-aside-header js-aside-header is-fixed">
-                {* NEW *}
-                <div class="block">
-                    <div class="c-layout">
-                        <div class="c-column middle">
-                            <div class="c-new-wrapper">
-                                <a href="{$wa_app_url}invoice/new/" class="bold c-add-link c-no-margin js-disable-router"><i class="icon16 add"></i>[`New invoice`]</a>
-                            </div>
-                        </div>
-                        <div class="c-column middle right">
-                            <div class="c-search-wrapper">
-                                <input class="js-search-field" placeholder="[`Find by number`]" type="text" style="width: 125px;">
-                            </div>
-                        </div>
+<div class="c-invoices-page flexbox wrap-mobile" id="c-invoices-page">
+    <div class="sidebar blank  c-shadowed flexbox width-20rem wide-mobile overflow-visible" id="js-aside-block">
+        <div class="sidebar-header box js-aside-header c-invoices-header">
+            {* NEW *}
+            <div class="flexbox middle full-width">
+                <div class="c-search-wrapper">
+                    <div class="state-with-inner-icon left">
+                        <input class="js-search-field" placeholder="[`Find by number`]" type="text">
+                        <button class="icon"><i class="fas fa-search"></i></button>
                     </div>
                 </div>
-
-                {* NAV *}
-                <div class="c-heading-menu block">
-                    <ul class="menu-h dropdown">
-                        <li>
-                            <a href="javascript:void(0);">
-                                {$_active_state.name}
-                                <i class="icon10 darr-tiny"></i>
-                            </a>
-                            <ul class="menu-v with-icons">
-                                {foreach $_states as $name => $_state}
-                                    {$name = strtolower($name)}
-                                    {$_state_classed = []}
-                                    {if $name == $state}
-                                        {$_state_classed[] = "selected"}
-                                    {/if}
-                                    {if !empty($_state.class)}
-                                        {$_state_classed[] = $_state.class}
-                                    {/if}
-
-                                    <li class="{$_state_classed|join:" "}">
-                                        <a href="{$_state.uri}">
-                                            {if !empty($_state.icon)}
-                                                <i class="icon16 {$_state.icon}"></i>
-                                            {/if}
-                                            {$_state.name|escape}
-                                        </a>
-                                    </li>
-                                {/foreach}
-                            </ul>
-                        </li>
-                        <li class="float-right" style="margin-right: 0;">
-                            <a href="javascript:void(0);">
-                                <i class="icon16 sort" title="[`Order by:`]"></i>&nbsp;
-                                {$_active_sort.name}
-                                <i class="icon10 darr-tiny"></i>
-                            </a>
-                            <ul class="menu-v with-icons right">
-                                {foreach $_sort_array as $name => $_sort}
-                                    <li class="{if $name == $sort}selected{/if}">
-                                        <a href="{$_sort.uri}">{$_sort.name}</a>
-                                    </li>
-                                {/foreach}
-                            </ul>
-                        </li>
-                    </ul>
+                <div class="c-new-wrapper">
+                    <a href="{$wa_app_url}invoice/new/" class="button c-add-link circle js-disable-router" title="[`New invoice`]">
+                        <i class="fas fa-plus"></i>
+                    </a>
                 </div>
             </div>
 
-            {if !empty($invoices)}
-                {* LIST *}
-                {$sidebar_html}
-            {/if}
-        </div>
-    </div>
-    <div class="content bordered-left blank">
-
-        <div id="js-inner-content">
-            <div class="block double-padded js-inner-content">
-                {include file="$invoice_template"}
+            {* NAV *}
+            <div class="c-filters flexbox full-width custom-my-16">
+                <div class="dropdown c-dropdown-states">
+                    <button class="align-left dropdown-toggle full-width light-gray small" type="button">
+                            {if !empty($_active_state.icon)}
+                            <span class="icon baseline custom-mr-4 {$_active_state.class|default:''}">
+                                <i class="svg-icon {$wa->crm->convertIcon($_active_state.icon)} fa-xs"></i>
+                            </span>
+                            {/if}
+                            {$_active_state.name}
+                    </button>
+                    <div class="dropdown-body">
+                        <ul class="menu">
+                        {foreach $_states as $name => $_state}
+                            {$name = strtolower($name)}
+                            {$_state_classed = []}
+                            {if $name == $state}
+                                {$_state_classed[] = "selected"}
+                            {/if}
+                            {if !empty($_state.class)}
+                                {$_state_classed[] = $_state.class}
+                            {/if}
+                            <li class="{$_state_classed|join:' '}">
+                                <a href="{$_state.uri}" {if empty($_state.icon)}class="custom-pl-16"{/if}>
+                                    {if !empty($_state.icon)}
+                                    <span class="icon baseline custom-mr-4 {$_state.class}">
+                                        <i class="svg-icon {$wa->crm->convertIcon($_state.icon)} fa-xs"></i>
+                                    </span>
+                                    {/if}
+                                    {$_state.name|escape}
+                                </a>
+                            </li>
+                        {/foreach}
+                        </ul>
+                    </div>
+                </div>
+                <div class="dropdown c-dropdown-sort">
+                    <button class="align-left dropdown-toggle full-width flexbox middle light-gray small" type="button">
+                        {$_active_sort.name}
+                    </button>
+                    <div class="dropdown-body right">
+                        <ul class="menu">
+                        {foreach $_sort_array as $name => $_sort}
+                            <li class="{if $name == $sort}selected{/if}">
+                                <a href="{$_sort.uri}">{$_sort.name}</a>
+                            </li>
+                        {/foreach}
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <div class="sidebar-body c-invoices-body" id="js-sidebar-body-invoices">
+        {if !empty($invoices)}
+            {* LIST *}
+            {$sidebar_html}
+        {/if}
+        </div>
+    </div>
+    <div class="not-blank wide desktop-and-tablet-only width-0 width-100-mobile" id="js-inner-content">
+        <div class="article wider">
+            <div class="article-body">
+                <div class="js-inner-content">
+                    {include file="$invoice_template"}
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>

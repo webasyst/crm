@@ -1,0 +1,131 @@
+{strip}
+
+{$_title = "[`Invoices`]"}
+
+{$_states = crmInvoice::getStates(true)}
+
+{if empty($list_params.state_id)}
+    {$state = "all"}
+{else}
+    {$state = $list_params.state_id}
+{/if}
+{$_active_state = $_states[strtoupper($state)]}
+
+{$_sort_array = [
+    "newest" => [
+        "name" => "[`Newest`]",
+        "uri" => "`$wa_app_url`invoice/?sort=newest"
+    ],
+    "updated" => [
+        "name" => "[`Updated`]",
+        "uri" => "`$wa_app_url`invoice/?sort=updated"
+    ],
+    "paid" => [
+        "name" => "[`Paid`]",
+        "uri" => "`$wa_app_url`invoice/?sort=paid"
+    ]
+]}
+{if empty($list_params.sort_filter)}
+    {$sort = "newest"}
+{else}
+    {$sort = $list_params.sort_filter}
+{/if}
+{$_active_sort = $_sort_array[$sort]}
+
+<div class="c-invoices-page shadowed" id="c-invoices-page">
+    <div class="sidebar left300px">
+        <div class="" id="js-aside-block">
+
+            <div class="c-aside-header js-aside-header is-fixed">
+                {* NEW *}
+                <div class="block">
+                    <div class="c-layout">
+                        <div class="c-column middle">
+                            <div class="c-new-wrapper">
+                                <a href="{$wa_app_url}invoice/new/" class="bold c-add-link c-no-margin js-disable-router"><i class="icon16 add"></i>[`New invoice`]</a>
+                            </div>
+                        </div>
+                        <div class="c-column middle right">
+                            <div class="c-search-wrapper">
+                                <input class="js-search-field" placeholder="[`Find by number`]" type="text" style="width: 125px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {* NAV *}
+                <div class="c-heading-menu block">
+                    <ul class="menu-h dropdown">
+                        <li>
+                            <a href="javascript:void(0);">
+                                {$_active_state.name}
+                                <i class="icon10 darr-tiny"></i>
+                            </a>
+                            <ul class="menu-v with-icons">
+                                {foreach $_states as $name => $_state}
+                                    {$name = strtolower($name)}
+                                    {$_state_classed = []}
+                                    {if $name == $state}
+                                        {$_state_classed[] = "selected"}
+                                    {/if}
+                                    {if !empty($_state.class)}
+                                        {$_state_classed[] = $_state.class}
+                                    {/if}
+
+                                    <li class="{$_state_classed|join:" "}">
+                                        <a href="{$_state.uri}">
+                                            {if !empty($_state.icon)}
+                                                <i class="icon16 {$_state.icon}"></i>
+                                            {/if}
+                                            {$_state.name|escape}
+                                        </a>
+                                    </li>
+                                {/foreach}
+                            </ul>
+                        </li>
+                        <li class="float-right" style="margin-right: 0;">
+                            <a href="javascript:void(0);">
+                                <i class="icon16 sort" title="[`Order by:`]"></i>&nbsp;
+                                {$_active_sort.name}
+                                <i class="icon10 darr-tiny"></i>
+                            </a>
+                            <ul class="menu-v with-icons right">
+                                {foreach $_sort_array as $name => $_sort}
+                                    <li class="{if $name == $sort}selected{/if}">
+                                        <a href="{$_sort.uri}">{$_sort.name}</a>
+                                    </li>
+                                {/foreach}
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            {if !empty($invoices)}
+                {* LIST *}
+                {$sidebar_html}
+            {/if}
+        </div>
+    </div>
+    <div class="content bordered-left blank">
+
+        <div id="js-inner-content">
+            <div class="block double-padded js-inner-content">
+                {include file="$invoice_template"}
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        ( function($) {
+            $.crm.title.set({$_title|json_encode});
+
+            new CRMInvoices({
+                $wrapper: $("#c-invoices-page")
+            });
+        })(jQuery);
+    </script>
+</div>
+
+{/strip}

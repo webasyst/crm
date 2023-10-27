@@ -307,18 +307,22 @@ class crmContact extends waContact
         ), array('status' => 'confirmed'));
     }
 
-    public static function getAllColumns()
+    public static function getAllColumns($contact_type = '')
     {
         $fields = array();
 
         $ignore = array(
             'type' => array(
-                'Hidden' => 1, 'Text' => 1
-            ),
-            'field_id' => array(
-                'name' => 1, 'firstname' => 1, 'middlename' => 1, 'lastname' => 1
-            )
+                'Hidden' => 1,
+            ) + ($contact_type === 'all_api' ? [] : ['Text' => 1])
         );
+        if (empty($contact_type)) {
+            $ignore += array(
+                'field_id' => array(
+                    'name' => 1, 'firstname' => 1, 'middlename' => 1, 'lastname' => 1
+                )
+            );
+        }
 
         // several special columns
         $special_fields = array(
@@ -326,7 +330,7 @@ class crmContact extends waContact
             'last_datetime' => new waContactDateField('last_datetime', _w('Last activity'))
         );
 
-        $all_fields = array_merge($special_fields, waContactFields::getAll('all'));
+        $all_fields = $special_fields + waContactFields::getAll('all');
 
         foreach ($all_fields as $field_id => $field) {
 

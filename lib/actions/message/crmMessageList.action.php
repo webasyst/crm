@@ -76,7 +76,7 @@ class crmMessageListAction extends crmBackendViewAction
     {
         $contacts = array();
         $collection = new waContactsCollection('/id/'.join(',', $contact_ids));
-        $col = $collection->getContacts('id,name,photo_url_32', 0, count($contact_ids));
+        $col = $collection->getContacts('id,name,photo_url_32,photo_url_50', 0, count($contact_ids));
         foreach ($col as $id => $c) {
             $contacts[$id] = new waContact($c);
         }

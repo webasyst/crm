@@ -79,10 +79,10 @@ var CRMEmailPersonalSettingsDialog = ( function($) {
             }
         });
 
-        var old_close_func = that.dialog.onClose;
+        //var old_close_func = that.dialog.onClose;
 
         that.dialog.onClose = function() {
-            old_close_func(arguments);
+            //old_close_func(arguments);
             destroyRedactor($textarea);
         };
     };

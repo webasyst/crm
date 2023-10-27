@@ -390,6 +390,7 @@ class crmNotification
         $message['direction'] = crmMessageModel::DIRECTION_OUT;
         $message['contact_id'] = $customer ? $customer->getId() : 0;
         $message['event'] = $this->getEvent();
+        $message['crm_log_id'] = ifempty($this->options, 'crm_log_id', 0);
         $wa_log = array_key_exists('wa_log', $this->options) ? $this->options['wa_log'] : true;
         self::getMessageModel()->fix($message, array(
             'wa_log' => $wa_log,
@@ -558,6 +559,7 @@ class crmNotification
             }
             $n['name'] = _w($n['name']);
             $n['subject'] = _w($n['subject']);
+            $n['recipient'] = ifset($n, 'recipient', 'client');
             $n['sms'] = _w($n['sms']);
 
             $n['body'] = '';

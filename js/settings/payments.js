@@ -1,10 +1,11 @@
-var CRMSettingsPayments = ( function($) {
-
-    CRMSettingsPayments = function(options) {
+var CRMSettingsPayments = (function ($) {
+    
+    CRMSettingsPayments = function (options) {
         var that = this;
 
         // DOM
         that.$wrapper = options["$wrapper"];
+        that.$dropdown = that.$wrapper.find(".dropdown");
         that.$pluginsDropdown = that.$wrapper.find(".js-plugins-dropdown");
         that.$table = that.$wrapper.find(".js-payments-table");
 
@@ -18,7 +19,7 @@ var CRMSettingsPayments = ( function($) {
         that.initClass();
     };
 
-    CRMSettingsPayments.prototype.initClass = function() {
+    CRMSettingsPayments.prototype.initClass = function () {
         var that = this;
         //
         that.initTabs();
@@ -27,9 +28,11 @@ var CRMSettingsPayments = ( function($) {
         //
         that.initSortable();
 
+        that.initDropDown();
+
         var $page_body = that.$wrapper.find(".c-payments-list");
 
-        var observer = new MutationObserver( function(mutations) {
+        var observer = new MutationObserver(function (mutations) {
             $page_body.trigger("refresh");
         });
 
@@ -40,22 +43,20 @@ var CRMSettingsPayments = ( function($) {
         });
     };
 
-    CRMSettingsPayments.prototype.initTabs = function() {
+    CRMSettingsPayments.prototype.initTabs = function () {
         var that = this,
             $section = that.$wrapper.find(".c-tabs-wrapper"),
             $companies = that.$wrapper.find(".c-companies-wrapper"),
             $list = $companies.find(".c-companies-list"),
             $activeTab = $list.find(".c-company.selected");
 
-        initSetWidth();
-
-        initSlider();
-
+            initSetWidth();
+            initSlider();
         //
 
         function initSetWidth() {
             var $window = $(window),
-                other_w = $section.find(".c-add-wrapper").outerWidth(true);
+                other_w = $section.find(".c-add-wrapper").outerWidth();
 
             setWidth();
 
@@ -71,9 +72,8 @@ var CRMSettingsPayments = ( function($) {
             }
 
             function setWidth() {
-                var section_w = $section.width(),
-                    max_w = section_w - other_w - 10;
-
+                var section_w = $section.outerWidth(true),
+                    max_w = section_w - other_w - 38;
                 $companies.css("max-width", max_w + "px");
             }
         }
@@ -82,12 +82,17 @@ var CRMSettingsPayments = ( function($) {
             $.crm.tabSlider({
                 $wrapper: $companies,
                 $slider: $list,
-                $activeSlide: ($activeTab.length ? $activeTab : false )
+                $activeSlide: ($activeTab.length ? $activeTab : false)
             });
         }
     };
 
-    CRMSettingsPayments.prototype.initDelete = function() {
+    CRMSettingsPayments.prototype.initDropDown = function () {
+        var that = this;
+        that.$dropdown.waDropdown();
+    }
+
+    CRMSettingsPayments.prototype.initDelete = function () {
         var that = this,
             is_locked = false;
 
@@ -103,11 +108,14 @@ var CRMSettingsPayments = ( function($) {
             showConfirm();
 
             function showConfirm() {
-                $.crm.confirm.show({
-                    title: that.locales["confirm_delete_title"].replace("%payment", $tr.find(".js-name").text()),
+                $.waDialog.confirm({
+                    title: '<i class=\"fas fa-exclamation-triangle smaller state-error\"></i> ' + that.locales["confirm_delete_title"].replace("%payment", $tr.find(".js-name").text()),
                     text: that.locales["confirm_delete_text"],
-                    button: that.locales["confirm_delete_button"],
-                    onConfirm: remove
+                    success_button_title: that.locales["confirm_delete_button"],
+                    success_button_class: 'danger',
+                    cancel_button_title: that.locales["confirm_cancel_button"],
+                    cancel_button_class: 'light-gray',
+                    onSuccess: remove
                 });
 
                 function remove() {
@@ -120,7 +128,7 @@ var CRMSettingsPayments = ( function($) {
                                 company_id: that.company_id
                             };
 
-                        $.post(href, data, function(response) {
+                        $.post(href, data, function (response) {
                             if (response.status == "ok") {
                                 $tr.remove();
 
@@ -129,7 +137,7 @@ var CRMSettingsPayments = ( function($) {
                                     $plugin.show();
                                 }
                             }
-                        }).always( function() {
+                        }).always(function () {
                             is_locked = false;
                         })
                     }
@@ -138,7 +146,7 @@ var CRMSettingsPayments = ( function($) {
         }
     };
 
-    CRMSettingsPayments.prototype.initSortable = function() {
+    CRMSettingsPayments.prototype.initSortable = function () {
         var that = this,
             xhr = false;
 
@@ -163,16 +171,16 @@ var CRMSettingsPayments = ( function($) {
                 xhr.abort();
             }
 
-            xhr = $.post(href, data, function(response) {
+            xhr = $.post(href, data, function (response) {
 
-            }).always( function() {
+            }).always(function () {
                 xhr = false;
             });
 
             function getIds() {
                 var result = [];
 
-                that.$table.find("tr").each( function() {
+                that.$table.find("tr").each(function () {
                     result.push($(this).data("id"));
                 });
 
@@ -185,9 +193,9 @@ var CRMSettingsPayments = ( function($) {
 
 })(jQuery);
 
-var CRMPaymentEdit = ( function($) {
+var CRMPaymentEdit = (function ($) {
 
-    CRMPaymentEdit = function(options) {
+    CRMPaymentEdit = function (options) {
         var that = this;
 
         // DOM
@@ -206,7 +214,7 @@ var CRMPaymentEdit = ( function($) {
         that.initClass();
     };
 
-    CRMPaymentEdit.prototype.initClass = function() {
+    CRMPaymentEdit.prototype.initClass = function () {
         var that = this;
         //
         that.initSubmit();
@@ -214,12 +222,12 @@ var CRMPaymentEdit = ( function($) {
         that.initDelete();
     };
 
-    CRMPaymentEdit.prototype.initSubmit = function() {
+    CRMPaymentEdit.prototype.initSubmit = function () {
         var that = this,
             is_locked = false,
             $form = that.$form;
 
-        $form.on("submit", function(event) {
+        $form.on("submit", function (event) {
             event.preventDefault();
             var formData = getData();
             if (formData.errors.length) {
@@ -239,7 +247,7 @@ var CRMPaymentEdit = ( function($) {
 
                 var href = "?module=settings&action=paymentSave";
 
-                $.post(href, data, function(response) {
+                $.post(href, data, function (response) {
                     if (response.status == "ok") {
                         $loading.remove();
 
@@ -251,7 +259,7 @@ var CRMPaymentEdit = ( function($) {
                                 $saved = $(saved);
                             that.$footer.append($saved);
                             //
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 var is_exist = $.contains(document, $saved[0]);
                                 if (is_exist) {
                                     $saved.remove();
@@ -259,7 +267,7 @@ var CRMPaymentEdit = ( function($) {
                             }, 2000);
                         }
                     }
-                }).always( function() {
+                }).always(function () {
                     is_locked = false;
                 });
             }
@@ -281,7 +289,7 @@ var CRMPaymentEdit = ( function($) {
 
             if (ajax_errors) {
                 var keys = Object.keys(ajax_errors);
-                $.each(keys, function(index, name) {
+                $.each(keys, function (index, name) {
                     errors.push({
                         name: name,
                         value: ajax_errors[name]
@@ -289,7 +297,7 @@ var CRMPaymentEdit = ( function($) {
                 });
             }
 
-            $.each(errors, function(index, item) {
+            $.each(errors, function (index, item) {
                 var name = item.name,
                     text = item.value;
 
@@ -302,7 +310,7 @@ var CRMPaymentEdit = ( function($) {
 
                     $field
                         .addClass(error_class)
-                        .one("focus click", function() {
+                        .one("focus click", function () {
                             $field.removeClass(error_class);
                             $text.remove();
                         });
@@ -311,7 +319,7 @@ var CRMPaymentEdit = ( function($) {
         }
     };
 
-    CRMPaymentEdit.prototype.initDelete = function() {
+    CRMPaymentEdit.prototype.initDelete = function () {
         var that = this,
             is_locked = false;
 
@@ -326,24 +334,17 @@ var CRMPaymentEdit = ( function($) {
                 if (!is_locked) {
                     is_locked = true;
 
-                    var href = "?module=dialogConfirm",
-                        data = {
-                            title: that.locales["confirm_delete_title"],
-                            text: that.locales["confirm_delete_text"],
-                            ok_button: that.locales["confirm_delete_button"]
-                        };
-
-                    $.post(href, data, function(html) {
-                        new CRMDialog({
-                            html: html,
-                            onConfirm: function() {
-                                remove();
-                            }
-                        });
-                    }).always( function() {
-                        is_locked = false;
-                    })
+                    $.waDialog.confirm({
+                        title: '<i class=\"fas fa-exclamation-triangle smaller state-error\"></i> ' + that.locales["confirm_delete_title"],
+                        text: that.locales["confirm_delete_text"],
+                        success_button_title: that.locales["confirm_delete_button"],
+                        success_button_class: 'danger',
+                        cancel_button_title: that.locales["confirm_cancel_button"],
+                        cancel_button_class: 'light-gray',
+                        onSuccess: remove
+                    });
                 }
+                is_locked = false;
             }
 
             function remove() {
@@ -356,12 +357,12 @@ var CRMPaymentEdit = ( function($) {
                             company_id: that.company_id
                         };
 
-                    $.post(href, data, function(response) {
+                    $.post(href, data, function (response) {
                         if (response.status == "ok") {
                             var content_uri = $.crm.app_url + "settings/payment/?company=" + that.company_id;
                             $.crm.content.load(content_uri);
                         }
-                    }).always( function() {
+                    }).always(function () {
                         is_locked = false;
                     })
                 }

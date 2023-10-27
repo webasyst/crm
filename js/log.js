@@ -1,4 +1,5 @@
 /** Section controller */
+// TODO: remove file
 var CRMLog = ( function($) {
 
     var ActivityLazyLoading = ( function($) {

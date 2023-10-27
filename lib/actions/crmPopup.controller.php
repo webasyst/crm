@@ -53,7 +53,7 @@ class crmPopupController extends crmJsonController
 
                 $url = wa()->getAppUrl('crm').'reminder/show/'.$reminder['id'];
                 $reminder_id = $reminder['id'];
-                $content = htmlspecialchars($reminder['content']);
+                $content = $reminder['content'];
                 $time_left = $this->timeLeft($reminder['due_datetime']);
 
                 $contact_id = $reminder['contact_id'];
@@ -85,6 +85,10 @@ class crmPopupController extends crmJsonController
                     $contact_show = null;
                 }
 
+                $tmz = wa()->getUser()->get('timezone');
+                $tmz = (empty($tmz) ? waRequest::cookie('tz') : $tmz);
+                $reminder_time = waDateTime::date('H:i', $reminder['due_datetime'], $tmz);
+
                 $body = '<div class="c-notifi-body">
                             '.$contact_show.'
                             <div class="c-notifi-content">
@@ -98,7 +102,7 @@ class crmPopupController extends crmJsonController
                 $html = '<div class="crm-notification-popup" data-item="reminder-'.$reminder_id.'">
                             <div class="c-notifi-head">
                                 <i class="icon16 clock"></i>
-                                <span class="c-notifi-title">'._w('Reminder').' '.date('H:i', strtotime($reminder['due_datetime'])).'</span>
+                                <span class="c-notifi-title">'._w('Reminder').' '.$reminder_time.'</span>
                                 <i class="icon16 c-notify-close" title="'._w('Close').'"></i>
                             </div>
                             <div class="c-notifi-link">
@@ -186,7 +190,7 @@ class crmPopupController extends crmJsonController
                 $message = $res ? $res : $message;
             }
 
-            $template = wa()->getAppPath("templates/actions/popup/PopupMessage.html", 'crm');
+            $template = wa()->getAppPath("templates/actions-legacy/popup/PopupMessage.html", 'crm');
             $assign = array(
                 'message'     => $message,
                 'contact'     => $contact,

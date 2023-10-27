@@ -1,0 +1,137 @@
+{$_change_is_locked = false}
+{if !empty($is_shop_supported) && !empty($use_shop_currencies)}
+    {$_change_is_locked = true}
+{/if}
+
+{function _renderCurrency}
+    {$_is_primary = ($_currency && $_currency.code === $currency.code)}
+    <li class="c-currency" {if !empty($_currency.code)}data-code="{$_currency.code}"{/if} data-title="{if $_currency}{$_currency.title|escape}{/if}">
+        <div class="c-layout">
+            <div class="c-column middle c-column-name">
+                <i class="icon16 sort js-sort-toggle"></i>
+                <span class="c-name js-name">{if !empty($_currency)}{$_currency.title|escape}{/if}</span>
+                <span class="c-sign hint js-sign">{if !empty($_currency)}{$_currency.sign|escape}{/if}</span>
+            </div>
+            <div class="c-column middle c-column-rate">
+                {if $_is_primary}
+                    <span class="gray italic">[`Primary currency`]</span>
+                {else}
+                    <span>1</span>
+                    <span class="c-current-code js-current-code">{if !empty($_currency)}{$_currency.code}{/if}</span>
+                    <span>=</span>
+                    <span class="c-visible">
+                        <span class="js-rate-text">{if $_currency}{$_currency.rate|default:"1" + 0}{/if}</span>
+                    </span>
+                    <span class="c-hidden">
+                        <input class="c-rate js-rate" name="rate" type="text" value="{if $_currency}{$_currency.rate|default:"1" + 0}{else}0{/if}">
+                    </span>
+                    <span class="c-primary-code js-primary-code">{if !empty($currency)}{$currency.code}{/if}</span>
+                {/if}
+            </div>
+            <div class="c-column middle right c-column-actions">
+                {if !$_is_primary && empty($_change_is_locked)}
+                    <div class="c-actions">
+                        <span class="c-visible">
+                            <i class="icon16 settings js-edit-currency" title="[`Edit currency`]"></i>
+                            <i class="icon16 delete js-remove-currency" title="[`Remove currency`]"></i>
+                        </span>
+                        <span class="c-hidden">
+                            <i class="icon16 disk js-save-currency"></i>
+                            [`or`]
+                            <a class="inline-link js-cancel" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                        </span>
+                    </div>
+                {/if}
+            </div>
+        </div>
+
+    </li>
+{/function}
+
+{capture assign="_currency_template_html"}{_renderCurrency _currency=[]}{/capture}
+
+<div class="c-currencies-page" id="c-currencies-page">
+
+    <div class="c-layout">
+        <div class="c-column">
+            <h1 class="c-page-header">[`Currencies`]</h1>
+        </div>
+        <div class="c-column middle right">
+            {if empty($_change_is_locked)}
+                <a class="inline-link js-change-primary" href="javascript:void(0);"><i class="icon16 dollar"></i><b><i>[`Change primary currency`]</i></b></a>
+            {/if}
+        </div>
+    </div>
+
+    {if $is_shop_supported}
+        <div class="c-shop-currency-toggle">
+            <input class="js-shop-currency-toggle" id="js-shop-currency-ibutton" type="checkbox" name="use_shop_currencies" data-use-shop="{if !empty($use_shop_available)}true{/if}" {if $use_shop_currencies}checked{/if}>
+            <label for="js-shop-currency-ibutton">[`Copy Shop-Script currency settings`]</label>
+        </div>
+        {if $use_shop_currencies}
+            <div class="block hint">[`Currency exchange rates changed in Shop-Script settings are updated in CRM in 1 minute.`]</div>
+        {/if}
+    {/if}
+
+    <ul class="menu-v c-currencies-list js-currencies-list">
+        {foreach $currencies as $_currency}
+            {_renderCurrency _currency=$_currency}
+        {/foreach}
+    </ul>
+
+    <div class="c-add-wrapper">
+        <select class="js-add-currency" {if !empty($_change_is_locked)}disabled{/if}>
+            <option value="" selected disabled>[`Add currency`]...</option>
+            {foreach $currency_list as $_code => $_title}
+                <option value="{$_code}" {if !empty($currencies[$_code])}disabled{/if}>{$_code|escape} {$_title['title']|escape}</option>
+            {/foreach}
+        </select>
+    </div>
+
+    {capture assign="_copy_shop_currencies_dialog_html"}
+        <div class="crm-dialog-wrapper c-copy-shop-currencies-dialog" id="c-copy-shop-currencies-dialog">
+            <div class="crm-dialog-background"></div>
+            <div class="crm-dialog-block">
+                <form>
+                    <header class="crm-dialog-header">
+                        <h1>[`Copy Shop-Script currency settings`]</h1>
+                    </header>
+
+                    <div class="crm-dialog-content">
+                        <p>
+                            [`New main currency rate`]: 1&nbsp;{$currency.code}&nbsp;=&nbsp;<input class="c-field small" type="number" name="rate" required>&nbsp;{$shop_currency.code}
+                        </p>
+                    </div>
+
+                    <footer class="crm-dialog-footer">
+                        <div class="crm-actions">
+                            <input class="button red crm-button js-confirm-button" type="submit" value="[`Copy`]">
+                            <span style="margin: 0 4px;">[`or`]</span>
+                            <a class="js-close-dialog js-cancel-button" href="javascript:void(0);">[`cancel`]</a>
+                        </div>
+                    </footer>
+                </form>
+            </div>
+        </div>
+    {/capture}
+
+    <script>
+        (function ($) {
+            new CRMSettingsCurrencies({
+                $wrapper: $("#c-currencies-page"),
+                currency_template_html: {$_currency_template_html|trim|strip|json_encode},
+                copy_shop_currencies_dialog_html: {$_copy_shop_currencies_dialog_html|trim|strip|json_encode},
+                currencies_is_locked: {if !empty($_change_is_locked)}true{else}false{/if},
+                locales: {
+                    confirm_delete_title: "[`Delete currency`] <span class=\"gray\">%currency_name</span>",
+                    confirm_delete_text: "<p>[`After deletion it will be not possible to set deal and invoice amount in that currency.`]</p><p>[`Currency in existing deals and invoices will not be affected.`]</p>",
+                    confirm_delete_button: "[`Delete`]",
+                    confirm_shop_title: "[`Copy Shop-Script currency settings`]",
+                    confirm_shop_text: "[`Are you sure?`]",
+                    confirm_shop_button: "[`Copy settings`]"
+                },
+                currencies: {$currency_list|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

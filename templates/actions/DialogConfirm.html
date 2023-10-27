@@ -1,20 +1,19 @@
 {strip}
 
-<div class="crm-dialog-wrapper crm-confirm-dialog" id="crm-confirm-dialog">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
-        <header class="crm-dialog-header">
+<div class="dialog crm-confirm-dialog" id="crm-confirm-dialog">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <header class="dialog-header">
             <h1>{if !empty($title)}{$title}{else}%title%{/if}</h1>
         </header>
 
-        <div class="crm-dialog-content js-content">{if !empty($text)}{$text}{else}%text%{/if}</div>
+        <div class="dialog-content js-content">{if !empty($text)}{$text}{else}%text%{/if}</div>
 
-        <footer class="crm-dialog-footer">
+        <footer class="dialog-footer">
             <div class="crm-actions">
-                <input class="button red crm-button js-confirm-dialog js-confirm-button" type="button" value="{if !empty($ok_button)}{$ok_button}{else}%button%{/if}">
-                <i class="icon16 loading crm-loading" style="margin-top: 7px; margin-left: 2px; display: none;"></i>
-                <span style="margin: 0 4px;">[`or`]</span>
-                <a class="js-close-dialog js-cancel-dialog" href="javascript:void(0);">[`cancel`]</a>
+                <button class="button red crm-button js-confirm-dialog js-confirm-button custom-mr-8">{if !empty($ok_button)}{$ok_button}{else}%button%{/if}</button>
+                <a class="button light-gray js-close-dialog js-cancel-dialog" href="javascript:void(0);">[`Cancel`]</a>
+                <span class="icon loading crm-loading" style="margin-top: 7px; margin-left: 2px; display: none;"><i class="fas fa-spinner fa-spin" ></i></span>
             </div>
         </footer>
     </div>

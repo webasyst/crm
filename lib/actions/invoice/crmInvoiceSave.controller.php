@@ -60,10 +60,20 @@ class crmInvoiceSaveController extends crmJsonController
         $invoice_data['update_datetime'] = date('Y-m-d H:i:s');
         if ($invoice_id) {
             $im->updateById($invoice_id, $invoice_data);
+            $this->getLogModel()->log(
+                'invoice_updated',
+                $invoice_data['contact_id'],
+                $invoice_id
+            );
         } else {
             $invoice_data['create_datetime'] = date('Y-m-d H:i:s');
             $invoice_data['creator_contact_id'] = wa()->getUser()->getId();
             $invoice_id = $im->insert($invoice_data);
+            $this->getLogModel()->log(
+                'invoice_add',
+                $invoice_data['contact_id'],
+                $invoice_id
+            );
         }
 
         // Insert/update items

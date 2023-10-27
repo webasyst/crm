@@ -1,0 +1,190 @@
+{$_is_admin = $wa->user()->isAdmin($wa->app())}
+
+<div class="c-sidebar-block" id="c-sidebar-block">
+
+    <div class="block">
+        <ul class="menu-v with-icons">
+
+            <!-- CORE -->
+            <li{if waRequest::param('module') == 'contact'} class="selected"{/if}>
+                {if isset($contacts_count)}
+                    <span class="count js-count">{$contacts_count}</span>
+                {/if}
+                <a href="{$wa_app_url}contact/">
+                    <i class="icon16 user"></i>[`Contacts`]
+                    {if !empty($contacts_new_count)}
+                        <span class="highlighted small bold black c-indicator js-indicator">+{$contacts_new_count}</span>
+                    {/if}
+                </a>
+            </li>
+
+            {if !empty($deals_has_access)}
+                <li{if waRequest::param('module') == 'deal'} class="selected"{/if}>
+                    {if isset($deals_count)}
+                        <span class="count js-count">{$deals_count}</span>
+                    {/if}
+                    <a href="{$wa_app_url}deal/">
+                        <i class="icon16 funnel"></i>[`Deals`]
+                        {if !empty($deals_new_count)}
+                            <span class="highlighted small bold black c-indicator js-indicator">+{$deals_new_count}</span>
+                        {/if}
+                    </a>
+                </li>
+            {/if}
+
+            <li{if waRequest::param('module') == 'reminder'} class="selected"{/if}>
+                {if !empty($reminders_count)}
+                    <span class="count js-count indicator {$reminders_state|default:""}">{$reminders_count}</span>
+                {/if}
+                <a href="{$wa_app_url}reminder/">
+                    <i class="icon16 clock"></i>[`Reminders`]
+                    {if !empty($reminders_new_count)}
+                        <span class="highlighted small bold black c-indicator js-indicator">+{$reminders_new_count}</span>
+                    {/if}
+                </a>
+            </li>
+            {if $can_manage_invoices}
+                <li{if waRequest::param('module') == 'invoice'} class="selected"{/if}>
+                    {if isset($invoices_count)}
+                        <span class="count js-count">{$invoices_count|default:""}</span>
+                    {/if}
+                    <a href="{$wa_app_url}invoice/">
+                        <i class="icon16 invoice"></i>[`Invoices`]
+                        {if !empty($invoices_new_count)}
+                            <span class="highlighted small bold black c-indicator js-indicator">+{$invoices_new_count}</span>
+                        {/if}
+                    </a>
+                </li>
+            {/if}
+
+            {* @event backend_sidebar.%plugin_id%.top_li *}
+            {foreach $backend_sidebar as $_}{ifset($_.top_li)}{/foreach}
+
+            <li class="bottom-padded {if $wa->get('_screen') == 'live'} selected{/if}">
+                <a href="{$wa_app_url}live/"><i class="icon16 lightning"></i>[`Live`]</a>
+            </li>
+
+            <!-- EXTRAS -->
+
+            {if !empty($calls_has_access)}
+                <li>
+                    <span class="count">{if isset($calls_count)}{$calls_count}{/if}</span>
+                    <a href="{$wa_app_url}call/"><i class="icon16 phone"></i>[`Calls`]
+                        {if $calls_new_count}
+                            <span class="highlighted small bold black">+{$calls_new_count}</span>
+                        {/if}
+                    </a>
+                </li>
+            {/if}
+
+            <li>
+                <span class="count">{if isset($messages_count)}{$messages_count}{/if}</span>
+                <a href="{$wa_app_url}message/"><i class="icon16 email"></i>[`Messages`]
+                    {if $messages_new_count}
+                        <span class="highlighted small bold black">+{$messages_new_count}</span>
+                    {/if}
+                </a>
+            </li>
+
+            <li>
+                <a href="{$wa_app_url}report/"><i class="icon16 reports"></i>[`Reports`]</a>
+            </li>
+            {* @event backend_sidebar.%plugin_id%.middle_li *}
+            {foreach $backend_sidebar as $_}{ifset($_.middle_li)}{/foreach}
+
+        </ul>
+    </div>
+
+    {* SEARCH *}
+    <div class="block c-search-wrapper">
+        <form class="c-search-form js-search-form">
+            <input class="c-search-field js-search-field" type="text" placeholder="[`Search`]">
+            <input class="c-search-submit" type="submit" value="">
+        </form>
+        <a href="{$wa_app_url}contact/search/" class="small">[`Advanced contact search`]</a>
+    </div>
+
+    {if !empty($recent)}
+        <div class="block c-recent-wrapper js-recent-wrapper {if $recent_block_hidden}js-recent-fold-hidden{else}js-recent-fold-visible{/if}">
+            <h5 class="heading top-padded {if $recent_block_hidden}js-recent-heading-hidden{else}js-recent-heading-visible{/if}">
+                <i class="icon16 {if $recent_block_hidden}rarr{else}darr{/if}"></i>
+                <b>[`Recent`]</b>
+            </h5>
+
+            <div class="c-recent-content">
+                {function _renderRecent}
+                    {strip}
+                    {$_is_deal = ( $_recent.contact_id < 0 )}
+                    {$_contact = $_recent.contact}
+                    {$_deal = $_recent.deal}
+                    {$_photo = $_contact.photo_url_16}
+
+                    <li data-id="{$_recent.contact_id}">
+                        {if !empty($_is_deal) && !empty($_recent.deal.amount) && $_recent.deal.amount != 0}
+                            <span class="count c-visible">
+                                {waCurrency::format('%k{h}', $_recent.deal.amount, $_recent.deal.currency_id)}
+                            </span>
+                        {/if}
+                        <a href="{$wa_app_url}{$_recent.uri}">
+                            {if !empty($_photo)}
+                                <i class="icon16 userpic20" style="background-image: url({$_photo});"></i>
+                            {/if}
+                            <i class="icon16 c-hidden {if empty($_recent.is_pinned)}star-empty js-pin-recent{else}star js-unpin-recent{/if}"></i>
+                            <span class="c-name">{$wa->crm->contactName($_recent.name)}</span>
+                        </a>
+                    </li>
+                    {/strip}
+                {/function}
+
+                <ul class="menu-v with-icons collapsible js-pinned-list">
+                    {foreach $recent as $_recent}
+                        {if !empty($_recent.is_pinned)}
+                            {_renderRecent _recent=$_recent}
+                        {/if}
+                    {/foreach}
+                </ul>
+                <ul class="menu-v with-icons collapsible js-recent-list">
+                    {$_i = 0}
+                    {foreach $recent as $_recent}
+                        {if $_i >= 10}{break}{/if}
+
+                        {if empty($_recent.is_pinned)}
+                            {_renderRecent _recent=$_recent}
+                            {$_i = $_i + 1}
+                        {/if}
+                    {/foreach}
+                </ul>
+            </div>
+        </div>
+    {/if}
+
+
+    <div class="hr"></div>
+    <div class="block">
+        <ul class="menu-v with-icons">
+            
+            {* @event backend_sidebar.%plugin_id%.bottom_li *}
+            {foreach $backend_sidebar as $_}{ifset($_.bottom_li)}{/foreach}
+
+            {if $_is_admin}
+                <li>
+                    <a href="{$wa_app_url}plugins/"><i class="icon16 plugins"></i>[`Plugins`]</a>
+                </li>
+            {/if}
+
+            <li>
+                <a href="{$wa_app_url}settings/"><i class="icon16 settings"></i>[`Settings`]</a>
+            </li>
+        </ul>
+    </div>
+
+
+    <script>
+        ( function($) {
+            $.crm.sidebar = new CRMSidebar({
+                $wrapper: $("#c-sidebar-block"),
+                $ui: '{$wa->whichUI()}'
+            });
+        })(jQuery);
+    </script>
+</div>

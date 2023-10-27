@@ -1,0 +1,123 @@
+<div class="crm-dialog-wrapper c-vault-edit-dialog" id="c-vault-edit-dialog">
+    <div class="crm-dialog-background"></div>
+    <div class="crm-dialog-block">
+
+        <form action="">
+            <header class="crm-dialog-header">
+                <h1>{if !empty($vault.id)}<span class="gray">[`Edit vault`]</span> {$vault.name|escape}{else}[`Create vault`]{/if}</h1>
+            </header>
+
+            <div class="crm-dialog-content">
+                <div class="field">
+                    <div class="name">[`Vault name`]</div>
+                    <div class="value">
+                        <input type="text" name="data[name]" value="{$vault.name|escape|default:""}" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">[`Style`]</div>
+                    <div class="value">
+
+                        <div class="c-color-toggle js-color-toggle">
+                            <input class="c-field js-field" type="text" name="data[color]" value="{$vault.color|default:""|escape}">
+                            <i class="icon16 color c-toggle js-toggle" style="background: {$vault.color|default:""|escape}"></i>
+                            <div class="c-color-picker js-color-picker"></div>
+                        </div>
+                        <p class="hint">[`background color`]</p>
+
+                    </div>
+                </div>
+
+                {if !empty($groups)}
+                    <div class="field">
+                        <div class="name">[`Access`]</div>
+
+                        <div class="value">
+
+                            <p class="hint" style="margin: 0 0 4px;">[`Select user groups which you want to be able to access this vault.`]</p>
+
+                            {function name="_renderGroup" _group=[]}
+                                <li>
+                                    <label>
+                                        <input type="checkbox" name="groups[{$_group.id}]" {if $_group.rights >= 0 && $_group.rights !== null}checked{/if} {if $_group.rights > 2}disabled{/if}>
+                                        <span>{$_group.name|escape}</span>
+                                        {*{if $_group.rights > 2}*}
+                                            {*<i class="hint">([`Full access to CRM app`])</i>*}
+                                        {*{else if $_group.rights === null}*}
+                                            {*<i class="hint">([`No access to CRM app yet`])</i>*}
+                                        {*{/if}*}
+                                    </label>
+                                </li>
+                            {/function}
+
+                            {if !empty($groups.backend)}
+                                <ul class="menu-v compact" style="margin: 0;">
+                                    {foreach $groups.backend as $_group}
+                                        {_renderGroup _group=$_group}
+                                    {/foreach}
+                                </ul>
+                            {/if}
+
+                            {if !empty($groups.no_access)}
+                                <div class="c-no-access-wrapper js-no-access-wrapper">
+                                    <div class="c-visible">
+                                        <a href="javascript:void(0);" class="inline-link js-show-access-list small"><b><i>[`Show groups without access to CRM app`]</i></b></a>
+                                    </div>
+                                    <div class="c-hidden">
+                                        <a href="javascript:void(0);" class="inline-link js-hide-access-list small"><b><i>[`Hide groups without access to CRM app`]</i></b></a>
+                                        <ul class="menu-v compact" style="margin: 10px 0 0;">
+                                            {foreach $groups.no_access as $_group}
+                                                {_renderGroup _group=$_group}
+                                            {/foreach}
+                                        </ul>
+                                    </div>
+                                </div>
+                            {/if}
+
+                        </div>
+                    </div>
+                {else}
+                    <div class="clear"></div>
+                    <p class="hint">{sprintf("No group have access to CRM app. Customize group access rights in <a href=\"%s\">Team app.</a>", "{$wa_backend_url}team/")}</p>
+                {/if}
+            </div>
+
+            <footer class="crm-dialog-footer">
+                <div class="c-layout">
+                    <div class="c-column">
+                        <input class="button green crm-button js-some-action" type="submit" value="[`Save`]">
+                        <span style="margin: 0 4px;">[`or`]</span>
+                        <a class="inline-link js-close-dialog" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                    </div>
+                    {if !empty($vault.id)}
+                        <div class="c-column middle right">
+                            <a class="inline-link js-vault-delete" href="javascript:void(0);"><i class="icon16 delete"></i><b><i>[`delete`]</i></b></a>
+                        </div>
+                    {/if}
+                </div>
+            </footer>
+
+            <input type="hidden" name="id" value="{$vault.id|default:""}">
+        </form>
+
+        {$_confirm_delete_text = "{sprintf_wp('There are no contacts in vault “%s”. Vault deleting cause no effect to access any contacts data.', "{$vault.name|escape|default:""}")}"}
+        {if !empty($vault.count)}
+            {$_confirm_delete_text = "{sprintf(_w('There are %d contact in vault “%%s”.', 'There are %d contacts in vault “%%s”.', $vault.count), "{$vault.name|escape|default:""}")} [`Vault deleting cause free access to this contacts data for all backend users.`]"}
+        {/if}
+
+        <script>
+            ( function($) {
+                new CRMVaultEdit({
+                    $wrapper: $("#c-vault-edit-dialog"),
+                    vault_id: {if !empty($vault.id)}{$vault.id}{else}false{/if},
+                    count: {if !empty($vault.count)}{$vault.count}{else}false{/if},
+                    locales: {
+                        confirm_delete_title: "<span class=\"gray\">[`Delete`]</span> &laquo;{$vault.name|escape|default:""}&raquo;",
+                        confirm_delete_text: {$_confirm_delete_text|json_encode},
+                        confirm_delete_button: "[`Delete`]"
+                    }
+                })
+            })(jQuery);
+        </script>
+    </div>
+</div>

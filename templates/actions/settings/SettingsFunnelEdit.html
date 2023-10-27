@@ -78,7 +78,7 @@
 
                         <h3>[`Stages`]</h3>
 
-                        <ul class="menu-v compact c-stages-list">
+                        <ul class="menu-v menu compact c-stages-list">
                             {if !empty($stages)}
                                 {foreach $stages as $_stage}
                                     {_renderStage _stage=$_stage}
@@ -103,8 +103,7 @@
                     <div class="c-column middle">
 
                         <input class="button green crm-button" type="submit" value="{if !empty($funnel.id)}[`Save`]{else}[`Create`]{/if}">
-                        <span style="margin: 0 4px;">[`or`]</span>
-                        <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                        <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
 
                     </div>
                     <div class="c-column middle right">

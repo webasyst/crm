@@ -11,7 +11,7 @@ function checkPopup(crm_url) {
         $.ajax({
             type: 'get',
             dateType: 'json',
-            url: crm_url+'?module=popup&background_process=1',
+            url: crm_url+'?module=popup20&background_process=1',
             success: function(json) {
                 if (json.data && json.data.length != 0) {
                     $("#crm-popup-area").empty();

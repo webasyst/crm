@@ -1,86 +1,98 @@
 {$class_id = 'js-create-deal-include-row'}
 {$wrapper_id = uniqid($class_id)}
-<div class="crm-field c-create-deal-include-row {$class_id}" id="{$wrapper_id}">
+<div class="field crm-field c-create-deal-include-row {$class_id}" id="{$wrapper_id}">
     {$_name = $_inc_options.name|default:''}
     {if $_name}
-        <div class="crm-name-col">{$_name}</div>
+        <div class="name crm-name-col">{$_name}</div>
     {/if}
-    <div class="crm-input-col-1">
-        <div class="c-funnels-list js-funnels-list crm-input-wrapper">
-            {$_active_funnel = reset($funnels)}
-            {if !empty($funnel_id) && !empty($funnels[$funnel_id])}
-                {$_active_funnel = $funnels[$funnel_id]}
-            {/if}
+    <div class="value">
+        <div class="flexbox middle wrap space-16">
+            <div class="crm-input-col-1">
+                <div class="c-funnels-list js-funnels-list crm-input-wrapper">
+                    {$funnel_unic_id = uniqid('funnel_dropdown')}
+                    {$_active_funnel = reset($funnels)}
+                    {if !empty($funnel_id) && !empty($funnels[$funnel_id])}
+                        {$_active_funnel = $funnels[$funnel_id]}
+                    {/if}
+                    <div class="dropdown" id="{$funnel_unic_id}">
+                        <button class="dropdown-toggle button light-gray js-visible-link" type="button" style="word-break: break-word;">
+                            {if !empty($_active_funnel.color)}
+                                {*<i class="icon funnel-state svg-icon" data-color="{$_active_funnel.color}"></i>*}
+                                <i class="fas fa-circle funnel-state" style="color: {$_active_funnel.color}"></i>
+                            {/if}
+                                <span class="js-name">{$_active_funnel.name|escape}</span>
+                        </button>
+                        <div class="dropdown-body">
+                            <ul class="menu with-icons">
+                                {strip}
+                                    {foreach $funnels as $_funnel}
+                                        <li class="{if $funnel_id == $_funnel.id}selected{/if}">
+                                            <a href="javascript:void(0);" data-id="{$_funnel.id}">
+                                                {if !empty($_funnel.color)}
+                                                {*<i class="icon funnel-state svg-icon" data-color="{$_funnel.color}"></i>*}
+                                                <i class="fas fa-circle funnel-state" style="color: {$_funnel.color}"></i>
+                                                {/if}
+                                                <span class="js-name">{$_funnel.name|escape}</span>
+                                            </a>
+                                        </li>
+                                    {/foreach}
+                                {/strip}
+                            </ul>
+                            <input class="js-field js-funnel-id" name="{input_name id='funnel_id'}" type="hidden" value="{$_active_funnel.id}">
+                        </div>
+                        <script>
+                            ( function($) {
+                                $("#{$funnel_unic_id}").waDropdown();
+                            })(jQuery);
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="crm-input-col-2">
+                <div class="c-stages-list js-stages-list crm-input-wrapper">
 
-            <ul class="menu-h dropdown">
-                <li>
-                    <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
-                                <span class="js-text">
-                                    {if !empty($_active_funnel.color)}
-                                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_funnel.color}"></i>
-                                    {/if}
-                                    <b><i class="js-name">{$_active_funnel.name|escape}</i></b>
-                                </span>&nbsp;<i class="icon10 darr"></i>
-                    </a>
-                    <ul class="menu-v with-icons">
-                        {strip}
-                            {foreach $funnels as $_funnel}
-                                <li class="{if $funnel_id == $_funnel.id}selected{/if}">
-                                    <a href="javascript:void(0);" data-id="{$_funnel.id}">
-                                        {if !empty($_funnel.color)}
-                                            <i class="icon16 funnel-state svg-icon" data-color="{$_funnel.color}"></i>
-                                        {/if}
-                                        <b><i>{$_funnel.name|escape}</i></b>
-                                    </a>
-                                </li>
-                            {/foreach}
-                        {/strip}
-                    </ul>
-                    <input class="js-field js-funnel-id" name="{input_name id='funnel_id'}" type="hidden" value="{$_active_funnel.id}">
-                </li>
-            </ul>
+                    {$_active_stage = reset($stages)}
+                    {if !($stage_id > 0)}
+                        {$stage_id = 0}
+                    {/if}
+                    {if !empty($stage_id) && !empty($stages[$stage_id])}
+                        {$_active_stage = $stages[$stage_id]}
+                    {/if}
+                    {$stage_unic_id = uniqid('stage_dropdown')}
 
-        </div>
-    </div>
-    <div class="crm-input-col-2">
-        <div class="c-stages-list js-stages-list crm-input-wrapper">
+                    <div class="dropdown" id="{$stage_unic_id}">
+                        <button class="dropdown-toggle button light-gray js-visible-link" type="button" style="word-break: break-word;">
+                            {if !empty($_active_stage.color)}
+                                <i class="fas fa-circle funnel-state" style="color: {$_active_stage.color}"></i>
+                            {/if}
+                                <span class="js-name">{$_active_stage.name|escape}</span>
+                        </button>
+                        <div class="dropdown-body">
+                            <ul class="menu with-icons">
+                            {strip}
+                                {foreach $stages as $_id => $_stage}
+                                    <li class="{if $stage_id == $_id}selected{/if}">
+                                        <a href="javascript:void(0);" data-id="{$_id}">
+                                            {if !empty($_stage.color)}
+                                            <i class="fas fa-circle funnel-state" style="color: {$_stage.color}"></i>
+                                            {/if}
+                                            <span class="js-name">{$_stage.name|escape}</span>
+                                        </a>
+                                    </li>
+                                {/foreach}
+                            {/strip}
+                            </ul>
+                            <input class="js-field js-stage-id" name="{input_name id='stage_id'}" type="hidden" value="{$_active_stage.id}">
+                        </div>
+                        <script>
+                            ( function($) {
+                                $("#{$stage_unic_id}").waDropdown();
+                            })(jQuery);
+                        </script>
+                    </div>
 
-            {$_active_stage = reset($stages)}
-            {if !($stage_id > 0)}
-                {$stage_id = 0}
-            {/if}
-            {if !empty($stage_id) && !empty($stages[$stage_id])}
-                {$_active_stage = $stages[$stage_id]}
-            {/if}
-
-            <ul class="menu-h dropdown">
-                <li>
-                    <a class="inline-link c-visible-link js-visible-link" href="javascript:void(0);">
-                                <span class="js-text">
-                                    {if !empty($_active_stage.color)}
-                                        <i class="icon16 funnel-state svg-icon" data-color="{$_active_stage.color}"></i>
-                                    {/if}
-                                    <b><i class="js-name">{$_active_stage.name|escape}</i></b>
-                                </span>&nbsp;<i class="icon10 darr"></i>
-                    </a>
-                    <ul class="menu-v with-icons">
-                        {strip}
-                            {foreach $stages as $_id => $_stage}
-                                <li class="{if $stage_id == $_id}selected{/if}">
-                                    <a href="javascript:void(0);" data-id="{$_id}">
-                                        {if !empty($_stage.color)}
-                                            <i class="icon16 funnel-state svg-icon" data-color="{$_stage.color}"></i>
-                                        {/if}
-                                        <b><i>{$_stage.name|escape}</i></b>
-                                    </a>
-                                </li>
-                            {/foreach}
-                        {/strip}
-                    </ul>
-                    <input class="js-field js-stage-id" name="{input_name id='stage_id'}" type="hidden" value="{$_active_stage.id}">
-                </li>
-            </ul>
-
+                </div>
+            </div>
         </div>
     </div>
     <script>

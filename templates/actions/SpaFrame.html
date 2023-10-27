@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html style="background-color: transparent;">
+<head>
+    <title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <base target="_top" />
+    {$wa->css()}
+    <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
+<script>
+if (window.parent.appState) {
+    window.appState = window.parent.appState;
+} else {
+    window.appState = {
+        baseUrl: '{$wa_app_url}',
+        apiEndpoint: '{$wa_url}api.php',
+        token: '{$spa_api_token}',
+        lang: '{$spa_locale}',
+        can_init_call: false,
+        is_sms_configured: false,
+        is_email_configured: false,
+        user: {
+            id: {$wa->user()->getID()},
+            name: '{$wa->user()->getName()|escape:"javascript"}',
+            userpic: '{$wa->user()->getPhoto(64)}'
+        },
+        counters: {
+            contacts: {
+                {* update in sidebar template *}
+                total: 0
+            }
+        }
+    };
+}
+</script>
+
+<script>
+    window.parent.document.documentElement.addEventListener('wa-theme-change', (event) => {
+        document.documentElement.setAttribute('data-theme', event.target.getAttribute('data-theme'));
+    })
+</script>
+
+<script type="module" crossorigin src="{$wa_app_static_url}client/index.js?v={$wa->version()}"></script>
+<link rel="stylesheet" href="{$wa_app_static_url}client/index.css?v={$wa->version()}">
+<script type="module">
+    if ('emitter' in window) {
+        window.emitter.on('spa:navigate', (path) => {
+            if (new RegExp('/frame/\.+').test(path)) {
+                return;
+            }
+            if (window.parent && window.frameElement) {
+                window.parent.location = ('{$wa_app_url}' + path).replace('//', '/');
+            }
+        });
+
+        window.emitter.on('spa:closeModal', () => {
+            var $dialog_parent = window.parent.$('.dialog');
+            if ($dialog_parent) {
+                var dialog_instance = $dialog_parent.data('dialog');
+                if (dialog_instance) {
+                    dialog_instance.close();
+                }
+            }
+        });
+        window.emitter.on('spa:beforeShowModal', () => {
+            if (window.frameElement) {
+                window.frameElement.dispatchEvent(new Event('beforeShowModal'))
+
+            }
+        });
+        window.emitter.on('spa:beforeCloseModal', () => {
+            if (window.frameElement) {
+                window.frameElement.dispatchEvent(new Event('beforeCloseModal'))
+
+            }
+        });
+    }
+</script>
+</head>
+<body class="hide-scrollbar" style="background-color: transparent;">
+    <div id="app"></div>
+</body>
+</html>

@@ -1,0 +1,240 @@
+{strip}
+
+    {if empty($company.id)}
+        {$_new_company = [
+                "0" => [
+                "id" => false,
+                "name" => "[`New company`]"
+            ]
+        ]}
+        {$companies = $_new_company + $companies}
+    {/if}
+    <div class="c-companies-page" id="c-companies-page">
+
+        {* HEADER *}
+        <header class="c-companies-header">
+            <h1 class="c-page-header">[`Companies`]</h1>
+            <div class="c-tabs-wrapper">
+                <div class="c-companies-wrapper">
+                    <ul class="tabs c-companies-list">
+                        {foreach $companies as $_company}
+                            {$_is_selected = ($company.id == $_company.id)}
+                            <li class="c-company {if $_is_selected}selected{/if}" data-id="{$_company.id|default:""}">
+                                <a class="c-link" href="{if !$_is_selected}{$wa_app_url}settings/companies/{$_company.id}/{else}javascript:void(0);{/if}">
+                                    <span class="c-name">{$_company.name|escape}</span>
+                                </a>
+                            </li>
+                        {/foreach}
+                    </ul>
+                    <span class="c-action right" title="[`Next`]"></span>
+                    <span class="c-action left" title="[`Before`]"></span>
+                </div>
+                <div class="c-add-wrapper">
+                    <a href="{$wa_app_url}settings/companies/new/"><i class="icon16 add"></i> [`Add new company`]</a>
+                </div>
+            </div>
+        </header>
+
+        <form class="js-form">
+            <section class="c-company-section block double-padded">
+                <div class="field">
+                    <div class="name">[`Company name`]</div>
+                    <div class="value">
+                        <input class="large" type="text" name="company[name]" value="{$company.name|escape}" placeholder="[`Name`]" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">[`Logo`]</div>
+                    <div class="value">
+                        <div class="c-image-section js-logo-section {if empty($logo_url)}is-empty{/if}">
+
+                            {* IMAGE *}
+                            <div class="c-image-wrapper">
+                                <img class="js-image" src="{$logo_url}?{rand(1,1000)}" alt="">
+                            </div>
+
+                            {* DROPAREA + INPUT *}
+                            <div class="c-drop-area js-drop-area">
+                                <div class="c-drop-hint">[`Drag-n-drop company logo here`]</div>
+                                <input class="js-field" type="file" name="{if !empty($logo_url)}company[logo]{/if}" title="[`Change logo`]">
+                            </div>
+
+                            {* DELETE *}
+                            <span class="c-delete-image js-delete-logo" title="[`Delete logo`]">
+                            <i class="icon16 times"></i>
+                        </span>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">[`Phone`]</div>
+                    <div class="value">
+                        <input type="text" name="company[phone]" value="{$company.phone|escape}" placeholder="[`Phone`]">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">[`Address`]</div>
+                    <div class="value">
+                        <textarea name="company[address]" placeholder="[`Address`]">{$company.address|escape}</textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">[`Tax name`]</div>
+                    <div class="value">
+                        <input class="js-tax-name" type="text" name="company[tax_name]" value="{$company.tax_name|escape}" placeholder="[`Tax name`]"
+                               {if !empty($company.tax_options)}required{/if}>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="name">[`Tax options`]</div>
+                    <div class="value">
+
+                        {$_types = [
+                        "INCLUDE" => _w('include'),
+                        "APPEND" => _w('append'),
+                        "NONE" => _w('none')
+                        ]}
+
+                        {function _renderOption}
+                            <li class="c-tax-option">
+                                <i class="icon16 sort js-sort-toggle"></i>
+                                <select name="" class="js-type">
+                                    {foreach $_types as $_type => $_name}
+                                        <option value="{$_type}" {if !empty($_option.tax_type) && $_option.tax_type == $_type}selected{/if}>{$_name}</option>
+                                    {/foreach}
+                                </select>
+                                <input class="js-percent" type="text" name="" value="{if !empty($_option.tax_type) && $_option.tax_percent >= 0}{$_option.tax_percent}{/if}" placeholder="20">
+                                <span class="c-label">%</span>
+                                <a class="inline-link c-delete-link js-delete-option" href="javascript:void(0);">
+                                    <i class="icon10 delete"></i> <b><i>[`delete`]</i></b>
+                                </a>
+                            </li>
+                        {/function}
+
+                        {capture assign=tax_option_template}{_renderOption _option=[]}{/capture}
+
+                        <ul class="c-options-list menu-v compact">
+                            {if !empty($company.tax_options)}
+                                {foreach $company.tax_options as $_option}
+                                    {_renderOption _option=$_option}
+                                {/foreach}
+                            {/if}
+                        </ul>
+
+                        <div class="c-add-wrapper">
+                            <a class="inline-link c-add-option js-add-option" href="javascript:void(0);">
+                                <i class="icon10 add"></i> <b><i>[`Add tax option`]</i></b>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+                <section class="c-templates-section field">
+                    <header class="c-layout">
+                        <div class="c-column">
+                            <h3 class="heading">[`Invoice template`]</h3>
+                        </div>
+                        <div class="c-column middle right">
+                            <a href="{$wa_app_url}settings/templates/"><i class="icon16 settings"></i>[`Template settings`]</a>
+                        </div>
+                    </header>
+
+                    <div class="c-templates-slider">
+                        <ul class="c-templates-list">
+                            {foreach $templates as $_template}
+                                <li class="c-template-wrapper js-template-wrapper {if $company.template_id === $_template.id}is-active{/if}" data-id="{$_template.id|escape}">
+                                    <div class="c-template-block">
+                                        <div class="c-frame-wrapper">
+                                            <iframe scrolling="no" src="?module=invoice&action=templatesRender&template_id={$_template.id|escape}&company_id={$company.id|escape}"></iframe>
+                                        </div>
+                                        <h3 class="c-title">{$_template.name|escape}</h3>
+
+                                        <input class="js-field" type="radio" name="company[template_id]" value="{$_template.id|escape}" {if $company.template_id === $_template.id}checked{/if}>
+                                    </div>
+                                </li>
+                            {/foreach}
+                        </ul>
+                        <span class="c-slider-arrow left js-arrow-left" title="&larr;"></span>
+                        <span class="c-slider-arrow right js-arrow-right" title="&rarr;"></span>
+                    </div>
+
+                    <div class="c-template-options-wrapper">
+                        <div class="field">
+                            <div class="name">[`Public links URL`]</div>
+                            <div class="value">
+                                {if $has_storefronts}
+                                    <select name="company[invoice_options][domain]">
+                                        {foreach $storefront_list as $domain => $storefront}
+                                            <option value="{$domain}"
+                                                    {if isset($company_params.domain) && $company_params.domain == $domain}selected{/if}
+                                            >{$storefront}</option>
+                                        {/foreach}
+                                    </select>
+                                {else}
+                                    <i class="icon16 exclamation"></i>
+                                    [`A CRM settlement is required to publish invoices.`]
+                                    <a href="{$wa_backend_url}site/#/routing/">
+                                        [`Use Site app to add a settlement for CRM.`]
+                                    </a>
+                                {/if}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="c-template-options-wrapper js-template-options-wrapper">
+                        {include file="./SettingsCompaniesRenderParams.html" inline}
+                    </div>
+                </section>
+
+                <input name="company[id]" type="hidden" value="{$company.id}">
+                <div class="js-errors-place"></div>
+            </section>
+
+            <footer class="c-companies-footer">
+                <div class="c-layout">
+                    <div class="c-column">
+
+                        <div class="js-footer-actions">
+                            <input class="button green js-submit-button" type="submit" value="[`Save`]">
+                            {if !empty($company.id)}
+                                <span class="js-edit-actions" style="display: none;">
+                                <span style="margin: 0 4px;">[`or`]</span>
+                                <a href="{$wa_app_url}settings/companies/{$company.id}/" class="inline-link"><b><i>[`cancel`]</i></b></a>
+                            </span>
+                            {else}
+                                <span class="js-edit-actions">
+                                <span style="margin: 0 4px;">[`or`]</span>
+                                <a href="{$wa_app_url}settings/companies/" class="inline-link"><b><i>[`cancel`]</i></b></a>
+                            </span>
+                            {/if}
+                        </div>
+
+                    </div>
+                    {if count($companies) > 1}
+                        <div class="c-column middle right">
+                            <a class="inline-link js-company-delete" href="javascript:void(0);"><i class="icon16 delete"></i><b><i>[`Delete company`]</i></b></a>
+                        </div>
+                    {/if}
+                </div>
+            </footer>
+        </form>
+    </div>
+    <script>
+        (function ($) {
+            $.crm.title.set("[`Companies`]");
+
+            new CRMSettingsCompanies({
+                $wrapper: $("#c-companies-page"),
+                company_id: {if !empty($company.id)}{$company.id}{else}false{/if},
+                tax_option_template: {$tax_option_template|json_encode},
+                locales: {
+                    loading: '<span class="c-notice"><i class="icon16 loading"></i></span>',
+                    saved_html: '<span class="c-notice"><i class="icon16 yes"></i> [`Saved`]</span>'
+                }
+            });
+        })(jQuery);
+    </script>
+{/strip}
+

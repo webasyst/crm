@@ -56,7 +56,7 @@ class crmHtmlSanitizer
         // Remove all tags except known.
         // We don't rely on this for protection. Everything should be escaped anyway.
         // strip_tags() is here so that unknown tags do not show as escaped sequences, making the text unreadable.
-        $allowable_tags = '<a><b><i><u><pre><blockquote><p><strong><section><em><del><strike><span><ul><ol><li><div><font><br><table><thead><tbody><tfoot><tr><td><th><hr><h1><h2><h3><h4><h5><h6><style>';
+        $allowable_tags = '<a><b><i><u><img><pre><mark><code><blockquote><p><strong><section><em><del><strike><span><ul><ol><li><div><font><br><table><thead><tbody><tfoot><tr><td><th><hr><h1><h2><h3><h4><h5><h6><style>';
         $content = strip_tags($content, $allowable_tags);
 
         // Strip <style>...</style>
@@ -183,6 +183,9 @@ class crmHtmlSanitizer
         // Remove \n around <blockquote> startting and ending tags
         $content = preg_replace('~(?U:\n\s*){0,2}<(/?blockquote)>(?U:\s*\n){0,2}~i', '<\1>', $content);
 
+        // Convert urls to clickable links
+        $content = $this->linkify($content, ['target' => '_blank', 'rel' => 'nofollow']);
+        
         return $content;
     }
 
@@ -259,7 +262,7 @@ class crmHtmlSanitizer
     // Section
     protected function sanitizeHtmlASection()
     {
-        return '<section data-role="c-email-signature">';
+        return '<section data-role="c-email-signature" class="email-signature">';
     }
 
     protected function sanitizeUrl($url)
@@ -293,5 +296,65 @@ class crmHtmlSanitizer
         $pattern = '~' . $opened_tag . $inner_content . $closed_tag . '~iuxsm';
         $text = preg_replace($pattern, '', $text);
         return $text;
+    }
+
+    public function toPlainText($content)
+    {
+        // Make sure it's a valid UTF-8 string
+        $content = preg_replace('~\\xED[\\xA0-\\xBF][\\x80-\\xBF]~', '?', mb_convert_encoding($content, 'UTF-8', 'UTF-8'));
+
+        // Strip <style>...</style>
+        $content = $this->stripTagWithContent($content, 'style');
+        // Strip <script>...</script>
+        $content = $this->stripTagWithContent($content, 'script');
+
+        // Remove all tags except some of them.
+        $allowable_tags = '<pre><blockquote><p><section><li><div><br><tr><h1><h2><h3><h4><h5><h6>';
+        $content = strip_tags($content, $allowable_tags);
+
+        // Replace br to nl
+        $content = preg_replace('/\s+/', ' ', $content);
+        $content = preg_replace('~(<[^/])~', " \r\n$1", $content);
+        $content = preg_replace('/^\s+/', '', $content);
+
+        // Strip all remaining tags
+        $content = strip_tags($content, '<unexisted>');
+        $content = html_entity_decode($content);
+        return $content;
+    }
+
+    public function linkify($value, array $attributes = [])
+    {
+        // Link attributes
+        $attr = '';
+        foreach ($attributes as $key => $val) {
+            $attr .= ' ' . $key . '="' . htmlentities($val) . '"';
+        }
+        
+        $links = [];
+        
+        // Extract existing links and tags
+        $value = preg_replace_callback('~(<a .*?>.*?</a>|<.*?>)~i', function ($match) use (&$links) { 
+            return '<' . array_push($links, $match[1]) . '>'; 
+        }, $value);
+        
+        $value = preg_replace_callback(
+            '~(?:(https?)://([^\s<]+)|(www\.[^\s<]+?\.[^\s<]+))(?<![\.,:])~i', 
+            function ($match) use (&$links, $attr) { 
+                $protocol = 'http';
+                if ($match[1]) {
+                    $protocol = $match[1];
+                }
+                $link = $match[2] ?: $match[3];
+                $link_string = mb_strlen($link) <= 64 ? $link : mb_substr($link, 0, 50) . '...';
+                return '<' . array_push($links, "<a $attr href=\"$protocol://$link\">$link_string</a>") . '>'; 
+            }, 
+            $value
+        );
+        
+        // Insert all link
+        return preg_replace_callback('/<(\d+)>/', function ($match) use (&$links) { 
+            return $links[$match[1] - 1]; 
+        }, $value);
     }
 }

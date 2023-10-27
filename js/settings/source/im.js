@@ -23,10 +23,9 @@ var CRMSettingsSourceIm = ( function($) {
     CRMSettingsSourceIm.prototype.initClass = function () {
         var that = this;
         that.initBlockToggles();
-        that.initStickyButton();
         that.initSubmit();
         that.initChangeListeners();
-        that.initIButton();
+        //that.initIButton();
         if (that.source.id > 0) {
             that.initDeleteLink();
         }
@@ -57,7 +56,7 @@ var CRMSettingsSourceIm = ( function($) {
     CRMSettingsSourceIm.prototype.initBlockToggles = function () {
         var that = this,
             $wrapper = that.$wrapper;
-        $wrapper.find('.js-crm-block-toggle').change(function () {
+        /*$wrapper.find('.js-crm-block-toggle').change(function () {
             var $el = $(this),
                 $field = $el.closest('.field'),
                 $block = $field.find('.js-crm-block');
@@ -66,7 +65,7 @@ var CRMSettingsSourceIm = ( function($) {
             } else {
                 $block.hide();
             }
-        }).trigger('change');
+        }).trigger('change');*/
 
         that.initDealCreateToggle();
     };
@@ -86,32 +85,14 @@ var CRMSettingsSourceIm = ( function($) {
         });
     };
 
-    CRMSettingsSourceIm.prototype.initStickyButton = function () {
-        var that = this;
-
-        that.$wrapper.find('.crm-form-buttons').sticky({
-            fixed_css: { bottom: 0, 'z-index': 100 },
-            fixed_class: 'sticky-bottom-shadow',
-            showFixed: function(e) {
-                e.element.css('min-height', e.element.height());
-                e.fixed_clone.empty().append(e.element.children());
-            },
-            hideFixed: function(e) {
-                e.fixed_clone.children().appendTo(e.element);
-            },
-            updateFixed: function(e, o) {
-                this.width(e.element.width());
-            }
-        });
-    };
 
     CRMSettingsSourceIm.prototype.setFormChanged = function (status) {
         var that = this;
         status = status !== undefined ? status : true;
         if (status) {
-            that.$button.removeClass('green').addClass('yellow');
+            that.$button.addClass('yellow');
         } else {
-            that.$button.removeClass('yellow').addClass('green');
+            that.$button.removeClass('yellow');
         }
         that.changed = status;
     };
@@ -190,13 +171,44 @@ var CRMSettingsSourceIm = ( function($) {
 
     CRMSettingsSourceIm.prototype.initIButton = function() {
         var that = this;
-        that.$wrapper.find(".js-ibutton").each( function() {
+        /*that.$wrapper.find(".js-ibutton").each( function() {
             var $field = $(this);
             !$field.data('iButton') && $field.iButton({
                 labelOn : "",
                 labelOff : "",
                 classContainer: "c-ibutton ibutton-container mini"
             });
+        });*/
+        that.$wrapper.find(".c-checkbox .js-ibutton").each( function() {
+            var $checkbox = $(this),
+            $checkbox_parent = $checkbox.parent();
+            $switch_wrapper = $('<span class="switch smaller"></span>');
+            $switch_wrapper.prependTo($checkbox_parent);
+            $checkbox.clone().appendTo($switch_wrapper);
+            $checkbox.remove();
+
+            //$switch_wrapper.addClass('switch');
+            that.$switch =  $switch_wrapper.waSwitch({
+               
+                ready: function (wa_switch) {
+                    let $label = wa_switch.$wrapper.siblings('label');
+                    wa_switch.$label = $label;
+                    wa_switch.inactive_text = $label.eq(0).text();
+                    wa_switch.active_text = $label.eq(1).text();
+                    $label.eq(0).removeClass('gray');
+                    $label.eq(1).hide();
+                },
+                change: function(active, wa_switch) {
+                    
+                    if (active) {
+                    wa_switch.$label.text(wa_switch.active_text);
+                    }
+                    else {
+                     wa_switch.$label.text(wa_switch.inactive_text); 
+                    }
+                }
+            });
+          //  that.initIButton($(this));
         });
     };
 

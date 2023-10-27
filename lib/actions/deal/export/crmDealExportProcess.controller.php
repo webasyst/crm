@@ -13,7 +13,8 @@ class crmDealExportProcessController extends waLongActionController
     protected $contacts_exporter;
 
     /** Called only once when a new export is requested */
-    protected function init() {
+    protected function init()
+    {
         $this->data = array(
             // Separator between fields
             'separator' => $this->getSeparator(),
@@ -27,7 +28,9 @@ class crmDealExportProcessController extends waLongActionController
 
             'deals_export_result' => array(),
 
-            'contacts_export_result' => array()
+            'contacts_export_result' => array(),
+
+            'filename' => wa()->getTempPath('deal/'.$this->processId.'.csv', 'crm')
         );
 
         $ids = $this->getIds();
@@ -123,11 +126,13 @@ class crmDealExportProcessController extends waLongActionController
         return @iconv('utf-8', $outputEncoding . '//IGNORE', $string);
     }
 
-    protected function isDone() {
+    protected function isDone()
+    {
         return ifset($this->data['done']);
     }
 
-    protected function step() {
+    protected function step()
+    {
         if ($this->isDone()) {
             return false;
         }
@@ -157,8 +162,7 @@ class crmDealExportProcessController extends waLongActionController
             }
 
             unset($deal_line['contact_id']);
-            
-            $line = array_merge(array_values($deal_line), array_values($contact_line));
+            $line = array_merge(array_values($deal_line), array_values((array) $contact_line));
             fputcsv($this->fd, $line, $this->data['separator']);
 
             unset($this->data['deals_export_result'][$key]);
@@ -180,7 +184,7 @@ class crmDealExportProcessController extends waLongActionController
     {
         $exporter = $this->getDealsExporter();
         if (!$exporter->isExportDone()) {
-            $exporter->exportChunk();
+            $exporter->exportChunk(10);
             return false;
         }
 
@@ -200,7 +204,7 @@ class crmDealExportProcessController extends waLongActionController
     {
         $exporter = $this->getContactsExporter();
         if (!$exporter->isExportDone()) {
-            $exporter->exportChunk();
+            $exporter->exportChunk(10);
             return false;
         }
         if (!$exporter->isExportResultGettingDone()) {
@@ -236,26 +240,53 @@ class crmDealExportProcessController extends waLongActionController
         return $exporter->isExportDone() && $exporter->isExportResultGettingDone();
     }
 
-    protected function info() {
+    private function getProgress()
+    {
+        if ($this->isDone()) {
+            $progress = 100;
+        } else {
+            $progress_contacts = $this->getContactsExporter()->getCurrentProgress();
+            $progress_deals = $this->getDealsExporter()->getCurrentProgress();
+            $progress = ($progress_contacts + $progress_deals) / 2;
+            $progress = min(round($progress), 100);
+        }
+
+        return $progress;
+    }
+
+    protected function info()
+    {
         echo json_encode(array(
             'processId' => $this->processId,
             'ready' => false,
+            'progress' => $this->getProgress()
         ));
     }
 
 
     /** Return file to browser */
-    protected function finish($filename) {
-
+    protected function finish($filename)
+    {
         if (!$this->getRequest()->get('file') && !$this->getRequest()->post('file')) {
             // lost messenger
             echo json_encode(array(
                 'processId' => $this->processId,
-                'ready' => true,
+                'ready'     => true,
+                'progress'  => $this->getProgress()
             ));
             return false;
+        } elseif (wa()->whichUI('crm') == '1.3') {
+            waFiles::readfile($filename, 'exported_deals.csv', false);
+        } else {
+            waFiles::copy($filename, $this->data['filename']);
+            echo json_encode([
+                'processId' => $this->processId,
+                'ready'     => true,
+                'progress'  => $this->getProgress(),
+                'file'      => basename($this->data['filename'])
+            ]);
         }
-        waFiles::readfile($filename, 'exported_deals.csv', false);
+
         return true;
     }
 }

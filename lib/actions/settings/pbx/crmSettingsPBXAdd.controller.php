@@ -17,18 +17,21 @@ class crmSettingsPBXAddController extends waJsonController
         $pm = new crmPbxModel();
         $pbx = $pm->getByField(array('plugin_id' => $data['plugin_id'], 'plugin_user_number' => $data['plugin_user_number']));
         if (!$pbx) {
-            throw new waException('Pbx number not found');
+            $this->errors[] = _w('PBX number not found');
+            return;
         }
 
         $pum = new crmPbxUsersModel();
         $pbx_user = $pum->getByField($data);
         if ($pbx_user) {
-            throw new waException('PBX already exists');
+            $this->errors[] = _w('User already added to PBX number');
+            return;
         }
 
         $contact = new waContact($data['contact_id']);
         if (!$contact->exists()) {
-            throw new waException('Contact not found');
+            $this->errors[] = _w('User not found.');
+            return;
         }
 
         $pum->insert($data);

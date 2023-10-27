@@ -6,9 +6,9 @@
 {function _renderCurrency}
     {$_is_primary = ($_currency && $_currency.code === $currency.code)}
     <li class="c-currency" {if !empty($_currency.code)}data-code="{$_currency.code}"{/if} data-title="{if $_currency}{$_currency.title|escape}{/if}">
-        <div class="c-layout">
+        <div class="flexbox middle wrap full-width">
             <div class="c-column middle c-column-name">
-                <i class="icon16 sort js-sort-toggle"></i>
+                <i class="fas fa-grip-vertical text-light-gray js-sort-toggle"></i>
                 <span class="c-name js-name">{if !empty($_currency)}{$_currency.title|escape}{/if}</span>
                 <span class="c-sign hint js-sign">{if !empty($_currency)}{$_currency.sign|escape}{/if}</span>
             </div>
@@ -31,14 +31,14 @@
             <div class="c-column middle right c-column-actions">
                 {if !$_is_primary && empty($_change_is_locked)}
                     <div class="c-actions">
-                        <span class="c-visible">
-                            <i class="icon16 settings js-edit-currency" title="[`Edit currency`]"></i>
-                            <i class="icon16 delete js-remove-currency" title="[`Remove currency`]"></i>
+                        <span class="flexbox middle wrap space-8 c-visible">
+                            <button class="button small circle light-gray cursor-pointer custom-pr-0 js-edit-currency"><span class="icon"><i class="fas fa-cog " title="[`Edit currency`]"></i></span></button>
+                            <button class="button small circle light-gray js-remove-currency"  title="[`Remove currency`]"><i class="fas fa-trash-alt text-red"></i></button>
                         </span>
                         <span class="c-hidden">
-                            <i class="icon16 disk js-save-currency"></i>
+                            <button class="button small circle light-gray cursor-pointer custom-mr-0 js-save-currency" title="[`Save`]"><i class="fas fa-save text-blue"></i></button>
                             [`or`]
-                            <a class="inline-link js-cancel" href="javascript:void(0);"><b><i>[`cancel`]</i></b></a>
+                            <button class="button small circle light-gray js-cancel" title="[`Cancel`]"><i class="fas fa-undo" ></i></button>
                         </span>
                     </div>
                 {/if}
@@ -50,64 +50,69 @@
 
 {capture assign="_currency_template_html"}{_renderCurrency _currency=[]}{/capture}
 
-<div class="c-currencies-page" id="c-currencies-page">
+<div class="fields c-currencies-page" id="c-currencies-page">
 
-    <div class="c-layout">
+    <div class="flexbox middle wrap full-width space-16">
         <div class="c-column">
             <h1 class="c-page-header">[`Currencies`]</h1>
         </div>
         <div class="c-column middle right">
             {if empty($_change_is_locked) && !empty($currencies)}
-                <a class="inline-link js-change-primary" href="javascript:void(0);"><i class="icon16 dollar"></i><b><i>[`Change primary currency`]</i></b></a>
+                <a class="button rounded light-gray js-change-primary" href="javascript:void(0);"><i class="fas fa-dollar-sign text-blue"></i> [`Change primary currency`]</a>
             {/if}
         </div>
     </div>
 
     {if $is_shop_supported}
         <div class="c-shop-currency-toggle">
-            <input class="js-shop-currency-toggle" id="js-shop-currency-ibutton" type="checkbox" name="use_shop_currencies" data-use-shop="{if !empty($use_shop_available)}true{/if}" {if $use_shop_currencies}checked{/if}>
+
+            <span class="switch smaller" id="shop-currency-switch">
+                <input class="js-shop-currency-toggle" id="js-shop-currency-ibutton" type="checkbox" name="use_shop_currencies" data-use-shop="{if !empty($use_shop_available)}true{/if}" {if $use_shop_currencies}checked{/if}>
+            </span>
             <label for="js-shop-currency-ibutton">[`Copy Shop-Script currency settings`]</label>
         </div>
+    
         {if $use_shop_currencies}
             <div class="block hint">[`Currency exchange rates changed in Shop-Script settings are updated in CRM in 1 minute.`]</div>
         {/if}
     {/if}
-
-    <ul class="menu-v c-currencies-list js-currencies-list">
+    <div class="c-currencies-group fields-group">
+    <ul class="menu c-currencies-list js-currencies-list">
         {foreach $currencies as $_currency}
             {_renderCurrency _currency=$_currency}
         {/foreach}
     </ul>
 
     <div class="c-add-wrapper">
-        <select class="js-add-currency" {if !empty($_change_is_locked)}disabled{/if}>
-            <option value="" selected disabled>[`Add currency`]...</option>
-            {foreach $currency_list as $_code => $_title}
-                <option value="{$_code}" {if !empty($currencies[$_code])}disabled{/if}>{$_code|escape} {$_title['title']|escape}</option>
-            {/foreach}
-        </select>
+        <div class="wa-select">
+            <select class="js-add-currency not-styled" {if !empty($_change_is_locked)}disabled{/if}>
+                <option value="" selected disabled>[`Add currency`]...</option>
+                {foreach $currency_list as $_code => $_title}
+                    <option value="{$_code}" {if !empty($currencies[$_code])}disabled{/if}>{$_code|escape} {$_title['title']|escape}</option>
+                {/foreach}
+            </select>
+        </div>
     </div>
-
+    </div>
     {capture assign="_copy_shop_currencies_dialog_html"}
-        <div class="crm-dialog-wrapper c-copy-shop-currencies-dialog" id="c-copy-shop-currencies-dialog">
-            <div class="crm-dialog-background"></div>
-            <div class="crm-dialog-block">
+        <div class="dialog c-copy-shop-currencies-dialog" id="c-copy-shop-currencies-dialog">
+            <div class="dialog-background"></div>
+            <div class="dialog-body">
                 <form>
-                    <header class="crm-dialog-header">
+                    <header class="dialog-header">
                         <h1>[`Copy Shop-Script currency settings`]</h1>
                     </header>
 
-                    <div class="crm-dialog-content">
+                    <div class="dialog-content">
                         <p>
                             [`New main currency rate`]: 1&nbsp;{$currency.code}&nbsp;=&nbsp;<input class="c-field small" type="number" name="rate" required>&nbsp;{$shop_currency.code}
                         </p>
                     </div>
 
-                    <footer class="crm-dialog-footer">
+                    <footer class="dialog-footer">
                         <div class="crm-actions">
-                            <input class="button red crm-button js-confirm-button" type="submit" value="[`Copy`]">
-                            <span style="margin: 0 4px;">[`or`]</span>
-                            <a class="js-close-dialog js-cancel-button" href="javascript:void(0);">[`cancel`]</a>
+                            <input class="button red js-confirm-button" type="submit" value="[`Copy`]">
+                            <a class="button light-gray js-close-dialog js-cancel-button" href="javascript:void(0);">[`Cancel`]</a>
                         </div>
                     </footer>
                 </form>
@@ -126,12 +131,14 @@
                     confirm_delete_title: "[`Delete currency`] <span class=\"gray\">%currency_name</span>",
                     confirm_delete_text: "<p>[`After deletion it will be not possible to set deal and invoice amount in that currency.`]</p><p>[`Currency in existing deals and invoices will not be affected.`]</p>",
                     confirm_delete_button: "[`Delete`]",
+                    confirm_cancel_button: "[`Cancel`]",
                     confirm_shop_title: "[`Copy Shop-Script currency settings`]",
                     confirm_shop_text: "[`Are you sure?`]",
                     confirm_shop_button: "[`Copy settings`]"
                 },
                 currencies: {$currency_list|json_encode}
             });
+         
         })(jQuery);
     </script>
 </div>

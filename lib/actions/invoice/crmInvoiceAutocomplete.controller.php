@@ -43,9 +43,10 @@ class crmInvoiceAutocompleteController extends waController
             $_name = ifset($contacts[$r['contact_id']]['name']);
             if (!empty($_name)) { $_name = htmlspecialchars($_name); }
 
+            $icon_class = wa()->whichUI() === '1.3' ? 'icon16 invoice' : 'fas fa-file-invoice-dollar custom-mr-8';
             $r['label'] = ''
-                .'<i class="icon16 invoice"></i>'
-                .'<span class="c-number '.strtolower($r['state_id']).'">'.$this->prepare($r['number'], $term_safe).'</span> '
+                .'<i class="'.$icon_class.'"></i>'
+                .'<span class="c-number bold '.strtolower($r['state_id']).'">'.$this->prepare($r['number'], $term_safe).'</span> '
                 .'<span class="c-date hint">'.wa_date('date', $r['create_datetime']).'</span> '
                 .'<span class="c-price nowrap">'.waCurrency::format('%{s}', $r['amount'], $r['currency_id']).'</span> '
                 .'<span class="c-user small">'. $_name .'</span>';

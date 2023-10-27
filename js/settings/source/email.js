@@ -23,7 +23,6 @@ var CRMSettingsSourceEmail = ( function($) {
     CRMSettingsSourceEmail.prototype.initClass = function () {
         var that = this;
         that.initBlockToggles();
-        that.initStickyButton();
         that.initSubmit();
         that.initSecureCheckboxes();
         that.initChangeListeners();
@@ -70,7 +69,7 @@ var CRMSettingsSourceEmail = ( function($) {
     CRMSettingsSourceEmail.prototype.initBlockToggles = function () {
         var that = this,
             $wrapper = that.$wrapper;
-        $wrapper.find('.js-crm-block-toggle').change(function () {
+       /* $wrapper.find('.js-crm-block-toggle').change(function () {
             var $el = $(this),
                 $field = $el.closest('.field'),
                 $block = $field.find('.js-crm-block');
@@ -79,7 +78,7 @@ var CRMSettingsSourceEmail = ( function($) {
             } else {
                 $block.hide();
             }
-        }).trigger('change');
+        }).trigger('change');*/
 
         that.initDealCreateToggle();
     };
@@ -99,32 +98,13 @@ var CRMSettingsSourceEmail = ( function($) {
         });
     };
 
-    CRMSettingsSourceEmail.prototype.initStickyButton = function () {
-        var that = this;
-
-        that.$wrapper.find('.crm-form-buttons').sticky({
-            fixed_css: { bottom: 0, 'z-index': 100 },
-            fixed_class: 'sticky-bottom-shadow',
-            showFixed: function(e) {
-                e.element.css('min-height', e.element.height());
-                e.fixed_clone.empty().append(e.element.children());
-            },
-            hideFixed: function(e) {
-                e.fixed_clone.children().appendTo(e.element);
-            },
-            updateFixed: function(e, o) {
-                this.width(e.element.width());
-            }
-        });
-    };
-
     CRMSettingsSourceEmail.prototype.setFormChanged = function (status) {
         var that = this;
         status = status !== undefined ? status : true;
         if (status) {
-            that.$button.removeClass('green').addClass('yellow');
+            that.$button.addClass('yellow');
         } else {
-            that.$button.removeClass('yellow').addClass('green');
+            that.$button.removeClass('yellow');
         }
         that.changed = status;
     };
@@ -217,13 +197,44 @@ var CRMSettingsSourceEmail = ( function($) {
 
     CRMSettingsSourceEmail.prototype.initIButton = function() {
         var that = this;
-        that.$wrapper.find(".js-ibutton").each( function() {
+       /* that.$wrapper.find(".js-ibutton").each( function() {
             var $field = $(this);
             !$field.data('iButton') && $field.iButton({
                 labelOn : "",
                 labelOff : "",
                 classContainer: "c-ibutton ibutton-container mini"
             });
+        });*/
+
+        that.$wrapper.find("#js-ibutton").each( function() {
+            var $checkbox_wrapper = $(this),
+                $field = $checkbox_wrapper.closest('.fields-group'),
+                $block = $field.find('.js-crm-block');
+            if ($checkbox_wrapper.data('iButtonInit')) {
+                return $checkbox_wrapper;
+            }
+            that.$switch = $checkbox_wrapper.waSwitch({
+                ready: function (wa_switch) {
+                    let $label = wa_switch.$wrapper.siblings('label');
+                    wa_switch.$label = $label;
+                    wa_switch.active_text = $label.data('active-text');
+                    wa_switch.inactive_text = $label.data('inactive-text');
+                },
+                change: function(active, wa_switch) {
+                    
+                    if (active) {
+                    wa_switch.$label.text(wa_switch.active_text);
+                    $checkbox_wrapper.find(".js-ibutton").attr('checked', true);
+                    $block.slideDown(350);
+                    }
+                    else {
+                     wa_switch.$label.text(wa_switch.inactive_text); 
+                     $checkbox_wrapper.find(".js-ibutton").attr('checked', false);
+                     $block.slideUp(350);
+                    }
+                }
+            });
+          //  that.initIButton($(this));
         });
     };
 
@@ -263,7 +274,7 @@ var CRMSettingsSourceEmail = ( function($) {
                 $field = !name ? $() : $wrapper.find('[name="' + name + '"]');
             $field.addClass('error');
             $.each(errors, function (index, error) {
-                $error.append('<em class="errormsg">' + error + '</em>');
+                $error.append('<em class="errormsg text-red">' + error + '</em>');
             });
             if ($field.length) {
                 $field.after($error);

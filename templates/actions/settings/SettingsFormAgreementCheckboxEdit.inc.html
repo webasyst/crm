@@ -21,7 +21,13 @@
                     <div class="name"></div>
                     <div class="value">
                         <label>
-                            <input type="checkbox" name="params[default_checked]" value="1">
+                            <span class="wa-checkbox"><input type="checkbox" name="params[default_checked]" value="1">
+                                <span>
+                                    <span class="icon">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                </span>
+                            </span>
                             [`Checked by default`]
                         </label>
                     </div>
@@ -32,8 +38,7 @@
         <footer class="crm-dialog-footer">
             <div class="crm-actions">
                 <input class="button green crm-button js-some-action" type="button" value="[`Apply`]">
-                <span style="margin: 0 4px;">[`or`]</span>
-                <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+                <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
             </div>
         </footer>
     </div>

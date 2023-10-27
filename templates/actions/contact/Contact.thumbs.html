@@ -4,12 +4,57 @@
         {if !$asc}{$_asc = '1'}{else}{$_asc = '0'}{/if}
     {/if}
     {$_url = crmHelper::getUrl(['sort' => $id, 'asc' => $_asc])}
-    <a href="{$_url}">{$txt|escape} {if $sort == $id}<i class="icon16 {if $asc}uarr{else}darr{/if}"></i>{/if}</a>
+    <a href="{$_url}"><span>{$txt|escape} {if $sort == $id}</span><i class="fas fa-angle-{if $asc}up{else}down{/if}"></i></span>{/if}</a>
 {/function}
 
 {strip}
 
-<main class="c-contacts-thumbs block double-padded">
+<main class="c-contacts-thumbs article">
+    <div class="article-body">
+        <header class="c-contacts-header flexbox middle wrap custom-mb-24">
+            <h1 class="wide custom-pr-16"><span class="{if !empty($editable_name)}editable js-name-editable{/if}">
+                {$title|escape}
+            </span></h1>
+
+            {$_sort_list = [
+                'last_datetime' => '[`Last activity`]',
+                'name' => '[`Name `]',
+                'create_datetime' => '[`Signed up`]'
+            ]}
+            <div class="dropdown custom-mt-8 custom-mb-16 small js-sort-by" id="sort-by">
+                {* [`Order by:`] *}
+                <button class="dropdown-toggle button light-gray nowrap" type="button">
+                    {if !empty($_sort_list[$sort])}{$_sort_list[$sort]|escape}{elseif !empty($columns[$sort])}{$columns[$sort].name|escape}{else}{$sort}{/if}
+                    <span class="custom-ml-8 gray"><i class="fas fa-angle-{if $asc}down{else}up{/if}"></i></span>
+                </button>
+                <div class="dropdown-body right">
+                    <ul class="menu">
+                        {foreach $_sort_list as $_id => $_name}
+                            <li class="c-menu-item {if $sort == $_id}selected{/if}">
+                                {get_sortable_link txt=$_name id=$_id}
+                            </li>
+                        {/foreach}
+                        {if empty($_sort_list[$sort])}
+                            <li class="c-menu-item selected">
+                                {if !empty($columns[$sort])}
+                                    {$_txt = $columns[$sort].name}
+                                {else}
+                                    {$_txt = $sort}
+                                {/if}
+                                {get_sortable_link txt=$_txt id=$sort}
+                            </li>
+                        {/if}
+                    </ul>
+                </div>
+            </div>
+        </header>
+        <script>
+            ( function($) {
+                $("#sort-by").waDropdown();
+            })(jQuery);
+        </script>
+
+{*
     <div class="c-contacts-header c-layout">
         <div class="c-column">
             <h1><span class="crm-contact-list-name {if !empty($editable_name)}editable js-name-editable{/if}">{$title|escape}</span></h1>
@@ -121,6 +166,7 @@
 
         </div>
     </div>
+*}
     <div class="c-thumbs-list js-contacts-section">
         {if !empty($contacts)}
 
@@ -129,6 +175,7 @@
             {$wa->crm->pager($total_count|default:0, $page, '', $limit)}
         {/if}
         <p class="c-description c-no-contacts{if !empty($contacts)} hidden{/if}">[`No contacts.`]</p>
+    </div>
     </div>
 </main>
 

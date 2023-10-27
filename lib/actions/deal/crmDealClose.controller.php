@@ -11,13 +11,22 @@ class crmDealCloseController extends crmJsonController
         $lost_id = waRequest::post('lost_id', null, waRequest::TYPE_INT);
         $lost_text = waRequest::post('lost_text', null, waRequest::TYPE_STRING_TRIM);
 
-        if (!$this->validate($deal_id, $action, $lost_id, $lost_text)) {
-            return;
+        if (!$deal_id) {
+            throw new waException('Deal not found');
         }
-        $dm = new crmDealModel();
-        $deal = $dm->getById($deal_id);
+
+        $deal = $this->getDealModel()->getById($deal_id);
         if (!$deal) {
-            return;
+            throw new waException('Deal not found');
+        } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
+            $this->accessDenied();
+        }
+        if ($action == 'LOST') {
+            $lost_reason_require = wa()->getSetting('lost_reason_require');
+            if ($lost_reason_require && !$lost_id && !$lost_text) {
+                $this->errors['lost_id'] = _w('This field required');
+                return;
+            }
         }
 
         $sm = new crmFunnelStageModel();
@@ -33,26 +42,5 @@ class crmDealCloseController extends crmJsonController
         }
 
         crmDeal::close($deal_id, $action, $lost_id, $lost_text);
-    }
-
-    protected function validate($deal_id, $action, $lost_id, $lost_text)
-    {
-        $dm = new crmDealModel();
-        $deal = $dm->getById($deal_id);
-
-        if (!$deal_id || !$deal) {
-            throw new waException('Deal not found');
-        }
-        if ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
-            $this->accessDenied();
-        }
-        if ($action == 'LOST') {
-            $lost_reason_require = wa()->getSetting('lost_reason_require');
-            if ($lost_reason_require && !$lost_id && !$lost_text) {
-                $this->errors['lost_id'] = _w('This field required');
-                return false;
-            }
-        }
-        return true;
     }
 }

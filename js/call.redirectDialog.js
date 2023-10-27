@@ -118,7 +118,7 @@ var CRMCallRedirectDialog = ( function($) {
             function submit() {
                 var number_type = that.$form.find('.js-number-type').val(),
                     $footer = that.$wrapper.find('.js-dialog-footer'),
-                    $loading = $('<i class="icon16 loading" style="vertical-align: middle; margin-left: 6px;"></i>');
+                    $loading = $('<span class="icon size-16 loading"><i class="fas fa-spinner fa-spin"></i></span>');
 
                 that.$button.prop('disabled', true);
                 $footer.append($loading);
@@ -128,7 +128,8 @@ var CRMCallRedirectDialog = ( function($) {
 
                 $.post(href, data, function (r) {
                     if (r.status === "ok") {
-                        $loading.removeClass('loading').addClass('yes');
+                        $footer.find('.svg-inline--fa.fa-spinner').removeClass('fa-spinner fa-spin').addClass('fa-check text-green');
+                        that.$wrapper.hide();
                         setTimeout(function () {
                             $.crm.content.reload();
                         }, 2000);

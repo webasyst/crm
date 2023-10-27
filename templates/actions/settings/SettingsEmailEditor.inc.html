@@ -29,7 +29,13 @@
     {$variants = $message_to_variants}
     <li>
         <label>
-            <input type="checkbox" name="{$to_name|escape}[{$variant}]" value="1"{if !empty($to_value[$variant])} checked{/if}>
+            <span class="wa-checkbox"><input type="checkbox" name="{$to_name|escape}[{$variant}]" value="1"{if !empty($to_value[$variant])} checked{/if}>
+                <span>
+                    <span class="icon">
+                        <i class="fas fa-check"></i>
+                    </span>
+                </span>
+            </span>
             {$variants[$variant]}
         </label>
     </li>
@@ -43,52 +49,79 @@
         <div class="field">
             <div class="name">[`To`]</div>
             <div class="value">
-                <ul class="menu-v checklist no-click-close c-message-to-selector" data-field-name="{$to_name|escape}" style="margin-top: 0px;">
-                    <li style="min-width: 400px;">
-                        <i class="icon10 darr"></i>
-                        <span class="selected-items c-label" style="cursor:pointer;">[`Select`]</span>
-                        {if $to_value && !is_array($to_value)}
-                            {$to_value = [$to_value => 1]}
-                        {elseif !$to_value}
-                            {$to_value = []}
-                        {/if}
-                        <ul class="menu-v hidden shadowed no-mouseleave c-message-to-variants-list" style="padding:5px;position:absolute;z-index:200;">
+
+                <div class="dropdown checklist no-click-close c-message-to-selector" data-field-name="{$to_name|escape}" style="margin-top: 0px;" id="dropdown-to-selector">
+                    <span class="dropdown-toggle selected-items c-label">[`Select`]</span>
+                    {if $to_value && !is_array($to_value)}
+                        {$to_value = [$to_value => 1]}
+                    {elseif !$to_value}
+                        {$to_value = []}
+                    {/if}
+                    <div class="dropdown-body" style="min-width: 400px;">
+
+                        <ul class="menu shadowed no-mouseleave c-message-to-variants-list custom-p-8">
 
                             {foreach $message_to_variants as $variant_id => $variant_name}
-                                <li>
+                                <li class="custom-py-4">
                                     <label>
-                                        <input type="checkbox" data-id="{$variant_id}" name="{$to_name|escape}[{$variant_id}]" value="1"{if !empty($to_value[$variant_id])} checked{/if}>
+                                        <span class="wa-checkbox"><input type="checkbox" data-id="{$variant_id}" name="{$to_name|escape}[{$variant_id}]" value="1" {if !empty($to_value[$variant_id])} checked{/if}>
+                                            <span>
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </span>
+                                        </span>
                                         <span class="c-variant-name-text">{$variant_name|escape}</span>
                                     </label>
                                 </li>
                             {/foreach}
 
-                            <li class="hr show-if-custom" style="display:none;"></li>
+                            <li class="hr show-if-custom custom-py-4" style="display:none;"></li>
 
                             {if $to_value}
                                 {foreach $to_value as $val => $name}
                                     {if !isset($message_to_variants[$val])}
-                                        <li><label>
-                                            <input type="checkbox" name="{$to_name|escape}[{$val|escape}]" value="1" checked>
+                                        <li class="custom-py-4"><label>
+                                            <span class="wa-checkbox"><input type="checkbox" name="{$to_name|escape}[{$val|escape}]" value="1" checked>
+                                                <span>
+                                                    <span class="icon">
+                                                        <i class="fas fa-check"></i>
+                                                    </span>
+                                                </span>
+                                            </span>
                                                 <span class="c-variant-name-text">{$name|escape}</span>
                                         </label></li>
                                     {/if}
                                 {/foreach}
                             {/if}
 
-                            <li class="hidden template"><label>
-                                <input type="checkbox" name="{$to_name|escape}[%VALUE%]" value="1" checked disabled>
+                            <li class="hidden template custom-py-4"><label>
+                                <span class="wa-checkbox"><input type="checkbox" name="{$to_name|escape}[%VALUE%]" value="1" checked disabled>
+                                    <span>
+                                        <span class="icon">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    </span>
+                                </span>
                                 <span class="val"></span>
                             </label></li>
 
                             <li class="hr"></li>
-                            <li>
+                            <li class="custom-py-4">
                                 <input type="text" placeholder="[`Add another recipient`]" style="width:100%;">
                                 <div class="clear-left hint">[`All messages will be sent as blind copies (BCC).`]</div>
                             </li>
                         </ul>
-                    </li>
-                </ul>
+                    </div>
+                </div>
+                <script>
+                    ( function($) {
+                        $("#dropdown-to-selector").waDropdown({
+                            hover: false,
+                            items: ".menu > li > a",
+                        });
+                    })(jQuery);
+                </script>
             </div>
         </div>
     {/if}
@@ -103,10 +136,10 @@
     <div class="field template-subfield" style="margin-top: 40px;">
         <div class="name">[`Text`]</div>
         <div class="value">
-            <div class="crm-variables-link-wrapper equal-width" style="border: 1px solid #ccc;">
+            <div class="crm-variables-link-wrapper equal-width">
 
                 <div class="wa-editor-core-wrapper">
-                    <ul class="c-editor-toggle wa-editor-wysiwyg-html-toggle">
+                    <ul class="tabs overflow-dropdown c-editor-toggle wa-editor-wysiwyg-html-toggle bordered-bottom custom-px-8 small">
                         <li class="selected">
                             <a href="#" class="wysiwyg">[`WYSIWYG`]</a>
                         </li>
@@ -120,11 +153,11 @@
                 </div>
 
                 {if !empty($variables)}
-                    <a href="javascript:void(0)" class="crm-variables-link inline-link" style="font-size:.8em;"><b><i>[`Variables`]</i></b></a>
+                    <a href="javascript:void(0)" class="crm-variables-link inline-link" style="font-size:.8em;"><b>[`Variables`]</b></a>
                 {elseif !empty($cheat_sheet)}
                     <div class="wa-dropdown">
                         <div class="wa-drop-link">
-                            <a href="javascript:void(0)" class="crm-variables-link inline-link js-help-link" style="font-size:.8em;"><b><i>[s`Cheat sheet`]</i></b></a>
+                            <a href="javascript:void(0)" class="crm-variables-link inline-link js-help-link" style="font-size:.8em;"> <i class="fas fa-code"></i> <b>[s`Cheat sheet`]</b></a>
                         </div>
                         <div class="wa-dropdown-block js-help-block"></div>
                     </div>
@@ -135,8 +168,8 @@
     </div>
 
     {if !empty($variables)}
-        <div class="field crm-variables-wrapper">
-            <div class="fields shadowed equal-width">
+        <div class="field crm-variables-wrapper" style="display: none">
+            <div class="fields shadowed equal-width custom-px-16 custom-py-8">
                 {foreach $variables|default:[] as $k => $v}
                     <div class="field">
                         <div class="name"><a href="javascript:void(0)" class="inline-link{if strlen($k) > 35} small{/if}"><b><i>{$k|escape}</i></b></a></div>
@@ -155,7 +188,13 @@
         <div class="field top-padded">
             <div class="value">
                 <label>
-                    <input type="checkbox" name="{$add_attachments_name|escape}" value="1"{if !empty($add_attachments_set)} checked{/if}>
+                    <span class="wa-checkbox"><input type="checkbox" name="{$add_attachments_name|escape}" value="1"{if !empty($add_attachments_set)} checked{/if}>
+                        <span>
+                            <span class="icon">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        </span>
+                    </span>
                         [`Include attachments`]
                 </label>
             </div>
@@ -210,59 +249,75 @@
     var initHelp = function ($wrapper, body_textarea) {
         var that = this,
             $document = $(document),
-            $help = $wrapper.find(".js-help-block"),
+            //$help = $wrapper.find(".js-help-block"),
             $help_link = $wrapper.find(".js-help-link"),
             cheat_sheet_key = {$cheat_sheet_key|default:''|json_encode},
-            site_app_url = {$site_app_url|default:''|json_encode};
-
-        var listener = function (e) {
-            // auto-off event-handler from global object
-            if ($document.find($wrapper).length <= 0) {
-                $document.off('click', listener);
-                return;
-            }
-            // click outside of help area lead to close help area
-            var $target = $(e.target);
-            if (!$target.is($help) && $help.find($target).length <= 0) {
-                $help.hide();
-            }
-        };
-
-        $document.on('click', listener);
+            site_app_url = {$wa_app_url|default:''|json_encode},
+            drawerLoaded = false,
+            $drawer = null;
 
         $help_link.on('click', function () {
-            if ($help.is(":visible")) {
-                $help.hide();
-                return false;
-            }
-
-            if ($help.data('loaded')) {
-                $help.show();
-                return false;
-            }
+            event.preventDefault();
 
             var unique_name = "settings-email-editor-" + (Math.random() + '').slice(2);
-            var url = site_app_url + '?module=pages&action=help',
+            var url = site_app_url + '?module=settings&action=help',
                 data = 'app=crm&key=' + cheat_sheet_key + '&name=' + unique_name;
 
             // so system code could set js handlers to links and etc
-            $help.attr('id', 'wa-editor-help-' + unique_name);
-
-            $help.load(url, data, function () {
-                $help.find('#wa-help-wa').remove();
-                $help.find('#wa-help-wa-content').remove();
-                $help.show();
-                $help.find('ul>li.no-tab>p.bold').hide();
-                $help.data('loaded', true);
-            });
-            return false;
+            if (drawerLoaded && $drawer) {
+                $drawer.show();
+                return false;
+            }
+            const drawer_loader = '<div class="flexbox middle width-100 height-100 spinner-wrapper"><div class="spinner custom-p-16"></div></div>'
+            const drawer_html = '<div class=\"drawer crm-help\" id=\"\"> <div class=\"drawer-background\"><\/div> <div class=\"drawer-body\"> <a href=\"#\" class=\"drawer-close js-close-drawer\"><i class=\"fas fa-times\"><\/i><\/a> <div class=\"drawer-block\">'+drawer_loader+'<\/div> <\/div> <\/div>';
+                $drawer = $.waDrawer({
+                    html: drawer_html,
+                    direction: "right",
+                    onClose: () => handleWaTabs(false)
+                });
+                console.log(url);
+            $.get(url, data, function (res) {
+                $(".drawer .drawer-block").html(res);
+                    handleWaTabs(true)
+                    drawerLoaded = true;
+            }, 'html')
         });
 
-        $help.on('click', "div.fields a.inline-link", function (e) {
-            e.preventDefault();
-            var $el = $(this).find('i');
-            body_textarea.waEditor('insert', $.trim($el.text()));
-        });
+        function handleWaTabs(tabEvent) {
+            var $drawerWrapper = $('.drawer');
+           
+            if (tabEvent) {
+                $drawerWrapper.on('click', "ul.tabs li", toggleWaTabs);
+                $drawerWrapper.on('click', ".wa-help-vars-item", printVars);
+                $drawerWrapper.on('click', ".drawer-background", () => $drawer.hide());
+            }
+            else {
+                $drawerWrapper.off('click');
+                drawerLoaded = false;
+            }
+        }
+        function toggleWaTabs(event) {
+            event.preventDefault();
+            if ($(this).hasClass('selected')) {
+                return false;
+            }
+            var $drawerContent = $('.drawer-content');
+            let idSelected = $(this).attr('id') + '-content';
+            $(this).addClass('selected').siblings().removeClass('selected');
+            let newId = $drawerContent.find('#'+idSelected);
+            newId.siblings().hide();
+            newId.show();
+        }
+
+        function printVars(event) {
+            event.preventDefault();
+                body_textarea.waEditor('insert', $.trim($(this).find('.js-var').text()));
+                //editor.insert($.trim($(this).text()));
+                //that.toggleButton(true);
+                //const $reset = that.$wrapper.find(".js-reset-template");
+                //$reset.removeClass('hidden');
+                $drawer.hide();
+        }
     };
 
     initHelp(wrapper, body_textarea);
@@ -331,34 +386,38 @@
         selected_items_span.data('initial_text', '[`Select`]');
 
         // Click on a closed checklist closes/opens the checklist dropdown
-        selected_items_span.click(function() {
-            var menu = checklist.find('.hidden.menu-v').toggle();
+       /* selected_items_span.click(function() {
+            var menu = checklist.find('.hidden.menu').toggle();
             if (!menu.hasClass('no-mouseleave') && menu.is(':visible')) {
                 checklist.mouseleave(function() {
-                    checklist.find('.hidden.menu-v').hide();
+                    checklist.find('.hidden.menu').hide();
                 });
             }
-        });
+        });*/
 
         // Dropdown checkbox change changes the visible description in selected_items_span
-        $('input:checkbox', checklist[0]).live('change', function() {
+        checklist.on('change', 'input:checkbox', function() {
             var str = [];
             checklist.find('input:checkbox').each(function() {
+
                 var cb = $(this);
                 if (cb.is(':checked:not(:disabled)')) {
-                    cb.parent().addClass('bold');
-                    str.push($.trim($(this).parent().text()));
+                    cb.parent().parent().addClass('bold');
+                    str.push($.trim($(this).parent().parent().text()));
                 } else {
-                    cb.parent().removeClass('bold');
+                    cb.parent().parent().removeClass('bold');
                 }
             });
+            
             if (str.length > 0) {
                 selected_items_span.text(str.join(', '));
             } else {
                 selected_items_span.text(selected_items_span.data('initial_text'));
             }
             return false;
-        }).change();
+        });
+
+        checklist.find('input:checkbox').first().change();
 
         return checklist;
     };
@@ -367,7 +426,7 @@
         // Checklist for To: selector
         (function() {
             var checklist = wrapper.find('.checklist');
-            var menu = checklist.find('.menu-v');
+            var menu = checklist.find('.menu');
             var search_field = checklist.find('input:text');
 
             animateChecklist(checklist);
@@ -403,7 +462,7 @@
             });
 
             // Close dropdown on click anywhere
-            var h;
+            /*var h;
             $(document).on('click', h = function(e) {
                 if (!wrapper.closest('html').length) {
                     $(document).off('click', h);
@@ -413,6 +472,7 @@
                     menu.hide();
                 }
             });
+            */
 
             updateState();
 

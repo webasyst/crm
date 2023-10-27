@@ -1,43 +1,73 @@
-{$class_id = 'crm-contact-operation-export-wrapper'}
-{$wrapper_id = uniqid($class_id)}
+<!DOCTYPE html>
+<html>
+<head>
+<title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
+{$wa->css()}
+<link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
+<link href="{$wa_app_static_url}css/crm2.css?v={$wa->version()}" rel="stylesheet">
 
-<div class="crm-dialog-wrapper {$class_id}" id="{$wrapper_id}">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
-        <header class="crm-dialog-header">
+<script type="text/javascript" src="{$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="{$wa_url}wa-content/js/jquery-plugins/jquery.store.js?v={$wa->version()}"></script>
+<script type="text/javascript" src="{$wa_app_static_url}js/crm.js?v={$wa->version()}"></script>
+<script type="text/javascript" src="{$wa_app_static_url}js/contacts.operation.export.js?v={$wa->version()}"></script>
+<script>
+    (function ($) {
+        window.wa_url = {$wa_url|json_encode};
+        $.crm.lang = {substr($wa->locale(), 0, 2)|json_encode};
+        $.crm.app_url = {$wa_app_url|json_encode};
+        $.crm.backend_url = {$wa_backend_url|json_encode};
+        $.crm.is_debug = {$wa->debug()|json_encode};
+        $.crm.title.pattern = "%s — {$wa->accountName(false)|escape:'javascript'}";
+    })(jQuery);
+</script>
+</head>
+<body style="background: var(--background-color-blank);">
+    <div class="crm-dialog-wrapper" id="export-dialog">
+        <header class="dialog-header custom-mb-24">
             <h1>[`Export contacts`]</h1>
         </header>
-        <div class="crm-dialog-content">
+        <div class="dialog-content">
             <div class="crm-start-block">
                 <p>
                     {_w('%d selected contact will be exported into CSV file', '%d selected contacts will be exported into CSV file', $count)}
                 </p>
                 <div class="fields">
                     <div class="field">
-                        <div class="name">[`Separator:`]</div>
+                        <div class="name for-input">[`Separator:`]</div>
                         <div class="value">
-                            <select name="separator">
-                                {foreach waCSV::$delimiters as $_sep}
-                                    <option value="{$_sep[0]}">{_w($_sep[1])}</option>
-                                {/foreach}
-                            </select>
+                            <div class="wa-select">
+                                <select name="separator">
+                                    {foreach waCSV::$delimiters as $_sep}
+                                        <option value="{$_sep[0]}">{_ws($_sep[1])}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="field">
-                        <div class="name">[`Encoding:`]</div>
+                        <div class="name for-input">[`Encoding:`]</div>
                         <div class="value">
-                            <select name="encoding">
-                                {foreach $encoding as $v => $e}
-                                    <option value="{$v}"{if $v=="utf-8"} selected="selected"{/if}>{$e}</option>
-                                {/foreach}
-                            </select>
+                            <div class="wa-select">
+                                <select name="encoding">
+                                    {foreach $encoding as $v => $e}
+                                        <option value="{$v}"{if $v=="utf-8"} selected="selected"{/if}>{$e}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="field">
                         <div class="name"></div>
                         <div class="value">
                             <label>
-                                <input type="checkbox" name="export_fields_name" value="1">
+                                <span class="wa-checkbox">
+                                    <input type="checkbox" name="export_fields_name" value="1">
+                                    <span>
+                                        <span class="icon">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    </span>
+                                </span>
                                 [`Export field names`]
                             </label>
                         </div>
@@ -46,7 +76,14 @@
                         <div class="name"></div>
                         <div class="value">
                             <label>
-                                <input type="checkbox" name="not_export_empty_columns" value="1">
+                                <span class="wa-checkbox">
+                                    <input type="checkbox" name="not_export_empty_columns" value="1">
+                                    <span>
+                                        <span class="icon">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    </span>
+                                </span>
                                 [`Do not export empty columns`]
                             </label>
                         </div>
@@ -55,15 +92,19 @@
             </div>
             <div class="crm-process-block" style="display: none;">
                 <p>
-                    [`Export is in progress. Please don’t leave this page until the process is completed.`]<i class="icon16 loading"></i>
+                    [`Export is in progress. Please don’t leave this page until the process is completed.`] <span class="icon loader"><i class="icon fas fa-spinner fa-spin loading"></i></span>
                 </p>
                 <div class="crm-progressbar-wrapper js-progressbar-wrapper">
-                    <div class="progressbar blue js-export-contacts-progressbar" style="width: 95%">
-                        <div class="progressbar-outer">
-                            <div class="progressbar-inner js-export-contacts-progressbar-progress" style="width: 0"></div>
+                    <div class="progressbar js-export-contacts-progressbar">
+                        <div class="progressbar-line-wrapper text-inside">
+                            <div class="progressbar-outer ">
+                                <div class="progressbar-inner js-export-contacts-progressbar-progress" style="width: 0%">
+                                    <div class="progressbar-text"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="js-current-progress-txt"></div>
+                    <!--<div class="js-current-progress-txt"></div>-->
                 </div>
             </div>
 
@@ -74,11 +115,37 @@
             </form>
 
         </div>
-        <footer class="crm-dialog-footer">
-            <input class="button green js-save" type="button" value="[`Start export`]">
-            <i class="icon16 loading crm-loading" style="display: none;"></i>
-            <span style="margin: 0 4px;">[`or`]</span>
-            <a class="js-close-dialog crm-js-cancel" href="javascript:void(0);">[`cancel`]</a>
+        <footer class="dialog-footer custom-mt-24 flexbox vertical">
+            <div class="dialog-footer--visible">
+                <button class="button js-save">[`Start export`]</button>
+                <button class="button gray js-close-dialog crm-js-cancel" href="javascript:void(0);">[`Cancel`]</button>
+                <i class="icon fas fa-spinner fa-spin loading crm-loading" style="display: none;"></i>
+            </div>
+            <div class="dialog-footer--hidden hidden">
+                <a class="button js-download" download>[`Download`]</a>
+                <button class="button gray js-close-dialog crm-js-cancel" href="javascript:void(0);">[`Close`]</button>
+            </div>
+            
         </footer>
     </div>
 </div>
+<script>
+    (function ($) {
+        var context = {
+            total_count: {$count},
+            page_count: {$count},
+            checked_count: {$count},
+            is_checked_all: {$is_checked_all},
+            contact_ids: {json_encode($ids)},
+            hash: {json_encode($hash)}
+        };
+
+        var exportOperation = new CRMContactsOperationExport({
+            $wrapper: $("#export-dialog"),
+            context: context
+        });
+    })(jQuery);
+</script>
+
+</body>
+</html>

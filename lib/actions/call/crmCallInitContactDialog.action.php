@@ -8,23 +8,28 @@ class crmCallInitContactDialogAction extends crmBackendViewAction
 
     public function execute()
     {
-        $contact_id = waRequest::post('contact_id', 0, waRequest::TYPE_INT);
+        $contact_id = waRequest::request('contact_id', 0, waRequest::TYPE_INT);
+        $client_number = waRequest::request('phone', 0, waRequest::TYPE_STRING_TRIM);
+        $deal_id = waRequest::request('deal_id', null, waRequest::TYPE_INT);
+        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
+
         if (!$contact_id) {
             throw new waException('Missing contact id', 404);
+        } elseif (!$client_number) {
+            throw new waException('Missing phone number', 404);
         }
+
+        // Pbx numbers by user
+        $user_pbx_numbers = $this->getPbxNumbers();
+        if (empty($user_pbx_numbers)) {
+            throw new waException('You are not assigned any telephony plugin number', 404);
+        }
+
         $contact = new crmContact($contact_id);
         if (empty($contact) || !$contact->exists()) {
             throw new waException('Contact not found', 404);
         }
 
-        $client_number = waRequest::post('phone', 0, waRequest::TYPE_STRING_TRIM);
-        if (!$client_number) {
-            throw new waException('Missing phone number', 404);
-        }
-        // 8 and 7 at the beginning of the line, replace with +7
-        $client_number = preg_replace('~^(8|7)~', '+7', $client_number);
-
-        $deal_id = waRequest::post('deal_id', null, waRequest::TYPE_INT);
         if ($deal_id) {
             $dm = new crmDealModel();
             $deal = $dm->getDeal($deal_id);
@@ -33,16 +38,15 @@ class crmCallInitContactDialogAction extends crmBackendViewAction
             }
         }
 
-        // Pbx numbers by user
-        $user_pbx_numbers = $this->getPbxNumbers();
-
-        if (empty($user_pbx_numbers)) {
-            throw new waException('You are not assigned any telephony plugin number', 404);
-        }
+        $client_number = $this->replacePrefixPhone($client_number);
 
         // If only one assigned number - immediately initialize the call
         if (count($user_pbx_numbers) == 1) {
             $this->call_ready = 'ready';
+        }
+
+        if (!empty($iframe) && wa('crm')->whichUI('crm') !== '1.3') {
+            $this->setLayout();
         }
 
         $this->view->assign(array(
@@ -52,6 +56,7 @@ class crmCallInitContactDialogAction extends crmBackendViewAction
             'call_ready'           => $this->call_ready,
             'pbx_numbers'          => $this->getPbxNumbers(),
             'deal_id'              => $deal_id,
+            'iframe'               => $iframe
         ));
     }
 
@@ -127,5 +132,25 @@ class crmCallInitContactDialogAction extends crmBackendViewAction
         $formatter = new waContactPhoneFormatter();
         $number = str_replace(str_split("+-() \n\t"), '', $number);
         return $formatter->format($number);
+    }
+
+    /**
+     * ../webasyst/crm/settings/sms/
+     * @param $phone_number
+     * @return string
+     * @throws waException
+     */
+    private function replacePrefixPhone($phone_number)
+    {
+        $phone_prefix = wa('crm')->getConfig()->getPhoneTransformPrefix();
+        if (!empty($phone_prefix['input_code']) && !empty($phone_prefix['output_code'])) {
+            $phone_digits = ltrim($phone_number, '+');
+            /** example 8... -> +7 */
+            if (strpos($phone_digits, $phone_prefix['input_code']) === 0) {
+                return '+'.$phone_prefix['output_code'].ltrim($phone_digits, $phone_prefix['input_code']);
+            }
+        }
+
+        return $phone_number;
     }
 }

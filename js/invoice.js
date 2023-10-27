@@ -373,7 +373,7 @@ var CRMInvoiceEdit = ( function($) {
             if (formData.errors.length) {
                 showErrors(false, formData.errors);
             } else {
-                request(formData.data);
+                request(formData.data, $form.find('.js-submit-button'));
             }
         }
 
@@ -460,7 +460,7 @@ var CRMInvoiceEdit = ( function($) {
         }
 
         function showErrors(ajax_errors, errors) {
-            var error_class = "error";
+            var error_class = "state-error";
 
             errors = (errors ? errors : []);
 
@@ -482,18 +482,9 @@ var CRMInvoiceEdit = ( function($) {
 
                 if ($field.length && !$field.hasClass(error_class)) {
 
-                    var $text = $("<span />").addClass("errormsg").text(text),
-                        field_o = $field.offset(),
-                        wrapper_o = that.$wrapper.offset(),
-                        top = field_o.top - wrapper_o.top + $field.outerHeight(),
-                        left = field_o.left - wrapper_o.left;
+                    var $text = $("<span />").addClass("state-error-hint").text(text);
 
-                    $text.css({
-                        left: left + "px",
-                        top: top + "px"
-                    });
-
-                    that.$wrapper.append($text);
+                    $text.insertAfter($field);
 
                     $field
                         .addClass(error_class)
@@ -505,20 +496,29 @@ var CRMInvoiceEdit = ( function($) {
             });
         }
 
-        function request(data) {
+        function request(data, $button) {
             if (!is_locked) {
                 is_locked = true;
 
                 var href = $.crm.app_url + "?module=invoice&action=save";
 
+                const spinner = spinnerView($button);
+                spinner.show();
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
                         if (response.data.id) {
                             $(document).trigger("unsavedChanges", false);
                             var content_uri = $.crm.app_url + "invoice/" + response.data.id + "/";
-                            $.crm.content.load(content_uri);
+                            const iframe = getIframeIfExists();
+                            if (iframe) {
+                                window.parent.iframe_invoice_is_saved = true;
+                                iframe.src = content_uri + '?iframe=1'
+                            } else {
+                                $.crm.content.load(content_uri);
+                            }
                         }
                     } else {
+                        spinner.hide();
                         showErrors(response.errors);
                     }
                 }, "json").always( function() {
@@ -546,7 +546,7 @@ var CRMInvoiceEdit = ( function($) {
         // Events
 
         that.$wrapper.on("click", ".js-focus-on-field", function() {
-            $(this).parent().find("input:text").trigger("focus");
+            $(this).parent().find(".js-invoice-due-datepicker").trigger("focus");
         });
 
         $dayDueField.on("change", function() {
@@ -650,7 +650,7 @@ var CRMInvoiceEdit = ( function($) {
                 href = $.crm.app_url + "?module=invoice&action=contactAdd";
 
             $.get(href, function (html) {
-                new CRMDialog({
+                $.waDialog({
                     html: html,
                     options: {
                         onAdd: function(id, name) {
@@ -661,7 +661,7 @@ var CRMInvoiceEdit = ( function($) {
                                 var $label = $link.find(".js-label"),
                                     text = $label.data("change-text");
 
-                                $label.text(text);
+                                $label.html(`<span class="c-dotted">${text}</span>`);
                                 is_set = true;
                             }
                         }
@@ -707,7 +707,7 @@ var CRMInvoiceEdit = ( function($) {
             //
             if (tax_array && tax_name) {
                 that.$emptyTax.hide();
-                that.$tax.show();
+                that.$tax.parent().show();
                 $.each(tax_array, function(index, item) {
                     var $item = $("<option value=\"" + index + "\"></option>"),
                         text;
@@ -754,7 +754,7 @@ var CRMInvoiceEdit = ( function($) {
                     }
                 });
             } else {
-                that.$tax.hide();
+                that.$tax.parent().hide();
                 that.$emptyTax.show();
                 var href = that.$emptyTaxLink.data('href');
                 that.$emptyTaxLink.attr('href', href + that.$companyField.val().toString() + '/');
@@ -991,7 +991,7 @@ var CRMInvoiceEdit = ( function($) {
 
             function renderItem($item) {
                 if ($item === "loading") {
-                    $list.html("").append("<li class=\"ui-menu-item-html ui-menu-item\"><div class=\"ui-menu-item-wrapper\"><i class=\"icon16 loading\"></i></div></li>");
+                    $list.html("").append("<li class=\"ui-menu-item-html ui-menu-item\"><div class=\"ui-menu-item-wrapper\"><i class=\"fas fa-spinner wa-animation-spin\"></i></div></li>");
 
                 } else {
                     var $li = $("<li />").addClass("ui-menu-item-html ui-menu-item");
@@ -1082,7 +1082,7 @@ var CRMInvoiceEdit = ( function($) {
             if (show_confirm) {
                 that.$currencyField.val(currency);
 
-                new CRMDialog({
+                $.waDialog({
                     html: that.confirm_dialog_template,
                     options: {
                         changeCurrencyWithPrice: function() {
@@ -1323,7 +1323,7 @@ var CRMInvoiceContactAdd = ( function($) {
         }
 
         function showErrors(ajax_errors, errors) {
-            var error_class = "error";
+            var error_class = "state-error";
 
             errors = (errors ? errors : []);
 
@@ -1353,7 +1353,7 @@ var CRMInvoiceContactAdd = ( function($) {
 
                 if ($field.length && !$field.hasClass(error_class)) {
 
-                    var $text = $("<span />").addClass("errormsg").text(text);
+                    var $text = $("<div />").addClass("state-error-hint").text(text);
                     $text.insertAfter($field);
 
                     $field
@@ -1413,6 +1413,11 @@ var CRMInvoicePage = ( function($) {
         }, 100);
 
         that.$wrapper.data("page", that);
+
+        // TODO: remove
+        $('.js-action-link').one("click", function () {
+            spinnerView($(this)).show()
+        })
     };
 
     CRMInvoicePage.prototype.initChangeState = function() {
@@ -1424,10 +1429,10 @@ var CRMInvoicePage = ( function($) {
         $wrapper.on("click", ".js-change-state", function(event) {
             event.preventDefault();
             var action = $(this).data("action");
-            if (action) { submit(action); }
+            if (action) { submit(action, $(this)); }
         });
 
-        function submit(action) {
+        function submit(action, $button) {
             if (!is_locked) {
                 is_locked = true;
 
@@ -1437,16 +1442,24 @@ var CRMInvoicePage = ( function($) {
                         action: action
                     };
 
+                const spinner = spinnerView($button);
+                spinner.show();
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
-                        updateInvoiceAtSidebar(that.invoice_id, (action === "delete" ? "" : response.data.html));
-                        var redirect_uri = $.crm.app_url + "invoice/" + that.invoice_id + "/";
-                        that.load(redirect_uri);
-
+                        const iframe = getIframeIfExists();
+                        if (iframe) {
+                            window.parent.iframe_invoice_is_saved = true;
+                            iframe.contentWindow.location.reload();
+                        } else {
+                            updateInvoiceAtSidebar(that.invoice_id, (action === "delete" ? "" : response.data.html));
+                            var redirect_uri = $.crm.app_url + "invoice/" + that.invoice_id + "/";
+                            that.load(redirect_uri);
+                        }
                     } else {
                         alert(response.errors);
                     }
                 }, "json").always( function() {
+                    spinner.hide();
                     is_locked = false;
                 });
             }
@@ -1460,15 +1473,18 @@ var CRMInvoicePage = ( function($) {
         that.$wrapper.on("click", ".js-delete-invoice", function(event) {
             event.preventDefault();
 
-            $.crm.confirm.show({
+            $.waDialog.confirm({
                 title: that.locales["delete_confirm_title"],
                 text: that.locales["delete_confirm_text"],
-                button: that.locales["delete_confirm_button"],
-                onConfirm: deleteInvoice
+                success_button_title: that.locales["delete_confirm_button"],
+                success_button_class: 'danger',
+                cancel_button_title: $.crm.locales['cancel'],
+                cancel_button_class: 'light-gray',
+                onSuccess: deleteInvoice
             });
         });
 
-        function deleteInvoice() {
+        function deleteInvoice(dialog) {
             if (!is_locked) {
                 is_locked = true;
 
@@ -1478,12 +1494,20 @@ var CRMInvoicePage = ( function($) {
                         action: "delete"
                     };
 
+                const spinner = spinnerView(dialog.$body.find('.js-success-action'));
+                spinner.show();
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
                         var content_uri = $.crm.app_url + "invoice/";
-                        $.crm.content.load(content_uri);
+                        const iframe = getIframeIfExists();
+                        if (iframe) {
+                            iframe.dispatchEvent(new CustomEvent('close', { detail: 'refresh' }));
+                        } else {
+                            $.crm.content.load(content_uri);
+                        }
                     }
                 }, "json").always( function() {
+                    spinner.hide();
                     is_locked = false;
                 });
             }
@@ -1496,10 +1520,10 @@ var CRMInvoicePage = ( function($) {
 
         that.$wrapper.on("click", ".js-change-refund", function(event) {
             event.preventDefault();
-            showDialog();
+            showDialog($(this));
         });
 
-        function showDialog() {
+        function showDialog($button) {
             if (!is_locked) {
                 is_locked = true;
 
@@ -1508,16 +1532,26 @@ var CRMInvoicePage = ( function($) {
                         invoice_id: that.invoice_id
                     };
 
+                const spinner = spinnerView($button, 0);
+                spinner.show();
                 $.post(href, data, function(html) {
-                    new CRMDialog({
+                    $.waDialog({
                         html: html,
                         options: {
-                            onRefund: function() {
-                                that.reload();
+                            onRefund: function(data) {
+                                const iframe = getIframeIfExists();
+                                if (iframe) {
+                                    window.parent.iframe_invoice_is_saved = true;
+                                    iframe.contentWindow.location.reload();
+                                } else {
+                                    updateInvoiceAtSidebar(that.invoice_id, data.html);
+                                    that.reload();
+                                }
                             }
                         }
                     });
                 }).always( function() {
+                    spinner.hide();
                     is_locked = false;
                 });
             }
@@ -1530,10 +1564,10 @@ var CRMInvoicePage = ( function($) {
 
         that.$wrapper.on("click", ".js-restore-invoice", function(event) {
             event.preventDefault();
-            restore();
+            restore($(this));
         });
 
-        function restore() {
+        function restore($button) {
             if (!is_locked) {
                 is_locked = true;
 
@@ -1542,11 +1576,20 @@ var CRMInvoicePage = ( function($) {
                         id: that.invoice_id
                     };
 
+                const spinner = spinnerView($button);
+                spinner.show();
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
-                        updateInvoiceAtSidebar(that.invoice_id, response.data.html);
-                        that.reload();
+                        const iframe = getIframeIfExists();
+                        if (iframe) {
+                            window.parent.iframe_invoice_is_saved = true;
+                            iframe.contentWindow.location.reload();
+                        } else {
+                            updateInvoiceAtSidebar(that.invoice_id, response.data.html);
+                            that.reload();
+                        }
                     } else {
+                        spinner.hide();
                         alert(response.errors);
                     }
                 }, "json").always( function() {
@@ -1635,7 +1678,7 @@ var CRMInvoiceRefundDialog = ( function($) {
             if (formData.errors.length) {
                 showErrors(formData.errors);
             } else {
-                request(formData.data);
+                request(formData.data, $form.find('.js-submit-button'));
             }
         }
 
@@ -1657,19 +1700,22 @@ var CRMInvoiceRefundDialog = ( function($) {
             console.log(errors);
         }
 
-        function request(data) {
+        function request(data, $button) {
             if (!is_locked) {
                 is_locked = true;
                 var href = $.crm.app_url + "?module=invoice&action=handleTransaction";
 
+                const spinner = spinnerView($button);
+                spinner.show();
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
-                        that.dialog.options.onRefund();
+                        that.dialog.options.onRefund(response.data);
                         that.dialog.close();
                     } else {
                         showErrors(response.errors);
                     }
                 }, "json").always( function() {
+                    spinner.hide();
                     is_locked = false;
                 });
             }
@@ -1679,3 +1725,34 @@ var CRMInvoiceRefundDialog = ( function($) {
     return CRMInvoiceRefundDialog;
 
 })(jQuery);
+
+function getIframeIfExists () {
+    const iframe = new URLSearchParams(document.location.search).get('iframe');
+    if (iframe && window.parent) {
+        return window.parent.document.getElementById('iframe-invoice')
+    }
+
+    return null
+}
+
+function spinnerView ($button, timeout = 350) {
+    const $loading = $('<span class="icon size-16 custom-mr-8 js-loading"><i class="fas fa-spinner wa-animation-spin"></i></span>');
+    const $existsIcon = $button.find('.icon:not(.js-loading)')
+    return {
+        show: function () {
+            if ($existsIcon) {
+                $existsIcon.hide();
+            }
+            $button.prepend($loading).prop('disabled', true);
+        },
+        hide: function () {
+            setTimeout(() => {
+                $button.removeAttr('disabled');
+                $button.find('.js-loading').remove();
+                if ($existsIcon) {
+                    $existsIcon.show();
+                }
+            }, timeout)
+        }
+    }
+}

@@ -91,6 +91,21 @@ abstract class crmSourceHelper
     public function workupConversation($conversation)
     {
         // override it
+        return $this->workupConversationInList($conversation);
+    }
+
+    public function workupConversationInList($conversation)
+    {
+        $transport_name = $this->source->getName();
+        if (!empty($transport_name)) {
+            $conversation['transport_name'] = $transport_name;
+        }
+        $conversation['icon_url'] = $this->source->getIcon();
+        $fa_icon = $this->source->getFontAwesomeBrandIcon();
+        if (ifset($fa_icon['icon_fab'])) {
+            $conversation['icon_fab'] = $fa_icon['icon_fab'];
+            $conversation['icon_color'] = $fa_icon['icon_color'];
+        }
         return $conversation;
     }
 
@@ -104,6 +119,40 @@ abstract class crmSourceHelper
     {
         // override it
         return $messages;
+    }
+
+    public function normalazeMessagesExtras($messages)
+    {
+        // override it
+        return $messages;
+    }
+
+    public function getFeatures()
+    {
+        if (!empty($this->source) && $this->source->getType() == crmSourceModel::TYPE_EMAIL) {
+            return [
+                'html' => true,
+                'attachments' => true,
+                'images' => false,
+            ];
+        }
+        return [
+            'html' => false,
+            'attachments' => false,
+            'images' => false,
+        ];
+    }
+
+    protected function addExtra($message, $extra_type, $value)
+    {
+        if (!isset($message['extras'])) {
+            $message['extras'] = [];
+        }
+        if (!isset($message['extras'][$extra_type])) {
+            $message['extras'][$extra_type] = [];
+        }
+        $message['extras'][$extra_type][] = $value;
+        return $message;
     }
 
     protected function renderTemplate($template, $assign = array())

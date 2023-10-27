@@ -1,0 +1,1 @@
+const o=async r=>{const s=await(await fetch(r)).blob();return new Promise((e,t)=>{try{const a=new FileReader;a.onload=function(){e(this.result)},a.readAsDataURL(s)}catch(a){t(a)}})},c=r=>new Promise((n,s)=>{try{const e=new FileReader;e.onload=function(){var t;n((t=this.result)==null?void 0:t.toString())},e.readAsDataURL(r)}catch(e){s(e)}});export{c as f,o as i};

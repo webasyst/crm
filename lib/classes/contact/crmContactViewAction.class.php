@@ -18,6 +18,8 @@ abstract class crmContactViewAction extends crmBackendViewAction
             'is_admin'     => $this->getCrmRights()->isAdmin(),
             'merge_rights' => (wa()->getUser()->getRights('crm', 'edit')) ? true : false,
         ));
+
+        parent::preExecute();
     }
 
     protected function getSegments()
