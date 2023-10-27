@@ -80,6 +80,13 @@ class crmTelegramPluginImSourceHelper extends crmSourceHelper
         return $message;
     }
 
+    public function workupConversationInList($conversation)
+    {
+        $conversation = parent::workupConversationInList($conversation);
+        $conversation['transport_name'] = $this->source->getParam('username');
+        return $conversation;
+    }
+
     public function workupConversation($conversation)
     {
         $mm = new crmMessageModel();
@@ -90,7 +97,7 @@ class crmTelegramPluginImSourceHelper extends crmSourceHelper
         } elseif ($this->source->isDisabled()) {
             $conversation['reply_form_html'] = '<div class="c-reply-form-error">'._wd('crm_telegram',
                     'Deal source disabled')."</div>";
-        } else {
+        } elseif (wa()->whichUI('crm') === '1.3') {
             $assign = array(
                 'message'         => $last_message,
                 'source_id'       => $this->source->getId(),
@@ -101,15 +108,13 @@ class crmTelegramPluginImSourceHelper extends crmSourceHelper
             $reply_form_html = $this->renderTemplate($template, $assign);
             $conversation['reply_form_html'] = $reply_form_html;
         }
-        $conversation['transport_name'] = $this->source->getParam('username');
-        $conversation['icon_url'] = $this->source->getIcon();
-        return $conversation;
+        return $this->workupConversationInList($conversation);
     }
 
     public function workupMessagesInConversation($conversation, $messages)
     {
+        $messages = self::workupMessagesForDisplaying($messages);
         foreach ($messages as &$message) {
-            $message = self::workupMessageForDisplaying($message);
             // format From block in conversation
             $template = wa()->getAppPath("plugins/telegram/templates/source/message/ConversationFromFormatted.html", 'crm');
             $assign = array(
@@ -124,11 +129,6 @@ class crmTelegramPluginImSourceHelper extends crmSourceHelper
     }
 
     public static function workupMessageForDialog($message)
-    {
-        return self::workupMessageForDisplaying($message);
-    }
-
-    protected static function workupMessageForDisplaying($message)
     {
         $contact_ids = array($message['contact_id'], $message['creator_contact_id'], ifset($message['params']['forward_contact_id']));
         $contact_ids = crmHelper::toIntArray($contact_ids);
@@ -153,32 +153,150 @@ class crmTelegramPluginImSourceHelper extends crmSourceHelper
             $message['funnel'] = $funnel;
         }
 
-        if ($message['direction'] == crmMessageModel::DIRECTION_IN) {
-            $message['to_telegram_url'] = $message['to'] ? "https://t.me/".$message['to'] : false; // Bot url
-            $message['from_telegram_url'] = ifset($message['params']['username']) ? "https://t.me/".$message['params']['username'] : false; // User url
-        } else {
-            $message['to_telegram_url'] = ifset($message['params']['username']) ? "https://t.me/".$message['params']['username'] : false; // User url
-            $message['from_telegram_url'] = $message['from'] ? "https://t.me/".$message['from'] : false; // Bot url
+        $res = self::workupMessagesForDisplaying([$message]);
+        return reset($res);
+    }
+
+    protected static function workupMessagesForDisplaying($messages)
+    {
+        $attachment_ids = [];
+        foreach($messages as $message) {
+            $attachment_ids = array_merge($attachment_ids, array_keys((array)ifset($message['attachments'])));
+        }
+        $files_params = (new crmTelegramPluginFileParamsModel)->get($attachment_ids);
+        
+        return array_map(function($m) use ($files_params) {
+            if ($m['direction'] == crmMessageModel::DIRECTION_IN) {
+                $m['to_telegram_url'] = $m['to'] ? "https://t.me/".$m['to'] : false; // Bot url
+                $m['from_telegram_url'] = ifset($m['params']['username']) ? "https://t.me/".$m['params']['username'] : false; // User url
+            } else {
+                $m['to_telegram_url'] = ifset($m['params']['username']) ? "https://t.me/".$m['params']['username'] : false; // User url
+                $m['from_telegram_url'] = $m['from'] ? "https://t.me/".$m['from'] : false; // Bot url
+            }
+
+            foreach (ifset($m['attachments'], []) as $file_id => $file) {
+                if (ifset($files_params, $file_id, 'type', null)) {
+                    $m[$files_params[$file_id]['type']][$file_id] = $file;
+                    unset($m['attachments'][$file_id]);
+                }
+            }
+
+            if (!empty($m['params']['caption'])) {
+                $m['params']['caption_sanitized'] = crmHtmlSanitizer::work($m['params']['caption']);
+            }
+            $m['body_formatted'] = crmTelegramPluginMessageBodyFormatter::format($m);
+            $m['subject_formatted'] = crmTelegramPluginMessageSubjectFormatter::format($m);
+    
+            return $m;
+        }, $messages);
+    }
+
+
+    protected function prepareSticker($width = 16)
+    {
+        $sticker_id = $this->message['params']['sticker_id'];
+        $tsm = new crmTelegramPluginStickerModel();
+        $sticker_file = $tsm->getById($sticker_id);
+        if (!$sticker_file) {
+            return array(
+                'error' => _wd('crm_telegram', 'Unkown sticker'),
+            );
         }
 
-        $attachment_ids = array_keys((array)ifset($message['attachments']));
-        $tfpm = new crmTelegramPluginFileParamsModel();
-        $params = $tfpm->get($attachment_ids);
-        foreach ($params as $file_id => $param) {
-            if (isset($param['type'])) {
-                $message[$param['type']][$file_id] = $message['attachments'][$file_id];
-                unset($message['attachments'][$file_id]);
+        return array(
+            'url'   => wa()->getAppUrl('crm').'?module=file&action=download&id='.(int)$sticker_file['id'],
+            'width' => $width,
+        );
+    }
+
+    public function normalazeMessagesExtras($messages)
+    {
+        $attachment_ids = [];
+        $sticker_ids = [];
+        foreach($messages as $message) {
+            $attachment_ids = array_merge($attachment_ids, array_column(array_values(ifset($message['attachments'], [])), 'id'));
+            $sticker_id = ifset($message, 'params', 'sticker_id', null);
+            if ($sticker_id) {
+                $sticker_ids[] = $sticker_id;
+            }
+        }
+        $files_params = (new crmTelegramPluginFileParamsModel)->get($attachment_ids);
+        $stickers = $sticker_files = [];
+        if (!empty($sticker_ids)) {
+            $stickers = (new crmTelegramPluginStickerModel)->getByField(['id' => $sticker_ids], 'id');
+            $file_ids = array_column(array_values($stickers), 'crm_file_id');
+            if (!empty($file_ids)) {
+                $sticker_files = (new crmFileModel)->getByField(['id' => $file_ids], 'id');
             }
         }
 
-        if (!empty($message['params']['caption'])) {
-            $message['params']['caption_sanitized'] = crmHtmlSanitizer::work($message['params']['caption']);
+        return array_map(function($m) use ($files_params, $stickers, $sticker_files) {
+            foreach (ifset($m['attachments'], []) as $idx => $file) {
+                if (ifset($files_params, $file['id'], 'type', null) 
+                    && $extra_type = $this->normilizeExtraType($files_params[$file['id']]['type'])
+                ) {
+                    $m = $this->addExtra($m, $extra_type, $file);
+                    unset($m['attachments'][$idx]);
+                }
+            }
+            if (!empty($m['attachments'])) {
+                $m['attachments'] = array_values($m['attachments']);
+            }
+
+            $sticker_file = null;
+            $sticker_id = ifset($m, 'params', 'sticker_id', null) 
+                and $sticker_file_id = ifset($stickers, $sticker_id, 'crm_file_id', null)
+                and $sticker_file = ifset($sticker_files[$sticker_file_id]);
+            if ($sticker_file) {
+                $m = $this->addExtra($m, 'stickers', $sticker_file);
+            }
+
+            $location = ifset($m, 'params', 'location', null);
+            if ($location) {
+                $m = $this->addExtra($m, 'locations', ['point' => $location]);
+            }
+
+            $location = ifset($m, 'params', 'venue_location', null);
+            if ($location) {
+                $m = $this->addExtra($m, 'locations', [
+                    'point' => $location,
+                    'title' => ifset($m, 'params', 'venue_title', null),
+                    'address' => ifset($m, 'params', 'venue_address', null),
+                    'foursquare_id' => ifset($m, 'params', 'venue_foursquare_id', null)
+                ]);
+            }
+
+            $caption = ifset($m, 'params', 'caption', null);
+            if ($caption) {
+                $m['caption'] = crmHtmlSanitizer::work($caption);
+            }
+
+            return $m;
+        }, $messages);
+    }
+
+    public function getFeatures()
+    {
+        return [
+            'html' => true,
+            'attachments' => true,
+            'images' => true,
+        ];
+    }
+
+    protected function normilizeExtraType($type)
+    {
+        switch ($type) {
+            case 'photo':
+                return 'images';
+            case 'video':
+            case 'video_note':
+                return 'videos';
+            case 'audio':
+            case 'voice':
+                return 'audios';
         }
-
-        $message['body_formatted'] = crmTelegramPluginMessageBodyFormatter::format($message);
-        $message['subject_formatted'] = crmTelegramPluginMessageSubjectFormatter::format($message);
-
-        return $message;
+        return false;
     }
 
     protected static function getFunnel($deal)

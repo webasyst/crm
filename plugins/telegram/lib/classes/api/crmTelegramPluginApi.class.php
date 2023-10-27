@@ -166,7 +166,7 @@ class crmTelegramPluginApi
      * https://api.telegram.org/file/bot<token>/<file_path>,
      * where <file_path> is taken from the response.
      * It is guaranteed that the link will be valid for at least 1 hour.
-     * 
+     *
      * @see https://core.telegram.org/bots/api#getfile
      * @param string $file_id
      * @return mixed
@@ -205,7 +205,7 @@ class crmTelegramPluginApi
         curl_close($curl_handle);
     }
 
-    protected function multipartRequest($method, $params = array(), $file, $type) {
+    protected function multipartRequest($method, $params, $file, $type) {
         $token = $this->access_token;
         $url = self::API_URL.$token.'/'.$method;
         if (!empty($params)) {
@@ -217,7 +217,7 @@ class crmTelegramPluginApi
         }
 
         $post_fields = array(
-            'chat_id' => ifset($params['chat_id']),
+            'chat_id' => ifset($params, 'chat_id', null),
             $type => $file,
         );
 

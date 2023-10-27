@@ -19,7 +19,9 @@ class crmTelegramPluginContactExporter
         $data = array();
         $this->prepareSimpleFields($data);
         $contact = new crmContact();
-        $contact->save($data);
+        if ($errors = $contact->save($data)) {
+            waLog::log(waUtils::jsonEncode($errors), 'crm/plugins/telegram.log');
+        }
         return $contact;
     }
 

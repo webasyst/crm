@@ -27,6 +27,8 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
      */
     protected $downloader;
 
+    protected $is_start_response = false;
+
     public function __construct(crmSource $source, $message, array $options = array())
     {
         parent::__construct($source, $message, $options);
@@ -80,10 +82,15 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
 
     public function reply($data)
     {
-        $errors = $this->validate($data);
+        // Check uploaded photos and files
+        $uploaded_photos = $this->getUploadedPhotos(ifset($data['hash']));
+        $uploaded_files = $this->getUploadedFiles(ifset($data['hash']));
+
+        $errors = $this->validate($data, (!!$uploaded_photos || !!$uploaded_files));
         if ($errors) {
             return $this->fail($errors);
         }
+        $this->is_start_response = !empty($data['is_start_response']);
 
         $chat_id = ($this->message['direction'] == crmMessageModel::DIRECTION_IN) ? $this->message['from'] : $this->message['to'];
         if (!$chat_id) {
@@ -96,9 +103,6 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
             'text'    => crmTelegramPluginHtmlSanitizer::convector($data['body']),
         );
 
-        // Check uploaded photos and files
-        $uploaded_photos = $this->getUploadedPhotos(ifset($data['hash']));
-        $uploaded_files = $this->getUploadedFiles(ifset($data['hash']));
         $attachments = array();
         if (!empty($uploaded_photos)) {
             foreach ($uploaded_photos as $photo_path) {
@@ -171,12 +175,20 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
             }
         }
 
-        if (isset($params)) {
+        if (!empty($params['text'])) {
             $new_message = $this->api->sendMessage($params);
             if (!empty($attachments)) {
                 $new_message['attachments'] = $attachments;
             }
         } else {
+            // для пустого сообщения с вложениями
+            if (!empty($attachments)) {
+                $response['attachments'] = $attachments;
+                unset(
+                    $response['result']['photo'],
+                    $response['result']['document']
+                );
+            }
             $new_message = ifset($response);
         }
 
@@ -212,7 +224,7 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
         }
 
         $data = array(
-            'creator_contact_id' => wa()->getUser()->getId(),
+            'creator_contact_id' => $this->is_start_response ? 0 : wa()->getUser()->getId(),
             'transport'          => crmMessageModel::TRANSPORT_IM,
             'contact_id'         => $this->message['contact_id'],
             'deal_id'            => ifset($this->message['deal_id']),
@@ -338,10 +350,10 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
         return $message_id;
     }
 
-    protected function validate($data)
+    protected function validate($data, $is_attachments)
     {
         $body = (string)ifset($data['body']);
-        if (strlen($body) <= 0) {
+        if (!$is_attachments && strlen($body) <= 0) {
             return array(
                 'body' => _w('This is a required field.')
             );

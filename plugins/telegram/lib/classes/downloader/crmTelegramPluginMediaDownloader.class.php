@@ -72,10 +72,13 @@ class crmTelegramPluginMediaDownloader
             return;
         }
         $file_path = $file_data['result']['file_path'];
+        if (strtolower(substr($file_path, -4)) !== '.jpg') {
+            return;
+        }
         $url = 'https://api.telegram.org/file/bot'.$this->source->getParam('access_token').'/'.$file_path;
         $path = $this->downloadProfilePhoto($url);
-        $contact->setPhoto($path);
         try {
+            $contact->setPhoto($path);
             waFiles::delete($path);
         } catch (Exception $e) {
 

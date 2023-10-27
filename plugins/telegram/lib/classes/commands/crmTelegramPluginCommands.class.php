@@ -49,7 +49,7 @@ class crmTelegramPluginCommands
     {
         if ($this->telegram_message['text'] === '/start' && $this->source->getParam('start_response')) {
             $start_text = $this->replaceVars($this->source->getParam('start_response'));
-            $this->source_sender->reply(array('body' => $start_text));
+            $this->source_sender->reply(array('body' => $start_text, 'is_start_response' => true));
         }
     }
 
