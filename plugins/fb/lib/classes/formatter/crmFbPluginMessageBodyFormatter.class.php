@@ -11,7 +11,7 @@ class crmFbPluginMessageBodyFormatter extends crmFbPluginMessageContentFormatter
     /**
      * @return array
      */
-    protected function getAssigns()
+    public function getAssigns()
     {
         $attachments = isset($this->message['params']['attachments']) ? $this->message['params']['attachments'] : null;
         $images = array_merge(

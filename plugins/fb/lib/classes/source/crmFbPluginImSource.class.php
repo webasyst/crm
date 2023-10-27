@@ -18,4 +18,12 @@ class crmFbPluginImSource extends crmImSource
     {
         return $this->getParam('access_marker');
     }
+
+    public function getFontAwesomeBrandIcon()
+    {
+        return [
+            'icon_fab' => 'facebook-f',
+            'icon_color' => '#4267B2',
+        ];
+    }
 }

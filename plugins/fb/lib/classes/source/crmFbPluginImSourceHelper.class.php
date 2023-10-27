@@ -67,9 +67,7 @@ class crmFbPluginImSourceHelper extends crmSourceHelper
             $reply_form_html = $this->renderTemplate($template, $assign);
             $conversation['reply_form_html'] = $reply_form_html;
         }
-        $conversation['transport_name'] = $this->source->getName();
-        $conversation['icon_url'] = $this->source->getIcon();
-        return $conversation;
+        return $this->workupConversationInList($conversation);
     }
 
     public function workupMessagesInConversation($conversation, $messages)
@@ -80,6 +78,47 @@ class crmFbPluginImSourceHelper extends crmSourceHelper
         }
         unset($message);
         return $messages;
+    }
+
+    public function normalazeMessagesExtras($messages)
+    {
+        $extra_file_ids = [];
+        foreach ($messages as &$message) {
+            $formatter = new crmFbPluginMessageBodyFormatter($message);
+            $extras = $formatter->getAssigns();
+            unset($extras['body']);
+            $message['extras'] = $extras;
+            $extra_file_ids = array_merge(
+                $extra_file_ids,
+                ifempty($extras['images'], []),
+                ifempty($extras['videos'], []), 
+                ifempty($extras['audios'], [])
+            );
+        }
+        unset($message);
+
+        $extra_files = (new crmFileModel)->getFiles($extra_file_ids);
+
+        return array_map(function ($el) use ($extra_files) {
+            foreach(['images', 'videos', 'audios'] as $type) {
+                if (ifset($el, 'extras', $type, null)) {
+                    $_extras = array_intersect_key($extra_files, array_flip($el['extras'][$type]));
+                    if (!empty($_extras)) {
+                        $el['extras'][$type] = array_values($_extras);
+                    }
+                }
+            }
+            return $el;
+        }, $messages);
+    }
+
+    public function getFeatures()
+    {
+        return [
+            'html' => false,
+            'attachments' => true,
+            'images' => false,
+        ];
     }
 
     public static function workupMessageForDialog($message)
