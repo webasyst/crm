@@ -11,6 +11,10 @@ class crmVkPluginBodyHtmlFormatter
 
     public function execute($html)
     {
+        if (empty($html)) {
+            return '';
+        }
+        
         $tokens = preg_split('/(\s+)/', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
 
         foreach ($tokens as &$token) {
@@ -41,6 +45,9 @@ class crmVkPluginBodyHtmlFormatter
 
     protected function looksLikeEmail($email)
     {
+        if (empty($email)) {
+            return false;
+        }
         $validator = new waEmailValidator();
         return $validator->isValid($email);
     }

@@ -50,4 +50,12 @@ class crmVkPluginImSource extends crmImSource
         }
         return $params;
     }
+
+    public function getFontAwesomeBrandIcon()
+    {
+        return [
+            'icon_fab' => 'vk',
+            'icon_color' => '#4C75A3',
+        ];
+    }
 }

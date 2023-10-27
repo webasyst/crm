@@ -64,11 +64,7 @@ class crmVkPluginImSourceHelper extends crmSourceHelper
             $conversation['reply_form_html'] = $reply_form_html;
         }
 
-        $conversation['icon_url'] = $this->source->getIcon();
-        $conversation['transport_name'] = $this->source->getName();return $conversation;
-
-
-        return $conversation;
+        return $this->workupConversationInList($conversation);
     }
 
     public function workupMessagesInConversation($conversation, $messages)
@@ -135,18 +131,166 @@ class crmVkPluginImSourceHelper extends crmSourceHelper
                 $message['body_formatted'] = crmVkPluginMessageBodyFormatter::format($message);
             }
 
-            $message['principal_participant'] = $chat->getPrincipalParticipant()->getInfo();
-            $message['principal_participant']['contact'] =
-                ifset($contacts[$message['principal_participant']['contact_id']]);
-            $message['participant'] = $chat->getParticipant()->getInfo();
-            $message['participant']['contact'] =
-                ifset($contacts[$message['participant']['contact_id']]);
+            if (ifset($message['params']['chat_id'])) {
+                $chat = $chats[$message['params']['chat_id']];
+                $message['principal_participant'] = $chat->getPrincipalParticipant()->getInfo();
+                $message['principal_participant']['contact'] = ifset($contacts[$message['principal_participant']['contact_id']]);
+                $message['participant'] = $chat->getParticipant()->getInfo();
+                $message['participant']['contact'] = ifset($contacts[$message['participant']['contact_id']]);
+            }
+            
             $message['contact'] = ifset($contacts[$message['contact_id']]);
             $message['creator_contact'] = ifset($contacts[$message['creator_contact_id']]);
         }
         unset($message);
 
         return $messages;
+    }
+
+    public function normalazeMessagesExtras($messages)
+    {
+        // return $messages;
+        // TODO - не закончено - см. дальше что есть в crmVkPluginMessageBodyFormatter
+        return array_map(function($m) {
+            $attachments = ifset($m, 'params', 'attachments', []);
+            foreach($attachments as $att) {
+                if (ifset($att['type']) == 'doc' && isset($att['doc'])) {
+                    $m = $this->addAttachement($m, $att['doc']);
+                    continue;
+                }
+                if (ifset($att['type']) == 'photo' && isset($att['photo'])) {
+                    if (isset($att['photo']['sizes']) && is_array($att['photo']['sizes'])) {
+                        // get the biggest thumb
+                        $thumbs = $att['photo']['sizes'];
+                        array_multisort(array_column($thumbs, 'width'), SORT_DESC, SORT_NUMERIC, $thumbs);
+                        $thumb = reset($thumbs);
+
+                        // get file name & ext from url
+                        $url = ifset($thumb['url']);
+                        if (empty($url)) {
+                            continue;
+                        }
+                        $_parts = explode('?', $url);
+                        $_parts = reset($_parts);
+                        $_parts = explode('/', $_parts);
+                        $name = end($_parts);
+                        $_parts = explode('.', $name);
+                        $ext = end($_parts);
+                        $m = $this->addExtra($m, 'images', [
+                            'name' => $name,
+                            'ext' => $ext,
+                            'url' => $url,
+                        ]);
+                    }
+                    continue;
+                }
+                if (ifset($att['type']) == 'audio_message' && isset($att['audio_message'])) {
+                    $audio = [];
+                    if (isset($att['audio_message']['link_ogg'])) {
+                        $audio['name'] = $att['audio_message']['id'] . 'ogg';
+                        $audio['ext'] = 'ogg';
+                        $audio['url'] = $att['audio_message']['link_ogg'];
+                    } elseif (isset($att['audio_message']['link_mp3'])) {
+                        $audio['name'] = $att['audio_message']['id'] . 'mp3';
+                        $audio['ext'] = 'mp3';
+                        $audio['url'] = $att['audio_message']['link_mp3'];
+                    }
+                    if (empty($audio)) {
+                        continue;
+                    }
+
+                    $m = $this->addExtra($m, 'audios', $audio);
+                    continue;
+                }
+                if (ifset($att['type']) == 'video' && isset($att['video'])) {
+                    if (ifset($att['video']['title'])) {
+                        $m['caption'] = crmHtmlSanitizer::work($att['video']['title']);
+                    }
+                    // TODO: add video normalization
+                    continue;
+                }
+
+                if (ifset($att['type']) == 'sticker' && isset($att['sticker'])) {
+                    if (isset($att['sticker']['images']) && is_array($att['sticker']['images'])) {
+                        // get the biggest thumb
+                        $thumbs = $att['sticker']['images'];
+                        array_multisort(array_column($thumbs, 'width'), SORT_DESC, SORT_NUMERIC, $thumbs);
+                        $thumb = reset($thumbs);
+
+                        // get file name & ext from url
+                        $url = ifset($thumb['url']);
+                        if (empty($url)) {
+                            continue;
+                        }
+                        $_parts = explode('?', $url);
+                        $_parts = reset($_parts);
+                        $_parts = explode('/', $_parts);
+                        $name = end($_parts);
+                        $_parts = explode('.', $name);
+                        $ext = end($_parts);
+                        if ($ext == $name) {
+                            // if no file ext in url, suppose we have .png
+                            $ext = 'png';
+                            $name .= '.png';
+                        }
+                        $m = $this->addExtra($m, 'stickers', [
+                            'name' => $name,
+                            'ext' => $ext,
+                            'url' => $url,
+                        ]);
+                    }
+                    continue;
+                }
+
+            }
+
+            $geo = ifset($m, 'params', 'geo', null);
+            if (!empty($geo)) {
+                $location = [];
+                if (isset($geo['coordinates']) && isset($geo['coordinates']['latitude']) && isset($geo['coordinates']['longitude'])) {
+                    $coordinates[] = $geo['coordinates']['latitude'];
+                    $coordinates[] = $geo['coordinates']['longitude'];
+                    $location['point'] = join(',', $coordinates);
+                }
+                if (isset($geo['place']) && isset($geo['place']['title'])) {
+                    $location['title'] = $geo['place']['title'];
+                    $location['address'] = $geo['place']['title'];
+                }
+                if (!empty($location)) {
+                    $m = $this->addExtra($m, 'locations', $location);
+                }
+            }
+
+            // convert plain-text message body to html
+            $body = (new crmVkPluginBodyHtmlFormatter)->execute($m['body']);
+            $m['body_sanitized'] = crmHtmlSanitizer::work($body);
+
+            return $m;
+        }, $messages);
+        
+    }
+
+    public function getFeatures()
+    {
+        return [
+            'html' => false,
+            'attachments' => true,
+            'images' => true,
+        ];
+    }
+
+    private function addAttachement($message, $file)
+    {
+        if (!isset($message['attachments'])) {
+            $message['attachments'] = [];
+        }
+        $message['attachments'][] = [
+            'name' => $file['title'],
+            'ext' => $file['ext'],
+            'size' => $file['size'],
+            'url' => $file['url'],
+        ];
+        return $message;
     }
 
     /**

@@ -156,6 +156,11 @@ class crmVkPluginImSourceMessageSender extends crmImSourceMessageSender
             $attachment = $api->attachFile($vk_user_id, $photo, crmVkPluginApi::ATTACH_TYPE_PHOTO);
             if ($attachment) {
                 $attachments[crmVkPluginApi::ATTACH_TYPE_PHOTO][] = $attachment;
+                try {
+                    waFiles::delete($photo);
+                } catch (Exception $e) {
+                    //nop
+                }
             }
         }
 
@@ -163,6 +168,11 @@ class crmVkPluginImSourceMessageSender extends crmImSourceMessageSender
             $attachment = $api->attachFile($vk_user_id, $file, crmVkPluginApi::ATTACH_TYPE_DOC);
             if ($attachment) {
                 $attachments[crmVkPluginApi::ATTACH_TYPE_DOC][] = $attachment;
+                try {
+                    waFiles::delete($file);
+                } catch (Exception $e) {
+                    //nop
+                }
             }
         }
 

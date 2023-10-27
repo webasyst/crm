@@ -41,7 +41,9 @@ abstract class crmVkPluginMessageContentFormatter
             return null;
         }
         $sticker = $this->message['params']['sticker'];
-        $rate = $sticker['height'] / $sticker['width'];
+
+        $rate = ifset($sticker['width']) ? $sticker['height'] / $sticker['width'] : 1;
+        $height = $rate * $width;
         if ($width <= 64) {
             $photo_url = $sticker['photo_64'];
         } elseif ($width <= 128) {
@@ -51,7 +53,7 @@ abstract class crmVkPluginMessageContentFormatter
         } else {
             $photo_url = $sticker['photo_352'];
         }
-        $height = $rate * $width;
+        
         return array(
             'photo_url' => $photo_url,
             'width' => $this->formatNumber($width),
