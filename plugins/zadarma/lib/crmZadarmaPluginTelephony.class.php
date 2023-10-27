@@ -2,16 +2,15 @@
 
 class crmZadarmaPluginTelephony extends crmPluginTelephony
 {
-
     public function getRecordHref($call)
     {
-        return array(
+        return [
             'href'    => 'javascript:void('.json_encode($call['plugin_record_id']).');',
-            'onclick' => 'zadarmaHandleDownload(event,this,'.json_encode(array(
+            'onclick' => 'zadarmaHandleDownload(event,this,'.json_encode([
                     'r' => $call['plugin_record_id'],
-                    'c' => $call['plugin_call_id'],
-                )).')',
-        );
+                    'c' => $call['plugin_call_id']
+                ]).')',
+        ];
     }
 
     /**
@@ -67,5 +66,12 @@ class crmZadarmaPluginTelephony extends crmPluginTelephony
     {
         $api = new crmZadarmaPluginApi();
         return $api;
+    }
+
+    public function getRecordUrl($plugin_call_id, $plugin_record_id)
+    {
+        $api = new crmZadarmaPluginApi();
+
+        return $api->getRecordUrl($plugin_record_id);
     }
 }

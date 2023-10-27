@@ -9,8 +9,9 @@ class crmZadarmaPluginBackendActions extends waActions
         $plugin_record_id = waRequest::post('r', '', 'string');
 
         try {
-            $api = new crmZadarmaPluginApi();
-            $record_url = $api->getRecordUrl($plugin_record_id);
+            /** @var crmZadarmaPluginTelephony $plugin */
+            $plugin = wa()->getConfig()->getTelephonyPlugins('zadarma');
+            $record_url = $plugin->getRecordUrl($plugin_call_id, $plugin_record_id);
         } catch (Exception $e) {
             waLog::log("Error fetching URL of record {$plugin_record_id} for call {$plugin_call_id} from API: ".$e->getMessage().' ('.$e->getCode().')', 'crm/plugins/zadarma.log');
             $this->displayJson(null, array(
