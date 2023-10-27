@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm/plugin/crm_mango\n"
+"POT-Creation-Date: 2016-11-14 16:26+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: crm/plugin/crm_mango\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"Language: ru_RU\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "These data are %sin your personal account%s %s on the «API Connection» page."
+msgstr "Эти данные находятся %sв личном кабинете%s %s, на странице «Подключение по API»."
+
+msgid "The unique code of your PBX"
+msgstr "Уникальный код вашей АТС"
+
+msgid "The key for creating a signature"
+msgstr "Ключ для создания подписи"
+
+msgid "External system address"
+msgstr "Адрес внешней системы"
+
+msgid "The record is not yet ready or does not exist."
+msgstr "Запись еще не готова или не существует."
