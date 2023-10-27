@@ -10,6 +10,7 @@ var CRMAtolPluginSettings = ( function($) {
 
         // VARS
         that.company_id = options["company_id"];
+        is_UI2 = options["is_UI2"];
         that.locales = options["locales"];
 
         // DYNAMIC VARS
@@ -27,12 +28,14 @@ var CRMAtolPluginSettings = ( function($) {
         //
         that.initSubmit();
         //
-        that.toggleButton();
+        //that.toggleButton();
         //
-        that.initIButton();
+        is_UI2 ? that.initSwitcherButton() : that.initIButton();
 
-        that.$form.on("change", "input, select, textarea", function() {
-            that.toggleButton(true);
+        that.$form.on("change", "input, select, textarea", function(event) {
+            if ($(event.target).is(':visible')) {
+                that.toggleButton(true);
+            }
         });
     };
 
@@ -111,6 +114,7 @@ var CRMAtolPluginSettings = ( function($) {
 
         $field.on("change", function() {
             var is_active = ($field.attr('checked') === "checked");
+            that.toggleButton(true);
             if (is_active) {
                 $toggleFields.slideDown(200);
                 $toggleFields.find("input, select").attr("disabled", false);
@@ -119,6 +123,35 @@ var CRMAtolPluginSettings = ( function($) {
                 $toggleFields.find("input, select").attr("disabled", true);
             }
         });
+    };
+
+    CRMAtolPluginSettings.prototype.initSwitcherButton = function() {
+        var that = this,
+        $switch = that.$wrapper.find("#js-switch-button");
+         var $toggleFields = that.$wrapper.find(".js-toggle-fields");
+            $switch.waSwitch({
+                
+                ready: function (wa_switch) {
+                    let $label = wa_switch.$wrapper.siblings('label');
+                    wa_switch.$label = $label;
+                    wa_switch.active_text = $label.data('active-text');
+                    wa_switch.inactive_text = $label.data('inactive-text');
+                },
+                change: function(active, wa_switch) {
+                    that.toggleButton(true);
+                    if (active) {
+                    wa_switch.$label.text(wa_switch.active_text);
+                    $toggleFields.slideDown(300);
+                    $toggleFields.find("input, select").attr("disabled", false);
+                    }
+                    else {
+                     wa_switch.$label.text(wa_switch.inactive_text); 
+                     $toggleFields.slideUp(300);
+                     $toggleFields.find("input, select").attr("disabled", true);
+                    }
+                }
+            });
+
     };
 
     CRMAtolPluginSettings.prototype.initTestConnection = function() {
@@ -149,13 +182,14 @@ var CRMAtolPluginSettings = ( function($) {
             var href = $.crm.app_url + "?plugin=atolonline&module=checkConnection",
                 data = $form.serializeArray(),
                 $message = "";
-
-            var $loading = $('<i class="icon16 loading"></i>');
+                
+            var $loading = is_UI2 ? $('<span class="icon loading"><i class="fas fa-spinner wa-animation-spin speed-1000"></i></span>') : $('<i class="icon16 loading"></i>');
             $button.after($loading);
 
             xhr = $.post(href, data, function(response) {
                 if (response.status === "ok") {
-                    $message = $('<span class="js-message" style="color: green;"><i class="icon16 yes js-res"></i>' + that.locales["connection_done"]+ '</span>');
+                    var $icon = is_UI2 ? '<span class="icon yes js-res"><i class="fas fa-check"></i></span>' : '<i class="icon16 yes js-res"></i>';
+                    $message = $('<span class="js-message" style="color: green;">'+ $icon + that.locales["connection_done"]+ '</span>');
                 } else {
                     $message = $('<span class="js-message" style="color: red;">' + response.errors + '</span>');
                 }
@@ -226,7 +260,7 @@ var CRMAtolPluginSettings = ( function($) {
             console.log( errors );
 
             $.each(errors, function(index, text) {
-                var $text = $("<span class='c-error' />").addClass("errormsg").text(text);
+                var $text = $("<span class='c-error text-red' />").addClass("errormsg").text(text);
 
                 $errorsPlace.append($text);
 
@@ -242,7 +276,7 @@ var CRMAtolPluginSettings = ( function($) {
 
                 var href = $.crm.app_url + "?module=plugins&id=atolonline&action=save",
                     submit_button = $form.find(".js-submit-form"),
-                    loading = $('<i class="icon16 loading" style="vertical-align: middle; margin-left: 1em;"></i>');
+                    loading = is_UI2 ? $('<span class="icon loading" style="margin-left: 1em;"><i class="fas fa-spinner wa-animation-spin speed-1000"></i></span>') : $('<i class="icon16 loading" style="vertical-align: middle; margin-left: 1em;"></i>');
 
                 submit_button.after(loading);
 
@@ -266,7 +300,7 @@ var CRMAtolPluginSettings = ( function($) {
     CRMAtolPluginSettings.prototype.toggleButton = function( set_active ) {
         var that = this,
             $button = that.$submitButton;
-
+            console.log(set_active)
         if (set_active) {
             $button
                 .removeClass("green")

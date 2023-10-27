@@ -1,40 +1,52 @@
-<div class="crm-dialog-wrapper c-atol-receipt-add-dialog" id="c-atol-receipt-add-dialog">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
-        <header class="crm-dialog-header">
+<div class="dialog c-atol-receipt-add-dialog" id="c-atol-receipt-add-dialog">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <header class="dialog-header">
             <h1>[`Выписать чек`]</h1>
         </header>
 
-        <div class="crm-dialog-content">
+        <div class="dialog-content">
             <form id="js-receipt-form">
 
                 <p>{sprintf_wp('Чек на сумму %s будет создан и отправлен оператору фискальных данных', $invoice.amount|wa_format_amount_currency:$invoice.currency_id)}</p>
 
                 {if !empty($receipt)}
                     <p>[`По данному счету уже выписан чек.`]</p>
-                    <p><label><input type="checkbox" name="repeat" class="js-enable-receipt"> [`Подтверждаю повторное создание чека`]</label></p>
+                    <p>
+                        <label>
+                            <span class="wa-checkbox">
+                                <input type="checkbox" name="repeat" class="js-enable-receipt">
+                                <span>
+                                    <span class="icon">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                </span>
+                            </span>
+                            [`Подтверждаю повторное создание чека`]
+                        </label>
+                    </p>
                 {/if}
 
                 {if !$tax_available}
                     <p>Размер налога, заданный в счете, не соответствует допустимым вариантам НДС.</p>
                     <p>Укажите вариант, который необходимо использовать в чеке:</p>
-                    <p>
-                        <label><input type="radio" name="tax_percent" value="none" class="js-enable-receipt"> Без НДС</label><br>
-                        <label><input type="radio" name="tax_percent" value="0" class="js-enable-receipt"> НДС 0%</label><br>
-                        <label><input type="radio" name="tax_percent" value="10" class="js-enable-receipt"> НДС 10%</label><br>
-                        <label><input type="radio" name="tax_percent" value="18" class="js-enable-receipt"> НДС 18%</label>
-                        <label><input type="radio" name="tax_percent" value="20" class="js-enable-receipt"> НДС 20%</label>
-                    </p>
+                    <ul class="list">
+                        <li class="custom-my-4"><label><input type="radio" name="tax_percent" value="none" class="js-enable-receipt"> Без НДС</label></li>
+                        <li class="custom-my-4"><label><input type="radio" name="tax_percent" value="0" class="js-enable-receipt"> НДС 0%</label></li>
+
+                        <li class="custom-my-4"><label><input type="radio" name="tax_percent" value="10" class="js-enable-receipt"> НДС 10%</label></li>
+                        <li class="custom-my-4"><label><input type="radio" name="tax_percent" value="18" class="js-enable-receipt"> НДС 18%</label></li>
+                        <li class="custom-my-4"><label><label><input type="radio" name="tax_percent" value="20" class="js-enable-receipt"> НДС 20%</label></li>
+                    </ul>
                 {/if}
 
                 <input type="hidden" name="invoice" value="{$invoice.id|default:''}">
             </form>
         </div>
 
-        <footer class="crm-dialog-footer">
-            <input class="button red js-atol-receipt-submit-button" type="button" value="[`Выписать чек`]" {if !empty($receipt)}disabled{/if}>
-            <span style="margin: 0 4px;">[`or`]</span>
-            <a class="js-close-dialog" href="javascript:void(0);">[`cancel`]</a>
+        <footer class="dialog-footer">
+            <button type="button" class="button yellow js-atol-receipt-submit-button" {if !empty($receipt)}disabled{/if}>[`Выписать чек`]</button>
+            <button type="button" class="button light-gray js-close-dialog">[`Cancel`]</button>
         </footer>
 
         <script>

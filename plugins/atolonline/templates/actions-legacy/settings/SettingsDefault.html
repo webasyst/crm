@@ -1,9 +1,9 @@
 <section class="c-atol-plugin-settings-page" id="c-atol-plugin-settings-page">
 
-    <h1 class="c-page-header">АТОЛ Онлайн (UI 2.0)</h1>
+    <h1 class="c-page-header">АТОЛ Онлайн (UI 1.3)</h1>
 
-    <div class="c-tabs-wrapper flexbox middle ">
-        <div class="c-companies-wrapper" style="max-width: fit-content;">
+    <div class="c-tabs-wrapper">
+        <div class="c-companies-wrapper">
             <ul class="tabs c-companies-list">
                 {foreach $companies as $_company}
                     {$_is_selected = ($company.id == $_company.id)}
@@ -14,8 +14,8 @@
                     </li>
                 {/foreach}
             </ul>
-            <span class="c-action right" title="[`Next`]"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
-            <span class="c-action left" title="[`Before`]"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
+            <span class="c-action right" title="[`Next`]"></span>
+            <span class="c-action left" title="[`Before`]"></span>
         </div>
         {*<div class="c-add-wrapper">*}
             {*<a href="{$wa_app_url}settings/companies/new/"><i class="icon16 add"></i> [`Add new company`]</a>*}
@@ -23,14 +23,12 @@
     </div>
 
     <section class="c-company-section">
-        <form class="fields">
-            <div class="switch-with-text">
-                <span class="switch smaller" id="js-switch-button">
-                    <input type="checkbox" class="not-styled" id="js-switch-button-2" name="crm_atolonline[crm_company_on]" {if !empty($settings.crm_company[$company.id])}checked{/if}>
-                </span>
-                <label for="js-switch-button-2" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">[`Disabled`]</label>
+        <form>
+            <div class="field-group">
+                <label class="gray" for="js-ibutton-2">[`Disabled`]</label>
+                <input class="js-ibutton" id="js-ibutton-2" type="checkbox" name="crm_atolonline[crm_company_on]" {if !empty($settings.crm_company[$company.id])}checked{/if}>
+                <label for="js-ibutton-2">[`Enabled`]</label>
             </div>
-
             <div class="field-group js-toggle-fields" style="{if empty($settings.crm_company[$company.id])}display: none;{/if}">
                 <div class="field">
                     <div class="name">Версия протокола API</div>
@@ -155,7 +153,6 @@
             new CRMAtolPluginSettings({
                 $wrapper: $("#c-atol-plugin-settings-page"),
                 company_id: "{$company.id|escape}",
-                is_UI2: "{$wa->whichUI() === '2.0'}",
                 locales: {
                     connection_done: "Успешное подключение",
                     connection_fail: "Подключение не удалось"

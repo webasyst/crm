@@ -2,9 +2,9 @@
 
     <p>[`Отменить также чеки, выписанные по данному счету:`]</p>
 
-    <ul class="menu-v">
+    <ul class="list">
         {foreach $receipts as $_r}
-            <li>
+            <li class="custom-my-4">
                 <label><input type="checkbox" name="data[receipt_id][]" value="{$_r.id}" checked> {$_r.html}</label>
             </li>
         {/foreach}

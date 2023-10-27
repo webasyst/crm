@@ -3,14 +3,14 @@
     {$_is_done = true}
 {/if}
 
-<div class="crm-dialog-wrapper c-atol-receipt-details-dialog" id="c-atol-receipt-details-dialog">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
-        <header class="crm-dialog-header">
+<div class="dialog c-atol-receipt-details-dialog" id="c-atol-receipt-details-dialog">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <header class="dialog-header">
             <h1>[`Кассовый чек`]</h1>
         </header>
 
-        <div class="crm-dialog-content">
+        <div class="dialog-content">
             <div class="c-receipt-wrapper">
                 <div class="field-group">
 
@@ -18,7 +18,7 @@
                         <div class="c-field-wrapper c-layout fixed">
                             <div class="c-column">[`Статус`]</div>
                             <div class="c-column right">
-                                <span style="color: #ff8c00">[`Ожидание`]</span>
+                                <span style="color: var(--orange);">[`Ожидание`]</span>
                             </div>
                         </div>
                         <div class="c-field-wrapper c-layout fixed">
@@ -31,7 +31,7 @@
                         <div class="c-field-wrapper c-layout fixed">
                             <div class="c-column">[`Ошибка`]</div>
                             <div class="c-column right">
-                                <span style="color: #f20;">{$receipt.error_text}</span>
+                                <span style="color: var(--red);">{$receipt.error_text}</span>
                             </div>
                         </div>
                         <div class="c-field-wrapper c-layout fixed">
@@ -174,8 +174,8 @@
             </div>
         </div>
 
-        <footer class="crm-dialog-footer">
-            <input class="button blue js-close-dialog" type="button" value="[`Close`]">
+        <footer class="dialog-footer">
+            <button type="button" class="button light-gray js-close-dialog">[`Close`]</button>
         </footer>
     </div>
 </div>

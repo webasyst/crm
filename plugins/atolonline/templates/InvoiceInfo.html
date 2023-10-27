@@ -1,9 +1,9 @@
 {if !empty($receipts)}
     {$_count = $receipts|count}
 
-    <div class="field-group js-receipts-wrapper">
+    <div class="custom-my-32 custom-px-4 js-receipts-wrapper">
         <h4 class="heading">{if $_count == 1}Кассовый чек{else}Кассовые чеки{/if}:</h4>
-        <table class="c-atol-receipts-table zebra">
+        <table class="c-atol-receipts-table small">
             {foreach $receipts as $_r}
                 {$_classes = ["c-atol-receipt"]}
                 {if ($_r.status === "done")}
@@ -26,11 +26,11 @@
 
                 <tr class="{$_classes|join:" "}" data-id="{$_r.id}" title="Показать кассовый чек">
                     <td>
-                        <div class="c-single-line c-atol-receip-text">{$_r.html}</div>
+                        <div class="c-single-line c-single-line--dark c-atol-receip-text">{$_r.html}</div>
                     </td>
-                    <td class="c-action-column">
+                    <td class="c-action-column nowrap">
                         {if $_r.operation == 'sell' && $_r.status == 'done' && !$_r.refund_id}
-                            <a class="c-atol-receipt-refund js-atol-receipt-refund inline-link small" href="javascript:void(0);" title="[`Refund`]" style="display: inline;" data-invoice_id="{$_r.invoice_id}" data-receipt_id="{$_r.id}"><b><i>[`Refund`]</i></b></a>
+                            <a class="c-atol-receipt-refund js-atol-receipt-refund button light-gray small" href="javascript:void(0);" title="[`Refund`]" data-invoice_id="{$_r.invoice_id}" data-receipt_id="{$_r.id}">[`Refund`]</a>
                         {/if}
                     </td>
                 </tr>
@@ -62,15 +62,18 @@
             });
 
             function refund($link) {
-                var invoice_id = $link.data('invoice_id'),
+                const invoice_id = $link.data('invoice_id'),
                     receipt_id = $link.data('receipt_id');
 
-                $.crm.confirm.show({
+                $.waDialog.confirm({
                     title: '[`Refund receipt?`]',
                     text: '<p>[`Reciept refund can not be undone.`]</p>',
-                    button: '[`Refund`]',
-                    onConfirm: function() {
-                        var href = "{$wa_app_url}?plugin=atolonline&module=receipt&operation=refund",
+                    success_button_title: '[`Refund`]',
+                    success_button_class: 'danger',
+                    cancel_button_title: '[`Cancel`]',
+                    cancel_button_class: 'light-gray',
+                    onSuccess: function() {
+                        const href = "{$wa_app_url}?plugin=atolonline&module=receipt&operation=refund",
                             data = {
                                 invoice: invoice_id,
                                 receipt: receipt_id
@@ -87,14 +90,12 @@
                 if (xhr) { xhr.abort(); }
 
                 var href = "{$wa_app_url}?plugin=atolonline&module=receipt&action=details",
-                    data = {
-                        "id": id
-                    };
+                    data = { id };
 
                 xhr = $.post(href, data, function(html) {
-                    new CRMDialog({
-                        html: html
-                    });
+                    $.waDialog({
+                        html: html,
+                    })
                 }).always( function() {
                     xhr = false;
                 });
@@ -104,8 +105,8 @@
 {/if}
 
 {if $invalid_tax_percent}
-    <p class="error">[`Для выбранного варианта расчета НДС невозможно выписать чек при оплате.`]</p>
+    <p class="custom-mx-8 state-caution-hint">[`Для выбранного варианта расчета НДС невозможно выписать чек при оплате.`]</p>
 {/if}
 {if $invalid_tax_type}
-    <p class="error">[`Регистрация чека возможна только для НДС, включенного в стоимость.`]</p>
+    <p class="custom-mx-8 state-caution-hint">[`Регистрация чека возможна только для НДС, включенного в стоимость.`]</p>
 {/if}

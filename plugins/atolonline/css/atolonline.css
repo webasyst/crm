@@ -4,22 +4,22 @@ table.c-atol-receipts-table {
 }
 table.c-atol-receipts-table td.c-action-column {
   text-align: right;
-  width: 100px;
+  width: 70px;
 }
 table.c-atol-receipts-table .c-atol-receipt {
   cursor: pointer;
 }
 table.c-atol-receipts-table .c-atol-receipt.is-sell-done {
-  color: #7ac33c;
+  color: var(--green);
 }
 table.c-atol-receipts-table .c-atol-receipt.is-refund-done {
-  color: #b22222;
+  color: color #b22222;
 }
 table.c-atol-receipts-table .c-atol-receipt.is-fail {
   color: #f20;
 }
 table.c-atol-receipts-table .c-atol-receipt.is-wait {
-  color: #808080;
+  color: var(--gray);
 }
 table.c-atol-receipts-table .c-atol-receipt .c-atol-receip-text .c-text {
   margin-right: 1em;
@@ -34,28 +34,14 @@ table.c-atol-receipts-table .c-atol-receipt .c-atol-receip-text .c-text-group:la
   margin-right: 0;
 }
 table.c-atol-receipts-table .c-atol-receipt .c-atol-receip-text .c-label {
-  color: #808080;
-}
-table.c-atol-receipts-table .c-atol-receipt .c-atol-receipt-refund {
-  visibility: hidden;
-  opacity: 0;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-  filter: alpha(opacity=0);
-  -webkit-transition: 200ms linear;
-  -moz-transition: 200ms linear;
-  -o-transition: 200ms linear;
-  -ms-transition: 200ms linear;
-  transition: 200ms linear;
-}
-table.c-atol-receipts-table .c-atol-receipt:hover .c-atol-receipt-refund {
-  visibility: visible;
-  opacity: 1;
-  -ms-filter: none;
-  filter: none;
+  color: var(--gray);
 }
 .c-atol-receipt-details-dialog {
   padding: 0;
   font-family: Courier, Arial, sans-serif;
+}
+.c-atol-receipt-details-dialog .button {
+  font-family: var(--font-family-default);
 }
 .c-atol-receipt-details-dialog .c-receipt-wrapper {
   word-wrap: break-word;
@@ -103,7 +89,7 @@ table.c-atol-receipts-table .c-atol-receipt:hover .c-atol-receipt-refund {
   margin: 0 0 -1px;
 }
 .c-atol-plugin-settings-page .c-company-section {
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border-color-soft);
   padding: 20px 0 0;
 }
 .c-atol-plugin-settings-page .c-company-section .c-footer-actions {

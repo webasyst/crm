@@ -1,5 +1,5 @@
-<div class="c-atol-invoice-action" style="display: inline-block;">
-    <a href="javascript:void(0);" class="inline-link js-show-atol-receipt-dialog"><b><i>[`Выписать чек`]</i></b></a>
+<div class="c-atol-invoice-action flexbox-inline">
+    <button type="button" class="button yellow js-show-atol-receipt-dialog">[`Выписать чек`]</button>
 
     <script>
         ( function($) {
@@ -8,6 +8,8 @@
             $(".js-show-atol-receipt-dialog").on('click', function(event) {
                 event.preventDefault();
 
+                var $spinner = $('<span><i class="fas fa-spinner wa-animation-spin custom-mr-4"></i></span>');
+                $(this).prepend($spinner);
                 if (!is_locked) {
                     is_locked = true;
 
@@ -15,11 +17,12 @@
                         data = { invoice_id: {$invoice.id|default:""|json_encode} };
 
                     $.post(href, data, function(html) {
-                        new CRMDialog({
+                        $.waDialog({
                             html: html
                         });
                     }).always( function() {
                         is_locked = false;
+                        $spinner.remove();
                     });
                 }
             });
