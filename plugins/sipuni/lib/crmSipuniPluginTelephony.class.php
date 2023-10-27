@@ -4,12 +4,12 @@ class crmSipuniPluginTelephony extends crmPluginTelephony
 {
     public function getRecordHref($call)
     {
-        return array(
+        return [
             'href'    => 'javascript:void('.json_encode($call['id']).');',
-            'onclick' => 'sipuniHandleDownload(event,this,'.json_encode(array(
-                'call' => $call['id'],
-            )).')',
-        );
+            'onclick' => 'sipuniHandleDownload(event,this,'.json_encode([
+                    'call' => $call['id'],
+                ]).')',
+        ];
     }
 
     public function checkZombieCall($call)
@@ -55,5 +55,10 @@ class crmSipuniPluginTelephony extends crmPluginTelephony
     {
         $api = new crmSipuniPluginApi();
         return $api;
+    }
+
+    public function getRecordUrl($plugin_call_id, $plugin_record_id)
+    {
+        return $plugin_record_id;
     }
 }
