@@ -173,7 +173,7 @@ class crmVkPluginChat extends crmVkPluginChatEntity
             'creator_contact_id' => $creator_contact_id,
             'contact_id' => $contact_id,
             'subject' => $message ? $message->getTitle() : '',
-            'body' => $message ? $message->getBody() : '',
+            'body' => $message ? $message->getText() : '',
             'params' => array(
                 'id' => $message ? $message->getId() : '',
                 'from_id' => $message ? $message->getFromId() : '',

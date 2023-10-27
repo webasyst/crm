@@ -8,7 +8,7 @@ class crmVkPluginApi
 
     protected $url = 'https://api.vk.com/method/';
 
-    static protected $version = '5.78';
+    static protected $version = '5.131';
 
     const ATTACH_TYPE_PHOTO = 'photo';
     const ATTACH_TYPE_DOC = 'doc';
@@ -202,6 +202,12 @@ class crmVkPluginApi
      */
     public function markAsRead($params)
     {
+        if (!empty($params['message_ids'])) {
+            sort($params['message_ids'], SORT_NUMERIC);
+            $start_message_id = reset($params['message_ids']);
+            $params['start_message_id'] = $start_message_id;
+            unset($params['message_ids']);
+        }
         $res = $this->query('messages.markAsRead', $params);
         if (empty($res) || empty($res['response'])) {
             $this->logFailedResponse($res);
@@ -230,6 +236,7 @@ class crmVkPluginApi
         $message = str_replace("\r", "\n", $message);
 
         $params['message'] = $message;
+        $params['random_id'] = 0;
 
         $res = $this->query('messages.send', $params);
         if (empty($res) || empty($res['response'])) {
@@ -292,19 +299,26 @@ class crmVkPluginApi
 
     protected function saveFile($file_info, $type)
     {
+        $result = false;
         if ($type == self::ATTACH_TYPE_PHOTO) {
-            $url = 'photos.saveMessagesPhoto';
+            $res = $this->query('photos.saveMessagesPhoto', $file_info);
+            if (empty($res) || (empty($res['response'][0]))) {
+                $this->logFailedResponse($res);
+            } else {
+                $result = $res['response'][0];
+            }
         } elseif ($type == self::ATTACH_TYPE_DOC) {
-            $url = 'docs.save';
+            $res = $this->query('docs.save', $file_info);
+            if (empty($res) || empty($res['response']['doc'])) {
+                $this->logFailedResponse($res);
+            } else {
+                $result = $res['response']['doc'];
+            }
         } else {
             throw new crmVkPluginException("Unknown attach type");
         }
-        $res = $this->query($url, $file_info);
-        if (empty($res) || empty($res['response'])) {
-            $this->logFailedResponse($res);
-            return false;
-        }
-        return $res['response'][0];
+
+        return $result;
     }
 
     protected function uploadFile($upload_url, $file_path, $type)
@@ -370,8 +384,11 @@ class crmVkPluginApi
                 case !is_readable($v):
                     continue; // or return false, throw new InvalidArgumentException
             }
+
             $data = file_get_contents($v);
-            $v = call_user_func("end", explode(DIRECTORY_SEPARATOR, $v));
+            
+            $parts = explode(DIRECTORY_SEPARATOR, $v);
+            $v = end($parts);
             $k = str_replace($disallow, "_", $k);
             $v = str_replace($disallow, "_", $v);
             $body[] = implode("\r\n", array(

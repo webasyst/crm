@@ -5,7 +5,7 @@
         {if $message.participant}
             <span>{$message.participant.full_name|escape}</span>
         {else}
-            <span>[`vk.com`]</span>
+            <span>{_wd('crm_vk', 'vk.com')}</span>
         {/if}
     </a>
 {/if}

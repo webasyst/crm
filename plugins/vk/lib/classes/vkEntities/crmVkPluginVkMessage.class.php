@@ -38,11 +38,19 @@ class crmVkPluginVkMessage extends crmVkPluginVkEntity
         return (bool)$this->getField('important');
     }
 
+    /**
+     * @depecated
+     * @return bool
+     */
     public function isDeleted()
     {
         return (bool)$this->getField('deleted');
     }
 
+    /**
+     * @depecated
+     * @return bool
+     */
     public function hasEmoji()
     {
         return (bool)$this->getField('emoji');
@@ -53,14 +61,20 @@ class crmVkPluginVkMessage extends crmVkPluginVkEntity
         return $this->getField('from_id');
     }
 
+    /**
+     * @depecated
+     * @return mixed|null
+     */
     public function getTitle()
     {
         return $this->getField('title');
     }
 
-    public function getBody()
+    public function getText()
     {
-        return $this->getField('body');
+        $text = $this->getField('text');
+
+        return (null === $text ? $this->getField('body') : $text);
     }
 
     public function getGeo()

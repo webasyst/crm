@@ -20,9 +20,12 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
     public function __construct(array $event, crmVkPluginImSource $source, array $options = array())
     {
         parent::__construct($event, $source, $options);
+        if (!empty($this->event['object']['message'])) {
+            $this->event['object'] = $this->event['object']['message'];
+        }
         $object = (array)ifset($this->event['object']);
 
-        $user_id = $object['user_id'];
+        $user_id = (empty($object['user_id']) ? $object['from_id'] : $object['user_id']);
         $this->vk_user = new crmVkPluginVkUser($user_id, $this->source->getApiParams());
 
         $group_id = $this->source->getGroupId();

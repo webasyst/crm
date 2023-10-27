@@ -9,11 +9,11 @@
 <div class="c-vk-plugin-message-log-item-header">
 
     {if $message.direction == crmMessageModel::DIRECTION_IN}
-        <i class="icon16 message-in" title="[`incoming`]"></i>
-        [`from`]
+        <i class="icon16 message-in" title="{_wd('crm_vk', 'incoming')}"></i>
+        {_wd('crm_vk', 'from')}
     {else}
-        <i class="icon16 message-out" title="[`outgoing`]"></i>
-        [`to `]
+        <i class="icon16 message-out" title="{_wd('crm_vk', 'outgoing')}"></i>
+        {_wd('crm_vk', 'to ')}
     {/if}
 
     {$contact = $message.contact}
