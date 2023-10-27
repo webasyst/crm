@@ -72,6 +72,8 @@ msgstr "Соединение с API установлено"
 
 msgid "API connection not established"
 msgstr "Соединение с API не установлено"
+<<<<<<< HEAD
+=======
 
 msgid "Email"
 msgstr ""
@@ -93,3 +95,4 @@ msgstr "Ошибка получения URL записи от API «Телфин
 
 msgid "Record does not exist."
 msgstr "Запись не существует."
+>>>>>>> a14ceaf9b2cda6c298b57c1ca2ecd2b46b9f4cf0

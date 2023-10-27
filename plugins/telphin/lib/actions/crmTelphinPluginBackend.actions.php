@@ -9,8 +9,9 @@ class crmTelphinPluginBackendActions extends waActions
         $plugin_record_id = waRequest::post('r', '', 'string');
 
         try {
-            $api = new crmTelphinPluginApi();
-            $record_url = $api->getRecordUrl($plugin_record_id);
+            /** @var crmTelphinPluginTelephony $plugin */
+            $plugin = wa()->getConfig()->getTelephonyPlugins('telphin');
+            $record_url = $plugin->getRecordUrl($plugin_call_id, $plugin_record_id);
         } catch (Exception $e) {
             waLog::log("Error fetching URL of record {$plugin_record_id} for call {$plugin_call_id} from API: ".$e->getMessage().' ('.$e->getCode().')', 'crm/plugins/telphin.log');
             $this->displayJson(null, array(

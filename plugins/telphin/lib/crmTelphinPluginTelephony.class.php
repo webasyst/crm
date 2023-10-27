@@ -2,6 +2,17 @@
 
 class crmTelphinPluginTelephony extends crmPluginTelephony
 {
+    public function getRecordHref($call)
+    {
+        return [
+            'href'    => 'javascript:void('.json_encode($call['plugin_record_id']).');',
+            'onclick' => 'telphinHandleDownload(event,this,'.json_encode([
+                    'r' => $call['plugin_record_id'],
+                    'c' => $call['plugin_call_id']
+                ]).')',
+        ];
+    }
+
     public function getNumbers()
     {
         $result = $params = array();
@@ -40,17 +51,6 @@ class crmTelphinPluginTelephony extends crmPluginTelephony
         $this->getPbxParamsModel()->multipleInsert($params);
 
         return $result;
-    }
-
-    public function getRecordHref($call)
-    {
-        return array(
-            'href'    => 'javascript:void('.json_encode($call['plugin_record_id']).');',
-            'onclick' => 'telphinHandleDownload(event,this,'.json_encode(array(
-                    'r' => $call['plugin_record_id'],
-                    'c' => $call['plugin_call_id'],
-                )).')',
-        );
     }
 
     public function checkZombieCall($call)
@@ -183,5 +183,12 @@ class crmTelphinPluginTelephony extends crmPluginTelephony
     {
         $api = new crmTelphinPluginApi();
         return $api;
+    }
+
+    public function getRecordUrl($plugin_call_id, $plugin_record_id)
+    {
+        $api = new crmTelphinPluginApi();
+
+        return $api->getRecordUrl($plugin_record_id);
     }
 }
