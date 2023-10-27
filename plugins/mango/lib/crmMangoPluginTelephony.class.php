@@ -4,13 +4,13 @@ class crmMangoPluginTelephony extends crmPluginTelephony
 {
     public function getRecordHref($call)
     {
-        return array(
-            'href' => 'javascript:void('.json_encode($call['plugin_record_id']).');',
-            'onclick' => 'mangoHandleDownload(event,this,'.json_encode(array(
+        return [
+            'href'    => 'javascript:void('.json_encode($call['plugin_record_id']).');',
+            'onclick' => 'mangoHandleDownload(event,this,'.json_encode([
                     'r' => $call['plugin_record_id'],
-                    'c' => $call['plugin_call_id'],
-                )).')',
-        );
+                    'c' => $call['plugin_call_id']
+                ]).')',
+        ];
     }
 
     public function checkZombieCall($call)
@@ -116,5 +116,12 @@ class crmMangoPluginTelephony extends crmPluginTelephony
     {
         $api = new crmMangoPluginApi();
         return $api;
+    }
+
+    public function getRecordUrl($plugin_call_id, $plugin_record_id)
+    {
+        $api = new crmMangoPluginApi();
+
+        return $api->getRecordUrl($plugin_record_id);
     }
 }

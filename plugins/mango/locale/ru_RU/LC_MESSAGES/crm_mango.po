@@ -16,7 +16,7 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
-msgid "These data are %sin your personal account%s %s on the «API Connection» page."
+msgid "These data are %sin your personal account%s %s on the “API Connection” page."
 msgstr "Эти данные находятся %sв личном кабинете%s %s, на странице «Подключение по API»."
 
 msgid "The unique code of your PBX"
@@ -30,3 +30,6 @@ msgstr "Адрес внешней системы"
 
 msgid "The record is not yet ready or does not exist."
 msgstr "Запись еще не готова или не существует."
+
+msgid "Add settlement for CRM"
+msgstr "Добавьте поселение для CRM"

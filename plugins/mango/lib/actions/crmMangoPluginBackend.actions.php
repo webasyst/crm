@@ -8,8 +8,9 @@ class crmMangoPluginBackendActions extends waActions
         $plugin_record_id = waRequest::post('r', '', 'string');
 
         try {
-            $api = new crmMangoPluginApi();
-            $record_url = $api->getRecordUrl($plugin_record_id);
+            /** @var crmMangoPluginTelephony $plugin */
+            $plugin = wa()->getConfig()->getTelephonyPlugins('mango');
+            $record_url = $plugin->getRecordUrl($plugin_call_id, $plugin_record_id);
         } catch (Exception $e) {
             waLog::log("Error fetching URL of record {$plugin_record_id} for call {$plugin_call_id} from API: ".$e->getMessage().' ('.$e->getCode().')', 'crm/plugins/mango.log');
             $this->displayJson(null, array(

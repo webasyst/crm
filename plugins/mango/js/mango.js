@@ -11,6 +11,7 @@ window.mangoHandleDownload = ( function($) { "use strict";
             // DOM
             that.$wrapper = options["$wrapper"];
             that.$icon = that.$wrapper.find(".icon16");
+            that.$call_wrapper = that.$wrapper.parents('tr[data-id]');
             that.$audio = false; // will be rendered after load;
 
             // VARS
@@ -19,6 +20,7 @@ window.mangoHandleDownload = ( function($) { "use strict";
             // DYNAMIC VARS
             that.state = null;
             that.icon_class = "play";
+            that.played_class = "on-playing";
             that.locked = false;
 
             // INIT
@@ -95,8 +97,10 @@ window.mangoHandleDownload = ( function($) { "use strict";
 
                 that.setState("pause");
 
+                that.$call_wrapper.addClass(that.played_class);
                 $audio.on('ended', function() {
                     that.setState("play");
+                    that.$call_wrapper.removeClass(that.played_class);
                 });
 
                 $audio[0].play();
