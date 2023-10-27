@@ -9,6 +9,13 @@ class crmTwitterPluginImSourceHelper extends crmSourceHelper
         return $message;
     }
 
+    public function workupConversationInList($conversation)
+    {
+        $conversation = parent::workupConversationInList($conversation);
+        $conversation['transport_name'] = '@'.$this->source->getParam('username');
+        return $conversation;
+    }
+
     public function workupConversation($conversation)
     {
         $mm = new crmMessageModel();
@@ -26,9 +33,7 @@ class crmTwitterPluginImSourceHelper extends crmSourceHelper
             $reply_form_html = $this->renderTemplate($template, $assign);
             $conversation['reply_form_html'] = $reply_form_html;
         }
-        $conversation['transport_name'] = '@'.$this->source->getParam('username');
-        $conversation['icon_url'] = $this->source->getIcon();
-        return $conversation;
+        return $this->workupConversationInList($conversation);
     }
 
     public function workupMessagesInConversation($conversation, $messages)
