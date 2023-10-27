@@ -4,12 +4,12 @@ class crmGravitelPluginTelephony extends crmPluginTelephony
 {
     public function getRecordHref($call)
     {
-        return array(
+        return [
             'href'    => 'javascript:void('.json_encode($call['id']).');',
-            'onclick' => 'gravitelHandleDownload(event,this,'.json_encode(array(
+            'onclick' => 'gravitelHandleDownload(event,this,'.json_encode([
                     'call' => $call['id'],
-                )).')',
-        );
+                ]).')',
+        ];
     }
 
     public function checkZombieCall($call)
@@ -87,5 +87,10 @@ class crmGravitelPluginTelephony extends crmPluginTelephony
     {
         $api = new crmGravitelPluginApi();
         return $api;
+    }
+
+    public function getRecordUrl($plugin_call_id, $plugin_record_id)
+    {
+        return $plugin_record_id;
     }
 }
