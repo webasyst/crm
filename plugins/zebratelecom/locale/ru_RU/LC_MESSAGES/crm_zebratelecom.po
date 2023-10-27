@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm/plugin/crm_zebratelecom\n"
+"POT-Creation-Date: 2016-11-14 16:26+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: crm/plugin/crm_zebratelecom\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"Language: ru_RU\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "Below, enter the data for authentication in the %sZebraTelecom PBX%s %s"
+msgstr "Ниже введите данные для авторизации в %sАТС ЗебраТелеком%s %s"
+
+msgid "Domain (SIP Server)"
+msgstr "Домен (SIP Сервер)"
+
+msgid "IMPORTANT:"
+msgstr "ВАЖНО:"
+
+msgid "Zebra Telecom does not support the sending of callbacks to 443 ports."
+msgstr "Zebra Telecom не поддерживает отправку коллбеков на 443 порты."
+
+msgid "The %s page should be accessible via the <b>http</b> protocol."
+msgstr "Страница %s должна быть доступна по протоколу <b>http</b>."
