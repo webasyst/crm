@@ -1,1 +1,0 @@
-import{_ as a,j as s,o as e,b as o,w as c,K as r,D as l}from"./main-ec0df6a4.js";const _={};function i(m,p){const t=s("RouterView");return e(),o(t,null,{default:c(({Component:n})=>[(e(),o(r,{include:"FormDealsContact"},[(e(),o(l(n)))],1024))]),_:1})}const f=a(_,[["render",i]]);export{f as default};

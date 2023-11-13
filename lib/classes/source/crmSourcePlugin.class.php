@@ -85,6 +85,9 @@ abstract class crmSourcePlugin extends waPlugin
 
         $part_of_name = ucfirst($id);
         $class_name = "crm{$part_of_name}Plugin";
+        if (!class_exists($class_name)) {
+            return null;
+        }
         $instance = new $class_name($info);
         if (!($instance instanceof crmSourcePlugin)) {
             return null;

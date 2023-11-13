@@ -65,6 +65,7 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
             );
         }
         $this->invoice['comment'] = crmHtmlSanitizer::work($this->invoice['comment']);
+        $this->invoice['tax_name'] = htmlspecialchars($this->invoice['tax_name']);
 
         $this->invoice['subtotal'] = 0;
         foreach ($this->invoice['items'] as &$i) {

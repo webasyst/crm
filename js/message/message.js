@@ -59,7 +59,7 @@ var MessageContentRouter = ( function($) {
         });
 
         if ($link) {
-            $link.find('[data-fa-i2svg]').hide().after('<i class="fas fa-spinner fa-spin"></i>');
+            $link.find('.enable-animation [data-fa-i2svg]').hide().after('<i class="fas fa-spinner fa-spin"></i>');
         }
 
         var content_url = $.crm.app_url + '?module=messageConversationId&id=' + target_props;
@@ -79,8 +79,8 @@ var MessageContentRouter = ( function($) {
             }
 
             if ($link) {
-                $link.find('[data-fa-i2svg]:first').show();
-                $link.find('[data-fa-i2svg]').slice(1).remove();
+                $link.find('.enable-animation [data-fa-i2svg]:first').show();
+                $link.find('.enable-animation [data-fa-i2svg]').slice(1).remove();
             }
 
             that.setContent( html );
@@ -96,8 +96,8 @@ var MessageContentRouter = ( function($) {
                     })
             }
             if ($link) {
-                $link.find('[data-fa-i2svg]:first').show();
-                $link.find('[data-fa-i2svg]').slice(1).remove();
+                $link.find('.enable-animation [data-fa-i2svg]:first').show();
+                $link.find('.enable-animation [data-fa-i2svg]').slice(1).remove();
             }
         });
 
@@ -549,8 +549,9 @@ var CRMMessagesSidebar = ( function($) {
 
     CRMMessagesSidebar.prototype.initSearchHandler = function() {
         var that = this,
-            $sidebar = that.$sidebar,
-            $search_wrapper = $sidebar.find(".js-search-wrapper"),
+            $sidebar = that.$sidebar;
+        that.$search_wrapper = $sidebar.find(".js-search-wrapper");
+        var $search_wrapper = that.$search_wrapper;
             $page_name = $sidebar.find(".js-page-name-header"),
             $autocomplete = $search_wrapper.find(".js-search-field"),
             $search_block = $search_wrapper.find(".state-with-inner-icon");
@@ -606,11 +607,30 @@ var CRMMessagesSidebar = ( function($) {
             is_locked = false,
             timeout = 0;
 
-            $(document).on('change_active_id', function(e, data) {
-                if (data.target_id) {
-                    that.active_id = data.target_id;
-                }
-            });
+        clearGlobalListeners();
+
+        $(document).on('change_active_id', function(e, data) {
+            if (data.target_id) {
+                that.active_id = data.target_id;
+            }
+        });
+
+        $(document).on('msg_sidebar_upd_needed', function() {
+            console.log('msg_sidebar_upd_needed');
+            reload();
+            runner();
+        });
+
+        function clearGlobalListeners() {
+            $(document).off('msg_sidebar_upd_needed');
+            $(document).off('change_active_id');
+        }
+
+        function clearListeners() {
+            that.$wrapper.off('click');
+            that.$search_wrapper.off('click');
+            that.$list.off('click');
+        }
 
         runner();
 
@@ -620,10 +640,12 @@ var CRMMessagesSidebar = ( function($) {
         }
 
         function request() {
+            
             if (!is_locked) {
                 is_locked = true;
 
                 var is_exist = $.contains(document, that.$wrapper[0]);
+                
                 if (is_exist) {
                     
                     var href = "?module=message&action=listByConversation",
@@ -632,7 +654,7 @@ var CRMMessagesSidebar = ( function($) {
                         };
 
                     $.post(href, data, function(response) {
-                       
+                        
                         if (response.status === "ok") {
                             var is_changed = (response.data !== last_message_id),
                                 is_exist = $.contains(document, that.$wrapper[0]);
@@ -653,7 +675,7 @@ var CRMMessagesSidebar = ( function($) {
         }
 
         function reload() {
-   
+            //$.crm.content.reload();
             const active_id = that.active_id ? 'conversation/' + that.active_id + '/' : '';
             const iframe = that.iframe ? '&iframe=' + that.iframe : '';
             const contact_id = that.$settings_contact_id ? '&contact='+that.$settings_contact_id : that.$settings_deal_id ? '&deal='+that.$settings_deal_id : '';
@@ -661,6 +683,9 @@ var CRMMessagesSidebar = ( function($) {
             var content_uri = $.crm.app_url + "message/" + active_id + "?reload=1" + contact_id + iframe;
             var data = {ui: that.$ui};
 
+            clearGlobalListeners();
+            clearListeners();
+           
             $.get(content_uri, data, function(html) {
                 const sidebar_list = $(html).find('#c-messages-conversation-list').html();
                 that.$wrapper.html( sidebar_list );
@@ -698,6 +723,7 @@ var CRMMessagesSidebar = ( function($) {
                 $content.removeClass($hidden_class);
             }
         }
+
         $list.on('click', 'a', openConversationList);
         $window.on('beforeunload', function() {
             $list.off('click', 'a', openConversationList);

@@ -24,7 +24,7 @@ class crmContactUserpicMethod extends crmApiAbstractMethod
         } elseif ($contact_id < 1 || !$this->getContactModel()->getById($contact_id)) {
             throw new waAPIException('not_found', 'Contact not found', 404);
         } elseif (!$this->getCrmRights()->contactEditable($contact_id)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $rand = mt_rand();

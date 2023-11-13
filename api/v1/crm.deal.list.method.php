@@ -245,6 +245,7 @@ class crmDealListMethod extends crmApiAbstractMethod
     protected function prepareContactData(waContact $contact, $userpic_size)
     {
         $data = array_merge(['id' => $contact->getId()], $contact->getCache());
+        $data['name'] = waContactNameField::formatName($contact, true);
         $data['name'] = ifempty($data, 'name', '');
 
         return $this->filterFields($this->prepareUserpic($data, $userpic_size), ['id', 'name', 'userpic']);

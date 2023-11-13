@@ -37,7 +37,7 @@ class crmMessageSendFileMethod extends crmApiAbstractMethod
             throw new waAPIException('invalid_reply_message_id', 'Message not found', 400);
         }
         if (!$this->getCrmRights()->contact($message['contact_id'])) {
-            throw new waAPIException('access_denied', 'Access denied', 403);
+            throw new waAPIException('access_denied', _w('Access denied'), 403);
         }
         if ($message['transport'] !== crmMessageModel::TRANSPORT_IM) {
             throw new waAPIException('invalid_reply_message_id', 'Message was not sent via messenger', 400);

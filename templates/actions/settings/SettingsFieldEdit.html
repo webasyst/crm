@@ -48,7 +48,7 @@
                         {if $rest_locales}
                             <li class="hint">
                               <div class="wa-select">
-                                      <select class="crm-add-name-another-language-wrapper">
+                                      <select class="not-styled crm-add-name-another-language-wrapper">
                                         <option>[s`Add name in another language`]</option>
                                             {foreach $rest_locales as $loc}
                                             <option class="crm-add-name-another-language" data-name-region="{$loc.name_region}" data-id="{$loc.id}">
@@ -78,7 +78,7 @@
                     <div class="value">
                         {if !$field}
                             <div class="wa-select">
-                                <select name="ftype" class="crm-field-type-select">
+                                <select name="ftype" class="not-styled crm-field-type-select">
                                     {foreach $field_types as $ftype => $ftype_str}
                                         <option value="{$ftype}">{$ftype_str}</option>
                                     {/foreach}
@@ -172,7 +172,7 @@
                     </div>
                 {/if}
 
-                <em class="errormsg crm-common-errors"></em>
+                <span class="errormsg crm-common-errors"></span>
             </div>
             <footer class="dialog-footer">
                 <div class="crm-actions">

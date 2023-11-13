@@ -1,5 +1,5 @@
 {$wrapper_id = uniqid('js-deal-attach-dialog')}
-<div class="crm-dialog-wrapper c-deal-attach-dialog js-deal-attach-dialog" id="{$wrapper_id}">
+<div class="crm-dialog-wrapper c-conversation-deal-attach-dialog js-deal-attach-dialog" id="{$wrapper_id}">
     <div class="crm-dialog-background"></div>
     <div class="crm-dialog-block">
         <header class="crm-dialog-header">
@@ -8,7 +8,7 @@
 
         <div class="crm-dialog-content">
             <p>[`Прикрепить этот счёт к другой сделке`]</p>
-            <div class="c-invoice-deal js-invoice-deal">
+            <div class="c-conversation-deal js-invoice-deal">
                 {include file="templates/actions-legacy/message/MessageConversation.dealSelector.inc.html" inline}
                 <input name="invoice_id" type="hidden" value="{$invoice_id|default:0}">
             </div>

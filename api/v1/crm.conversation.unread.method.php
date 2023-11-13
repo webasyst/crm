@@ -19,7 +19,7 @@ class crmConversationUnreadMethod extends crmMessageListMethod
         if (empty($conversation)) {
             throw new waAPIException('not_found', 'Conversation not found', 404);
         } elseif (!$this->getCrmRights()->canViewConversation($conversation)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
         $this->getMessageReadModel()->setUnread($conversation['last_message_id'], $this->getUser()->getId());
 

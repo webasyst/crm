@@ -20,8 +20,8 @@
                     {/if}
                     <i class="fas fa-users"></i>
                     <span class="name">[`Contacts`]</span>
-                    {if !empty($contacts_new_count) && $contacts_new_count < 100}
-                        <strong class="c-badge badge small js-indicator">{$contacts_new_count}</strong>
+                    {if !empty($contacts_new_count)}
+                        <strong class="c-badge badge small js-indicator">{if $contacts_new_count < 100}{$contacts_new_count}{else}99+{/if}</strong>
                     {/if}
                 </a>
             </li>
@@ -34,8 +34,8 @@
                         {/if}
                         <i class="fas fa-funnel-dollar"></i>
                         <span class="name">[`Deals`]</span>
-                        {if !empty($deals_new_count) && $deals_new_count < 100}
-                            <strong class="c-badge badge small js-indicator">{$deals_new_count}</strong>
+                        {if !empty($deals_new_count)}
+                            <strong class="c-badge badge small js-indicator">{if $deals_new_count < 100}{$deals_new_count}{else}99+{/if}</strong>
                         {/if}
                     </a>
                 </li>
@@ -45,8 +45,8 @@
                 <a href="{$wa_app_url}reminder/" data-wa-tooltip-content="[`Reminders`]">
                     <i class="fas fa-bell"></i>
                     <span class="name">[`Reminders`]</span>
-                    {if !empty($reminders_due_count) && $reminders_due_count < 100}
-                        <strong class="c-badge badge small js-indicator">{$reminders_due_count}</strong>
+                    {if !empty($reminders_due_count)}
+                        <strong class="c-badge badge small js-indicator">{if $reminders_due_count < 100}{$reminders_due_count}{else}99+{/if}</strong>
                     {/if}
                 </a>
             </li>
@@ -59,8 +59,8 @@
                         {/if}
                         <i class="fas fa-file-invoice-dollar"></i>
                         <span class="name">[`Invoices`]</span>
-                        {if !empty($invoices_new_count) && $invoices_new_count < 100}
-                        <strong class="c-badge badge small js-indicator">{$invoices_new_count}</strong>
+                        {if !empty($invoices_new_count)}
+                        <strong class="c-badge badge small js-indicator">{if $invoices_new_count < 100}{$invoices_new_count}{else}99+{/if}</strong>
                         {/if}
                     </a>
                 </li>
@@ -79,8 +79,8 @@
                         <span class="count">{if isset($calls_count)}{$calls_count}{/if}</span>
                         <i class="fas fa-phone-alt"></i>
                         <span class="name">[`Calls`]</span>
-                        {if !empty($calls_new_count) && $calls_new_count < 100}
-                        <strong class="c-badge badge small js-indicator">{$calls_new_count}</strong>
+                        {if !empty($calls_new_count)}
+                        <strong class="c-badge badge small js-indicator">{if $calls_new_count < 100}{$calls_new_count}{else}99+{/if}</strong>
                         {/if}
                     </a>
                 </li>
@@ -91,8 +91,8 @@
                     <span class="count hidden">{if isset($messages_count)}{$messages_count}{/if}</span>
                     <i class="fas fa-comments"></i>
                     <span class="name">[`Messages`]</span>
-                    {if !empty($messages_new_count) && $messages_new_count < 100}
-                    <strong class="c-badge badge small js-indicator">{$messages_new_count}</strong>
+                    {if !empty($messages_new_count)}
+                    <strong class="c-badge badge small js-indicator">{if $messages_new_count < 100}{$messages_new_count}{else}99+{/if}</strong>
                     {/if}
                 </a>
             </li>

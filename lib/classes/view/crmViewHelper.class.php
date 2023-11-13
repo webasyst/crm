@@ -155,7 +155,7 @@ class crmViewHelper
     }
 
 
-        /**
+    /**
      * @param $count
      * @param $page
      * @param $url_params
@@ -163,8 +163,7 @@ class crmViewHelper
      * @param bool $need_total 
      * @return string
      */
-
-    public function waCustomPaging($count, $page, $url_params = '', $need_total, $limit = crmConfig::ROWS_PER_PAGE)
+    public function waCustomPaging($count, $page, $url_params = '', $need_total = false, $limit = crmConfig::ROWS_PER_PAGE)
     {
         $width = 5;
         $html = '';

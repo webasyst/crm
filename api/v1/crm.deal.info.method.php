@@ -16,6 +16,11 @@ class crmDealInfoMethod extends crmApiAbstractMethod
             throw new waAPIException('not_found', 'Deal not found', 404);
         }
 
+        $deal_access_level = $this->getCrmRights()->deal($this->deal);
+        if ($deal_access_level === crmRightConfig::RIGHT_DEAL_NONE) {
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
+        }
+
         if ($magic_source_email = crmHelper::getMagicSourceEmail($this->deal)) {
             $this->deal['email'] = $magic_source_email;
         }
@@ -48,7 +53,6 @@ class crmDealInfoMethod extends crmApiAbstractMethod
             $this->deal['contacts'] = $this->getDealContacts($contacts, $userpic_size, !empty($order));
         }
 
-        $deal_access_level = $this->getCrmRights()->deal($this->deal);
         $funnel_rights_value = $this->getCrmRights()->funnel($this->deal['funnel_id']);
         $can_edit_deal = ($deal_access_level > crmRightConfig::RIGHT_DEAL_VIEW);
         $can_delete = ($deal_access_level === crmRightConfig::RIGHT_DEAL_ALL);
@@ -145,6 +149,7 @@ class crmDealInfoMethod extends crmApiAbstractMethod
         foreach ($contacts as $_contact) {
             if ($_contact['role_id'] === crmDealParticipantsModel::ROLE_USER) {
                 $_contact = $this->prepareUserpic($_contact, $userpic_size);
+                $_contact['name'] = waContactNameField::formatName($_contact, true);
                 $deal_users[] = [
                     'label'       => $_contact['label'],
                     'assigned_at' => $this->formatDatetimeToISO8601($_contact['assigned_at']),
@@ -165,6 +170,7 @@ class crmDealInfoMethod extends crmApiAbstractMethod
         $counters_shop = ifset($counters, 'order_counters', []);
         foreach ($contacts as $id => $_contact) {
             if ($_contact['role_id'] === crmDealParticipantsModel::ROLE_CLIENT) {
+                $_contact['name'] = waContactNameField::formatName($_contact, true);
                 if (!!ifempty($_contact, 'is_company', '')) {
                     $_contact['company'] = '';
                 }

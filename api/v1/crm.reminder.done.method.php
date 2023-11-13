@@ -18,7 +18,7 @@ class crmReminderDoneMethod extends crmApiAbstractMethod
         if ($reminder === null) {
             throw new waAPIException('not_found', 'Reminder not found', 404);
         } else if (!$this->getCrmRights()->reminderEditable($reminder)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } else if ($reminder['complete_datetime']) {
             $this->http_status_code = 204;
             $this->response = null;

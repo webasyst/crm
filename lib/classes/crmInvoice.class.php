@@ -461,7 +461,7 @@ class crmInvoice
         return (int) (new crmLogModel())->log(
             $action,
             $contact_id,
-            ifset($invoice, 'id', null),
+            ifset($invoice, 'id', null)
         );
     }
 }

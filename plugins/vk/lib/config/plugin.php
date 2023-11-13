@@ -4,7 +4,7 @@ return array(
     'name'        => 'VK',
     'description' => 'Provides integration with VK.com messages',
     'img'         => 'img/vk.png',
-    'version'     => '1.0.9',
+    'version'     => '1.0.10',
     'vendor'      => 'webasyst',
     'custom_settings_url' => '?plugin=vk&action=settings',
     'frontend'            => true,

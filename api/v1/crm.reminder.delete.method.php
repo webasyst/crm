@@ -15,7 +15,7 @@ class crmReminderDeleteMethod extends crmApiAbstractMethod
         if ($reminder === null || $reminder['complete_datetime']) {
             throw new waAPIException('not_found', 'Reminder not found', 404);
         } else if (!$this->getCrmRights()->reminderEditable($reminder)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
         $this->getReminderModel()->deleteById($reminder_id);
         crmDeal::updateReminder($reminder['contact_id']);

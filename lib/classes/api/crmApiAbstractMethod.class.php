@@ -255,11 +255,18 @@ abstract class crmApiAbstractMethod extends waAPIMethod
 
     protected function prepareSegments(array $result_set)
     {
+        $rights = $this->getCrmRights();
+        $result = array_map(function ($el) use ($rights) {
+            $el['is_editable'] = $rights->canEditSegment($el);
+            return $el;
+        }, $result_set);
+        
         $result = $this->filterData(
-            $result_set, 
-            ['id', 'name', 'icon', 'icon_path', 'type', 'count', 'archived'],
+            $result, 
+            ['id', 'name', 'icon', 'icon_path', 'type', 'count', 'archived', 'is_editable'],
             ['id' => 'integer', 'count' => 'integer', 'archived' => 'boolean']
         );
+        
         return $this->prepareSegmentIcons($result);
     }
 
@@ -293,7 +300,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
         }
         $phone_formatter = new waContactPhoneFormatter();
         return array_map(function ($phone) use ($phone_formatter) {
-            $phone['data'] = $phone['value'];
+            $phone['data'] = $this->doPhonePrefix($phone['value']);
             $phone['value'] = $phone_formatter->format($phone['value']);
             if (!empty($phone['ext'])) {
                 $phone['ext_value'] = _ws($phone['ext']);
@@ -509,6 +516,10 @@ abstract class crmApiAbstractMethod extends waAPIMethod
                     break;
             }
 
+            if (isset($l['create_app_id'])) {
+                $l['icon'] = $this->getAppIcon($l['create_app_id']);
+            }
+
             if (isset($l['deal'])) {
                 $l['deal'] = $this->prepareDealShort($l['deal']);
             }
@@ -648,5 +659,47 @@ abstract class crmApiAbstractMethod extends waAPIMethod
         }
 
         return $map_adapter->getUrlToMap($address, $longitude, $latitude, 15);
+    }
+
+    protected function getAppIcon($app)
+    {
+        if (!is_array($app)) {
+            $app = wa()->getAppInfo($app);
+        }
+
+        $icon_data = ifset($app, 'icon', null);
+        if (empty($icon_data)) {
+            return [
+                'fa' => 'info',
+                'color' => '#AAAAAA',
+            ];
+        }
+        $sizes = array_keys($icon_data);
+        $sizes = array_filter($sizes, function ($el) {
+            return $el > 40;
+        });
+        if (empty($sizes)) {
+            return [
+                'fa' => 'info',
+                'color' => '#AAAAAA',
+            ];
+        }
+        $size = min($sizes);
+        return [
+            'url' => rtrim(wa()->getRootUrl(true), '/') . '/' . $icon_data[$size],
+        ];
+    }
+
+    protected function doPhonePrefix($phone_number)
+    {
+        if (empty($phone_number)) {
+            return $phone_number;
+        }
+        $phone_prefix = wa('crm')->getConfig()->getPhoneTransformPrefix();
+        if (!empty($phone_prefix['input_code']) && strpos($phone_number, $phone_prefix['input_code']) === 0) {
+            return $phone_number;
+        }
+        $phone_number = ltrim($phone_number, '+');
+        return '+'.$phone_number;
     }
 }

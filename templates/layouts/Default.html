@@ -43,7 +43,7 @@
     {/wa_js}{strip}
 
 
-    
+
     <script src="{$wa_url}wa-content/js/fontawesome/fontawesome-all.min.js?v={$wa->version(true)}"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@0.4.0/dist/tgs-player.js"></script>
 
@@ -206,6 +206,7 @@
             contact_list_sort: {$contact_list_sort},
             deal_list_filter: {$deal_list_filter},
             deal_list_sort: {$deal_list_sort},
+            rights: {$access_rights},
             user: {
                 id: {$wa->user()->getID()},
                 name: '{$wa->user()->getName()|escape:"javascript"}',
@@ -218,6 +219,9 @@
                 }
             }
         };
+        window.crmAction = {
+            setTitle: $.crm.title.set
+        }
     </script>
 
 </head>

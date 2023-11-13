@@ -266,6 +266,9 @@ var CRMMessageConversationPage = ( function($) {
                                 startLazyLoading();
                             }
                         }
+                        else {
+                            if ($loader) $loader.remove();
+                        }
                            
                         startLazyLoading();
                     }
@@ -1322,8 +1325,6 @@ var CRMMessagesProfileAdditional = ( function($) {
             $link_list = that.$wrapper.find(".js-drawer-list"),
             draw_locked = false;
 
-        
-
         that.$wrapper.on("click", ".js-info-toggle", toggleContent);
 
         function toggleContent(event) {
@@ -1342,15 +1343,26 @@ var CRMMessagesProfileAdditional = ( function($) {
         function drawAdditionalLinks() {
             var href = $.crm.app_url + '?module=contact&action=tabs&id=' + that.contact_id;
             draw_locked = true;
+            that.item_html = {};
             $.get(href)
             .done(function(response) {
+                /*console.log(response.data);
+                const custom_obj = {
+                    "html": `<div>Я тута <br><span class="custom-pr-12 icon size-16 js-message-attachment"><i class="fas fa-paperclip"></i></span></div>`,
+                    "url": null,
+                    "count": 0,
+                    "title": "Custom",
+                    "id": "custom",
+                    "app_id": "custom"
+                }
+                response.data.push(custom_obj);*/
                 $.each(response.data, function (i, item) {
                     var item_count = item.count !== null ? `<span class="hint custom-ml-4">${item.count}</span>` : '';
-                    var item_html = item.url ? false : item.html;
                     var link_html = `<li class="custom-mb-16 bold">
-                    <a href="javascript:void(0);" class="js-drawer-list-link js-drawer-list--${item.app_id} additional" data-dialog-url="${item.url || ''}" data-class-name="custom" ${item_html ? `data-dialog-html="${item_html}"` : ''}>
+                    <a href="javascript:void(0);" class="js-drawer-list-link js-drawer-list--${item.app_id} additional" data-dialog-url="${item.url || ''}" data-class-name="custom" data-id="${item.app_id}">
                     <span class="js-drawer-list-link--header" >${item.title}</span>${item_count}</a></li>`;
                     $link_list.append(link_html);
+                    that.item_html[item.app_id] = item.html;
                 });
                 $link_list.find('.skeleton').hide();
                 that.$main_wrapper.animate({scrollTop: that.$main_wrapper[0].scrollHeight}, 450);
@@ -1367,17 +1379,17 @@ var CRMMessagesProfileAdditional = ( function($) {
                 is_locked = true;
                 var href = $(this).data('dialog-url');
                 var is_additional_link = $(this).hasClass('additional');
-                var data_html = $(this).data('dialog-html') || null;
+                var data_id = $(this).data('id') || null;
                 var extraClass = $(this).data('class-name') || '';
                 var drawer_header = $(this).find('.js-drawer-list-link--header').text();
-                if (href) {
+
                 const drawer_loader = '<div class="flexbox middle width-100 height-100 spinner-wrapper"><div class="spinner custom-p-16"></div></div>';
                 drawer_html = `<div class=\"drawer crm-help crm-message-additional ${extraClass}\" id=\"\"> <div class=\"drawer-background\"><\/div> <div class=\"drawer-body\"><header class=\"drawer-header\"><h3>${drawer_header}<\/h3><\/header><a href=\"#\" class=\"drawer-close js-close-drawer\"><i class=\"fas fa-times\"><\/i><\/a><div class=\"drawer-block\">${drawer_loader}<\/div><\/div><\/div>`;
                 var iframe_html = `<iframe frameborder="0" src="${href}" style="width:100%;  height: 100vh; background-color: var(--background-color);"></iframe>`;
                 if (is_additional_link) {
                     iframe_html = `<iframe frameborder="0" style="width:100%; height: 100vh; background-color: var(--background-color-blank);"></iframe>`;
                 }
-                
+              
                 that.drawer = $.waDrawer({
                     html: drawer_html,
                     direction: "right",
@@ -1385,8 +1397,8 @@ var CRMMessagesProfileAdditional = ( function($) {
                         $drawer.find('.drawer-block').append(iframe_html);
                         const $iframe = $drawer.find('iframe');
                         if ($iframe.length) {
-                            if (is_additional_link) handleAdditionalIframe($iframe, href, data_html);
-                            $iframe.on('load', function(){
+                            $iframe.on('load', function() {
+                                console.log('load')
                                 $drawer.find('.spinner-wrapper').remove();
                             })
                             $iframe.on('beforeShowModal', () => {
@@ -1395,6 +1407,7 @@ var CRMMessagesProfileAdditional = ( function($) {
                             $iframe.on('beforeCloseModal', () => {
                                 $iframe.removeClass('z-10')
                             });
+                            if (is_additional_link) handleAdditionalIframe($iframe, href, data_id);
                         }
                         else {
                             $drawer.find('.spinner-wrapper').remove();
@@ -1405,14 +1418,11 @@ var CRMMessagesProfileAdditional = ( function($) {
                         is_locked = false;
                     }
                 });
-                }
-                else {
-                    is_locked = false;
-                }
               
             }
         });
-        function handleAdditionalIframe($iframe, href, data_html) {
+
+        function handleAdditionalIframe($iframe, href, data_id) {
             var $iframe_content = $iframe.contents();
             var $iframe_head = $iframe_content.find('head');
             var $iframe_body = $iframe_content.find('body');
@@ -1440,13 +1450,8 @@ var CRMMessagesProfileAdditional = ( function($) {
                     })();
                     <\/script>`);
             }
-
-            if (data_html) {
-                $iframe_body.html(data_html);
-               
-                setTopLinks();
-            }
-            else {
+            
+            if (href) {
                 $.ajax({
                     method: 'GET',
                     url: href,
@@ -1466,6 +1471,17 @@ var CRMMessagesProfileAdditional = ( function($) {
                 .always(function () {
                     $iframe.trigger('load');
                 });   
+            }
+            else if (data_id) {
+                const item_html = that.item_html[data_id];
+                $iframe_body.html(item_html);
+                setTopLinks();
+                $iframe.trigger('load');
+                console.log(item_html); 
+            }
+            else {
+                $iframe_body.html('<div>Not found</div>');
+                $iframe.trigger('load');
             }
         }
     };
@@ -2250,6 +2266,9 @@ var CRMEmailConversationEmailSender = ( function($) { //форма ответа 
                         that.body = that.body_old;
                         that.$replySection.find(".js-revert").trigger("click");
                         toggleHeight();
+                        if ($('#c-messages-page #c-messages-sidebar').length) {
+                            $(document).trigger('msg_sidebar_upd_needed');
+                        }
                     
                 }).fail(function(data) {
                     var error_box = that.$form.find('#tooltip-error-message'),
@@ -2350,7 +2369,7 @@ var CRMEmailConversationEmailSender = ( function($) { //форма ответа 
             $textarea_small.attr("disabled", false);
             $dropField.prop("disabled", false);
             that.$form.find('button').prop("disabled", false);
-            $textarea_small.val('');
+            $textarea_small.val('').focus();
             if (that.files_storage.length) {
                 var $exist_files = that.$form.find(".c-upload-item");
                 $.each($exist_files, function(index, item) {
@@ -2926,6 +2945,9 @@ var CRMImConversationSection = ( function($) { //форма ответа IM
                                     onImagesLoaded(response_id);
                                     $submitButton.prop('disabled', true);
                                     toggleHeight();
+                                    if ($('#c-messages-page #c-messages-sidebar').length) {
+                                        $(document).trigger('msg_sidebar_upd_needed');
+                                    }
                             
                             } else {
                                 console.error(response);
@@ -3023,7 +3045,7 @@ var CRMImConversationSection = ( function($) { //форма ответа IM
                     $textarea.attr("disabled", false);
                     $input_field.prop("disabled", false);
                     that.$form.find('button').prop("disabled", false);
-                    $textarea.val('');
+                    $textarea.val('').focus();
                     if (that.files_storage.length) {
                         var $exist_files = that.$form.find(".c-upload-item");
                         $.each($exist_files, function(index, item) {

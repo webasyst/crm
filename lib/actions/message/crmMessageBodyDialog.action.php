@@ -175,13 +175,15 @@ class crmMessageBodyDialogAction extends crmViewAction
         $all_recipients = [];
 
         if ($message['transport'] === crmMessageModel::TRANSPORT_EMAIL && $message['direction'] === crmMessageModel::DIRECTION_IN && $message['source_id'] > 0) {
-            $source = crmEmailSource::factory($message['source_id']);
-            $source_email = $source->getEmail();
-            $all_recipients[$source_email] = array_merge($mrm->getEmptyRow(), [
-                'destination' => $source_email,
-                'name' => $source_email,
-                'type' => crmMessageRecipientsModel::TYPE_TO
-            ]);
+            try {
+                $source = crmEmailSource::factory($message['source_id']);
+                $source_email = $source->getEmail();
+                $all_recipients[$source_email] = array_merge($mrm->getEmptyRow(), [
+                    'destination' => $source_email,
+                    'name' => $source_email,
+                    'type' => crmMessageRecipientsModel::TYPE_TO
+                ]);
+            } catch (crmSourceException $ex) {}
         }
 
         $recipients = $mrm->getRecipients($message['id']);

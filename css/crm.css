@@ -1,3 +1,20 @@
+html {
+  --invoice-pending-color: var(--yellow);
+  --invoice-processing-color: var(--purple);
+  --invoice-payment-expired-color: var(--orange);
+  --invoice-paid-color: var(--green);
+  --invoice-refunded-color: var(--red);
+  --invoice-archived-color: #a9a9a9;
+  --invoice-draft-color: var(--gray);
+/* replacing colors in wa-2.0.css */
+  --accent-color: #f27130;
+  --accent-color-hover: #cc4b0a;
+  --blue: #1a9afe;
+}
+html[data-theme="dark"] {
+  --accent-color: #cc6d3d;
+  --accent-color-hover: #bf4d13;
+}
 form {
   overflow: inherit;
 }
@@ -44,6 +61,9 @@ ul.c-tags-list li .c-tag {
   word-wrap: break-word;
   background: #f0f0f0;
   color: #666;
+}
+#wa2ui-dropdown .badge.blue {
+  background: var(--accent-color);
 }
 #wa-app:before,
 #wa-app:after {
@@ -2129,7 +2149,16 @@ ul.pager li {
   margin: 0;
   padding: 0;
 }
-.c-call-page .c-call-header .c-nav-wrapper .c-page-name h2 {
+.c-call-page .c-call-header .c-call-header-right .ui-widget-content.ui-autocomplete .ui-menu-item-wrapper {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  word-break: break-word;
+}
+.c-call-page .c-call-header .c-call-header-right .c-page-name h2 {
   line-height: inherit;
 }
 .c-call-page .c-page-header {
@@ -3418,8 +3447,8 @@ ul.pager li {
 .c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail .c-bottom-detail .c-subject-wrapper {
   color: var(--text-color-heading);
   font-weight: 450;
-  font-size: 15px;
-  line-height: 20px;
+  font-size: 13px;
+  line-height: 16px;
 }
 .c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail .c-bottom-detail .c-subject-wrapper .icon svg {
   -webkit-transition: color 0.3s;
@@ -3428,11 +3457,40 @@ ul.pager li {
   -ms-transition: color 0.3s;
   transition: color 0.3s;
 }
-.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper.unread .profile > .detail .c-bottom-detail .c-subject-wrapper,
-.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper.unread .profile > .detail .c-bottom-detail .c-subject-wrapper .hint,
-.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper.unread .profile > .detail .c-bottom-detail .c-subject-wrapper .icon svg {
-  color: var(--menu-selected-link-color);
-  font-weight: 500;
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail .c-bottom-detail .c-subject-unread-icon,
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail .c-bottom-detail .c-subject-need-response-icon {
+  display: none;
+}
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail .c-bottom-detail .c-subject-unread-icon svg,
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail .c-bottom-detail .c-subject-need-response-icon svg {
+  font-size: 0.5rem;
+  max-width: 8px;
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -o-box-flex: 1;
+  box-flex: 1;
+  -webkit-flex: 0 0 0.5rem;
+  -ms-flex: 0 0 0.5rem;
+  flex: 0 0 0.5rem;
+}
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper.need-response .profile > .detail .c-subject-need-response-icon {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+}
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper.unread .profile > .detail .c-subject-unread-icon {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+}
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper.unread .profile > .detail .c-subject-need-response-icon {
+  display: none;
 }
 .c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper.selected {
   background: var(--accent-color);
@@ -4369,7 +4427,8 @@ ul.pager li {
   font-weight: 700;
   font-size: 13px;
   line-height: 150%;
-  max-width: 78%;
+  max-width: calc(100% - 39px);
+  width: 100%;
 }
 .c-message-conversation-page .c-email-conversation-section .c-message-item .c-message-header .c-contact .c-contact-link {
   color: var(--text-color-heading);
@@ -4504,7 +4563,8 @@ ul.pager li {
   font-weight: 700;
   font-size: 13px;
   line-height: 150%;
-  max-width: 78%;
+  max-width: calc(100% - 39px);
+  width: 100%;
 }
 .c-message-conversation-page .c-im-conversation-section .c-message-item .c-message-header .c-contact .c-contact-link {
   color: var(--text-color-heading);
@@ -8963,67 +9023,50 @@ ul.pager li {
   font-size: 11px;
 }
 .c-invoices-page > .sidebar .c-search-results-list .c-number.pending {
-  color: #008000;
+  color: var(--invoice-pending-color);
 }
 .c-invoices-page > .sidebar .c-search-results-list .c-number.processing {
   font-weight: bold;
-  color: var(--orange);
+  color: var(--invoice-processing-color);
 }
 .c-invoices-page > .sidebar .c-search-results-list .c-number.paid {
-  color: var(--purple);
+  color: var(--invoice-paid-color);
 }
 .c-invoices-page > .sidebar .c-search-results-list .c-number.refunded {
-  color: #b22222;
+  color: var(--invoice-refunded-color);
 }
 .c-invoices-page > .sidebar .c-search-results-list .c-number.archived {
-  color: #a9a9a9;
+  color: var(--invoice-archived-color);
 }
 .c-invoices-page > .sidebar .c-search-results-list .c-number.draft {
-  color: var(--gray);
+  color: var(--invoice-draft-color);
 }
 .c-invoices-page > .sidebar .c-filters .c-dropdown-states,
 .c-invoices-page > .sidebar .c-filters .c-dropdown-sort {
   min-width: 9rem;
+  width: 100%;
 }
 .c-invoices-page > .sidebar .c-filters .c-dropdown-states .svg-icon {
   margin-top: 0;
 }
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .pending a {
-  color: #008000;
+.c-invoices-page > .sidebar .c-filters .c-dropdown-states .pending * {
+  color: var(--invoice-pending-color);
 }
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .pending .svg-icon {
-  color: #008000 !important;
-}
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .processing a {
+.c-invoices-page > .sidebar .c-filters .c-dropdown-states .processing * {
   font-weight: bold;
-  color: var(--orange);
+  color: var(--invoice-processing-color);
 }
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .processing .svg-icon {
-  color: var(--orange) !important;
+.c-invoices-page > .sidebar .c-filters .c-dropdown-states .paid * {
+  color: var(--invoice-paid-color);
 }
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .paid a {
-  color: var(--purple);
+.c-invoices-page > .sidebar .c-filters .c-dropdown-states .refunded * {
+  color: var(--invoice-refunded-color);
 }
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .paid .svg-icon {
-  color: var(--purple) !important;
+.c-invoices-page > .sidebar .c-filters .c-dropdown-states .archived * {
+  color: var(--invoice-archived-color);
 }
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .refunded a {
-  color: #b22222;
-}
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .refunded .svg-icon {
-  color: #b22222 !important;
-}
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .archived a {
-  color: #a9a9a9;
-}
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .archived .svg-icon {
-  color: #a9a9a9 !important;
-}
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .draft a {
-  color: var(--gray);
-}
-.c-invoices-page > .sidebar .c-filters .c-dropdown-states .draft .svg-icon {
-  color: var(--gray) !important;
+.c-invoices-page > .sidebar .c-filters .c-dropdown-states .draft * {
+  color: var(--invoice-draft-color);
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice {
   border-bottom: 1px solid var(--border-color-soft);
@@ -9043,7 +9086,10 @@ ul.pager li {
   line-height: 16px;
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice.pending .c-bg {
-  background: #008000;
+  background: var(--invoice-pending-color);
+}
+.c-invoices-page > .sidebar .c-invoices-list .c-invoice.payment-expired .c-bg {
+  background: var(--invoice-payment-expired-color);
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice.processing .c-price {
   font-weight: 500;
@@ -9053,19 +9099,19 @@ ul.pager li {
   border-radius: 5px;
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice.processing .c-bg {
-  background: var(--orange);
+  background: var(--invoice-processing-color);
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice.paid .c-bg {
-  background: var(--purple);
+  background: var(--invoice-paid-color);
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice.refunded .c-bg {
-  background: #b22222;
+  background: var(--invoice-refunded-color);
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice.archived .c-bg {
-  background: #a9a9a9;
+  background: var(--invoice-archived-color);
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice.draft .c-bg {
-  background: var(--gray);
+  background: var(--invoice-draft-color);
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice.selected {
   background: var(--list-item-selected-background-color);
@@ -9078,11 +9124,32 @@ ul.pager li {
   color: var(--text-color);
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice .line {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-pack: justify;
+  -moz-box-pack: justify;
+  -o-box-pack: justify;
+  -ms-flex-pack: justify;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -o-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
   margin-top: 2px;
   line-height: 16px;
 }
 .c-invoices-page > .sidebar .c-invoices-list .c-invoice .line:first-child {
   margin-top: 0;
+}
+.c-invoices-page > .sidebar .c-invoices-list .c-invoice .line .badge {
+  font-size: 68%;
 }
 @media screen and (min-width: 761px) {
   .c-invoices-page .c-invoices-body {
@@ -9109,6 +9176,48 @@ ul.pager li {
 .c-invoice-page .fields-group {
   margin-top: 1rem !important;
 }
+.c-invoice-page .c-page-header {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+.c-invoice-page .c-page-header-amount {
+  font-weight: 400;
+}
+.c-invoice-page .c-page-header-badge {
+  display: inline-block;
+  vertical-align: middle;
+  font-weight: 400;
+  padding: 0.25rem 0.5rem;
+}
+.c-invoice-page .c-page-header .c-state.pending {
+  background: var(--invoice-pending-color);
+}
+.c-invoice-page .c-page-header .c-state.payment-expired {
+  background: var(--invoice-payment-expired-color);
+}
+.c-invoice-page .c-page-header .c-state.processing {
+  background: var(--invoice-processing-color);
+}
+.c-invoice-page .c-page-header .c-state.paid {
+  background: var(--invoice-paid-color);
+}
+.c-invoice-page .c-page-header .c-state.refunded {
+  background: var(--invoice-refunded-color);
+}
+.c-invoice-page .c-page-header .c-state.archived {
+  background: var(--invoice-archived-color);
+}
+.c-invoice-page .c-page-header .c-state.draft {
+  background: var(--invoice-draft-color);
+}
+.c-invoice-page .c-page-header-wrapper .c-page-change-state {
+  row-gap: 0.5rem;
+}
+.c-invoice-page .c-public-link {
+  display: inline-block;
+  word-break: break-all;
+  line-height: 1.6;
+}
 .c-invoice-page .c-page-actions {
   display: -webkit-box;
   display: -moz-box;
@@ -9122,28 +9231,15 @@ ul.pager li {
   -webkit-flex-wrap: wrap;
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
-  margin-bottom: 0;
+  margin: 0;
+}
+.c-invoice-page .c-page-actions a,
+.c-invoice-page .c-page-actions svg {
+  font-weight: 500;
+  color: var(--gray) !important;
 }
 .c-invoice-page .c-details-wrapper .c-amount {
   font-size: 20px;
-}
-.c-invoice-page .c-details-wrapper .c-state.pending {
-  background: #008000;
-}
-.c-invoice-page .c-details-wrapper .c-state.processing {
-  background: var(--orange);
-}
-.c-invoice-page .c-details-wrapper .c-state.paid {
-  background: var(--purple);
-}
-.c-invoice-page .c-details-wrapper .c-state.refunded {
-  background: #b22222;
-}
-.c-invoice-page .c-details-wrapper .c-state.archived {
-  background: #a9a9a9;
-}
-.c-invoice-page .c-details-wrapper .c-state.draft {
-  background: var(--gray);
 }
 .c-invoice-page .c-details-wrapper .c-profile-block img {
   vertical-align: sub;
@@ -9169,21 +9265,14 @@ ul.pager li {
 .c-invoice-page .c-details-wrapper .c-transactions-table .c-transaction.is-auth {
   color: #e70;
 }
-.c-invoice-page .c-footer-actions {
-  padding: 0 0.5rem;
-  margin: 20px 0 0;
-}
-.c-invoice-page .c-footer-actions > * {
-  margin-left: 8px;
-}
-.c-invoice-page .c-footer-actions > *:first-child {
-  margin-left: 0;
-}
 .c-invoice-front-section {
   margin: -10px -25px -20px;
   padding: 0 20px;
   max-width: 100%;
   overflow-x: auto;
+}
+.c-invoice-front-section .c-front-invoice-wrapper > p {
+  margin: 0;
 }
 .c-invoice-front-section .c-front-invoice-wrapper iframe {
   width: 100%;
@@ -9262,18 +9351,6 @@ ul.pager li {
   font-weight: bold;
   background: transparent;
 }
-.c-invoice-edit-page .c-product-table table tbody tr:hover td.c-number .c-field {
-  display: none;
-}
-.c-invoice-edit-page .c-product-table table tbody tr:hover td.c-number .c-remove {
-  display: inline;
-}
-.c-invoice-edit-page .c-product-table table tbody tr:first-child:last-child td.c-number .c-field {
-  display: inline;
-}
-.c-invoice-edit-page .c-product-table table tbody tr:first-child:last-child td.c-number .c-remove {
-  display: none;
-}
 .c-invoice-edit-page .c-product-table table tbody tr td {
   padding: 8px;
 }
@@ -9282,9 +9359,10 @@ ul.pager li {
 }
 .c-invoice-edit-page .c-product-table table tbody tr td .c-name-autocomplete {
   position: relative;
+  word-break: break-word;
 }
 .c-invoice-edit-page .c-product-table table tbody tr td .c-name-autocomplete.is-active {
-  z-index: 1;
+  z-index: 999;
 }
 .c-invoice-edit-page .c-product-table table tbody tr td .c-name-autocomplete.is-active .c-hidden-list {
   display: block;
@@ -9294,7 +9372,7 @@ ul.pager li {
   position: absolute;
   top: 100%;
   left: 0;
-  width: 300px;
+  width: 100%;
   padding: 0;
   margin: 0;
   background: var(--background-color-blank);
@@ -9310,7 +9388,6 @@ ul.pager li {
   padding: 0;
   list-style: none;
   line-height: 18px;
-  white-space: nowrap;
   cursor: pointer;
 }
 .c-invoice-edit-page .c-product-table table tbody tr td .c-name-autocomplete .c-hidden-list li:hover,
@@ -9369,14 +9446,6 @@ ul.pager li {
 .c-invoice-edit-page .c-product-table table tbody tr td .c-tax-dropdown .c-hidden-list li.is-highlighted {
   background: #eed;
 }
-.c-invoice-edit-page .c-product-table table tbody tr td.c-number .c-remove {
-  display: none;
-  cursor: pointer;
-}
-.c-invoice-edit-page .c-product-table table tbody tr td.c-number .c-remove i {
-  margin: 0;
-  vertical-align: top;
-}
 .c-invoice-edit-page .c-product-table table tfoot tr:first-child td {
   padding-top: 8px;
 }
@@ -9403,6 +9472,38 @@ ul.pager li {
 }
 .c-invoice-edit-page .c-actions {
   margin: 16px 0 0;
+}
+.dialog.c-deal-attach-dialog .dialog-body .dialog-content {
+  overflow-y: visible;
+}
+.dialog.c-deal-attach-dialog .dialog-body .dialog-content .c-invoice-deal .c-empty-deal-hidden,
+.dialog.c-deal-attach-dialog .dialog-body .dialog-content .c-invoice-deal .c-deal-name-hidden {
+  display: none;
+}
+.dialog.c-deal-attach-dialog .dialog-body .dialog-content .c-invoice-deal .c-select-deal .deal-item--name {
+  white-space: pre-wrap;
+}
+.dialog.c-deal-attach-dialog .dialog-body .dialog-content .c-invoice-deal .c-select-funnel .dropdown ul > li > a {
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.dialog.c-deal-attach-dialog .dialog-body .dialog-content .c-invoice-deal .c-select-funnel .dropdown-toggle .js-text {
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.dialog.c-deal-attach-dialog .dialog-body .dialog-content .c-invoice-deal .deal-form-hidden .deal-form {
+  display: none;
+}
+.dialog.c-deal-attach-dialog .dialog-body .dialog-content .c-invoice-deal .js-created-deal {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  gap: 0.25rem;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 @media screen and (max-width: 1024px) {
   .c-invoice-page .c-details-wrapper .c-transactions-table .flexible-col {
@@ -9502,6 +9603,17 @@ ul.pager li {
   }
   .c-invoice-edit-page .c-products-table > tbody > tr > td.right input {
     text-align: left;
+  }
+}
+@media screen and (max-width: 760px) {
+  .c-invoice-page .c-page-header {
+    font-size: 1.5rem;
+  }
+  .c-invoice-page .c-page-header-wrapper.space-16 {
+    gap: 0;
+  }
+  .c-invoice-page .c-page-header-wrapper .c-page-actions li:not(:first-child) {
+    margin-top: 0.5rem;
   }
 }
 .c-live-page {
@@ -9688,6 +9800,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
     font-size: 1.7rem;
   }
   .c-reminders-page .article-body {
+    min-height: calc(100vh - 4rem);
     padding: 1rem 0 2rem 0;
   }
   .c-reminders-page .sidebar {
@@ -9952,6 +10065,9 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   overflow: hidden;
   vertical-align: top;
 }
+.c-reminders-page .c-user:not(:hover) {
+  color: var(--dark-gray);
+}
 .c-reminders-page .c-user .c-user-name {
   font-size: 13px;
   white-space: nowrap;
@@ -9976,6 +10092,10 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   padding-bottom: 0;
+}
+.c-reminders-page .c-reminder-content-area .article-body .drawer .drawer-background {
+  background-color: var(--dialog-background-color);
+  backdrop-filter: blur(0.25rem);
 }
 .c-reminders-page .c-reminder-content-area .skeleton-wrapper {
   position: absolute;
@@ -10838,13 +10958,23 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   margin-right: 0.5rem;
 }
 .c-reminders-page .c-reminder-content-area .c-completed-reminders-section.bottombar.sticky {
+  position: fixed;
   left: unset;
   right: unset;
   height: fit-content;
-  width: 100%;
+  z-index: 1041;
+  border-radius: 0.375rem 0.375rem 0 0;
+  margin-top: 1.25rem;
+  top: unset;
 }
 .c-reminders-page .c-reminder-content-area .c-completed-reminders-section.bottombar.sticky.is-shown {
-  top: unset;
+  margin-top: 0;
+  -webkit-box-shadow: 0 -6px 12px -7px rgba(0,0,0,0.2);
+  box-shadow: 0 -6px 12px -7px rgba(0,0,0,0.2);
+}
+.c-reminders-page .c-reminder-content-area .c-completed-reminders-section.bottombar.sticky.is-shown:hover {
+  -webkit-box-shadow: 0 -6px 16px -7px rgba(0,0,0,0.2);
+  box-shadow: 0 -6px 16px -7px rgba(0,0,0,0.2);
 }
 .c-reminders-page .c-reminder-content-area .c-completed-reminders-section.bottombar.sticky.is-shown .sort-down .fa-angle-down {
   -webkit-transform: rotate(180deg);
@@ -10854,7 +10984,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   transform: rotate(180deg);
 }
 .c-reminders-page .c-reminder-content-area .c-completed-reminders-section.bottombar.sticky .c-reminders-list {
-  max-height: calc(100vh - 9.25rem);
+  max-height: calc(100vh - 12rem);
   overflow-y: auto;
   height: auto;
 }
@@ -10881,10 +11011,16 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
     max-width: calc(100vw - 645px);
   }
 }
+@media (max-width: 1200px) {
+  .c-reminders-page .c-user,
+  .c-reminders-page .js-float-text {
+    max-width: calc(100vw - 581px);
+  }
+}
 @media (max-width: 760px) {
   .c-reminders-page .c-user,
   .c-reminders-page .js-float-text {
-    max-width: calc(100vw - 100px);
+    max-width: calc(100vw - 118px);
   }
 }
 .c-reminders-page .with-userblock .c-user,
@@ -10897,29 +11033,66 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
     max-width: calc(100vw - 682px);
   }
 }
+@media (max-width: 1200px) {
+  .c-reminders-page .with-userblock .c-user,
+  .c-reminders-page .with-userblock .js-float-text {
+    max-width: calc(100vw - 618px);
+  }
+}
 @media (max-width: 760px) {
   .c-reminders-page .with-userblock .c-user,
   .c-reminders-page .with-userblock .js-float-text {
-    max-width: calc(100vw - 137px);
+    max-width: calc(100vw - 155px);
   }
 }
 .c-reminders-page .no-reminders {
   margin-top: 5.5rem;
   text-align: center;
 }
+.iframe-style .c-reminders-page .c-reminder-content-area {
+  height: 100vh;
+}
 .iframe-style .c-reminders-page .c-reminder-content-area .skeleton-wrapper {
   height: 100%;
 }
-@media (max-width: 760px) {
-  .iframe-style .c-reminders-page .c-reminder-content-area .skeleton-wrapper .c-user,
-  .iframe-style .c-reminders-page .c-reminder-content-area .skeleton-wrapper .js-float-text {
-    max-width: calc(100vw - 120px);
+.iframe-style .c-reminders-page .c-reminder-content-area .c-user,
+.iframe-style .c-reminders-page .c-reminder-content-area .js-float-text {
+  max-width: 845px;
+}
+@media (max-width: 960px) {
+  .iframe-style .c-reminders-page .c-reminder-content-area .c-user,
+  .iframe-style .c-reminders-page .c-reminder-content-area .js-float-text {
+    max-width: calc(100vw - 118px);
   }
 }
 @media (max-width: 760px) {
-  .iframe-style .c-reminders-page .c-reminder-content-area .skeleton-wrapper .with-userblock .c-user,
-  .iframe-style .c-reminders-page .c-reminder-content-area .skeleton-wrapper .with-userblock .js-float-text {
-    max-width: calc(100vw - 154px);
+  .iframe-style .c-reminders-page .c-reminder-content-area .c-user,
+  .iframe-style .c-reminders-page .c-reminder-content-area .js-float-text {
+    max-width: calc(100vw - 118px);
+  }
+}
+.iframe-style .c-reminders-page .c-reminder-content-area .with-userblock .c-user,
+.iframe-style .c-reminders-page .c-reminder-content-area .with-userblock .js-float-text {
+  max-width: 808px;
+}
+@media (max-width: 960px) {
+  .iframe-style .c-reminders-page .c-reminder-content-area .with-userblock .c-user,
+  .iframe-style .c-reminders-page .c-reminder-content-area .with-userblock .js-float-text {
+    max-width: calc(100vw - 155px);
+  }
+}
+@media (max-width: 760px) {
+  .iframe-style .c-reminders-page .c-reminder-content-area .with-userblock .c-user,
+  .iframe-style .c-reminders-page .c-reminder-content-area .with-userblock .js-float-text {
+    max-width: calc(100vw - 155px);
+  }
+}
+.iframe-style .c-reminders-page .c-completed-reminders-section.bottombar.sticky.is-shown .c-reminders-list {
+  max-height: calc(100vh - 8rem);
+}
+@media (max-width: 760px) {
+  .iframe-style .c-reminders-page .c-completed-reminders-section.bottombar.sticky.is-shown .c-reminders-list {
+    max-height: calc(100vh - 6rem);
   }
 }
 .c-report-page {
@@ -10944,6 +11117,16 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   -ms-flex-pack: end;
   -webkit-justify-content: flex-end;
   justify-content: flex-end;
+}
+.c-report-page .c-report-header .c-nav-wrapper .c-filter-wrapper #dropdown-funnel-filter .dropdown-toggle {
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  max-width: 45vw;
+}
+.c-report-page .c-report-header .c-nav-wrapper .c-filter-wrapper .filter-funnel-name {
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .c-report-page .c-report-header .c-nav-wrapper > div.c-hidden-part {
   display: none;
@@ -12647,24 +12830,25 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   display: inline-block;
   overflow: hidden;
 }
-.crm-dialog-edit-field-wrapper .crm-dialog-block {
-  min-width: 600px;
+.crm-dialog-edit-field-wrapper .errormsg {
+  font-size: 87.5%;
+  color: #f00;
 }
-.crm-dialog-edit-field-wrapper .crm-dialog-block .subfields-list td {
-  vertical-align: top;
+.crm-dialog-edit-field-wrapper .dialog-body {
+  width: 650px;
 }
-.crm-dialog-edit-field-wrapper .crm-dialog-block .subfields-list tr:hover .c-link-wrapper a {
+.crm-dialog-edit-field-wrapper .dialog-body .subfields-list tr:hover .c-link-wrapper a {
   opacity: 1;
   -ms-filter: none;
   filter: none;
 }
-.crm-dialog-edit-field-wrapper .crm-dialog-block .subfields-list .add-field {
+.crm-dialog-edit-field-wrapper .dialog-body .subfields-list .add-field {
   line-height: 2rem;
 }
-.crm-dialog-edit-field-wrapper .crm-dialog-block .c-link-wrapper {
+.crm-dialog-edit-field-wrapper .dialog-body .c-link-wrapper {
   text-align: right;
 }
-.crm-dialog-edit-field-wrapper .crm-dialog-block .c-link-wrapper a {
+.crm-dialog-edit-field-wrapper .dialog-body .c-link-wrapper a {
   opacity: 0.5;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
   filter: alpha(opacity=50);
@@ -12674,20 +12858,14 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   -ms-transition: opacity 200ms linear;
   transition: opacity 200ms linear;
 }
-.crm-dialog-edit-field-wrapper .crm-dialog-block .c-link-wrapper .icon16 {
-  margin: 0 4px 0 0;
-}
-.crm-dialog-edit-field-wrapper .crm-dialog-block .c-link-wrapper .icon16:last-child {
-  margin-right: 0;
-}
-.crm-dialog-edit-field-wrapper .crm-dialog-block .c-link-wrapper .installer-small-icon {
+.crm-dialog-edit-field-wrapper .dialog-body .c-link-wrapper .installer-small-icon {
   margin: 0;
   opacity: 0.5;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
   filter: alpha(opacity=50);
   filter: grayscale(50%);
 }
-.ui-sortable i.sort {
+.ui-sortable .sort {
   cursor: move;
 }
 .editor-on .edit {
@@ -13890,10 +14068,21 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .c-reasons-page .c-reasons-section .c-reasons-list .c-reason .c-sort-toggle {
   position: relative;
-  top: 3px;
   vertical-align: baseline;
   margin: 0 4px 0 0;
   cursor: move;
+}
+.c-reasons-page .c-reasons-section .c-reasons-list .c-reason .js-funnel-id-field {
+  white-space: nowrap;
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  max-width: 450px;
+}
+@media (max-width: 760px) {
+  .c-reasons-page .c-reasons-section .c-reasons-list .c-reason .js-funnel-id-field {
+    max-width: 250px;
+  }
 }
 .c-reasons-page .c-reasons-section .c-actions {
   margin: 8px 0 0;

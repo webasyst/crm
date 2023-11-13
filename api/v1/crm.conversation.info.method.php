@@ -16,7 +16,7 @@ class crmConversationInfoMethod extends crmMessageListMethod
         }
 
         if (!$this->getCrmRights()->canViewConversation($conversation)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         // Get messages

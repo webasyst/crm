@@ -10,7 +10,7 @@ class crmInvoiceInfoMethod extends crmApiAbstractMethod
 
         $cim = new crmInvoiceModel();
         if (!wa()->getUser()->getRights('crm', 'manage_invoices')) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif ($id < 1) {
             throw new waAPIException('not_found', 'Invoice not found', 404);
         } elseif (!$invoice = $cim->getInvoice($id)) {

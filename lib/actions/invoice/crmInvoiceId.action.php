@@ -105,6 +105,26 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
         }
         unset($i);
 
+        $company_contact = null;
+        $company_contact_id = $contact->get('company_contact_id');
+        if ($company_contact_id) {
+            $company_contact = $this->getContactModel()
+                ->select('id,name')->where('id = ?', $company_contact_id)->fetchAssoc();
+        }
+
+
+        $this->invoice['days_left'] = null;
+        if ($this->invoice['due_date']) {
+            $current_date = new DateTime();
+            $current_date->setTime(0, 0, 0, 0);
+
+            $target_date = new DateTime($this->invoice['due_date']);
+            $target_date->setTime(0, 0, 0, 0);
+
+            $interval = $current_date->diff($target_date);
+            $this->invoice['days_left'] = $current_date > $target_date ? -$interval->days : $interval->days;
+        }
+
         $this->view->assign(array(
             'iframe'                 => $iframe,
             'invoice'                => $this->invoice,
@@ -116,6 +136,7 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
             'companies'              => $companies,
             'currencies'             => $currencies,
             'contact'                => $contact,
+            'company_contact'        => $company_contact,
             'deal'                   => $deal,
             'deal_access_denied'     => $deal_access_denied,
             'invoice_id'             => $invoice_id,

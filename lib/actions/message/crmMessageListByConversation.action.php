@@ -3,10 +3,11 @@
 class crmMessageListByConversationAction extends crmBackendViewAction
 {
     const USERPIC = 32;
+    protected $mm;
 
     public function execute()
     {
-        $mm = new crmMessageModel();
+        $this->mm = $mm = new crmMessageModel();
         $cm = new crmConversationModel();
         $fm = new crmFunnelModel();
         $asm = new waAppSettingsModel();
@@ -37,8 +38,9 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         $conversations = $cm->getList($list_params, $total_count);
         $this->workup($conversations);
 
-        $deal_ids = array();
-        $contact_ids = array();
+        $deal_ids = [];
+        $contact_ids = [];
+        $last_message_ids = [];
         if (!empty($contact_id)) {
             $contact_ids[$contact_id] = $contact_id;
         }
@@ -46,6 +48,9 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         foreach ($conversations as $c) {
             if ($c['deal_id']) {
                 $deal_ids[$c['deal_id']] = $c['deal_id'];
+            }
+            if ($c['last_message_id']) {
+                $last_message_ids[] = $c['last_message_id'];
             }
             $contact_ids[$c['contact_id']] = $c['contact_id'];
             $last_message_id = $c['last_message_id'] > $last_message_id ? $c['last_message_id'] : $last_message_id;
@@ -58,6 +63,13 @@ class crmMessageListByConversationAction extends crmBackendViewAction
 
         // Get Deals
         $deals = $this->getDeals($deal_ids);
+
+        // Get last messages
+        $last_messages = $this->getMessages($last_message_ids);
+        $conversations = array_map(function ($el) use ($last_messages) {
+            $el['need_response'] = ifset($last_messages, ifset($el['last_message_id'], 0), 'direction', crmMessageModel::DIRECTION_IN) === crmMessageModel::DIRECTION_IN;
+            return $el;
+        }, $conversations);
 
         // Get Sources
         $cs = new crmSourceModel();
@@ -256,7 +268,8 @@ class crmMessageListByConversationAction extends crmBackendViewAction
 
         // requested filter by responsible
         $selected_responsible = waRequest::request('responsible', null, waRequest::TYPE_STRING_TRIM);
-        if ($selected_responsible === null) {
+        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
+        if ($selected_responsible === null && !$iframe) {
             $selected_responsible = wa()->getUser()->getSettings('crm', "message_list_user", 'all');
         }
 
@@ -274,7 +287,9 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         }
 
         // remember filter by responsible (user)
-        wa()->getUser()->setSettings('crm', "message_list_user", $active_filter_responsible['id']);
+        if (!$iframe) {
+            wa()->getUser()->setSettings('crm', "message_list_user", $active_filter_responsible['id']);
+        }
 
         $this->view->assign(array(
             'has_access_filter_responsibles' => true,
@@ -301,7 +316,8 @@ class crmMessageListByConversationAction extends crmBackendViewAction
 
         // requested transport
         $selected_transport = waRequest::request('transport', null, waRequest::TYPE_STRING_TRIM);
-        if ($selected_transport === null) {
+        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
+        if ($selected_transport === null && !$iframe) {
             $selected_transport = wa()->getUser()->getSettings('crm', 'message_list_transport', 'all');
         }
 
@@ -319,11 +335,22 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         }
 
         // remember filter by transport (user)
-        wa()->getUser()->setSettings('crm', 'message_list_transport', $active_filter_transport['id']);
+        if (!$iframe) {
+            wa()->getUser()->setSettings('crm', 'message_list_transport', $active_filter_transport['id']);
+        }
 
         $this->view->assign(array(
             'filter_transports'         => $filter_transports,
             'active_filter_transport'   => $active_filter_transport,
         ));
+    }
+
+    protected function getMessages($mess_ids)
+    {
+        if (!$mess_ids) {
+            return array();
+        }
+        $messages = $this->mm->getById($mess_ids, 'id');
+        return $messages;
     }
 }

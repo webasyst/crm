@@ -18,8 +18,13 @@ class crmMessageConversationsAction extends crmBackendViewAction
         if (empty($conversation_id)) {
             $conversations = $this->view->getVars('conversations');
             if (!empty($conversations)) {
-                $conversation = reset($conversations);
-                $conversation_id = $conversation['id'];
+                $available_conversations = array_filter($conversations, function ($item) {
+                    return ifset($item, 'can_view', false);
+                });
+                if (!empty($available_conversations)) {
+                    $conversation = reset($available_conversations);
+                    $conversation_id = $conversation['id'];
+                }
             }
         }
         if (!empty($conversation_id)) {

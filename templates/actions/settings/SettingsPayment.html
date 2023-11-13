@@ -83,7 +83,7 @@
                         {foreach $instances as $id => $plugin}
                             {$_edit_url = "{$wa_app_url}settings/payment/{$id}/?company={$_company.id}"}
 
-                            <tr data-id="{$id}">
+                            <tr class="payments-table-row" data-id="{$id}">
                                 <td class="min-width"><i class="fas fa-grip-vertical text-gray sort js-sort-toggle"></i></td>
                                 <td class="min-width">
                                     {if !empty($plugin.logo)}
@@ -115,7 +115,7 @@
                         {foreachelse}
                             <tr>
                                 <td>
-                                    <em class="gray">[`No payment options are defined.`]</em>
+                                    <span class="gray">[`No payment options are defined.`]</span>
                                 </td>
                             </tr>
                         {/foreach}

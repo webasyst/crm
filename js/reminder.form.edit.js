@@ -223,7 +223,6 @@ var CRMReminderFormEdit = ( function($) {
         $textarea.on("focusout", function () {
             that.form_is_change = true;
         });
-        //toggleHeight();
 
         $textarea.on("keydown", function (event) {
             var key = event.keyCode,
@@ -244,9 +243,10 @@ var CRMReminderFormEdit = ( function($) {
         });
 
           function toggleHeight() {
-            $textarea.css("min-height", 0);
+           
+            //$textarea.css("height", 0);
             var scroll_h = $textarea[0].scrollHeight;
-            $textarea.css("min-height", scroll_h + "px");
+            $textarea.css("height", scroll_h + "px");
         }
     }
 
@@ -354,7 +354,8 @@ var CRMReminderFormEdit = ( function($) {
         var that = this,
             //$form = that.$form,
             $main_wrapper = that.$main_wrapper,
-            $wrapper = that.$wrapper;
+            $wrapper = that.$wrapper,
+            $textarea = that.$wrapper.find(".js-textarea");
             //is_locked = false;
 
         $main_wrapper.on("editOpen", function () {
@@ -363,10 +364,18 @@ var CRMReminderFormEdit = ( function($) {
                 that.initCombobox();
                 that.initSearchDeal();
                 that.is_first_click = false;
+                toggleHeight();
             }
             $(document).on("click", that.editClickWatcher);
             $main_wrapper.on("escKeyPress", that.$clear);
         });
+
+        function toggleHeight() {
+           
+            $textarea.css("height", 0);
+            var scroll_h = $textarea[0].scrollHeight;
+            $textarea.css("height", scroll_h + "px");
+        }
 
         that.close_edit = function() {
 
@@ -518,8 +527,16 @@ var CRMReminderFormEdit = ( function($) {
                     $form.find(`[name="data[content]"`).trigger('clear_error'); 
                     $has_errors = false;
                 }
+                toggleHeight($textarea);
             }
             that.close_edit();
+        }
+
+        function toggleHeight($textarea) {
+           
+            $textarea.css("height", 0);
+            var scroll_h = $textarea[0].scrollHeight;
+            $textarea.css("height", scroll_h + "px");
         }
 
         $form.on('submit', function(event) {
@@ -624,7 +641,7 @@ var CRMReminderFormEdit = ( function($) {
             if (!is_locked) {
                 is_locked = true;
                 var href = that.app_url + "?module=reminder&action=save";
-                var $loader = $('<span/>').addClass('icon').append("<i/>").addClass('fas fa-spinner wa-animation-spin');
+                $loader = $('<span class="icon"><i class="fas fa-spinner wa-animation-spin"></i></span>'),
                 $wrapper.find('.c-actions-button.js-save').append($loader);
                 $.post(href, data, function(response) {
 
@@ -641,13 +658,11 @@ var CRMReminderFormEdit = ( function($) {
                         that.form_is_change = false;
                     } else {
                         showErrors(response.errors);
-                        $loader.remove();
                     }
                 }, "json").always( function() {
-
+                    $loader.remove();
                     is_locked = false;
                 });
-
             }
         }
 

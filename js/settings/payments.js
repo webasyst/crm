@@ -154,7 +154,7 @@ var CRMSettingsPayments = (function ($) {
             distance: 10,
             handle: ".js-sort-toggle",
             helper: "clone",
-            items: "tr",
+            items: ".payments-table-row",
             axis: "y",
             stop: save
         });

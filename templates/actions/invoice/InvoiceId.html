@@ -43,19 +43,100 @@
 {$_title = '[`Invoice`]'}
 
 {$invoice.contact = $contact}
-
+{$is_pending = $invoice.state_id === 'PENDING'}
+{$is_payment_expired = $is_pending && $invoice.days_left && $invoice.days_left < 0}
 <div class="c-invoice-page custom-mb-32" id="c-invoice-page" data-id="{$invoice.id}">
 
-    <div class="c-page-header-wrapper flexbox middle wrap">
-        <div class="c-column wide">
-            <h1 class="c-page-header h3-mobile flexbox space-8">
-                <a href="javascript:void(0);" class="back mobile-only js-invoice-hide-mobile"><i class="fas fa-arrow-circle-left"></i></a>
-                [`Invoice`] [`#`]{$invoice.number|escape} [`issued on`] {$invoice.invoice_date|wa_date}
+    <h1 class="c-page-header flexbox space-8">
+        <a href="javascript:void(0);" class="back mobile-only js-invoice-hide-mobile"><i class="fas fa-arrow-circle-left"></i></a>
+        <div>
+            [`Invoice`] [`#`]{$invoice.number|escape} [`issued on`] {$invoice.invoice_date|wa_date}
 
-                <!-- plugin hook: 'invoice_info.title_suffix' -->
-                {* @event backend_invoice.%plugin_id%.title_suffix *}
-                {if !empty($backend_invoice)}{foreach $backend_invoice as $_}{ifset($_.title_suffix)}{/foreach}{/if}
-            </h1>
+            <span class="c-page-header-amount">{sprintf('[`for %s`]', $invoice.amount|wa_format_amount_currency:$invoice.currency_id)}</span>
+            <!-- plugin hook: 'invoice_info.title_suffix' -->
+            {* @event backend_invoice.%plugin_id%.title_suffix *}
+            {if !empty($backend_invoice)}{foreach $backend_invoice as $_}{ifset($_.title_suffix)}{/foreach}{/if}
+
+            {$_state = crmInvoice::getState($invoice.state_id)}
+            <span class="c-page-header-badge c-state badge nowrap smallest {if $is_payment_expired}payment-expired{else}{strtolower($invoice.state_id)}{/if}">
+                {if $is_pending}
+                    {if $is_payment_expired}
+                        [`Payment deadline has expired`]
+                    {else}
+                        [`Pending payment`]
+                    {/if}
+                {else}
+                    {$_state.name|escape|default:$invoice.state_id}
+                {/if}
+            </span>
+        </div>
+    </h1>
+    {if $show_url && empty($public_url)}
+        <span class="alert small custom-mt-16">
+            <i class="fas fa-exclamation-triangle text-yellow"></i>&nbsp;
+            [`A CRM settlement is required to publish invoices.`]
+            <a href="{$wa_backend_url}site/#/routing/" {if $iframe}target="_parent"{/if}>
+                [`Use Site app to add a settlement for CRM.`]
+            </a>
+        </span>
+    {/if}
+    <div class="c-page-header-wrapper custom-my-24 small flexbox space-16 middle wrap custom-my-16-mobile">
+        <div class="c-column c-page-change-state wide flexbox wrap small-mobile space-4 custom-mb-12-mobile">
+            {$_disabled = false}
+            {$_contact = $invoice.contact}
+            {$_exists = $_contact->exists()}
+            {$_disabled = !$_exists}
+
+            {if $invoice.state_id == 'PROCESSING'}
+                <button class="button green js-change-state" type="button" data-action="accept" {if $_disabled}disabled="disabled"{/if}>[`Accept payment`]</button>
+                <button class="button gray js-change-state" type="button" data-action="refuse" {if $_disabled}disabled="disabled"{/if}>[`Refuse payment`]</button>
+            {elseif $invoice.state_id == 'PAID'}
+                <button class="button red flexbox middle space-4 js-change-refund" type="button" data-action="refund" {if $_disabled}disabled="disabled"{/if}>
+                    <span class="icon size-12">
+                        <i class="fas fa-times-circle"></i>
+                    </span>
+                    [`Make a refund`]
+                </button>
+                {if $is_cancel_available}
+                    <button class="button gray js-change-state" type="button" data-action="cancel" {if $_disabled}disabled="disabled"{/if}>[`Cancel payment`]</button>
+                {/if}
+            {elseif $invoice.state_id == 'PENDING'}
+                <button class="button green js-change-state" type="button" data-action="paid" {if $_disabled}disabled="disabled"{/if}>[`Mark as paid`]</button>
+                <button class="button gray js-change-state" type="button" data-action="draft" {if $_disabled}disabled="disabled"{/if}>[`Return to draft`]</button>
+            {elseif $invoice.state_id == 'DRAFT' && floatval($invoice.amount)}
+                <button class="button green js-change-state" type="button" data-action="activate" {if $_disabled}disabled="disabled"{/if}>[`Activate`]</button>
+            {/if}
+
+            <!-- plugin hook: 'backend_invoice.action_button' -->
+            {* @event backend_invoice.%plugin_id%.action_button *}
+            {if !empty($backend_invoice)}{foreach $backend_invoice as $_}{ifset($_.action_button)}{/foreach}{/if}
+
+            {if $show_url && !empty($public_url)}
+                <div class="dropdown" id="dropdown-public-link">
+                    <button class="dropdown-toggle button outlined" type="button">
+                        <i class="fas fa-link fa-sm"></i>
+                        [`Link`]
+                    </button>
+                    <div class="dropdown-body right">
+                        <div class="box">
+                            <a href="{$public_url}" class="small c-public-link" target="_blank">
+                                {$public_url} <i class="fas fa-external-link-alt"></i>
+                            </a>
+                            <button class="button outlined align-center width-100 custom-mt-16 js-copy-public-link"
+                                type="button"
+                                data-class-success="green"
+                                data-icon-default="fa-copy"
+                                data-icon-success="fa-check"
+                                data-text-default="[`Copy link`]"
+                                data-text-success="[`Copied`]">
+                                <span class="icon js-icon"><i class="fas fa-copy"></i></span>
+                                <span class="js-text">[`Copy link`]</span>
+                            </button>
+                            <input type="text" class="js-public-link-input" style="position: fixed; height: 0; padding: 0; border: none;" readonly="readonly" value="{$public_url}">
+                        </div>
+                    </div>
+                </div>
+            {/if}
         </div>
 
         <div class="c-column width-100-mobile">
@@ -89,14 +170,32 @@
     <div class="c-details-wrapper">
         <div class="fields break-words">
             <div class="fields-group blank">
-                <div class="field">
-                    <div class="name">[`Created at`]</div>
-                    <div class="value">{$invoice.create_datetime|wa_datetime}</div>
-                </div>
                 {if !empty($invoice.due_date)}
                     <div class="field">
-                        <div class="name">[`Valid through`]</div>
-                        <div class="value">{$invoice.due_date|wa_date}</div>
+                        <div class="name">[`Expires in`]</div>
+                        <div class="value">
+                            <div class="flexbox middle space-8">
+                                {if $invoice.state_id == 'PENDING' && !$is_payment_expired}
+                                    <span class="icon text-yellow">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                {/if}
+                                {if $invoice.state_id == 'PAID'}
+                                    <span class="icon text-green">
+                                        <i class="fas fa-check-circle"></i>
+                                    </span>
+                                {/if}
+                                <span class="c-details-expires-in">{if $invoice.days_left >= 0}{_w('%s day', '%s days', $invoice.days_left)} [`to`] {/if}{$invoice.due_date|wa_date}</span>
+                                {if in_array($invoice.state_id, ['PENDING', 'DRAFT']) && $invoice.days_left < 0}
+                                    <span style="color: var(--alert-warning-text-color)">
+                                        <span class="icon">
+                                            <i class="fas fa-hourglass-end"></i>
+                                        </span>
+                                        [`Expired`]
+                                    </span>
+                                {/if}
+                            </div>
+                        </div>
                     </div>
                     {if !crmInvoice::isCliOk()}
                         <div class="crm-invoices-recap-error custom-my-16">
@@ -104,13 +203,74 @@
                         </div>
                     {/if}
                 {/if}
+
                 <div class="field">
-                    <div class="name">[`State`]</div>
+                    <div class="name">[`Billed To`]</div>
                     <div class="value">
-                        {$_state = crmInvoice::getState($invoice.state_id)}
-                        <span class="c-state badge text-white custom-px-8 semibold {strtolower($invoice.state_id)}">{$_state.name|escape|default:$invoice.state_id}</span>
+                        {$_exists = $contact->exists()}
+                        {$_userpic = $contact->getPhoto(32)}
+                        {$_contact_name = $wa->crm->contactName($contact.name)}
+
+                        <div class="c-profile-block flexbox space-8">
+                            {if !empty($_userpic)}
+                                <div class="c-column c-column-image">
+                                    {if $_exists}
+                                        <a href="{$wa_app_url}contact/{$contact.id}/" {if $iframe}target="_parent"{/if}>
+                                            <img src="{$_userpic}" class="userpic userpic-20">
+                                        </a>
+                                    {else}
+                                        <img src="{$_userpic}" class="userpic userpic-20">
+                                    {/if}
+                                </div>
+                            {/if}
+                            <div class="c-column">
+                                {if $_exists}
+                                    <a href="{$wa_app_url}contact/{$contact.id}/" class="semibold" {if $iframe}target="_parent"{/if}>{$_contact_name|escape}</a>
+                                    {if $company_contact}
+                                        <a href="{$wa_app_url}contact/{$company_contact.id}/" class="custom-ml-4" {if $iframe}target="_parent"{/if}>{$company_contact.name|escape}</a>
+                                    {/if}
+                                {else}
+                                    <span>{$_contact_name}</span>
+                                {/if}
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <div class="field">
+                    <div class="name">[`Payment recipient`]</div>
+                    <div class="value">
+                        {ifempty($invoice.company.name, $invoice.company_id)|escape}
+                    </div>
+                </div>
+                {if !empty($invoice.comment_sanitized)}
+                    <div class="field">
+                        <div class="name">[`Comment`]</div>
+                        <div class="value">
+                            {$invoice.comment_sanitized}
+                        </div>
+                    </div>
+                {/if}
+            </div>
+
+            <div class="fields-group blank">
+                {if $deal}
+                    <div class="field">
+                        <div class="name">[`Deal`]</div>
+                        <div class="value">
+                            <span class="icon text-green custom-mr-4">
+                                <i class="fas fa-flag"></i>
+                            </span>
+                            <a class="semibold" href="{$wa_app_url}deal/{$deal.id}/" {if $iframe}target="_parent"{/if}>{$deal.name|escape}</a>
+                        </div>
+                    </div>
+                {elseif $deal_access_denied}
+                    <div class="field">
+                        <div class="value hint">
+                            [`Deal not shown due to access rights restrictions.`]
+                        </div>
+                    </div>
+                {/if}
 
                 {if !empty($invoice.creator_contact)}
                     {$_contact = $invoice.creator_contact}
@@ -145,98 +305,11 @@
                     </div>
                 {/if}
 
-                {if $show_url}
-                    <div class="field">
-                        <div class="name">[`Public link`]</div>
-                        <div class="value">
-                            {if !empty($public_url)}
-                                <a href="{$public_url}" class="small" target="_blank">
-                                    {$public_url} <i class="fas fa-external-link-alt"></i>
-                                </a>
-                            {else}
-                                <i class="fas fa-exclamation-triangle text-yellow"></i>&nbsp;
-                                [`A CRM settlement is required to publish invoices.`]
-                                <a href="{$wa_backend_url}site/#/routing/" {if $iframe}target="_parent"{/if}>
-                                    [`Use Site app to add a settlement for CRM.`]
-                                </a>
-                            {/if}
-                        </div>
-                    </div>
-                {/if}
+                <div class="field">
+                    <div class="name">[`Created at`]</div>
+                    <div class="value">{$invoice.create_datetime|wa_datetime}</div>
+                </div>
             </div>
-
-            <div class="fields-group blank">
-
-                <div class="field">
-                    <div class="name">[`Company`]</div>
-                    <div class="value">{ifempty($invoice.company.name, $invoice.company_id)|escape}</div>
-                </div>
-
-                <div class="field">
-                    <div class="name">[`Client`]</div>
-                    <div class="value">
-
-                        {$_exists = $contact->exists()}
-                        {$_userpic = $contact->getPhoto(32)}
-                        {$_contact_name = $wa->crm->contactName($contact.name)}
-
-                        <div class="c-profile-block flexbox space-8">
-                            {if !empty($_userpic)}
-                                <div class="c-column c-column-image">
-                                    {if $_exists}
-                                        <a href="{$wa_app_url}contact/{$contact.id}/" {if $iframe}target="_parent"{/if}>
-                                            <img src="{$_userpic}" class="userpic userpic-20">
-                                        </a>
-                                    {else}
-                                        <img src="{$_userpic}" class="userpic userpic-20">
-                                    {/if}
-                                </div>
-                            {/if}
-                            <div class="c-column">
-                                {if $_exists}
-                                    <a href="{$wa_app_url}contact/{$contact.id}/" {if $iframe}target="_parent"{/if}>{$_contact_name}</a>
-                                {else}
-                                    <span>{$_contact_name}</span>
-                                {/if}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {if $deal}
-                <div class="field">
-                    <div class="name">[`Deal`]</div>
-                    <div class="value">
-                        <a href="{$wa_app_url}deal/{$deal.id}/" {if $iframe}target="_parent"{/if}>{$deal.name|escape}</a>
-                    </div>
-                </div>
-            {elseif $deal_access_denied}
-                <div class="field">
-                    <div class="value hint">
-                        [`Deal not shown due to access rights restrictions.`]
-                    </div>
-                </div>
-            {/if}
-            </div>
-
-            <div class="fields-group blank">
-                <div class="field">
-                    <div class="name">[`Amount`]</div>
-                    <div class="value">
-                        <span class="c-amount semibold">{$invoice.amount|wa_format_amount_currency:$invoice.currency_id}</span>
-                    </div>
-                </div>
-
-                {if $invoice.state_id == 'PAID'}
-                    <div class="field">
-                        <div class="name">[`Payment date`]</div>
-                        <div class="value">
-                            {$invoice.payment_datetime|wa_date}
-                        </div>
-                    </div>
-                {/if}
-            </div>
-
 
             {if $transactions}
                 <div class="custom-my-32 custom-px-4">
@@ -275,33 +348,6 @@
         </div>
     </div>
 
-    <footer class="c-footer-actions">
-
-        {$_disabled = false}
-        {$_contact = $invoice.contact}
-        {$_exists = $_contact->exists()}
-        {$_disabled = !$_exists}
-
-        {if $invoice.state_id == 'PROCESSING'}
-            <button class="button green js-change-state" type="button" data-action="accept" {if $_disabled}disabled="disabled"{/if}>[`Accept payment`]</button>
-            <button class="button gray js-change-state" type="button" data-action="refuse" {if $_disabled}disabled="disabled"{/if}>[`Refuse payment`]</button>
-        {elseif $invoice.state_id == 'PAID'}
-            <button class="button red js-change-refund" type="button" data-action="refund" {if $_disabled}disabled="disabled"{/if}>[`Refund`]</button>
-            {if $is_cancel_available}
-                <button class="button gray js-change-state" type="button" data-action="cancel" {if $_disabled}disabled="disabled"{/if}>[`Cancel payment`]</button>
-            {/if}
-        {elseif $invoice.state_id == 'PENDING'}
-            <button class="button green js-change-state" type="button" data-action="paid" {if $_disabled}disabled="disabled"{/if}>[`Mark as paid`]</button>
-            <button class="button gray js-change-state" type="button" data-action="draft" {if $_disabled}disabled="disabled"{/if}>[`Return to draft`]</button>
-        {elseif $invoice.state_id == 'DRAFT' && floatval($invoice.amount)}
-            <button class="button green js-change-state" type="button" data-action="activate" {if $_disabled}disabled="disabled"{/if}>[`Activate`]</button>
-        {/if}
-
-        <!-- plugin hook: 'backend_invoice.action_button' -->
-        {* @event backend_invoice.%plugin_id%.action_button *}
-        {if !empty($backend_invoice)}{foreach $backend_invoice as $_}{ifset($_.action_button)}{/foreach}{/if}
-    </footer>
-
     <script>
         ( function($) {
             new CRMInvoicePage({
@@ -311,6 +357,40 @@
                     delete_confirm_title: "[`Delete invoice`] [`#`]{$invoice.number|escape}",
                     delete_confirm_text: '<i class="fas fa-exclamation-triangle text-orange"></i> [`Invoice deletion cannot be undone.`]',
                     delete_confirm_button: "[`Delete`]"
+                }
+            });
+
+            $("#dropdown-public-link").waDropdown({
+                hide: false,
+                ready: function () {
+                    $(".js-copy-public-link").on("click", function (e) {
+                        e.preventDefault();
+                        const inputWithLink = $(".js-public-link-input");
+                        inputWithLink.select();
+                        try {
+                            if (document.execCommand('copy')) {
+                                const $button = $(this);
+                                const defaultIconClass = $button.data('icon-default');
+                                const successIconClass = $button.data('icon-success');
+                                const $icon = $button.find('.js-icon svg');
+                                if ($icon.length && $icon.hasClass(defaultIconClass)) {
+                                    $button.addClass($button.data('class-success'));
+                                    $button.find('.js-text').text($button.data('text-success'));
+                                    $icon.removeClass(defaultIconClass);
+                                    $icon.addClass(successIconClass);
+                                    setTimeout(function () {
+                                        const $icon = $button.find('.js-icon svg');
+                                        $button.find('.js-text').text($button.data('text-default'));
+                                        $button.removeClass($button.data('class-success'));
+                                        $icon.removeClass(successIconClass);
+                                        $icon.addClass(defaultIconClass);
+                                    }, 1000)
+                                }
+                            }
+                        } catch (err) {
+                            console.log('Unable to copy');
+                        }
+                    });
                 }
             });
         })(jQuery);

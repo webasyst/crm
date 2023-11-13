@@ -51,7 +51,7 @@ class crmHtmlSanitizer
     public function sanitize($content)
     {
         // Make sure it's a valid UTF-8 string
-        $content = preg_replace('~\\xED[\\xA0-\\xBF][\\x80-\\xBF]~', '?', mb_convert_encoding($content, 'UTF-8', 'UTF-8'));
+        $content = preg_replace('~\\xED[\\xA0-\\xBF][\\x80-\\xBF]~', '?', mb_convert_encoding((string) $content, 'UTF-8', 'UTF-8'));
 
         // Remove all tags except known.
         // We don't rely on this for protection. Everything should be escaped anyway.
@@ -301,7 +301,7 @@ class crmHtmlSanitizer
     public function toPlainText($content)
     {
         // Make sure it's a valid UTF-8 string
-        $content = preg_replace('~\\xED[\\xA0-\\xBF][\\x80-\\xBF]~', '?', mb_convert_encoding($content, 'UTF-8', 'UTF-8'));
+        $content = preg_replace('~\\xED[\\xA0-\\xBF][\\x80-\\xBF]~', '?', mb_convert_encoding((string) $content, 'UTF-8', 'UTF-8'));
 
         // Strip <style>...</style>
         $content = $this->stripTagWithContent($content, 'style');

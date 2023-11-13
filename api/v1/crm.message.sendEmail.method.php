@@ -11,7 +11,7 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
         $subject = trim(ifset($_json, 'subject', ''));
         $body = trim(ifset($_json, 'body', ''));
         $email_to = (string) ifset($_json, 'email_to', '');
-        $deal_id = (int) abs(ifset($_json, 'deal_id', 0));
+        $deal_id = (int) abs(ifempty($_json, 'deal_id', 0));
         $content_type = (string) ifempty($_json, 'content_type', 'plain-text');
         $attachments = ifempty($_json, 'attachments', []);
 
@@ -68,7 +68,7 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
             'email'        => $email_to,
             'sender_email' => $from,
             'deal_id'      => ifempty($deal_id, 'none'),
-            'hash'         => (empty($attachments) ? '' : $this->getFiles($attachments)),
+            'hash'         => $this->getFiles($attachments),
             'contact_id'   => $contact_id
         ]);
 

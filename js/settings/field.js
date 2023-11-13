@@ -61,22 +61,32 @@ var crmSettingsField = (function ($) {
 
     crmSettingsField.prototype.bindEvents = function () {
         var that = this,
+            locked = false,
             href = $.crm.app_url + "?module=settings&action=fieldEdit",
             xhr = null;
 
         that.$wrapper.on('click', '.crm-edit-field-link', function () {
             var $el = $(this);
-
-            if (xhr) {
-                xhr.abort();
-                xhr = null;
+            if (!locked) {
+                locked = true;
+                if (xhr) {
+                    xhr.abort();
+                    xhr = null;
+                }
+    
+                xhr = $.post(href, { id: $el.data('id') || null }, function(html) {
+                    $.waDialog({
+                        html: html,
+                        onOpen: function ($dialog_wrapper, dialog){
+                            dialog.resize();
+                        },
+                        onClose: function ($dialog_wrapper, dialog){
+                            locked = false;
+                        }
+                    })
+                });
             }
-
-            xhr = $.post(href, { id: $el.data('id') || null }, function(html) {
-                $.waDialog({
-                    html: html
-                })
-            });
+           
         });
     };
 

@@ -2,7 +2,7 @@
 return array(
     'name'     => 'Zebra Telecom',
     'img'      => 'img/zebratelecom.png',
-    'version'  => '1.0.2',
+    'version'  => '1.0.3',
     'vendor'   => 'webasyst',
     'frontend' => true,
     'handlers' => array(

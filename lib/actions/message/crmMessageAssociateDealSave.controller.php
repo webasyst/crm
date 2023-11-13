@@ -76,7 +76,7 @@ class crmMessageAssociateDealSaveController extends crmJsonController
         if ($deal_data['id'] == 0 && intval($deal_data['funnel_id']) && intval($deal_data['stage_id']) && trim($deal_data['name'])) {
             // Funnel rights
             if (!$this->getCrmRights()->funnel($deal_data['funnel_id'])) {
-                $this->errors = array('Access denied');
+                $this->errors = array(_w('Access denied'));
                 return;
             }
 

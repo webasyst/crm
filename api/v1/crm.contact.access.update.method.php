@@ -23,7 +23,7 @@ class crmContactAccessUpdateMethod extends crmApiAbstractMethod
         if (!$contact->exists()) {
             throw new waAPIException('not_found', 'Contact not found', 404);
         } elseif (!$this->getCrmRights()->classifyContactAccess($contact)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif ($errors = $this->validate($owner_ids, $vault_id)) {
             throw new waAPIException('invalid_data', implode(', ', $errors), 400);
         }
@@ -32,7 +32,7 @@ class crmContactAccessUpdateMethod extends crmApiAbstractMethod
             $this->saveOwners($contact, $owner_ids);
         } elseif (isset($vault_id)) {
             if (!$this->getUser()->getRights('crm', "vault.$vault_id")) {
-                throw new waAPIException('forbidden', 'Access denied', 403);
+                throw new waAPIException('forbidden', _w('Access denied'), 403);
             }
             $this->saveVaultId($contact, $vault_id);
         }

@@ -22,7 +22,7 @@ class crmInvoiceTransactionMethod extends crmApiAbstractMethod
         ];
 
         if (!wa()->getUser()->getRights('crm', 'manage_invoices')) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } else if (empty($invoice_id)) {
             throw new waAPIException('required_param', 'Required parameter is missing: id', 400);
         } else if (empty($action)) {
@@ -38,7 +38,7 @@ class crmInvoiceTransactionMethod extends crmApiAbstractMethod
         if (!$invoice) {
             throw new waAPIException('not_found', 'Invoice not found', 404);
         } else if (!$this->getCrmRights()->contact($invoice['contact_id'])) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } else if (!method_exists('crmInvoice', $action)) {
             throw new waAPIException('invalid_param', 'Unknown action', 400);
         }

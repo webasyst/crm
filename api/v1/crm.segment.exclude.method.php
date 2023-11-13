@@ -19,7 +19,7 @@ class crmSegmentExcludeMethod extends crmApiAbstractMethod
         } elseif (empty($segment['type']) || $segment['type'] !== crmSegmentModel::TYPE_CATEGORY) {
             throw new waAPIException('not_found', 'Segment not found', 404);
         } elseif (!$this->getCrmRights()->canEditSegment($segment)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         if (!empty($contact_ids)) {

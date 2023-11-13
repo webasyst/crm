@@ -16,8 +16,14 @@ function checkPopup(crm_url) {
                 if (json.data && json.data.length != 0) {
                     $("#crm-popup-area").empty();
                     $.each(json.data, function(){
+                        
                         if (itemShow(this.type,this.id) == true) {
                             initNotification(this.html);
+                            if (this.type === 'message') {
+                                if ($('#c-messages-page #c-messages-sidebar').length) {
+                                    $(document).trigger('msg_sidebar_upd_needed');
+                                }
+                            }
                         }
                     });
                 } else {

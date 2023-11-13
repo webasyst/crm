@@ -34,7 +34,7 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
 
         $deal_access_level = $this->getCrmRights()->deal($deal);
         if ($deal_access_level <= crmRightConfig::RIGHT_DEAL_VIEW) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $participant_exists = false;

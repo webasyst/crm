@@ -25,7 +25,7 @@ class crmSegmentArchiveMethod extends crmApiAbstractMethod
 
         $segment = $this->getSegmentModel()->getSegment($segment_id);
         if (!$segment || !$this->getCrmRights()->canArchiveSegment($segment)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $archived = ($acton === self::ACTIONS[0] ? 1 : 0);

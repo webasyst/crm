@@ -14,7 +14,7 @@ class crmNoteDeleteMethod extends crmApiAbstractMethod
         if ($note === null) {
             throw new waAPIException('not_found', 'Note not found', 404);
         } else if (!$this->getCrmRights()->contactOrDeal($note['contact_id'])) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $action = 'note_delete';

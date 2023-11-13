@@ -148,26 +148,42 @@
             <div class="field">
                 <div class="name">[`Client`]</div>
                 <div class="value">
-
                     <div class="c-contact-toggle js-contact-toggle">
                         {strip}
                         <span class="bold js-name">{if !empty($contact)}{$_contact_name|escape}{/if}</span>
                         {/strip}
                         <a class="inline-link js-change-contact" href="javascript:void(0);"><span class="js-label" data-change-text="[`change client`]">{if !empty($contact)}<span class="c-dotted">[`change client`]</span>{else}<i class="fas fa-address-book text-gray"></i> [`Set client`]{/if}</span></a>
-                        <input name="invoice[deal_id]" type="hidden" value="{$invoice.deal_id}">
                         <input class="js-contact-id" type="text" name="invoice[contact_id]" value="{if !empty($contact)}{$_contact_id}{/if}" style="{$hidden_input_style}">
                     </div>
-
                 </div>
             </div>
+
             {if $deal}
-                <div class="field">
-                    <div class="name">[`Deal`]</div>
-                    <div class="value">
-                        <b class="break-words">{$deal.name|escape}</b>
+            <div class="field">
+                <div class="name">[`Deal`]</div>
+                <div class="value">
+                    <div class="c-deal-toggle js-deal-toggle">
+                    {if $deal}
+                        <b class="break-words js-deal-name">{$deal.name|escape}</b>
+{* 83.6957 *}
+{*                        <a href="javascript:void(0);" class="c-deal-wrapper c-dotted js-attach-other-deal">*}
+{*                            <i class="icon fas fa-pen"></i> [`прикрепить к другой сделке`]*}
+{*                        </a>*}
+{*                        <a class="inline-link js-detach-deal" href="javascript:void(0);">*}
+{*                            <i class="icon fas fa-times-circle"></i> [`Detach from deal`]*}
+{*                        </a>*}
+{*                    {elseif !empty($clean_data.deal)}*}
+{*                        <a href="javascript:void(0);" class="flexbox middle js-associate-deal nowrap">*}
+{*                            <i class="custom-mr-8 fas fa-plus add"></i>*}
+{*                            [`Associate with a deal`]*}
+{*                        </a>*}
+                    {/if}
                     </div>
                 </div>
+            </div>
             {/if}
+            <input name="invoice[deal_id]" type="hidden" value="{$invoice.deal_id}">
+
             <div class="field">
                 <div class="name">[`Currency`]</div>
                 <div class="value">
@@ -189,7 +205,6 @@
                 <tr>
                     <td class="c-number" aria-label="[`#`]">
                         <span class="c-field js-product-number">{if !empty($_index)}{$_index}{else}1{/if}</span>
-                        <span class="c-remove js-remove-row"><i class="fas fa-trash-alt text-red delete"></i></span>
                     </td>
                     <td class="c-name" aria-label="[`Product or service`]">
 
@@ -218,7 +233,7 @@
 
                         <div class="c-tax-dropdown js-tax-dropdown {if !empty($_is_changed)}is-changed{/if}">
                             {if $company}
-                                <input class="c-tax-percent-field js-product-tax-percent" type="text" value="{if !empty($_item.tax_percent) && $_item.tax_type != "NONE"}{floatval($_item.tax_percent)}%{else}[`without`] {$company["tax_name"]}{/if}" readonly>
+                                <input class="c-tax-percent-field js-product-tax-percent" type="text" value="{if !empty($_item.tax_percent) && $_item.tax_type != "NONE"}{floatval($_item.tax_percent)}%{else}[`without`] {$company["tax_name"]|escape}{/if}" readonly>
                             {/if}
                             <input class="js-product-tax-type" type="hidden" value="{$_item.tax_type|default:""}">
                             <ul class="c-hidden-list ui-menu js-hidden-list"></ul>
@@ -236,6 +251,12 @@
                     </td>
                     <td class="c-total right" aria-label="[`Amount`]">
                         <span class="c-field js-product-total">0,00</span>
+                    </td>
+                    <td class="desktop-and-tablet-only">
+                        <a href="javascript:void();" class="c-remove js-remove-row"><i class="fas fa-times-circle text-gray"></i></a>
+                    </td>
+                    <td class="mobile-only width-100">
+                        <button class="button light-gray small js-remove-row"><i class="fas fa-times-circle text-gray"></i> [`Remove`]</button>
                     </td>
                 </tr>
             {/function}
@@ -304,7 +325,7 @@
         </div>
 
         <div class="c-comment-wrapper">
-            <textarea class="js-wysiwyg" name="invoice[comment]" placeholder="[`Type your comment here`]">{$invoice.comment_sanitized}</textarea>
+            <textarea class="js-wysiwyg" name="invoice[comment]" placeholder="[`Type your comment here`]">{$invoice.comment_sanitized|escape}</textarea>
         </div>
 
         <footer class="c-actions js-footer-actions bottombar sticky c-fixed-bottombar">
@@ -332,7 +353,7 @@
                 <footer class="dialog-footer">
                     <div class="crm-actions">
                         <button class="button green js-change-currency-with-price">[`Recalculate`]</button>
-                        <button class="button blue js-change-currency">[`Do not change prices`]</button>
+                        <button class="button js-change-currency">[`Do not change prices`]</button>
                         <button class="button light-gray js-close-dialog js-cancel-dialog">[`Cancel`]</button>
                     </div>
                 </footer>
@@ -391,7 +412,11 @@
                     no_tax: "[`without`] %name",
                     include_tax: "[`including`] %name %value",
                     append_tax: "%name %value",
-                    empty_contact: "[`Contact is required`]"
+                    empty_contact: "[`Contact is required`]",
+                    deal_detach_title: "[`Detach from deal`]",
+                    deal_detach_text: "[`Вы действительно хотите открепить этот счёт от сделки “<strong>%s</strong>”?`]",
+                    deal_detach_confirm_button: "[`Detach`]",
+                    deal_empty: "[`Empty`]"
                 }
             });
         })(jQuery);

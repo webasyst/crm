@@ -8,24 +8,32 @@
 {if !isset($iframe)}
     {$iframe = waRequest::request('iframe', waRequest::get('iframe', null, waRequest::TYPE_INT), waRequest::TYPE_INT)}
 {/if}
+{if !isset($noemail)}
+    {$noemail = waRequest::request('noemail', waRequest::get('noemail', null, waRequest::TYPE_INT), waRequest::TYPE_INT)}
+{/if}
+
 {function name="_renderListTime" _date='' }
-    {$now = time()}
-    {$your_date = strtotime($_date)}
-    {$datediff = round(($now - $your_date)  / (60 * 60 * 24))}
-    {$now_year = '.'|cat:waDateTime::date('y', $now)}
-    {if $datediff < 2}
+    {$now = waDateTime::date('d-m-Y')}
+    {$your_date = waDateTime::date('d-m-Y', $_date)}
+    {$now2 = waDateTime::date('U', $now)}
+    {$your_date2 = waDateTime::date('U', $your_date)}
+    {$datediff = round(($now2 - $your_date2) / (60 * 60 * 24))}
+    {if $datediff == 0}
+        {$chat_date = substr($_date|wa_datetime:'humandatetime', -5)}
+    {elseif $datediff == 1}
         {$chat_date = substr($_date|wa_datetime:'humandatetime', 0, -5)}
-    {else}
-        {$chat_date = waDateTime::date('j.m.y', $_date)}
-    {/if}
-    {$chat_date = str_replace($now_year, '', $chat_date)}
-    {$week_day = date('N', $your_date)}
-    {if $datediff > 1 && $datediff < 6}
+    {elseif $datediff > 1 && $datediff < 6}
+        {$week_day = date('N', strtotime($_date))}
         {$week_days = waDateTime::getWeekdayNames('ucfirst', false)}
         {$chat_date = $week_days[$week_day]}
+    {else}
+        {$now_year = '.'|cat:waDateTime::date('y', $now)}
+        {$chat_date = waDateTime::date('j.m.y', $_date)}
+        {$chat_date = str_replace($now_year, '', $chat_date)}
     {/if}
+
     <div class="flexbox middle c-column-date">
-        <span class="nowrap c-date">{$chat_date}</span>
+        <span class="nowrap c-date" >{$chat_date}</span>
     </div>
 {/function}
 
@@ -39,7 +47,12 @@
         </div>
 </div>
 {/function}
-{$no_active_filter = $active_filter_transport.id === 'all' && $active_filter_responsible.id === 'all'}
+{if $has_access_filter_responsibles}
+{$no_active_filter = $iframe || $active_filter_transport.id === 'all' && $active_filter_responsible.id === 'all'}
+{else}
+{$no_active_filter = $iframe || $active_filter_transport.id === 'all'}
+{/if}
+
 {$empty_conversations = empty($conversations) && $no_active_filter && ($iframe || empty($list_params.contact_id))}
 
 <div class="c-messages-conversation-list shadowed js-messages-conversation-list" id="c-messages-conversation-list">
@@ -86,7 +99,7 @@
                 </button>
             </div>
             {/if}
-            
+
             <div class="c-message-filter-wrapper {if $no_active_filter}c-hidden{/if}">
                 <div class="flexbox middle wrap space-8 c-message-filter">
                     {if !empty($list_params.contact_id)}
@@ -172,11 +185,11 @@
         <div class="skeleton-wrapper">
             <div class="skeleton">
                 <div class="body-skeleton">
-                    <span class="skeleton-list"></span> 
-                    <span class="skeleton-list"></span> 
-                    <span class="skeleton-list"></span> 
-                    <span class="skeleton-list"></span> 
-                    <span class="skeleton-list"></span> 
+                    <span class="skeleton-list"></span>
+                    <span class="skeleton-list"></span>
+                    <span class="skeleton-list"></span>
+                    <span class="skeleton-list"></span>
+                    <span class="skeleton-list"></span>
                 </div>
             </div>
         </div>
@@ -187,17 +200,24 @@
         {/if}
 
         {if !$active_sources}
-            <section class="c-cron-birthday-section ">
-                <div class="c-is-cli-ok" style="text-align: center;">
-                    <p class="bold">[`No message sources configured.`]</p>
-                    <p>
-                        [`To receive and handle messages from clients set up a message source`]
+            <section class="flexbox vertical middle custom-p-16 no-sources-block">
+                <div class="flexbox vertical middle space-16 c-is-cli-ok align-center" style="max-width: 500px;">
+                    {if empty($conversations)}
+                        <span class="custom-pt-48 icon size-80 text-light-gray"><i class="fas fa-comments"></i></span>
+                        <div class="large bold" style="max-width: 250px;">[`Conversations with your clients will be displayed here`]</div>
+                    {else}
+                        <div class="large bold">[`No message sources configured.`]</div>
+                    {/if}
+                    <div class="flexbox vertical middle space-16">
+                        <div class="gray">[`To receive and handle messages from clients set up a message source.`]</div>
                         {if $_is_admin}
-                            <br>
-                            <a href="{$crm_app_url}settings/message-sources/email/">[`Email`]</a>
-                            <a href="{$crm_app_url}settings/message-sources/im/">[`Messengers`]</a>
+                            <div class="flexbox vertical space-8" style="max-width: 250px;">
+                                <a class="button rounded light-gray" href="{$crm_app_url}settings/message-sources/im/">[`Connect messengers`]</a>
+                                <a class="button rounded light-gray" href="{$crm_app_url}settings/message-sources/email/">[`Connect email`]</a>
+
+                            </div>
                         {/if}
-                    </p>
+                    </div>
                 </div>
             </section>
         {/if}
@@ -216,7 +236,7 @@
                         {if !empty($_c.deal_id) && !empty($deals[$_c.deal_id])}
                             {$_deal = $deals[$_c.deal_id]}
                         {/if}
-
+                        {$_is_active = ($_c.id == $_active_c)}
                         {$_can_view = $_c.can_view|default:false}
 
                         {$_conversation_url = "{$wa_app_url}message/conversation/{$_c.id}/{$_page_tail}{if $iframe}{if $_page_tail == ''}?{else}&{/if}iframe=1{/if}"}
@@ -228,12 +248,15 @@
                             {$_message_classes[] = "is-view-locked"}
                         {else}
                             {$_message_classes[] = "pointer is-view-ready"}
-                            {if $_c.read != 1}
+                            {if $_c.read != 1 && !$_is_active}
                                 {$_message_classes[] = "unread"}
                             {/if}
+                            {if $_c.need_response}
+                                {$_message_classes[] = "need-response"}
+                            {/if}
                         {/if}
-                        {$_is_active = ($_c.id == $_active_c)}
-    
+
+
                         <li class="c-message-wrapper js-message-wrapper {$_message_classes|join:" "} {if $_is_active}selected{/if}"
                             data-id="{$_c.id}"
                             data-has-deal="{if !empty($_deal)}1{else}0{/if}"
@@ -243,9 +266,13 @@
                             {else}
                                 data-read="1"
                             {/if}>
+                            {if $_can_view}
                             <a class="item profile flexbox middle space-12" href="{$_conversation_url}">
+                            {else}
+                            <span class="item profile flexbox middle space-12 opacity-50" title="[`You do not have sufficient rights to view this conversation`]">
+                            {/if}
                                 {* CLIENT PHOTO *}
-                                
+
                                 {if !empty($_client) && !empty($_c.contact_id)}
                                 <div class="c-user-photo userpic userpic-48 rounded">
                                     <img src="{$_client.photo_url_50}" alt="{$_client.name|escape}">
@@ -254,7 +281,7 @@
                                     {/if}
                                 </div>
                                 {elseif empty($_client) && !empty($_c.contact_id)}
-                                
+
                                 <div class="c-user-photo userpic userpic-48 ">
                                     <img class="" src="{$site_url}wa-content/img/userpic.svg" />
                                 </div>
@@ -276,13 +303,13 @@
 
                                     </div>
 
-                                    <div class="flexbox middle space-4 c-bottom-detail">
+                                    <div class="flexbox middle full-width space-4 c-bottom-detail">
                                         {* TYPE *}
 
                                         {* SUBJECT *}
                                         <div class="flexbox middle space-8 c-column-subject">
                                                 <div class="c-subject-wrapper">
-                                                    <span class="icon size-16 custom-ml-0 custom-mr-4">
+                                                    <span class="icon enable-animation size-16 custom-ml-0 custom-mr-4">
                                                     {if !empty($_c.icon_fab)}
                                                         <i class="fab fa-{$_c.icon_fab}" title="{$_c.transport_name|escape}" style="color:{$_c.icon_color}"></i>
                                                     {elseif !empty($_c.icon_fa)}
@@ -296,51 +323,21 @@
                                                     <span class="hint custom-ml-4">({$_c.count})</span>
                                                     {/if}
                                                 </div>
-                                         
-                                        </div>
 
-                                        {* DEAL *}
-                                        {*if !empty($_deal)}
-                                        <div class="c-column-deal">
-            
-                                                {if $_deal.funnel_id && $_deal.stage_id && isset($funnels[$_deal.funnel_id]) && isset($funnels[$_deal.funnel_id].stages[$_deal.stage_id])}
-                                                    {$_funnel = $funnels[$_deal.funnel_id]}
-                                                    {$_stage = $_funnel.stages[$_deal.stage_id]}
-                                                
-                                                        <div class="c-deal-wrapper">
-                                                            <i class="fas fa-circle funnel-state svg-icon" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
-                                                        
-                                                            {strip_tags($_deal.name)|escape}
-                                                        </div>
-                                                
-                                                {else}
-                                                    <div class="c-deal-wrapper">
-                                                        {strip_tags($_deal.name)|escape}
-                                                        {if !$_deal.funnel_id}<span class="hint">[`Funnel deleted`]</span>{/if}
-                                                        {if !$_deal.stage_id}<span class="hint">[`Stage deleted`]</span>{/if}
-                                                    </div>
-                                                {/if}
-                                            {elseif !empty($available_funnel) && !empty($_client) && $_client.is_visible && empty($_deal)}
-                                                <a href="javascript:void(0);" class="inline-link small js-associate-deal nowrap" data-dialog-url="{$wa_app_url}?module=message&action=conversationAssociateDealDialog&conversation_id={$_c.id}">
-                                                    <i class="fas fa-plus add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i>
-                                                  [`Associate with a deal`]
-                                                </a>
-                                        
-                                        </div> {/if*}  
-                                    
-                                        {* OWNER *}
-                                        {*if $_is_admin}
-                                            <div>
-                                                    {if !empty($responsibles[$_c['user_contact_id']])}
-                                                        {_renderContact _contact=$responsibles[$_c['user_contact_id']]}
-                                                    {else}
-                                                        <span class="hint">[`No owner`]</span>
-                                                    {/if}
-                                            </div>
-                                        {/if*}
+                                        </div>
+                                        <div class="c-subject-unread-icon" title="[`not read`]">
+                                            <i class="fas fa-circle text-red"></i>
+                                        </div>
+                                        <div class="c-subject-need-response-icon" title="[`waiting for reply`]">
+                                            <i class="fas fa-circle text-yellow"></i>
+                                        </div>
                                     </div>
                                 </div>
+                            {if $_can_view}
                             </a>
+                            {else}
+                            </span>
+                            {/if}
                         </li>
                     {/foreach}
                         {if isset($pages_count) && $pages_count > $current_page}
@@ -386,16 +383,25 @@
             </div>
 
         {else}
-        
+            {if $active_sources}
+
+            {$email_source_active = false}
+            {foreach $active_sources as $_a => $_b}
+                {if $_b.type == 'EMAIL'}
+                    {$email_source_active = true}
+                {/if}
+            {/foreach}
+       
             <div class="flexbox vertical middle no-messages">
                 <span class="icon size-80 text-light-gray"><i class="fas fa-comments"></i></span>
                 <span class="custom-my-16 gray">[`No messages`]</span>
-                {if $active_sources && !empty($available_funnel) && $empty_conversations}
-                <div class="custom-mt-4 c-add-wrapper">
-                    <a href="javascript:void(0);" class="c-write-message js-write-message">[`Write message`]</a>
-                </div>
+                {if !empty($available_funnel) && $empty_conversations && $email_source_active && !$noemail}
+                    <div class="custom-mt-4 c-add-wrapper">
+                        <a href="javascript:void(0);" class="button rounded light-gray c-write-message js-write-message">[`Write message`]</a>
+                    </div>
                 {/if}
-            </div>
+                </div>
+            {/if}
         {/if}
     </div>
 
@@ -403,7 +409,6 @@
 
         ( function($) {
             $.crm.title.set({$_title|json_encode});
-            
             new CRMMessagesSidebar({
                 $wrapper: $("#c-messages-conversation-list"),
                 $ui: '{$wa->whichUI()}',

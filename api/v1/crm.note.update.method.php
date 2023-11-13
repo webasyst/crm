@@ -22,7 +22,7 @@ class crmNoteUpdateMethod extends crmApiAbstractMethod
             throw new waAPIException('non_found', 'Note not found', 404);
         }
         if (!$this->getCrmRights()->contactOrDeal($note['contact_id'])) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
         $action = 'note_edit';
         $note['content'] = $content;

@@ -18,7 +18,7 @@ class crmReminderAction extends crmBackendViewAction
         $highlight_id = waRequest::get('highlight_id', 0, waRequest::TYPE_INT);
         $max_id_cookie = waRequest::cookie('reminder_max_id', 0, waRequest::TYPE_INT);
         $contact_id = waRequest::get('contact', null, waRequest::TYPE_INT);
-        $deal_id = abs(waRequest::get('deal', null, waRequest::TYPE_INT));
+        $deal_id = abs(waRequest::get('deal', 0, waRequest::TYPE_INT));
         $iframe = (bool) waRequest::get('iframe', 0, waRequest::TYPE_INT);
         $focus = (bool) waRequest::get('focus', 0, waRequest::TYPE_INT);
 

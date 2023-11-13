@@ -19,7 +19,7 @@ class crmMessageInfoMethod extends crmApiAbstractMethod
         } else if (empty($message['contact_id'])) {
             throw new waAPIException('not_found', 'Contact not found', 404);
         } else if (!$this->getCrmRights()->canViewMessage($message)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
         $message['id'] = (int) $message['id'];
         $message['original'] = boolval($message['original']);

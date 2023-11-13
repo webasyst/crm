@@ -4,7 +4,7 @@ return array(
     'name'                => 'Twitter',
     'description'         => 'Provides integration with Twitter messages',
     'img'                 => 'img/twitter.png',
-    'version'             => '1.0.4',
+    'version'             => '1.0.5',
     'vendor'              => 'webasyst',
     'custom_settings_url' => '?plugin=twitter&action=settings',
     'source'              => true,

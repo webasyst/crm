@@ -102,7 +102,7 @@ class crmContactListMethod extends crmApiAbstractMethod
 
         $contacts = array_map(function ($el) use ($log, $creators, $apps, $handle_last_action, $adhoc_group, $pinned_recent, $do_get_pinned) {
             $el['fields'] = [];
-            $disallow_fields = array_merge(self::EXT_FIELDS, ['jobtitle', 'company']);
+            $disallow_fields = self::EXT_FIELDS;
             foreach ($this->fields as $_field_name) {
                 if (isset($el[$_field_name]) && !in_array($_field_name, $disallow_fields)) {
                     if (strpos($_field_name, ':')) {
@@ -142,11 +142,15 @@ class crmContactListMethod extends crmApiAbstractMethod
                 } elseif ($el['create_datetime']) {
                     $content = [];
                     $content_str = '';
+                    $icon = [
+                        'fa' => 'info',
+                        'color' => '#AAAAAA',
+                    ];
                     if (!empty($apps[$el['create_app_id']])) {
-                        $content[] = _w('app').': '.$apps[$el['create_app_id']]['name'];
+                        $icon = $this->getAppIcon($apps[$el['create_app_id']]);
                     }
-                    if ($el['create_method']) {
-                        $content[] = _w('method').': '.$el['create_method'];
+                    if ($el['create_method'] && $el['create_app_id'] != 'crm') {
+                        $content[] = $el['create_method'];
                     }
                     if (!empty($content)) {
                         $content_str = '('.join(', ', $content).')';
@@ -161,10 +165,7 @@ class crmContactListMethod extends crmApiAbstractMethod
                         'action_name' => _w('added contact'),
                         'content' => $content_str,
                         'actor' => ifset($creators[$el['create_contact_id']]),
-                        'icon' => [
-                            'fa' => 'info',
-                            'color' => '#AAAAAA',
-                        ],
+                        'icon' => $icon,
                     ];
                 }
             }
@@ -545,6 +546,9 @@ class crmContactListMethod extends crmApiAbstractMethod
             $result = $field_obj->format($value, 'value');
         } elseif ($field_obj instanceof waContactSelectField) {
             try {
+                if (is_array($value)) {
+                    $value = ifset($value, 'data', $field_obj->getId(), null);
+                }
                 $result = $field_obj->getOptions($value);
             } catch (Exception $ex) {
                 $result = $value;
@@ -561,6 +565,14 @@ class crmContactListMethod extends crmApiAbstractMethod
             $value = ifset($value, 'data', []);
             $result = $field_obj->format($_val, 'value', $value);
         } elseif ($field_obj instanceof waContactStringField) {
+            if (is_string($value)) {
+                $result = $value;
+            } elseif (isset($value['value'])) {
+                $result = $value['value'];
+            } else {
+                $result = ifset($value, 'data', $field_obj->getId(), null);
+            }
+        } elseif ($field_obj instanceof waContactConditionalField) {
             $result = ifset($value, 'data', $field_obj->getId(), null);
         } else {
             $result = $value;

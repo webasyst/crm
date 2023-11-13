@@ -27,7 +27,7 @@ class crmHistoryMethod extends crmApiAbstractMethod
             }
             $crm_vault_id = $contact['crm_vault_id'];
             if (!$this->getCrmRights()->contactVaultId($crm_vault_id)) {
-                throw new waAPIException('forbidden', 'Access denied', 403);
+                throw new waAPIException('forbidden', _w('Access denied'), 403);
             }
         }
         if (!empty($user_id)) {
@@ -47,7 +47,7 @@ class crmHistoryMethod extends crmApiAbstractMethod
             if (!$deal) {
                 throw new waAPIException('not_found', 'Deal not found', 404);
             } elseif (!$this->getCrmRights()->deal($deal_id)) {
-                throw new waAPIException('forbidden', 'Access denied', 403);
+                throw new waAPIException('forbidden', _w('Access denied'), 403);
             }
         }
 
@@ -71,10 +71,10 @@ class crmHistoryMethod extends crmApiAbstractMethod
                     if (!empty($apps[$contact['create_app_id']])) {
                         $content[] = _w('app').': '.$apps[$contact['create_app_id']]['name'];
                     }
-                    if ($contact['create_method']) {
+                    if ($contact['create_method'] && $contact['create_app_id'] != 'crm') {
                         $content[] = _w('method').': '.$contact['create_method'];
                     }
-                    $log[] = array(
+                    $log_record = [
                         'id' => 0,
                         'create_datetime' => $contact['create_datetime'],
                         'actor_contact_id' => $contact['create_contact_id'],
@@ -84,7 +84,11 @@ class crmHistoryMethod extends crmApiAbstractMethod
                         'object_type' => crmLogModel::OBJECT_TYPE_CONTACT,
                         'object_id' => $contact['id'],
                         'actor' => $this->newContact($contact['create_contact_id']),
-                    );
+                    ];
+                    if (!empty($apps[$contact['create_app_id']])) {
+                        $log_record['create_app_id'] = $contact['create_app_id'];
+                    }
+                    $log[] = $log_record;
                 }
             } elseif (!empty($deal)) {
                 $log[] = array(

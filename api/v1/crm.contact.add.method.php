@@ -17,8 +17,8 @@ class crmContactAddMethod extends crmApiAbstractMethod
         if (!$this->validate($fields_data) || $errors = $this->contact->validate($this->data)) {
             $this->http_status_code = 400;
             $this->response = [
-                'error' => 'error_valid',
-                'error_description' => 'The fields were not validated',
+                'error' => 'invalid_param',
+                'error_description' => _w('Please correct errors in the data'),
                 'error_fields' => array_merge(
                     $this->errors,
                     (empty($errors) ? [] : $this->errorFormat($errors))
@@ -104,7 +104,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
                     'field' => $_req,
                     'value' => '',
                     'code' => 'invalid_param',
-                    'description' => 'The field is required'
+                    'description' => _w('This field is required')
                 ];
             }
         }
@@ -137,7 +137,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
                             'field' => $field_data['field'].'.'.$v['field'],
                             'value' => $v['value'],
                             'code'  => 'unknown_field',
-                            'description' => 'Unknown field identifier'
+                            'description' => _w('Unknown field'),
                         ];
                     }, $field_data['value']);
                     $this->errors = array_merge($this->errors, $_errors);
@@ -147,7 +147,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
                         'field' => $field_data['field'],
                         'value' => $field_data['value'],
                         'code'  => 'unknown_field',
-                        'description' => 'Unknown field identifier'
+                        'description' => _w('Unknown field'),
                     ];
                     unset($fields_data[$i]);
                 }
@@ -160,7 +160,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
                             'field' => $field_data['field'].'.'.$field_data['value'][$j]['field'],
                             'value' => $field_data['value'][$j]['value'],
                             'code'  => 'unknown_subcolumns',
-                            'description' => 'Unknown subcolumns identifier'
+                            'description' => _w('Unknown field'),
                         ];
                         unset($field_data['value'][$j]);
                     }

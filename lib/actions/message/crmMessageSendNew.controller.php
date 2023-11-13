@@ -89,8 +89,8 @@ class crmMessageSendNewController extends crmSendEmailController
 
         // For new contact
         $data = array(
-            'name'        => trim($this->getParameter('name')),
-            'email'       => trim($this->getParameter('email')),
+            'name'        => trim((string) $this->getParameter('name')),
+            'email'       => trim((string) $this->getParameter('email')),
             'crm_user_id' => $this->autoResponsible(),
         );
 

@@ -53,13 +53,13 @@ class crmReminder
                     '{USER_NAME}'         => htmlspecialchars(wa()->getUser()->getName()),
                     '{LINK}'              => $link,
                     '{LINK_NAME}'         => $link_name ? $link_name : $link,
-                    '{REMINDER_CONTENT}'  => nl2br(htmlspecialchars($reminder['content'])),
+                    '{REMINDER_CONTENT}'  => nl2br(htmlspecialchars((string) $reminder['content'])),
                     '{REMINDER_DUE_DATE}' => $date,
                     '{ACCOUNT_NAME}'      => wa()->accountName(),
                 );
                 $content = str_replace(array_keys($vars), array_values($vars), $notification);
 
-                $subject = $subject_prefix.self::cutString(strip_tags($reminder['content']));
+                $subject = $subject_prefix.self::cutString(strip_tags((string) $reminder['content']));
 
                 // Send message
                 try {

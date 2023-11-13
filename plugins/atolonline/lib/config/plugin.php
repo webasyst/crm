@@ -3,7 +3,7 @@ return array(
     'name'                => 'АТОЛ Онлайн',
     'description'         => 'Фискализация платежей через сервис «АТОЛ Онлайн»',
     'img'                 => 'img/logo.png',
-    'version'             => '1.0.4',
+    'version'             => '1.0.5',
     'vendor'              => 'webasyst',
     'frontend'            => true,
     'custom_settings_url' => '?plugin=atolonline&module=settings',

@@ -2,7 +2,7 @@
 return array(
     'name' => 'Mango Office',
     'img' => 'img/mango.png',
-    'version' => '1.0.1',
+    'version' => '1.0.2',
     'vendor' => 'webasyst',
     'frontend' => true,
     'handlers' => array(

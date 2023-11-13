@@ -4,7 +4,7 @@
 {/if}
 
 {function _renderCurrency}
-    {$_is_primary = ($_currency && $_currency.code === $currency.code)}
+    {$_is_primary = ($_currency && !empty($currency) && $_currency.code === $currency.code)}
     <li class="c-currency" {if !empty($_currency.code)}data-code="{$_currency.code}"{/if} data-title="{if $_currency}{$_currency.title|escape}{/if}">
         <div class="flexbox middle wrap full-width">
             <div class="c-column middle c-column-name">
@@ -63,6 +63,8 @@
         </div>
     </div>
 
+    
+
     {if $is_shop_supported}
         <div class="c-shop-currency-toggle">
 
@@ -71,7 +73,6 @@
             </span>
             <label for="js-shop-currency-ibutton">[`Copy Shop-Script currency settings`]</label>
         </div>
-    
         {if $use_shop_currencies}
             <div class="block hint">[`Currency exchange rates changed in Shop-Script settings are updated in CRM in 1 minute.`]</div>
         {/if}
@@ -105,7 +106,7 @@
 
                     <div class="dialog-content">
                         <p>
-                            [`New main currency rate`]: 1&nbsp;{$currency.code}&nbsp;=&nbsp;<input class="c-field small" type="number" name="rate" required>&nbsp;{$shop_currency.code}
+                            [`New main currency rate`]: 1&nbsp;{if !empty($currency)}{$currency.code}{/if}&nbsp;=&nbsp;<input class="c-field small" type="number" name="rate" required>&nbsp;{$shop_currency.code}
                         </p>
                     </div>
 

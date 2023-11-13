@@ -60,12 +60,12 @@ class crmDealParticipantDeleteMethod extends crmApiAbstractMethod
         }
 
         if ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif (
             $this->getCrmRights()->funnel($deal['funnel_id']) < 3
             && $deal['user_contact_id'] != $this->getUser()->getId()
         ) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         list($users, $clients) = $this->getUsersAndClients($deal['participants']);
@@ -106,7 +106,7 @@ class crmDealParticipantDeleteMethod extends crmApiAbstractMethod
         if (empty($deal['participants'])) {
             return;
         } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $funnel_rights_value = $this->getCrmRights()->funnel($deal['funnel_id']);
@@ -116,10 +116,10 @@ class crmDealParticipantDeleteMethod extends crmApiAbstractMethod
                 && $funnel_rights_value < 3
                 && ($deal['user_contact_id'] || $funnel_rights_value < 1)
             ) {
-                throw new waAPIException('forbidden', 'Access denied', 403);
+                throw new waAPIException('forbidden', _w('Access denied'), 403);
             }
         } elseif ($funnel_rights_value < 1) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         list($users, $clients) = $this->getUsersAndClients($deal['participants']);

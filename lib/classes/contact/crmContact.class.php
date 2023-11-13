@@ -326,7 +326,7 @@ class crmContact extends waContact
 
         // several special columns
         $special_fields = array(
-            'create_datetime' => new waContactDateField('create_datetime', _w('Signed up')),
+            'create_datetime' => new waContactDateField('create_datetime', _w('Created')),
             'last_datetime' => new waContactDateField('last_datetime', _w('Last activity'))
         );
 

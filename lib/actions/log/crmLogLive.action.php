@@ -4,8 +4,18 @@ class crmLogLiveAction extends crmBackendViewAction
 {
     public function execute()
     {
+        $log = [];
+        $actors = [];
+        $actor_ids = [];
+        $invoice_ids = [];
+        $reminders = [];
+        $users = [];
+        $user_ids = [];
+        $invoices = [];
+
         $list_params = $this->getListParams();
         $chart_params = $this->getTimeframeParams();
+        $is_ui_13 = (wa('crm')->whichUI('crm') === '1.3');
 
         $lm = new crmLogModel();
         $chart = $lm->getLogLiveChart($list_params, $chart_params);
@@ -14,48 +24,48 @@ class crmLogLiveAction extends crmBackendViewAction
             echo json_encode(array('status' => 'ok', 'data' => array('chart' => $chart)));
             exit;
         }
-        $rm = new crmReminderModel();
-        $im = new crmInvoiceModel();
-        $log = $lm->getLogLive($list_params);
 
-        $actors = $actor_ids = $invoice_ids = array();
+        if ($is_ui_13) {
+            $log = $lm->getLogLive($list_params);
+            foreach ($log as &$l) {
+                $actor_ids[$l['actor_contact_id']] = 1;
+                if (stripos($l['action'], 'invoice_') === 0) {
+                    $invoice_ids[] = $l['object_id'];
+                }
+            }
+            unset($l);
 
-        foreach ($log as &$l) {
-            $actor_ids[$l['actor_contact_id']] = 1;
-            if (stripos($l['action'], 'invoice_') === 0) {
-                $invoice_ids[] = $l['object_id'];
+            if (!$list_params['action_type'] || $list_params['action_type'] == 'reminder') {
+                $ids = array();
+                if ($list_params['user_id']) {
+                    $ids[] = $list_params['user_id'];
+                }
+                if ($lm->deals) {
+                    $ids[] = '-'.join(",-", array_keys($lm->deals));
+                }
+                $condition = '';
+                if ($ids) {
+                    $condition = "AND contact_id IN (".join(",", $ids).")";
+                }
+                $reminders = $this->getReminderModel()->select('*')
+                    ->where("complete_datetime IS NULL $condition")
+                    ->order('due_date, ISNULL(due_datetime), due_datetime')
+                    ->fetchAll('id');
+            }
+            foreach ($reminders as &$r) {
+                $r['state'] = crmHelper::getReminderState($r);
+                $r['rights'] = $this->getCrmRights()->reminderEditable($r);
+                $user_ids[$r['user_contact_id']] = 1;
+            }
+            unset($r);
+
+            if ($invoice_ids && (!$list_params['action_type'] || $list_params['action_type'] == 'invoice')) {
+                $invoices = $this->getInvoiceModel()->select('*')
+                    ->where('id IN (?)', array($invoice_ids))
+                    ->fetchAll('id');
             }
         }
-        unset($l);
 
-        $reminders = $users = $user_ids = $invoices = $deals = array();
-        if (!$list_params['action_type'] || $list_params['action_type'] == 'reminder') {
-            $ids = array();
-            if ($list_params['user_id']) {
-                $ids[] = $list_params['user_id'];
-            }
-            if ($lm->deals) {
-                $ids[] = '-'.join(",-", array_keys($lm->deals));
-            }
-            $condition = '';
-            if ($ids) {
-                $condition = "AND contact_id IN (".join(",", $ids).")";
-            }
-            $reminders = $rm->select('*')->where("complete_datetime IS NULL $condition")
-                            ->order('due_date, ISNULL(due_datetime), due_datetime')->fetchAll('id');
-        }
-        foreach ($reminders as &$r) {
-            $r['state'] = crmHelper::getReminderState($r);
-            $r['rights'] = $this->getCrmRights()->reminderEditable($r);
-            $user_ids[$r['user_contact_id']] = 1;
-        }
-        unset($r);
-
-        if ($invoice_ids && (!$list_params['action_type'] || $list_params['action_type'] == 'invoice')) {
-            $invoices = $im->select('*')->where(
-                "id IN('".join("','", $im->escape($invoice_ids))."')"
-            )->fetchAll('id');
-        }
         $contact = $list_params['user_id'] ? (new waContact($list_params['user_id'])) : null;
 
         $creator_contact = null;
@@ -118,7 +128,7 @@ class crmLogLiveAction extends crmBackendViewAction
             'selected_filter_action' => $selected_filter_action,
             'can_manage_invoices'    => wa()->getUser()->getRights('crm', 'manage_invoices'),
         ));
-        $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
+        $actions_path = ($is_ui_13 ? 'actions-legacy' : 'actions');
         if (!$list_params['max_id']) {
             $this->setTemplate('templates/' . $actions_path . '/log/LogLive.html');
         } else {

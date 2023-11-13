@@ -120,6 +120,7 @@ class crmCallAction extends crmBackendViewAction
         foreach ($calls as &$c) {
             $c['user_number'] = crmHelper::formatCallNumber($c, 'plugin_user_number');
             $c['client_number'] = crmHelper::formatCallNumber($c);
+            $c['gateway_number'] = empty($c['plugin_gateway']) ? '' : crmHelper::formatCallNumber($c, 'plugin_gateway');
 
             if ($c['client_contact_id']) {
                 $contact_ids[$c['client_contact_id']] = 1;
@@ -279,12 +280,13 @@ class crmCallAction extends crmBackendViewAction
     {
         $contacts = array();
         $collection = new waContactsCollection('/id/'.join(',', array_keys($ids)));
-        $col = $collection->getContacts('id,name,photo,photo_url_32', 0, count($ids));
+        $col = $collection->getContacts('id,firstname,middlename,lastname,photo,photo_url_32', 0, count($ids));
 
         foreach ($col as $id => $c) {
             $contacts[$id] = new waContact($c);
             $contacts[$id]['is_visible'] = $this->getCrmRights()->contact($c);
         }
+
         return $contacts;
     }
 

@@ -14,4 +14,9 @@ class crmOrderAction extends waViewAction
             ]);
         }
     }
+
+    public static function checkSkipUpdateLastPage()
+    {
+        waRequest::setParam('skip_update_last_page', '1');
+    }
 }

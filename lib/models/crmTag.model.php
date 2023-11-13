@@ -86,7 +86,10 @@ class crmTagModel extends crmModel
     public function getPopularTagsSort($limit = 10)
     {
         $tags = $this->getAllOrderedAndLimited('count DESC', $limit, 'id');
-        uasort($tags, function($a, $b) { return mb_strtolower($a['name'])>mb_strtolower($b['name']); });
+        uasort($tags, function ($a, $b) {
+            return (mb_strtolower($a['name']) > mb_strtolower($b['name']) ? 1 : -1);
+        });
+
         return $tags;
     }
 

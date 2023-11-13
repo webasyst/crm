@@ -9,7 +9,7 @@ class crmCallRecordUrlMethod extends crmApiAbstractMethod
         $plugin_record_id = trim((string) $this->get('record_id', true));
 
         if ($this->getUser()->getRights('crm', 'calls') == crmRightConfig::RIGHT_CALL_NONE) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         /** @var crmPluginTelephony $plugin */

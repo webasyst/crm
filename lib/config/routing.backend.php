@@ -3,9 +3,11 @@
 return array(
     // backend URL after `/webasyst/crm/`             => 'module/action' (empty action means 'default')
     'deal/'                                           => 'deal/',
-    'deal/<id>/edit/?'                                => 'deal/edit',
+    'deal/list/?'                                     => 'deal/',
+    'deal/kanban/?'                                   => 'deal/',
     'deal/new/?'                                      => 'deal/edit',
     'deal/merge/?'                                    => 'deal/merge',
+    'deal/<id>/edit/?'                                => 'deal/edit',
     'deal/<id>/?'                                     => 'deal/id',
     'reminder/show/<reminder_id>/?'                   => 'reminderShow/',
     'reminder/<user_id>/?'                            => 'reminder/',

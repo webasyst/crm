@@ -26,7 +26,11 @@ class crmFrontController extends waFrontController
                 }
             }
         }
-        parent::dispatch();
+        try {
+            parent::dispatch();
+        } catch (waRightsException $re) {
+            throw new crmRightsException();
+        }
     }
 
     protected function runController($controller, $params = null)

@@ -32,21 +32,24 @@
 
         <section class="c-reasons-section">
             {function _renderReason}
-                <li class="c-reason" {if !empty($_reason)}data-id="{$_reason.id}"{/if}>
+                <li class="flexbox middle wrap space-8 c-reason" {if !empty($_reason)}data-id="{$_reason.id}"{/if}>
                     <i class="fas fa-grip-vertical text-light-gray c-sort-toggle js-sort-toggle"></i>
-                    <input class="js-name-field" type="text" placeholder="[`Reason name`]" value="{if !empty($_reason)}{$_reason.name|escape}{else}[`New reason`]{/if}" required>
-                    <div class="wa-select">
-                        <select class="js-funnel-id-field not-styled">
-                            <option value="0">[`All funnels`]</option>
-                            {foreach $_funnels as $_funnel}
-                                <option value="{$_funnel.id}" {if isset($_reason.funnel_id) && $_reason.funnel_id == $_funnel.id}selected{/if}>{$_funnel.name|escape:"html"}</option>
-                            {/foreach}
-                        </select>
+                    <div class="flexbox middle wrap space-8">
+                        <input class="js-name-field" type="text" placeholder="[`Reason name`]" value="{if !empty($_reason)}{$_reason.name|escape}{else}[`New reason`]{/if}" required>
+                        <div class="wa-select">
+                            <select class="js-funnel-id-field not-styled">
+                                <option value="0">[`All funnels`]</option>
+                                {foreach $_funnels as $_funnel}
+                                    <option value="{$_funnel.id}" {if isset($_reason.funnel_id) && $_reason.funnel_id == $_funnel.id}selected{/if}>{$_funnel.name|escape:"html"}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                        <a class="button light-gray small c-delete-link js-delete-reason" href="javascript:void(0);">
+                            <i class="fas fa-trash-alt text-red"></i>
+                            [`Delete`]
+                        </a>
                     </div>
-                    <a class="button light-gray small c-delete-link js-delete-reason" href="javascript:void(0);">
-                        <i class="fas fa-trash-alt text-red"></i>
-                        [`Delete`]
-                    </a>
+                    
                 </li>
             {/function}
 

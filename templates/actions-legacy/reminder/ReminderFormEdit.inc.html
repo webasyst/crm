@@ -23,7 +23,7 @@
     {if $_reminder.contact_id > 0}
         {$_contact_id = $_reminder.contact_id}
     {else}
-        {$_deal_id = $_reminder.contact_id|abs}
+        {$_deal_id = $_reminder.contact_id|default:0|abs}
     {/if}
 {/if}
 

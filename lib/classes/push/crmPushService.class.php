@@ -60,7 +60,17 @@ class crmPushService
                 
                 $crm_app_url = wa()->getRootUrl(true) . wa()->getConfig()->getBackendUrl() .'/crm/';
                 $client_userpic_url = waContact::getPhotoUrl($contact['id'], $contact['photo'], null, null, $contact['is_company'] ? 'company' : 'person');
-        
+                
+                $user = new waContact($conversation['user_contact_id']);
+                if (!$user->exists()) {
+                    return;
+                }
+
+                $old_locale = wa()->getLocale();
+                if ($user->getLocale() !== $old_locale) {
+                    wa()->setLocale($user->getLocale());
+                }
+
                 $this->push_adapter->sendByContact($conversation['user_contact_id'], [
                     'title'   => sprintf_wp('New message from %s', $contact->getName()),
                     'message' => $push_body,
@@ -68,6 +78,10 @@ class crmPushService
                     'image_url' => $this->getDataResourceUrl($client_userpic_url),
                     'data' => $data,
                 ]);
+
+                if ($user->getLocale() !== $old_locale) {
+                    wa()->setLocale($old_locale);
+                }
                 /*
                 $crm_user_ids = array_filter($crm_user_ids, function ($el) use ($conversation) {
                     return $el != $conversation['user_contact_id'];

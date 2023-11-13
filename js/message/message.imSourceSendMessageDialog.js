@@ -131,9 +131,9 @@ var CRMImSourceSendMessageDialog = ( function($) {
             $wrapper = that.$wrapper;
         $.each(errors, function (name, error) {
             var $field = $wrapper.find('[name="' + name + '"]'),
-                $error = '<em class="errormsg">' + error + '</em>';
+                $error = '<span class="errormsg">' + error + '</span>';
             if ($field.length) {
-                $field.addClass('error');
+                $field.addClass('state-error');
                 $field.after($error);
             } else {
                 $wrapper.find('.js-errors-place').append($error);
@@ -144,7 +144,7 @@ var CRMImSourceSendMessageDialog = ( function($) {
     CRMImSourceSendMessageDialog.prototype.clearErrors = function () {
         var that = this,
             $wrapper = that.$wrapper;
-        $wrapper.find('.error').removeClass('error');
+        $wrapper.find('.state-error').removeClass('state-error');
         $wrapper.find('.errormsg').remove();
         $wrapper.find('.js-errors-place').empty();
     };

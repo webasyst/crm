@@ -32,7 +32,7 @@ class crmFileListMethod extends crmApiAbstractMethod
         } elseif (!empty($contact_id) && !empty($deal_id)) {
             throw new waAPIException('error', 'One of the parameters is required: contact_id or deal_id', 400);
         } elseif (!$this->getCrmRights()->contactOrDeal($this->getUser()->getId())) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif (!empty($deal_id)) {
             $contact_id = ($deal_id < 0 ?: $deal_id * -1);
         }

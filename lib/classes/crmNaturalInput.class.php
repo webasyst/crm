@@ -184,7 +184,7 @@ class crmNaturalInput
         foreach ($lookup_rules as $lookup_rule) {
             foreach ($lookup_rule['regex'] as $regex_in_rule_id => $regex_in_rule) {
                 // found something!!!
-                if (preg_match("/" . $regex_in_rule . "/imu", $item_name, $matches)) {
+                if (preg_match("/" . $regex_in_rule . "/imu", (string) $item_name, $matches)) {
                     $time_after_rules = $instance->proceedFoundRegex($matches, $lookup_rule, $time_after_rules);
                     if ($time_after_rules) {
                         // trim found date from item's name

@@ -467,10 +467,11 @@ class crmCallModel extends crmModel
                     $call['client_contact'] = $calls_client_contacts[$call['client_contact_id']];
                 }
 
+                $client_phone_formatted = $this->formatPhone($call['plugin_client_number']);
                 $data = array(
                     'title'   => _w('New call'),
-                    'message' => $this->formatPhone($call['plugin_client_number']),
-                    'url'     => $crm_app_url.'contact/new/?call='.$call['id'],
+                    'message' => $client_phone_formatted,
+                    'url'     => $crm_app_url.'contact/new/?call='.$call['id'].'&phone='.urlencode($client_phone_formatted),
                 );
 
                 if (!empty($call['client_contact_id']) && !empty($calls_client_contacts[$call['client_contact_id']])) {

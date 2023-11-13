@@ -14,7 +14,7 @@ class crmConversationListMethod extends crmApiAbstractMethod
         $userpic_size = waRequest::get('userpic_size', self::USERPIC_SIZE, waRequest::TYPE_INT);
 
         if (!$this->getCrmRights()->getConversationsRights() >= crmRightConfig::RIGHT_CONVERSATION_ALL) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif ($transport_filter && !in_array($transport_filter, ['email', 'im'])) {
             throw new waAPIException('invalid_transport', 'Unknown transport', 400);
         }

@@ -47,6 +47,10 @@ var CRMInvoiceEdit = ( function($) {
     CRMInvoiceEdit.prototype.initClass = function() {
         var that = this;
 
+        if (that.$wrapper.find('input[name="invoice[deal_id]"]').val() == 0) {
+            that.initSelectDeal();
+        }
+
         that.initDatePickers();
         //
         that.initTableEvents();
@@ -56,6 +60,8 @@ var CRMInvoiceEdit = ( function($) {
         that.initSubmit();
         //
         that.initChangeContact();
+        //
+        that.initDealActions();
         //
         that.initChangeCurrency();
         //
@@ -512,7 +518,8 @@ var CRMInvoiceEdit = ( function($) {
                             const iframe = getIframeIfExists();
                             if (iframe) {
                                 window.parent.iframe_invoice_is_saved = true;
-                                iframe.src = content_uri + '?iframe=1'
+                                // iframe.src = content_uri + '?iframe=1'
+                                iframe.dispatchEvent(new CustomEvent('close', { detail: { id: response.data.id } }));
                             } else {
                                 $.crm.content.load(content_uri);
                             }
@@ -669,6 +676,341 @@ var CRMInvoiceEdit = ( function($) {
                 });
             });
         }
+    };
+
+    CRMInvoiceEdit.prototype.initDealActions = function () {
+        let that = this;
+        let $wrapper = that.$wrapper;
+        let $deal = $wrapper.find('.js-deal-toggle');
+        let deal_id = that.$wrapper.find(".js-deal-toggle [name='invoice[deal_id]']").val();
+
+        function openDetachDialog($dialog, name) {
+            let detach_deal_xhr = null;
+            $dialog.on('click', '.js-detach-deal', function (e) {
+                e.preventDefault();
+
+                $.crm.confirm.show({
+                    title: that.locales["deal_detach_title"],
+                    text: that.locales["deal_detach_text"].replace(/%s/, name),
+                    button: that.locales["deal_detach_confirm_button"],
+                    onConfirm: function() {
+                        detach_deal_xhr && detach_deal_xhr.abort();
+
+                        that.loadDealListByContact(function (data) {
+                            let url = $.crm.app_url +'?module=invoiceDeal&action=detach';
+                            detach_deal_xhr = $.post(url, { invoice_id: that.invoice_id })
+                                .done(function (r) {
+                                    if (r && r.status === 'ok') {
+                                        $.crm.content.reload();
+                                        $dialog.data('dialog').close();
+                                    }
+                                })
+                                .always(function () {
+                                    detach_deal_xhr = null;
+                                });
+                        });
+                    }
+                });
+            });
+        }
+
+        $deal.on('click', '.js-attach-other-deal, .js-associate-deal', function (e) {
+            e.preventDefault();
+            let name = $deal.find('.js-deal-name').text();
+
+            that.loadDealListByContact(function (data) {
+                let dialog_url = $.crm.app_url +'?module=invoiceDeal&action=attachDialog';
+                $.get(dialog_url, { invoice_id: that.invoice_id, deal_id: deal_id }, function (html) {
+                    let $dialog = $(html);
+                    $.waDialog({
+                        html: $dialog,
+                        onOpen: function () {
+                            let $deal_block = $dialog.find('.js-invoice-deal');
+                            let deal_selector = that.initSelectDeal({
+                                $wrapper: $deal_block,
+                                data: data
+                            });
+                            $dialog.find('.js-save-button').on('click', function () {
+                                deal_selector.submit();
+                            });
+                            openDetachDialog($dialog, name);
+                        }
+                    });
+                });
+            });
+        });
+
+        $deal.on('click', '.js-detach-deal', function (e) {
+            e.preventDefault();
+            let detach_deal_xhr = null;
+            let name = $deal.find('.js-deal-name').text();
+            $.crm.confirm.show({
+                title: that.locales["deal_detach_title"],
+                text: that.locales["deal_detach_text"].replace(/%s/, name),
+                button: that.locales["deal_detach_confirm_button"],
+                onConfirm: function () {
+                    detach_deal_xhr && detach_deal_xhr.abort();
+
+                    that.loadDealListByContact(function (data) {
+                        let url = $.crm.app_url + '?module=invoiceDeal&action=detach';
+                        detach_deal_xhr = $.post(url, { invoice_id: that.invoice_id })
+                            .done(function (r) {
+                                if (r && r.status === 'ok') {
+                                    $.crm.content.reload();
+                                }
+                            })
+                            .always(function () {
+                                detach_deal_xhr = null;
+                            });
+                    });
+                }
+            });
+        })
+    };
+
+    CRMInvoiceEdit.prototype.initSelectDeal = function (options) {
+        options = options || {};
+        let that = this;
+        let $wrapper = options.$wrapper || that.$wrapper;
+        let $deal_form = $wrapper.find('.js-deal-selector-control-wrapper');
+        let $deal_name = $deal_form.find('.js-deal-name');
+        let $deal_name_input = $deal_form.find('.js-deal-name-input');
+        let $deal_save_button = $wrapper.closest('.js-conversation-deal-attach-dialog').find('.js-save-button');
+        let $deal_save = $deal_form.find('.js-save-deal');
+        let $deals_dropdown = $deal_form.find('.js-deals-dropdown');
+        let $deal_create_new_single_link = $deal_form.find('.js-create-new-deal-link');
+        let $deal_remove = $deal_form.find('.js-remove-deal');
+        let $deal_empty = $deals_dropdown.find('.js-empty-deal');
+        let $visible_link = $deal_form.find('.js-select-deal .js-visible-link .js-text');
+        let $select_funnel = $deal_form.find('.js-select-funnel-wrapper');
+        let $select_stage = $deal_form.find('.js-select-stage-wrapper');
+        let $deals_list = $deal_form.find('.js-deals-list');
+        let $deal_id = $deal_form.find('.js-deal-id');
+
+        // render helper
+        var renderContactDeals = function (data) {
+            data = data || {};
+            let deals = data.deals || {};
+            let funnels = data.funnels || {};
+
+            // rendering contact deals
+            let deals_count = 0;
+            $.each(deals, function (i, deal) {
+                $deals_list.prepend(renderDeals(deal, funnels[deal.funnel_id]));
+                deals_count++;
+            });
+
+            $deal_form.show();
+            $deals_dropdown.data('deals_count', deals_count);
+            if (deals_count > 0) {
+                $deals_dropdown.removeClass('hidden');
+                $deal_create_new_single_link.addClass('hidden');
+            } else {
+                $deal_create_new_single_link.removeClass('hidden');
+                $deals_dropdown.addClass('hidden');
+            }
+        };
+
+        function renderDeals(deal, funnel) {
+            if (!deal || deal.id <= 0) {
+                return '';
+            }
+
+            let deal_id = deal.id;
+            let deal_name = deal.name || '';
+            let color = '';
+            let funnel_deleted_html = '';    // if case if funnel is deleted (empty)
+
+            if (funnel && funnel.stages && funnel.stages[deal.stage_id]) {
+                color = funnel.stages[deal.stage_id].color || '';
+            }
+
+            if ($.isEmptyObject(funnel)) {
+                funnel_deleted_html = '<span class="hint">' + that.locales['funnel_deleted'] + '</span>';
+            }
+
+            return '<li><a href="javascript:void(0);" class="js-deal-item" data-deal-id="' + deal_id + '">' +
+                '<span class="flexbox middle js-text"><i class="fas fa-circle funnel-state" style="color: ' + color +'"></i>' +
+                '<span class="deal-item--name" style="word-break: break-word;">' + deal_name + '</span>' +
+                '</span>' + funnel_deleted_html + '</a>' +
+                '</li>';
+        }
+
+        function emptyDeal() {
+            $visible_link.html(that.locales['deal_empty']);
+            $deal_id.val('none');
+            $deal_name_input.val('');
+            $deal_name.addClass('c-deal-name-hidden');
+            $deal_save.addClass('hidden').removeAttr('title');
+            $deal_empty.addClass('c-empty-deal-hidden');
+            $select_funnel.addClass('hidden');
+            $deals_list.find('li').removeClass('selected');
+
+            if ($deals_dropdown.data('deals_count') > 0) {
+                $deals_dropdown.removeClass('hidden');
+                $deal_create_new_single_link.addClass('hidden');
+            } else {
+                $deals_dropdown.addClass('hidden');
+                $deal_create_new_single_link.removeClass('hidden');
+            }
+        }
+
+        function saveDeal() {
+            let $created_deal = $wrapper.find('.js-created-deal');
+            let $new_deal_stage_icon = $select_stage.find('.js-visible-link .js-text .funnel-state').clone();
+            let new_deal_name = $.trim($deal_name_input.val());
+            let data = $deal_form.serializeObject();
+
+            data['invoice_id'] = that.invoice_id;
+            data['deal[id]'] = $deal_id.val();
+            data['deal[name]'] = $deal_name_input.val();
+            data['deal[funnel_id]'] = $deal_form.find('.js-select-deal-funnel').val();
+            data['deal[stage_id]'] = $deal_form.find('.js-select-deal-stage').val();
+
+            // Validate deal data
+            if ($deal_id.val() === 'none') {
+                $deal_form.addClass('shake animated');
+                setTimeout(function () {
+                    $deal_form.removeClass('shake animated');
+                },500);
+                return false;
+            }
+
+            if ($deal_id.val() <= 0 && !new_deal_name) {
+                $deal_name.addClass('shake animated');
+                setTimeout(function(){
+                    $deal_name.removeClass('shake animated');
+                    $deal_name_input.focus();
+                },500);
+                return false;
+            }
+
+            $deal_form.addClass('deal-form-hidden');
+            $created_deal.removeClass('hidden');
+
+            // Set deal
+            if ($deal_id.val() <= 0) {
+                $created_deal.html($new_deal_stage_icon);
+                $created_deal.append($.crm.escape(new_deal_name));
+            } else {
+                let $old_deal = $deals_dropdown.find('.js-visible-link .js-text');
+                let $old_deal_stage_icon = $old_deal.find('.funnel-state').clone();
+                let old_deal_name = $old_deal.find('.deal-item--name').text();
+
+                $created_deal.html($old_deal_stage_icon);
+                $created_deal.append($.crm.escape(old_deal_name));
+            }
+
+            // Send data
+            var href = $.crm.app_url +"?module=invoice&action=associateDealSave";
+            $.post(href, data, function (res) {
+                if (res.status === "ok") {
+                    $wrapper.closest('.dialog').data('dialog').close();
+                    $.crm.content.reload();
+                } else {
+                    $created_deal.html('');
+                    $created_deal.addClass('hidden');
+                    emptyDeal();
+                    $deal_form.removeClass('deal-form-hidden');
+                }
+            });
+        }
+
+        // Default deal_id - none
+        $deal_id.val('none');
+
+        if (typeof options.data === 'undefined') {
+            // Load deals by contact
+            that.loadDealListByContact(renderContactDeals);
+        } else {
+            // render predefined list of deals
+            renderContactDeals(options.data);
+        }
+
+        // New deal
+        $deal_form.on('click', '.js-create-new-deal', function () {
+            $deal_id.val('0');
+            $deals_dropdown.addClass('hidden');
+            $deal_create_new_single_link.addClass('hidden');
+            $deal_name.removeClass('c-deal-name-hidden');
+            $deal_save.attr('title', that.locales['deal_create']).removeClass('hidden');
+            $select_funnel.removeClass('hidden');
+            $deal_empty.removeClass('c-empty-deal-hidden');
+            $deal_name_input.focus();
+            $deal_save_button.addClass('yellow');
+        });
+
+        // Select old deal
+        $deal_form.on('click', '.js-deal-item', function () {
+            var new_deal = $(this).find('.js-text').html();
+            $visible_link.html(new_deal);
+            $deal_id.val($(this).data('deal-id'));
+            $deal_save.attr('title', that.locales['deal_add']).removeClass('hidden');
+            $select_funnel.addClass('hidden');
+            $deal_empty.removeClass('c-empty-deal-hidden');
+            $deals_list.find('li').removeClass('selected');
+            $(this).parent().addClass('selected');
+
+            $deal_save_button.addClass('yellow');
+        });
+
+        // Hide items in .menu-h .dropdown, by clicking (select) an item
+        $deals_list.on('click', function () {
+            $deals_list.hide();
+            setTimeout( function() {
+                $deals_list.removeAttr("style");
+            }, 200);
+        });
+
+        // Remove deal
+        $deal_empty.on('click', function () {
+            emptyDeal();
+        });
+
+        $deal_remove.on('click', function () {
+            emptyDeal();
+        });
+
+        // Save deal on click button (this button could not exist)
+        $deal_save.on('click', function (e) {
+            e.preventDefault();
+            $deal_form.trigger('submit');
+        });
+
+        $deal_form.on('submit', function (e) {
+            e.preventDefault();
+            saveDeal();
+        });
+
+        // Load new funnel stages
+        $deal_form.on('change', '.js-select-deal-funnel', function() {
+            $deal_form.find('.js-select-stage-wrapper').load('?module=deal&action=stagesByFunnel&id=' + $(this).val());
+        });
+
+        return {
+            submit: function () {
+                $deal_form.trigger('submit');
+            }
+        };
+    };
+
+    CRMInvoiceEdit.prototype.loadDealListByContact = function (callback) {
+        let contact_id = this.$wrapper.find(".js-contact-toggle .js-contact-id").val();
+        let href = '?module=deal&action=byContact&id='+ contact_id;
+
+        callback = callback || function () {};
+        if (contact_id <= 0 || this.iframe) {
+            callback({});
+            return;
+        }
+
+        $.get(href, "json").always(function (response) {
+            if (response && response.status === "ok") {
+                callback(response.data || {});
+            } else {
+                callback({});
+            }
+        });
     };
 
     CRMInvoiceEdit.prototype.initChangeCompany = function() {
@@ -1414,9 +1756,8 @@ var CRMInvoicePage = ( function($) {
 
         that.$wrapper.data("page", that);
 
-        // TODO: remove
-        $('.js-action-link').one("click", function () {
-            spinnerView($(this)).show()
+        $('.js-action-link').one("click", function (e) {
+            spinnerView($(this)).show();
         })
     };
 
@@ -1743,7 +2084,11 @@ function spinnerView ($button, timeout = 350) {
             if ($existsIcon) {
                 $existsIcon.hide();
             }
-            $button.prepend($loading).prop('disabled', true);
+
+            $button.prepend($loading);
+            if ($button.prop("tagName") === "BUTTON") {
+                $button.prop('disabled', true);
+            }
         },
         hide: function () {
             setTimeout(() => {

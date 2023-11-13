@@ -16,7 +16,7 @@ class crmFileDeleteMethod extends crmApiAbstractMethod
         if (!$file) {
             throw new waAPIException('not_found', 'File not found', 404);
         } else if (!$this->getCrmRights()->contactOrDeal($file['contact_id'])) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $file_model->delete($file['id']);

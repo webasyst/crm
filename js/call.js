@@ -875,23 +875,28 @@ var CRMCallPage = ( function($) {
 
             function load($loader) {
                 const params = (window.location.href).split('/crm/call/')[1];
-                const href = $.crm.app_url + '?module=call' + (params ? params : '');
-
+                const href = $.crm.app_url + '?module=call' + (params ? '&' + params.slice(1) : '');
                 data = {
                     lazy: 1,
                     page: ++that.current_page
                 };
                 is_locked = true;
                 console.log(href);
+
+                
                 $.post(href, data, function (html) {
-                    if ($loader) $loader.remove();
+                    
                     var $new_list = $(html).find('#js-calls-table').html();
-                    $list.append($new_list);
-                    $(document).trigger("wa_loaded");
-                    startLazyLoading();
+                    $.when($list.append($new_list)).then(() => {
+                        $(document).trigger("wa_loaded");
+                        if ($loader) $loader.remove();
+                        startLazyLoading();
+                    });
+
                 }).always(function () {
                     is_locked = false;
                 });
+  
             }
         }
 

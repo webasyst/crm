@@ -23,7 +23,7 @@ class crmNoteAddMethod extends crmApiAbstractMethod
         } else if (!empty($contact_id) && !$this->getContactModel()->getById($contact_id)) {
             throw new waAPIException('not_found', 'Contact not found', 404);
         } else if (!$this->getCrmRights()->contactOrDeal($cnt_dl_id)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $note = [

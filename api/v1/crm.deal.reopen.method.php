@@ -17,7 +17,7 @@ class crmDealReopenMethod extends crmApiAbstractMethod
         if (!$deal) {
             throw new waAPIException('not_found', 'Deal not found', 404);
         } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif (!in_array($deal['status_id'], ['WON', 'LOST'])) {
             throw new waAPIException('warning', 'Deal status not closed', 400);
         }

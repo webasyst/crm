@@ -29,21 +29,21 @@ class crmDealAddMethod extends crmApiAbstractMethod
         if ($error_fields = $this->checkRequired($deal_name, $deal_stage_id, $contact_id)) {
             $this->response = [
                 'error' => 'required_parameter',
-                'error_description' => 'Required parameter',
+                'error_description' => _w('Please correct errors in the data'),
                 'error_fields' => $error_fields
             ];
             return;
         } elseif ($error_fields = $this->validate($deal_data)) {
             $this->response = [
                 'error' => 'error_validate',
-                'error_description' => 'Error validate',
+                'error_description' => _w('Please correct errors in the data'),
                 'error_fields' => $error_fields
             ];
             return;
         } elseif ($error_fields = $this->validateFields($deal_data)) {
             $this->response = [
                 'error' => 'error_validate',
-                'error_description' => 'Custom fields error validate',
+                'error_description' => _w('Please correct errors in the data'),
                 'error_fields' => $error_fields
             ];
             return;
@@ -116,7 +116,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
         if (!(new crmContact($deal_data['contact_id']))->exists()) {
             throw new waAPIException('not_found', 'Contact not found', 404);
         } elseif (!$this->getCrmRights()->contact($deal_data['contact_id'])) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $fsm = new crmFunnelStageModel();
@@ -129,7 +129,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                 'description' => 'Deal stage not found'
             ];
         } elseif (!$this->getCrmRights()->funnel($stage['funnel_id'])) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
         $deal_data['funnel_id'] = $stage['funnel_id'];
 
@@ -174,7 +174,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                     'field' => 'amount',
                     'value' => $deal_data['amount'],
                     'code'  => 'amount_out',
-                    'description' => 'Out of range value'
+                    'description' => _w('Out of range value')
                 ];
             }
         }

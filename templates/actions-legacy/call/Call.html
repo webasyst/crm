@@ -53,22 +53,23 @@
         {if !empty($calls)}
 
             {function name="_renderContact" _contact=[]}
+                {$_name = waContactNameField::formatName($_contact, true)|escape}
                 <div class="c-user-wrapper">
                     <div class="c-layout fixed">
                         <div class="c-column c-column-image">
                             {if ($_contact.is_visible)}
                                 <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top">
-                                    <img src="{$_contact.photo_url_32}" alt="{$_contact.name|escape}">
+                                    <img src="{$_contact.photo_url_32}" alt="{$_name}">
                                 </a>
                             {else}
-                            <img src="{$_contact.photo_url_32}" alt="{$_contact.name|escape}">
+                            <img src="{$_contact.photo_url_32}" alt="{$_name}">
                             {/if}
                         </div>
                         <div class="c-column middle">
                             {if ($_contact.is_visible)}
-                                <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" title="{$_contact.name|escape}">{$_contact.name|escape}</a>
+                                <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" title="{$_name}">{$_name}</a>
                             {else}
-                                {$_contact.name|escape}
+                                {$_name}
                             {/if}
 
                             {* jobtitle *}
@@ -200,7 +201,7 @@
                                     {if !empty($_client)}
                                         {_renderContact _contact=$_client}
                                     {else}
-                                        <a href="{$wa_app_url}contact/new/?call={$_call.id|default:""|escape}" class="small"><i class="icon10 add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i>[`Create or update contact`]</a>
+                                        <a href="{$wa_app_url}contact/new/?call={$_call.id|default:""|escape}&phone={urlencode($_call.plugin_client_number)}" class="small"><i class="icon10 add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i>[`Create or update contact`]</a>
                                     {/if}
                                 </div>
                             </td>

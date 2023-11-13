@@ -57,7 +57,7 @@ class crmReminderAddMethod extends crmApiAbstractMethod
                 throw new waAPIException('invalid_deal', 'Invalid deal specified', 400);
             }
             if (!$this->getCrmRights()->deal($deal)) {
-                throw new waAPIException('forbidden', 'Access denied', 403);
+                throw new waAPIException('forbidden', _w('Access denied'), 403);
             }
         } else if ($contact_id) {
             if ($contact_id < 0) {
@@ -68,7 +68,7 @@ class crmReminderAddMethod extends crmApiAbstractMethod
                 throw new waAPIException('invalid_contact', 'Invalid contact specified', 400);
             }
             if (!$this->getCrmRights()->contact($contact)) {
-                throw new waAPIException('forbidden', 'Access denied', 403);
+                throw new waAPIException('forbidden', _w('Access denied'), 403);
             }
         }
     }

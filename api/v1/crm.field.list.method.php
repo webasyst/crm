@@ -13,7 +13,7 @@ class crmFieldListMethod extends crmApiAbstractMethod
 
         $response = [];
         $one_name_field = wa()->getSetting('one_name_field', '', 'crm');
-        if (empty($one_name_field)) {
+        if (empty($one_name_field) || $scope == 'company') {
             $columns_unset = [
                 'name'
             ];
@@ -55,7 +55,7 @@ class crmFieldListMethod extends crmApiAbstractMethod
                 foreach ($options as $opt => $option) {
                     $_response['option_values'][] = [
                         'id'    => (string) $opt,
-                        'value' => $option
+                        'value' => (string) $option
                     ];
                 }
                 unset($options, $opt, $option);
@@ -78,9 +78,9 @@ class crmFieldListMethod extends crmApiAbstractMethod
                         continue;
                     }
                     $fields = [
-                        'id'   => $sub_name,
+                        'id'   => (string) $sub_name,
                         'name' => ifset($sub_field, 'name', ''),
-                        'type' => $this->normalizeFieldType($sub_column_object)
+                        'type' => $sub_type
                     ];
                     if ($o_order = ifset($sub_field, 'oOrder', [])) {
                         $o_index = array_search('', $o_order);
@@ -99,8 +99,8 @@ class crmFieldListMethod extends crmApiAbstractMethod
                         );
                         foreach ($options as $opt => $option) {
                             $fields['option_values'][] = [
-                                'id'    => $opt,
-                                'value' => $option
+                                'id'    => (string) $opt,
+                                'value' => (string) $option
                             ];
                         }
                     }
@@ -117,7 +117,7 @@ class crmFieldListMethod extends crmApiAbstractMethod
                         'name'          => _w('Month'),
                         'type'          => 'select',
                         'option_values' => array_map(function ($_month, $_id) {
-                            return ['id' => (string) $_id, 'value' => $_month];
+                            return ['id' => (string) $_id, 'value' => (string) $_month];
                         }, $months, array_keys($months))
                     ];
 
@@ -127,7 +127,7 @@ class crmFieldListMethod extends crmApiAbstractMethod
                         'name'          => _w('Day'),
                         'type'          => 'select',
                         'option_values' => array_map(function ($_day) {
-                            return ['id' => $_day, 'value' => $_day];
+                            return ['id' => (string) $_day, 'value' => (string) $_day];
                         }, $days)
                     ];
                 }
@@ -152,7 +152,11 @@ class crmFieldListMethod extends crmApiAbstractMethod
             }
         } elseif ($type === 'address') {
             $type = 'composite';
-        } else if ($column_object instanceof waContactRadioSelectField || $column_object instanceof crmDealRadioField) {
+        } else if (
+            $column_object instanceof waContactRadioSelectField
+            || $column_object instanceof crmDealRadioField
+            || $column_object instanceof waContactBranchField
+        ) {
             $type = 'radio';
         } else if ($column_object instanceof waContactSelectField || $column_object instanceof crmDealSelectField) {
             $type = 'select';

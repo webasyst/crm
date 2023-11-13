@@ -76,15 +76,15 @@ var CRMContactSegmentEdit = (function ($) {
         var that = this,
             $form = that.$form;
         $.each(errors || {}, function (name, msg) {
-            var $input = $form.find(':input[name="' + name + '"]').addClass('error');
-            $input.after('<em class="errormsg">' + msg + '</em>');
+            var $input = $form.find(':input[name="' + name + '"]').addClass('state-error');
+            $input.after('<span class="errormsg">' + msg + '</span>');
         });
     };
 
     CRMContactSegmentEdit.prototype.clearValidateErrors = function () {
         var that = this,
             $form = that.$form;
-        $form.find('.error').removeClass('error');
+        $form.find('.state-error').removeClass('state-error');
         $form.find('.errormsg').remove();
     };
 

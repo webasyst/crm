@@ -10,6 +10,11 @@
         "icon" => "status-green-tiny",
         "class" => "pending"
     ],
+    "PAYMENT_EXPIRED" => [
+        "name" => _w('Payment deadline has expired'),
+        "icon" => "status-green-tiny",
+        "class" => "payment-expired"
+    ],
     "PROCESSING" => [
         "name" => _w('Processing'),
         "icon" => "light-bulb",
@@ -36,7 +41,12 @@
 
 {$_state = false}
 {if $invoice.state_id && !empty($_states[$invoice.state_id])}
-    {$_state = $_states[$invoice.state_id]}
+    {$is_payment_expired = $invoice.state_id === 'PENDING' && $invoice.due_date && {$invoice.due_date|strtotime|date_format:"Y-m-d"} < {$smarty.now|date_format:"Y-m-d"}}
+    {if $is_payment_expired}
+        {$_state = $_states['PAYMENT_EXPIRED']}
+    {else}
+        {$_state = $_states[$invoice.state_id]}
+    {/if}
 {/if}
 
 {$_invoice_classes = []}
@@ -50,7 +60,7 @@
     {$_invoice_classes[] = "highlighted"}
 {/if}
 
-<li class="c-invoice {$_invoice_classes|join:" "}" data-id="{$invoice.id}">
+<li class="c-invoice {$_invoice_classes|join:' '}" data-id="{$invoice.id}">
     <a class="flexbox full-width middle box js-disable-router" href="{$wa_app_url}invoice/{$invoice.id}/">
         {if !empty($_userpic)}
             <div class="image custom-mr-8">
@@ -69,7 +79,9 @@
             {/if}
             <div class="small black custom-my-4 break-words">{$wa->crm->contactName($invoice.contact.name)}</div>
             <div class="line">
-                <strong class="badge uppercase nowrap opacity-90 c-bg custom-mr-8" style="font-size: 68%;">{if $_state}{$_state.name}{/if}</strong>
+                <div>
+                    <strong class="badge uppercase nowrap opacity-90 c-bg custom-mr-8">{if $_state}{$_state.name}{/if}</strong>
+                </div>
                 <span class="text-gray smaller">{$invoice.invoice_date|wa_date:'humandate'}</span>
             </div>
         </div>

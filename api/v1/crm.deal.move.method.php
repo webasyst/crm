@@ -24,7 +24,7 @@ class crmDealMoveMethod extends crmApiAbstractMethod
         if (!$deal) {
             throw new waAPIException('not_found', 'Deal not found', 404);
         } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $this->http_status_code = 204;

@@ -5208,10 +5208,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/tag'
-        files:
-          type: array
-          items:
-            $ref: '#/components/schemas/file'
         userpic:
           type: object
           properties:

@@ -184,11 +184,13 @@
                                 {if $sender_emails|count}
                                     <span class="c-user-email">
                                         <span class="c-user-email">[`via`]</span>
-                                        <select class="js-sender-email-select">
-                                            {foreach $sender_emails as $_email}
-                                                <option value="{$_email|escape}"{if ($sender_default_email == $_email)} selected{/if}>{$_email|escape}</option>
-                                            {/foreach}
-                                        </select>
+                                        <span class="wa-select">
+                                            <select class="js-sender-email-select">
+                                                {foreach $sender_emails as $_email}
+                                                    <option value="{$_email|escape}"{if ($sender_default_email == $_email)} selected{/if}>{$_email|escape}</option>
+                                                {/foreach}
+                                            </select>
+                                        </span>
                                     </span>
                                 {/if}
                                 <a href="javascript:void(0)" class="text-gray nowrap js-show-personal-settings-dialog">
@@ -208,7 +210,7 @@
                                             <span class="flexbox space-8 align-left js-text">[`Empty`]</span>
                                         </button>
                                         <div class="dropdown-body">
-                                    
+
                                             <ul class="menu with-icons js-deals-list">
                                                 <li class="js-create-new-deal">
                                                     <a href="javascript:void(0);">
@@ -262,7 +264,7 @@
                                         <script>
                                             ( function($) {
                                                 $("#dropdown-funnels-list-send").waDropdown({
-                                                  
+
                                                 });
                                                 var $wrapper = $(".js-funnels-list-send"),
                                                     $visibleLink = $wrapper.find(".js-visible-link"),
@@ -383,7 +385,7 @@
                 </div>
 
                 <footer class="dialog-footer flexbox middle" >
-                    <input class="button blue js-submit-button" type="submit" value="[`Send email`]">
+                    <input class="button js-submit-button" type="submit" value="[`Send email`]">
                     <button class="button light-gray js-close-dialog">[`Cancel`]</button>
                     <div class="c-files-wrapper c-drop-wrapper js-drop-area">
                         <span class="icon size-16 js-message-attachment cursor-pointer">
@@ -452,7 +454,7 @@
 
     <script>
         ( function($) {
-       
+
             $("#dropdown-deals-send").waDropdown();
            // var $body = $(window.top.document).find("body");
            // $.waDialog({

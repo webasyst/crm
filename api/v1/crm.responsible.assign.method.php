@@ -16,7 +16,7 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
         $conversation_ids = array_map('intval', crmHelper::dropNotPositive($conversation_ids));
 
         if (!$this->getUser()->isAdmin('crm') && !$this->getUser()->getRights('crm', 'edit')) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif ($user_id < 0) {
             /** Если user_id = 0, то ответственного удаляем */
             throw new waAPIException('not_found', 'User not found', 404);
@@ -122,7 +122,7 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
 
         $_deal = reset($deals);
         if (!$this->getCrmRights()->funnel($_deal['funnel_id'])) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
         $this->getDealModel()->updateByField(
             ['id' => $deal_ids],

@@ -11,7 +11,7 @@ class crmConversationDeleteMethod extends crmMessageListMethod
         if ($conversation_id < 0 || !$conversation = $this->getConversationModel()->getById($conversation_id)) {
             throw new waAPIException('not_found', 'Conversation not found', 404);
         } elseif (!$this->getCrmRights()->canEditConversation($conversation)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $this->getConversationModel()->delete($conversation_id);

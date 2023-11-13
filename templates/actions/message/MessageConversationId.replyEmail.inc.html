@@ -116,11 +116,13 @@
                     {if $_sender.email|count}
                         <span class="c-user-email">
                             <span class="text-gray">[`via`]</span>
-                            <select class="js-sender-email-select">
-                                {foreach $_sender.email as $_email}
-                                    <option value="{$_email.value|escape}">{$_email.value|escape}</option>
-                                {/foreach}
-                            </select>
+                            <span class="wa-select">
+                                <select class="js-sender-email-select">
+                                    {foreach $_sender.email as $_email}
+                                        <option value="{$_email.value|escape}">{$_email.value|escape}</option>
+                                    {/foreach}
+                                </select>
+                            </span>
                         </span>
                     {/if}
 

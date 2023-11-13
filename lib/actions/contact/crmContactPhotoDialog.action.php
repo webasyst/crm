@@ -7,7 +7,7 @@ class crmContactPhotoDialogAction extends webasystProfilePhotoAction
         $rights = new crmRights();
         $id = waRequest::request('id', null, 'int');
         if (!$id || !$rights->contactEditable($id)) {
-            throw new waRightsException('Access denied');
+            throw new waRightsException(_w('Access denied'));
         }
 
         parent::execute();

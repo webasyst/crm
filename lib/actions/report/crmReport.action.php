@@ -204,7 +204,7 @@ class crmReportAction extends crmBackendViewAction
             'charts'          => $charts,
             'active_deal_tag' => $active_deal_tag,
             'tag_cloud'       => $tag_cloud,
-            'popular_cloud'       => $popular_cloud,
+            'popular_cloud'   => $popular_cloud,
             "active_fields"   => $active_fields,
             "fields"          => $deal_fields,
         ));

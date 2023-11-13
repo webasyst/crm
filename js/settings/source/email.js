@@ -250,7 +250,7 @@ var CRMSettingsSourceEmail = ( function($) {
 
     // STATIC METHODS (Because it using outside current instance)
     CRMSettingsSourceEmail.clearValidateErrors = function ($wrapper) {
-        $wrapper.find('.error').removeClass('error');
+        $wrapper.find('.state-error').removeClass('state-error');
         $wrapper.find('.crm-errors-block').remove();
     };
 
@@ -272,9 +272,9 @@ var CRMSettingsSourceEmail = ( function($) {
         $.each(plain_errors, function (name, errors) {
             var $error = $('<div class="crm-errors-block"></div>'),
                 $field = !name ? $() : $wrapper.find('[name="' + name + '"]');
-            $field.addClass('error');
+            $field.addClass('state-error');
             $.each(errors, function (index, error) {
-                $error.append('<em class="errormsg text-red">' + error + '</em>');
+                $error.append('<span class="errormsg text-red">' + error + '</span>');
             });
             if ($field.length) {
                 $field.after($error);

@@ -19,7 +19,7 @@ class crmInvoiceListMethod extends crmApiAbstractMethod
         $limit      = (int) $this->get('limit');
 
         if (!wa()->getUser()->getRights('crm', 'manage_invoices')) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif (!empty($contact_id) && $contact_id < 1) {
             throw new waAPIException('not_found', 'Contact not found', 404);
         } elseif (!empty($deal_id) && $deal_id < 1) {

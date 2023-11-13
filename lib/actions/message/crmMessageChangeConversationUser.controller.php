@@ -22,7 +22,7 @@ class crmMessageChangeConversationUserController extends crmJsonController
 
         $can_edit_conversation = $this->getCrmRights()->canEditConversation($conversation);
         if (!$can_edit_conversation) {
-            $this->errors = array('Access denied');
+            $this->errors = array(_w('Access denied'));
             return;
         }
 

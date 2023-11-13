@@ -27,7 +27,7 @@ class crmDealPatchMethod extends crmApiAbstractMethod
         } elseif (!$deal = $this->getDealModel()->getDeal($deal_id, false, true)) {
             throw new waAPIException('not_found', 'Deal not found', 404);
         } elseif (!$this->getCrmRights()->deal($deal)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif (!$this->validateFields($fields_data)) {
             $this->http_status_code = 400;
             $this->response = $this->errors;
@@ -146,7 +146,7 @@ class crmDealPatchMethod extends crmApiAbstractMethod
                            'field' => 'amount',
                            'value' => $data[$_name],
                            'code'  => 'amount_out',
-                           'description' => 'Out of range value'
+                           'description' => _w('Out of range value')
                        ];
                    }
                    $data[$_name] = preg_replace('#(\.\d{1,4})\d*#', '$1', $data[$_name]);

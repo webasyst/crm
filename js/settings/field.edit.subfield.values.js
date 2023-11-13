@@ -25,19 +25,29 @@ var crmSettingsFieldEditSubfieldValues = (function ($) {
 
     crmSettingsFieldEditSubfieldValues.prototype.initValuesLink = function() {
         var that = this;
+        var locked = false;
 
         that.$wrapper.find(that.$dialog_link).on("click", function() {
-            $.get(that.dialog_url, function(html) {
-                // Init the values dialog
-                new CRMDialog({
-                    html: html,
-                    onOpen: function ($dialog_wrapper, dialog){
-                        that.editValues($dialog_wrapper, dialog);
-                        //
-                        that.initSubmit($dialog_wrapper, dialog);
-                    }
+            if (!locked) {
+                locked = true;
+                $.get(that.dialog_url, function(html) {
+                    // Init the values dialog
+                    $.waDialog({
+                        html: html,
+                        onOpen: function ($dialog_wrapper, dialog){
+                            dialog.resize();
+                            that.editValues($dialog_wrapper, dialog);
+                            //
+                            that.initSubmit($dialog_wrapper, dialog);
+                        },
+                        onClose: function ($dialog_wrapper, dialog){
+                            locked = false;
+                        },
+                        
+                    });
                 });
-            });
+            }
+        
         });
 
     };
@@ -117,12 +127,11 @@ var crmSettingsFieldEditSubfieldValues = (function ($) {
         var that = this,
             $form = $dialog_wrapper.find('form'),
             $button = $dialog_wrapper.find('.js-save-values'),
-            $loading = $('<i class="icon16 loading" style="vertical-align: middle;margin-left: 10px;"></i>'),
-            $done = $('<i class="icon16 yes" style="vertical-align: middle;margin-left: 10px;"></i>');
+            $loading = $('<span class="icon loading custom-ml-4"><i class="fas fa-spinner fa-spin"></i></span>'),
+            $done = $('<span class="icon yes custom-ml-4"><i class="icon fas fa-check"></i>');
 
             $form.submit(function(e) {
                 e.preventDefault();
-
                 $button.prop('disabled', true);
                 $('.loading').remove(); // remove old .loading (paranoia)
                 $loading.appendTo($button.parent());
@@ -130,17 +139,17 @@ var crmSettingsFieldEditSubfieldValues = (function ($) {
                 // Validation
                 var validation_passed = true;
                 $dialog_wrapper.find('.errormsg').remove();
-                $dialog_wrapper.find('.error').removeClass('error');
+                $dialog_wrapper.find('.state-error').removeClass('state-error');
                 $dialog_wrapper.find('[name^="parent_value["]:not(:disabled)').each(function() {
                     if (!this.value) {
                         validation_passed = false;
-                        $(this).addClass('error').after($('<em class="errormsg"></em>').text(that.locales["field_is_required"]));
+                        $(this).addClass('state-error').after($('<span class="errormsg"></span>').text(that.locales["field_is_required"]));
                     }
                 });
                 $dialog_wrapper.find('[name^="value["]:not(:disabled)').each(function() {
                     if (!this.value) {
                         validation_passed = false;
-                        $(this).addClass('error').after($('<em class="errormsg"></em>').text(that.locales["field_is_required"]));
+                        $(this).addClass('state-error').after($('<span class="errormsg"></span>').text(that.locales["field_is_required"]));
                     }
                 });
                 if (!validation_passed) {
@@ -167,6 +176,7 @@ var crmSettingsFieldEditSubfieldValues = (function ($) {
                             }, 1000);
                             return;
                         }
+
                     });
             })
 

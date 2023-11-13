@@ -156,9 +156,8 @@ var crmSettingsFieldEdit = (function ($) {
   crmSettingsFieldEdit.prototype.save = function () {
     var that = this,
       $form = that.$form;
-
     var $button = $(".crm-dialog-edit-field-wrapper").find(".js-save"),
-      $loading = $('<i class="fas fa-spinner fa-spin loading" style="vertical-align: middle;margin-left: 10px;"></i>');
+      $loading = $('<span class="icon loading" style="vertical-align: middle;margin-left: 10px;"><i class="fas fa-spinner fa-spin"></i></span>');
     $('.loading').remove(); // remove old .loading
 
     $button.prop('disabled', true);
@@ -166,19 +165,22 @@ var crmSettingsFieldEdit = (function ($) {
     // Validation
     var validation_passed = true;
     $form.find('.errormsg').text('');
-    $form.find('.error').removeClass('error');
+    $form.find('.state-error').removeClass('state-error');
     $('[name$="[localized_names]"]').each(function () {
       var self = $(this);
       if (!self.val() && self.parents('.template').length <= 0) {
         if (self.closest('tr').find('[name$="[_disabled]"]:checked').length) {
           validation_passed = false;
-          self.addClass('error').parent().append($('<em class="errormsg"></em>').text(that.locales["field_is_required"]));
+          self.addClass('state-error').parent().append($('<span class="errormsg"></span>').text(that.locales["field_is_required"]));
         }
       }
     });
 
     if (!validation_passed) {
       $button.attr('disabled', false);
+      $form.one('input, keydown', '.state-error', function () {
+        $(this).removeClass('state-error').nextAll('.state-error-hint:first, .errormsg:first').empty();
+      });
       return false;
     }
 
@@ -384,7 +386,7 @@ var crmSettingsFieldEdit = (function ($) {
       var select = $(this);
       var tr = select.closest('tr');
       var table = tr.closest('table');
-      var adv_settings_block = tr.find('.field-advanced-settings').html('<i class="icon16 loading"></i>');
+      var adv_settings_block = tr.find('.field-advanced-settings').html('<span class="icon"><i class="fas fa-spinner fa-spin"></i></span>');
       $.post($.crm.app_url + '?module=settings&action=fieldEditor', {
         ftype: select.val(),
         fid: tr.data('fieldId'),

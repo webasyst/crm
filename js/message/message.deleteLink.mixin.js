@@ -25,7 +25,7 @@ var CRMMessageDeleteLinkMixin = ( function($) {
             var href = $.crm.app_url + "?module=message&action=delete",
                 data = {id: that.message.id};
 
-            var $loading = $('<i class="icon16 loading" style="vertical-align: middle; margin-left: 12px;"></i>');
+            var $loading = $('<span class="icon loading"><i class="fas fa-spinner wa-animation-spin"></i></span>');
             $loading.appendTo(that.$button.parent());
 
             that.$button.attr("disabled", true);
@@ -33,6 +33,7 @@ var CRMMessageDeleteLinkMixin = ( function($) {
             $.post(href, data, function (response) {
                 if (response.status === "ok") {
                     $.crm.content.reload();
+                    $('.dialog.c-message-show-body-dialog')?.data('dialog')?.close();
                 } else {
                     console.log('Error saving Responsible contact classification: ' + arguments[2], arguments);
                     showError("Error saving Responsible contact classification: " + arguments[2]);

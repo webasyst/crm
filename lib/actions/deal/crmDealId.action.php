@@ -124,7 +124,7 @@ class crmDealIdAction extends crmBackendViewAction
         $currencies = $cm->getAll('code');
         $currency_info = waCurrency::getInfo($deal['currency_id']);
         if (isset($currency_info['precision'])) {
-            $deal['amount'] = round($deal['amount'], $currency_info['precision']);
+            $deal['amount'] = round((float) $deal['amount'], $currency_info['precision']);
         }
 
         $can_delete = $deal_access_level === crmRightConfig::RIGHT_DEAL_ALL;

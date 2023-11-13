@@ -32,7 +32,7 @@ class crmMessageSendMethod extends crmApiAbstractMethod
                 throw new waAPIException('access_denied', 'Deal access denied', 403);
             }
         } elseif (!$this->getCrmRights()->contact($message['contact_id'])) {
-            throw new waAPIException('access_denied', 'Access denied', 403);
+            throw new waAPIException('access_denied', _w('Access denied'), 403);
         } elseif (!($message['source_id'] > 0 || $message['transport'] == crmMessageModel::TRANSPORT_EMAIL)) {
             throw new waAPIException('access_denied', 'Access denied. Reply is not allowed', 403);
         }

@@ -14,36 +14,36 @@
         {/if}
         {foreach $f->getOptions() as $value => $label}
             <tr class="item-row">
-                <td class="min-width"><i class="icon16 sort ui-sortable-handle"></i></td>
-                <td>
+                <td class="min-width"><i class="icon fas fa-grip-vertical sort ui-sortable-handle"></i></td>
+                <td class="custom-px-0">
                     <input type="text" name="{$prefix}[{$fid}][options][{$value}]" value="{$label|escape}" class="small short">
                     {if $ftype == 'branch'}
                     <input type="hidden" name="{$prefix}[{$fid}][hide][{$value}]" value="{implode(',', ifempty($hide[$value], array()))}">
                     {/if}
                 </td>
-                <td class="min-width"><a href="#" title="[`Delete`]" onClick="return false;"><i class="icon10 delete"></i></a></td>
+                <td class="min-width"><a href="#" title="[`Delete`]" onClick="return false;"><i class="icon fas fa-trash-alt delete"></i></a></td>
             </tr>
         {/foreach}
     {/if}
     <tr class="hidden item-row template">
-        <td class="min-width"><i class="icon16 sort ui-sortable-handle"></i></td>
-        <td>
+        <td class="min-width"><i class="icon fas fa-grip-vertical sort ui-sortable-handle"></i></td>
+        <td class="custom-px-0">
             <input type="text" name="{$prefix}[{$fid}][options][]" class="small short">
             {if $ftype == 'branch'}
             <input type="hidden" name="{$prefix}[{$fid}][hide][]" value="">
             {/if}
         </td>
-        <td class="min-width"><a href="#" title="[`Delete`]" onClick="return false;"><i class="icon10 delete"></i></a></td>
+        <td class="min-width"><a href="#" title="[`Delete`]" onClick="return false;"><i class="icon fas fa-trash-alt delete"></i></a></td>
     </tr>
     <tr class="add-item">
-        <td colspan="3"><a class="inline-link add-item small" href="javascript:void(0)"><i class="icon10 add"></i> <b><i>[`Add item`]</i></b></a></td>
+        <td colspan="3"><a class="nowrap add-item small" href="javascript:void(0)"><i class="icon fas fa-plus add"></i> [`Add item`]</a></td>
     </tr>
 </tbody>
 </table>
 
 <div class="show-in-readonly" style="margin-right: 40px;">
     {if $f->getParameter('options')}
-    <ul class="menu-v menu compact small with-icons read-only-items-list hide-when-field-disabled" style="max-width:200px;">
+    <ul class="menu compact small with-icons read-only-items-list hide-when-field-disabled" style="max-width:200px;">
         {foreach $f->getOptions() as $value => $label}
         <li>{$label|escape}</li>
         {/foreach}
@@ -59,7 +59,7 @@
         <div class="field hidden option template">
             <div class="name insert-option-name-here"></div>
             <div class="value">
-                <ul class="menu-v menu" style="margin-top:0">
+                <ul class="menu" style="margin-top:0">
                     <li class="field-checkbox template" style="display:none"><label>
                         <span class="wa-checkbox"><input type="checkbox">{* JS assigns attrs at dialog creation time: name = option name, value = field id *}
                             <span>
@@ -85,7 +85,7 @@
     // Drag-and-drop for list items
     table.find(".ui-sortable").sortable({
         items : ".item-row",
-        handle : "i.sort",
+        handle : ".sort",
         axis: 'y'
     });
 
@@ -93,6 +93,7 @@
     table.on('click', 'tr.add-item a.add-item', function() {
         var tmpl = table.find('tbody > .item-row.template');
         var tr = tmpl.clone().insertBefore(tmpl).removeClass('template').removeClass('hidden');
+        $(this).parent().find('.errormsg')?.remove();
     });
 
     // Link to delete item
@@ -108,7 +109,7 @@
         if (lis.length >= 5) {
             lis.slice(5).hide();
             $(lis[4]).after(
-                $('<li><a href="javascript:void(0)" class="inline-link"><b><i>'+"{sprintf_wp('Show %d more', count($f->getOptions()) - 5)}"+'</i></b></a></li>').click(function() {
+                $('<li><a href="javascript:void(0)" class="inline-link">'+"{sprintf_wp('Show %d more', count($f->getOptions()) - 5)}"+'</a></li>').click(function() {
                     $(this).remove();
                     lis.show();
                 })
@@ -128,12 +129,12 @@
             }
 
             table.find('.errormsg').remove();
-            table.find('.error').removeClass('error');
+            table.find('.state-error').removeClass('state-error');
             var valid = true;
 
             if (table.closest('tr').find('[name$="[_disabled]"]:checked').length) {
                 if (!table.find('tr:not(.template) [name$="[options][]"]').length) {
-                    table.find('a.add-item').parent().append($('<em class="errormsg"></em>').text("[`Please specify options for multiple choice field.`]"));
+                    table.find('a.add-item').parent().append($('<span class="errormsg"></span>').text("[`Please specify options for multiple choice field.`]"));
                     valid = false;
                 }
             }
@@ -155,8 +156,8 @@
 {elseif $ftype == 'conditional'}{* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *}
 
 <input type="hidden" name="{$prefix}[{$fid}][hide_unmatched]" value="{$f->getParameter('hide_unmatched')}">
-<div class="show-always hide-when-modified">
-    <a href="javascript:void(0)" class="small" id="{$uniqid}" style="margin-top:5px"><i class="icon10 settings"></i>[`Manage conditions`]</a>
+<div class="show-always hide-when-modified" style="margin-top:5px">
+    <a href="javascript:void(0)" class="small" id="{$uniqid}"><i class="icon fas fa-cog settings"></i> [`Manage conditions`]</a>
 </div>
 <div class="hidden show-when-modified"><span class="highlighted small italic">[`Click “Save” button below to commit changes.`]</span></div>
 

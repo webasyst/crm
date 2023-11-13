@@ -123,7 +123,7 @@
                         <div class="hint">[`There is no deals for this contact.`]</div>
                     {else}
                         <div class="c-link-wrapper">
-                            <a href="{$wa_app_url}contact/new/?call={$call.id|default:""|escape}" class="small"><i class="icon10 add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i>[`Create or update contact`]</a>
+                            <a href="{$wa_app_url}contact/new/?call={$call.id|default:""|escape}&phone={urlencode($call.plugin_client_number)}" class="small"><i class="icon10 add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i>[`Create or update contact`]</a>
                         </div>
                     {/if}
                 </div>

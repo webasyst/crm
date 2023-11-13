@@ -263,7 +263,7 @@
                         </div>
                     </div>
                     <div class="dropdown" id="dropdown-c-name">
-                        <a href="javascript:void(0);" class="dropdown-toggle without-arrow c-name" type="button">
+                        <a href="javascript:void(0);" class="dropdown-toggle without-arrow c-name">
                             <span class="icon size-14"><i class="fas fa-ellipsis-h"></i></span>
                         </a>
                         <div class="dropdown-body right">
@@ -557,7 +557,7 @@
                         <button class="button light-gray rounded js-messages-list--to-bottom-button">
                             <i class="fas fa-angle-down"></i>
                         </button>
-                        <div class="flexbox middle custom-p-16 source-not-found">[`Deal source disabled`]</div>
+                        <div class="flexbox middle custom-p-16 source-not-found">[`Oops, sorry, this message source is disabled :(`]</div>
                     </section>
 
                     {elseif $conversation.contact_id && !empty($contacts[$conversation.contact_id])}
@@ -668,7 +668,7 @@
                         <button class="button light-gray rounded js-messages-list--to-bottom-button">
                             <i class="fas fa-angle-down"></i>
                         </button>
-                        <div class="flexbox middle custom-p-16 source-not-found">[`Deal source disabled`]</div>
+                        <div class="flexbox middle custom-p-16 source-not-found">[`Oops, sorry, this messenger is disabled :(`]</div>
                     </section>
                     {elseif $conversation.contact_id && !empty($contacts[$conversation.contact_id])}
                         <section class="c-reply-section">

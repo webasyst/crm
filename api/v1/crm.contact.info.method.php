@@ -15,7 +15,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
 
         $rights = $this->getCrmRights();
         if (!$rights->contactVaultId($contact['crm_vault_id'])) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $fields = $this->getContactData($contact);
@@ -115,7 +115,6 @@ class crmContactInfoMethod extends crmApiAbstractMethod
             'is_pinned'   => $this->isPinned($contact_id),
             'segments'    => $this->getSegments($contact_id),
             'tags'        => $this->getTags($contact_id),
-            'files'       => $this->getFiles($contact_id),
             'userpic'     => [
                 'thumb' => $this->getDataResourceUrl($contact->getPhoto2x(waRequest::get('userpic_size', 96, waRequest::TYPE_INT))),
             ],
@@ -191,7 +190,8 @@ class crmContactInfoMethod extends crmApiAbstractMethod
              ] + $field;
             switch ($field['id']) {
                 case 'address':
-                    $data = $contact->get($field['id'], 'short');
+                    $data = $contact->get($field['id']);
+                    $data = $this->formatAddress($data);
                     break;
                 case 'name':
                     $data = waContactNameField::formatName($contact, true);
@@ -248,7 +248,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                 } elseif ($field_object instanceof waContactPhoneField) {
                     $phone_formatted = $phone_formatter->format($value);
                     $field['values'][] = $phone_formatted;
-                    $row['data'] = $row['value'];
+                    $row['data'] = $this->doPhonePrefix($row['value']);
                     $row['value'] = $phone_formatted;
                 } elseif ($field_object instanceof waContactBirthdayField) {
                     $field['values'][] = $value;
@@ -365,11 +365,6 @@ class crmContactInfoMethod extends crmApiAbstractMethod
         return $this->prepareSegments((new crmSegmentModel)->getByContact($contact_id));
     }
 
-    protected function getFiles($contact_id)
-    {
-        return $this->prepareFiles((new crmFileModel)->getFilesByField(['contact_id' => $contact_id]));
-    }
-
     private function formatData($fields)
     {
         $result = [];
@@ -435,5 +430,40 @@ class crmContactInfoMethod extends crmApiAbstractMethod
         ]);
 
         return !!ifset($recent, 'is_pinned', 0);
+    }
+
+    /**
+     * @param $addresses
+     * @return array
+     */
+    private function formatAddress($addresses)
+    {
+        $address_fields = waContactFields::get('address')->getFields();
+        foreach ((array) $addresses as $key => $_address) {
+            $value = [];
+            foreach ($address_fields as $field) {
+                if ($field instanceof waContactHiddenField) {
+                    continue;
+                }
+
+                /** @var $field waContactField */
+                $f_id = $field->getId();
+                if (isset($_address['data'][$f_id])) {
+                    if (in_array($f_id, ['country', 'region'])) {
+                        $tmp = trim($field->format($_address['data'][$f_id], 'value', $_address['data']));
+                    } else {
+                        $tmp = (string) $_address['data'][$f_id];
+                    }
+                    if (!in_array($f_id, ['country', 'region', 'zip', 'street', 'city'])) {
+                        $tmp = $field->getName().' '.$tmp;
+                    }
+                    $value[$f_id] = $tmp;
+                }
+            }
+
+            $addresses[$key]['value'] = implode(', ', array_filter($value, 'strlen'));
+        }
+
+        return $addresses;
     }
 }

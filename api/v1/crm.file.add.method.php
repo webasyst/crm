@@ -45,7 +45,7 @@ class crmFileAddMethod extends crmApiAbstractMethod
             }
         }
         if (!$this->getCrmRights()->contactOrDeal($cnt_dl_id)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         /** download to temp directory */

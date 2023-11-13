@@ -32,7 +32,7 @@ return array(
     'contact/vault/<id>/?'                            => 'spaLayout/',
     'contact/responsible/<id>/?'                      => 'spaLayout/',
     'contact/tag/<id>/?'                              => 'spaLayout/',
-    'contact/new/?'                                   => 'contact/new',
+    'contact/new/?'                                   => 'spaLayout/',
     'contact/<id>/<tab>/?'                            => 'spaLayout/',
     'contact/<id>/?'                                  => 'spaLayout/',
     'frame/contact/<id>/?'                            => 'spaFrame/',

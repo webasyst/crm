@@ -10,7 +10,7 @@ class crmSegmentDeleteMethod extends crmApiAbstractMethod
 
         $segment = $this->getSegmentModel()->getSegment($segment_id);
         if (!$this->getCrmRights()->canEditSegment($segment)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         try {

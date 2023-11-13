@@ -18,26 +18,31 @@
 
 {if $f->getType() != "Hidden"}
     <tr class="{$tr_classes}" data-field-id="{$fid}"{if !$new_field} data-field-type="{$f->getType()}"{/if}>
-        <td class="min-width"><i class="fas fa-grip-vertical text-gray js-subfield-sort"></i></td>
+        <td class="min-width"><i class="fas fa-grip-vertical text-gray js-subfield-sort sort"></i></td>
         <td class="min-width">
             {if $f->getParameter('always_required')}
                 <input type="hidden" name="{$prefix}[{$fid}][_disabled]" value="">
-                <span class="wa-checkbox"><input type="checkbox" checked disabled>
-                    <span>
-                        <span class="icon">
-                            <i class="fas fa-check"></i>
+                <label>
+                    <span class="wa-checkbox">
+                        <input type="checkbox" checked disabled>
+                        <span>
+                            <span class="icon">
+                                <i class="fas fa-check"></i>
+                            </span>
                         </span>
                     </span>
-                </span>
+                </label>
             {else}
                 <input type="hidden" name="{$prefix}[{$fid}][_disabled]" value="1">
-                <span class="wa-checkbox"><input type="checkbox" id="enbl-{$uniqid}" name="{$prefix}[{$fid}][_disabled]" value=""{if !$f->getParameter('_disabled')} checked{/if}>
+                <label><span class="wa-checkbox">
+                    <input type="checkbox" id="enbl-{$uniqid}" name="{$prefix}[{$fid}][_disabled]" value=""{if !$f->getParameter('_disabled')} checked{/if}>
                     <span>
                         <span class="icon">
                             <i class="fas fa-check"></i>
                         </span>
                     </span>
                 </span>
+                </label>
             {/if}
         </td>
         <td>
@@ -72,9 +77,9 @@
             {/if}
 
             {if $new_field}
-                <div class="hide-when-field-disabled">
-                    <div class="wa-select">
-                        <select class="type-selector" name="{$prefix}[%FID%][_type]">
+                <div class="hide-when-field-disabled align-right">
+                    <div class="wa-select small custom-mr-0">
+                        <select class="not-styled type-selector" name="{$prefix}[%FID%][_type]">
                             <option value="string">[`Text (input)`]</option>
                             <option value="textarea">[`Text (textarea)`]</option>
                             <option value="number">[`Number (input)`]</option>
@@ -87,13 +92,13 @@
                     <div class="field-advanced-settings"></div>
                 </div>
             {else}
-                <div class="hide-when-field-enabled">
+                <div class="hide-when-field-enabled custom-mt-4" >
                     <input type="hidden" name="{$prefix}[{$fid}][_default_value_enabled]" value="{if ifset($default_value) !== null}1{/if}">
                     {if ifset($default_value) === null}
-                        <a href="javascript:void(0)" class="setup-default-value-link small hint inline-link"><b><i>[`Set default fixed value`]</i></b></a>
+                        <a href="javascript:void(0)" class="setup-default-value-link small hint inline-link">[`Set default fixed value`]</a>
                     {else}
-                        <a href="javascript:void(0)" class="setup-default-value-link hint inline-link"><b><i>[`Default fixed value:`]
-                                    <strong>{$default_value|escape}</strong></i></b></a>
+                        <a href="javascript:void(0)" class="setup-default-value-link hint inline-link">[`Default fixed value:`]
+                                    <strong>{$default_value|escape}</strong></a>
                     {/if}
                     <div class="hidden default-value-editor">
                         <div class="small">[`Default fixed value:`]</div>
@@ -105,7 +110,7 @@
                     </div>
                 </div>
                 {if $f->getParameter('app_id') === 'crm'}
-                    <div class="hide-when-field-disabled">
+                    <div class="hide-when-field-disabled align-right">
                         <div class="field-advanced-settings">
                             {wa_action app="crm" module="settings" action="fieldEditor" f=$f fid=$fid prefix=$prefix parent=$parent}
                         </div>

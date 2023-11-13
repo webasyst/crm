@@ -1,1 +1,0 @@
-import{_ as o}from"./ContactInfoFavorites.vue_vue_type_script_setup_true_lang-e1a57a3f.js";import"./main-ec0df6a4.js";import"./recentContacts-b91545dc.js";import"./ButtonFavorites.vue_vue_type_script_setup_true_lang-518e5029.js";export{o as default};

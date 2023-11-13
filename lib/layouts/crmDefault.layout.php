@@ -29,7 +29,8 @@ class crmDefaultLayout extends waLayout
             'contact_list_columns' => waUtils::jsonEncode($contact_list_columns),
             'contact_list_sort'    => waUtils::jsonEncode($contact_list_sort),
             'deal_list_filter'     => waUtils::jsonEncode($deal_list_filter),
-            'deal_list_sort'       => waUtils::jsonEncode($deal_list_sort)
+            'deal_list_sort'       => waUtils::jsonEncode($deal_list_sort),
+            'access_rights'        => waUtils::jsonEncode($this->getAccessRights()),
         ]);
     }
 
@@ -37,16 +38,17 @@ class crmDefaultLayout extends waLayout
     {
         /** default value */
         $contact_list_columns = [
-            ['field' => 'last_action', 'width' => 'm'],
-            ['field' => 'email', 'width' => 's'],
-            ['field' => 'tags', 'width' => 's']
+            ['field' => 'phone', 'width' => 'm'],
+            ['field' => 'email', 'width' => 'l'],
+            ['field' => 'tags', 'width' => 's'],
+            ['field' => 'create_datetime', 'width' => 's'],
         ];
         $contact_list_sort = [
-            'field' => 'last_action',
+            'field' => 'create_datetime',
             'asc'   => false
         ];
         $deal_list_sort = [
-            'field' => 'stage_id',
+            'field' => 'create_datetime',
             'asc'   => false
         ];
 
@@ -120,5 +122,15 @@ class crmDefaultLayout extends waLayout
         $source = $csm->getActiveEmailSource();
 
         return !empty($source);
+    }
+
+    protected function getAccessRights()
+    {
+        $user = wa()->getUser();
+        return [
+            'call'     => !($user->getRights('crm', 'calls') === crmRightConfig::RIGHT_CALL_NONE),
+            'invoice'  => !!$user->getRights('crm', 'manage_invoices'),
+            'is_admin' => $user->isAdmin('crm'),
+        ];
     }
 }

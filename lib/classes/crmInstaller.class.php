@@ -37,6 +37,7 @@ class crmInstaller
         $this->installEditRight();
         $this->installCountry();
         $this->installTemplates();
+        $this->pullLogsFromShop();
 
         // restore default locale adapter
         if (!$is_eng) {
@@ -630,6 +631,51 @@ class crmInstaller
                     $tpm->multipleInsert($t['template_params']);
                 }
             }
+        }
+    }
+
+    public function pullLogsFromShop()
+    {
+        if (!crmShop::appExists()) {
+            return;
+        }
+        $lm = new crmLogModel();
+
+        $res = $lm->query('SELECT * FROM crm_log LIMIT 1')->fetch();
+        if (!empty($res)) {
+            return;
+        }
+
+        $limit = 1000000;
+        $offset = 0;
+
+        $startTime=time();
+        try {
+            while(time() - $startTime < 10) {
+                $res = $lm->query("
+                    INSERT IGNORE INTO crm_log (id, create_datetime, actor_contact_id, action, contact_id, object_id, object_type)
+                    SELECT l.id, l.`datetime` AS create_datetime, 
+                        IFNULL(l.contact_id, 0) AS actor_contact_id, l.action_id AS action, o.contact_id, l.id AS object_id, 'ORDER_LOG' AS object_type
+                    FROM shop_order_log l
+                    INNER JOIN shop_order o ON l.order_id=o.id
+                    ORDER BY l.id DESC
+                    LIMIT i:limit OFFSET i:offset
+                ",
+                [
+                    'limit' => $limit,
+                    'offset' => $offset,
+                ]);
+                if (!$res->affectedRows()) {
+                    break;
+                }
+                $offset += $limit;
+            }
+        } catch (waException $ex) {
+            $error = join(PHP_EOL, [
+                $ex->getMessage(),
+                $ex->getTraceAsString()
+            ]);
+            waLog::log($error, 'crm/install.error.log');
         }
     }
 }

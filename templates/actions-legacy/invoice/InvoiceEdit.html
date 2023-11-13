@@ -81,26 +81,41 @@
                     </div>
                 </div>
             </div>
+
+            {if $deal}
             <div class="field">
                 <div class="name">[`Deal`]</div>
                 <div class="value">
-                    <div class="c-deal-toggle js-deal-toggle">
-                    {if $deal}
-                        <span class="bold js-deal-name">{$deal.name|escape}</span>
-                        <a class="inline-link js-change-deal" href="javascript:void(0);"><b><i><span class="js-label-deal" data-change-text="[`прикрепить к другой сделке`]">[`прикрепить к другой сделке`]</span></i></b></a>
-                        <span class="c-change-toggle js-detach-deal" title="[`Отвязать от сделки`]"><i class="icon16 close"></i></span>
-                    {elseif !empty($clean_data.deal)}
-                        {include file="templates/actions-legacy/message/MessageConversation.dealSelector.inc.html"
-                            deal = $clean_data.deal|default:[]
-                            funnels = $clean_data.funnels|default:[]
-                            stages = $clean_data.stages|default:[]
-                            show_save_button = true
-                        inline}
-                    {/if}
-                        <input name="invoice[deal_id]" type="hidden" value="{$invoice.deal_id}">
+            
+                    <div class="c-message-conversation-page">
+                        <div class="c-conversation-header" style="padding: 0;">
+                            <div class="c-conversation-deal" style="margin: 0;">
+                                <div class="deal-form">
+                                    <div class="c-deal-toggle js-deal-toggle">
+                                        {if $deal}
+                                            <span class="bold js-deal-name">{$deal.name|escape}</span>
+{* 83.6957 *}
+{*                                            <a class="inline-link js-change-deal" href="javascript:void(0);"><b><i><span class="js-label-deal" data-change-text="[`прикрепить к другой сделке`]">[`прикрепить к другой сделке`]</span></i></b></a>*}
+{*                                            <span class="c-change-toggle js-detach-deal" title="[`Отвязать от сделки`]"><i class="icon16 close"></i></span>*}
+{*                                        {elseif !empty($clean_data.deal)}*}
+{*                                            {include file="templates/actions-legacy/message/MessageConversation.dealSelector.inc.html"*}
+{*                                                deal = $clean_data.deal|default:[]*}
+{*                                                funnels = $clean_data.funnels|default:[]*}
+{*                                                stages = $clean_data.stages|default:[]*}
+{*                                                show_save_button = true*}
+{*                                            inline}*}
+                                        {/if}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                                
                 </div>
             </div>
+            {/if}
+            <input name="invoice[deal_id]" type="hidden" value="{$invoice.deal_id}">
+
             <div class="field">
                 <div class="name">[`Currency`]</div>
                 <div class="value">
@@ -148,7 +163,7 @@
 
                         <div class="c-tax-dropdown js-tax-dropdown {if !empty($_is_changed)}is-changed{/if}">
                             {if $company}
-                                <input class="c-tax-percent-field js-product-tax-percent" type="text" value="{if !empty($_item.tax_percent) && $_item.tax_type != "NONE"}{floatval($_item.tax_percent)}%{else}[`without`] {$company["tax_name"]}{/if}" readonly>
+                                <input class="c-tax-percent-field js-product-tax-percent" type="text" value="{if !empty($_item.tax_percent) && $_item.tax_type != "NONE"}{floatval($_item.tax_percent)}%{else}[`without`] {$company["tax_name"]|escape}{/if}" readonly>
                             {/if}
                             <input class="js-product-tax-type" type="hidden" value="{$_item.tax_type|default:""}">
                             <ul class="c-hidden-list ui-menu js-hidden-list"></ul>
@@ -324,7 +339,8 @@
                     empty_contact: "[`Contact is required`]",
                     deal_detach_title: "[`Detach from deal`]",
                     deal_detach_text: "[`Вы действительно хотите открепить этот счёт от сделки “<strong>%s</strong>”?`]",
-                    deal_detach_confirm_button: "[`Detach`]"
+                    deal_detach_confirm_button: "[`Detach`]",
+                    deal_empty: "[`Empty`]"
                 }
             });
         })(jQuery);

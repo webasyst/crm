@@ -10,7 +10,7 @@ class crmMessageListMethod extends crmApiAbstractMethod
     {
         $conversation_id = waRequest::get('conversation_id', 0, waRequest::TYPE_INT);
         if (!empty($conversation_id) && !$this->getCrmRights()->canViewConversation($conversation_id)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
         $conversation = $this->getConversationModel()->getConversation($conversation_id);
         if (empty($conversation)) {

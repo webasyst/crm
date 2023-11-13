@@ -611,7 +611,7 @@ var crmSettingsForm = (function ($) {
     crmSettingsForm.prototype.clearValidateErrors = function () {
         var that = this,
             $form = that.$form;
-        $form.find('.error').removeClass('error');
+        $form.find('.state-error').removeClass('state-error');
         $form.find('.crm-errors-block').remove();
     };
 
@@ -635,9 +635,9 @@ var crmSettingsForm = (function ($) {
         $.each(plain_errors, function (name, errors) {
             var $error = $('<div class="crm-errors-block"></div>'),
                 $field = !name ? $() : $form.find('[name="' + name + '"]');
-            $field.addClass('error');
+            $field.addClass('state-error');
             $.each(errors, function (index, error) {
-                $error.append('<em class="errormsg">' + error + '</em>');
+                $error.append('<span class="errormsg">' + error + '</span>');
             });
             if ($field.length) {
                 $field.after($error);

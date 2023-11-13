@@ -1,1 +1,0 @@
-import{a3 as e}from"./main-ec0df6a4.js";async function c(){var r;await e();const o=document.querySelector(".dialog-content"),t=o==null?void 0:o.querySelector(".state-error");o&&t&&(o.scrollTop=(t.offsetTop||((r=t.offsetParent)==null?void 0:r.offsetTop)||0)-200)}export{c as s};

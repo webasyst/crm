@@ -59,7 +59,9 @@ class crmInvoiceDealAttachDialogAction extends crmViewAction
     protected function checkDealAccess($deal_id)
     {
         $deal = null;
-        if ($deal_id > 0) {
+        if (empty($deal_id)) {
+            return;
+        } elseif ($deal_id > 0) {
             $deal = $this->getDealModel()->getById($deal_id);
         }
         if (!$deal) {

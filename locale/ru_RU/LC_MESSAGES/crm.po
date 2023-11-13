@@ -88,6 +88,9 @@ msgstr "Имя"
 msgid "Signed up"
 msgstr "Зарегистрирован"
 
+msgid "Created"
+msgstr "Создан"
+
 msgid "All users"
 msgstr "Все пользователи"
 
@@ -481,6 +484,12 @@ msgstr "180 дней"
 msgid "365 days"
 msgstr "365 дней"
 
+msgid "%s day"
+msgid_plural "%s days"
+msgstr[0] "%s день"
+msgstr[1] "%s дня"
+msgstr[2] "%s дней"
+
 msgid "Enter date..."
 msgstr "Выберите дату..."
 
@@ -871,6 +880,9 @@ msgstr "Статус"
 msgid "Public link"
 msgstr "Общедоступная ссылка"
 
+msgid "Link"
+msgstr "Ссылка"
+
 msgid "A CRM settlement is required to publish invoices."
 msgstr "Для публикации счетов требуется поселение CRM."
 
@@ -886,11 +898,14 @@ msgstr "Отвергнуть платеж"
 msgid "Refund"
 msgstr "Возврат"
 
+msgid "Make a refund"
+msgstr "Сделать возврат"
+
 msgid "Cancel payment"
 msgstr "Отменить платеж"
 
 msgid "Mark as paid"
-msgstr "Оплачен"
+msgstr "Отметить оплаченным"
 
 msgid "Return to draft"
 msgstr "Вернуть в черновики"
@@ -2059,6 +2074,9 @@ msgstr "Неизвестный"
 msgid "Read"
 msgstr "Прочитано"
 
+msgid "not read"
+msgstr "не прочитано"
+
 msgid "Unsubscribed"
 msgstr "Отписался"
 
@@ -2464,6 +2482,9 @@ msgstr "Нет сообщений"
 msgid "Reminders not added"
 msgstr "Напоминания не добавлены"
 
+msgid "All reminders are completed"
+msgstr "Все напоминания выполнены"
+
 msgid "User has no chats"
 msgstr "У пользователя нет чатов"
 
@@ -2568,6 +2589,12 @@ msgstr "Источник сделок не найден"
 
 msgid "Deal source disabled"
 msgstr "Источник сделок отключен"
+
+msgid "Oops, sorry, this messenger is disabled :("
+msgstr "Ой, извините, этот мессенджер отключен :("
+
+msgid "Oops, sorry, this message source is disabled :("
+msgstr "Ой, извините, этот источник сообщений отключен :("
 
 msgid "Change deal stage"
 msgstr "Изменение этапа сделки"
@@ -3082,6 +3109,9 @@ msgstr "Или <i>вручную</i> создавайте сделки в бек
 msgid "No PBX plugins installed."
 msgstr "Плагины для IP-телефонии не установлены."
 
+msgid "The whole history of phone calls with your customers will be displayed here"
+msgstr "Здесь будет видна вся история телефонных разговоров с вашими клиентами"
+
 msgid "Install and set up <a href=\"%s\">IP telephony integration plugins</a>."
 msgstr "Установите и настройте <a href=\"%s\">плагины для интеграции с IP-телефонией</a>."
 
@@ -3117,6 +3147,12 @@ msgstr "Сохраняйте переписку с клиентом в исто�
 
 msgid "Add this address to the “CC” field when sending a message to the client to get the message copy saved in the deal history."
 msgstr "Добавляйте этот адрес в копию, когда пишете клиенту, чтобы ваше письмо попало в историю сделки."
+
+msgid "Copy link"
+msgstr "Скопировать"
+
+msgid "Copied"
+msgstr "Скопировано"
 
 msgid "copied to clipboard"
 msgstr "скопировано в буфер обмена"
@@ -3396,6 +3432,9 @@ msgstr "Название уведомления"
 
 msgid "Recipient"
 msgstr "Получатель"
+
+msgid "Payment recipient"
+msgstr "Получатель платежа"
 
 msgid "Set the owner"
 msgstr "Назначить ответственного"
@@ -3907,8 +3946,8 @@ msgstr "Изменить компанию"
 msgid "To receive and handle messages from clients %sset up a message source%s"
 msgstr "Чтобы получать и обрабатывать сообщения от клиентов необходимо %sнастроить источники сообщений%s"
 
-msgid "To receive and handle messages from clients set up a message source"
-msgstr "Чтобы получать и обрабатывать сообщения от клиентов необходимо настроить источники сообщений"
+msgid "To receive and handle messages from clients set up a message source."
+msgstr "Чтобы получать и обрабатывать сообщения от клиентов, настройте источники сообщений."
 
 msgid "Write SMS to %s"
 msgstr "Написать SMS на %s"
@@ -3930,6 +3969,9 @@ msgstr "Укажите внутренний номер"
 
 msgid "No message sources configured."
 msgstr "Нет настроенных источников сообщений."
+
+msgid "Conversations with your clients will be displayed here"
+msgstr "Здесь будут видны переписки с вашими клиентами"
 
 msgid "Set up an email address to receive messages and deal requests."
 msgstr "Настройте адрес email, который будет использоваться для получения обращений от клиентов."
@@ -4258,7 +4300,7 @@ msgstr "Нет открытых сделок"
 msgid "%d open deal"
 msgid_plural "%d open deals"
 msgstr[0] "%d открытая сделка"
-msgstr[1] "%d открытых сделок"
+msgstr[1] "%d открытых сделки"
 msgstr[2] "%d открытых сделок"
 
 msgid "Are you sure you want to detach this conversation from the deal “<strong>%s</strong>”?"
@@ -4600,8 +4642,14 @@ msgstr "Размер файла превышает заданные ограни
 msgid "call"
 msgstr "звонок"
 
-msgid "To handle phone calls in CRM, install and set up <a class=\"js-disable-router\" href=\"%s\" target=\"_top\" >IP telephony integration plugins</a>."
-msgstr "Чтобы работать с телефонными звонками в CRM, установите и настройте <a class=\"js-disable-router\" href=\"%s\" target=\"_top\" >плагины для интеграции с IP-телефонией</a>."
+msgid "To handle phone calls in CRM, install and set up <a href=\"%s\" target=\"_top\" >IP telephony integration plugins</a>."
+msgstr "Чтобы работать с телефонными звонками в CRM, установите и настройте <a href=\"%s\" target=\"_top\" >плагины для интеграции с IP-телефонией</a>."
+
+msgid "To work with phone calls in CRM, you need to install and configure a plugin for the integration with an IP telephony provider."
+msgstr "Чтобы работать с телефонными звонками в CRM, нужно установить и настроить плагин интеграции с провайдером IP-телефонии."
+
+msgid "Connect IP telephony"
+msgstr "Подключить IP-телефонию"
 
 msgid "Download"
 msgstr "Скачать"
@@ -4737,3 +4785,27 @@ msgstr "В данных присутствуют неизвестные поля
 
 msgid "Please fill in the required fields"
 msgstr "Пожалуйста, заполните обязательные поля"
+
+msgid "for %s"
+msgstr "на %s"
+
+msgid "Expired"
+msgstr "Истек"
+
+msgid "Pending payment"
+msgstr "Ожидает оплаты"
+
+msgid "Payment deadline has expired"
+msgstr "Истек срок оплаты"
+
+msgid "You do not have sufficient rights to view this conversation"
+msgstr "Недостаточно прав для просмотра этой переписки"
+
+msgid "Connect messengers"
+msgstr "Подключить мессенджеры"
+
+msgid "Connect email"
+msgstr "Подключить email"
+
+msgid "Out of range value"
+msgstr "Вне допустимого диапазона"

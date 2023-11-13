@@ -24,7 +24,7 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
         if (!$contact->exists()) {
             throw new waAPIException('not_found', 'Contact not found', 404);
         } else if (!$this->getCrmRights()->contactEditable($contact)) {
-            throw new waAPIException('forbidden', 'Access denied', 403);
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         if (
@@ -341,15 +341,21 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
                 $this->data['company_contact_id'] = $this->getCompanyIdByName($this->data['company']);
             }
         }
-        if (empty($this->data['name'])) {
+
+        $one_name_field = wa()->getSetting('one_name_field', '', 'crm');
+        if ($one_name_field) {
+            $name = explode(' ', $this->data['name']);
+            $name_order = waContactNameField::getNameOrder();
+            foreach ($name_order as $_part) {
+                if ($_name = array_shift($name)) {
+                    $this->data[$_part] = $_name;
+                }
+            }
+        } else {
             if ($is_company) {
                 $this->data['name'] = ifset($this->data, 'company', '');
             } else {
-                $this->data['name'] = implode(' ', [
-                    ifset($this->data, 'firstname', ''),
-                    ifset($this->data, 'middlename', ''),
-                    ifset($this->data, 'lastname', '')
-                ]);
+                $this->data['name'] = waContactNameField::formatName($this->data, true);
             }
         }
 
@@ -365,9 +371,11 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
             }
             if (is_array($_error)) {
                 foreach ($_error as $key => $_val) {
+                    $_value = ifset($this->data, $_field_name, '');
+                    $_value = (is_array($_value) ? ifset($_value, $key, '') : '');
                     $error_fields[] = [
                         'field' => $_field_name,
-                        'value' => ifset($this->data, $_field_name, $key, ''),
+                        'value' => $_value,
                         'code'  => 'field_invalid',
                         'description' => ifset($_error, $key, '')
                     ];
