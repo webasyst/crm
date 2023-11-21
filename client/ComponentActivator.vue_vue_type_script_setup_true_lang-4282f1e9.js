@@ -1,0 +1,1 @@
+import{d as n,a as o,aC as r,aI as i,P as u,r as c,f as l}from"./main-ad3d4b2a.js";const _=n({__name:"ComponentActivator",setup(m){const t=o(!1),s=r(i()),a=u(s,e=>{e&&(t.value=!0,a())});return(e,f)=>t.value?c(e.$slots,"default",{key:0}):l("",!0)}});export{_};

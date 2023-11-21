@@ -56,7 +56,7 @@ class crmReminderSaveController extends crmJsonController
         if ($data['contact_id'] && $data['contact_id'] < 0) {
             $dm = new crmDealModel();
             if (!$dm->getById(abs($data['contact_id']))) {
-                throw new waException('Deal not found');
+                throw new waException(_w('Deal not found'));
             }
         }
         return $errors;

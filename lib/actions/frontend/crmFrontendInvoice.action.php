@@ -9,7 +9,7 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
     {
         $hash = waRequest::param('hash', waRequest::post('hash', null, waRequest::TYPE_STRING_TRIM), waRequest::TYPE_STRING_TRIM);
         if (!$hash) {
-            throw new waException('Invoice not found', 404);
+            throw new waException(_w('Invoice not found'), 404);
         }
         $im = new crmInvoiceModel();
         $iim = new crmInvoiceItemsModel();
@@ -18,11 +18,11 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
 
         $id = intval(substr($hash, 16, -16));
         if (!$id) {
-            throw new waException('Invoice not found', 404);
+            throw new waException(_w('Invoice not found'), 404);
         }
         $this->invoice = $im->getById($id);
         if (!$this->invoice || $hash != crmHelper::getInvoiceHash($this->invoice)) {
-            throw new waException('Invoice not found', 404);
+            throw new waException(_w('Invoice not found'), 404);
         }
         $invoices = (array)wa()->getStorage()->get('crm_frontend_invoices');
         $invoices[$id] = 1;

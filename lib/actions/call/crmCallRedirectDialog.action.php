@@ -10,7 +10,7 @@ class crmCallRedirectDialogAction extends crmBackendViewAction
         $call = $call_model->getById($call_id);
 
         if (!$call) {
-            throw new waException('Call not found', 404);
+            throw new waException(_w('Call not found'), 404);
         }
         $call['client_number'] = $this->formatNumber($call['plugin_client_number']);
 

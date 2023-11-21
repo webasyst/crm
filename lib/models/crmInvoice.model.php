@@ -29,7 +29,7 @@ class crmInvoiceModel extends crmModel
         $invoice = $this->getInvoice($invoice_id);
 
         if (!$invoice) {
-            throw new waException('Invoice not found', 404);
+            throw new waException(_w('Invoice not found'), 404);
         }
 
         $cm = new crmCompanyModel();

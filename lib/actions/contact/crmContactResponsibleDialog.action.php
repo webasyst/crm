@@ -15,7 +15,7 @@ class crmContactResponsibleDialogAction extends waViewAction
         }
 
         if (empty($contact) || !$contact->exists()) {
-            throw new waException('Contact not found', 404);
+            throw new waException(_w('Contact not found'), 404);
         }
 
         // Responsible currently assigned to this contact

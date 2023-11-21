@@ -72,7 +72,7 @@ class crmSettingsFunnelEditSaveController extends crmJsonController
             $action = 'funnel_edit';
 
             if (!empty($funnel['id']) && !($old_funnel = $fm->getById($funnel['id']))) {
-                throw new waException('Note not found');
+                throw new waException(_w('Note not found'));
             }
             $old_stages = $fsm->getStagesByFunnel($funnel['id']);
             $edited_stages = array();

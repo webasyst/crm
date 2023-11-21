@@ -3802,6 +3802,18 @@ msgstr "Недостаточно прав для чтения сообщения
 msgid "Deal not found"
 msgstr "Сделка не найдена"
 
+msgid "Contact not found"
+msgstr "Контакт не найден"
+
+msgid "Invoice not found"
+msgstr "Счет не найден"
+
+msgid "Call not found"
+msgstr "Звонок не найден"
+
+msgid "Note not found"
+msgstr "Заметка не найдена"
+
 msgid "<p><br></p></b><br><section data-role=\"c-email-signature\">:SIGNATURE:</section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>"
 msgstr "<p><br></p></b><br><section data-role=\"c-email-signature\">:SIGNATURE:</section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: написал:</p><blockquote>:BODY:</blockquote>"
 

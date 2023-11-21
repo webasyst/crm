@@ -15,7 +15,7 @@ class crmCallRecordUrlMethod extends crmApiAbstractMethod
         /** @var crmPluginTelephony $plugin */
         $plugin = wa('crm')->getConfig()->getTelephonyPlugins($plugin_id);
         if (!$plugin) {
-            throw new waAPIException('invalid_param', 'Plugin not exists', 400);
+            throw new waAPIException('invalid_param', 'Plugin does not exist', 400);
         }
 
         try {

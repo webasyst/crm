@@ -14,7 +14,7 @@ class crmContactUnpinMethod extends crmApiAbstractMethod
         } elseif (!is_numeric($contact_id)) {
             throw new waAPIException('invalid_param', 'Invalid contact ID', 400);
         } elseif ($contact_id < 1) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         }
 
         try {

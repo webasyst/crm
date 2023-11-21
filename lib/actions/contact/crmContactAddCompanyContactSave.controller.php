@@ -12,7 +12,7 @@ class crmContactAddCompanyContactSaveController extends crmJsonController
         $contact = new crmContact($client['id']);
 
         if (empty($contact) || !$contact->exists()) {
-            $this->notFound('Contact not found');
+            $this->notFound(_w('Contact not found'));
         }
         if ($contact['is_company'] > 0) {
             throw new waException('This contact is a company', 403);

@@ -11,7 +11,7 @@ class crmNoteUpdateMethod extends crmApiAbstractMethod
         $content = trim($content);
         $note_id = (int) $this->get('id', true);
         if ($note_id < 1) {
-            throw new waAPIException('non_found', 'Note not found', 404);
+            throw new waAPIException('non_found', _w('Note not found'), 404);
         } else if (empty($content)) {
             throw new waAPIException('required_param', 'Required parameter is missing: content', 400);
         }
@@ -19,7 +19,7 @@ class crmNoteUpdateMethod extends crmApiAbstractMethod
         $cnm = $this->getNoteModel();
         $note = $cnm->getById($note_id);
         if ($note === null) {
-            throw new waAPIException('non_found', 'Note not found', 404);
+            throw new waAPIException('non_found', _w('Note not found'), 404);
         }
         if (!$this->getCrmRights()->contactOrDeal($note['contact_id'])) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);

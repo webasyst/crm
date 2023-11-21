@@ -104,7 +104,8 @@ var CRMSettingsCompanies = ( function($) {
                 axis: "x",
                 start: function(event,ui) {
                 },
-                stop: save
+                stop: save,
+                onUpdate: save
             });
 
             function save() {
@@ -217,7 +218,7 @@ var CRMSettingsCompanies = ( function($) {
             if (is_exist) {
                 $droparea.addClass(highlighted_class);
             } else {
-                $(document).off("myDragEnter", watcher);
+                $(document).off("myDragEnter", that.watcher);
             }
         }
 
@@ -228,7 +229,7 @@ var CRMSettingsCompanies = ( function($) {
             if (is_exist) {
                 $droparea.removeClass(highlighted_class);
             } else {
-                $(document).off("myDragLeave", watcher);
+                $(document).off("myDragLeave", that.watcher);
             }
         }
 
@@ -649,9 +650,9 @@ var CRMSettingsCompanies = ( function($) {
                         }
                     }
 
-                    $(document).on("keyup", watcher);
+                    $(document).on("keyup", that.watcher);
 
-                    function watcher(event) {
+                    that.watcher = function(event) {
                         var is_exist = $.contains(document, that.$wrapper[0]);
                         if (is_exist) {
                             var code = event.keyCode;
@@ -661,7 +662,7 @@ var CRMSettingsCompanies = ( function($) {
                                 }
                             }
                         } else {
-                            $(document).off("keyup", watcher);
+                            $(document).off("keyup", that.watcher);
                         }
                     }
                 };
@@ -741,7 +742,7 @@ var CRMSettingsCompanies = ( function($) {
                 if (is_exist) {
                     $droparea.addClass(highlighted_class);
                 } else {
-                    $(document).off("myDragEnter", watcher);
+                    $(document).off("myDragEnter", that.watcher);
                 }
             }
 
@@ -752,7 +753,7 @@ var CRMSettingsCompanies = ( function($) {
                 if (is_exist) {
                     $droparea.removeClass(highlighted_class);
                 } else {
-                    $(document).off("myDragLeave", watcher);
+                    $(document).off("myDragLeave", that.watcher);
                 }
             }
 

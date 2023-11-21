@@ -21,7 +21,7 @@ class crmDealEditAction extends crmBackendViewAction
         if ($deal_id) {
             $deal = $dm->getDeal($deal_id, false, true);
             if (!$deal) {
-                throw new waException('Deal not found');
+                throw new waException(_w('Deal not found'));
             }
             if ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
                 $this->accessDenied();

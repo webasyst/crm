@@ -17,7 +17,7 @@ class crmAtolonlinePluginReceiptController extends waJsonController
         $im = new crmInvoiceModel();
         $invoice = $im->getById($invoice_id);
         if (!$invoice_id || !$invoice) {
-            throw new waException('Invoice not found', 404);
+            throw new waException(_w('Invoice not found'), 404);
         }
 
         $crm_rights = new crmRights();

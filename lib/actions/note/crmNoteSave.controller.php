@@ -59,7 +59,7 @@ class crmNoteSaveController extends crmJsonController
             $id = $data['id'];
 
             if (!($note = $nm->getById($id))) {
-                throw new waException('Note not found');
+                throw new waException(_w('Note not found'));
             }
             if (!$this->getCrmRights()->contactOrDeal($note['contact_id'])) {
                 throw new waRightsException();

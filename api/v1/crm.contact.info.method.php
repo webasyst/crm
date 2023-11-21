@@ -10,7 +10,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
 
         $contact = new waContact($contact_id);
         if (!$contact->exists()) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         }
 
         $rights = $this->getCrmRights();
@@ -449,8 +449,10 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                 /** @var $field waContactField */
                 $f_id = $field->getId();
                 if (isset($_address['data'][$f_id])) {
-                    if (in_array($f_id, ['country', 'region'])) {
+                    if ($f_id === 'country') {
                         $tmp = trim($field->format($_address['data'][$f_id], 'value', $_address['data']));
+                    } elseif ($f_id === 'region') {
+                        $tmp = trim($field->format($_address['data'][$f_id], '', $_address['data']));
                     } else {
                         $tmp = (string) $_address['data'][$f_id];
                     }

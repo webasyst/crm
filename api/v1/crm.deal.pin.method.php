@@ -17,7 +17,7 @@ class crmDealPinMethod extends crmApiAbstractMethod
             $deal_id < 1
             || !$this->getDealModel()->getById((int) $deal_id)
         ) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         }
 
         try {

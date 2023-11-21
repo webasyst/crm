@@ -506,7 +506,11 @@ var CRMLog = ( function($) {
             //         $body.off("click", watcher);
             //     }
             // }
-            toggleHeight();
+            
+            setTimeout(() => {
+                toggleHeight();
+            }, 100)
+            
 
             // FUNCTIONS
 
@@ -536,6 +540,7 @@ var CRMLog = ( function($) {
             function toggleHeight() {
                 $textarea.css("min-height", 0);
                 var scroll_h = $textarea[0].scrollHeight;
+                console.log(scroll_h)
                 $textarea.css("min-height", scroll_h + "px");
             }
         };
@@ -727,6 +732,7 @@ var CRMLog = ( function($) {
         function toggleHeight() {
             $textarea.css("min-height", 0);
             var scroll_h = $textarea[0].scrollHeight;
+            console.log(scroll_h)
             $textarea.css("min-height", scroll_h + "px");
         }
 
@@ -1668,6 +1674,7 @@ var CRMTimelineReminder = ( function($) {
         function toggleHeight() {
             $textarea.css("min-height", 0);
             var scroll_h = $textarea[0].scrollHeight;
+            console.log(scroll_h)
             $textarea.css("min-height", scroll_h + "px");
         }
     };

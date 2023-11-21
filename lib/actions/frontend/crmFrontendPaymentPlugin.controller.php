@@ -14,7 +14,7 @@ class crmFrontendPaymentPluginController extends waController
         }
         $invoices = (array)wa()->getStorage()->get('crm_frontend_invoices');
         if (!isset($invoices[$order_id])) {
-            throw new waException('Invoice not found', 404);
+            throw new waException(_w('Invoice not found'), 404);
         }
         $im = new crmInvoiceModel();
         $iim = new crmInvoiceItemsModel();

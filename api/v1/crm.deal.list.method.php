@@ -45,9 +45,9 @@ class crmDealListMethod extends crmApiAbstractMethod
         }
         if ($contact_id) {
             if ($contact_id < 0) {
-                throw new waAPIException('not_found', 'Contact not found', 404);
+                throw new waAPIException('not_found', _w('Contact not found'), 404);
             } elseif (!(new crmContact($contact_id))->exists()) {
-                throw new waAPIException('not_found', 'Contact not found', 404);
+                throw new waAPIException('not_found', _w('Contact not found'), 404);
             }
             $this->list_params['participants'] = [$contact_id];
         }

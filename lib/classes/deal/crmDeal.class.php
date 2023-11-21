@@ -132,7 +132,7 @@ class crmDeal
             $deal_id = abs($contact_id);
             $dm = new crmDealModel();
             if (!$deal_id || !($deal = $dm->getById($deal_id))) {
-                throw new waException('Deal not found');
+                throw new waException(_w('Deal not found'));
             }
             $rm = new crmReminderModel();
             $reminder = $rm->select('*')->where(

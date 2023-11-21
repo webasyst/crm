@@ -1,7 +1,6 @@
 {$class = 'c-call-redirect'}
 {$dialog_id = uniqid($class)}
 
-<div class="{$class}-container">
     <div class="dialog {$class}" id="{$dialog_id}">
         <div class="dialog-background"></div>
         <div class="dialog-body">
@@ -28,7 +27,7 @@
                         <div class="value">
                             <div class="c-candidates-list">
                                 {foreach $candidates as $candidate}
-                                <label class="c-candidate"{if $candidate.not_exist} style="opacity: 0.5"{/if}>
+                                <div class="c-candidate"{if $candidate.not_exist} style="opacity: 0.5"{/if}>
                                     <input type="radio" name="redirect[to]" value="{$candidate.number|escape}"{if $candidate.not_exist} disabled{/if}>
                                     {if $call.plugin_icon}
                                         <i class="icon" title="{$call.plugin_name|escape}" style="background-image: url('{$call.plugin_icon|escape}'); background-size: 16px 16px;"></i>
@@ -45,17 +44,17 @@
                                         {/foreach}
                                     </div>
                                     {/if}
-                                </label>
+                                </div>
                                 {/foreach}
-                                <label class="c-candidate">
+                                <div class="c-candidate">
                                     <input class="js-other-candidate" type="radio" name="redirect[to]" />
                                     <span class="js-other-lbl">[`Other `]</span>
                                     <span class="c-contact js-candidate hidden">
                                         <span class="js-label"></span>
-                                        <i class="icon16 delete c-delete js-delete-candidate" title="[`Delete`]" style="margin-left: 6px; cursor: pointer"></i>
+                                        <span class="icon pointer custom-pl-8 delete c-delete js-delete-candidate" title="[`Delete`]"><i class="fas fa-trash-alt " ></i></span>
                                     </span>
                                     <input type="text" class="c-autocomplete js-autocomplete ui-autocomplete-input" style="display: none;" autofocus="autofocus" placeholder="[`Phone number`]" autocomplete="off" name="redirect[to]">
-                                </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -77,16 +76,10 @@
 
         <script>
             ( function($) {
-                var $body = $(window.top.document).find("body");
-                $.waDialog({
-                    html: $body.find('#{$dialog_id}').show(),
-                    onOpen: function($wrapper) {
+                var $wrapper = $('#{$dialog_id}')
                         new CRMCallRedirectDialog({
                             $wrapper: $wrapper
                         });
-                    }
-                });
             })(jQuery);
         </script>
     </div>
-</div>

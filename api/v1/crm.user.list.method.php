@@ -20,7 +20,7 @@ class crmUserListMethod extends crmApiAbstractMethod
         if ($can_own_contact_id) {
             $can_own_contact = new crmContact($can_own_contact_id);
             if (!$can_own_contact->exists()) {
-                throw new waAPIException('not_found', 'Contact not found', 404);
+                throw new waAPIException('not_found', _w('Contact not found'), 404);
             }
             $vault_id = $can_own_contact->get('crm_vault_id');
             if ($vault_id > 0) {
@@ -35,7 +35,7 @@ class crmUserListMethod extends crmApiAbstractMethod
         if ($can_own_deal_id) {
             $can_own_deal = $this->getDealModel()->getById($can_own_deal_id);
             if (empty($can_own_deal) || empty($can_own_deal['funnel_id'])) {
-                throw new waAPIException('not_found', 'Deal not found', 404);
+                throw new waAPIException('not_found', _w('Deal not found'), 404);
             }
             $funnel_rights = $rights_model->getByIds($crm_user_ids, 'crm', 'funnel.'.$can_own_deal['funnel_id']);
             for ($i = count($crm_users) - 1; $i >= 0; $i--) {

@@ -10,14 +10,14 @@ class crmMessageInfoMethod extends crmApiAbstractMethod
         $userpic_size = waRequest::get('userpic_size', 32, waRequest::TYPE_INT);
 
         if ($messgae_id < 1) {
-            throw new waAPIException('not_found', 'Message not found', 404);
+            throw new waAPIException('not_found', _w('Message not found'), 404);
         }
 
         $message = $this->getMessageModel()->getById($messgae_id);
         if (!$message) {
-            throw new waAPIException('not_found', 'Message not found', 404);
+            throw new waAPIException('not_found', _w('Message not found'), 404);
         } else if (empty($message['contact_id'])) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } else if (!$this->getCrmRights()->canViewMessage($message)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }

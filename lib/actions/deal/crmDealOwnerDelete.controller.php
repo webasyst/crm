@@ -16,7 +16,7 @@ class crmDealOwnerDeleteController extends crmJsonController
 
         $deal = $dm->getById($deal_id);
         if (!$deal) {
-            throw new waException('Deal not found');
+            throw new waException(_w('Deal not found'));
         }
 
         if ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {

@@ -13,13 +13,13 @@ class crmMessageAssociateDealSaveController extends crmJsonController
         $message = $this->getMessageModel()->getMessage($message_id);
 
         if (empty($message)) {
-            $this->errors = array('Message not found');
+            $this->errors = array(_w('Message not found'));
             return;
         }
 
         $contact = new crmContact($message['contact_id']);
         if (empty($contact) || !$contact->exists()) {
-            $this->errors = array('Contact not found');
+            $this->errors = array(_w('Contact not found'));
             return;
         }
         if (!$this->getCrmRights()->contact($contact)) {
@@ -44,7 +44,7 @@ class crmMessageAssociateDealSaveController extends crmJsonController
         if ($deal_data['id'] > 0) {
             $deal = $this->getDealModel()->getDeal($deal_data['id'], false, true);
             if (!$deal) {
-                $this->errors = array('Deal not found');
+                $this->errors = array(_w('Deal not found'));
                 return;
             }
             if (!$this->getCrmRights()->deal($deal)) {

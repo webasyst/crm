@@ -28,7 +28,7 @@ class crmInvoiceTransactionMethod extends crmApiAbstractMethod
         } else if (empty($action)) {
             throw new waAPIException('required_param', 'Required parameter is missing: action', 400);
         } elseif ($invoice_id < 1) {
-            throw new waAPIException('not_found', 'Invoice not found', 404);
+            throw new waAPIException('not_found', _w('Invoice not found'), 404);
         } elseif (!in_array($action, $actions)) {
             throw new waAPIException('invalid_param', 'Invalid parameter: action', 400);
         }
@@ -36,7 +36,7 @@ class crmInvoiceTransactionMethod extends crmApiAbstractMethod
         $cim = new crmInvoiceModel();
         $invoice = $cim->getById($invoice_id);
         if (!$invoice) {
-            throw new waAPIException('not_found', 'Invoice not found', 404);
+            throw new waAPIException('not_found', _w('Invoice not found'), 404);
         } else if (!$this->getCrmRights()->contact($invoice['contact_id'])) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         } else if (!method_exists('crmInvoice', $action)) {

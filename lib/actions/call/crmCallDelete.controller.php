@@ -17,7 +17,7 @@ class crmCallDeleteController extends crmJsonController
         $call = $cm->getById($call_id);
 
         if (!$call_id || !$call) {
-            throw new waException('Call not found');
+            throw new waException(_w('Call not found'));
         }
         if (!wa()->getUser()->isAdmin('crm')) {
             throw new waRightsException();

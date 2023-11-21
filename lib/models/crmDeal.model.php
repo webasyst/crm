@@ -93,7 +93,7 @@ class crmDealModel extends crmModel
         }
         $deal = $this->getById($deal_id);
         if (!$deal) {
-            throw new waException('Deal not found');
+            throw new waException(_w('Deal not found'));
         }
         $this->updateById($deal_id, array($field => $contact_id));
 

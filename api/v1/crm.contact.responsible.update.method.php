@@ -11,14 +11,14 @@ class crmContactResponsibleUpdateMethod extends crmApiAbstractMethod
         $contact_id = (int) $this->get('id', true);
 
         if ($contact_id < 1) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif ($user_id < 0) {
             throw new waAPIException('not_found', 'User not found', 404);
         }
 
         $contact = new crmContact($contact_id);
         if (!$contact->exists()) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (!$this->getCrmRights()->contactEditable($contact)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }

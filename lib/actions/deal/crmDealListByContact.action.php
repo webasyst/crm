@@ -9,7 +9,7 @@ class crmDealListByContactAction extends crmDealListAction
     {
         $contact_id = waRequest::get('id', null, waRequest::TYPE_INT);
         if (!$contact_id) {
-            throw new waException('Contact not found');
+            throw new waException(_w('Contact not found'));
         }
         $cm = new waContactModel();
         $employees = $cm->select('id')->where('company_contact_id='.(int)$contact_id)->fetchAll('id', true);

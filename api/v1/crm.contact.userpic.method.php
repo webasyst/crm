@@ -22,7 +22,7 @@ class crmContactUserpicMethod extends crmApiAbstractMethod
         } elseif (!in_array($content_type, ['image/jpeg', 'image/png'])) {
             throw new waAPIException('invalid_type', 'MIME type file not supported', 400);
         } elseif ($contact_id < 1 || !$this->getContactModel()->getById($contact_id)) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (!$this->getCrmRights()->contactEditable($contact_id)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }

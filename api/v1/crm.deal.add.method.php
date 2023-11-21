@@ -102,7 +102,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                 'field' => 'contact_id',
                 'value' => $contact_id,
                 'code'  => 'contact_id',
-                'description' => 'Contact not found',
+                'description' => _w('Contact not found'),
             ];
         }
 
@@ -114,7 +114,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
         $error_fields = [];
 
         if (!(new crmContact($deal_data['contact_id']))->exists()) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (!$this->getCrmRights()->contact($deal_data['contact_id'])) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }

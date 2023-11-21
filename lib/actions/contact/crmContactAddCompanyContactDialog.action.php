@@ -10,7 +10,7 @@ class crmContactAddCompanyContactDialogAction extends waViewAction
         }
         $contact = new waContact($contact_id);
         if (empty($contact) || !$contact->exists()) {
-            throw new waException('Contact not found', 404);
+            throw new waException(_w('Contact not found'), 404);
         }
         if ($contact['is_company'] > 0) {
             throw new waException('This contact is a company', 403);

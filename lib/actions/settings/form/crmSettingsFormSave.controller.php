@@ -68,6 +68,8 @@ class crmSettingsFormSaveController extends crmJsonController
                 // template of message is changed => user edit this template, so force it to smarty type
                 if ($message['tmpl'] != $old_message_tmpl) {
                     $message['is_smarty_tmpl'] = true;
+                } elseif (empty($message['is_smarty_tmpl']) && ifset($old_messages, $idx, 'is_smarty_tmpl', false)) {
+                    $message['is_smarty_tmpl'] = ifset($old_messages, $idx, 'is_smarty_tmpl', false);
                 }
             }
             unset($message);

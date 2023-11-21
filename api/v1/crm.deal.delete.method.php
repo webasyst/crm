@@ -9,7 +9,7 @@ class crmDealDeleteMethod extends crmApiAbstractMethod
         $deal_id = (int) $this->get('id', true);
 
         if (empty($deal_id) || $deal_id < 0) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif (!$this->getCrmRights()->dropUnallowedDeals([$deal_id], ['level' => crmRightConfig::RIGHT_DEAL_ALL])) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }

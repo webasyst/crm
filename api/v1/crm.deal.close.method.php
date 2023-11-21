@@ -18,14 +18,14 @@ class crmDealCloseMethod extends crmApiAbstractMethod
         } elseif (!in_array($status_id, ['WON', 'LOST', 'won', 'lost'])) {
             throw new waAPIException('unknown_value', 'Unknown value status_id', 400);
         } elseif ($deal_id < 1) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif (isset($lost_id) && !$this->getDealLostModel()->getById((int) $lost_id)) {
             throw new waAPIException('not_found', 'lost_id not found', 404);
         }
 
         $deal = $this->getDealModel()->getById($deal_id);
         if (!$deal) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }

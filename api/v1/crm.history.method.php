@@ -19,11 +19,11 @@ class crmHistoryMethod extends crmApiAbstractMethod
 
         if (!empty($contact_id)) {
             if ($contact_id < 1) {
-                throw new waAPIException('not_found', 'Contact not found', 404);
+                throw new waAPIException('not_found', _w('Contact not found'), 404);
             }
             $contact = new crmContact($contact_id);
             if (!$contact->exists()) {
-                throw new waAPIException('not_found', 'Contact not found', 404);
+                throw new waAPIException('not_found', _w('Contact not found'), 404);
             }
             $crm_vault_id = $contact['crm_vault_id'];
             if (!$this->getCrmRights()->contactVaultId($crm_vault_id)) {
@@ -41,11 +41,11 @@ class crmHistoryMethod extends crmApiAbstractMethod
         }
         if (!empty($deal_id)) {
             if ($deal_id < 1) {
-                throw new waAPIException('not_found', 'Deal not found', 404);
+                throw new waAPIException('not_found', _w('Deal not found'), 404);
             }
             $deal = $this->getDealModel()->getById($deal_id);
             if (!$deal) {
-                throw new waAPIException('not_found', 'Deal not found', 404);
+                throw new waAPIException('not_found', _w('Deal not found'), 404);
             } elseif (!$this->getCrmRights()->deal($deal_id)) {
                 throw new waAPIException('forbidden', _w('Access denied'), 403);
             }

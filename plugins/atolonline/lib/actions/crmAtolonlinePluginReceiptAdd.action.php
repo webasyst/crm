@@ -15,7 +15,7 @@ class crmAtolonlinePluginReceiptAddAction extends waViewAction
             $invoice = $im->getInvoice($invoice_id);
 
             if (!$invoice) {
-                throw new waException('Invoice not found', 404);
+                throw new waException(_w('Invoice not found'), 404);
             }
         } else {
             throw new waException('Invoice id is required', 404);

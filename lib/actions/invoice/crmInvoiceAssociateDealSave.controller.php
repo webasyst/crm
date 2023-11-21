@@ -9,20 +9,20 @@ class crmInvoiceAssociateDealSaveController extends crmJsonController
         $deal_id = (int) ifempty($deal, 'id', 0);
 
         if (!$invoice_id || $invoice_id < 0) {
-            $this->errors = ['No invoice identifier'];
+            $this->errors = [_w('No invoice identifier')];
             return;
         }
 
         $invoice = $this->getInvoiceModel()->getById($invoice_id);
         if (empty($invoice)) {
-            $this->errors = ['Invoice not found'];
+            $this->errors = [_w('Invoice not found')];
             return;
         }
 
         if ($deal_id > 0) {
             $deal = $this->getDealModel()->getDeal($deal_id, false, true);
             if (!$deal) {
-                $this->errors = ['Deal not found'];
+                $this->errors = [_w('Deal not found')];
                 return;
             } elseif (!$this->getCrmRights()->deal($deal)) {
                 $this->errors = [_w('Access to deal is denied.')];
@@ -56,6 +56,6 @@ class crmInvoiceAssociateDealSaveController extends crmJsonController
             return;
         }
 
-        $this->errors = ['Unknown error'];
+        $this->errors = [_w('Unknown error')];
     }
 }

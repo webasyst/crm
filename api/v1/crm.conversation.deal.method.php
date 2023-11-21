@@ -87,11 +87,11 @@ class crmConversationDealMethod extends crmMessageListMethod
 
         $contact = new crmContact($conversation['contact_id']);
         if (!$contact->exists()) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (!$this->getCrmRights()->contact($contact)) {
             throw new waAPIException('forbidden', 'Contact access denied', 403);
         } elseif (!$deal = $this->getDealModel()->getDeal($deal_id, false, true)) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif (!$this->getCrmRights()->deal($deal)) {
             throw new waAPIException('forbidden', 'Access to deal is denied', 403);
         }

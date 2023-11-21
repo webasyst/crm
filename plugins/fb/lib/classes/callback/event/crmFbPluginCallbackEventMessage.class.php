@@ -65,7 +65,7 @@ class crmFbPluginCallbackEventMessage extends crmFbPluginCallbackEvent
             return;
         }
         if (!$contact) {
-            crmFbPlugin::sendError('Contact not found');
+            crmFbPlugin::sendError(_w('Contact not found'));
             return;
         }
         // Ignore blocked users

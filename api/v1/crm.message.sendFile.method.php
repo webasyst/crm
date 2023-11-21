@@ -24,26 +24,26 @@ class crmMessageSendFileMethod extends crmApiAbstractMethod
         } else if (empty($file_name)) {
             throw new waAPIException('empty_file_name', 'Required parameter is missing: file_name', 400);
         } else if (!in_array($type, [self::FILE_TYPE_IMAGE, self::FILE_TYPE_OTHER])) {
-            throw new waAPIException('invalid_file_type', 'Invalid file type', 400);
+            throw new waAPIException('invalid_file_type', _w('Invalid file type'), 400);
         } else if (
             in_array(trim($file_name), ['.', '..'])
             || !preg_match('#^[^:*?"<>|/\\\\]+$#', $file_name)
         ) {
-            throw new waAPIException('invalid_file_name', 'Invalid file name', 400);
+            throw new waAPIException('invalid_file_name', _w('Invalid file name'), 400);
         }
 
         $message = $this->getMessageModel()->getById($message_id);
         if (!$message) {
-            throw new waAPIException('invalid_reply_message_id', 'Message not found', 400);
+            throw new waAPIException('invalid_reply_message_id', _w('Message not found'), 400);
         }
         if (!$this->getCrmRights()->contact($message['contact_id'])) {
             throw new waAPIException('access_denied', _w('Access denied'), 403);
         }
         if ($message['transport'] !== crmMessageModel::TRANSPORT_IM) {
-            throw new waAPIException('invalid_reply_message_id', 'Message was not sent via messenger', 400);
+            throw new waAPIException('invalid_reply_message_id', _w('Message was not sent via messenger'), 400);
         }
         if ($message['source_id'] < 1) {
-            throw new waAPIException('invalid_reply_message_id', 'Message source not found', 400);
+            throw new waAPIException('invalid_reply_message_id', _w('Message source not found'), 400);
         }
 
         $name = md5(uniqid(__METHOD__));
@@ -56,7 +56,7 @@ class crmMessageSendFileMethod extends crmApiAbstractMethod
         waFiles::create($temp_path, true);
         $n = file_put_contents($temp_path."/$file_name", $file);
         if (!$n) {
-            throw new waAPIException('server_error', 'Can\'t save the file', 500);
+            throw new waAPIException('server_error', _w('Can\'t save the file'), 500);
         }
 
         $source = crmSource::factory($message['source_id']);
@@ -65,7 +65,7 @@ class crmMessageSendFileMethod extends crmApiAbstractMethod
         if ($result['status'] === 'ok') {
             $this->response = ['message_id' => (int) ifset($result, 'response', 'message_id', 0)];
         } else {
-            $error = implode(' ', (array) ifempty($result, 'errors', ['Unknown error']));
+            $error = implode(' ', (array) ifempty($result, 'errors', [_w('Unknown error')]));
             throw new waAPIException('server_error', $error, 500);
         }
     }

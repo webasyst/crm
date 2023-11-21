@@ -13,7 +13,7 @@ class crmDealInfoMethod extends crmApiAbstractMethod
         $this->deal = $this->getDealModel()->getDeal($deal_id, true, true);
         
         if (empty($this->deal)) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         }
 
         $deal_access_level = $this->getCrmRights()->deal($this->deal);
@@ -182,17 +182,17 @@ class crmDealInfoMethod extends crmApiAbstractMethod
                     $_contact['email'] = $this->addFormattedEmailValues($_contact['email']);
                 }
                 if (!empty($_contact['address'])) {
+                    $short_address = $this->formatAddress($_contact['address']);
                     $_contact['address'] = array_map(function ($_address) use ($address_obj) {
-                        $addr_short = $address_obj->format($_address, 'short');
                         return [
-                            'value'   => ifempty($addr_short, 'value', ''),
+                            'value'   => ifempty($_address, 'value', ''),
                             'map_url' => $this->getUrlMap(
                                 $address_obj->format($_address, 'value'),
                                 ifset($_address, 'data', 'lng', null),
                                 ifset($_address, 'data', 'lat', null)
                             )
                         ];
-                    }, $_contact['address']);
+                    }, $short_address);
                 }
                 $deal_clients[] = [
                     'label'       => $_contact['label'],
@@ -260,5 +260,43 @@ class crmDealInfoMethod extends crmApiAbstractMethod
         ]);
 
         return !!ifset($recent, 'is_pinned', 0);
+    }
+
+    /**
+     * @param $addresses
+     * @return array
+     * @throws waException
+     */
+    private function formatAddress($addresses)
+    {
+        $address_fields = waContactFields::get('address')->getFields();
+        foreach ((array) $addresses as $key => $_address) {
+            $value = [];
+            foreach ($address_fields as $field) {
+                if ($field instanceof waContactHiddenField) {
+                    continue;
+                }
+
+                /** @var $field waContactField */
+                $f_id = $field->getId();
+                if (isset($_address['data'][$f_id])) {
+                    if ($f_id === 'country') {
+                        $tmp = trim($field->format($_address['data'][$f_id], 'value', $_address['data']));
+                    } elseif ($f_id === 'region') {
+                        $tmp = trim($field->format($_address['data'][$f_id], '', $_address['data']));
+                    } else {
+                        $tmp = (string) $_address['data'][$f_id];
+                    }
+                    if (!in_array($f_id, ['country', 'region', 'zip', 'street', 'city'])) {
+                        $tmp = $field->getName().' '.$tmp;
+                    }
+                    $value[$f_id] = $tmp;
+                }
+            }
+
+            $addresses[$key]['value'] = implode(', ', array_filter($value, 'strlen'));
+        }
+
+        return $addresses;
     }
 }

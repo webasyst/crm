@@ -18,7 +18,7 @@ class crmInvoiceRefundDialogAction extends crmViewAction
         $im = new crmInvoiceModel();
         $invoice = $im->getInvoice($invoice_id);
         if (!$invoice) {
-            throw new waException('Invoice not found', 404);
+            throw new waException(_w('Invoice not found'), 404);
         }
 
         // Parameters for events

@@ -27,14 +27,14 @@ class crmCallInitContactDialogAction extends crmBackendViewAction
 
         $contact = new crmContact($contact_id);
         if (empty($contact) || !$contact->exists()) {
-            throw new waException('Contact not found', 404);
+            throw new waException(_w('Contact not found'), 404);
         }
 
         if ($deal_id) {
             $dm = new crmDealModel();
             $deal = $dm->getDeal($deal_id);
             if (!$deal) {
-                throw new waException('Deal not found', 404);
+                throw new waException(_w('Deal not found'), 404);
             }
         }
 

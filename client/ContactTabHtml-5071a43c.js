@@ -1,0 +1,1 @@
+import{d as n,o,c as a,f as r}from"./main-ad3d4b2a.js";const c=["innerHTML"],p=n({__name:"ContactTabHtml",props:{tab:{}},setup(e){const t=e;return(s,m)=>t.tab.html?(o(),a("div",{key:0,innerHTML:t.tab.html},null,8,c)):r("",!0)}});export{p as default};

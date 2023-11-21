@@ -75,7 +75,7 @@ class crmDealMergeRunController extends crmJsonController
         $dm = new crmDealModel();
         $master = $dm->getById($master_id);
         if (!$master) {
-            throw new waException('Deal not found');
+            throw new waException(_w('Deal not found'));
         }
         $m = new waModel();
         $rm = new crmReminderModel();

@@ -10,7 +10,7 @@ class crmNoteDeleteController extends crmJsonController
         $note = $nm->getById($id);
 
         if (!$id || !$note) {
-            throw new waException('Note not found');
+            throw new waException(_w('Note not found'));
         }
         if (!$this->getCrmRights()->contactOrDeal($note['contact_id'])) {
             throw new waRightsException();

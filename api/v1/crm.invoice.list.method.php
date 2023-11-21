@@ -21,9 +21,9 @@ class crmInvoiceListMethod extends crmApiAbstractMethod
         if (!wa()->getUser()->getRights('crm', 'manage_invoices')) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif (!empty($contact_id) && $contact_id < 1) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (!empty($deal_id) && $deal_id < 1) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif (!empty($state_id) && !in_array($state_id, ['PENDING', 'PAID', 'REFUNDED', 'ARCHIVED', 'DRAFT', 'PROCESSING'])) {
             throw new waAPIException('invalid_param', 'Invalid parameter: state_id', 400);
         } elseif (!in_array($sort, ['create_datetime', 'update_datetime', 'payment_datetime'])) {

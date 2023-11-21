@@ -12,12 +12,12 @@ class crmDealCloseController extends crmJsonController
         $lost_text = waRequest::post('lost_text', null, waRequest::TYPE_STRING_TRIM);
 
         if (!$deal_id) {
-            throw new waException('Deal not found');
+            throw new waException(_w('Deal not found'));
         }
 
         $deal = $this->getDealModel()->getById($deal_id);
         if (!$deal) {
-            throw new waException('Deal not found');
+            throw new waException(_w('Deal not found'));
         } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
             $this->accessDenied();
         }

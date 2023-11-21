@@ -86,12 +86,12 @@ var CRMSettingsVaults = ( function($) {
             helper: "clone",
             items: "> .c-vault-item",
             axis: "y",
-            stop: save
+            stop: save,
+            onUpdate: save
         });
 
-        function save(event, ui) {
-            var $item = $(ui.item);
-
+        function save(ui, ui2) {
+            var $item = ui.item ? $(ui.item) : $(ui2.item);
             if (xhr) {
                 xhr.abort();
             }

@@ -16,7 +16,7 @@ class crmMessageDeleteController extends crmJsonController
         }
 
         if (empty($message)) {
-            throw new waException('Message not found', 404);
+            throw new waException(_w('Message not found'), 404);
         }
 
         $mm->delete($id);

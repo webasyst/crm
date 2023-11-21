@@ -37,7 +37,7 @@ var CRMCallRedirectDialog = ( function($) {
 
         that.$autocomplete.autocomplete({
             source: $.crm.app_url + "?module=autocomplete&type=user&phonecomplete=true",
-            appendTo: that.$wrapper,
+            appendTo: that.$autocomplete.parent(),
             minLength: 0,
             focus: function() {
                 return false;

@@ -14,7 +14,7 @@ class crmDealUnpinMethod extends crmApiAbstractMethod
         } elseif (!is_numeric($deal_id)) {
             throw new waAPIException('invalid_param', 'Invalid deal ID', 400);
         } elseif ($deal_id < 1) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         }
 
         try {

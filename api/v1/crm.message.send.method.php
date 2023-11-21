@@ -25,25 +25,25 @@ class crmMessageSendMethod extends crmApiAbstractMethod
 
         $message = $this->getMessageModel()->getMessage($reply_message_id);
         if (!$message) {
-            throw new waAPIException('invalid_reply_message_id', 'Message not found', 400);
+            throw new waAPIException('invalid_reply_message_id', _w('Message not found'), 400);
         } elseif ($message['deal_id'] > 0) {
             $deal = $this->getDealModel()->getDeal($message['deal_id']);
             if (!$this->getCrmRights()->deal($deal)) {
-                throw new waAPIException('access_denied', 'Deal access denied', 403);
+                throw new waAPIException('access_denied', _w('Deal access denied'), 403);
             }
         } elseif (!$this->getCrmRights()->contact($message['contact_id'])) {
             throw new waAPIException('access_denied', _w('Access denied'), 403);
         } elseif (!($message['source_id'] > 0 || $message['transport'] == crmMessageModel::TRANSPORT_EMAIL)) {
-            throw new waAPIException('access_denied', 'Access denied. Reply is not allowed', 403);
+            throw new waAPIException('access_denied', _w('Access denied. Reply is not allowed'), 403);
         }
 
         if ($message['transport'] === crmMessageModel::TRANSPORT_IM) {
             if ($message['source_id'] < 1) {
-                throw new waAPIException('invalid_reply_message_id', 'Message source not found', 400);
+                throw new waAPIException('invalid_reply_message_id', _w('Message source not found'), 400);
             }
             $source = crmSource::factory($message['source_id']);
             if (empty($source) || $source->isDisabled()) {
-                throw new waAPIException('source_switched_off', 'Source switched off', 400);
+                throw new waAPIException('source_switched_off', _w('Source switched off'), 400);
             }
             $data = [
                 'body' => $reply_body,
@@ -59,7 +59,7 @@ class crmMessageSendMethod extends crmApiAbstractMethod
             }
         } else {
             if (!in_array($content_type, ['plain-text', 'html'])) {
-                throw new waAPIException('invalid_content_type', 'Invalid content_type', 400);
+                throw new waAPIException('invalid_content_type', _w('Invalid content_type'), 400);
             } elseif ($content_type === 'plain-text') {
                 $reply_body = nl2br(htmlspecialchars($reply_body));
             }

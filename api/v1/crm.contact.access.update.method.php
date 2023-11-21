@@ -12,7 +12,7 @@ class crmContactAccessUpdateMethod extends crmApiAbstractMethod
         $vault_id  = ifset($_json, 'vault_id', null);
 
         if (!is_numeric($contact_id) || $contact_id < 1) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (isset($owner_ids, $vault_id)) {
             throw new waAPIException('invalid_data', 'One of the values is expected: owner_id or vault_id', 400);
         } elseif (isset($vault_id) && (!is_numeric($vault_id) || $vault_id < 0)) {
@@ -21,7 +21,7 @@ class crmContactAccessUpdateMethod extends crmApiAbstractMethod
 
         $contact = new crmContact($contact_id);
         if (!$contact->exists()) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (!$this->getCrmRights()->classifyContactAccess($contact)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif ($errors = $this->validate($owner_ids, $vault_id)) {

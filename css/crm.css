@@ -10280,8 +10280,9 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   display: none;
 }
 .c-reminders-page .c-reminder-content-area .c-add-form-wrapper .c-time-toggle .c-timepicker {
-  width: 38px;
+  width: 44px;
   caret-color: transparent;
+  padding-right: 0;
 }
 .c-reminders-page .c-reminder-content-area .c-add-form-wrapper .js-autocomplete-deal {
   max-width: 7.65rem;
@@ -17170,6 +17171,10 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 .c-call-redirect .crm-dialog-block .crm-dialog-content {
   min-height: 90px;
 }
+.c-call-redirect .field .ui-widget.ui-widget-content {
+  position: absolute;
+  padding: 0;
+}
 .c-call-redirect .field .name {
   width: 110px;
   padding-top: 6px;
@@ -17178,15 +17183,27 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   margin-left: 110px;
 }
 .c-call-redirect .field .value .c-candidates-list .c-candidate {
-  display: block;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -o-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 0.5rem;
   padding: 6px 10px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color-hr);
 }
 .c-call-redirect .field .value .c-candidates-list .c-candidate:last-child {
   border-bottom: none;
 }
 .c-call-redirect .field .value .c-candidates-list .c-candidate:hover {
-  background-color: #ffffe5;
+  background-color: var(--highlighted-yellow);
 }
 .c-call-redirect .field .value .c-candidates-list .c-candidate .c-autocomplete {
   display: inline-block;
@@ -17203,6 +17220,18 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .c-call-redirect .field .value .c-contact {
   margin-right: 5px;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-lines: multiple;
+  -moz-box-lines: multiple;
+  -o-box-lines: multiple;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 .c-call-redirect .field .value .c-contact .userpic20 {
   vertical-align: top;

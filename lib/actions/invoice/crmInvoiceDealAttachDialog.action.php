@@ -65,7 +65,7 @@ class crmInvoiceDealAttachDialogAction extends crmViewAction
             $deal = $this->getDealModel()->getById($deal_id);
         }
         if (!$deal) {
-            $this->notFound('Deal not found');
+            $this->notFound(_w('Deal not found'));
         } elseif (!$this->getCrmRights()->deal($deal)) {
             $this->accessDenied();
         }

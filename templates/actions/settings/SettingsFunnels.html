@@ -334,7 +334,7 @@
                     funnel_id: "{$funnel.id}",
                     stage_html: {$_stage_template|json_encode},
                     locales: {
-                        delete_confirm_title: "[`Delete`] {$funnel.name|default: ''|escape}",
+                        delete_confirm_title: "[`Delete`] {$funnel.name|stripslashes|escape|default: ''}",
                         delete_confirm_text: "[`Are you sure?`]",
                         delete_confirm_button: "[`Delete`]",
                         delete_cancel_button: "[`Cancel`]"

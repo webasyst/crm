@@ -39,7 +39,7 @@ class crmReminderAddController extends crmJsonController
             $dm = new crmDealModel();
             $deal = $dm->getById($deal_id);
             if (!$deal_id) {
-                throw new waException('Deal not found');
+                throw new waException(_w('Deal not found'));
             }
             if (!$this->getCrmRights()->deal($deal)) {
                 throw new waRightsException();

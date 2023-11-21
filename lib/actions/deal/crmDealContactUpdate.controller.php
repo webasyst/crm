@@ -15,7 +15,7 @@ class crmDealContactUpdateController extends crmContactSaveController
         }
         $id = (int)$this->getRequest()->request('deal_id');
         if (!$id) {
-            throw new waException('Deal not found');
+            throw new waException(_w('Deal not found'));
         }
         $deal = $this->getDealModel()->getById($id);
         if ($this->getCrmRights()->deal($deal, true) <= crmRightConfig::RIGHT_DEAL_VIEW) {

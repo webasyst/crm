@@ -12,9 +12,9 @@ class crmInvoiceInfoMethod extends crmApiAbstractMethod
         if (!wa()->getUser()->getRights('crm', 'manage_invoices')) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif ($id < 1) {
-            throw new waAPIException('not_found', 'Invoice not found', 404);
+            throw new waAPIException('not_found', _w('Invoice not found'), 404);
         } elseif (!$invoice = $cim->getInvoice($id)) {
-            throw new waAPIException('not_found', 'Invoice not found', 404);
+            throw new waAPIException('not_found', _w('Invoice not found'), 404);
         }
 
         $items = $this->filterData($invoice['items'], [

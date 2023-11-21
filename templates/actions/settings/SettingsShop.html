@@ -37,7 +37,7 @@
                             <span class="switch smaller" id="c-storefront-switch">
                                 <input type="checkbox" class="c-storefont-checkbox js-ibutton" id="js-ibutton-{$storefront@iteration}" name="{$_namespace}[checked]" value="1" {if $storefront.checked}checked{/if}>
                             </span>
-                            <label for="js-ibutton-{$storefront@iteration}" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">[`Disabled`]</label>
+                            <label for="js-ibutton-{$storefront@iteration}" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">{if $storefront.checked}[`Enabled`]{else}[`Disabled`]{/if}</label>
                         </div>
 
                         <div class="c-storefront-params-block" {if !$storefront.checked}style="display: none;"{/if}>

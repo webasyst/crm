@@ -265,6 +265,6 @@ class crmMessageBodyDialogAction extends crmViewAction
 
     private function messageNotFound()
     {
-        $this->notFound('Message not found');
+        $this->notFound(_w('Message not found'));
     }
 }

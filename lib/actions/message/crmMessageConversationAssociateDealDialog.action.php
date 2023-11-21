@@ -19,7 +19,7 @@ class crmMessageConversationAssociateDealDialogAction extends crmBackendViewActi
         $contact = new crmContact($conversation['contact_id']);
 
         if (empty($contact) || !$contact->exists()) {
-            throw new waException('Contact not found', 404);
+            throw new waException(_w('Contact not found'), 404);
         }
 
         $dm = new crmDealModel();
@@ -64,7 +64,7 @@ class crmMessageConversationAssociateDealDialogAction extends crmBackendViewActi
     protected function getContactDeals($contact_id)
     {
         if (!$contact_id) {
-            throw new waException('Contact not found', 404);
+            throw new waException(_w('Contact not found'), 404);
         }
         $cm = new waContactModel();
         $employees = $cm->select('id')->where('company_contact_id='.(int)$contact_id)->fetchAll('id', true);

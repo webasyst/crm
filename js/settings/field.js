@@ -26,11 +26,12 @@ var crmSettingsField = (function ($) {
             $block = that.$wrapper.find('.js-other-fields');
 
         $block.sortable({
-            handle: '.sort',
-            items: '.field',
-            axis: 'y',
-            tolerance: 'pointer',
-            delay: 200,
+            helper: "clone",
+            handle: ".sort",
+            items: "> .field",
+            axis: "y",
+            tolerance: "pointer",
+            //delay: 200,
             start: function(event,ui) {
                 item_index = ui.item.index();
             },
@@ -39,6 +40,10 @@ var crmSettingsField = (function ($) {
                     var fields = getSortArray($block);
                     saveSort(href, { fields: fields });
                 }
+            },
+            onUpdate: function(ui) {              
+                var fields = getSortArray($block);
+                saveSort(href, { fields: fields });  
             }
         });
 

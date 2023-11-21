@@ -162,14 +162,17 @@ var CRMSettingsCurrencies = (function ($) {
     CRMSettingsCurrencies.prototype.initCurrenciesSort = function () {
         var that = this,
             xhr = false;
-
-        that.$currenciesList.sortable({
+        
+        var $currenciesList = that.$wrapper.find(".js-currencies-list");
+        $currenciesList.sortable({
             distance: 10,
             handle: ".js-sort-toggle",
             helper: "clone",
             items: "> .c-currency",
             axis: "y",
-            stop: save
+            stop: save,
+            onUpdate: save,
+            
         });
 
         function save() {

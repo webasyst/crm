@@ -15,7 +15,7 @@ class crmContactResponsibleSaveController extends crmJsonController
         }
 
         if (empty($contact) || !$contact->exists()) {
-            throw new waException('Contact not found', 404);
+            throw new waException(_w('Contact not found'), 404);
         } else {
             $this->response = array('result' => 'ok');
             $isIncceptable = $contact->isResponsibleUserIncceptable($responsible_id);

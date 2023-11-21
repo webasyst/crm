@@ -10,17 +10,17 @@ class crmCallAssociateDealDialogAction extends crmBackendViewAction
         $call = $call_model->getById($call_id);
 
         if (!$call) {
-            throw new waException('Call not found', 404);
+            throw new waException(_w('Call not found'), 404);
         }
 
         if (empty($call['client_contact_id'])) {
-            throw new waException('A call without a client can not be linked to a deal', 404);
+            throw new waException(_w('A call without a client can not be linked to a deal'), 404);
         }
 
         $contact = new crmContact($call['client_contact_id']);
 
         if (empty($contact) || !$contact->exists()) {
-            throw new waException('Contact not found', 404);
+            throw new waException(_w('Contact not found'), 404);
         }
 
         $dm = new crmDealModel();
@@ -65,7 +65,7 @@ class crmCallAssociateDealDialogAction extends crmBackendViewAction
     protected function getContactDeals($contact_id)
     {
         if (!$contact_id) {
-            throw new waException('Contact not found', 404);
+            throw new waException(_w('Contact not found'), 404);
         }
         $cm = new waContactModel();
         $employees = $cm->select('id')->where('company_contact_id='.(int)$contact_id)->fetchAll('id', true);

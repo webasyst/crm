@@ -76,7 +76,8 @@ var CRMSettingsFunnels = ( function($) {
                 distance: 10,
                 items: "> li",
                 axis: "x",
-                stop: save
+                stop: save,
+                onUpdate: save
             });
 
             function save() {

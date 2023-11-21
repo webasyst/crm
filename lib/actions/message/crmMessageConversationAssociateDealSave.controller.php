@@ -19,7 +19,7 @@ class crmMessageConversationAssociateDealSaveController extends crmJsonControlle
 
         $contact = new crmContact($conversation['contact_id']);
         if (empty($contact) || !$contact->exists()) {
-            $this->errors = array('Contact not found');
+            $this->errors = array(_w('Contact not found'));
             return;
         }
         if (!$this->getCrmRights()->contact($contact)) {
@@ -36,7 +36,7 @@ class crmMessageConversationAssociateDealSaveController extends crmJsonControlle
         if ($deal['id'] > 0) {
             $deal = $this->getDealModel()->getDeal($deal['id'], false, true);
             if (!$deal) {
-                $this->errors = array('Deal not found');
+                $this->errors = array(_w('Deal not found'));
                 return;
             }
             if (!$this->getCrmRights()->deal($deal)) {

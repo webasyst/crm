@@ -21,11 +21,11 @@ class crmDealPatchMethod extends crmApiAbstractMethod
         $deal_id = (int) $this->get('id', true);
 
         if ($deal_id < 1) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif (empty($fields_data)) {
             throw new waAPIException('required_param', 'Required parameter is missing: field, value', 400);
         } elseif (!$deal = $this->getDealModel()->getDeal($deal_id, false, true)) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif (!$this->getCrmRights()->deal($deal)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif (!$this->validateFields($fields_data)) {

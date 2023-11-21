@@ -42,11 +42,11 @@ class crmContactPatchMethod extends crmApiAbstractMethod
     private function getContact($contact_id)
     {
         if ($contact_id < 1) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         }
         $contact = new waContact($contact_id);
         if (!$contact->exists()) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } else if (!$this->getCrmRights()->contactEditable($contact)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }

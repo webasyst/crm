@@ -9,7 +9,7 @@ class crmInvoiceListByContactAction extends crmDealListAction
     {
         $contact_id = waRequest::get('id', null, waRequest::TYPE_INT);
         if (!$contact_id) {
-            throw new waException('Contact not found');
+            throw new waException(_w('Contact not found'));
         }
 
         $manage_invoices_right = wa()->getUser()->getRights('crm', 'manage_invoices');

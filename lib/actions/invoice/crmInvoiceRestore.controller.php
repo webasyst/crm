@@ -11,7 +11,7 @@ class crmInvoiceRestoreController extends crmJsonController
 
         $invoice = $im->getById(waRequest::post('id', null, waRequest::TYPE_INT));
         if (!$invoice || $invoice['state_id'] != 'ARCHIVED') {
-            throw new waException('Invoice not found');
+            throw new waException(_w('Invoice not found'));
         }
         $invoice['state_id'] = 'PENDING';
         $im->updateById($invoice['id'], array('state_id' => $invoice['state_id']));

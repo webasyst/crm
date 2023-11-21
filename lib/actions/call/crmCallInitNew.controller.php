@@ -13,7 +13,7 @@ class crmCallInitNewController extends crmJsonController
         }
         $contact = new crmContact($contact_id);
         if (empty($contact) || !$contact->exists()) {
-            throw new waException('Contact not found', 404);
+            throw new waException(_w('Contact not found'), 404);
         }
 
         $client_number = (string) $data['to'];
@@ -26,7 +26,7 @@ class crmCallInitNewController extends crmJsonController
             $dm = new crmDealModel();
             $deal = $dm->getDeal($deal_id);
             if (!$deal) {
-                throw new waException('Deal not found', 404);
+                throw new waException(_w('Deal not found'), 404);
             }
         }
 

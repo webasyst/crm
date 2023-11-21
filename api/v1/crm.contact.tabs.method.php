@@ -24,7 +24,7 @@ class crmContactTabsMethod extends crmApiAbstractMethod
         if ($contact_id < 1) {
             throw new waAPIException('invalid_param', 'Invalid contact ID', 400);
         } else if (null === $this->getContactModel()->getById($contact_id)) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         }
         $view = waSystem::getInstance()->getView();
         $tabs = $view->getHelper()->getContactTabs($contact_id);

@@ -25,7 +25,7 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
 
         $contact = new crmContact($contact_id);
         if (!$contact->exists()) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         }
         if (!in_array($content_type, ['plain-text', 'html'])) {
             throw new waAPIException('invalid_content_type', 'Invalid content_type', 400);
@@ -33,7 +33,7 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
             $body = nl2br(htmlspecialchars($body));
         }
         if (!empty($deal_id) && !$this->getDealModel()->getDeal($deal_id)) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         }
 
         /** from */

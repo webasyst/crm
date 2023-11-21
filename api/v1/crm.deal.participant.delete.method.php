@@ -13,11 +13,11 @@ class crmDealParticipantDeleteMethod extends crmApiAbstractMethod
 
         $contact = new crmContact($contact_id);
         if (!$contact->exists()) {
-            throw new waAPIException('not_found', 'Contact not found', 404);
+            throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (!in_array($role, [crmDealParticipantsModel::ROLE_CLIENT, crmDealParticipantsModel::ROLE_USER])) {
             throw new waAPIException('unknown_value', 'Unknown value role_id', 400);
         } elseif (!$deal = $this->getDealModel()->getDeal($deal_id, true)) {
-            throw new waAPIException('not_found', 'Deal not found', 404);
+            throw new waAPIException('not_found', _w('Deal not found'), 404);
         }
 
         $this->http_status_code = 204;

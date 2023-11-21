@@ -6,32 +6,32 @@ class crmCallAssociateDealSaveController extends crmJsonController
     {
         $call_id = waRequest::post('call_id', 0, waRequest::TYPE_INT);
         if (!$call_id) {
-            throw new waException('No call identifier', 404);
+            throw new waException(_w('No call identifier'), 404);
         }
 
         $call = $this->getCallModel()->getById($call_id);
 
         if (empty($call)) {
-            $this->notFound('Call not found');
+            $this->notFound(_w('Call not found'));
         }
 
         $contact = new crmContact($call['client_contact_id']);
         if (empty($contact) || !$contact->exists()) {
-            $this->notFound('Contact not found');
+            $this->notFound(_w('Contact not found'));
         }
         if (!$this->getCrmRights()->contact($contact)) {
-            throw new waRightsException('Access to a contact is denied');
+            throw new waRightsException(_w('Access to a contact is denied'));
         }
 
         $deal = waRequest::post('deal', null, waRequest::TYPE_ARRAY_TRIM);
         if (empty($deal)) {
-            throw new waException('No data on the deal', 404);
+            throw new waException(_w('No data on the deal'), 404);
         }
 
         if ($deal['id'] > 0) {
             $deal = $this->getDealModel()->getDeal($deal['id'],false,true);
             if (!$deal) {
-                $this->notFound('Deal not found');
+                $this->notFound(_w('Deal not found'));
             }
             if (!$this->getCrmRights()->deal($deal)) {
                 $this->accessDenied();
@@ -81,6 +81,6 @@ class crmCallAssociateDealSaveController extends crmJsonController
             return;
         }
 
-        $this->errors = array('Unknown error');
+        $this->errors = array(_w('Unknown error'));
     }
 }

@@ -149,14 +149,17 @@ var CRMSettingsPayments = (function ($) {
     CRMSettingsPayments.prototype.initSortable = function () {
         var that = this,
             xhr = false;
+            
+        var $t_body = that.$table.find('tbody');
 
-        that.$table.sortable({
+        $t_body.sortable({
             distance: 10,
             handle: ".js-sort-toggle",
             helper: "clone",
-            items: ".payments-table-row",
+            items: "> .payments-table-row",
             axis: "y",
-            stop: save
+            stop: save,
+            onUpdate: save
         });
 
         function save() {
