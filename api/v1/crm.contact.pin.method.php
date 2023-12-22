@@ -10,9 +10,9 @@ class crmContactPinMethod extends crmApiAbstractMethod
         $contact_id = ifempty($_json, 'id', 0);
 
         if (empty($contact_id)) {
-            throw new waAPIException('required_param', 'Required parameter is missing: id', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'id'), 400);
         } elseif (!is_numeric($contact_id)) {
-            throw new waAPIException('invalid_param', 'Invalid contact ID', 400);
+            throw new waAPIException('invalid_param', _w('Invalid contact ID.'), 400);
         } elseif (
             $contact_id < 1
             || !$this->getContactModel()->getById((int) $contact_id)
@@ -38,12 +38,12 @@ class crmContactPinMethod extends crmApiAbstractMethod
                     ]
                 );
             } catch (waDbException $db_ex) {
-                throw new waAPIException('error_db', $db_exception->getMessage(), 400);
+                throw new waAPIException('error_db', $db_exception->getMessage(), 500);
             }
         }
 
         if (!$result) {
-            throw new waAPIException('error_pin', 'Error pinned contact', 400);
+            throw new waAPIException('error_pin', _w('Contact pinning error.'), 500);
         }
 
         $this->http_status_code = 204;

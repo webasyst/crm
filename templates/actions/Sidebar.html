@@ -46,7 +46,7 @@
                     <i class="fas fa-bell"></i>
                     <span class="name">[`Reminders`]</span>
                     {if !empty($reminders_due_count)}
-                        <strong class="c-badge badge small js-indicator">{if $reminders_due_count < 100}{$reminders_due_count}{else}99+{/if}</strong>
+                        <strong class="c-badge badge small js-indicator{if $reminders_state != 'overdue'} indicator {$reminders_state}{/if}">{if $reminders_due_count < 100}{$reminders_due_count}{else}99+{/if}</strong>
                     {/if}
                 </a>
             </li>

@@ -41,17 +41,9 @@
 {/function}
 
 {function name="_renderFromContact" _contact=[]}
-    {if isset($_contact.id)}
         <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top" class="flexbox middle nowrap c-contact-link {if !empty($_is_bold)}bold{/if}">
             <i class="icon userpic custom-mr-4" style="background-image: url({$_contact.photo_url_16});" title="{$_contact.name|escape}"></i><span class="c-contact-link--name">{$_contact.name|escape}</span>
         </a>
-    {else}
-        {* TODO: if not $contact.id how we displaying $contact.name? :o *}
-        <span class="c-contact-link--name">{$_contact.name|escape}&nbsp;</span>
-        {if !empty($_m.from)}
-            <span style="color: #999">&lt;{$_m.from|escape}&gt;</span>
-        {/if}
-    {/if}
 {/function}
 
 {function name="_renderRecipient" _contact=[]}
@@ -479,7 +471,7 @@
                             {_renderChatTime _date=$_m.create_datetime}
                             {$message_date = waDateTime::format('date', $_m.create_datetime)}
                             {$current_date = $message_date}
-                            {$is_another_user = ($_m.direction == 'OUT' && $_m.creator_contact_id !== $current_user_id)}
+                            {$is_another_user = ($_m.direction == crmMessageModel::DIRECTION_OUT && $_m.creator_contact_id !== $current_user_id)}
                             <div class="c-message-wrapper js-message-wrapper {if $_m.direction == 'IN'}left{else}right{/if}" data-id="{$_m.id}">
                                 <div class="fields c-message-item {if $_m.direction == 'IN'}c-message-in{else}c-message-out{/if} {if $is_another_user}another-user{/if}">
                                     <div class="c-message-tail">
@@ -488,7 +480,7 @@
                                         </svg>
                                     </div>
                                     <div class="flexbox middle nowrap space-8 c-message-header">
-                                        {if $is_another_user}
+                                        {if $_m.direction == crmMessageModel::DIRECTION_OUT}
                                             <span class="flexbox middle space-4 c-contact">
                                             {if !empty($contacts[$_m.creator_contact_id])}
                                                 {_renderFromContact _contact=$contacts[$_m.creator_contact_id] _is_bold=true}
@@ -588,9 +580,9 @@
                             {$message_date = waDateTime::format('date', $_m.create_datetime)}
                             {$current_date = $message_date}
                             {$_contact_name = null}
-                            {$is_another_user = ($_m.direction == 'OUT' && $_m.creator_contact_id !== $current_user_id)}
+                            {$is_another_user = ($_m.direction == crmMessageModel::DIRECTION_OUT && $_m.creator_contact_id !== $current_user_id)}
 
-                            {if $is_another_user}
+                            {if $_m.direction == crmMessageModel::DIRECTION_OUT}
                                 {if isset($_m.from_formatted)}
                                     {$_contact_name = $_m.from_formatted}
                                 {else}
@@ -715,7 +707,7 @@
                                                             <button class="button rounded c-im-save-button js-save-button" type="submit" disabled>
                                                                 <i class="fas fa-arrow-up"></i>
                                                             </button>
-                                                            {*<a class="button light-gray js-revert" href="javascript:void(0);">[`Сancel`]</a>*}
+                                                            {*<a class="button light-gray js-revert" href="javascript:void(0);">[`Cancel`]</a>*}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -755,8 +747,8 @@
                                                     hash: "{$hash|default:""}",
                                                     file_template_html: {$_file_template_html|json_encode},
                                                     max_upload_size: {waRequest::getUploadMaxFilesize()},
-                                                    is_images_enabled: {$is_images_enabled},
-                                                    is_files_enabled: {$is_files_enabled}
+                                                    is_images_enabled: {$is_images_enabled|json_encode},
+                                                    is_files_enabled: {$is_files_enabled|json_encode}
                                                 });
                                             })(jQuery);
                                         </script>

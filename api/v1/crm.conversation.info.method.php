@@ -1,7 +1,7 @@
 <?php
 
 class crmConversationInfoMethod extends crmMessageListMethod
-{    
+{
     protected $method = self::METHOD_GET;
     const MAX_LIMIT = 500;
     const DEFAULT_LIMIT = 30;
@@ -12,7 +12,7 @@ class crmConversationInfoMethod extends crmMessageListMethod
 
         $conversation = $this->getConversationModel()->getConversation($conversation_id);
         if (empty($conversation)) {
-            throw new waAPIException('not_found', 'Conversation not found', 404);
+            throw new waAPIException('not_found', _w('Conversation not found.'), 404);
         }
 
         if (!$this->getCrmRights()->canViewConversation($conversation)) {
@@ -31,7 +31,7 @@ class crmConversationInfoMethod extends crmMessageListMethod
 
         $conversation = $this->workupConversation($conversation, $messages, $contacts, $sources);
         $conversation = $this->filterFields(
-            $conversation, 
+            $conversation,
             ['id', 'create_datetime', 'update_datetime', 'source', 'supported_features', 'type', 'contact', 'user', 'deal', 'summary', 'last_message_id', 'count', 'is_closed', 'read', 'icon_url', 'icon', 'icon_color', 'icon_fab', 'transport_name'],
             ['id' => 'integer', 'count' => 'integer', 'last_message_id' => 'integer', 'is_closed' => 'boolean', 'read' => 'boolean', 'create_datetime' => 'datetime', 'update_datetime' => 'datetime']
         );
@@ -69,7 +69,7 @@ class crmConversationInfoMethod extends crmMessageListMethod
             $conversation['deal']['contact'] = $contacts[$conversation['deal']['contact_id']];
             $conversation['deal'] = $this->prepareDealShort($conversation['deal']);
         }
-        
+
         $conversation['icon_url'] = null;
         $conversation['icon'] = 'exclamation-circle';
         $conversation['transport_name'] = _w('Unknown');

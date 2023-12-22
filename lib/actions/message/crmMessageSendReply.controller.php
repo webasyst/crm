@@ -64,7 +64,8 @@ class crmMessageSendReplyController extends crmSendEmailController
             $sent_message = $this->workupMessage($sent_message);
             $view = wa()->getView();
             $view->assign([
-                'message' => $sent_message
+                'message' => $sent_message,
+                'contact'  => new crmContact((int)$sent_message['creator_contact_id']),
             ]);
             $template = wa()->getAppPath('templates/actions/message/MessageConversationId.singleMessage.inc.html', 'crm');
             $message_html = $view->fetch($template);

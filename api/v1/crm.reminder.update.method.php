@@ -28,49 +28,49 @@ class crmReminderUpdateMethod extends crmApiAbstractMethod
     private function validate($reminder_id, $user_id, $content, $deal_id, $contact_id, $type)
     {
         if (empty($user_id)) {
-            throw new waAPIException('required_param', 'Required parameter is missing: user_id', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'user_id'), 400);
         }
         if ($user_id < 1) {
-            throw new waAPIException('invalid_user', 'Invalid user_id specified', 400);
+            throw new waAPIException('invalid_user', sprintf_wp('Invalid “%s” value.', 'user_id'), 400);
         }
         if ($reminder_id < 1) {
-            throw new waAPIException('not_found', 'Reminder not found', 404);
+            throw new waAPIException('not_found', _w('Reminder not found.'), 404);
         }
         if (empty($content) && $type === 'OTHER') {
-            throw new waAPIException('required_param', 'Required parameter is missing: content', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'content'), 400);
         }
         if (!in_array($type, $this->reminder_types)) {
-            throw new waAPIException('invalid_param', 'Invalid param type', 400);
+            throw new waAPIException('invalid_param', _w('Invalid parameter type.'), 400);
         }
         $user = $this->getContactModel()->getById($user_id);
         if (empty($user) || intval($user['is_user']) !== 1) {
-            throw new waAPIException('invalid_user', 'Invalid user_id specified', 400);
+            throw new waAPIException('invalid_user', sprintf_wp('Invalid “%s” value.', 'user_id'), 400);
         }
         $reminder = $this->getReminderModel()->getById($reminder_id);
         if ($reminder === null) {
-            throw new waAPIException('not_found', 'Reminder not found', 404);
+            throw new waAPIException('not_found', _w('Reminder not found.'), 404);
         }
         if (!$this->getCrmRights()->reminderEditable($reminder)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
         if ($deal_id) {
             if ($deal_id < 0) {
-                throw new waAPIException('invalid_deal', 'Invalid deal specified', 400);
+                throw new waAPIException('invalid_deal', _w('Invalid deal specified.'), 400);
             }
             $deal = $this->getDealModel()->getById($deal_id);
             if ($deal === null) {
-                throw new waAPIException('invalid_deal', 'Invalid deal specified', 400);
+                throw new waAPIException('invalid_deal', _w('Invalid deal specified.'), 400);
             }
             if (!$this->getCrmRights()->deal($deal)) {
                 throw new waAPIException('forbidden', _w('Access denied'), 403);
             }
         } else if ($contact_id) {
             if ($contact_id < 0) {
-                throw new waAPIException('invalid_contact', 'Invalid contact specified', 400);
+                throw new waAPIException('invalid_contact', _w('Invalid contact specified.'), 400);
             }
             $contact = $this->getContactModel()->getById($contact_id);
             if ($contact === null) {
-                throw new waAPIException('invalid_contact', 'Invalid contact specified', 400);
+                throw new waAPIException('invalid_contact', _w('Invalid contact specified.'), 400);
             }
             if (!$this->getCrmRights()->contact($contact)) {
                 throw new waAPIException('forbidden', _w('Access denied'), 403);
@@ -103,7 +103,7 @@ class crmReminderUpdateMethod extends crmApiAbstractMethod
             $reminder['due_date'] = date('Y-m-d', strtotime($due_datetime));
             $reminder['due_datetime'] = date('Y-m-d H:i:s', strtotime($due_datetime));
         }
-        
+
         $this->getReminderModel()->updateById($reminder['id'], $reminder);
         if (!empty($reminder['contact_id'])) {
             crmDeal::updateReminder($reminder['contact_id']);

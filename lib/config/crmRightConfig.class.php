@@ -105,7 +105,7 @@ class crmRightConfig extends waRightConfig
         //
         // Conversations
         //
-        $this->addItem('conversations', _w('Access to conversations'), 'select', array(
+        $this->addItem('conversations', _w('Access to conversations of accessible contacts'), 'select', array(
             'options' => array(
                 self::RIGHT_CONVERSATION_OWN => _w('Only own'),
                 self::RIGHT_CONVERSATION_OWN_OR_FREE => _w('Own or free'),

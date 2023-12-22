@@ -885,13 +885,11 @@ var CRMCallPage = ( function($) {
 
                 
                 $.post(href, data, function (html) {
-                    
                     var $new_list = $(html).find('#js-calls-table').html();
-                    $.when($list.append($new_list)).then(() => {
-                        $(document).trigger("wa_loaded");
-                        if ($loader) $loader.remove();
-                        startLazyLoading();
-                    });
+                    $list.append($new_list);
+                    $(document).trigger("wa_loaded");
+                    if ($loader) $loader.remove();
+                    startLazyLoading();
 
                 }).always(function () {
                     is_locked = false;

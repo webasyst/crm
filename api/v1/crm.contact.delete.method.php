@@ -10,7 +10,7 @@ class crmContactDeleteMethod extends crmApiAbstractMethod
 
         $contact_ids = crmHelper::dropNotPositive($contact_ids);
         if (empty($contact_ids)) {
-            throw new waAPIException('empty_id', 'Required parameter is missing: id', 400);
+            throw new waAPIException('empty_id', sprintf_wp('Missing required parameter: “%s”.', 'id'), 400);
         }
 
         $operation = new crmContactOperationDelete(['contacts' => $contact_ids]);

@@ -11,7 +11,7 @@ class crmSettingsVaultDialogAction extends waViewAction
         }
         $vm = new crmVaultModel();
         if ($vault_id && !($vault = $vm->getById($vault_id))) {
-            throw new waException('Vault not found');
+            throw new waException(_w('Vault not found.'));
         }
         $groups = crmHelper::getAvailableGroups('vault.'.$vault_id, true);
 

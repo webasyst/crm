@@ -36,3 +36,5 @@
 .dialog .dialog-body .redactor-box .redactor-layer {max-height: 300px;}
 
 button.flexbox { display: flex; }
+
+#wa-app > .content { min-width: 0; flex-basis: auto !important; }

@@ -205,11 +205,11 @@ class crmDeal
         $dm = new crmDealModel();
         $now = date('Y-m-d H:i:s');
 
-        if ($action == 'WON') {
+        if ($action == crmDealModel::STATUS_WON) {
             $action_id  = 'deal_won';
             $crm_log_id = $lm->log($action_id, $deal_id * -1, $deal_id);
             $dm->updateById($deal_id, [
-                'status_id'         => 'WON',
+                'status_id'         => crmDealModel::STATUS_WON,
                 'closed_datetime'   => $now,
                 'update_datetime'   => $now,
                 'reminder_datetime' => null,
@@ -223,7 +223,7 @@ class crmDeal
                 $lost_text = $lost['name'];
             }
             $dm->updateById($deal_id, [
-                'status_id'         => 'LOST',
+                'status_id'         => crmDealModel::STATUS_LOST,
                 'lost_id'           => $lost_id,
                 'lost_text'         => $lost_text,
                 'closed_datetime'   => $now,

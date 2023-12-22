@@ -229,7 +229,7 @@ class crmLogModel extends crmModel
         $id = intval($id);
         $context = ($id >= 0 ? 'contact' : 'deal');
         $condition1 = (empty($id) ? '1=1' : "contact_id=$id");
-        $condition2 = " AND action <> 'reminder_add'";
+        $condition2 = ifset($options['do_not_exclude_reminder_add'], false) ? '' : " AND action <> 'reminder_add'";
 
         if ($id > 0) {
             $contact = new waContact($id);
@@ -292,13 +292,27 @@ class crmLogModel extends crmModel
         if (!empty($selected_filters['order_log']['is_active']) && crmShop::canExplainOrderLog()) {
             $objects[] = self::OBJECT_TYPE_ORDER_LOG;
         }
+        if ($objects) {
+            $condition2 .= " AND object_type IN('".join("','", $objects)."')";
+        }
+
         if (!empty($selected_filters['actor_contact_id'])) {
             $condition1 .= ' AND actor_contact_id='.$selected_filters['actor_contact_id'];
         }
 
-        if ($objects) {
-            $condition2 .= " AND object_type IN('".join("','", $objects)."')";
+        $exclude_objects = [];
+        $can_view_call = !(wa()->getUser()->getRights('crm', 'calls') === crmRightConfig::RIGHT_CALL_NONE);
+        $can_view_invoices = !!(wa()->getUser()->getRights('crm', 'manage_invoices'));
+        if (!$can_view_call) {
+            $exclude_objects[] = self::OBJECT_TYPE_CALL;
         }
+        if (!$can_view_invoices) {
+            $exclude_objects[] = self::OBJECT_TYPE_INVOICE;
+        }
+        if (!empty($exclude_objects)) {
+            $condition2 .= " AND object_type NOT IN('".join("','", $exclude_objects)."')";
+        }
+
         if ($context == 'deal') {
             $condition1 .= " AND action <> 'deal_add'";
         }
@@ -581,12 +595,20 @@ class crmLogModel extends crmModel
         $view->clearAllAssign();
         $app_url = rtrim(wa()->getRootUrl(true), '/') . '/' . wa()->getConfig()->getBackendUrl() . '/crm/';
 
+        $invoice_rights_level = wa()->getUser()->getRights('crm', 'manage_invoices');
+        $call_rights_level = wa()->getUser()->getRights('crm', 'calls');
+        $exclude_log_ids = [];
+
         foreach ($log as $id => &$l) {
             if (!empty($contacts[$l['actor_contact_id']])) {
                 $l['actor'] = $contacts[$l['actor_contact_id']];
             }
-            if ($l['contact_id'] > 0 && !empty($contacts[$l['contact_id']])) {
-                $l['contact'] = $contacts[$l['contact_id']];
+            if ($l['contact_id'] > 0) {
+                if (!empty($contacts[$l['contact_id']])) {
+                    $l['contact'] = $contacts[$l['contact_id']];
+                } else {
+                    $exclude_log_ids[] = $id;
+                }
             }
             $l['link'] = '';
             $l['action_name'] = isset($logs[$l['action']]['name']) ? _w($logs[$l['action']]['name']) : $l['action'];
@@ -600,6 +622,9 @@ class crmLogModel extends crmModel
                     $r = $reminders[$l['object_id']];
                     if ($r['contact_id'] < 0 && $context != 'deal') {
                         $l['deal'] = $this->getDeal(abs($r['contact_id']));
+                        if (empty($l['deal'])) {
+                            $exclude_log_ids[] = $id;
+                        }
                     }
                 } else {
                     $l['object_id'] = null;
@@ -611,6 +636,9 @@ class crmLogModel extends crmModel
                     $n = $notes[$l['object_id']];
                     if ($n['contact_id'] < 0 && $context != 'deal') {
                         $l['deal'] = $this->getDeal(abs($n['contact_id']));
+                        if (empty($l['deal'])) {
+                            $exclude_log_ids[] = $id;
+                        }
                     }
                 } else {
                     $l['object_id'] = null;
@@ -628,6 +656,9 @@ class crmLogModel extends crmModel
 
                     if ($f['contact_id'] < 0 && $context != 'deal') {
                         $l['deal'] = $this->getDeal(abs($f['contact_id']));
+                        if (empty($l['deal'])) {
+                            $exclude_log_ids[] = $id;
+                        }
                     }
 
                     $l['file'] = $f;
@@ -661,6 +692,14 @@ class crmLogModel extends crmModel
                     } else {
                         $l['inline_html'] .= '&lt;'._w('No owner').'&gt;';
                     }
+                }
+                if ($l['action'] == 'contact_ban' && !empty($l['params'])) {
+                    $_params = json_decode($l['params'], true);
+                    if (!empty($_params) && !empty(ifset($_params['reason']))) {
+                        $l['inline_html'] = htmlspecialchars($_params['reason']);
+                        $l['content'] = $_params['reason'];
+                    }
+                    
                 }
             } elseif ($l['object_type'] == self::OBJECT_TYPE_MESSAGE) {
                 if (!empty($messages[$l['object_id']])) {
@@ -728,6 +767,9 @@ class crmLogModel extends crmModel
                     $l['message'] = $m;
                     if ($m['deal_id'] && $context != 'deal') {
                         $l['deal'] = $this->getDeal($m['deal_id']);
+                        if (empty($l['deal'])) {
+                            $exclude_log_ids[] = $id;
+                        }
                     }
                 } else {
                     $l['object_id'] = null;
@@ -735,71 +777,87 @@ class crmLogModel extends crmModel
             } elseif ($l['object_type'] == self::OBJECT_TYPE_CALL) {
                 if (!empty($calls[$l['object_id']])) {
                     $c = $calls[$l['object_id']];
-                    $phone = crmHelper::formatCallNumber($c);
-                    $c['client_phone_formatted'] = $phone;
-                    $c['contact'] = ifset($contacts, $c['client_contact_id'], null);
-                    $c['user'] = ifset($contacts, $c['user_contact_id'], null);
-                    $l['call'] = $c;
 
-                    if (empty($c['direction']) || $c['direction'] == 'IN') {
-                        if ($c['status_id'] == 'VOICEMAIL') {
-                            $l['content'] = sprintf_wp('Voice mail from %s.', $phone);
-                        } elseif ($c['status_id'] == 'DROPPED') {
-                            $l['content'] = sprintf_wp('Missed call from %s.', $phone);
-                        } else {
-                            $l['content'] = sprintf_wp('Incoming call from %s.', $phone);
-                        }
-                        $l['inline_html'] = '<i class="icon16 import"></i> '.$l['content'];
+                    if ($call_rights_level <= crmRightConfig::RIGHT_CALL_OWN &&
+                        $c['user_contact_id'] != wa()->getUser()->getId()
+                    ) {
+                        $exclude_log_ids[] = $id;
                     } else {
-                        if ($c['status_id'] == 'VOICEMAIL') {
-                            $l['content'] = sprintf_wp('Voice mail to %s.', $phone);
-                        } elseif ($c['status_id'] == 'DROPPED') {
-                            $l['content'] = sprintf_wp('No answer from %s.', $phone);
+                        $phone = crmHelper::formatCallNumber($c);
+                        $c['client_phone_formatted'] = $phone;
+                        $c['contact'] = ifset($contacts, $c['client_contact_id'], null);
+                        $c['user'] = ifset($contacts, $c['user_contact_id'], null);
+                        $l['call'] = $c;
+    
+                        if (empty($c['direction']) || $c['direction'] == 'IN') {
+                            if ($c['status_id'] == 'VOICEMAIL') {
+                                $l['content'] = sprintf_wp('Voice mail from %s.', $phone);
+                            } elseif ($c['status_id'] == 'DROPPED') {
+                                $l['content'] = sprintf_wp('Missed call from %s.', $phone);
+                            } else {
+                                $l['content'] = sprintf_wp('Incoming call from %s.', $phone);
+                            }
+                            $l['inline_html'] = '<i class="icon16 import"></i> '.$l['content'];
                         } else {
-                            $l['content'] = sprintf_wp('Outgoing call to %s.', $phone);
+                            if ($c['status_id'] == 'VOICEMAIL') {
+                                $l['content'] = sprintf_wp('Voice mail to %s.', $phone);
+                            } elseif ($c['status_id'] == 'DROPPED') {
+                                $l['content'] = sprintf_wp('No answer from %s.', $phone);
+                            } else {
+                                $l['content'] = sprintf_wp('Outgoing call to %s.', $phone);
+                            }
+                            $l['inline_html'] = '<i class="icon16 export-blue"></i> '.$l['content'];
                         }
-                        $l['inline_html'] = '<i class="icon16 export-blue"></i> '.$l['content'];
-                    }
-                    $status = wa('crm')->getConfig()->getCallStates($c['status_id']);
-                    $l['inline_html'] .= ' '.sprintf_wp(
-                            'Status: %s',
-                            '<span style="color:'.$status['color'].'">'.$status['name'].'</span>'
-                        );
-                    if ($c['status_id'] != 'DROPPED') {
+                        $status = wa('crm')->getConfig()->getCallStates($c['status_id']);
                         $l['inline_html'] .= ' '.sprintf_wp(
-                                'Duration: %s',
-                                crmHelper::formatSeconds($c['duration'])
+                                'Status: %s',
+                                '<span style="color:'.$status['color'].'">'.$status['name'].'</span>'
                             );
-                    }
-
-                    if ($c['status_id'] == 'CONNECTED') {
-                        $l['action_name'] = _w('talking');
-                    } elseif ($c['status_id'] == 'PENDING') {
-                        $l['action_name'] = _w('waiting for reply');
-                    } elseif ($c['status_id'] == 'VOICEMAIL') {
-                        $l['action_name'] = _w('left a voice message');
-                    } elseif ($c['status_id'] == 'DROPPED') {
-                        if ($c['direction'] == 'IN') {
-                            $l['action_name'] = _w('missed call');
-                        } else {
-                            $l['action_name'] = _w('no reply');
+                        if ($c['status_id'] != 'DROPPED') {
+                            $l['inline_html'] .= ' '.sprintf_wp(
+                                    'Duration: %s',
+                                    crmHelper::formatSeconds($c['duration'])
+                                );
                         }
-                    }
-
-                    // if no access, no link
-                    if (!empty($c['has_access']) && !empty($c['record_attrs'])) {
-                        $l['inline_html'] .= ' ' . crmHelper::getCallRecordLinkHtml($c);
-                    }
-
-                    if ($c['deal_id'] && $context != 'deal') {
-                        $l['deal'] = $this->getDeal($c['deal_id']);
+    
+                        if ($c['status_id'] == 'CONNECTED') {
+                            $l['action_name'] = _w('talking');
+                        } elseif ($c['status_id'] == 'PENDING') {
+                            $l['action_name'] = _w('waiting for reply');
+                        } elseif ($c['status_id'] == 'VOICEMAIL') {
+                            $l['action_name'] = _w('left a voice message');
+                        } elseif ($c['status_id'] == 'DROPPED') {
+                            if ($c['direction'] == 'IN') {
+                                $l['action_name'] = _w('missed call');
+                            } else {
+                                $l['action_name'] = _w('no reply');
+                            }
+                        }
+    
+                        // if no access, no link
+                        if (!empty($c['has_access']) && !empty($c['record_attrs'])) {
+                            $l['inline_html'] .= ' ' . crmHelper::getCallRecordLinkHtml($c);
+                        }
+    
+                        if ($c['deal_id'] && $context != 'deal') {
+                            $l['deal'] = $this->getDeal($c['deal_id']);
+                            if (empty($l['deal'])) {
+                                $exclude_log_ids[] = $id;
+                            }
+                        }
                     }
                 } else {
                     $l['object_id'] = null;
                 }
             } elseif ($l['object_type'] == self::OBJECT_TYPE_INVOICE) {
                 if (!empty($invoices[$l['object_id']])) {
-                    $l['invoice'] = $invoices[$l['object_id']];
+                    if ($invoice_rights_level <= crmRightConfig::RIGHT_INVOICES_OWN && 
+                        $invoices[$l['object_id']]['creator_contact_id'] != wa()->getUser()->getId()
+                    ) {
+                        $exclude_log_ids[] = $id;
+                    } else {
+                        $l['invoice'] = $invoices[$l['object_id']];
+                    }
                 }
             } elseif ($l['object_type'] == self::OBJECT_TYPE_ORDER_LOG) {
                 if (isset($order_log[$l['object_id']])) {
@@ -843,11 +901,34 @@ class crmLogModel extends crmModel
                     }
                 }
             }
-            if ($l['contact_id'] < 0 && !empty($this->deals[abs($l['contact_id'])]) && $context != 'deal') {
+            if ($l['contact_id'] < 0 && $context != 'deal') {
                 $l['deal'] = $this->getDeal(abs($l['contact_id']));
+                if (empty($l['deal'])) {
+                    $exclude_log_ids[] = $id;
+                }
             }
         }
         unset($l);
+
+        foreach ($exclude_log_ids as $_id) {
+            if (isset($log[$_id])) {
+                unset($log[$_id]['content']);
+                unset($log[$_id]['file']);
+                unset($log[$_id]['deal']);
+                unset($log[$_id]['message']);
+                unset($log[$_id]['call']);
+                unset($log[$_id]['reminder']);
+                unset($log[$_id]['before']);
+                unset($log[$_id]['after']);
+                unset($log[$_id]['params']);
+                unset($log[$_id]['inline_html']);
+                unset($log[$_id]['link']);
+                unset($log[$_id]['order']);
+                unset($log[$_id]['order_log_item']);
+                unset($log[$_id]['invoice']);
+                $log[$_id]['is_not_available'] = true;
+            }
+        }
 
         $view->clearAllAssign();
         $view->assign($old_view_vars);

@@ -6,7 +6,7 @@ class crmContactLinksMethod extends crmApiAbstractMethod
     {
         $contact_ids = waRequest::get('id', [], waRequest::TYPE_ARRAY_INT);
         if (empty($contact_ids)) {
-            throw new waAPIException('empty_id', 'Required parameter is missing: id[]', 400);
+            throw new waAPIException('empty_id', sprintf_wp('Missing required parameter: “%s”.', 'id'), 400);
         }
 
         $contact_ids = crmHelper::dropNotPositive($contact_ids);

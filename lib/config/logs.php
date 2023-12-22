@@ -12,6 +12,14 @@ return array(
         'name' => /*_w*/('edited contact'),
         'subject' => true,
     ),
+    'contact_ban' => array(
+        'name' => /*_w*/('banned contact'),
+        'subject' => true,
+    ),
+    'contact_unban' => array(
+        'name' => /*_w*/('removed ban from contact'),
+        'subject' => true,
+    ),
     'contact_merge' => array(
         'name' => /*_w*/('merged contacts')
     ),
@@ -29,6 +37,12 @@ return array(
     ),
     'deal_removeowner' => array(
         'name' => /*_w*/('remove deal owner'),
+    ),
+    'deal_removeuser' => array(
+        'name' => /*_w*/('remove deal performer'),
+    ),
+    'deal_stage_overdue' => array(
+        'name' => /*_w*/('deal stage overdue'),
     ),
     'deal_reopen' => array(
         'name' => /*_w*/('reopened deal'),

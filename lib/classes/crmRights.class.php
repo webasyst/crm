@@ -1166,4 +1166,34 @@ class crmRights
 
         return $messages;
     }
+
+    /**
+     * @param array $call item crmCallModel
+     * @return bool
+     * @throws waDbException
+     * @throws waException
+     */
+    public function call($call = [])
+    {
+        $call_right = $this->contact->getRights('crm', 'calls');
+        if ($call_right == crmRightConfig::RIGHT_CALL_NONE) {
+            return false;
+        } elseif ($call_right == crmRightConfig::RIGHT_CALL_OWN) {
+            if (ifset($call, 'user_contact_id', 0) !== $this->contact->getId()) {
+                return false;
+            }
+            if (!empty($call['client_contact_id'])) {
+                if (!$this->contact($call['client_contact_id'])) {
+                    return false;
+                }
+            }
+            if (!empty($call['deal_id'])) {
+                if ($this->deal($call['deal_id']) === crmRightConfig::RIGHT_DEAL_NONE) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
 }

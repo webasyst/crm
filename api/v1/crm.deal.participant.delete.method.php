@@ -6,26 +6,27 @@ class crmDealParticipantDeleteMethod extends crmApiAbstractMethod
 
     public function execute()
     {
-        $deal_id = (int) abs($this->get('deal_id', true));
+        $deal_id = (int) $this->get('deal_id', true);
         $contact_id = (int) $this->get('contact_id', true);
         $role = (string) $this->get('role_id',true);
         $force = (bool) $this->post('force');
 
-        $contact = new crmContact($contact_id);
-        if (!$contact->exists()) {
-            throw new waAPIException('not_found', _w('Contact not found'), 404);
-        } elseif (!in_array($role, [crmDealParticipantsModel::ROLE_CLIENT, crmDealParticipantsModel::ROLE_USER])) {
-            throw new waAPIException('unknown_value', 'Unknown value role_id', 400);
-        } elseif (!$deal = $this->getDealModel()->getDeal($deal_id, true)) {
+        if (!in_array($role, [crmDealParticipantsModel::ROLE_CLIENT, crmDealParticipantsModel::ROLE_USER])) {
+            throw new waAPIException('unknown_value', sprintf_wp('Unknown “%s” value.', 'role_id'), 400);
+        }
+        if (!$deal = $this->getDealModel()->getDeal($deal_id, true)) {
             throw new waAPIException('not_found', _w('Deal not found'), 404);
+        }
+        if ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $this->http_status_code = 204;
         $this->response = null;
         if ($role === crmDealParticipantsModel::ROLE_USER) {
-            $this->deleteUser($deal, $contact, $force);
+            $this->deleteUser($deal, $contact_id, $force);
         } else {
-            $this->deleteContact($deal, $contact);
+            $this->deleteContact($deal, $contact_id);
         }
     }
 
@@ -38,19 +39,20 @@ class crmDealParticipantDeleteMethod extends crmApiAbstractMethod
      * @throws waDbException
      * @throws waException
      */
-    private function deleteUser($deal, $contact, $force)
+    private function deleteUser($deal, $contact_id, $force)
     {
-        $contact_id = $contact->getId();
+        list($users, $clients) = $this->getUsersAndClients($deal['participants']);
+        if (!in_array($contact_id, $users) && $contact_id != $deal['user_contact_id']) {
+            return;
+        }
         if (!$force) {
-            $contact_rights = new crmRights(['contact' => $contact]);
-            if ($contact_rights->deal($deal) < crmRightConfig::RIGHT_DEAL_VIEW) {
-                throw new waAPIException('forbidden', 'Deal access denied', 403);
-            }
-            if ($contact_id != $this->getUser()->getId()) {
-                $updated_deal = array_merge($deal, [
-                    'user_contact_id' => $contact_id
-                ]);
-                if ($contact_rights->deal($updated_deal) < crmRightConfig::RIGHT_DEAL_VIEW) {
+            if ($contact_id == $this->getUser()->getId()) {
+                $updated_deal = $deal;
+                $updated_deal['user_contact_id'] = 0;
+                $updated_deal['participants'] = array_filter($deal['participants'], function ($_participant) use ($contact_id) {
+                    return $_participant['contact_id'] != $contact_id;
+                });
+                if ($this->getCrmRights()->deal($updated_deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
                     $this->http_status_code = 409;
                     $this->response = [
                         'dialog_html' => (new crmDealChangeUserConfirmController())->renderConfirmDialog($deal, $contact_id, '2.0')
@@ -59,21 +61,10 @@ class crmDealParticipantDeleteMethod extends crmApiAbstractMethod
             }
         }
 
-        if ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
-            throw new waAPIException('forbidden', _w('Access denied'), 403);
-        } elseif (
-            $this->getCrmRights()->funnel($deal['funnel_id']) < 3
-            && $deal['user_contact_id'] != $this->getUser()->getId()
-        ) {
-            throw new waAPIException('forbidden', _w('Access denied'), 403);
-        }
-
-        list($users, $clients) = $this->getUsersAndClients($deal['participants']);
-        if (!in_array($contact_id, $users)) {
-            return;
-        }
+        $action = 'deal_removeuser';
         if ($contact_id == $deal['user_contact_id']) {
             $this->getDealModel()->updateById($deal['id'], ['user_contact_id' => 0]);
+            $action = 'deal_removeowner';
         }
         $this->getDealParticipantsModel()->deleteByField([
             'contact_id' => $contact_id,
@@ -81,12 +72,13 @@ class crmDealParticipantDeleteMethod extends crmApiAbstractMethod
             'role_id'    => crmDealParticipantsModel::ROLE_USER
         ]);
 
-
+        $contact = new crmContact($contact_id);
+        $contact_name = $contact->exists() ? $contact->getName() : _w('Was deleted');
         $this->getLogModel()->log(
-            'deal_removeowner',
+            $action,
             $deal['id'] * -1,
             $deal['id'],
-            $contact->getName(),
+            $contact_name,
             null,
             null,
             ['contact_id' => $contact_id]
@@ -101,56 +93,37 @@ class crmDealParticipantDeleteMethod extends crmApiAbstractMethod
      * @throws waException
      * @throws waRightsException
      */
-    private function deleteContact($deal, $contact)
+    private function deleteContact($deal, $contact_id)
     {
-        if (empty($deal['participants'])) {
-            return;
-        } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
-            throw new waAPIException('forbidden', _w('Access denied'), 403);
-        }
-
-        $funnel_rights_value = $this->getCrmRights()->funnel($deal['funnel_id']);
-        if ($contact->getId() == $deal['user_contact_id']) {
-            if (
-                $deal['user_contact_id'] != $this->getUser()->getId()
-                && $funnel_rights_value < 3
-                && ($deal['user_contact_id'] || $funnel_rights_value < 1)
-            ) {
-                throw new waAPIException('forbidden', _w('Access denied'), 403);
-            }
-        } elseif ($funnel_rights_value < 1) {
-            throw new waAPIException('forbidden', _w('Access denied'), 403);
-        }
-
         list($users, $clients) = $this->getUsersAndClients($deal['participants']);
-        if (!in_array($contact->getId(), $clients)) {
+        if (!in_array($contact_id, $clients) && $contact_id != $deal['contact_id']) {
             return;
         }
 
         $this->getDealParticipantsModel()->deleteByField([
-            'contact_id' => $contact->getId(),
+            'contact_id' => $contact_id,
             'deal_id'    => $deal['id'],
             'role_id'    => crmDealParticipantsModel::ROLE_CLIENT
         ]);
-        if ($contact->getId() == $deal['contact_id']) {
-            $contact_id = 0;
-            if (count($clients) > 1) {
-                $contact_id = array_shift($clients);
-                if ($contact->getId() == $contact_id) {
-                    $contact_id = array_shift($clients);
-                }
-            }
-            $this->getDealModel()->updateById($deal['id'], ['contact_id' => $contact_id]);
+        if ($contact_id == $deal['contact_id']) {
+            $clients = array_filter($clients, function ($_participant) use ($contact_id) {
+                return $_participant != $contact_id;
+            });
+
+            $new_contact_id = count($clients) > 0 ? array_shift($clients) : 0;
+            $this->getDealModel()->updateById($deal['id'], ['contact_id' => $new_contact_id]);
         }
 
+        $contact = new crmContact($contact_id);
+        $contact_name = $contact->exists() ? $contact->getName() : _w('Was deleted');
         $this->getLogModel()->log(
             'deal_removecontact',
             $deal['id'] * -1,
             $deal['id'],
-            $contact->getName(),
+            $contact_name,
             null,
             null,
-            ['contact_id' => $contact->getId()]
+            ['contact_id' => $contact_id]
         );
     }
 

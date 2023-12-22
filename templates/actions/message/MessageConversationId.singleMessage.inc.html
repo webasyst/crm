@@ -23,6 +23,14 @@
 
 {/function}
 
+{function name="_renderFromContact" _contact=[]}
+
+        <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top" class="flexbox middle nowrap c-contact-link {if !empty($_is_bold)}bold{/if}">
+            <i class="icon userpic custom-mr-4" style="background-image: url({waContact::getPhotoUrl($_contact.id, $_contact.photo, 20)|escape})" title="{$_contact.name|escape}"></i>
+            <span class="c-contact-link--name">{$_contact.name|escape}</span>
+        </a>
+{/function}
+
 {function _renderMessageBody message = []}
     {strip}
         {if !empty($message.body_formatted)}
@@ -160,7 +168,18 @@
     {_renderChatTime _date = $message.create_datetime}
     {$message_date = waDateTime::format('date', $message.create_datetime)}
     {$current_date = $message_date}
-    {$is_another_user = ($message.direction == 'OUT' && $message.creator_contact_id !== $current_user_id)}
+    {$is_another_user = ($message.direction == crmMessageModel::DIRECTION_OUT && $message.creator_contact_id !== $current_user_id)}
+    {if $message.direction == crmMessageModel::DIRECTION_OUT}
+        {if isset($message.from_formatted)}
+            {$_contact_name = $message.from_formatted}
+        {else}
+            {$_contact_name = $message.from|escape}
+        {/if}
+        {if !empty($contact)}
+        {capture assign=_contact_name}{_renderFromContact _contact=$contact}{/capture}
+        {/if}
+    {/if}
+    
     <div class="c-message-wrapper js-message-wrapper {if $message.direction == 'IN'}left{else}right{/if}" data-id="{$message.id}">
         <div class="fields c-message-item {if $message.direction == 'IN'}c-message-in{else}c-message-out{/if} {if $is_another_user}another-user{/if}">
             <div class="c-message-tail">
@@ -169,14 +188,14 @@
                 </svg>
             </div>
             <div class="flexbox middle nowrap space-8 c-message-header">
-                {if $is_another_user}
+                {if $message.direction == crmMessageModel::DIRECTION_OUT}
                     <span class="flexbox middle space-4 c-contact">
-                        {$message.from|escape}
+                        {$_contact_name}
                     </span>
                 {/if}
 
                 {if !empty($message.create_datetime)}
-                    <span class="nowrap c-date hint">
+                    <span class="nowrap c-date hint" data-time="{$message.create_datetime|wa_datetime:'datetime'}">
                         {$message.create_datetime|wa_datetime:'time'}
                     </span>
                 {/if}
@@ -217,12 +236,15 @@
     {$message_date = waDateTime::format('date', $message.create_datetime)}
     {$current_date = $message_date}
     {$_contact_name = null}
-    {$is_another_user = ($message.direction == 'OUT' && $message.creator_contact_id !== $current_user_id)}
-    {if $is_another_user}
+    {$is_another_user = ($message.direction == crmMessageModel::DIRECTION_OUT && $message.creator_contact_id !== $current_user_id)}
+    {if $message.direction == crmMessageModel::DIRECTION_OUT}
         {if isset($message.from_formatted)}
             {$_contact_name = $message.from_formatted}
         {else}
             {$_contact_name = $message.from|escape}
+        {/if}
+        {if !empty($contact)}
+        {capture assign=_contact_name}{_renderFromContact _contact=$contact}{/capture}
         {/if}
     {/if}
 

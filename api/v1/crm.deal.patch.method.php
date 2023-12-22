@@ -23,7 +23,7 @@ class crmDealPatchMethod extends crmApiAbstractMethod
         if ($deal_id < 1) {
             throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif (empty($fields_data)) {
-            throw new waAPIException('required_param', 'Required parameter is missing: field, value', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameters: %s.', 'field, value'), 400);
         } elseif (!$deal = $this->getDealModel()->getDeal($deal_id, false, true)) {
             throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif (!$this->getCrmRights()->deal($deal)) {
@@ -63,7 +63,7 @@ class crmDealPatchMethod extends crmApiAbstractMethod
 
             $this->response = array_merge($resp_db, $resp_params, $desc);
         } catch (waDbException $db_exception) {
-            throw new waAPIException('error_db', $db_exception->getMessage(), 400);
+            throw new waAPIException('error_db', $db_exception->getMessage(), 500);
         }
     }
 
@@ -90,7 +90,7 @@ class crmDealPatchMethod extends crmApiAbstractMethod
                         'field' => ifset($data, $i, 'field', ''),
                         'value' => ifset($data, $i, 'value', ''),
                         'code'  => 'invalid_param',
-                        'description' => 'Required parameters: field, value'
+                        'description' => sprintf_wp('Missing required parameters: %s.', sprintf_wp('“%s” and “%s”', 'field', 'value'))
                     ];
                     continue;
                 }
@@ -102,7 +102,7 @@ class crmDealPatchMethod extends crmApiAbstractMethod
                     'field' => $field_name,
                     'value' => ifset($data, $i, 'value', ''),
                     'code'  => 'field_duplicate',
-                    'description' => 'Field name duplicate'
+                    'description' => _w('Duplicate field name.')
                 ];
             } else {
                 $data[$field_name] = $data[$i]['value'];
@@ -112,7 +112,7 @@ class crmDealPatchMethod extends crmApiAbstractMethod
         if (!empty($_error_fields)) {
             $this->errors = [
                 'error' => 'invalid_field',
-                'error_description' => 'Found invalid fields',
+                'error_description' => _w('Invalid fields found.'),
                 'error_fields' => $_error_fields
             ];
             return false;
@@ -131,7 +131,7 @@ class crmDealPatchMethod extends crmApiAbstractMethod
                     'field' => $_name,
                     'value' => $_value,
                     'code'  => 'field_unacceptable',
-                    'description' => 'Field unacceptable'
+                    'description' => _w('Unacceptable field.')
                 ];
                 continue;
             } elseif ($this->acceptField($_name)) {
@@ -170,7 +170,7 @@ class crmDealPatchMethod extends crmApiAbstractMethod
         if (!empty($_error_fields)) {
             $this->errors = [
                 'error' => 'invalid_field',
-                'error_description' => 'Found invalid fields',
+                'error_description' => _w('Invalid fields found.'),
                 'error_fields' => $_error_fields
             ];
         }

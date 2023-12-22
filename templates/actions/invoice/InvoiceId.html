@@ -225,7 +225,7 @@
                             {/if}
                             <div class="c-column">
                                 {if $_exists}
-                                    <a href="{$wa_app_url}contact/{$contact.id}/" class="semibold" {if $iframe}target="_parent"{/if}>{$_contact_name|escape}</a>
+                                    <a href="{$wa_app_url}contact/{$contact.id}/" class="semibold" {if $iframe}target="_parent"{/if}>{$_contact_name}</a>
                                     {if $company_contact}
                                         <a href="{$wa_app_url}contact/{$company_contact.id}/" class="custom-ml-4" {if $iframe}target="_parent"{/if}>{$company_contact.name|escape}</a>
                                     {/if}

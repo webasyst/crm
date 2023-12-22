@@ -1394,12 +1394,19 @@ var CRMMessagesProfileAdditional = ( function($) {
                     html: drawer_html,
                     direction: "right",
                     onOpen: function ($drawer, drawer_instance) {
-                        $drawer.find('.drawer-block').append(iframe_html);
+                        var $drawer_block = $drawer.find('.drawer-block');
+                        $drawer_block.append(iframe_html);
                         const $iframe = $drawer.find('iframe');
                         if ($iframe.length) {
                             $iframe.on('load', function() {
-                                console.log('load')
                                 $drawer.find('.spinner-wrapper').remove();
+                                console.log($($iframe).contents())
+                                $($iframe).contents().on('click', 'a', function(){
+                                   
+                                    if ($(this).data('link')) {
+                                        drawer_instance.close()
+                                    }
+                                })
                             })
                             $iframe.on('beforeShowModal', () => {
                                 $iframe.addClass('z-10')
@@ -1412,6 +1419,7 @@ var CRMMessagesProfileAdditional = ( function($) {
                         else {
                             $drawer.find('.spinner-wrapper').remove();
                         }
+                      
 
                     },
                     onClose: function () {
@@ -2269,7 +2277,7 @@ var CRMEmailConversationEmailSender = ( function($) { //форма ответа 
                         if ($('#c-messages-page #c-messages-sidebar').length) {
                             $(document).trigger('msg_sidebar_upd_needed');
                         }
-                    
+                        updateSendReply(response_html);
                 }).fail(function(data) {
                     var error_box = that.$form.find('#tooltip-error-message'),
                         error_msg = Object.values(response.errors);
@@ -2297,6 +2305,18 @@ var CRMEmailConversationEmailSender = ( function($) { //форма ответа 
                     that.is_locked = false;
                 });
 
+        }
+
+        function updateSendReply(response_html) {
+            var $body_redactor = that.$wrapper.find('.redactor-layer.redactor-styles.redactor-layer-img-edit');
+            var $body_redactor_b = $body_redactor.find('blockquote').eq(0);
+            var $body_redactor_p = $body_redactor.find('> p').eq(1);
+            var response_html_body = $(response_html).find('.c-message-body').html();
+            var response_html_client = $(response_html).find('.c-contact-link--name').html();
+            var response_html_date = $(response_html).find('.c-date.hint').data('time');
+            $body_redactor_b.html(response_html_body);
+            var new_sign = `${response_html_date}, ${response_html_client} ${that.locales['wrote']}:`;
+            $body_redactor_p.html(new_sign);
         }
 
         function onImagesLoaded(response_id) {

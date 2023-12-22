@@ -1,7 +1,7 @@
 <?php
 
 class crmConversationDealMethod extends crmMessageListMethod
-{    
+{
     protected $method = self::METHOD_POST;
 
     public function execute()
@@ -13,13 +13,13 @@ class crmConversationDealMethod extends crmMessageListMethod
         if (empty($conversation_id) + !is_numeric($deal_id) > 0) {
             throw new waAPIException(
                 'required_param',
-                'Required parameter is missing: conversation_id and deal_id',
+                sprintf_wp('Missing required parameters: %s.', sprintf_wp('“%s” and “%s”', 'conversation_id', 'deal_id')),
                 400
             );
         } elseif ($conversation_id < 0) {
-            throw new waAPIException('not_found', 'Conversation not found', 404);
+            throw new waAPIException('not_found', _w('Conversation not found.'), 404);
         } elseif (!$conversation = $this->getConversationModel()->getConversation($conversation_id)) {
-            throw new waAPIException('not_found', 'Conversation not found', 404);
+            throw new waAPIException('not_found', _w('Conversation not found.'), 404);
         }
 
         $deal_id = (int) abs($deal_id);
@@ -89,11 +89,11 @@ class crmConversationDealMethod extends crmMessageListMethod
         if (!$contact->exists()) {
             throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (!$this->getCrmRights()->contact($contact)) {
-            throw new waAPIException('forbidden', 'Contact access denied', 403);
+            throw new waAPIException('forbidden', _w('Access to contact denied.'), 403);
         } elseif (!$deal = $this->getDealModel()->getDeal($deal_id, false, true)) {
             throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif (!$this->getCrmRights()->deal($deal)) {
-            throw new waAPIException('forbidden', 'Access to deal is denied', 403);
+            throw new waAPIException('forbidden', _w('Access to deal denied.'), 403);
         }
 
         /** update conversation */

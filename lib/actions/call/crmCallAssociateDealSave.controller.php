@@ -20,12 +20,12 @@ class crmCallAssociateDealSaveController extends crmJsonController
             $this->notFound(_w('Contact not found'));
         }
         if (!$this->getCrmRights()->contact($contact)) {
-            throw new waRightsException(_w('Access to a contact is denied'));
+            throw new waRightsException(_w('Access to the contact is denied.'));
         }
 
         $deal = waRequest::post('deal', null, waRequest::TYPE_ARRAY_TRIM);
         if (empty($deal)) {
-            throw new waException(_w('No data on the deal'), 404);
+            throw new waException(_w('No data on the deal.'), 404);
         }
 
         if ($deal['id'] > 0) {

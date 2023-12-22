@@ -2,6 +2,7 @@
 
 class crmMessageWriteNewDialogAction extends crmSendEmailDialogAction
 {
+    protected $deal = null;
     public function execute()
     {
         $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
@@ -13,26 +14,31 @@ class crmMessageWriteNewDialogAction extends crmSendEmailDialogAction
         $fm = new crmFunnelModel();
         $fsm = new crmFunnelStageModel();
 
-        $funnel = $fm->getAvailableFunnel();
-        if (!$funnel) {
-            throw new waRightsException();
-        }
-        $stage_id = $fsm->select('id')
-            ->where('funnel_id = ?', (int) $funnel['id'])
-            ->order('number')
-            ->limit(1)
-            ->fetchField('id');
+        $deal = [];
+        if ($this->deal) {
+            $deal = $this->deal;
+        } else {
+            $funnel = $fm->getAvailableFunnel();
+            if (!$funnel) {
+                throw new waRightsException();
+            }
+            $stage_id = $fsm->select('id')
+                ->where('funnel_id = ?', (int) $funnel['id'])
+                ->order('number')
+                ->limit(1)
+                ->fetchField('id');
 
-        // Just empty deal, for new message
-        $now = date('Y-m-d H:i:s');
-        $deal = $dm->getEmptyDeal();
-        $deal = array_merge($deal, array(
-            'creator_contact_id' => wa()->getUser()->getId(),
-            'create_datetime'    => $now,
-            'update_datetime'    => $now,
-            'funnel_id'          => $funnel['id'],
-            'stage_id'           => $stage_id,
-        ));
+            // Just empty deal, for new message
+            $now = date('Y-m-d H:i:s');
+            $deal = $dm->getEmptyDeal();
+            $deal = array_merge($deal, array(
+                'creator_contact_id' => wa()->getUser()->getId(),
+                'create_datetime'    => $now,
+                'update_datetime'    => $now,
+                'funnel_id'          => $funnel['id'],
+                'stage_id'           => $stage_id,
+            ));   
+        }
 
         $funnels = $fm->getAllFunnels();
         if (empty($funnels[$deal['funnel_id']])) {
@@ -61,6 +67,13 @@ class crmMessageWriteNewDialogAction extends crmSendEmailDialogAction
             return $this->contact;
         }
         $id = (int)$this->getParameter('contact_id');
+        $deal_id = (int)$this->getParameter('deal_id');
+        if ($deal_id > 0) {
+            $this->deal = $this->obtainDeal($deal_id);
+            if (empty($id) && !empty($this->deal['contact_id'])) {
+                $id = $this->deal['contact_id'];
+            }
+        }
         return $this->contact = new crmContact($id);
     }
 }

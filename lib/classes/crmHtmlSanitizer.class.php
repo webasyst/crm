@@ -183,9 +183,11 @@ class crmHtmlSanitizer
         // Remove \n around <blockquote> startting and ending tags
         $content = preg_replace('~(?U:\n\s*){0,2}<(/?blockquote)>(?U:\s*\n){0,2}~i', '<\1>', $content);
 
+        $content = $this->closeBrokenTags($content);
+
         // Convert urls to clickable links
         $content = $this->linkify($content, ['target' => '_blank', 'rel' => 'nofollow']);
-        
+
         return $content;
     }
 
@@ -356,5 +358,35 @@ class crmHtmlSanitizer
         return preg_replace_callback('/<(\d+)>/', function ($match) use (&$links) { 
             return $links[$match[1] - 1]; 
         }, $value);
+    }
+
+    function closeBrokenTags($string) {
+        preg_match_all('#<([a-z]+)(?: .*)?(?<![/|/ ])>#iU', $string, $result);
+        $opened_tags = $result[1];
+
+        preg_match_all('#</([a-z]+)>#iU', $string, $result);
+        $closed_tags = $result[1];
+    
+        if (count($closed_tags) == count($opened_tags)) {
+            return $string;
+        }
+
+        // We have a mismatched opening and closing tags
+        try {
+            libxml_use_internal_errors(true);
+            $string = mb_convert_encoding($string, 'HTML-ENTITIES', 'UTF-8');
+            $dom = new DOMDocument( "1.0", "UTF-8" );
+            $dom->encoding = 'UTF-8';
+            $dom->loadHTML($string, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            return $dom->saveHTML();
+        } catch (Exception $e) {
+            $log_record = join(PHP_EOL, [
+                'Exception',
+                $e->getMessage(),
+                $e->getTraceAsString()
+            ]);
+            waLog::log($log_record, 'crm/html-sanitizer-error.log');
+            return $string;
+        }
     }
 }

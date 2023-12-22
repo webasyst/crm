@@ -24,7 +24,7 @@ class crmSettingsVaultDialogDeleteController extends crmJsonController
         }
         $vm = new crmVaultModel();
         if (!$vault_id || !($vault = $vm->getById($vault_id))) {
-            throw new waException('Vault not found');
+            throw new waException(_w('Vault not found.'));
         }
     }
 }

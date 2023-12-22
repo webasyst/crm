@@ -12,10 +12,12 @@ class crmDealMoveMethod extends crmApiAbstractMethod
         $deal_id = (int) $this->get('id', true);
 
         if (!isset($stage_id)) {
-            throw new waAPIException('empty_id', 'Required parameter is missing: stage_id', 400);
-        } elseif ($stage_id < 1) {
-            throw new waAPIException('not_found', 'Stage not found', 404);
-        } elseif ($deal_id < 1) {
+            throw new waAPIException('empty_id', sprintf_wp('Missing required parameter: “%s”.', 'stage_id'), 400);
+        }
+        if ($stage_id < 1) {
+            throw new waAPIException('invalid_request', _w('Stage not found.'), 400);
+        }
+        if ($deal_id < 1) {
             throw new waAPIException('not_found', _w('Deal not found'), 404);
         }
 
@@ -23,19 +25,27 @@ class crmDealMoveMethod extends crmApiAbstractMethod
         $deal = $deal_model->getById($deal_id);
         if (!$deal) {
             throw new waAPIException('not_found', _w('Deal not found'), 404);
-        } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
+        }
+        if ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
-        $this->http_status_code = 204;
-        $this->response = null;
         $stage_model = $this->getFunnelStageModel();
         $stages = $stage_model->getById([$deal['stage_id'], $stage_id]);
         $before_stage = ifset($stages, $deal['stage_id'], []);
         $after_stage = ifset($stages, $stage_id, []);
+        $funnel_id = ifset($after_stage, 'funnel_id', 0);
         if (!$after_stage) {
-            throw new waAPIException('not_found', 'Stage not found', 404);
-        } elseif ($before_stage['id'] == $after_stage['id']) {
+            throw new waAPIException('invalid_request', _w('Stage not found.'), 400);
+        }
+        if (!$this->getCrmRights()->funnel($funnel_id)) {
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
+        }
+        
+        $this->http_status_code = 204;
+        $this->response = null;
+        if ($before_stage['id'] == $after_stage['id']) {
+            // do nothing
             return;
         }
 

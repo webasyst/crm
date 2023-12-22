@@ -106,7 +106,7 @@
                             $wrapper: $('#{$dialog_id}'),
                             call_ready: "{$call_ready}",
                             locales: {$_locales|json_encode},
-                            iframe: {$iframe}
+                            iframe: {$iframe|json_encode}
                         });
                   //  }
                 //});

@@ -93,7 +93,7 @@
                                         </div>
                                         {else}
                                         <div class="c-user-name js-to-name">
-                                            <input class="c-to-input js-to-input" type="text" autocomplete="off" placeholder="[`Start typing a name`].." style="width: 200px;" />
+                                            <input class="c-to-input js-to-input" type="text" autocomplete="off" placeholder="[`Start typing a name`]..." style="width: 200px;" />
                                         </div>
                                         {/if}
                                     </div>
@@ -176,22 +176,24 @@
 
                         <div class="field">
                             <div class="name">[`From`]</div>
-                            <div class="value">
-                                <i class="icon userpic" style="background-image: url({$sender_photo_url});"></i>
-                                <span class="c-user-name js-sender-name">
-                                    {$sender_name|escape}
-                                </span>
-                                {if $sender_emails|count}
-                                    <span class="c-user-email">
-                                        <span class="c-user-email">[`via`]</span>
-                                        <span class="wa-select">
-                                            <select class="js-sender-email-select">
-                                                {foreach $sender_emails as $_email}
-                                                    <option value="{$_email|escape}"{if ($sender_default_email == $_email)} selected{/if}>{$_email|escape}</option>
-                                                {/foreach}
-                                            </select>
-                                        </span>
+                            <div class="value flexbox middle wrap space-8" style="display: flex;">
+                                <span>
+                                    <i class="icon userpic" style="background-image: url({$sender_photo_url});"></i>
+                                    <span class="c-user-name js-sender-name">
+                                        {$sender_name|escape}
                                     </span>
+                                </span>
+                                
+                                {if $sender_emails|count}
+                                <span class="text-gray">[`via`]</span>
+                                <span class="wa-select">
+                                    <select class="js-sender-email-select">
+                                        {foreach $sender_emails as $_email}
+                                            <option value="{$_email|escape}"{if ($sender_default_email == $_email)} selected{/if}>{$_email|escape}</option>
+                                        {/foreach}
+                                    </select>
+                                </span>
+                              
                                 {/if}
                                 <a href="javascript:void(0)" class="text-gray nowrap js-show-personal-settings-dialog">
                                     <i class="icon text-gray fas fa-cog settings"></i>
@@ -308,12 +310,12 @@
                                     {$_stage = $stages[$deal.stage_id]|default:null}
                                     {if $_stage}
                                         <i class="icon fas fa-circle funnel-state " style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
-                                        <a href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
+                                        <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
                                     {else}
-                                        <a href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Stage deleted`]</span>
+                                        <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Stage deleted`]</span>
                                     {/if}
                                 {else}
-                                    <a href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Funnel deleted`]</span>
+                                    <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Funnel deleted`]</span>
                                 {/if}
                             </div>
                         </div>
@@ -405,6 +407,9 @@
                 <input name="sender_email" value="{$sender_default_email|default:""|escape}" type="hidden" class="js-sender-email">
                 <input name="source_email" value="{$email_source|default:""|escape}" type="hidden">
                 <input name="hash" value="{$hash|default:""}" type="hidden">
+                {if !empty($deal.id)}
+                    <input name="deal_id" value="{$deal.id}" type="hidden">
+                {/if}
             </form>
         </div>
 
@@ -474,7 +479,7 @@
                         deal_id: {$deal.id|default:"0"},
                         locales: {$_locales|json_encode},
                         is_admin: {$wa->user()->isAdmin()|json_encode},
-                        iframe: {$iframe|default:"0"}
+                        iframe: {if !empty($iframe)}true{else}false{/if},
                     });
              //   }
            // });

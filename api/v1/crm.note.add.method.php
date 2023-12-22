@@ -13,11 +13,11 @@ class crmNoteAddMethod extends crmApiAbstractMethod
         $cnt_dl_id = ($deal_id > 0 ? $deal_id * -1 : $contact_id);
 
         if (empty($content)) {
-            throw new waAPIException('required_param', 'Required parameter is missing: content', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'content'), 400);
         } else if (empty($deal_id) && empty($contact_id)) {
-            throw new waAPIException('required_param', 'Required parameter is missing: deal_id or contact_id', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', sprintf_wp('“%s” or “%s”', 'deal_id', 'contact_id')), 400);
         } else if ($cnt_dl_id === 0) {
-            throw new waAPIException('not_found', 'Deal or contact not found', 404);
+            throw new waAPIException('not_found', _w('Deal or contact not found.'), 404);
         } else if (!empty($deal_id) && !$this->getDealModel()->getById($deal_id)) {
             throw new waAPIException('not_found', _w('Deal not found'), 404);
         } else if (!empty($contact_id) && !$this->getContactModel()->getById($contact_id)) {

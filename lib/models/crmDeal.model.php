@@ -555,6 +555,26 @@ class crmDealModel extends crmModel
 
         if ($with_participants) {
             $participants = $this->getParticipantsModel()->getParticipants($deal['id']);
+            if (!empty($deal['contact_id']) && !in_array($deal['contact_id'], array_column($participants, 'contact_id'))) {
+                $participants[] = [
+                    'deal_id' => $deal['id'],
+                    'contact_id' => $deal['contact_id'],
+                    'role_id' => crmDealParticipantsModel::ROLE_CLIENT,
+                    'label' => '',
+                    'create_datetime' => $deal['create_datetime'],
+                ];
+                $this->addParticipants($deal, $deal['contact_id'], crmDealParticipantsModel::ROLE_CLIENT);
+            }
+            if (!empty($deal['user_contact_id']) && !in_array($deal['user_contact_id'], array_column($participants, 'contact_id'))) {
+                $participants[] = [
+                    'deal_id' => $deal['id'],
+                    'contact_id' => $deal['user_contact_id'],
+                    'role_id' => crmDealParticipantsModel::ROLE_USER,
+                    'label' => '',
+                    'create_datetime' => $deal['create_datetime'],
+                ];
+                $this->addParticipants($deal, $deal['user_contact_id'], crmDealParticipantsModel::ROLE_USER);
+            }
             $deal['participants'] = $participants;
         }
 
@@ -642,10 +662,13 @@ class crmDealModel extends crmModel
             $currency = $this->getCurrencyModel()->getById($currency_id);
         }
         if (!$currency) {
-            $currency = array(
-                'code' => 'USD',
+            $primary_currency = waCurrency::getInfo(wa('crm')->getConfig()->getCurrency());
+            $primary_currency_code = ifset($primary_currency, 'code', wa()->getLocale() == 'ru_RU' ? 'RUB' : 'USD');
+
+            $currency = [
+                'code' => $primary_currency_code,
                 'rate' => 1.0
-            );
+            ];
         }
         return $currency;
     }
@@ -1556,7 +1579,7 @@ class crmDealModel extends crmModel
     public function searchDeal($search, $user_contact_id = null)
     {
         try {
-            $search = $this->escape($search);
+            $search = $this->escape($search, 'like');
             $condition = (empty($user_contact_id) ? '1=1' : 'cd.user_contact_id = '.$user_contact_id);
 
             return $this->query("

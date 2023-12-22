@@ -133,6 +133,7 @@ class crmContactListMethod extends crmApiAbstractMethod
                     $el['acl'] = (empty($adhoc_group[abs($el['crm_vault_id'])]) ? 'group' : 'own');
                 }
             }
+            $el['is_banned'] = ($el['is_user'] == -1);
             if ($handle_last_action) {
                 if (ifset($el['crm_last_log_id']) && isset($log[$el['crm_last_log_id']])) {
                     $el['last_action'] = $this->filterFields($log[$el['crm_last_log_id']],
@@ -189,7 +190,8 @@ class crmContactListMethod extends crmApiAbstractMethod
                 'acl',
                 'vault_id',
                 'fields',
-                'is_pinned'
+                'is_pinned',
+                'is_banned',
             ],
             $userpic_size
         );
@@ -229,18 +231,18 @@ class crmContactListMethod extends crmApiAbstractMethod
             if ($split[0] === 'recent') {
                 return null;
             } elseif (!isset($split[0], $split[1])) {
-                return 'Hash invalid';
+                return _w('Invalid hash.');
             }
         } elseif (strpos($hash, 'import/') !== false) {
             /** exp: import/2023-05-20 12:00:30 */
             if (empty($split[1])) {
-                return 'Hash invalid. Unknown date';
+                return _w('Invalid hash: unknown date.');
             }
             $date = date_parse_from_format('Y-m-d H:i:s', $split[1]);
             if (!empty($date['errors'])) {
-                return 'Hash invalid. Unknown date format. (YYYY-mm-dd HH:ii:ss)';
+                return _w('Invalid hash: unknown date format (YYYY-mm-dd HH:ii:ss).');
             } elseif (!empty($date['warnings'])) {
-                return 'Hash invalid. Incorrect date';
+                return _w('Invalid hash: incorrect date.');
             }
         }
 
@@ -351,7 +353,8 @@ class crmContactListMethod extends crmApiAbstractMethod
                 'photo',
                 'create_contact_id',
                 'create_app_id',
-                'create_method'
+                'create_method',
+                'is_user',
             ],
             $fields
         );
@@ -598,7 +601,7 @@ class crmContactListMethod extends crmApiAbstractMethod
             } else {
                 $owner = new waContact($split[1]);
                 if (!$owner->exists()) {
-                    throw new waAPIException('responsible_not_found', 'Contact does not exist: '.$split[1], 404);
+                    throw new waAPIException('responsible_not_found', sprintf_wp('Contact does not exist: %s.', $split[1]), 404);
                 }
                 return _w('Responsible').': '.$owner['name'];
             }

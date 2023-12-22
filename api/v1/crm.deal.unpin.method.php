@@ -10,9 +10,9 @@ class crmDealUnpinMethod extends crmApiAbstractMethod
         $deal_id = ifempty($_json, 'id', 0);
 
         if (empty($deal_id)) {
-            throw new waAPIException('required_param', 'Required parameter is missing: id', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'id'), 400);
         } elseif (!is_numeric($deal_id)) {
-            throw new waAPIException('invalid_param', 'Invalid deal ID', 400);
+            throw new waAPIException('invalid_param', _w('Invalid deal ID.'), 400);
         } elseif ($deal_id < 1) {
             throw new waAPIException('not_found', _w('Deal not found'), 404);
         }
@@ -27,7 +27,7 @@ class crmDealUnpinMethod extends crmApiAbstractMethod
                 ]
             );
         } catch (Exception $_exception) {
-            throw new waAPIException('error_db', $_exception->getMessage(), 400);
+            throw new waAPIException('error_db', $_exception->getMessage(), 500);
         }
 
         $this->http_status_code = 204;

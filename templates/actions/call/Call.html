@@ -145,7 +145,7 @@
         {/if}
         <div class="c-column middle nowrap">
             {if ($_contact.is_visible)}
-                <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top" title="{$_name|escape} / {$_gateway} {$_number|escape}">{$_name}</a>
+                <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top" title="{$_name} / {$_gateway} {$_number|escape}">{$_name}</a>
             {else}
                 {$_name}
             {/if}
@@ -744,9 +744,10 @@
                     <div class="gray">
                     [`To work with phone calls in CRM, you need to install and configure a plugin for the integration with an IP telephony provider.`]
                     </div>
-                    {sprintf_wp(
-                        '<a class="js-disable-router button rounded light-gray custom-mt-16" href="%s" target="_top" >[`Connect IP telephony`]</a>',
-                        "`$wa_app_url`plugins/"
+                    {sprintf(
+                        '<a class="js-disable-router button rounded light-gray custom-mt-16" href="%s" target="_top" >%s</a>',
+                        "`$wa_app_url`plugins/",
+                        _w('Connect IP telephony')
                     )}
                 </div>
                 {/if}

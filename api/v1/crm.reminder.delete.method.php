@@ -9,11 +9,11 @@ class crmReminderDeleteMethod extends crmApiAbstractMethod
         $reminder_id = (int) $this->get('id', true);
 
         if ($reminder_id < 1) {
-            throw new waAPIException('not_found', 'Reminder not found', 404);
+            throw new waAPIException('not_found', _w('Reminder not found.'), 404);
         }
         $reminder = $this->getReminderModel()->getById($reminder_id);
         if ($reminder === null || $reminder['complete_datetime']) {
-            throw new waAPIException('not_found', 'Reminder not found', 404);
+            throw new waAPIException('not_found', _w('Reminder not found.'), 404);
         } else if (!$this->getCrmRights()->reminderEditable($reminder)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }

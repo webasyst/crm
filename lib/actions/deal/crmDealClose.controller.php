@@ -21,7 +21,7 @@ class crmDealCloseController extends crmJsonController
         } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
             $this->accessDenied();
         }
-        if ($action == 'LOST') {
+        if ($action == crmDealModel::STATUS_LOST) {
             $lost_reason_require = wa()->getSetting('lost_reason_require');
             if ($lost_reason_require && !$lost_id && !$lost_text) {
                 $this->errors['lost_id'] = _w('This field required');

@@ -26,6 +26,7 @@ class crmDealListMethod extends crmApiAbstractMethod
         $funnel_id = waRequest::get('funnel', 0, waRequest::TYPE_INT);
         $stage_id = waRequest::get('stage', 0, waRequest::TYPE_INT);
         $tag_id = waRequest::get('tag', 0, waRequest::TYPE_INT);
+        $pinned_only = boolval(waRequest::get('pinned_only', 0, waRequest::TYPE_INT));
         $reminder_ids = waRequest::get('reminder', [], waRequest::TYPE_ARRAY_TRIM);
         $sort_field = waRequest::get('sort', '', waRequest::TYPE_STRING_TRIM);
         $userpic_size = abs(waRequest::get('userpic_size', self::USERPIC_SIZE, waRequest::TYPE_INT));
@@ -35,9 +36,9 @@ class crmDealListMethod extends crmApiAbstractMethod
 
         if ($user_id) {
             if ($user_id < 0) {
-                throw new waAPIException('not_found', 'User not found', 404);
+                throw new waAPIException('not_found', _w('User not found.'), 404);
             } elseif (!(new crmContact($user_id))->exists()) {
-                throw new waAPIException('not_found', 'User not found', 404);
+                throw new waAPIException('not_found', _w('User not found.'), 404);
             }
             $this->user_id = $user_id;
         } elseif ($user_id === 0) {
@@ -52,18 +53,20 @@ class crmDealListMethod extends crmApiAbstractMethod
             $this->list_params['participants'] = [$contact_id];
         }
 
+        $fields = array_filter($fields);
+
         if ($funnel_id < 0) {
-            throw new waAPIException('not_found', 'Funnel not found', 404);
+            throw new waAPIException('not_found', _w('Funnel not found.'), 404);
         } elseif ($stage_id < 0) {
-            throw new waAPIException('not_found', 'Stage not found', 404);
+            throw new waAPIException('not_found', _w('Stage not found.'), 404);
         } elseif ($tag_id < 0) {
-            throw new waAPIException('not_found', 'Tag not found', 404);
+            throw new waAPIException('not_found', _w('Tag not found.'), 404);
         } elseif (!empty($fields) && $_f = array_diff($fields, $this->getConfigureFields())) {
-            throw new waAPIException('invalid_field', 'Unknown configured deal fields: '.implode(', ', $_f), 400);
+            throw new waAPIException('invalid_field', sprintf_wp('Unknown configured deal fields: %s.', implode(', ', $_f)), 400);
         } elseif (!empty($reminder_ids) && !!array_diff($reminder_ids, ['no', 'burn', 'overdue', 'actual'])) {
-            throw new waAPIException('invalid_field', 'Reminder state unknown', 400);
+            throw new waAPIException('invalid_field', _w('Unknown reminder state.'), 400);
         } elseif (!empty($sort_field) && !in_array($sort_field, self::SORT_FIELD)) {
-            throw new waAPIException('invalid_field', 'Sort field unknown', 400);
+            throw new waAPIException('invalid_field', _w('Unknown sorting field.'), 400);
         }
 
         if ($search) {
@@ -72,8 +75,17 @@ class crmDealListMethod extends crmApiAbstractMethod
         }
 
         $logs = [];
-        $pinned_recent = [];
-        $do_get_pinned = false;
+        $pinned_recent = (in_array('is_pinned', $fields) || $pinned_only) ? $this->getRecent(false) : [];
+        $do_get_pinned = in_array('is_pinned', $fields);
+
+        if ($pinned_only) {
+            if (isset($this->list_params['deal_ids'])) {
+                $this->list_params['deal_ids'] = array_intersect($this->list_params['deal_ids'], array_keys($pinned_recent));
+            } else {
+                $this->list_params['deal_ids'] = array_keys($pinned_recent);
+            }
+        }
+
         $data = $this->prepareData(true);
         $deal_tags = $data['deal_tags'];
         $funnels = ifempty($data, 'funnels', []);
@@ -81,10 +93,6 @@ class crmDealListMethod extends crmApiAbstractMethod
         if (in_array('last_action', $fields)) {
             $log_ids = array_column($data['deals'], 'last_log_id');
             $logs = $this->prepareLastActions($log_ids, $userpic_size);
-        }
-        if (in_array('is_pinned', $fields)) {
-            $pinned_recent = $this->getRecent(false);
-            $do_get_pinned = true;
         }
 
         $deals = array_map(function ($el) use ($deal_params, $logs, $deal_tags, $funnels, $userpic_size, $pinned_recent, $do_get_pinned) {
@@ -181,6 +189,7 @@ class crmDealListMethod extends crmApiAbstractMethod
                 'limit' => intval($list_params['limit']),
                 'user_id' => $user_id,
                 'search' => $search,
+                'pinned_only' => $pinned_only,
                 'sort' => $list_params['sort'],
                 'asc' => $list_params['order'] === 'asc',
                 'page' => floor($list_params['offset'] / $list_params['limit']) +1,

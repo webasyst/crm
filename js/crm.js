@@ -989,17 +989,20 @@ var ContentRouter = ( function($) {
         $(document).on("click", "a", function(event) {
             var $link = $(this),
                 href = $link.attr("href"),
+                href_top = $link.data("link"),
                 content_uri = this.href;
                 var uri_has_spa_url = ( content_uri.indexOf( $.crm.app_url + 'contact/' ) >= 0 ) || ( content_uri.indexOf( $.crm.app_url + 'deal/' ) >= 0 );
                 
 
             // preventing the processing of links in the iframe
             //var link_in_spa = that.$spaContainer.length? $.contains(that.$spaContainer[0], $link[0]) : false;
-            if ($.crm.iframe && (uri_has_spa_url || !href)) {
+            /*if ($.crm.iframe && (uri_has_spa_url || !href)) {
                     return false
-            }
+            }*/
             
+           
             // hack for jqeury ui links without href attr
+
             if (!href) {
                 $link.attr("href", "javascript:void(0);");
                 href = $link.attr("href");
@@ -1024,7 +1027,14 @@ var ContentRouter = ( function($) {
                         }
                     })
                 } else {
-                    that.load(content_uri, false, $link);
+                  
+                    if ($.crm.iframe && href_top === 'top') {
+                        window.parent.$.crm.content.load(content_uri, false, $link);
+                        
+                    } else {
+                        that.load(content_uri, false, $link);
+                    }
+                    
                 }
 
             }

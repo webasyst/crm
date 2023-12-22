@@ -15,12 +15,12 @@ class crmSegmentUpdateMethod extends crmApiAbstractMethod
         $shared = ($shared === 0 ? 0 : 1);
 
         if (!is_numeric($segment_id)) {
-            throw new waAPIException('invalid_param', 'Invalid segment ID', 400);
+            throw new waAPIException('invalid_param', _w('Invalid segment ID.'), 400);
         } elseif (
             $segment_id < 1
             || !$segment = $this->getSegmentModel()->getSegment($segment_id)
         ) {
-            throw new waAPIException('not_found', 'Segment not found', 404);
+            throw new waAPIException('not_found', _w('Segment not found.'), 404);
         } elseif (!$this->getCrmRights()->canEditSegment($segment)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }

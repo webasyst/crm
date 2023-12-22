@@ -46,7 +46,7 @@
         {*if !empty($_userpic_deal)}
             <span class="icon size-18 rounded" style="background-image: url({$_userpic_deal});"></span>
         {/if*}
-        <span class="c-user-name">{$_deal.name|escape}</span>
+        <span class="c-user-name">{if !empty($_deal)}{$_deal.name|escape}{/if}</span>
     </a>
     <div class="hint custom-pl-12 cursor-pointer js-open-search">
         <span class="icon size-14"><i class="fas fa-pen" title="[`edit`]"></i></span>
@@ -71,7 +71,7 @@
     <div class="">
         <span class="icon"><i class="fas fa-user"></i></span>
         <span class="icon"><i class="fas fa-flag"></i></span>
-        <input class="js-autocomplete-deal input-blank" type="text" id="input-autocomplete-deal" value="" placeholder="[`Сontact or deal`]">
+        <input class="js-autocomplete-deal input-blank" type="text" id="input-autocomplete-deal" value="" placeholder="[`Contact or deal`]">
     </div>
     <span class="c-hidden custom-pl-4">
         <span class="icon js-reset-deal text-red cursor-pointer" title="[`Delete`]"><i class="fas fa-times-circle"></i></span>
@@ -188,7 +188,7 @@
 
                     {* USER *}
                     <div class="c-contact-wrapper js-contact-wrapper">
-                        <div class="flexbox middle wrap space-16 c-contact js-user js-show-combobox">
+                        <div class="flexbox middle space-4 c-contact js-user js-show-combobox">
                             {if !$_user.deleted}
                                 {$_userpic = $_user->getPhoto(32)}
                                 {if !empty($_userpic)}
@@ -199,6 +199,7 @@
                             {else}
                                 <span class="icon size-24 rounded" style="color: var(--text-color-hint);" title="[`User not found.`]"><i class="fas fa-user-slash" style="max-width: 22px;"></i></span>
                             {/if}
+                            <span class="icon caret cursor-pointer" title="[`Assign another user`]"><i class="fas fa-caret-right"></i></span>
                         </div>
                         <div class="c-combobox flexbox middle">
                             <div class="state-with-inner-icon left">
@@ -241,7 +242,7 @@
                     due_time: "{$_time}",
                     contact: { id: "{if !empty($_deal_id)}{$_deal_id}{else}{$_contact_id}{/if}",
                                 photo_url: "{if !empty($_userpic_deal)}{$_userpic_deal}{/if}",
-                                name: "{if !empty($_deal_id)}{$_deal.name|escape}{else if !empty($_contact_name)}{$_contact_name|escape}{/if}"
+                                name: "{if !empty($_deal_id) && !empty($_deal)}{$_deal.name|escape}{else if !empty($_contact_name)}{$_contact_name|escape}{/if}"
                                 },
                     user_contact: { id: "{if !empty($_user.id)}{$_user.id}{/if}",
                                     photo_url: "{if !empty($_userpic)}{$_userpic}{/if}",

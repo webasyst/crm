@@ -39,7 +39,7 @@ class crmDealMassCloseRunController extends crmJsonController
         if (!$deal_ids) {
             throw new waException('Deals not found');
         }
-        if ($action == 'LOST') {
+        if ($action == crmDealModel::STATUS_LOST) {
             $lost_reason_require = wa()->getSetting('lost_reason_require');
             if ($lost_reason_require && !$lost_id && !$lost_text) {
                 $this->errors[] = array('name' => 'lost_id', 'value' => _w('This field required'));

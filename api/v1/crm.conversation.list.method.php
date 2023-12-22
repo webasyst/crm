@@ -13,10 +13,8 @@ class crmConversationListMethod extends crmApiAbstractMethod
         $contact_filter = waRequest::get('contact_id', null, waRequest::TYPE_INT);
         $userpic_size = waRequest::get('userpic_size', self::USERPIC_SIZE, waRequest::TYPE_INT);
 
-        if (!$this->getCrmRights()->getConversationsRights() >= crmRightConfig::RIGHT_CONVERSATION_ALL) {
-            throw new waAPIException('forbidden', _w('Access denied'), 403);
-        } elseif ($transport_filter && !in_array($transport_filter, ['email', 'im'])) {
-            throw new waAPIException('invalid_transport', 'Unknown transport', 400);
+        if ($transport_filter && !in_array($transport_filter, ['email', 'im'])) {
+            throw new waAPIException('invalid_transport', _w('Unknown transport.'), 400);
         }
 
         $list_params = [
@@ -57,7 +55,7 @@ class crmConversationListMethod extends crmApiAbstractMethod
                 $el['icon'] = $el['icon_fa'];
             }
             $el = $this->filterFields(
-                $el, 
+                $el,
                 ['id', 'create_datetime', 'update_datetime', 'source_id', 'type', 'contact_id', 'user_contact_id', 'deal_id', 'summary', 'last_message_id', 'count', 'is_closed', 'read', 'icon_url', 'icon', 'icon_color', 'icon_fab', 'transport_name'],
                 ['id' => 'integer', 'count' => 'integer', 'last_message_id' => 'integer', 'is_closed' => 'boolean', 'read' => 'boolean', 'create_datetime' => 'datetime', 'update_datetime' => 'datetime']
             );
@@ -70,7 +68,7 @@ class crmConversationListMethod extends crmApiAbstractMethod
                         $source['icon_url'] = $el['icon_url'];
                     }
                     $plugin = crmSourcePlugin::factory($source['provider'])
-                        and $source_obj = $plugin->factorySource($el['source_id']) 
+                        and $source_obj = $plugin->factorySource($el['source_id'])
                         and $source += $source_obj->getFontAwesomeBrandIcon();
                     $el['source'] = $source;
                 }

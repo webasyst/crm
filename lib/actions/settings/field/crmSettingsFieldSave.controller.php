@@ -72,11 +72,11 @@ class crmSettingsFieldSaveController extends crmJsonController
     protected function getFieldData()
     {
         return array(
-            'id' => trim($this->getRequest()->post('id_val')),
-            'ftype' => trim($this->getRequest()->post('ftype')),
-            'select_field_value' => trim($this->getRequest()->post('select_field_value')),
+            'id' => trim((string) $this->getRequest()->post('id_val')),
+            'ftype' => trim((string) $this->getRequest()->post('ftype')),
+            'select_field_value' => trim((string) $this->getRequest()->post('select_field_value')),
             'names' => array_map(function ($_name) {
-                    return trim($_name);
+                    return trim((string) $_name);
                 },
                 (array) $this->getRequest()->post('name')
             )

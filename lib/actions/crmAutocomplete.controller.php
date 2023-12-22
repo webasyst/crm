@@ -213,7 +213,7 @@ class crmAutocompleteController extends waController
         foreach ($result as &$c) {
             $contact = new waContact($c['id']);
             if (wa()->whichUI() === '2.0') {
-                $c['label'] = "<div class = \"c-layout-contact\"><span class=\"icon userpic custom-mr-4\"><i style='background-image: url(\"".$contact->getPhoto(20)."\");'></i></span><span class = \"c-layout-contact-name\">".$c['label']."</span></div>";
+                $c['label'] = "<div class = \"c-layout-contact\"><span class=\"icon userpic custom-mr-4\"><i class=\"rounded\" style='background-image: url(\"".$contact->getPhoto(20)."\");'></i></span><span class = \"c-layout-contact-name\">".$c['label']."</span></div>";
             }
             else {
                 $c['label'] = "<i class='icon16 userpic20' style='background-image: url(\"".$contact->getPhoto(20)."\");'></i>".$c['label'];

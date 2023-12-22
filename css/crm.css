@@ -6,6 +6,7 @@ html {
   --invoice-refunded-color: var(--red);
   --invoice-archived-color: #a9a9a9;
   --invoice-draft-color: var(--gray);
+  --background-color-message-blockquote: #a6adc2;
 /* replacing colors in wa-2.0.css */
   --accent-color: #f27130;
   --accent-color-hover: #cc4b0a;
@@ -14,6 +15,8 @@ html {
 html[data-theme="dark"] {
   --accent-color: #cc6d3d;
   --accent-color-hover: #bf4d13;
+  --background-color-blockquote: rgba(255,255,255,0.03);
+  --background-color-message-blockquote: #474556;
 }
 form {
   overflow: inherit;
@@ -811,7 +814,7 @@ table.zebra tr.selected .c-single-line:after {
     -ms-flex-pack: start;
     -webkit-justify-content: flex-start;
     justify-content: flex-start;
-    width: 100vw;
+    width: auto;
   }
   .sidebar.rail ul.menu > li > a svg {
     font-size: 1rem;
@@ -2784,7 +2787,7 @@ ul.pager li {
   padding: 80px 0;
   text-align: center;
 }
-@media (min-width: 761px) {
+@media (min-width: 601px) {
   .iframe-style .dialog .dialog-body {
     -webkit-transform: translate(-50%, -50%);
     -moz-transform: translate(-50%, -50%);
@@ -2793,6 +2796,7 @@ ul.pager li {
     transform: translate(-50%, -50%);
     top: 50% !important;
     left: 50% !important;
+    bottom: unset !important;
   }
 }
 .iframe-style .dialog.c-send-email-dialog .dialog-body,
@@ -2800,6 +2804,13 @@ ul.pager li {
 .iframe-style .dialog.c-message-show-body-dialog .dialog-body {
   width: 85vw;
   max-width: max-content;
+}
+@media (max-width: 600px) {
+  .iframe-style .dialog.c-send-email-dialog .dialog-body,
+  .iframe-style .dialog.c-email-personal-settings-dialog .dialog-body,
+  .iframe-style .dialog.c-message-show-body-dialog .dialog-body {
+    width: 100vw;
+  }
 }
 .iframe-style .dialog.c-send-email-dialog .dialog-header {
   padding: 0.5rem 1.5rem;
@@ -2820,8 +2831,27 @@ ul.pager li {
     width: 100vw;
   }
 }
+.dialog.c-send-email-dialog .c-message-form-wrapper.fields:not(.vertical) .field {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.dialog.c-send-email-dialog .c-message-form-wrapper.fields:not(.vertical) .field.email-copy-wrapper,
+.dialog.c-send-email-dialog .c-message-form-wrapper.fields:not(.vertical) .field.email-copy-wrapper-collapsed {
+  display: none;
+}
+.dialog.c-send-email-dialog .c-message-form-wrapper.fields:not(.vertical) .field.email-copy-wrapper.email-copy-wrapper-block,
+.dialog.c-send-email-dialog .c-message-form-wrapper.fields:not(.vertical) .field.email-copy-wrapper-collapsed.email-copy-wrapper-block {
+  display: block;
+}
+.dialog.c-send-email-dialog .c-message-form-wrapper.fields:not(.vertical) .field > *:not(script,
+.dialog.c-send-email-dialog .c-message-form-wrapper style,
+.dialog.c-send-email-dialog .c-message-form-wrapper link) {
+  display: table-cell;
+}
 .dialog.c-send-email-dialog .c-message-form-wrapper .name {
   max-width: 60px;
+  width: 150px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -2829,16 +2859,7 @@ ul.pager li {
   vertical-align: middle;
 }
 .dialog.c-send-email-dialog .c-message-form-wrapper .js-sender-email-select {
-  padding: 0.3125em 0.5em;
-  margin: 0 0.25em 0 0;
-  border-color: transparent;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  resize: none;
   outline: none;
-  overflow: hidden;
-  background: transparent;
 }
 .c-messages-page .sidebar.no-messages-sidebar {
   width: 100%;
@@ -3133,6 +3154,41 @@ ul.pager li {
     justify-content: space-between;
   }
 }
+.c-messages-conversation-list .c-messages-header .c-header-operation-wrapper {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  background: inherit;
+  height: 100%;
+  padding: 14px 12px;
+}
+.c-messages-conversation-list .c-messages-header .c-header-operation-wrapper .wa-checkbox.indeterminate input:checked + span {
+  background: transparent;
+}
+.c-messages-conversation-list .c-messages-header .c-header-operation-wrapper .wa-checkbox.indeterminate input + span .icon svg {
+  color: var(--gray) !important;
+}
+.c-messages-conversation-list .c-messages-header .c-header-operation-wrapper .wa-checkbox.indeterminate input + span .icon {
+  visibility: visible;
+}
+.c-messages-conversation-list .c-messages-header .c-header-operation-wrapper #js-operation-dropdown .crm-operation-li .crm-operation-link.disabled {
+  pointer-events: none;
+  cursor: default;
+  text-decoration: none;
+  opacity: 0.55;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=55)";
+  filter: alpha(opacity=55);
+}
+.c-messages-conversation-list .c-messages-header .c-header-operation-wrapper #js-operation-dropdown .crm-operation-li .crm-operation-li--name {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -o-box-flex: 1;
+  box-flex: 1;
+  -webkit-flex: 0;
+  -ms-flex: 0;
+  flex: 0;
+}
 .c-messages-conversation-list .c-messages-header .c-nav-wrapper {
   padding-bottom: 8px;
 }
@@ -3156,7 +3212,7 @@ ul.pager li {
   color: var(--text-color);
 }
 .c-messages-conversation-list .c-messages-header .c-search-wrapper input {
-  width: 188px;
+  width: 169px;
   margin: 0;
 }
 @media (max-width: 760px) {
@@ -3177,7 +3233,7 @@ ul.pager li {
   display: none;
 }
 .c-messages-conversation-list .c-messages-header .c-search-contact .c-user-wrapper {
-  max-width: 9.7rem;
+  max-width: 8.5rem;
 }
 .c-messages-conversation-list .c-messages-header .c-search-contact .c-user-name {
   white-space: nowrap;
@@ -3388,6 +3444,17 @@ ul.pager li {
 .c-messages-conversation-list .c-messages-body .pager {
   padding: 0 20px;
 }
+.c-messages-conversation-list .c-messages-body .c-messages-table-section.active-operations .c-message-wrapper .profile {
+  padding: 0;
+}
+.c-messages-conversation-list .c-messages-body .c-messages-table-section.active-operations .c-message-wrapper .operation-checkbox-wrapper {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+}
 .c-messages-conversation-list .c-messages-body .c-messages-table-section .js-lazy-load {
   display: -webkit-box;
   display: -moz-box;
@@ -3401,6 +3468,49 @@ ul.pager li {
   -ms-flex-pack: center;
   -webkit-justify-content: center;
   justify-content: center;
+}
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-pack: justify;
+  -moz-box-pack: justify;
+  -o-box-pack: justify;
+  -ms-flex-pack: justify;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  -webkit-box-align: stretch;
+  -moz-box-align: stretch;
+  -o-box-align: stretch;
+  -ms-flex-align: stretch;
+  -webkit-align-items: stretch;
+  align-items: stretch;
+}
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .operation-checkbox-wrapper {
+  display: none;
+  padding: 0;
+  -webkit-transition: 0.3s background;
+  -moz-transition: 0.3s background;
+  -o-transition: 0.3s background;
+  -ms-transition: 0.3s background;
+  transition: 0.3s background;
+}
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .operation-checkbox-wrapper label {
+  height: 100%;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+}
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .operation-checkbox-wrapper label .operation-checkbox {
+  -webkit-align-self: center;
+  align-self: center;
+  -ms-flex-item-align: center;
 }
 .c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .c-user-photo.userpic-48 {
   height: 40px;
@@ -3421,11 +3531,18 @@ ul.pager li {
 }
 .c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile {
   padding: 0 0 0 0.75rem;
-  -webkit-transition: 0.3s;
-  -moz-transition: 0.3s;
-  -o-transition: 0.3s;
-  -ms-transition: 0.3s;
-  transition: 0.3s;
+  -webkit-transition: 0.3s background;
+  -moz-transition: 0.3s background;
+  -o-transition: 0.3s background;
+  -ms-transition: 0.3s background;
+  transition: 0.3s background;
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -o-box-flex: 1;
+  -ms-box-flex: 1;
+  box-flex: 1;
+  -webkit-flex-grow: 1;
+  flex-grow: 1;
 }
 .c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail {
   padding: 0.75rem 0.75rem 0.75rem 0;
@@ -3449,6 +3566,11 @@ ul.pager li {
   font-weight: 450;
   font-size: 13px;
   line-height: 16px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 .c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail .c-bottom-detail .c-subject-wrapper .icon svg {
   -webkit-transition: color 0.3s;
@@ -3456,6 +3578,15 @@ ul.pager li {
   -o-transition: color 0.3s;
   -ms-transition: color 0.3s;
   transition: color 0.3s;
+}
+.c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail .c-bottom-detail .c-column-subject {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -o-box-flex: 1;
+  box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 .c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail .c-bottom-detail .c-subject-unread-icon,
 .c-messages-conversation-list .c-messages-body .c-messages-table-section .c-message-wrapper .profile > .detail .c-bottom-detail .c-subject-need-response-icon {
@@ -3628,6 +3759,28 @@ ul.pager li {
 }
 .drawer.crm-message-additional .drawer-body div.drawer-block .spinner-wrapper .spinner {
   margin-bottom: 4rem;
+}
+.c-message-body img {
+  max-width: 100%;
+}
+.c-message-body table td {
+  padding: 0;
+  border-bottom: none;
+}
+.c-message-body table tr:hover td {
+  background: transparent;
+}
+.c-message-body blockquote {
+  padding: 1.25em 0 1.75em 1.25em;
+  font-size: 0.95em;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.c-message-body blockquote blockquote blockquote blockquote blockquote blockquote blockquote blockquote {
+  font-size: 1em;
+  background: var(--background-color-message-blockquote);
+  border-left: 1px solid var(--light-gray);
+  border-radius: 0;
 }
 .c-message-conversation-page.shadowed {
   margin: 0;
@@ -4625,16 +4778,7 @@ ul.pager li {
   background: var(--background-color-blank);
 }
 .c-message-conversation-page .c-add-email-message-section .c-user-email .js-sender-email-select {
-  padding: 0.3125em 0.5em;
-  margin: 0 0.25em 0 0;
-  border-color: transparent;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  resize: none;
   outline: none;
-  overflow: hidden;
-  background: transparent;
 }
 .c-message-conversation-page .c-add-email-message-section .email-copy-input-div input:not(:focus) {
   padding: 0.3125em 0.5em;
@@ -9460,7 +9604,57 @@ ul.pager li {
 }
 .c-invoice-edit-page .c-comment-wrapper {
   margin: 3em 0 0;
-  border: 1px solid var(--border-color-soft);
+}
+.c-invoice-edit-page .c-comment-wrapper .redactor-box,
+.c-invoice-edit-page .c-comment-wrapper .redactor-layer {
+  -webkit-box-shadow: 0 0.25rem 1rem -0.75rem var(--big-editor-shadow-color);
+  box-shadow: 0 0.25rem 1rem -0.75rem var(--big-editor-shadow-color);
+  border-radius: 0.75rem;
+  background: var(--background-color-blank);
+  border-width: 0;
+}
+.c-invoice-edit-page .c-comment-wrapper .redactor-box .redactor-toolbar,
+.c-invoice-edit-page .c-comment-wrapper .redactor-layer .redactor-toolbar {
+  padding: 13px 13px 0px !important;
+  background: transparent;
+  -webkit-box-shadow: unset;
+  box-shadow: unset;
+}
+.c-invoice-edit-page .c-comment-wrapper .redactor-box .redactor-toolbar a.re-button,
+.c-invoice-edit-page .c-comment-wrapper .redactor-layer .redactor-toolbar a.re-button {
+  display: inline-block;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  font-size: 14px;
+  text-align: center;
+  padding: 10px 15px 9px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  vertical-align: middle;
+  text-decoration: none;
+  zoom: 1;
+  position: relative;
+  color: var(--text-color);
+  border-radius: 2px;
+  background: var(--background-color-blank);
+  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.22);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.22);
+  margin-right: 5px;
+  margin-bottom: 4px;
+  height: auto;
+}
+.c-invoice-edit-page .c-comment-wrapper .redactor-box .redactor-toolbar a.re-button:hover,
+.c-invoice-edit-page .c-comment-wrapper .redactor-layer .redactor-toolbar a.re-button:hover {
+  outline: none;
+  color: #fff;
+  background: #449aef;
+}
+.c-invoice-edit-page .c-comment-wrapper .redactor-box .redactor-toolbar a.re-button.re-button-icon,
+.c-invoice-edit-page .c-comment-wrapper .redactor-layer .redactor-toolbar a.re-button.re-button-icon {
+  font-size: 16px;
+  padding: 9px 15px 6px;
 }
 .c-invoice-edit-page .c-comment-wrapper textarea {
   width: 100%;
@@ -9472,6 +9666,10 @@ ul.pager li {
 }
 .c-invoice-edit-page .c-actions {
   margin: 16px 0 0;
+}
+.iframe-style .c-invoice-edit-page .c-comment-wrapper .redactor-layer,
+.iframe-style .c-invoice-edit-page .c-comment-wrapper .redactor-box {
+  background: var(--background-color) !important;
 }
 .dialog.c-deal-attach-dialog .dialog-body .dialog-content {
   overflow-y: visible;
@@ -10798,6 +10996,9 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .c-reminders-page .c-reminder-content-area .c-reminders-list .c-reminder-wrapper .c-dots {
   position: relative;
+  -webkit-align-self: flex-end;
+  align-self: flex-end;
+  -ms-flex-item-align: end;
 }
 .c-reminders-page .c-reminder-content-area .c-reminders-list .c-reminder-wrapper .c-dots .js-dots {
   padding: 0.2rem 0.3rem;
@@ -11009,13 +11210,13 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 @media (max-width: 1345px) {
   .c-reminders-page .c-user,
   .c-reminders-page .js-float-text {
-    max-width: calc(100vw - 645px);
+    max-width: calc(100vw - 647px);
   }
 }
 @media (max-width: 1200px) {
   .c-reminders-page .c-user,
   .c-reminders-page .js-float-text {
-    max-width: calc(100vw - 581px);
+    max-width: calc(100vw - 583px);
   }
 }
 @media (max-width: 760px) {
@@ -11031,13 +11232,13 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 @media (max-width: 1345px) {
   .c-reminders-page .with-userblock .c-user,
   .c-reminders-page .with-userblock .js-float-text {
-    max-width: calc(100vw - 682px);
+    max-width: calc(100vw - 684px);
   }
 }
 @media (max-width: 1200px) {
   .c-reminders-page .with-userblock .c-user,
   .c-reminders-page .with-userblock .js-float-text {
-    max-width: calc(100vw - 618px);
+    max-width: calc(100vw - 620px);
   }
 }
 @media (max-width: 760px) {
@@ -11050,10 +11251,18 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   margin-top: 5.5rem;
   text-align: center;
 }
+.iframe-style body {
+  overflow-x: hidden;
+}
 .iframe-style .c-reminders-page .c-reminder-content-area {
   height: 100vh;
 }
+.iframe-style .c-reminders-page .c-reminder-content-area .article-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 .iframe-style .c-reminders-page .c-reminder-content-area .skeleton-wrapper {
+  position: fixed;
   height: 100%;
 }
 .iframe-style .c-reminders-page .c-reminder-content-area .c-user,
@@ -11087,6 +11296,9 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   .iframe-style .c-reminders-page .c-reminder-content-area .with-userblock .js-float-text {
     max-width: calc(100vw - 155px);
   }
+}
+.iframe-style .c-reminders-page .c-completed-reminders-section.bottombar.sticky {
+  position: sticky;
 }
 .iframe-style .c-reminders-page .c-completed-reminders-section.bottombar.sticky.is-shown .c-reminders-list {
   max-height: calc(100vh - 8rem);
@@ -15539,20 +15751,9 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   margin: 0;
 }
 .c-send-email-dialog.iframe-style .c-message-form-wrapper .field {
-  display: -webkit-box;
-  display: -moz-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: box;
-  display: flex;
+  display: table;
   width: 100%;
   table-layout: fixed;
-  -webkit-box-align: center;
-  -moz-box-align: center;
-  -o-box-align: center;
-  -ms-flex-align: center;
-  -webkit-align-items: center;
-  align-items: center;
 }
 .c-send-email-dialog.iframe-style .c-message-form-wrapper .field.email-copy-wrapper {
   display: none;
@@ -15589,7 +15790,13 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 .c-send-email-dialog.iframe-style .c-message-form-wrapper .field .value {
   display: table-cell;
   vertical-align: top;
-  width: 85%;
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -o-box-flex: 1;
+  box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 .c-send-email-dialog.iframe-style .c-message-form-wrapper .field .value.js-deal-value {
   display: -webkit-box;
@@ -15645,20 +15852,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
-.c-send-email-dialog .c-message-form-wrapper .field .value input[type="text"]:not(:focus) {
-  padding: 0.3125em 0.5em 0.3125em 0;
-  margin: 0 0.25em 0 0;
-  border-color: transparent;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  resize: none;
-  outline: none;
-  overflow: hidden;
-  background: transparent;
-  background-color: transparent !important;
-}
-.c-send-email-dialog .c-message-form-wrapper .field .value input[name="subject"] {
+.c-send-email-dialog .c-message-form-wrapper .field .value input[name="subject"]:not(:focus) {
   font-weight: 500;
 }
 .c-send-email-dialog .c-message-form-wrapper .field .value input:-internal-autofill-selected {
@@ -15750,10 +15944,6 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .c-send-email-dialog .c-message-form-wrapper .field .value .c-empty-deal.c-empty-deal-hidden {
   display: none;
-}
-.c-send-email-dialog .c-message-form-wrapper .field .c-user-email {
-  color: #999;
-  margin-right: 12px;
 }
 .c-send-email-dialog .c-message-form-wrapper .c-email-to-user {
   cursor: default;
@@ -16107,9 +16297,13 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   }
   .c-send-email-dialog.iframe-style .dialog-body .c-message-form-wrapper .c-wysiwyg-wrapper {
     margin: 0;
-  }
-  .c-send-email-dialog.iframe-style .dialog-body .c-message-form-wrapper .js-sender-email-select {
-    margin-top: 0.5rem;
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    -o-box-flex: 1;
+    box-flex: 1;
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
   }
   .c-send-email-dialog.iframe-style .dialog-body .c-message-form-wrapper .redactor-toolbar li a.re-button-icon {
     padding: 10px;
@@ -16117,15 +16311,6 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   }
   .c-send-email-dialog.iframe-style .dialog-body .c-message-form-wrapper .field {
     margin-top: 0.5rem;
-    -webkit-box-lines: multiple;
-    -moz-box-lines: multiple;
-    -o-box-lines: multiple;
-    -webkit-flex-wrap: wrap;
-    -ms-flex-wrap: wrap;
-    flex-wrap: wrap;
-  }
-  .c-send-email-dialog.iframe-style .dialog-body .c-message-form-wrapper .field .value {
-    width: 100%;
   }
   .c-send-email-dialog.iframe-style .dialog-body .c-message-form-wrapper .field .value .js-show-personal-settings-dialog {
     display: none;
@@ -16156,7 +16341,10 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
     flex: auto;
   }
   .c-send-email-dialog.iframe-style .dialog-body .c-message-form-wrapper .field .name {
-    width: 100px;
+    width: 60px;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+    display: table-cell;
   }
 }
 .c-send-sms-dialog.iframe-style .dialog-header,

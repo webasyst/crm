@@ -14,9 +14,9 @@ class crmContactAccessUpdateMethod extends crmApiAbstractMethod
         if (!is_numeric($contact_id) || $contact_id < 1) {
             throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (isset($owner_ids, $vault_id)) {
-            throw new waAPIException('invalid_data', 'One of the values is expected: owner_id or vault_id', 400);
+            throw new waAPIException('invalid_data', sprintf_wp('One of the values is expected: %s.', sprintf_wp('“%s” or “%s”', 'owner_id', 'vault_id')), 400);
         } elseif (isset($vault_id) && (!is_numeric($vault_id) || $vault_id < 0)) {
-            throw new waAPIException('not_found', 'Vault not found', 404);
+            throw new waAPIException('not_found', _w('Vault not found.'), 404);
         }
 
         $contact = new crmContact($contact_id);
@@ -47,7 +47,7 @@ class crmContactAccessUpdateMethod extends crmApiAbstractMethod
         if (isset($owner_ids)) {
             foreach ((array) $owner_ids as $owner_id) {
                 if (!is_numeric($owner_id) || $owner_id < 1) {
-                    $errors[] = (empty($owner_id) ? 'Empty owner_id' : "Invalid owner_id: $owner_id");
+                    $errors[] = (empty($owner_id) ? sprintf_wp('Empty “%s” value.', 'owner_id') : sprintf_wp("Invalid “%s” value: %s.", 'owner_id', '$owner_id'));
                 }
             }
             if (!$errors) {
@@ -56,7 +56,7 @@ class crmContactAccessUpdateMethod extends crmApiAbstractMethod
                 $contact_collection->addWhere("id IN ('".join("','", $adhoc_group_model->escape($owner_ids))."')");
                 $owners = array_keys($contact_collection->getContacts('id'));
                 if ($id_diff = array_diff($owner_ids, $owners)) {
-                    $errors[] = 'User not existing id: '.implode(', ', $id_diff);
+                    $errors[] = sprintf_wp('Nonexistent user’s IDs: %s.', implode(', ', $id_diff));
                 }
                 if (!$errors) {
                     $user_ids = [];
@@ -66,13 +66,13 @@ class crmContactAccessUpdateMethod extends crmApiAbstractMethod
                         }
                     }
                     if ($id_diff = array_diff($owners, $user_ids)) {
-                        $errors[] = 'Contacts not access id: '.implode(', ', $id_diff);
+                        $errors[] = sprintf_wp('IDs of users without access rights: %s.', implode(', ', $id_diff));
                     }
                 }
             }
         } elseif (isset($vault_id) && $vault_id != 0) {
             if (!$this->getVaultModel()->getById($vault_id)) {
-                $errors[] = 'Vault not existing';
+                $errors[] = _w('Vault does not exist.');
             }
         }
 

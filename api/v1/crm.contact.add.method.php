@@ -18,7 +18,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
             $this->http_status_code = 400;
             $this->response = [
                 'error' => 'invalid_param',
-                'error_description' => _w('Please correct errors in the data'),
+                'error_description' => _w('Please correct errors in the data.'),
                 'error_fields' => array_merge(
                     $this->errors,
                     (empty($errors) ? [] : $this->errorFormat($errors))
@@ -31,7 +31,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
             $this->http_status_code = 400;
             $this->response = [
                 'error' => 'save_error',
-                'error_description' => 'Error saving a contact',
+                'error_description' => _w('Contact saving error.'),
                 'error_fields' => $this->errorFormat($errors)
             ];
             return;
@@ -79,7 +79,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
             $field_data += array_fill_keys(['field', 'value', 'ext'], '');
             $field_data['is_composite'] = (is_array($field_data['value']));
 
-            if (!empty($required) && in_array($field_data['field'], $required)) {
+            if (!empty($required) && in_array($field_data['field'], $required) && !!trim((string) $field_data['value'])) {
                 unset($required);
             }
             if ($field_data['is_composite']) {
@@ -186,7 +186,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
                         'field' => $name,
                         'value' => $v,
                         'code'  => 'not_multiple',
-                        'description' => 'Several values are set for field'
+                        'description' => _w('Multiple values set for a single-value field.')
                     ];
                 }, $values['v']);
                 $this->errors = array_merge($this->errors, $_errors);
@@ -196,7 +196,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
                         'field' => $name.(empty($_f['field']) ? '' : '.'.$_f['field']),
                         'value' => ifset($_f, 'value', $_f),
                         'code'  => 'not_composite',
-                        'description' => 'Field is not composite'
+                        'description' => _w('Not a composite field.')
                     ];
                 }
             }
@@ -207,7 +207,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
                     'field' => 'company_contact_id',
                     'value' => $company_contact_id,
                     'code' => 'invalid_value',
-                    'description' => 'Field value not integer or negative'
+                    'description' => _w('Field value is not an integer or is negative.')
                 ];
             }
         }
@@ -292,7 +292,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
                 'field' => $data['field'],
                 'value' => $data['value'],
                 'code'  => 'invalid_param',
-                'description' => 'Required parameter Field identifier'
+                'description' => sprintf_wp('Missing required parameter: “%s”.', _w('field identifier'))
             ];
             return false;
         }
@@ -311,7 +311,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
             if ($_data['is_composite']) {
                 $composite_value = ($field_object->hasExt() ? ['ext' => $_data['ext']] : []);
                 foreach ($_data['value'] as $_val) {
-                    if (!empty($_val['value'])) {
+                    if (isset($_val['value'])) {
                         $composite_value[$_val['field']] = $_val['value'];
                     }
                 }

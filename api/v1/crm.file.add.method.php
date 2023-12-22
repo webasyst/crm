@@ -8,40 +8,44 @@ class crmFileAddMethod extends crmApiAbstractMethod
     {
         $_json = $this->readBodyAsJson();
         $file = $this->getFileContent($_json);
-        $file_name = (string) ifempty($_json, 'file_name', 0);
+        $file_name = (string) ifempty($_json, 'file_name', null);
         $file_name = trim($file_name);
         $deal_id = (int) ifempty($_json, 'deal_id', 0);
         $contact_id = (int) ifempty($_json, 'contact_id', 0);
+        $comment = ifempty($_json, 'comment', null) and $comment = trim((string)$comment);
+        if ($comment === '') {
+            $comment = null;
+        }
 
         if (empty($file)) {
-            throw new waAPIException('empty_file', 'Required parameter is missing: file', 400);
+            throw new waAPIException('empty_file', sprintf_wp('Missing required parameter: “%s”.', 'file'), 400);
         } else if (empty($deal_id) && empty($contact_id)) {
-            throw new waAPIException('required_param', 'Required parameter is missing: deal_id or contact_id', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', sprintf_wp('“%s” or “%s”', 'deal_id', 'contact_id')), 400);
         } else if (
             (empty($deal_id) && empty($contact_id))
             || (!empty($deal_id) && $deal_id < 1)
             || (!empty($contact_id) && $contact_id < 1)
         ) {
-            throw new waAPIException('not_found', 'Deal or contact not found', 404);
+            throw new waAPIException('invalid_request', _w('Deal or contact not found.'), 400);
         } else if (empty($file_name)) {
-            throw new waAPIException('empty_file_name', 'Required parameter is missing: file_name', 400);
+            throw new waAPIException('empty_file_name', sprintf_wp('Missing required parameter: “%s”.', 'file_name'), 400);
         } else if (
             in_array($file_name, ['.', '..'])
             || !preg_match('#^[^:*?"<>|/\\\\]+$#', $file_name)
         ) {
-            throw new waAPIException('invalid_file_name', 'Invalid file name', 400);
+            throw new waAPIException('invalid_file_name', _w('Invalid file name.'), 400);
         }
         if ($deal_id) {
             $cnt_dl_id = $deal_id * -1;
             $deal = $this->getDealModel()->getDeal($deal_id);
             if ($deal === null) {
-                throw new waAPIException('invalid', 'Unknown deal', 400);
+                throw new waAPIException('invalid_request', _w('Unknown deal.'), 400);
             }
         } else {
             $cnt_dl_id = $contact_id;
             $contact = $this->getContactModel()->getById($contact_id);
             if ($contact === null) {
-                throw new waAPIException('invalid', 'Unknown crm contact', 400);
+                throw new waAPIException('invalid_request', _w('Unknown contact.'), 400);
             }
         }
         if (!$this->getCrmRights()->contactOrDeal($cnt_dl_id)) {
@@ -55,7 +59,7 @@ class crmFileAddMethod extends crmApiAbstractMethod
         $tmp_name = $temp_path."/$name";
         $n = file_put_contents($tmp_name, $file);
         if (!$n) {
-            throw new waAPIException('server_error', 'Can\'t save the file', 500);
+            throw new waAPIException('server_error', _w('File could not be saved.'), 500);
         }
         try {
             $file_size = (int) filesize($tmp_name);
@@ -72,7 +76,10 @@ class crmFileAddMethod extends crmApiAbstractMethod
 
         /** add to private directory */
         $file_model = new crmFileModel();
-        $file_id = $file_model->add(['contact_id' => $cnt_dl_id], $request_file);
+        $file_id = (int) $file_model->add([
+            'contact_id' => $cnt_dl_id, 
+            'comment' => $comment
+        ], $request_file);
         $_date = date('Y-m-d H:i:s');
         if ($file_id) {
             $clm = new crmLogModel();
@@ -88,11 +95,11 @@ class crmFileAddMethod extends crmApiAbstractMethod
                 'name' => $request_file->name,
                 'ext'  => $request_file->extension,
                 'size' => $file_size,
-                'comment' => '',
+                'comment' => $comment,
                 'create_datetime' => $this->formatDatetimeToISO8601($_date),
             ];
         } else {
-            throw new waAPIException('failed', 'Failed to upload file', 500);
+            throw new waAPIException('server_error', _w('File could not be uploaded.'), 500);
         }
     }
 

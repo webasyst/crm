@@ -202,9 +202,10 @@ class crmWaLogExplainer
                 $transport_str = _w("Instant messenger");
             }
         }
+        $transport_str = htmlspecialchars($transport_str);
 
         if (!empty($log_item['params']['subject'])) {
-            return sprintf(_w('%s “%s” to contact %s'), $transport_str, $log_item['params']['subject'], $subject_contact_str);
+            return sprintf(_w('%s “%s” to contact %s'), $transport_str, htmlspecialchars($log_item['params']['subject']), $subject_contact_str);
         } else {
             return sprintf(_w('%s to contact %s'), $transport_str, $subject_contact_str);
         }

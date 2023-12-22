@@ -165,7 +165,7 @@
                         send_action_url: {$send_action_url|default:''|json_encode},
                         app_url: {"`$wa_backend_url`crm/"|json_encode},
                         locales: {$_locales|json_encode},
-                        iframe: {$iframe}
+                        iframe: {$iframe|json_encode}
                     });
              //   }
            // });

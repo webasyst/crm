@@ -183,6 +183,10 @@ var CRMSettingsCompanies = ( function($) {
                 start: function(event,ui) {
                 },
                 stop: function(event,ui) {
+                    that.toggleButton(true); 
+                },
+                onUpdate: function(event,ui) {
+                    that.toggleButton(true); 
                 }
             });
         }

@@ -24,7 +24,7 @@ class crmContactTabsController extends crmJsonController
     {
         $contact_id = waRequest::get('id', 0, waRequest::TYPE_INT);
         if ($contact_id < 1) {
-            throw new waAPIException('invalid_param', 'Invalid contact ID', 400);
+            throw new waAPIException('invalid_param', _w('Invalid contact ID.'), 400);
         } elseif (null === $this->getContactModel()->getById($contact_id)) {
             throw new waAPIException('not_found', _w('Contact not found'), 404);
         }

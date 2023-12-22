@@ -18,7 +18,12 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
         if (empty($contact_id) || empty($subject) || empty($body)) {
             throw new waAPIException(
                 'required_parameter',
-                'Required parameter is missing: contact_id, subject, body',
+                sprintf_wp(
+                    'Missing some of required parameters: %s.',
+                    implode(', ', array_map(function ($field) {
+                        return sprintf_wp('“%s”', $field);
+                    }, ['contact_id', 'subject', 'body']))
+                ),
                 400
             );
         }
@@ -28,7 +33,7 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
             throw new waAPIException('not_found', _w('Contact not found'), 404);
         }
         if (!in_array($content_type, ['plain-text', 'html'])) {
-            throw new waAPIException('invalid_content_type', 'Invalid content_type', 400);
+            throw new waAPIException('invalid_content_type', sprintf_wp('Invalid “%s” value.', 'content_type'), 400);
         } elseif ($content_type === 'plain-text') {
             $body = nl2br(htmlspecialchars($body));
         }
@@ -40,7 +45,7 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
         $user_emails = waUtils::getFieldValues($this->getUser()->get('email'), 'value');
         $from = reset($user_emails);
         if (empty($from)) {
-            throw new waAPIException('empty_email', 'User email empty', 400);
+            throw new waAPIException('empty_email', _w('Empty user email address.'), 400);
         }
 
         /** to */
@@ -48,7 +53,7 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
             $contact_emails = waUtils::getFieldValues($contact['email'], 'value');
             $email_to = reset($contact_emails);
             if (empty($email_to)) {
-                throw new waAPIException('empty_email', 'Contact email empty. Set email_to', 400);
+                throw new waAPIException('empty_email', _w('Empty contact email address. Set the “email_to“ value.'), 400);
             }
         } else {
             $email_validator = new waEmailValidator();
@@ -77,9 +82,24 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
         $message_id = $email_send_controller->getMessageId();
 
         if (empty($message_id)) {
-            throw new waAPIException('send_error', waUtils::jsonEncode($email_send_controller->getError()), 400);
+            $error = $email_send_controller->getError();
+            $error_str = '';
+            if (is_array($error)) {
+                $error_str = array_reduce($error, function ($res, $item) {
+                    if (is_string($item)) {
+                        return empty($res) ? $item : $res." \r\n".$item;
+                    }
+                    return $res;
+                });
+            } elseif (is_string($error)) {
+                $error_str = trim($error);
+            }
+            if (empty($error_str)) {
+                $error_str = _w('Unknown error.');
+            }
+            throw new waAPIException('send_error', $error_str, 500);
         } else {
-            $this->response = ['message_id' => $email_send_controller->getMessageId()];
+            $this->response = ['message_id' => $message_id];
         }
     }
 
@@ -94,21 +114,21 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
         $hash = md5(uniqid(__METHOD__));
         foreach ((array) $attachments as $_attachment) {
             if (empty($_attachment['file'])) {
-                throw new waAPIException('empty_file', 'Required parameter is missing: file', 400);
+                throw new waAPIException('empty_file', sprintf_wp('Missing required parameter: “%s”.', 'file'), 400);
             } elseif (empty($_attachment['file_name'])) {
-                throw new waAPIException('empty_file_name', 'Required parameter is missing: file_name', 400);
+                throw new waAPIException('empty_file_name', sprintf_wp('Missing required parameter: “%s”.', 'file_name'), 400);
             } elseif (
                 in_array(trim($_attachment['file_name']), ['.', '..'])
                 || !preg_match('#^[^:*?"<>|/\\\\]+$#', $_attachment['file_name'])
             ) {
-                throw new waAPIException('invalid_file_name', 'Invalid file name', 400);
+                throw new waAPIException('invalid_file_name', _w('Invalid file name.'), 400);
             }
 
             $temp_path = wa('crm')->getTempPath('mail', 'crm').'/'.$hash;
             waFiles::create($temp_path, true);
             $n = file_put_contents($temp_path."/".$_attachment['file_name'], base64_decode($_attachment['file']));
             if (!$n) {
-                throw new waAPIException('server_error', 'Can\'t save the file', 500);
+                throw new waAPIException('server_error', _w('File could not be saved.'), 500);
             }
         }
 

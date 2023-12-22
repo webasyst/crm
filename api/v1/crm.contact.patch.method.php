@@ -27,7 +27,7 @@ class crmContactPatchMethod extends crmApiAbstractMethod
             $this->http_status_code = 400;
             $this->response = [
                 'error' => 'patch_error',
-                'error_description' => 'There were errors updating the contact',
+                'error_description' => _w('Contact updating error.'),
                 'error_fields' => $this->errorFormat($errors)
             ];
             return;
@@ -174,7 +174,7 @@ class crmContactPatchMethod extends crmApiAbstractMethod
                         'field' => $name,
                         'value' => $v,
                         'code'  => 'not_multiple',
-                        'description' => 'Several values are set for field'
+                        'description' => _w('Multiple values set for a single-value field.')
                     ];
                 }, $values['v']);
                 $error_fields = array_merge($error_fields, $_errors);
@@ -184,7 +184,7 @@ class crmContactPatchMethod extends crmApiAbstractMethod
                         'field' => $name.(empty($_f['field']) ? '' : '.'.$_f['field']),
                         'value' => ifset($_f, 'value', $_f),
                         'code'  => 'not_composite',
-                        'description' => 'Field is not composite'
+                        'description' => _w('Not a composite field.')
                     ];
                 }
             }
@@ -195,7 +195,7 @@ class crmContactPatchMethod extends crmApiAbstractMethod
                     'field' => 'company_contact_id',
                     'value' => $company_contact_id,
                     'code' => 'invalid_value',
-                    'description' => 'Field value not integer or negative'
+                    'description' => _w('Field value is not an integer or is negative.')
                 ];
             }
         }
@@ -203,7 +203,7 @@ class crmContactPatchMethod extends crmApiAbstractMethod
         if (!empty($error_fields)) {
             $this->errors = [
                 'error' => 'error_conformity',
-                'error_description' => 'Fields is not multiple or composite',
+                'error_description' => _w('Unsupported multiple values provided for a single-value field.'),
                 'error_fields' => $error_fields
             ];
             return false;
@@ -250,7 +250,7 @@ class crmContactPatchMethod extends crmApiAbstractMethod
         if (!empty($error_fields)) {
             $this->errors = [
                 'error' => 'invalid_param',
-                'error_description' => _w('Please correct errors in the data'),
+                'error_description' => _w('Please correct errors in the data.'),
                 'error_fields' => $error_fields
             ];
             return false;

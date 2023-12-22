@@ -5,13 +5,14 @@ var CRMPageMessagesOperations = (function ($) {
 
         // DOM
         that.$wrapper = options["$wrapper"];
-        that.$bar = that.$wrapper.find(".js-operations-wrapper");
-        //that.$list = that.$wrapper.find('#js-messages-table');
-        //that.$list_header = that.$list.find('.js-list-header');
-        //that.$checkbox_all = that.$wrapper.find('.js-checkbox-all');
-        that.$content = that.$wrapper.find(".js-messages-conversation-list");
-
+        that.$bar = that.$wrapper.find(".js-operation-wrapper");
+        that.$list = that.$wrapper.find('.js-messages-section');
+        that.$list_header = that.$wrapper.find('.c-messages-header');
+        that.$checkbox_all = that.$bar.find('#js-operation-main-checkbox');
+        that.$checkbox_all_counter = that.$bar.find('.js-operation-badge');
+        //that.$content = that.$wrapper.find(".js-messages-conversation-list");
         // VARS
+        that.is_admin = options["is_admin"];
         that.page = options.page || 1;
         that.limit = options.limit || 30;
         that.total_count = options.total_count || 0;
@@ -44,12 +45,26 @@ var CRMPageMessagesOperations = (function ($) {
     CRMPageMessagesOperations.prototype.initClass = function () {
         var that = this;
         //
-        //that.initCheckboxAll();
+        that.initCheckboxAll();
         //
-        //that.initOperations();
+        that.showOrHideBar();
         //
-        //that.initItemCheckbox();
+        that.initOperations();
+        //
+        that.initItemCheckbox();
 
+       /* $(document).on('changeActiveConversation', function(e, data) {
+            var $message = that.$list.find(`.js-message-wrapper[data-id="${data.target_id}"]`);
+            console.log($message);
+            that.unread_list = that.getSelectedIds().filter(function (id) {
+                return that.unread_list.indexOf(id) > -1;
+            });
+    
+            that.unread_counter = that.unread_list.length;
+            that.markAsReadList($message);
+            that.markAsUnreadList($message);
+            that.formBar();
+        });*/
        // that.initElasticHeader();
     };
 
@@ -128,16 +143,15 @@ var CRMPageMessagesOperations = (function ($) {
 
     CRMPageMessagesOperations.prototype.initCheckboxAll = function () {
         var that = this;
-
+        
         that.$checkbox_all.click(function () {
             var $el = $(this),
                 checked = $el.is(':checked');
-
             if(that.checked_count > 0) {
-                if(that.checked_count < that.total_items_at_page_count || that.checked_count === that.total_items_at_page_count) {
+                if(that.checked_count <= that.getTotalItemsAtPage()) {
                     that.unselectAll();
                 }else{
-                    that.selectAll();
+                    that.selectAll();   
                 }
             }else{
                 $el.prop('checked', checked);
@@ -148,8 +162,8 @@ var CRMPageMessagesOperations = (function ($) {
                 }
             }
 
-            that.formBar();
-            that.showOrHideBar();
+           that.formBar();
+            //that.showOrHideBar();
         });
     };
 
@@ -182,85 +196,82 @@ var CRMPageMessagesOperations = (function ($) {
         });
     };
 
-    CRMPageMessagesOperations.prototype.updateBarCount = function (menuItem, counter) {
-        menuItem.find('.crm-count').text('(' + counter + ')');
+    CRMPageMessagesOperations.prototype.updateBarCount = function (menuItem, counter, disable_class) {
+        if (counter > 0) {
+            menuItem.removeClass(disable_class);
+            menuItem.find('.crm-count').text(counter);
+        }
+        else {
+            menuItem.addClass(disable_class);
+            menuItem.find('.crm-count').text('');
+        }
+        
     };
 
     CRMPageMessagesOperations.prototype.showOrHideBar = function () {
         var that = this;
-        if (that.checked_count > 0) {
-            if (!that.is_shown) {
-                that.$bar.addClass('is-shown');
-                that.$list_header.removeClass('is-shown');
-                that.is_shown = true;
+
+        that.$list_header.on('click', '.js-operations-show', function() {
+            if (that.$bar.hasClass('hidden')) {
+                showOperations();
             }
-            that.formBar();
-        } else {
-            if (that.is_shown) {
-                that.$bar.removeClass('is-shown');
-                that.$list_header.addClass('is-shown');
-                that.is_shown = false;
-            }
+        });
+
+        function showOperations() {
+            that.$bar.removeClass('hidden');
+            that.$list.addClass('active-operations')
+        }
+
+        that.$bar.on('click', '.js-operation-hide', function() {
+            
+            clearOperations();
+        });
+
+        function clearOperations() {
+            that.$bar.addClass('hidden');
+            that.$list.removeClass('active-operations');
+            that.unselectAll();
         }
     };
 
     CRMPageMessagesOperations.prototype.getSelectedIds = function () {
         var that = this;
-        return that.$list.find('.c-checkbox :checkbox:checked').map(function () {
+        var selectedIds = that.$list.find('.c-checkbox :checkbox:checked').map(function () {
             return parseInt($(this).val());
         }).toArray();
+        //console.log(selectedIds)
+        return selectedIds;
     };
 
     CRMPageMessagesOperations.prototype.getTotalItemsAtPage = function () {
         var that = this;
-        if (that.page * that.limit > that.total_count) {
+       /* if (that.page * that.limit > that.total_count) {
             return that.total_count % that.limit
         }
-        return that.limit;
+        return that.limit;*/
+        return that.$list.find('.c-checkbox :checkbox').length
     };
 
     CRMPageMessagesOperations.prototype.formBar = function () {
         var that = this,
-            $associate_li = that.$bar.find('.crm-operation-li[data-id="associate"]'),
-            $detach_li = that.$bar.find('.crm-operation-li[data-id="detach"]'),
-            $read_li = that.$bar.find('.crm-operation-li[data-id="read"]'),
-            $unread_li = that.$bar.find('.crm-operation-li[data-id="unread"]'),
-            $delete_li = that.$bar.find('.crm-operation-li[data-id="delete"]');
+            disable_class = 'disabled',
+            //$associate_li = that.$bar.find('.crm-operation-li[data-id="associate"]'),
+            $detach_li = that.$bar.find('.crm-operation-li[data-id="detach"] a'),
+            $read_li = that.$bar.find('.crm-operation-li[data-id="read"] a'),
+            $unread_li = that.$bar.find('.crm-operation-li[data-id="unread"] a'),
+            $delete_li = that.$bar.find('.crm-operation-li[data-id="delete"] a');
 
-        if (that.unread_counter > 0) {
-            $read_li.show();
-            that.updateBarCount($read_li, that.unread_counter)
-        }else{
-            $read_li.hide();
-        }
-
-        if (that.read_counter > 0) {
-            $unread_li.show();
-            that.updateBarCount($unread_li, that.read_counter)
-        }else{
-            $unread_li.hide();
-        }
-
-        if (that.no_deal_counter > 0) {
+            that.updateBarCount($read_li, that.unread_counter, disable_class);
+            that.updateBarCount($unread_li, that.read_counter, disable_class)
+            that.updateBarCount($detach_li, that.deal_counter, disable_class)
+            that.updateBarCount($delete_li, that.checked_count, disable_class)
+        /*if (that.no_deal_counter > 0) {
             $associate_li.show();
             that.updateBarCount($associate_li, that.no_deal_counter)
         }else{
             $associate_li.hide();
-        }
+        }*/
 
-        if (that.deal_counter > 0) {
-            $detach_li.show();
-            that.updateBarCount($detach_li, that.deal_counter)
-        }else{
-            $detach_li.hide();
-        }
-
-        if (that.checked_count > 0) {
-            $delete_li.show();
-            that.updateBarCount($delete_li, that.checked_count)
-        }else{
-            $delete_li.hide();
-        }
     };
 
     CRMPageMessagesOperations.prototype.initItemCheckbox = function () {
@@ -278,25 +289,27 @@ var CRMPageMessagesOperations = (function ($) {
 
             that.markAsReadList($message);
             that.markAsUnreadList($message);
-            that.associateWithDealList($message);
+            //that.associateWithDealList($message);
             that.detachFromDealsList($message);
 
             handleMessageItem($message);
 
             if(that.checked_count > 0) {
-                if(that.checked_count < that.limit && that.checked_count !== that.total_items_at_page_count) {
-                    that.$checkbox_all.prop('indeterminate', true);
+                if(that.checked_count < that.getTotalItemsAtPage()) {
+                    that.$checkbox_all.parent().addClass('indeterminate').find('svg').addClass('fa-minus').removeClass('fa-check');
                 }else{
-                    that.$checkbox_all.prop('indeterminate', false).prop('checked', true);
+                    that.$checkbox_all.prop('checked', true);
+                    that.$checkbox_all.parent().removeClass('indeterminate').find('svg').removeClass('fa-minus').addClass('fa-check');
                 }
-            }else{
-                that.$checkbox_all.prop('indeterminate', false).prop('checked', false);
+            } else {
+                that.$checkbox_all.prop('checked', false);
+                that.$checkbox_all.parent().removeClass('indeterminate').find('svg').removeClass('fa-minus').addClass('fa-check');
             }
 
         });
 
         // click on checkbox cell
-        that.$list.on("click", ".c-checkbox", function(event) {
+        /*that.$list.on("click", ".c-checkbox", function(event) {
 
             var $target = $(event.target),
                 is_checkbox = $target.is(':checkbox');
@@ -309,10 +322,10 @@ var CRMPageMessagesOperations = (function ($) {
                 var $checkbox = $(this).find('.js-checkbox');
                 $checkbox.trigger("change", [!$checkbox.is(':checked')]);
             }
-        });
+        });*/
 
         // shift-select on contact items
-        that.$list.shiftSelectable({
+        /*that.$list.shiftSelectable({
             selector: '.js-message-wrapper',
             behavior_type: 'vertical',
             onSelect: function ($message, event) {
@@ -332,39 +345,40 @@ var CRMPageMessagesOperations = (function ($) {
                 // and only than update inner state invariants
                 $checkbox.trigger('change');
             }
-        });
+        });*/
 
         function handleMessageItem($message) {
 
             var $checkbox = $message.find('.js-checkbox'),
                 checked = $checkbox.is(':checked');
 
-            highlightMessageItem($message, checked);
+           // highlightMessageItem($message, checked);
             updateCheckedCounter(checked);
 
             that.formBar();
-            that.showOrHideBar();
+            //that.showOrHideBar();
         }
 
-        function highlightMessageItem($message, checked) {
+        /*function highlightMessageItem($message, checked) {
             if (checked) {
                 $message.addClass(active_class);
             } else {
                 $message.removeClass(active_class);
             }
-        }
+        }*/
 
         function updateCheckedCounter(checked) {
-            if (that.is_checked_all) {
+           /* if (that.is_checked_all) {
                 that.is_checked_all = false;
                 that.checked_count = that.$list.find('.c-checkbox :checkbox:checked').length;
-            } else {
+            } else {*/
                 if (checked) {
                     that.checked_count += 1;
                 } else {
-                    that.checked_count -= 1;
+                    if (that.checked_count > 0) that.checked_count -= 1;
                 }
-            }
+           // }
+            that.$checkbox_all_counter.text(that.checked_count);
         }
     };
 
@@ -429,8 +443,8 @@ var CRMPageMessagesOperations = (function ($) {
 
         var that = this,
             $wrapper = that.$wrapper,
-            $dialog_template = $wrapper.find('.crm-dialog-wrapper.js-detach-conversation'),
-            $dialog = $dialog_template.clone(),
+            //$dialog_template = $wrapper.find('.crm-dialog-wrapper.js-detach-conversation'),
+            //$dialog = $dialog_template.clone(),
             view = that.view,
             ids = that.deal_list,
             data_set = {'message_ids': ids},
@@ -454,21 +468,14 @@ var CRMPageMessagesOperations = (function ($) {
         };
 
         var showConfirmDialog = function (confirm_text, check_text) {
-            new CRMDialog({
-                html: $dialog.show(),
-                onOpen: function ($dialog) {
-                    var $content = $dialog.find('.crm-dialog-content');
-                    $content.find('.js-confirm-text').html(confirm_text);
-
-                    // show/hide "check" text
-                    var $check_text = $content.find('.js-check-text').hide();
-                    check_text = $.trim(check_text);
-                    if (check_text.length > 0) {
-                        $check_text.find('.js-text').text(check_text);
-                        $check_text.show();
-                    }
-                },
-                onConfirm: function () {
+            $.waDialog.confirm({
+                title: `<i class=\"fas fa-exclamation-triangle smaller state-error\"></i> ${confirm_text}`,
+                text: $.trim(check_text),
+                success_button_title: that.locales.detach_button,
+                success_button_class: 'danger',
+                cancel_button_title: that.locales.cancel_button,
+                cancel_button_class: 'light-gray',
+                onSuccess: function () {
 
                     $.post(url, data_set)
                         .done(function ( response ) {
@@ -480,7 +487,7 @@ var CRMPageMessagesOperations = (function ($) {
 
                                 response_ids.forEach(function (id) {
 
-                                    var html = '<a href="javascript:void(0);"'
+                                   /* var html = '<a href="javascript:void(0);"'
                                         +' class="inline-link small js-associate-deal nowrap"'
                                         +' data-dialog-url="' + $.crm.app_url + '?module=message&action=conversationAssociateDealDialog&conversation_id=' + id + '">'
                                         +'<i class="icon10 add" style="vertical-align: baseline; margin: 0 4px 0 0;"></i>'
@@ -489,13 +496,13 @@ var CRMPageMessagesOperations = (function ($) {
 
                                     if (view === 'all') {
                                         html = '';
-                                    }
+                                    }*/
 
-                                    $('tr[data-id="' + id + '"]', that.$list)
+                                    $('.js-message-wrapper[data-id="' + id + '"]', that.$list)
                                         .data('has-deal', 0)
                                         .attr('data-has-deal', 0)
-                                        .find('.c-column-deal')
-                                        .html(html);
+                                        //.find('.c-column-deal')
+                                        //.html(html);
 
                                     that.no_deal_list.push(id);
                                     that.deal_list = that.deal_list.splice(id, 1);
@@ -505,19 +512,21 @@ var CRMPageMessagesOperations = (function ($) {
                                 that.deal_counter = that.deal_list.length;
                                 that.formBar();
                             }
+                            var $active_id = that.$list.find(`.js-message-wrapper.selected`).data('id');
+                            $.message.content.reload($active_id);
                         })
                         .fail(function(response)  {
                             console.error("Detach Deals From Conversations", response);
                         });
                 },
                 onClose: function ($dialog) {
-                    $dialog.find('.crm-dialog-content').empty()
+                    //$dialog.find('.crm-dialog-content').empty()
                 }
             })
         };
 
         checkBeforeOperation().done(function (r) {
-            var confirm_text = '<h2>' + that.locales.detach_dialog_h2 + '</h2>',
+            var confirm_text = that.locales.detach_dialog_h2,
                 check_text = r.status === 'ok' && r.data && r.data.text || '';
             showConfirmDialog(confirm_text, check_text)
         });
@@ -561,8 +570,8 @@ var CRMPageMessagesOperations = (function ($) {
                 if (response_ids.length) {
                     response_ids.map(function (id) {
                         that.$list
-                            .find('tr[data-id="' + id + '"]')
-                            .removeClass('bold')
+                            .find('.js-message-wrapper[data-id="' + id + '"]')
+                            .removeClass('unread')
                             .data('read', 1)
                             .attr('data-read', 1);
                         that.read_list.push(id);
@@ -583,6 +592,7 @@ var CRMPageMessagesOperations = (function ($) {
 
         var that = this,
             id = $message.data('id'),
+            //is_selected = $message.hasClass('selected'),
             read = $message.data('read');
 
         if (read === 1 && that.read_list.indexOf(id) === -1) {
@@ -618,8 +628,8 @@ var CRMPageMessagesOperations = (function ($) {
 
                     response_ids.map(function (id) {
                         that.$list
-                            .find('tr[data-id="' + id + '"]')
-                            .addClass('bold')
+                            .find('.js-message-wrapper[data-id="' + id + '"]')
+                            .addClass('unread')
                             .data('read', 0)
                             .attr('data-read', 0);
                         that.unread_list.push(id);
@@ -639,7 +649,9 @@ var CRMPageMessagesOperations = (function ($) {
     CRMPageMessagesOperations.prototype.markAsUnreadList = function ($message) {
         var that = this,
             id = $message.data('id'),
+            //is_selected = $message.hasClass('selected'),
             read = $message.data('read');
+            //is_selected = $message.hasClass('selected');
 
         if (read === 0 && that.unread_list.indexOf(id) === -1) {
             that.unread_list.push(id);
@@ -650,14 +662,15 @@ var CRMPageMessagesOperations = (function ($) {
         });
 
         that.unread_counter = that.unread_list.length;
+        
     };
 
     CRMPageMessagesOperations.prototype.deleteConversation = function () {
 
         var that = this,
             $wrapper = that.$wrapper,
-            $dialog_template = $wrapper.find('.js-delete-conversation'),
-            $dialog = $dialog_template.clone(),
+            //$dialog_template = $wrapper.find('.js-delete-conversation'),
+            //$dialog = $dialog_template.clone(),
             view = that.view,
             ids = that.getSelectedIds(),
             data_set = {'message_ids': ids},
@@ -680,33 +693,48 @@ var CRMPageMessagesOperations = (function ($) {
             }
         };
 
+        var ban_html = that.is_admin ? `
+            <label>
+                <span class="wa-checkbox">
+                    <input type="checkbox" name="ban_checkbox" id="ban_checkbox">
+                    <span>
+                        <span class="icon">
+                            <i class="fas fa-check"></i>
+                        </span>
+                    </span>
+                </span>
+                    ${that.locales.ban_text}
+            </label>`: '';
+
         var showConfirmDialog = function (confirm_text, check_text) {
-            new CRMDialog({
-                html: $dialog.show(),
-                onOpen: function ($dialog) {
-                    var $content = $dialog.find('.crm-dialog-content');
-                    $content.find('.js-confirm-text').html(confirm_text);
 
-                    // show/hide "check" text
-                    var $check_text = $content.find('.js-check-text').hide();
-                    check_text = $.trim(check_text);
-                    if (check_text.length > 0) {
-                        $check_text.find('.js-text').text(check_text);
-                        $check_text.show();
+            var text_html = `<div class="flexbox vertical space-16">${ban_html} <span class="text-red">${$.trim(check_text)}</span></div>`;
+
+            $.waDialog.confirm({
+                title: `<i class=\"fas fa-exclamation-triangle smaller state-error\"></i> ${confirm_text}`,
+                text: text_html,
+                success_button_title: that.locales.delete_button,
+                success_button_class: 'danger',
+                cancel_button_title: that.locales.cancel_button,
+                cancel_button_class: 'light-gray',
+                onSuccess: function ($dialog, dialog_instance) {
+                    var is_ban_checked = $dialog.$content.find("#ban_checkbox").prop('checked');
+                    var data = data_set;
+                    if (is_ban_checked) {
+                        data = $.extend({ban_contacts: 1}, data_set, true);
                     }
-                },
-                onConfirm: function () {
 
-                    $.post(url, data_set)
+                    $.post(url, data)
                         .done(function( response ) {
 
-                            var data_set_key = Object.keys(data_set)[0],
+                            var data_set_keys = Object.keys(data),
+                                data_set_key = data_set_keys[data_set_keys.length-1],
                                 response_ids = response.data[data_set_key];
 
                             if (response_ids.length) {
 
                                 response_ids.map(function (id) {
-                                    $('tr[data-id="' + id + '"]', that.$list).hide();
+                                    $('.js-message-wrapper[data-id="' + id + '"]', that.$list).hide();
                                 });
 
                                 that.checked_count = that.checked_count - ids.length;
@@ -718,7 +746,8 @@ var CRMPageMessagesOperations = (function ($) {
                                 if (that.total_count < 1) {
                                     that.$list.hide().before('<div class="no-messages">' + that.locales.no_messages + '</div>');
                                     that.unselectAll();
-                                    that.hideBar();
+                                    that.$bar.addClass('hidden');
+                                    that.$list.removeClass('active-operations');
                                 }
                             }
                         })
@@ -727,13 +756,13 @@ var CRMPageMessagesOperations = (function ($) {
                         });
                 },
                 onClose: function ($dialog) {
-                    $dialog.find('.crm-dialog-content').empty()
+                    //$dialog.find('.dialog-content').empty()
                 }
             })
         };
 
         checkBeforeOperation().done(function (r) {
-            var confirm_text = '<h2>' + that.locales.delete_dialog_h2 + '</h2>',
+            var confirm_text = that.locales.delete_dialog_h2,
                 check_text = r.status === 'ok' && r.data && r.data.text || '';
             showConfirmDialog(confirm_text, check_text)
         });

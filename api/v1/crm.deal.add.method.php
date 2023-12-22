@@ -18,32 +18,32 @@ class crmDealAddMethod extends crmApiAbstractMethod
             'funnel_id'       => null,
             'params'          => ifset($_json, 'fields', []),
             'description'     => trim(ifset($_json, 'description', '')),
-            'expected_date'   => trim(ifset($_json, 'expected_date', null)),
-            'amount'          => trim(ifset($_json, 'amount', null)),
-            'currency_id'     => trim(ifset($_json, 'currency_id', null)),
-            'contact_label'   => trim(ifset($_json, 'contact_label', null)),
-            'user_contact_id' => trim(ifset($_json, 'user_contact_id', null))
+            'expected_date'   => trim(ifset($_json, 'expected_date', '')),
+            'amount'          => trim(ifset($_json, 'amount', '')),
+            'currency_id'     => trim(ifset($_json, 'currency_id', '')),
+            'contact_label'   => trim(ifset($_json, 'contact_label', '')),
+            'user_contact_id' => trim(ifset($_json, 'user_contact_id', ''))
         ];
 
         $this->http_status_code = 400;
         if ($error_fields = $this->checkRequired($deal_name, $deal_stage_id, $contact_id)) {
             $this->response = [
                 'error' => 'required_parameter',
-                'error_description' => _w('Please correct errors in the data'),
+                'error_description' => _w('Please correct errors in the data.'),
                 'error_fields' => $error_fields
             ];
             return;
         } elseif ($error_fields = $this->validate($deal_data)) {
             $this->response = [
                 'error' => 'error_validate',
-                'error_description' => _w('Please correct errors in the data'),
+                'error_description' => _w('Please correct errors in the data.'),
                 'error_fields' => $error_fields
             ];
             return;
         } elseif ($error_fields = $this->validateFields($deal_data)) {
             $this->response = [
                 'error' => 'error_validate',
-                'error_description' => _w('Please correct errors in the data'),
+                'error_description' => _w('Please correct errors in the data.'),
                 'error_fields' => $error_fields
             ];
             return;
@@ -70,7 +70,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                 'field' => 'name',
                 'value' => '',
                 'code'  => 'name',
-                'description' => 'Required parameter is missing: name',
+                'description' => sprintf_wp('Missing required parameter: “%s”.', 'name'),
             ];
         }
 
@@ -79,14 +79,14 @@ class crmDealAddMethod extends crmApiAbstractMethod
                 'field' => 'stage_id',
                 'value' => '',
                 'code'  => 'stage_id',
-                'description' => 'Required parameter is missing: stage_id',
+                'description' => sprintf_wp('Missing required parameter: “%s”.', 'stage_id'),
             ];
         } elseif (!is_numeric($deal_stage_id) || $deal_stage_id < 1) {
             $error_fields[] = [
                 'field' => 'stage_id',
                 'value' => $deal_stage_id,
                 'code'  => 'stage_id',
-                'description' => 'Deal stage not found',
+                'description' => _w('Deal stage not found.'),
             ];
         }
 
@@ -95,7 +95,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                 'field' => 'contact_id',
                 'value' => '',
                 'code'  => 'contact_id',
-                'description' => 'Required parameter is missing: contact_id',
+                'description' => sprintf_wp('Missing required parameter: “%s”.', 'contact_id'),
             ];
         } elseif (!is_numeric($contact_id) || $contact_id < 1) {
             $error_fields[] = [
@@ -114,7 +114,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
         $error_fields = [];
 
         if (!(new crmContact($deal_data['contact_id']))->exists()) {
-            throw new waAPIException('not_found', _w('Contact not found'), 404);
+            throw new waAPIException('invalid_request', _w('Invalid contact identifier.'), 400);
         } elseif (!$this->getCrmRights()->contact($deal_data['contact_id'])) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
@@ -126,7 +126,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                 'field' => 'stage_id',
                 'value' => $deal_data['stage_id'],
                 'code'  => 'stage_id',
-                'description' => 'Deal stage not found'
+                'description' => _w('Deal stage not found.')
             ];
         } elseif (!$this->getCrmRights()->funnel($stage['funnel_id'])) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
@@ -137,7 +137,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
             $deal_data['user_contact_id'] = $this->getUser()->getId();
         } elseif ($deal_data['user_contact_id'] != $this->getUser()->getId()) {
             if ($deal_data['user_contact_id'] < 1 || !(new crmContact($deal_data['user_contact_id']))->exists()) {
-                throw new waAPIException('not_found', 'User not found', 404);
+                throw new waAPIException('invalid_request', _w('Invalid user identifier.'), 400);
             }
             $crm_rights = new crmRights(['contact' => $deal_data['user_contact_id']]);
             if (!$crm_rights->contact($deal_data['contact_id'])) {
@@ -145,14 +145,14 @@ class crmDealAddMethod extends crmApiAbstractMethod
                     'field' => 'user_contact_id',
                     'value' => $deal_data['user_contact_id'],
                     'code'  => 'user_contact_id',
-                    'description' => 'User does not have access to contact'
+                    'description' => _w('User does not have access to contact.')
                 ];
             } elseif (!$crm_rights->funnel($deal_data['funnel_id'])) {
                 $error_fields[] = [
                     'field' => 'user_contact_id',
                     'value' => $deal_data['user_contact_id'],
                     'code'  => 'user_contact_id',
-                    'description' => 'User does not have access to funnel'
+                    'description' => _w('User does not have access to funnel.')
                 ];
             }
         }
@@ -162,7 +162,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                 'field' => 'expected_date',
                 'value' => $deal_data['expected_date'],
                 'code'  => 'expected_date',
-                'description' => 'Invalid date'
+                'description' => _w('Invalid date.')
             ];
         }
 
@@ -186,7 +186,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                     'field' => 'currency_id',
                     'value' => $deal_data['currency_id'],
                     'code'  => 'currency_id',
-                    'description' => 'Unknown currency'
+                    'description' => _w('Unknown currency.')
                 ];
             }
         }
@@ -209,7 +209,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                     'field' => ifset($params, 'field', ''),
                     'value' => ifset($params, 'value', ''),
                     'code'  => 'fields',
-                    'description' => 'Required parameters field and value'
+                    'description' => sprintf_wp('Missing required parameters: %s.', sprintf_wp('“%s” and “%s”', 'field', 'value'))
                 ];
                 continue;
             }
@@ -219,7 +219,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                     'field' => $params['field'],
                     'value' => $params['value'],
                     'code'  => 'fields',
-                    'description' => 'Unknown field name'
+                    'description' => _w('Unknown field name.')
                 ];
                 continue;
             }
@@ -230,7 +230,7 @@ class crmDealAddMethod extends crmApiAbstractMethod
                     'field' => $params['field'],
                     'value' => $params['value'],
                     'code'  => 'fields',
-                    'description' => 'Invalid field value. '.reset($er)
+                    'description' => _w('Invalid field value.') . ' ' . reset($er)
                 ];
             }
             $data_params[$params['field']] = $params['value'];

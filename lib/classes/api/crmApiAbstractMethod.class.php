@@ -75,7 +75,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
                     ['id' => 'integer', 'count' => 'integer']
                 );
             }
-            return $this->filterFields($el, $fields, ['id' => 'integer', 'company_contact_id' => 'integer', 'create_datetime' => 'datetime', 'last_datetime' => 'datetime', 'is_pinned' => 'boolean']);
+            return $this->filterFields($el, $fields, ['id' => 'integer', 'company_contact_id' => 'integer', 'create_datetime' => 'datetime', 'last_datetime' => 'datetime', 'is_pinned' => 'boolean', 'is_banned' => 'boolean']);
         }, array_values($raw_list));
     }
 
@@ -180,10 +180,16 @@ abstract class crmApiAbstractMethod extends waAPIMethod
 
     protected function prepareReminder(array $data)
     {
+        if (ifset($data['contact_id']) < 0) {
+            $data['deal_id'] = -1 * $data['contact_id'];
+            $data['contact_id'] = null;
+        } else {
+            $data['deal_id'] = null;
+        }
         return $this->filterFields(
             $data, 
-            ['id', 'create_datetime', 'creator_contact_id', 'contact_id', 'user_contact_id', 'due_date', 'due_datetime', 'complete_datetime', 'content', 'type'],
-            ['id' => 'integer', 'creator_contact_id' => 'integer', 'contact_id' => 'integer', 'user_contact_id' => 'integer', 'create_datetime' => 'datetime', 'due_datetime' => 'datetime', 'complete_datetime' => 'datetime']
+            ['id', 'create_datetime', 'creator_contact_id', 'contact_id', 'deal_id', 'user_contact_id', 'due_date', 'due_datetime', 'complete_datetime', 'content', 'type'],
+            ['id' => 'integer', 'creator_contact_id' => 'integer', 'contact_id' => 'integer', 'deal_id' => 'integer', 'user_contact_id' => 'integer', 'create_datetime' => 'datetime', 'due_datetime' => 'datetime', 'complete_datetime' => 'datetime']
         );
     }
 
@@ -328,7 +334,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
     protected function formatDatetimeToISO8601($sql_dt)
     {
         try {
-            $dt = new DateTime($sql_dt);
+            $dt = new DateTime((string) $sql_dt);
             $dt->setTimezone(new DateTimeZone('UTC'));
             return $dt->format('Y-m-d\TH:i:s.u\Z');
         } catch (Exception $ex) {
@@ -520,6 +526,13 @@ abstract class crmApiAbstractMethod extends waAPIMethod
                 $l['icon'] = $this->getAppIcon($l['create_app_id']);
             }
 
+            if ($l['action'] == 'contact_ban') {
+                $l['icon'] = [
+                    'fa' => 'ban',
+                    'color' => 'red',
+                ];
+            }
+
             if (isset($l['deal'])) {
                 $l['deal'] = $this->prepareDealShort($l['deal']);
             }
@@ -582,6 +595,11 @@ abstract class crmApiAbstractMethod extends waAPIMethod
                     $l['call']['user'] = $this->prepareUserpic($l['call']['user'], $userpic_size);
                 }
                 $l['call'] = $this->prepareCall($l['call']);
+            }
+
+            if (ifset($l['is_not_available'])) {
+                $l['object_id'] = null;
+                $l['object_type'] = crmLogModel::OBJECT_TYPE_CONTACT;
             }
             return $l;
         }, $log);

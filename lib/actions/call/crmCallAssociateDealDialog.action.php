@@ -14,7 +14,7 @@ class crmCallAssociateDealDialogAction extends crmBackendViewAction
         }
 
         if (empty($call['client_contact_id'])) {
-            throw new waException(_w('A call without a client can not be linked to a deal'), 404);
+            throw new waException(_w('A call without a client cannot be linked to a deal.'), 404);
         }
 
         $contact = new crmContact($call['client_contact_id']);

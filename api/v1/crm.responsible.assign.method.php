@@ -15,23 +15,45 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
         $conversation_ids = (array) ifset($_json, 'conversation_id', []);
         $conversation_ids = array_map('intval', crmHelper::dropNotPositive($conversation_ids));
 
-        if (!$this->getUser()->isAdmin('crm') && !$this->getUser()->getRights('crm', 'edit')) {
-            throw new waAPIException('forbidden', _w('Access denied'), 403);
-        } elseif ($user_id < 0) {
+        if ($user_id < 0) {
             /** Если user_id = 0, то ответственного удаляем */
-            throw new waAPIException('not_found', 'User not found', 404);
-        } elseif (empty($contact_ids) && empty($deal_ids) && empty($conversation_ids)) {
+            throw new waAPIException('invalid_request', _w('Invalid user identifier.'), 400);
+        }
+        
+        if (empty($contact_ids) && empty($deal_ids) && empty($conversation_ids)) {
             throw new waAPIException(
                 'empty_param',
-                'Required parameter is missing: contact_id, deal_id or conversation_id',
+                sprintf_wp(
+                    'Missing required parameters: %s.',
+                    sprintf(
+                        '%s, %s or %s',
+                        sprintf_wp('“%s”', 'contact_id'),
+                        sprintf_wp('“%s”', 'deal_id'),
+                        sprintf_wp('“%s”', 'conversation_id')
+                    )
+                ),
                 400
             );
-        } elseif (!empty($contact_ids) + !empty($deal_ids) + !empty($conversation_ids) > 1) {
+        }
+        
+        if (!empty($contact_ids) + !empty($deal_ids) + !empty($conversation_ids) > 1) {
             throw new waAPIException(
                 'error',
-                'One of the parameters is required: contact_id, deal_id or conversation_id',
+                sprintf_wp(
+                    'Only one of the parameters can be specified: %s.',
+                    sprintf(
+                        '%s, %s or %s',
+                        sprintf_wp('“%s”', 'contact_id'),
+                        sprintf_wp('“%s”', 'deal_id'),
+                        sprintf_wp('“%s”', 'conversation_id')
+                    )
+                ),
                 400
             );
+        }
+
+        if ($user_id !== 0 && !(new crmContact($user_id))->exists()) {
+            throw new waAPIException('invalid_request', _w('Spicified user does not exist.'), 400);
         }
 
         if (!empty($contact_ids)) {
@@ -52,14 +74,16 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
      */
     private function contactResponsible($contact_ids, $user_id)
     {
-        if ($user_id !== 0 && !(new crmContact($user_id))->exists()) {
-            throw new waAPIException('not_found', 'User not found', 404);
+        $allowed_contact_ids = $this->getCrmRights()->dropUnallowedContacts($contact_ids, 'edit');
+        if (empty($allowed_contact_ids)) {
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
+        $unallowed_contacts = array_diff($contact_ids, $allowed_contact_ids);
         $absent_contacts = [];
         $unsuccess_contacts = [];
         $contact_model = new crmContactModel();
-        foreach ($contact_ids as $contact_id) {
+        foreach ($allowed_contact_ids as $contact_id) {
             $contact = new crmContact($contact_id);
             if (!$contact->exists()) {
                 $absent_contacts[] = $contact_id;
@@ -83,21 +107,27 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
 
         $this->http_status_code = 204;
         $this->response = null;
+        $response = [];
         if ($unsuccess_contacts) {
             $message = _w(
                 'The responsible person is not assigned to this client, since he has no access rights.',
                 'The responsible person is not assigned to these clients, since he has no access rights.',
                 count($unsuccess_contacts)
             );
-            $this->http_status_code = 200;
-            $this->response = [
+            $response = [
                 'message'            => $message,
-                'unsuccess_contacts' => $unsuccess_contacts
+                'unsuccess_contacts' => array_values($unsuccess_contacts)
             ];
         }
         if ($absent_contacts) {
+            $response['absent_contacts'] = array_values($absent_contacts);
+        }
+        if ($unallowed_contacts) {
+            $response['unallowed_contacts'] = array_values($unallowed_contacts);
+        }
+        if (!empty($response)) {
             $this->http_status_code = 200;
-            $this->response['absent_contacts'] = $absent_contacts;
+            $this->response = $response;
         }
     }
 
@@ -110,52 +140,83 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
      */
     private function dealResponsible($deal_ids, $user_id)
     {
-        $user = new crmContact($user_id);
-        if (!$user->exists()) {
-            throw new waAPIException('not_found', 'User not found', 404);
-        }
-        $deals = $this->getDealModel()->getById($deal_ids);
+        $new_user = new crmContact($user_id);
 
-        if (!$deals) {
-            throw new waAPIException('not_found', 'Deals not found', 404);
-        }
-
-        $_deal = reset($deals);
-        if (!$this->getCrmRights()->funnel($_deal['funnel_id'])) {
+        $allowed_deal_ids = $this->getCrmRights()->dropUnallowedDeals($deal_ids, [ 'level' => crmRightConfig::RIGHT_DEAL_EDIT ]);
+        if (empty($allowed_deal_ids)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
+        $unallowed_deals = array_diff($deal_ids, $allowed_deal_ids);
+        $deals = $this->getDealModel()->getById($allowed_deal_ids);
+        if (!$deals) {
+            throw new waAPIException('invalid_request', _w('Invalid deals specified.'), 400);
+        }
+
+        $accessable_deals = $deals;
+        if ($user_id > 0) {
+            $new_user_rights = new crmRights(['contact' => $user_id]);
+            $accessable_deals = array_filter($deals, function ($d) use ($new_user_rights) {
+                return $new_user_rights->funnel($d['funnel_id']);
+            });
+        }
+
+        $accessable_deals_ids = array_column($accessable_deals, 'id');
+        $unaccessable_deals = array_diff($allowed_deal_ids, $accessable_deals_ids);
         $this->getDealModel()->updateByField(
-            ['id' => $deal_ids],
+            ['id' => $accessable_deals_ids],
             ['user_contact_id' => $user_id]
         );
 
         $participants_model = $this->getDealParticipantsModel();
         $log_model = $this->getLogModel();
-        foreach ($deals as $d) {
+        foreach ($accessable_deals as $d) {
             $before_user = new waContact($d['user_contact_id']);
             $participants_model->deleteByField([
                 'deal_id'    => $d['id'],
                 'contact_id' => $d['user_contact_id'],
                 'role_id'    => 'USER',
             ]);
-            $participants_model->replace([
-                'deal_id'    => $d['id'],
-                'contact_id' => $user_id,
-                'role_id'    => 'USER',
-                'label'      => null,
-            ]);
-            $log_model->log(
-                'deal_transfer',
-                $d['id'] * -1,
-                $d['id'],
-                $before_user->getName(),
-                $user->getName(),
-                null,
-                ['user_id_before' => $before_user->getId(), 'user_id_after' => $user_id]
-            );
+            if ($user_id > 0) {
+                $participants_model->replace([
+                    'deal_id'    => $d['id'],
+                    'contact_id' => $user_id,
+                    'role_id'    => 'USER',
+                    'label'      => null,
+                ]);
+                $log_model->log(
+                    'deal_transfer',
+                    $d['id'] * -1,
+                    $d['id'],
+                    $before_user->getName(),
+                    $new_user->getName(),
+                    null,
+                    ['user_id_before' => $before_user->getId(), 'user_id_after' => $user_id]
+                );
+            } else {
+                $log_model->log(
+                    'deal_removeowner',
+                    $d['id'] * -1,
+                    $d['id'],
+                    $before_user->getName(),
+                    null,
+                    null,
+                    ['user_id_before' => $before_user->getId()]
+                );
+            }
         }
         $this->http_status_code = 204;
         $this->response = null;
+        $response = [];
+        if (!empty($unallowed_deals)) {
+            $response['unallowed_deals'] = array_values($unallowed_deals);
+        }
+        if (!empty($unaccessable_deals)) {
+            $response['unaccessable_deals'] = array_values($unaccessable_deals);
+        }
+        if (!empty($response)) {
+            $this->http_status_code = 200;
+            $this->response = $response;
+        }
     }
 
     /**
@@ -169,31 +230,25 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
     {
         $conversations = $this->getConversationModel()->getById($conversation_ids);
         if (empty($conversations)) {
-            throw new waAPIException('not_found', 'Conversations not found', 404);
+            throw new waAPIException('invalid_request', _w('Invalid conversations specified.'), 400);
         }
+        $conversation_ids = array_keys($conversations);
 
         $allowed_conversations = $this->getCrmRights()->dropUnallowedConversations($conversations, ['access_type' => 'edit']);
-        $conversation_ids = array_keys($conversations);
-        $can_edit_conversation_diff = array_diff($conversation_ids, array_keys($allowed_conversations));
-        if (!empty($can_edit_conversation_diff)) {
-            throw new waAPIException(
-                'forbidden', '
-                Access denied conversation_id: '.implode(', ', $can_edit_conversation_diff),
-                403
-            );
+        if (empty($allowed_conversations)) {
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
+        $allowed_conversation_ids = array_keys($allowed_conversations);
+        $unallowed_conversation_ids = array_diff($conversation_ids, $allowed_conversation_ids);
 
         $after_user = new crmContact($user_id);
-        if ($user_id !== 0 && !$after_user->exists()) {
-            throw new waAPIException('not_found', 'User not found', 404);
-        }
 
         /** Update conversation */
         $data = ['user_contact_id' => ($user_id === 0 ? null : $user_id)];
-        $this->getConversationModel()->updateById($conversation_ids, $data);
+        $this->getConversationModel()->updateById($allowed_conversation_ids, $data);
 
         /** Update deal */
-        $deals = $this->getDealModel()->getById(array_unique(array_column($conversations, 'deal_id')));
+        $deals = $this->getDealModel()->getById(array_unique(array_column($allowed_conversations, 'deal_id')));
         if ($user_id !== 0 && $deals) {
             $log_model = $this->getLogModel();
             foreach ($deals as $d) {
@@ -217,5 +272,12 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
 
         $this->http_status_code = 204;
         $this->response = null;
+
+        if (!empty($unallowed_conversation_ids)) {
+            $this->http_status_code = 200;
+            $this->response = [
+                'unallowed_conversations' => array_values($unallowed_conversation_ids)
+            ];
+        }
     }
 }

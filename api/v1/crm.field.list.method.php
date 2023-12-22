@@ -8,7 +8,7 @@ class crmFieldListMethod extends crmApiAbstractMethod
     {
         $scope = $this->get('scope', true);
         if (!in_array($scope, ['person', 'company', 'deal', 'contact'])) {
-            throw new waAPIException('invalid_param', 'Invalid parameter: scope', 400);
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid “%s” value.', 'scope'), 400);
         }
 
         $response = [];
@@ -83,7 +83,7 @@ class crmFieldListMethod extends crmApiAbstractMethod
                         'type' => $sub_type
                     ];
                     if ($o_order = ifset($sub_field, 'oOrder', [])) {
-                        $o_index = array_search('', $o_order);
+                        $o_index = array_search('', $o_order, true);
                         if ($o_index === false) {
                             $o_order = [];
                         } else {
@@ -92,12 +92,9 @@ class crmFieldListMethod extends crmApiAbstractMethod
                     }
                     if ($options = ifempty($sub_field, 'options', [])) {
                         unset($options['']);
-                        $options = array_merge(
-                            array_intersect_key($options, array_flip($o_order)),
-                            (empty($o_order) ? [] : ['' => '']),
-                            $options
-                        );
-                        foreach ($options as $opt => $option) {
+                        $_options = array_intersect_key($options, array_flip($o_order));
+                        $_options += (empty($o_order) ? [] : ['' => '']) + $options;
+                        foreach ($_options as $opt => $option) {
                             $fields['option_values'][] = [
                                 'id'    => (string) $opt,
                                 'value' => (string) $option
@@ -108,7 +105,7 @@ class crmFieldListMethod extends crmApiAbstractMethod
                 }
                 if ($column_id === 'birthday') {
                     $_response['fields'] = [
-                        ['id' => 'year',  'name' => _w('Year'),  'type' => 'number']
+                        ['id' => 'year', 'name' => _w('Year'), 'type' => 'number']
                     ];
                     /** @var waContactBirthdayField $column_object */
                     $months = $column_object->getMonths();

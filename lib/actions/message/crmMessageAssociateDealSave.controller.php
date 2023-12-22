@@ -23,14 +23,14 @@ class crmMessageAssociateDealSaveController extends crmJsonController
             return;
         }
         if (!$this->getCrmRights()->contact($contact)) {
-            $this->errors = array('Access to a contact is denied');
+            $this->errors = array('Access to the contact is denied.');
             return;
         }
 
         $deal_data = waRequest::post('deal', null, waRequest::TYPE_ARRAY_TRIM);
 
         if (empty($deal_data)) {
-            $this->errors = array('No data on the deal');
+            $this->errors = array(_w('No data on the deal.'));
             return;
         }
 

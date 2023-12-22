@@ -25,13 +25,13 @@ class crmInvoiceListMethod extends crmApiAbstractMethod
         } elseif (!empty($deal_id) && $deal_id < 1) {
             throw new waAPIException('not_found', _w('Deal not found'), 404);
         } elseif (!empty($state_id) && !in_array($state_id, ['PENDING', 'PAID', 'REFUNDED', 'ARCHIVED', 'DRAFT', 'PROCESSING'])) {
-            throw new waAPIException('invalid_param', 'Invalid parameter: state_id', 400);
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid parameter: “%s”.', 'state_id'), 400);
         } elseif (!in_array($sort, ['create_datetime', 'update_datetime', 'payment_datetime'])) {
-            throw new waAPIException('invalid_param', 'Invalid parameter: sort', 400);
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid parameter: “%s”.', 'sort'), 400);
         } elseif (!empty($limit) && $limit < 1) {
-            throw new waAPIException('invalid_param', 'Invalid parameter: limit', 400);
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid parameter: “%s”.', 'limit'), 400);
         } elseif (!empty($offset) && $offset < 1) {
-            throw new waAPIException('invalid_param', 'Invalid parameter: offset', 400);
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid parameter: “%s”.', 'offset'), 400);
         }
 
         $where  = ['1 = 1'];
@@ -61,7 +61,7 @@ class crmInvoiceListMethod extends crmApiAbstractMethod
         $invoices = $invoice_model->query("
             SELECT SQL_CALC_FOUND_ROWS *
             FROM crm_invoice
-            WHERE ".implode(' AND ', $where)." 
+            WHERE ".implode(' AND ', $where)."
             ORDER BY $sort ".($asc ? 'ASC' : 'DESC')." LIMIT i:offset, i:limit
         ", $filter)->fetchAll();
         $total_count = $invoice_model->query('SELECT FOUND_ROWS()')->fetchField();

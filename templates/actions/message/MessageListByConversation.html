@@ -2,7 +2,8 @@
 {$_is_admin = $wa->user()->isAdmin('crm')}
 {if $page && $page != 1}{$_page_tail = "?pt=`$page`"}{else}{$_page_tail = ''}{/if}
 {include file="./MessageListHelper.inc.html" inline}
-{if empty($_active_c)}
+{$_reload = waRequest::request('reload', waRequest::get('reload', null, waRequest::TYPE_INT), waRequest::TYPE_INT)}
+{if ($_reload)}
     {$_active_c = waRequest::request('id', waRequest::get('id', null, waRequest::TYPE_INT), waRequest::TYPE_INT)}
 {/if}
 {if !isset($iframe)}
@@ -59,7 +60,7 @@
     <label id="js-crm-message-page"></label>
     {if !$iframe}
     <header class="c-messages-header sidebar-header">
-        <div class="flexbox middle space-16 wrap full-width">
+        <div class="flexbox middle space-12 wrap full-width">
 
             <div class="c-column mobile-only js-page-name-header {if !empty($list_params.contact_id)}hidden{/if}">
                 <div class="flexbox middle wrap c-nav-wrapper">
@@ -88,9 +89,11 @@
                 </div>
                 <span class="icon mobile-only js-search-mobile-show {if !empty($list_params.contact_id)}hidden{/if}"><i class="fas fa-search"></i></span>
             </div>
-            <div class="flexbox middle space-16 c-icon-wrapper">
+            <div class="flexbox middle space-12 c-icon-wrapper">
                 <span class="icon size-16 cursor-pointer js-filter-open"><i class="fas fa-filter"></i></span>
-                {*<span class="icon size-16 desktop-and-tablet-only"><i class="fas fa-sort"></i></span>*}
+            </div>
+            <div class="flexbox middle space-12 c-icon-wrapper">
+                <span class="icon size-16 cursor-pointer js-operations-show"><i class="fas fa-check-double"></i></span>
             </div>
             {if !empty($available_funnel)}
             <div class="c-add-wrapper">
@@ -178,6 +181,77 @@
                 </div>
             </div>
         </div>
+        <div class="flexbox middle space-12 wrap full-width c-header-operation-wrapper js-operation-wrapper hidden">
+            <div class="flexbox middle space-8">
+                <label>
+                    <span class="wa-checkbox">
+                        <input type="checkbox" name="1" id="js-operation-main-checkbox">
+                        <span>
+                            <span class="icon">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        </span>
+                    </span>
+                </label>
+                <span class="badge small gray js-operation-badge">0</span>
+            </div>
+            <div class="flexbox middle space-8">
+                <div class="dropdown small" id="js-operation-dropdown">
+                    <button class="dropdown-toggle button light-gray" type="button">[`Actions`]</button>
+                    <div class="dropdown-body right" style="width: fit-content">
+                        <ul class="menu">
+                            <li class="nowrap crm-operation-li" data-id="read">
+                                <a class="flexbox middle crm-operation-link disabled" href="javascript:void(0);" data-id="read">
+                                    <i class="size-12 fas fa-envelope-open text-blue" style="font-size: 0.85rem;"></i>
+                                    <span class="crm-operation-li--name">[`Mark messages as read`]</span>
+                                    <span class="crm-count custom-ml-8 text-gray"></span>
+                                </a>
+                            </li>
+                            <li class="nowrap crm-operation-li" data-id="unread">
+                                <a class="flexbox middle crm-operation-link disabled" href="javascript:void(0);" data-id="unread">
+                                    <i class="size-12 fas fa-envelope text-gray" style="font-size: 0.85rem;"></i>
+                                    <span class="crm-operation-li--name">[`Mark messages as unread`]</span>
+                                    <span class="crm-count custom-ml-8 text-gray"></span>
+                                </a>
+                            </li>
+                            <li class="nowrap crm-operation-li" data-id="detach">
+                                <a class="flexbox middle crm-operation-link disabled" href="javascript:void(0);" data-id="detach">
+                                    <i class="fas fa-unlink text-dark-gray" style="font-size: 0.85rem;"></i>
+                                    <span class="crm-operation-li--name">[`Detach from deals`]</span>
+                                    <span class="crm-count custom-ml-8 text-gray"></span>
+                                </a>
+                            </li>
+                            <li class="nowrap crm-operation-li" data-id="delete">
+                                <a class="flexbox middle crm-operation-link disabled" href="javascript:void(0);" data-id="delete">
+                                    <i class="fas fa-trash-alt text-red" style="font-size: 0.85rem;"></i>
+                                    <span class="crm-operation-li--name">[`Delete`]</span>
+                                    <span class="crm-count custom-ml-8 text-gray"></span>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                    <input id="js-operation-dropdown-input" name="dropdown_input" type="hidden" value="">
+                
+                    <script>
+                        ( function($) {
+                            $("#js-operation-dropdown").waDropdown({
+                                hover: false,
+                                //items: ".menu > li > a:not(.disabled)",
+                                change: function(event, target, dropdown) {
+                                 /*  if (!$(target).hasClass('disabled')) {
+                                    console.log('kek')
+                                    return*/
+                                }
+                                
+                            });
+                        })(jQuery);
+                    </script>
+                </div>
+                <span class="icon cursor-pointer js-operation-hide "><i class="fas fa-times-circle"></i></span>
+            </div>
+
+        </div>
     </header>
     {/if}
     <div class="c-messages-body blank">
@@ -212,8 +286,8 @@
                         <div class="gray">[`To receive and handle messages from clients set up a message source.`]</div>
                         {if $_is_admin}
                             <div class="flexbox vertical space-8" style="max-width: 250px;">
-                                <a class="button rounded light-gray" href="{$crm_app_url}settings/message-sources/im/">[`Connect messengers`]</a>
-                                <a class="button rounded light-gray" href="{$crm_app_url}settings/message-sources/email/">[`Connect email`]</a>
+                                <a {if $iframe}target="_top"{/if} class="button rounded light-gray{if $iframe} js-disable-router{/if}" href="{$crm_app_url}settings/message-sources/im/">[`Connect messengers`]</a>
+                                <a {if $iframe}target="_top"{/if} class="button rounded light-gray{if $iframe} js-disable-router{/if}" href="{$crm_app_url}settings/message-sources/email/">[`Connect email`]</a>
 
                             </div>
                         {/if}
@@ -267,6 +341,19 @@
                                 data-read="1"
                             {/if}>
                             {if $_can_view}
+                            <div class="item operation-checkbox-wrapper c-checkbox">
+                                <label class="">
+                                        <span class="wa-checkbox operation-checkbox custom-px-12">
+                                            <input type="checkbox" name="message[]" value="{$_c.id}" class="js-checkbox">
+                                            <span>
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </span>
+                                        </span>
+                                    
+                                </label>
+                            </div>
                             <a class="item profile flexbox middle space-12" href="{$_conversation_url}">
                             {else}
                             <span class="item profile flexbox middle space-12 opacity-50" title="[`You do not have sufficient rights to view this conversation`]">
@@ -307,7 +394,7 @@
                                         {* TYPE *}
 
                                         {* SUBJECT *}
-                                        <div class="flexbox middle space-8 c-column-subject">
+                                        <div class="flexbox middle space-8 full-width c-column-subject">
                                                 <div class="c-subject-wrapper">
                                                     <span class="icon enable-animation size-16 custom-ml-0 custom-mr-4">
                                                     {if !empty($_c.icon_fab)}
@@ -318,11 +405,12 @@
                                                         <img src="{$_c.icon_url}" title="{$_c.transport_name|escape}" data-fa-i2svg>
                                                     {/if}
                                                     </span>
-                                                    {$_c.summary|default:'[`no subject`]'|truncate:50:'...':true|escape}
-                                                    {if $_c.count > 1}
-                                                    <span class="hint custom-ml-4">({$_c.count})</span>
-                                                    {/if}
+                                                    {$_c.summary|default:'[`no subject`]'|truncate:50:'':true|escape}
+
                                                 </div>
+                                                {if $_c.count > 1}
+                                                    <div class="hint nowrap">({$_c.count})</div>
+                                                {/if}
 
                                         </div>
                                         <div class="c-subject-unread-icon" title="[`not read`]">
@@ -424,8 +512,15 @@
                     associate_with_deal: '[`Associate with a deal`]',
                     no_messages: '[`No messages`]',
                     detach_dialog_h2: '[`Are you sure you want to detach selected conversations from the deals?`]',
-                    delete_dialog_h2: '[`Are you sure you want to delete all selected conversations?`]'
+                    delete_dialog_h2: '[`Are you sure you want to delete all selected conversations?`]',
+                    cancel_button: '[`Cancel`]',
+                    detach_button: '[`Detach`]',
+                    delete_button: '[`Delete`]',
+                    ban_text: '[`Ban associated contacts`]'
                 },
+                is_admin: {if $_is_admin}true{else}false{/if},
+                total_count: {$total_count|json_encode},
+                limit: {$list_params.limit},
                 last_message_id: {$last_message_id|json_encode},
                 iframe: {$iframe|default:0}
             });

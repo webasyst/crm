@@ -73,7 +73,7 @@ var CRMSidebar = (function ($) {
             const stateUrl = window.location.href;
             handleUrl(stateUrl);
         })
-        
+
         function handleUrl(stateUrl) {
             const startIndex = stateUrl.indexOf('crm/');
             if (startIndex && startIndex > 0) {
@@ -86,12 +86,15 @@ var CRMSidebar = (function ($) {
             }
         }
 
-        that.$body.find('li > a').each(function() {
-            $(this).waTooltip({placement:"right"});
-        })
-        that.$footer.find('li > a').each(function() {
-            $(this).waTooltip({placement:"right"});
-        })
+        const isMdWithCursor = window.matchMedia("(min-width: 761px) and (pointer: fine)").matches;
+        if (isMdWithCursor) {
+            that.$body.find('li > a').each(function() {
+                $(this).waTooltip({placement:"right"});
+            })
+            that.$footer.find('li > a').each(function() {
+                $(this).waTooltip({placement:"right"});
+            })
+        }
     };
 
     CRMSidebar.prototype.setItem = function ($item) {
@@ -197,7 +200,7 @@ var CRMSidebar = (function ($) {
             //$(document).off('wa_before_render', toggleMenu);
             that.xhr = false;
             that.$body.html(html);
-           
+
         });
     };
 

@@ -50,6 +50,7 @@ class crmSendSMSDialogAction extends crmBackendViewAction
 
     protected function formatPhone($phone)
     {
+        $phone = preg_replace('/[^0-9]/', '', $phone);
         $phone_field = new waContactPhoneField('', '');
         return $phone_field->format($phone, 'value');
     }

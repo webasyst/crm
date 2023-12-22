@@ -286,7 +286,7 @@
 
                     new CRMMessageBodyDialog({
                         $wrapper: $dialog,
-                        is_admin: {$is_admin},
+                        is_admin: {$is_admin|json_encode},
                         app_url: "{$wa_app_url}",
                         contact_id: {if $message.direction === 'IN'}{$from.id|default:0}{else}{$to.id|default:0}{/if},
                         message: {$message|json_encode},

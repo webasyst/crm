@@ -590,20 +590,28 @@ var crmSettingsForm = (function ($) {
                     .done(function (r) {
                         if (r.status !== 'ok') {
                             that.showValidateErrors(r.errors || {});
+                            $loading.hide();
+                            that.$button.prop('disabled', false);
                             return;
                         }
-                        that.setFormChanged(false);
                         $status.show().fadeOut(500);
-                        $.crm.content.load($.crm.app_url + 'settings/form/' + r.data.form.id);
+                        $.crm.content.load($.crm.app_url + 'settings/form/' + r.data.form.id).then(function(){
+                            $loading.hide();
+                            that.$button.prop('disabled', false);
+                            that.setFormChanged(false);
+                            
+                        });
                     })
                     .fail(function () {
                         that.showValidateErrors({ '': that.messages['unknown_server_error']/*'Unknown server error'*/ });
+                        $loading.hide();
+                        that.$button.prop('disabled', false);
                     })
                     .always(function () {
-                        $loading.hide();
+                        /*$loading.hide();
                         setTimeout(function () {
                             that.$button.prop('disabled', false);
-                        }, 1500);
+                        }, 1500);*/
                     });
         });
     };

@@ -18,7 +18,7 @@ class crmContactAddCompanyContactSaveController extends crmJsonController
             throw new waException('This contact is a company', 403);
         }
         if (!$this->getCrmRights()->contactEditable($contact)) {
-            throw new waRightsException('Access to a contact is denied');
+            throw new waRightsException('Access to the contact is denied.');
         }
 
         $company = waRequest::post('company', 0, waRequest::TYPE_ARRAY);
@@ -81,7 +81,7 @@ class crmContactAddCompanyContactSaveController extends crmJsonController
             return;
         }
 
-        $this->errors = array('Unknown error');
+        $this->errors = array(_w('Unknown error'));
     }
 
     protected function autoResponsible()

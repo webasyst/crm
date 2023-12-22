@@ -80,7 +80,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                         unset($el['data'][$idx]);
                     }
                 }
-                $el['aux_data'] = $el['data'];
+                $el['aux_data'] = array_values($el['data']);
                 $el['data'] = $res;
                 $el['map_url'] = $this->getUrlMap(
                     ifset($el, 'value', null),
@@ -103,7 +103,8 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                 'create_contact_id'  => intval($contact->get('create_contact_id')),
                 'is_company'         => !empty($contact->get('is_company')),
                 'company_contact_id' => intval($contact->get('company_contact_id')),
-                'is_user'            => !empty($contact->get('is_user')),
+                'is_user'            => !empty($contact->get('is_user')) && $contact->get('is_user') != -1,
+                'is_banned'          => ($contact->get('is_user') == -1),
                 'login'              => $contact->get('login'),
                 'sex'                => $contact->get('sex'),
                 'has_password'       => !empty($contact->get('password')),
@@ -203,7 +204,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                 $data = array($data);
             }
             foreach ($data as $row) {
-                if (!$row) {
+                if (!$row && $row !== '0') {
                     if ($field_object instanceof waContactCheckboxField) {
                         $row = '';
                     } else {
@@ -234,6 +235,9 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                 if (!empty($field['options'][$value])) {
                     // Option label for select-based fields
                     $field['values'][] = $field['options'][$value];
+                    if ($field_object instanceof waContactRadioSelectField) {
+                        $field['type'] = 'Radio';
+                    }
                 } elseif ($field_object instanceof waContactDateField) {
                     try {
                         $date_formatted = waDateTime::format('humandate', $value);
@@ -273,11 +277,14 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                     if (isset($row['data']) && is_array($row['data']) && isset($field['fields'])) {
                         $row_data = [];
                         foreach($field['fields'] as $sub_field) {
-                            $sub_field_value = ifset($row['data'][$sub_field['id']]);
-                            if (empty($sub_field_value)) {
+                            $sub_field_value = ifset($row, 'data', $sub_field['id'], null);
+                            if (!isset($sub_field_value)) {
                                 continue;
                             }
-
+                            $sub_field_object = $field_object->getFields($sub_field['id']);
+                            if ($sub_field_object instanceof waContactBranchField || $sub_field_object instanceof waContactRadioSelectField) {
+                                $sub_field['type'] = 'Radio';
+                            }
                             $sub_field_data = [
                                 'id' => $sub_field['id'],
                                 'name' => $sub_field['name'],
@@ -457,6 +464,13 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                         $tmp = (string) $_address['data'][$f_id];
                     }
                     if (!in_array($f_id, ['country', 'region', 'zip', 'street', 'city'])) {
+                        if ($field instanceof waContactSelectField) {
+                            try {
+                                $tmp = $field->getOptions($tmp);
+                            } catch (Exception $e) {
+                                //
+                            }
+                        }
                         $tmp = $field->getName().' '.$tmp;
                     }
                     $value[$f_id] = $tmp;

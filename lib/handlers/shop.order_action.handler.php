@@ -152,7 +152,7 @@ class crmShopOrder_actionHandler extends waEventHandler
             'update_datetime' => $now,
         );
         if (is_array($stage)) {
-            $upd['status_id'] = 'OPEN';
+            $upd['status_id'] = crmDealModel::STATUS_OPEN;
             $upd['stage_id'] = $stage['id'];
             self::$deal_model->updateById($this->deal['id'], $upd);
             self::$log_model->log(
@@ -169,7 +169,7 @@ class crmShopOrder_actionHandler extends waEventHandler
             $upd['status_id'] = strtoupper($stage);
             $upd['closed_datetime'] = $now;
 
-            if ($upd['status_id'] === 'LOST') {
+            if ($upd['status_id'] === crmDealModel::STATUS_LOST) {
                 // Extra info in 'crm_change_workflow_data' subarray of POST
                 // This data injected in JS when show SS dialog, otherwise we could loose this data
                 // For LOST for example here could be lost_id, lost_text

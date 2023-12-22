@@ -4,7 +4,7 @@ class crmFileListMethod extends crmApiAbstractMethod
 {
     protected $contact_id;
     protected $userpic_size;
-    
+
     public function execute()
     {
         $this->validateParams();
@@ -28,9 +28,9 @@ class crmFileListMethod extends crmApiAbstractMethod
         $this->userpic_size = ifempty($userpic_size, self::USERPIC_SIZE);
 
         if (empty($contact_id) && empty($deal_id)) {
-            throw new waAPIException('empty_id', 'Required parameter is missing: contact_id or deal_id', 400);
+            throw new waAPIException('empty_id', sprintf_wp('Missing required parameter: “%s”.', sprintf_wp('“%s” or “%s”', 'contact_id', 'deal_id')), 400);
         } elseif (!empty($contact_id) && !empty($deal_id)) {
-            throw new waAPIException('error', 'One of the parameters is required: contact_id or deal_id', 400);
+            throw new waAPIException('error', sprintf_wp('Only one of the parameters is required: %s.', sprintf_wp('“%s” or “%s”', 'contact_id', 'deal_id')), 400);
         } elseif (!$this->getCrmRights()->contactOrDeal($this->getUser()->getId())) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         } elseif (!empty($deal_id)) {

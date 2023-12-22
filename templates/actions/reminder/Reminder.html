@@ -357,7 +357,7 @@
                                                             <div class="">
                                                                 <span class="icon"><i class="fas fa-user"></i></span>
                                                                 <span class="icon"><i class="fas fa-flag"></i></span>
-                                                                <input class="js-autocomplete-deal input-blank" id="input-autocomplete-deal" type="text" value="" placeholder="[`Сontact or deal`]">
+                                                                <input class="js-autocomplete-deal input-blank" id="input-autocomplete-deal" type="text" value="" placeholder="[`Contact or deal`]">
                                                             </div>
                                                             <span class="custom-pl-4 c-hidden">
                                                                 <span class="icon js-reset-deal text-red cursor-pointer" title="[`Delete`]"><i class="fas fa-times-circle"></i></span>
@@ -382,13 +382,14 @@
                                     <div class="flexbox vertical">
                                                 {* USER *}
                                                 <div class="c-contact-wrapper js-contact-wrapper">
-                                                    <div class="flexbox middle wrap space-16 c-contact js-user js-show-combobox">
+                                                    <div class="flexbox middle space-4 c-contact js-user js-show-combobox">
                                                         {$assign_to_user.userpic = $assign_to_user->getPhoto(32)}
                                                         {if !empty($assign_to_user.userpic)}
                                                         <span class="icon size-24 rounded" style="background-image: url({$assign_to_user.userpic});"></span>
                                                         {/if}
                                                         {*<span class="c-name">{$assign_to_user.name|escape}</span>
                                                         <a class="inline-link small js-show-combobox" href="javascript:void(0);">[`Assign another user`]</a>*}
+                                                        <span class="icon caret cursor-pointer" title="[`Assign another user`]"><i class="fas fa-caret-right"></i></span>
                                                     </div>
                                                     <div class="c-combobox flexbox middle">
                                                         <div class="state-with-inner-icon left">

@@ -1,20 +1,20 @@
 <?php
 
 class crmMessageListMethod extends crmApiAbstractMethod
-{    
+{
     protected $method = self::METHOD_GET;
     const MAX_LIMIT = 500;
     const DEFAULT_LIMIT = 30;
 
     public function execute()
     {
-        $conversation_id = waRequest::get('conversation_id', 0, waRequest::TYPE_INT);
-        if (!empty($conversation_id) && !$this->getCrmRights()->canViewConversation($conversation_id)) {
+        $conversation_id = $this->get('conversation_id', true);
+        if (!$this->getCrmRights()->canViewConversation($conversation_id)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
         $conversation = $this->getConversationModel()->getConversation($conversation_id);
         if (empty($conversation)) {
-            throw new waAPIException('not_found', 'Conversation not found', 404);
+            throw new waAPIException('not_found', _w('Conversation not found.'), 404);
         }
 
         $max_id = waRequest::get('max_id', 0, waRequest::TYPE_INT);
@@ -62,12 +62,12 @@ class crmMessageListMethod extends crmApiAbstractMethod
 
     protected function prepareMessages($messages, $conversation)
     {
-        $message_ids = array_column($messages, 'id');        
+        $message_ids = array_column($messages, 'id');
         $source_ids = array_column(array_filter($messages, function ($m) {
             return $m['source_id'] > 0;
         }), 'source_id');
         $sources = $this->getSources($source_ids);
-        
+
         $source_emails = $this->getSourceEmailAddresses($messages);
 
         $mrm = new crmMessageRecipientsModel();
@@ -82,11 +82,11 @@ class crmMessageListMethod extends crmApiAbstractMethod
 
         $contact_ids = array_filter(
             array_merge(
-                $contact_ids, 
-                array_column($messages, 'contact_id'), 
-                array_column($messages, 'creator_contact_id'), 
+                $contact_ids,
+                array_column($messages, 'contact_id'),
+                array_column($messages, 'creator_contact_id'),
                 array_column($recipients, 'contact_id')
-            ), 
+            ),
             function ($el) {
                 return wa_is_int($el);
             }
@@ -141,8 +141,8 @@ class crmMessageListMethod extends crmApiAbstractMethod
             );
 
             // if message is input and source is of EMAIL type then insert structure in [recipients][to] list
-            if ($m['transport'] === crmMessageModel::TRANSPORT_EMAIL && 
-                $m['direction'] === crmMessageModel::DIRECTION_IN && 
+            if ($m['transport'] === crmMessageModel::TRANSPORT_EMAIL &&
+                $m['direction'] === crmMessageModel::DIRECTION_IN &&
                 isset($source_emails[$m['source_id']])
             ) {
                 $source_email = $source_emails[$m['source_id']];
@@ -163,7 +163,7 @@ class crmMessageListMethod extends crmApiAbstractMethod
             if (isset($m['source_id']) && isset($sources[$m['source_id']])) {
                 $m['source'] = $this->prepareSource($sources[$m['source_id']]);
             }
-            
+
             return $m;
         }, $messages);
 
@@ -182,7 +182,7 @@ class crmMessageListMethod extends crmApiAbstractMethod
             return $m;
         }, $messages);
 
-        $messages = $this->filterData($messages, 
+        $messages = $this->filterData($messages,
             ['id', 'create_datetime', 'creator_contact_id', 'transport', 'direction', 'subject', 'body', 'from', 'to', 'original', 'event', 'recipients', 'attachments', 'extras', 'caption', 'body_sanitized', 'contact', 'author'],
             ['id' => 'integer', 'creator_contact_id' => 'integer', 'original' => 'boolean', 'create_datetime' => 'datetime']
         );
@@ -204,11 +204,11 @@ class crmMessageListMethod extends crmApiAbstractMethod
         }
 
         $sources = $this->getSourceModel()->getByField(['id' => $source_ids], true);
-        
+
         return array_reduce($sources, function ($result, $el) {
             if ($el['type'] === 'IM' && !empty($el['provider'])) {
                 $el['icon_url'] = wa()->getAppStaticUrl('crm/plugins/' . $el['provider'] . '/img', true) . $el['provider'].'.png';
-                $plugin = crmSourcePlugin::factory($el['provider']) 
+                $plugin = crmSourcePlugin::factory($el['provider'])
                     and $source = $plugin->factorySource($el['id'])
                     and $el += $source->getFontAwesomeBrandIcon();
             }
@@ -243,8 +243,8 @@ wa_dumpc($res);
 
         // collect source IDs for IN EMAIL messages
         $source_ids = array_column(array_filter($messages, function ($m) {
-            return $m['source_id'] > 0 
-                && $m['transport'] === crmMessageModel::TRANSPORT_EMAIL 
+            return $m['source_id'] > 0
+                && $m['transport'] === crmMessageModel::TRANSPORT_EMAIL
                 && $m['direction'] === crmMessageModel::DIRECTION_IN;
         }), 'source_id');
 

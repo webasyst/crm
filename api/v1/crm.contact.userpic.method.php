@@ -16,11 +16,11 @@ class crmContactUserpicMethod extends crmApiAbstractMethod
         $crop_size = (int) abs(ifset($_json, 'crop', 'size', 0));
 
         if (empty($picture)) {
-            throw new waAPIException('empty_file', 'Required parameter is missing: photo', 400);
+            throw new waAPIException('empty_file', sprintf_wp('Missing required parameter: “%s”.', 'photo'), 400);
         } elseif (empty($content_type)) {
-            throw new waAPIException('empty_type', 'Required parameter is missing: content_type', 400);
+            throw new waAPIException('empty_type', sprintf_wp('Missing required parameter: “%s”.', 'content_type'), 400);
         } elseif (!in_array($content_type, ['image/jpeg', 'image/png'])) {
-            throw new waAPIException('invalid_type', 'MIME type file not supported', 400);
+            throw new waAPIException('invalid_type', _w('File’s MIME type not supported.'), 400);
         } elseif ($contact_id < 1 || !$this->getContactModel()->getById($contact_id)) {
             throw new waAPIException('not_found', _w('Contact not found'), 404);
         } elseif (!$this->getCrmRights()->contactEditable($contact_id)) {
@@ -38,7 +38,7 @@ class crmContactUserpicMethod extends crmApiAbstractMethod
         $pic_ext = (explode('/', $content_type)[1] == 'png' ? 'png' : 'jpg');
         $original_file_name = "$rand.original.$pic_ext";
         if (!file_put_contents($path.$original_file_name, $picture)) {
-            throw new waAPIException('server_error', 'Can\'t save the file', 500);
+            throw new waAPIException('server_error', _w('File could not be saved.'), 500);
         }
 
         try {
@@ -67,7 +67,7 @@ class crmContactUserpicMethod extends crmApiAbstractMethod
             $thumb_file_name = "$rand.${userpic_size}x$userpic_size.$pic_ext";
             $img->crop($crop_size, $crop_size, $crop_x, $crop_y)->save($path.$cropped_file_name);
         } catch (Exception $ex) {
-            throw new waAPIException('server_error', 'Unable to crop an image: '.$ex->getMessage(), 500);
+            throw new waAPIException('server_error', sprintf_wp('Unable to crop image: %s', $ex->getMessage()), 500);
         }
 
         $contact = new crmContact($contact_id);

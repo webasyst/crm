@@ -19,7 +19,7 @@ class crmDealReopenController extends crmJsonController
             throw new waException(_w('Deal not found'));
         } elseif ($this->getCrmRights()->deal($deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
             $this->accessDenied();
-        } elseif (!in_array($deal['status_id'], ['WON', 'LOST'])) {
+        } elseif (!in_array($deal['status_id'], [ crmDealModel::STATUS_LOST, crmDealModel::STATUS_WON ])) {
             throw new waRightsException();
         }
 

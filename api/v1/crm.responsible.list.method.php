@@ -11,7 +11,7 @@ class crmResponsibleListMethod extends crmApiAbstractMethod
         $userpic_size = abs(waRequest::get('userpic_size', self::USERPIC_SIZE, waRequest::TYPE_INT));
 
         if (!in_array($scope, ['contact', 'deal', 'conversation'])) {
-            throw new waAPIException('invalid_param', 'Unknown scope param', 400);
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid “%s” value.', 'scope'), 400);
         }
 
         $available_responsibles = $this->getResponsibleModel()->getAvailableResponsibles($scope);

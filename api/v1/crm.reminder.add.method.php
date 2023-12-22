@@ -27,45 +27,45 @@ class crmReminderAddMethod extends crmApiAbstractMethod
     private function validate($user_id, $content, $deal_id, $contact_id, $type, $due_date)
     {
         if ($user_id < 1) {
-            throw new waAPIException('invalid_user', 'Invalid user_id specified', 400);
+            throw new waAPIException('invalid_user', sprintf_wp('Invalid “%s” value.', 'user_id'), 400);
         }
         if (!in_array($type, $this->reminder_types)) {
-            throw new waAPIException('invalid_type', 'Invalid reminder type specified', 400);
+            throw new waAPIException('invalid_type', _w('Invalid reminder type specified.'), 400);
         }
         if (empty($content) && $type === 'OTHER') {
-            throw new waAPIException('required_param', 'Required parameter is missing: content', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'content'), 400);
         }
         if (!empty($due_date)) {
             $validate = new waDateIsoValidator();
             if (!$validate->isValid($due_date)) {
                 $description = implode(', ', $validate->getErrors());
-                throw new waAPIException('invalid_date', 'Invalid due_date (ISO 8601 YYYY-MM-DD): '.$description, 400);
+                throw new waAPIException('invalid_date', sprintf_wp('Invalid “due_date” value (ISO 8601 YYYY-MM-DD): %s', $description), 400);
             }
         }
         if ($user_id != $this->getUser()->getId()) {
             $user = $this->getContactModel()->getById($user_id);
             if (empty($user) || intval($user['is_user']) !== 1) {
-                throw new waAPIException('invalid_user', 'Invalid user_id specified', 400);
+                throw new waAPIException('invalid_user', sprintf_wp('Invalid “%s” value.', 'user_id'), 400);
             }
         }
         if ($deal_id) {
             if ($deal_id < 0) {
-                throw new waAPIException('invalid_deal', 'Invalid deal specified', 400);
+                throw new waAPIException('invalid_deal', _w('Invalid deal specified.'), 400);
             }
             $deal = $this->getDealModel()->getById($deal_id);
             if ($deal === null) {
-                throw new waAPIException('invalid_deal', 'Invalid deal specified', 400);
+                throw new waAPIException('invalid_deal', _w('Invalid deal specified.'), 400);
             }
             if (!$this->getCrmRights()->deal($deal)) {
                 throw new waAPIException('forbidden', _w('Access denied'), 403);
             }
         } else if ($contact_id) {
             if ($contact_id < 0) {
-                throw new waAPIException('invalid_contact', 'Invalid contact specified', 400);
+                throw new waAPIException('invalid_contact', _w('Invalid contact specified.'), 400);
             }
             $contact = $this->getContactModel()->getById($contact_id);
             if ($contact === null) {
-                throw new waAPIException('invalid_contact', 'Invalid contact specified', 400);
+                throw new waAPIException('invalid_contact', _w('Invalid contact specified.'), 400);
             }
             if (!$this->getCrmRights()->contact($contact)) {
                 throw new waAPIException('forbidden', _w('Access denied'), 403);

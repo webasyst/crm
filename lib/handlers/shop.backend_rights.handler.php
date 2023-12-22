@@ -39,7 +39,13 @@ class crmShopBackend_rightsHandler extends waEventHandler
         }
 
         if (empty($order_id)) {
-            if ($module == 'backend' && $action == 'orders') {
+
+            // when user already has access to Orders, no need to do anything here
+            if (wa()->getUser()->getRights('shop', 'orders') > 0) {
+                return;
+            }
+
+            if ($module == 'backend' && ($action == 'orders' || $action === null)) {
                 // Allow to load Order tab layout via direct link
                 // Remember to append styles, modifying shop layout.
                 // (See webasyst.backend_header handler)

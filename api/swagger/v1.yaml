@@ -204,6 +204,48 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
         500:
           description: Internal server error.
+  /crm.contact.ban:
+    post:
+      security:
+        - BearerAuth: [ ]
+      summary: Ban contact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  description: Contact identifier
+                reason:
+                  type: string
+                  description: Ban reason
+      responses:
+        204:
+          description: OK
+        400:
+          description: Invalid request data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        403:
+          description: Access denied to the CRM app or this API method.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        404:
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        500:
+          description: Internal server error.
   /crm.contact.delete:
     delete:
       security:
@@ -377,7 +419,9 @@ paths:
             + tag/ID - contacts marked specified tag
             + vault/ID - contacts in specified vault
             + responsible/ID - contacts allocated to specified responsible user
-            + responsible/me - current user
+            + responsible/me - contacts allocated to current user
+            + recent - contacts recently viewed or saved in favorites by current user
+            + crmSearch/... - various CRM search queries
         - in: query
           name: fields[]
           description: |
@@ -387,7 +431,7 @@ paths:
             + online_status - contact online status
             + last_action - contact last action data
             + acl - access level to contact data
-            + is_pinned - pinned recent flag
+            + is_pinned - marker that the contact is saved in favorites by current user
           schema:
             type: array
             items:
@@ -782,6 +826,45 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
         500:
           description: Internal server error.
+  /crm.contact.unban:
+    post:
+      security:
+        - BearerAuth: [ ]
+      summary: Ban contact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  description: Contact identifier
+      responses:
+        204:
+          description: OK
+        400:
+          description: Invalid request data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        403:
+          description: Access denied to the CRM app or this API method.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        404:
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        500:
+          description: Internal server error.
   /crm.contact.unpin:
     post:
       security:
@@ -1053,6 +1136,18 @@ paths:
           required: true
           schema:
             type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ban_contact:
+                  type: boolean
+                  description: Is need to ban contact
+                reason:
+                  type: string
+                  description: Ban reason
       responses:
         204:
           description: OK
@@ -1589,13 +1684,42 @@ paths:
       parameters:
         - in: query
           name: id
-          required: true
-          description: Deal ID
+          description: Deal identifier. In case of deleting one deal.
           schema:
             type: integer
+        - in: query
+          name: id[]
+          description: Array of deal identifiers. In case of deals bulk deleting.
+          schema:
+            type: array
+            items:
+              type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: array
+                  description: Array of deal identifiers. In case of deals bulk deleting.
+                  items:
+                    type: integer
       responses:
         204:
-          description: OK
+          description: One deal has been successfully deleted.
+        200:
+          description: Many deals have been successfully deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    description: Deleted deal identifiers
+                    type: array
+                    items:
+                      type: integer
         400:
           description: Invalid request data.
           content:
@@ -1673,12 +1797,12 @@ paths:
             type: integer
         - in: query
           name: contact_id
-          description: Contact identifier
+          description: Customer contact identifier
           schema:
             type: integer
         - in: query
           name: search
-          description: Deal name or contact name
+          description: Deal name or deal customer contact name
           schema:
             type: string
         - in: query
@@ -1687,6 +1811,7 @@ paths:
             Deal fields need to get in list
             + any configured deal field
             + last_action - deal last action data
+            + is_pinned - marker that the deal is saved in favorites
           schema:
             type: array
             items:
@@ -1729,7 +1854,15 @@ paths:
                 - actual
         - in: query
           name: unread_only
-          description: Только непрочитанные сообщения
+          description: Show deals with unread messages only
+          schema:
+            type: integer
+            enum:
+              - 0
+              - 1
+        - in: query
+          name: pinned_only
+          description: Show deals saved in favorites only
           schema:
             type: integer
             enum:
@@ -1794,6 +1927,9 @@ paths:
                       search:
                         type: string
                         description: Search query
+                      pinned_only:
+                        type: boolean
+                        description: Show deals saved in favorites only
                       sort:
                         type: string
                         description: Deal field id to sort by
@@ -2398,6 +2534,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        409:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
         500:
           description: Internal server error.
   /crm.deal.unpin:
@@ -2498,6 +2640,10 @@ paths:
                 contact_id:
                   type: integer
                   description: Contact ID
+                comment:
+                  type: string
+                  format: text
+                  description: Comment
               required:
                 - file
                 - file_name
@@ -3055,7 +3201,7 @@ paths:
       parameters:
         - in: query
           name: id
-          description: Message ID
+          description: Message identifier
           required: true
           schema:
             type: integer
@@ -3101,6 +3247,7 @@ paths:
         - in: query
           name: conversation_id
           description: Conversation identifier
+          required: true
           schema:
             type: integer
         - in: query
@@ -4515,6 +4662,51 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
         500:
           description: Internal server error.
+  /crm.segment.order:
+    post:
+      security:
+        - BearerAuth: [ ]
+      summary: Reorder segments in list
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ids
+                - scope
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                    description: Array of segment identifiers
+                scope:
+                  type: string
+                  description: |
+                    Scope of ordering segments
+                    + shared: shared segments
+                    + my: personal segments
+                  enum:
+                    - shared
+                    - my
+      responses:
+        204:
+          description: No content
+        403:
+          description: Access denied to the CRM app or this API method.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        400:
+          description: Invalid request data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        500:
+          description: Internal server error.
   /crm.segment.update:
     put:
       security:
@@ -5168,6 +5360,9 @@ components:
             is_user:
               type: boolean
               description: Marker that the contact is user
+            is_banned:
+              type: boolean
+              description: Marker that the contact is blocked
             login:
               type: string
               description: Login (for users only)
@@ -5307,6 +5502,9 @@ components:
           type: boolean
           description: Pinned recent flag
           nullable: true
+        is_banned:
+          type: boolean
+          description: Blocked contact flag
         vault_id:
           type: integer
           description: Vault ID
@@ -5676,6 +5874,10 @@ components:
         contact_id:
           type: integer
           description: Client contact identifier
+          nullable: true
+        deal_id:
+          type: integer
+          description: Deal identifier
           nullable: true
         user_contact_id:
           type: integer
@@ -6775,6 +6977,7 @@ components:
         comment:
           type: string
           description: File comment
+          nullable: true
         url:
           type: string
           format: uri

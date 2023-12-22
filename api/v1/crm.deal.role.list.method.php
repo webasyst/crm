@@ -7,11 +7,11 @@ class crmDealRoleListMethod extends crmApiAbstractMethod
         $scope = strtoupper($this->get('scope', true));
 
         if (!in_array($scope, [crmDealParticipantsModel::ROLE_USER, crmDealParticipantsModel::ROLE_CLIENT])) {
-            throw new waAPIException('unknown_value', 'Unknown value role_id', 400);
+            throw new waAPIException('unknown_value', sprintf_wp('Unknown “%s” value.', 'role_id'), 400);
         }
 
         $labels = $this->getDealParticipantsModel()->query("
-            SELECT label FROM crm_deal_participants 
+            SELECT label FROM crm_deal_participants
             WHERE role_id = s:role AND label IS NOT NULL AND label <> ''
             GROUP BY label ORDER BY COUNT(*) DESC
         ", ['role' => $scope])->fetchAll();

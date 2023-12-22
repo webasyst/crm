@@ -1,0 +1,1 @@
+const c=()=>"ontouchstart"in window;function l(o=800){let n=null;function t(i,e){n||(n=setTimeout(()=>{n&&(e(),n=null)},o))}function u(){n&&(clearTimeout(n),n=null)}return{onTouchstart:t,onTouchend:u}}export{c as h,l as u};

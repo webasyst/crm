@@ -86,7 +86,7 @@
             <div class="field">
                 <div class="name">[`Deal`]</div>
                 <div class="value">
-            
+
                     <div class="c-message-conversation-page">
                         <div class="c-conversation-header" style="padding: 0;">
                             <div class="c-conversation-deal" style="margin: 0;">
@@ -95,8 +95,8 @@
                                         {if $deal}
                                             <span class="bold js-deal-name">{$deal.name|escape}</span>
 {* 83.6957 *}
-{*                                            <a class="inline-link js-change-deal" href="javascript:void(0);"><b><i><span class="js-label-deal" data-change-text="[`прикрепить к другой сделке`]">[`прикрепить к другой сделке`]</span></i></b></a>*}
-{*                                            <span class="c-change-toggle js-detach-deal" title="[`Отвязать от сделки`]"><i class="icon16 close"></i></span>*}
+{*                                            <a class="inline-link js-change-deal" href="javascript:void(0);"><b><i><span class="js-label-deal" data-change-text="[`link to another deal`]">[`link to another deal`]</span></i></b></a>*}
+{*                                            <span class="c-change-toggle js-detach-deal" title="[`Detach from deal`]"><i class="icon16 close"></i></span>*}
 {*                                        {elseif !empty($clean_data.deal)}*}
 {*                                            {include file="templates/actions-legacy/message/MessageConversation.dealSelector.inc.html"*}
 {*                                                deal = $clean_data.deal|default:[]*}
@@ -110,7 +110,7 @@
                             </div>
                         </div>
                     </div>
-                                
+
                 </div>
             </div>
             {/if}
@@ -338,7 +338,7 @@
                     append_tax: "%name %value",
                     empty_contact: "[`Contact is required`]",
                     deal_detach_title: "[`Detach from deal`]",
-                    deal_detach_text: "[`Вы действительно хотите открепить этот счёт от сделки “<strong>%s</strong>”?`]",
+                    deal_detach_text: "[`Do you really want to detach this invoice from deal “<strong>%s</strong>”?`]",
                     deal_detach_confirm_button: "[`Detach`]",
                     deal_empty: "[`Empty`]"
                 }

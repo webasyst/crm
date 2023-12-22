@@ -1,7 +1,7 @@
 <?php
 
 class crmConversationReadMethod extends crmMessageListMethod
-{    
+{
     protected $method = self::METHOD_POST;
 
     public function execute()
@@ -10,14 +10,14 @@ class crmConversationReadMethod extends crmMessageListMethod
         $conversation_id = (int) ifempty($_json, 'id', 0);
 
         if (empty($conversation_id)) {
-            throw new waAPIException('required_param', 'Required parameter is missing: id', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'id'), 400);
         } elseif ($conversation_id < 0) {
-            throw new waAPIException('not_found', 'Conversation not found', 404);
+            throw new waAPIException('not_found', _w('Conversation not found.'), 404);
         }
 
         $conversation = $this->getConversationModel()->getConversation($conversation_id);
         if (empty($conversation)) {
-            throw new waAPIException('not_found', 'Conversation not found', 404);
+            throw new waAPIException('not_found', _w('Conversation not found.'), 404);
         } elseif (!$this->getCrmRights()->canViewConversation($conversation)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }

@@ -104,7 +104,7 @@ var CRMReminderFormEdit = ( function($) {
         that.setContact = function(user) {
             var $user = $wrapper.find(".js-user");
             if (user["photo_url"]) {
-                $user.find(".icon").css("background-image", "url(" + user["photo_url"] + ")").html('');
+                $user.find(".icon.size-24").css("background-image", "url(" + user["photo_url"] + ")").html('');
             }
             $user.find(".c-name").text(user.name);
             $idField.val(user.id);

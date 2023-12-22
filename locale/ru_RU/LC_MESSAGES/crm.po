@@ -12,7 +12,7 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
 "Language: ru_RU\n"
-"X-Generator: Poedit 2.4.3\n"
+"X-Generator: Poedit 2.3\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -1006,6 +1006,12 @@ msgstr "Загрузка..."
 msgid "added contact"
 msgstr "добавлен контакт"
 
+msgid "banned contact"
+msgstr "заблокирован контакт"
+
+msgid "removed ban from contact"
+msgstr "разблокирован контакт"
+
 msgid "Reminders"
 msgstr "Напоминания"
 
@@ -1480,7 +1486,7 @@ msgstr "Поиск по именам, сделкам и датам"
 msgid "Search by customer names"
 msgstr "Поиск по именам клиентов"
 
-msgid "Сontact or deal"
+msgid "Contact or deal"
 msgstr "Контакт или сделка"
 
 msgid "Multiple instances of every payment option with custom settings can be created."
@@ -1829,7 +1835,7 @@ msgid "Backend"
 msgstr "Бекенд"
 
 msgid "Any UTM campaign"
-msgstr "Любая URM-кампания"
+msgstr "Любая UTM-кампания"
 
 msgid "Invoice issued"
 msgstr "Выписка счёта"
@@ -2194,7 +2200,7 @@ msgstr "Переместить <strong>%s</strong> на этап <strong>%s</str
 msgid "Assign me"
 msgstr "Закрепить сделку за собой"
 
-msgid "Move this deal to <strong>%s</strong> stage?"
+msgid "Move this deal to stage <strong>%s</strong>?"
 msgstr "Переместить эту сделку на этап <strong>%s</strong>?"
 
 msgid "Remove owner <strong>%s</strong> from the deal?"
@@ -3011,10 +3017,10 @@ msgid "<tt>Cron</tt> job required to automatically handle invoices expiration."
 msgstr "Необходимо настроить задание <tt>cron</tt> для <b>автоматического перевода в архив истекших счетов</b>."
 
 msgid "<tt>Cron</tt> job required for deal stages overdue."
-msgstr "Необходимо настроить задание <tt>cron</tt> для автоматической установки <b>просрочивания сделок</b>."
+msgstr "Необходимо настроить задание <tt>cron</tt> для автоматической установки метки для <b>просроченных сделок</b>."
 
 msgid "<tt>Cron</tt> job required for deal stages overdue is set up properly."
-msgstr "Задание <tt>cron</tt> для автоматической установки <b>просрочивания сделок</b>, настроена должным образом."
+msgstr "Задание <tt>cron</tt> для автоматической установки метки для <b>просроченных сделок</b>, настроена должным образом."
 
 msgid "<tt>Cron</tt> job required for currencies copy."
 msgstr "Необходимо настроить задание <tt>cron</tt> для автоматического <b>копирования валют</b>."
@@ -3817,6 +3823,9 @@ msgstr "Заметка не найдена"
 msgid "<p><br></p></b><br><section data-role=\"c-email-signature\">:SIGNATURE:</section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>"
 msgstr "<p><br></p></b><br><section data-role=\"c-email-signature\">:SIGNATURE:</section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: написал:</p><blockquote>:BODY:</blockquote>"
 
+msgid "wrote"
+msgstr "написал"
+
 msgid "All companies"
 msgstr "Все компании"
 
@@ -4366,8 +4375,8 @@ msgstr "Открыть карту"
 msgid "Order list"
 msgstr "Состав заказа"
 
-msgid "Access to conversations"
-msgstr "Доступ к перепискам"
+msgid "Access to conversations of accessible contacts"
+msgstr "Доступ к перепискам доступных контактов"
 
 msgid "Own or free"
 msgstr "Собственные и свободные"
@@ -4675,9 +4684,6 @@ msgstr "Источники сообщений"
 msgid "<strong>id</strong>: block ID.<br><strong>$params</strong>: associative array of additional parameters passed to a block (example: <code>['myparam' => 100]</code>). A parameter is available by its name as a Smarty variable within a block (example: <code>$myparam</code>)."
 msgstr "<strong>id</strong>: ID блока.<br><strong>$params</strong>: ассоциативный массив дополнительных параметров, передаваемых в блок (пример: <code>['myparam' => 100]</code>). Параметр доступен по его имени в виде переменной Smarty в содержимом блока (пример: <code>$myparam</code>)."
 
-msgid "Сancel"
-msgstr "Отмена"
-
 msgid "Payment was authorized on %s."
 msgstr "Оплата была подтверждена %s."
 
@@ -4789,7 +4795,7 @@ msgstr "Загрузить в полном размере"
 msgid "Select file"
 msgstr "Выберите файл"
 
-msgid "Please correct errors in the data"
+msgid "Please correct errors in the data."
 msgstr "Пожалуйста, исправьте ошибки в данных"
 
 msgid "The data contains unknown fields"
@@ -4821,3 +4827,363 @@ msgstr "Подключить email"
 
 msgid "Out of range value"
 msgstr "Вне допустимого диапазона"
+
+msgid "This contact is a backend user. Use the Team app to ban them."
+msgstr "Этот контакт является пользователем бекенда. Используйте приложение «Команда» для его блокировки."
+
+msgid "This contact is already banned."
+msgstr "Этот контакт уже заблокирован."
+
+msgid "This contact was a backend user. Use team app to restore their access."
+msgstr "Этот контакт был пользователем бекенда. Используйте приложение «Команда» для снятия с него блокировки."
+
+msgid "This contact is not banned."
+msgstr "Этот контакт не заблокирован."
+
+msgid "Unknown error"
+msgstr "Неизвестная ошибка"
+
+msgid "Contact saving error."
+msgstr "Ошибка сохранения контакта."
+
+msgid "Invalid request."
+msgstr "Недопустимый запрос."
+
+msgid "Invalid fields found."
+msgstr "Обнаружены недопустимые поля."
+
+msgid "Contact updating error."
+msgstr "Ошибка обновления контакта."
+
+msgid "Access to deal denied."
+msgstr "Доступ к сделке запрещён."
+
+msgid "Access denied. Reply is not allowed."
+msgstr "Доступ запрещён. Ответ не допускается."
+
+msgid "Message source not found."
+msgstr "Источник сообщений не найден."
+
+msgid "Source disabled."
+msgstr "Источник отключён."
+
+msgid "Message was not sent via messenger."
+msgstr "Сообщение не отправлено через мессенджер."
+
+msgid "File could not be saved."
+msgstr "Не удалось сохранить файл."
+
+msgid "Invalid contact ID."
+msgstr "Недопустимый ID контакта."
+
+msgid "Funnel not found."
+msgstr "Воронка не найдена."
+
+msgid "Invalid parameter: “%s”."
+msgstr "Недопустимый параметр: «%s»."
+
+msgid "Empty user email address."
+msgstr "Пустой email-адрес контакта."
+
+msgid "Empty contact email address. Set the “email_to“ value."
+msgstr "Пустой email-адрес контакта. Заполните значение «email_to»."
+
+msgid "Invalid file name."
+msgstr "Недопустимое имя файла."
+
+msgid "Invalid “%s” value."
+msgstr "Недопустимое значение «%s»."
+
+msgid "Unknown action."
+msgstr "Неизвестное действие."
+
+msgid "Deal or contact not found."
+msgstr "Сделка или контакт не найдены."
+
+msgid "Missing required parameter: “%s”."
+msgstr "Отсутствует обязательный параметр: «%s»."
+
+msgid "“%s” or “%s”"
+msgstr "«%s» или «%s»"
+
+msgid "Participant not added."
+msgstr "Участник не добавлен."
+
+msgid "Access to funnel denied."
+msgstr "Доступ к воронке запрещён."
+
+msgid "Missing required parameters: %s."
+msgstr "Отсутствуют обязательные параметры: %s."
+
+msgid "Missing some of required parameters: %s."
+msgstr "Отсутствуют некоторые обязательные параметры: %s."
+
+msgid "Invalid segment ID."
+msgstr "Недопустимый ID сегмента."
+
+msgid "Segment not found."
+msgstr "Сегмент не найден."
+
+msgid "Invalid reminder type specified."
+msgstr "Указан недопустимый тип напоминания."
+
+msgid "Invalid deal specified."
+msgstr "Указана недопустимая сделка."
+
+msgid "Invalid contact specified."
+msgstr "Указан недопустимый контакт."
+
+msgid "Invalid “due_date” value (ISO 8601 YYYY-MM-DD): %s"
+msgstr "Недопустимое значение «due_date» (ISO 8601 YYYY-MM-DD): %s"
+
+msgid "Conversation not found."
+msgstr "Переписка не найдена."
+
+msgid "One of the parameters is required: %s."
+msgstr "Требуется один из параметров: %s."
+
+msgid "Only one of the parameters is required: %s."
+msgstr "Требуется только один из параметров: %s."
+
+msgid "Contact pinning error."
+msgstr "Ошибка добавления контакта в избранные."
+
+msgid "Reminder not found."
+msgstr "Напоминание не найдено."
+
+msgid "Unknown “%s” value."
+msgstr "Неизвестное значение «%s»."
+
+msgid "Invalid “ids” value — must be an array."
+msgstr "Недопустимое значение «ids» — должен быть массив."
+
+msgid "Invalid “ids” value — must be an array of integers."
+msgstr "Недопустимое значение «ids» — должен быть массив целых чисел."
+
+msgid "Access to contact denied."
+msgstr "Доступ к контакту запрещён."
+
+msgid "Invalid deal ID."
+msgstr "Недопустимый ID сделки."
+
+msgid "Stage not found."
+msgstr "Этап не найден."
+
+msgid "Deals not found."
+msgstr "Сделки не найдены."
+
+msgid "Conversations not found."
+msgstr "Переписки не найдены."
+
+msgid "Unknown transport."
+msgstr "Неизвестный транспорт."
+
+msgid "Invalid file type."
+msgstr "Недопустимый тип файла."
+
+msgid "The deal is not closed."
+msgstr "Сделка не закрыта."
+
+msgid "One of the values is expected: %s."
+msgstr "Ожидается одно из значений: %s."
+
+msgid "Vault not found."
+msgstr "Тип контакта не найден."
+
+msgid "Unknown deal."
+msgstr "Неизвестная сделка."
+
+msgid "Unknown contact."
+msgstr "Неизвестный контакт."
+
+msgid "File could not be uploaded."
+msgstr "Не удалось загрузить файл."
+
+msgid "Plugin does not exist."
+msgstr "Плагин не существует."
+
+msgid "Invalid parameter type."
+msgstr "Недопустимый тип параметра."
+
+msgid "“lost_id” value not found."
+msgstr "Значение “lost_id” не найдено."
+
+msgid "File’s MIME type not supported."
+msgstr "MIME-тип файла не поддерживается."
+
+msgid "Unable to crop image: %s"
+msgstr "Не удалось обрезать изображение: %s"
+
+msgid "Tag not found."
+msgstr "Тег не найден."
+
+msgid "Unknown reminder state."
+msgstr "Неизвестный статус напоминания."
+
+msgid "Unknown sorting field."
+msgstr "Неизвестное поле сортировки."
+
+msgid "Unknown configured deal fields: %s."
+msgstr "Неизвестные настроенные поля сделок: %s."
+
+msgid "Shop-Script app is not available."
+msgstr "Приложение Shop-Script недоступно."
+
+msgid "Order not found."
+msgstr "Заказ не найден."
+
+msgid "Contact does not exist: %s."
+msgstr "Контакт не существует: %s."
+
+msgid "Deal pinning error."
+msgstr "Ошибка добавления сделки в избранные."
+
+msgid "Link this invoice to another deal"
+msgstr "Прикрепить этот счёт к другой сделке"
+
+msgid "link to another deal"
+msgstr "прикрепить к другой сделке"
+
+msgid "Do you really want to detach this invoice from deal “<strong>%s</strong>”?"
+msgstr "Вы действительно хотите открепить этот счёт от сделки “<strong>%s</strong>»?"
+
+msgid "No call identifier"
+msgstr "Нет идентификатора звонка"
+
+msgid "Access to the contact is denied."
+msgstr "Доступ к контакту запрещён."
+
+msgid "No data on the deal."
+msgstr "Нет данных в сделке."
+
+msgid "No redirect number type."
+msgstr "Нет типа номера перенаправления."
+
+msgid "No redirect number."
+msgstr "Нет номера перенаправления."
+
+msgid "A non-telephony plugin is used."
+msgstr "Используется плагин не для работы с телефонией."
+
+msgid "The telephony plugin does not provide the ability to redirect a call."
+msgstr "Плагин телефонии не предоставляет возможность записи звонка."
+
+msgid "A call without a client cannot be linked to a deal."
+msgstr "Звонок без клиента не может быть связан со сделкой."
+
+msgid "Banned during conversations deletion."
+msgstr "Заблокирован при удалении переписок."
+
+msgid "No invoice identifier"
+msgstr "Нет идентификатора счёта"
+
+msgid "Multiple values set for a single-value field."
+msgstr "Множественные значения установлены для простого поля."
+
+msgid "Not a composite field."
+msgstr "Не составное поле."
+
+msgid "Field value is not an integer or is negative."
+msgstr "Значение поля не является целым числом либо является отрицательным."
+
+msgid "field identifier"
+msgstr "идентификатор поля"
+
+msgid "Empty field."
+msgstr "Пустое поле."
+
+msgid "Empty width."
+msgstr "Пустая ширина."
+
+msgid "Empty sorting field."
+msgstr "Пустое поле сортировки."
+
+msgid "Empty deal sorting field."
+msgstr "Пустое поле сортировки сделок."
+
+msgid "Missing required parameter: %s."
+msgstr "Отсутствует обязательный параметр: %s."
+
+msgid "Unknown width value: %s."
+msgstr "Неизвестное значение ширины: %s."
+
+msgid "Empty required fields: %s."
+msgstr "Пустые обязательные поля: %s."
+
+msgid "Duplicate field name."
+msgstr "Дубликат названия поля."
+
+msgid "Unacceptable field."
+msgstr "Недопустимое поле."
+
+msgid "“%s” and “%s”"
+msgstr "«%s» и «%s»"
+
+msgid "Unsupported multiple values provided for a single-value field."
+msgstr "Неподдерживаемые множественные значения для поля с одним значением."
+
+msgid "Vault does not exist."
+msgstr "Класс контактов не существует."
+
+msgid "Empty “%s” value."
+msgstr "Пустое значение «%s»."
+
+msgid "Nonexistent user’s IDs: %s."
+msgstr "Несуществующие ID пользователей: %s."
+
+msgid "IDs of users without access rights: %s."
+msgstr "ID пользователей без прав доступа: %s."
+
+msgid "Invalid “%s” value: %s."
+msgstr "Недопустимое значение “%s”: %s."
+
+msgid "Deal stage not found."
+msgstr "Этап сделки не найден."
+
+msgid "User does not have access to contact."
+msgstr "У пользователя нет доступа к контакту."
+
+msgid "User does not have access to funnel."
+msgstr "У пользователя нет доступа к воронке."
+
+msgid "Invalid date."
+msgstr "Недопустимая дата."
+
+msgid "Unknown currency."
+msgstr "Неизвестная валюта."
+
+msgid "Unknown field name."
+msgstr "Неизвестное имя поля."
+
+msgid "Invalid field value."
+msgstr "Недопустимое значение поля."
+
+msgid "Invalid hash."
+msgstr "Недопустимый хеш."
+
+msgid "Invalid hash: unknown date."
+msgstr "Недопустимый хеш: неизвестная дата."
+
+msgid "Invalid hash: unknown date format (YYYY-mm-dd HH:ii:ss)."
+msgstr "Недопустимый хеш: неизвестный формат даты (YYYY-mm-dd HH:ii:ss)."
+
+msgid "Invalid hash: incorrect date."
+msgstr "Недопустимый хеш: неправильная дата."
+
+msgid "Action “%s” is not available for this order."
+msgstr "Действие «%s» для этого заказа недоступно."
+
+msgid "Lost reason required."
+msgstr "Необходимо указать причину проигрыша."
+
+msgid "The lost reason must be selected only from the available options."
+msgstr "Причину проигрыша необходимо выбирать только из доступных вариантов."
+
+msgid "Ban associated contacts"
+msgstr "Заблокировать связанные контакты"
+
+msgid "remove deal performer"
+msgstr "удалил исполнителя из сделки"
+
+msgid "deal stage overdue"
+msgstr "превышен лимит времени этапа сделки"

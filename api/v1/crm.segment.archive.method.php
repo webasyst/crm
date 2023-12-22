@@ -16,11 +16,11 @@ class crmSegmentArchiveMethod extends crmApiAbstractMethod
         $acton = ifset($body_json, 'action', null);
 
         if (empty($segment_id)) {
-            throw new waAPIException('empty_id', 'Required parameter is missing: id', 400);
+            throw new waAPIException('empty_id', sprintf_wp('Missing required parameter: “%s”.', 'id'), 400);
         } elseif (!is_numeric($segment_id) || $segment_id < 1) {
-            throw new waAPIException('invalid_id', 'Invalid parameter id', 400);
+            throw new waAPIException('invalid_id', sprintf_wp('Invalid “%s” value.', 'id'), 400);
         } elseif (empty($acton) || !in_array($acton, self::ACTIONS)) {
-            throw new waAPIException('invalid_action', 'Unknown action', 400);
+            throw new waAPIException('invalid_action', _w('Unknown action.'), 400);
         }
 
         $segment = $this->getSegmentModel()->getSegment($segment_id);

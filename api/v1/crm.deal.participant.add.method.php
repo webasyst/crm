@@ -18,28 +18,42 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
         $replace_contact_id = (int) ifset($_json, 'replace_contact_id', null);
 
         if (empty($deal_id) || empty($contact_id) || empty($role)) {
-            throw new waAPIException('required_param', 'Required parameters is missing: deal_id, contact_id, role_id', 400);
-        } elseif ($contact_id < 1) {
-            throw new waAPIException('not_found', _w('Contact not found'), 404);
-        } elseif (!in_array($role, [crmDealParticipantsModel::ROLE_CLIENT, crmDealParticipantsModel::ROLE_USER])) {
-            throw new waAPIException('unknown_value', 'Unknown value role_id', 400);
-        } elseif (!$deal = $this->getDealModel()->getDeal($deal_id, true)) {
-            throw new waAPIException('not_found', _w('Deal not found'), 404);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameters: %s.', 'deal_id, contact_id, role_id'), 400);
         }
-
+        if ($contact_id < 1) {
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid “%s” value.', 'contact_id'), 400);
+        }
+        if (!in_array($role, [crmDealParticipantsModel::ROLE_CLIENT, crmDealParticipantsModel::ROLE_USER])) {
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid “%s” value.', 'role_id'), 400);
+        }
+        if (!$deal = $this->getDealModel()->getDeal($deal_id, true)) {
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid “%s” value.', 'deal_id'), 400);
+        }
         $contact = new crmContact($contact_id);
         if (!$contact->exists()) {
-            throw new waAPIException('not_found', _w('Contact not found'), 404);
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid “%s” value.', 'contact_id'), 400);
         }
-
+        if (!$this->getCrmRights()->contact($contact)) {
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
+        }
         $deal_access_level = $this->getCrmRights()->deal($deal);
         if ($deal_access_level <= crmRightConfig::RIGHT_DEAL_VIEW) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
-        $participant_exists = false;
-        if ($this->getDealModel()->isRelated($deal_id, $contact_id, $role)) {
-            $participant_exists = true;
+        if ($role === crmDealParticipantsModel::ROLE_USER) {
+            $contact_rights = new crmRights(['contact' => $contact]);
+            if (!$contact_rights->funnel($deal['funnel_id'])) {
+                throw new waAPIException('not_available', _w('The specified user does not have access to the deal funnel.'), 400);
+            }
+        }
+
+        $participant = [];
+        foreach ((array) $deal['participants'] as $_participant) {
+            if ($role == $_participant['role_id'] && $contact_id == $_participant['contact_id']) {
+                $participant = $_participant;
+                break;
+            }
         }
 
         $this->http_status_code = 201;
@@ -50,7 +64,7 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
                 $contact,
                 $label,
                 $replace_contact_id,
-                $participant_exists,
+                $participant,
                 $userpic_size
             );
         } elseif ($role === crmDealParticipantsModel::ROLE_USER) {
@@ -61,7 +75,7 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
                 $replace_contact_id,
                 $is_responsible,
                 $force,
-                $participant_exists,
+                $participant,
                 $userpic_size
             );
         }
@@ -72,34 +86,24 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
      * @param $contact crmContact
      * @param $label
      * @param $replace_contact_id
-     * @param $participant_exists bool
+     * @param $participant array
      * @param $userpic_size
      * @return array
      * @throws waAPIException
      */
-    private function dealAddParticipantClient($deal, $contact, $label, $replace_contact_id, $participant_exists, $userpic_size)
+    private function dealAddParticipantClient($deal, $contact, $label, $replace_contact_id, $participant, $userpic_size)
     {
         $contact_id = $contact->getId();
-        if (!empty($deal['participants'])) {
-            $client_count = 0;
-            foreach ($deal['participants'] as $_participant) {
-                if (
-                    $_participant['role_id'] === crmDealParticipantsModel::ROLE_CLIENT
-                    && $_participant['contact_id'] != $replace_contact_id
-                ) {
-                    $client_count++;
-                }
-            }
-            if ($client_count === 0) {
-                $this->getDealModel()->updateById($deal['id'], ['contact_id' => $contact->getId()]);
-            }
+        $assigned_at = date('Y-m-d H:i:s');
+        $clients = array_filter($deal['participants'], function ($item) use ($replace_contact_id) {
+            return $item['role_id'] === crmDealParticipantsModel::ROLE_CLIENT && $item['contact_id'] != $replace_contact_id;
+        });
+        if (empty($clients)) {
+            $this->getDealModel()->updateById($deal['id'], ['contact_id' => $contact_id]);
         }
 
-        $participant = [
-            'contact_id' => $contact_id,
-        ];
-
-        if ($participant_exists) {
+        if ($participant) {
+            $assigned_at = ifset($participant, 'create_datetime', $assigned_at);
             $this->getDealParticipantsModel()->updateByField([
                 'deal_id'    => $deal['id'],
                 'contact_id' => $contact_id,
@@ -107,21 +111,34 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
             ], [
                 'label' => $label
             ]);
-        } elseif ($this->getDealModel()->addParticipants($deal, [$participant], crmDealParticipantsModel::ROLE_CLIENT, $label)) {
-            $this->getLogModel()->log(
-                ($replace_contact_id ? 'deal_contact_change' : 'deal_addcontact'),
-                $deal['id'] * -1,
-                $deal['id'],
-                ($replace_contact_id ? (new crmContact($replace_contact_id))->getName() : null),
-                $contact->getName(),
-                null,
-                ['contact_id' => $participant['contact_id']]
-            );
         } else {
-            throw new waAPIException('not_added', 'Participant not added', 400);
+            $result = $this->getDealModel()->addParticipants(
+                $deal,
+                $contact_id,
+                crmDealParticipantsModel::ROLE_CLIENT,
+                $label
+            );
+            if ($result) {
+                $replace_contact_name = null;
+                if ($replace_contact_id) {
+                    $replace_contact = new crmContact($replace_contact_id);
+                    $replace_contact_name = $replace_contact->exists() ? $replace_contact->getName() : _w('Was deleted');
+                }
+                $this->getLogModel()->log(
+                    ($replace_contact_id ? 'deal_contact_change' : 'deal_addcontact'),
+                    $deal['id'] * -1,
+                    $deal['id'],
+                    $replace_contact_name,
+                    $contact->getName(),
+                    null,
+                    ['contact_id' => $contact_id]
+                );
+            } else {
+                throw new waAPIException('server_error', _w('Participant was not added.'), 500);
+            }
         }
 
-        return $this->getDealContact($contact, $deal, $label, $userpic_size);
+        return $this->getDealContact($contact, $deal, $label, $userpic_size, $assigned_at);
     }
 
     /**
@@ -131,27 +148,21 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
      * @param $replace_contact_id
      * @param $is_responsible bool
      * @param $force bool
-     * @param $participant_exists bool
+     * @param $participant array
      * @param $userpic_size int
      * @return array
      * @throws waAPIException
      * @throws waDbException
      * @throws waException
      */
-    private function dealAddParticipantUser($deal, $contact, $label, $replace_contact_id, $is_responsible, $force, $participant_exists, $userpic_size)
+    private function dealAddParticipantUser($deal, $contact, $label, $replace_contact_id, $is_responsible, $force, $participant, $userpic_size)
     {
         $result = [];
         $contact_id = $contact->getId();
-        $contact_rights = new crmRights(['contact' => $contact]);
-        if (!$force && $result = $this->hasAccessToDeal($deal, $contact, $contact_rights)) {
-            return $result;
-        }
-        if ($replace_contact_id && $result = $this->hasAccessToDeal($deal, $replace_contact_id)) {
-            return $result;
-        }
+        $assigned_at = date('Y-m-d H:i:s');
 
-        if (!$contact_rights->funnel($deal['funnel_id'])) {
-            throw new waAPIException('forbidden', 'Funnel access denied', 403);
+        if (!$force && $result = $this->willLoseAccessToDeal($deal, $contact, $replace_contact_id)) {
+            return $result;
         }
 
         if ($is_responsible) {
@@ -161,7 +172,7 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
                 && $deal['user_contact_id'] != wa()->getUser()->getId()
                 && ($deal['user_contact_id'] || $funnel_rights < crmRightConfig::RIGHT_FUNNEL_OWN)
             ) {
-                throw new waAPIException('forbidden', 'Funnel access denied', 403);
+                throw new waAPIException('forbidden', _w('Access to funnel denied.'), 403);
             }
 
             if ($deal['user_contact_id'] != $contact_id) {
@@ -203,12 +214,13 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
                     'can_edit' => ($deal_access_level > crmRightConfig::RIGHT_DEAL_VIEW),
                     'can_delete' => ($deal_access_level === crmRightConfig::RIGHT_DEAL_ALL),
                     'can_manage_responsible' => ($contact_id == $this->getUser()->getId()
-                        || $funnel_rights > 2
-                        || !$deal['contacts']['user'] && $funnel_rights > 0)
+                        || $funnel_rights > crmRightConfig::RIGHT_FUNNEL_OWN_UNASSIGNED
+                        || !$deal['contacts']['user'] && $funnel_rights > crmRightConfig::RIGHT_FUNNEL_NONE)
                 ]
             ];
         } else {
-            if ($participant_exists) {
+            if ($participant) {
+                $assigned_at = ifset($participant, 'create_datetime', $assigned_at);
                 $this->getDealParticipantsModel()->updateByField([
                     'deal_id'    => $deal['id'],
                     'contact_id' => $contact_id,
@@ -224,13 +236,19 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
                     'contact_id' => $contact_id,
                     'deal_id'    => $deal['id'],
                     'role'       => crmDealParticipantsModel::ROLE_USER,
-                    'label'      => $label
+                    'label'      => $label,
+                    'create_datetime' => $assigned_at
                 ]);
+                $replace_contact_name = null;
+                if ($replace_contact_id) {
+                    $replace_contact = new crmContact($replace_contact_id);
+                    $replace_contact_name = $replace_contact->exists() ? $replace_contact->getName() : _w('Was deleted');
+                }
                 $this->getLogModel()->log(
                     ($replace_contact_id ? 'deal_contact_change' : 'deal_addcontact'),
                     $deal['id'] * -1,
                     $deal['id'],
-                    ($replace_contact_id ? (new crmContact($replace_contact_id))->getName() : null),
+                    $replace_contact_name,
                     $contact->getName(),
                     null,
                     ['contact_id' => $contact_id]
@@ -241,7 +259,7 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
         return [
             'user' => [
                 'label' => $label,
-                'assigned_at' => $this->formatDatetimeToISO8601($contact['create_datetime']),
+                'assigned_at' => $this->formatDatetimeToISO8601($assigned_at),
                 'contact' => [
                     'id' => $contact_id,
                     'name' => $contact->getName(),
@@ -263,14 +281,15 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
     }
 
     /**
-     * @param $contact crmContact
+     * @param $contact
      * @param $deal
      * @param $label
      * @param $userpic_size
+     * @param $assigned_at
      * @return array[]
      * @throws waException
      */
-    private function getDealContact($contact, $deal, $label, $userpic_size)
+    private function getDealContact($contact, $deal, $label, $userpic_size, $assigned_at)
     {
         $address_obj = waContactFields::get('address');
         $has_order = (crmShop::appExists() && !!crmShop::getOrderByDeal($deal));
@@ -309,7 +328,7 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
         return [
             'contact' => [
                 'label'       => $label,
-                'assigned_at' => $this->formatDatetimeToISO8601($contact['assigned_at']),
+                'assigned_at' => $this->formatDatetimeToISO8601($assigned_at),
                 'contact'     => $_contact,
                 'counters'    => [
                     'deal'       => ifset($counter_deal, $contact->getId(), null),
@@ -328,27 +347,37 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
      * @throws waDbException
      * @throws waException
      */
-    private function hasAccessToDeal($deal, $contact, $contact_rights = null)
+    private function willLoseAccessToDeal($deal, $user, $replace_contact_id)
     {
-        if (!($contact instanceof crmContact)) {
-            $contact = new crmContact($contact);
+        if ($replace_contact_id != $this->getUser()->getId()) {
+            return [];
         }
-        if (!($contact_rights instanceof crmRights)) {
-            $contact_rights = new crmRights(['contact' => $contact]);
+
+        if (!($user instanceof crmContact)) {
+            $user = new crmContact($user);
         }
-        if ($contact_rights->deal($deal) < crmRightConfig::RIGHT_DEAL_VIEW) {
-            throw new waAPIException('forbidden', 'Deal access denied', 403);
+
+        if ($user->getId() == $this->getUser()->getId()) {
+            return [];
         }
-        if ($contact->getId() != $this->getUser()->getId()) {
-            $updated_deal = array_merge($deal, [
-                'user_contact_id' => $contact->getId()
+        
+        $updated_deal = $deal;
+        if ($deal['user_contact_id'] == $replace_contact_id) {
+            $updated_deal = array_merge($updated_deal, [
+                'user_contact_id' => $user->getId()
             ]);
-            if ($contact_rights->deal($updated_deal) < crmRightConfig::RIGHT_DEAL_VIEW) {
-                $this->http_status_code = 409;
-                return [
-                    'dialog_html' => (new crmDealChangeUserConfirmController())->renderConfirmDialog($deal, $contact->getId(), '2.0')
-                ];
+        }
+        foreach ((array) $updated_deal['participants'] as &$_participant) {
+            if ($replace_contact_id == $_participant['contact_id']) {
+                $_participant['contact_id'] = $user->getId();
             }
+        }
+        
+        if ($this->getCrmRights()->deal($updated_deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
+            $this->http_status_code = 409;
+            return [
+                'dialog_html' => (new crmDealChangeUserConfirmController())->renderConfirmDialog($deal, $user->getId(), '2.0')
+            ];
         }
 
         return [];

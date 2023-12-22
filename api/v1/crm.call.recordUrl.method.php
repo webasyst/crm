@@ -8,14 +8,19 @@ class crmCallRecordUrlMethod extends crmApiAbstractMethod
         $plugin_call_id   = trim((string) $this->get('call_id', true));
         $plugin_record_id = trim((string) $this->get('record_id', true));
 
-        if ($this->getUser()->getRights('crm', 'calls') == crmRightConfig::RIGHT_CALL_NONE) {
+        $call = $this->getCallModel()->getByField([
+            'plugin_id' => $plugin_id,
+            'plugin_call_id' => $plugin_call_id,
+            'plugin_record_id' => $plugin_record_id
+        ]);
+        if (!$this->getCrmRights()->call($call)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         /** @var crmPluginTelephony $plugin */
         $plugin = wa('crm')->getConfig()->getTelephonyPlugins($plugin_id);
         if (!$plugin) {
-            throw new waAPIException('invalid_param', 'Plugin does not exist', 400);
+            throw new waAPIException('invalid_param', _w('Plugin does not exist.'), 400);
         }
 
         try {

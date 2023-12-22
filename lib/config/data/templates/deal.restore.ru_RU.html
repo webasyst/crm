@@ -1,6 +1,6 @@
 <p>
     {waDateTime::format('datetime')} переоткрыта
-    {if $deal.status_id == 'WON'}выигранная{else}проигранная{/if} сделка
+    {if $deal.status_id == crmDealModel::STATUS_WON}выигранная{else}проигранная{/if} сделка
     «<a href="{$deal.url}">{$deal.name|escape}</a>»
     на этапе «{$deal.stage.name|escape}» в воронке «{$deal.funnel.name|escape}».
 </p>

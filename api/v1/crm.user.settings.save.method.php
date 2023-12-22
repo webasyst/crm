@@ -12,7 +12,16 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
         if (empty($fields_data)) {
             throw new waAPIException(
                 'empty_param',
-                'Required parameter is missing: contact_list_columns, contact_list_sort, deal_list_filter or deal_list_sort',
+                sprintf_wp(
+                    'Missing required parameter: %s.',
+                    sprintf(
+                        '%s, %s, %s or %s',
+                        sprintf_wp('“%s”', 'contact_list_columns'),
+                        sprintf_wp('“%s”', 'contact_list_sort'),
+                        sprintf_wp('“%s”', 'deal_list_filter'),
+                        sprintf_wp('“%s”', 'deal_list_sort')
+                    )
+                ),
                 400
             );
         }
@@ -38,7 +47,7 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
                 $deal_list_sort
             );
         } catch (waDbException $db_exception) {
-            throw new waAPIException('error_db', $db_exception->getMessage(), 400);
+            throw new waAPIException('error_db', $db_exception->getMessage(), 500);
         }
 
         $this->http_status_code = 204;
@@ -51,11 +60,11 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
         if (!empty($data)) {
             foreach ($data as $_data) {
                 if (!isset($_data['field'])) {
-                    $errors['Empty field'] = 1;
+                    $errors[_w('Empty field.')] = 1;
                 } elseif (!isset($_data['width'])) {
-                    $errors['Empty width'] = 1;
+                    $errors[_w('Empty width.')] = 1;
                 } elseif (!in_array($_data['width'], ['s', 'm', 'l'])) {
-                    $errors['Unknown width value: '.$_data['width']] = 1;
+                    $errors[sprintf_wp('Unknown width value: %s.', $_data['width'])] = 1;
                 }
             }
         }
@@ -67,7 +76,7 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
     {
         $errors = [];
         if (!empty($data) && !isset($data['field'])) {
-            $errors[] = 'Empty sort field';
+            $errors[] = _w('Empty sorting field.');
         }
 
         return $errors;
@@ -85,9 +94,9 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
         if (!empty($data)) {
             $diff = array_diff($required_fields, array_keys($data));
             if (!empty($diff)) {
-                $errors[] = 'Empty required fields: '.implode(', ', $diff);
+                $errors[] = sprintf_wp('Empty required fields: %s.', implode(', ', $diff));
             } elseif (!is_numeric($data['stage_id']) && !in_array(strtolower($data['stage_id']), ['', 'null', 'won', 'lost'])) {
-                $errors[] = 'Unknown value stage_id';
+                $errors[] = sprintf_wp('Unknown “%s” value.', 'stage_id');
             }
         }
 
@@ -108,9 +117,9 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
         ];
         if (!empty($data)) {
             if (!isset($data['field'])) {
-                $errors[] = 'Empty deal sort field';
+                $errors[] = _w('Empty deal sorting field.');
             } elseif (!in_array($data['field'], $deal_sort_enum)) {
-                $errors[] = 'Empty deal sort field';
+                $errors[] = _w('Empty deal sorting field.');
             }
         }
 

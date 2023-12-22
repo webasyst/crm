@@ -9,14 +9,14 @@ class crmReminderUndoneMethod extends crmApiAbstractMethod
         $_json = $this->readBodyAsJson();
         $reminder_id = (int) ifempty($_json, 'id', 0);
         if ($reminder_id === 0) {
-            throw new waAPIException('required_param', 'Required parameter is missing: id', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'id'), 400);
         } else if ($reminder_id < 1) {
-            throw new waAPIException('not_found', 'Reminder not found', 404);
+            throw new waAPIException('not_found', _w('Reminder not found.'), 404);
         }
 
         $reminder = $this->getReminderModel()->getById($reminder_id);
         if ($reminder === null) {
-            throw new waAPIException('not_found', 'Reminder not found', 404);
+            throw new waAPIException('not_found', _w('Reminder not found.'), 404);
         } else if (!$this->getCrmRights()->reminderEditable($reminder)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         } else if (!$reminder['complete_datetime']) {

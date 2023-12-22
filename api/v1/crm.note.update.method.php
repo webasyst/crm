@@ -13,7 +13,7 @@ class crmNoteUpdateMethod extends crmApiAbstractMethod
         if ($note_id < 1) {
             throw new waAPIException('non_found', _w('Note not found'), 404);
         } else if (empty($content)) {
-            throw new waAPIException('required_param', 'Required parameter is missing: content', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'content'), 400);
         }
 
         $cnm = $this->getNoteModel();

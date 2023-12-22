@@ -16,11 +16,11 @@ class crmSegmentAddMethod extends crmApiAbstractMethod
         $shared = ($shared === 0 ? 0 : 1);
 
         if (empty($name)) {
-            throw new waAPIException('required_param', 'Required parameter is missing: name', 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'name'), 400);
         }
         if ($type === crmSegmentModel::TYPE_SEARCH) {
             if (empty($hash)) {
-                throw new waAPIException('required_param', 'Required parameter is missing: hash', 400);
+                throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'hash'), 400);
             }
         }
         if (!in_array($icon, crmSegmentModel::getIcons('2.0'))) {

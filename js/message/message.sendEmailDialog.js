@@ -474,9 +474,10 @@ var CRMSendEmailDialog = ( function($) {
                                 //old_close_func();
                                     auto_close_timer && clearTimeout(auto_close_timer);
                                     auto_close_timer = null;
-                                    that.crm.content.reload();
+                                    $.crm ? $.crm.content.reload() : that.crm.content.reload();
+                                    
                                 }
-                            };
+                        }
 
                         auto_close_timer = setTimeout(function () {
                             that.iframe ? $('.dialog iframe', window.parent.document)[0].dispatchEvent(new Event('close')) : that.dialog.close();

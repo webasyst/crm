@@ -14,12 +14,12 @@ class crmCallRedirectController extends crmJsonController
 
         $number_type = waRequest::post('number_type', 0, waRequest::TYPE_STRING_TRIM);
         if (!$number_type) {
-            throw new waException(_w('No redirect number type'), 404);
+            throw new waException(_w('No redirect number type.'), 404);
         }
 
         $number = waRequest::post('number', 0, waRequest::TYPE_STRING_TRIM);
         if (!$number) {
-            throw new waException(_w('No redirect number'), 404);
+            throw new waException(_w('No redirect number.'), 404);
         }
 
         $call = $this->getCallModel()->getById($call_id);
@@ -30,13 +30,13 @@ class crmCallRedirectController extends crmJsonController
 
         $tplugin = wa('crm')->getConfig()->getTelephonyPlugins($call['plugin_id']);
         if (!$tplugin) {
-            throw new waException(_w('A non-telephony plugin is used'), 404);
+            throw new waException(_w('A non-telephony plugin is used.'), 404);
         }
 
         $redirect_allowed = $tplugin->isRedirectAllowed($call);
 
         if (!$redirect_allowed) {
-            throw new waException(_w('The telephony plug-in does not provide the ability to redirect a call'), 404);
+            throw new waException(_w('The telephony plugin does not provide the ability to redirect a call.'), 404);
         }
 
         if ($number_type == self::TYPE_EXTERNAL) {

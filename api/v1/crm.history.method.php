@@ -32,11 +32,11 @@ class crmHistoryMethod extends crmApiAbstractMethod
         }
         if (!empty($user_id)) {
             if ($user_id < 1) {
-                throw new waAPIException('not_found', 'User not found', 404);
+                throw new waAPIException('not_found', _w('User not found.'), 404);
             }
             $rights_model = new waContactRightsModel();
             if (!$rights_model->get($user_id, $this->getAppId(), 'backend')) {
-                throw new waAPIException('not_found', 'User not found', 404);
+                throw new waAPIException('not_found', _w('User not found.'), 404);
             }
         }
         if (!empty($deal_id)) {
@@ -60,8 +60,9 @@ class crmHistoryMethod extends crmApiAbstractMethod
         list($log, $min_id_log, $count) = $lm->getLog($id, $filters, $min_id, $max_id, $limit, [
             'add_messenger_sources' => true,
             'handle_message_body'   => true,
+            'do_not_exclude_reminder_add' => true,
         ]);
-        
+
         $ids = array_keys($log);
         if ($min_id === 0 && array_pop($ids) == $min_id_log) { // last block (first record is reached)
             if (!empty($contact)) {
@@ -111,8 +112,8 @@ class crmHistoryMethod extends crmApiAbstractMethod
             $conversation_ids = array_unique(array_column($messages, 'conversation_id'));
             $conversations = $this->getConversationModel()->getByField(['id' => $conversation_ids], 'id');
             $conversation_participants = $lm->query("
-                SELECT DISTINCT cm.creator_contact_id AS id, cm.conversation_id, wc.name, wc.photo  
-                FROM crm_message cm 
+                SELECT DISTINCT cm.creator_contact_id AS id, cm.conversation_id, wc.name, wc.photo
+                FROM crm_message cm
                 JOIN wa_contact wc ON cm.creator_contact_id = wc.id
                 WHERE cm.conversation_id IN (i:conversation_ids)
                 GROUP BY cm.creator_contact_id, cm.conversation_id;
@@ -222,11 +223,11 @@ class crmHistoryMethod extends crmApiAbstractMethod
         }, $log);
 
         $log = $this->prepareLog($log, $conversations, $userpic_size);
-        
+
         $this->response = array(
             'count' => ($count < $limit ? count($log) : $count),
             'log'   => $this->filterData(
-                $log, 
+                $log,
                 [
                     'id',
                     'create_datetime',

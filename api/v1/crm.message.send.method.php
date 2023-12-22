@@ -16,11 +16,11 @@ class crmMessageSendMethod extends crmApiAbstractMethod
         $attachments = ifempty($_json, 'attachments', []);
 
         if (empty($reply_body) && empty($attachments)) {
-            throw new waAPIException('empty_param', 'One of the parameters is required: body or attachments', 400);
+            throw new waAPIException('empty_param', sprintf_wp('One of the parameters is required: %s.', sprintf_wp('“%s” or “%s”', 'body', 'attachments')), 400);
         } elseif (empty($reply_message_id)) {
-            throw new waAPIException('empty_reply_message_id', 'Required parameter is missing: reply_message_id', 400);
+            throw new waAPIException('empty_reply_message_id', sprintf_wp('Missing required parameter: “%s”.', 'reply_message_id'), 400);
         } elseif ($reply_message_id < 0) {
-            throw new waAPIException('invalid_reply_message_id', 'Invalid reply_message_id', 400);
+            throw new waAPIException('invalid_reply_message_id', sprintf_wp('Invalid “%s” value.', 'reply_message_id'), 400);
         }
 
         $message = $this->getMessageModel()->getMessage($reply_message_id);
@@ -29,21 +29,21 @@ class crmMessageSendMethod extends crmApiAbstractMethod
         } elseif ($message['deal_id'] > 0) {
             $deal = $this->getDealModel()->getDeal($message['deal_id']);
             if (!$this->getCrmRights()->deal($deal)) {
-                throw new waAPIException('access_denied', _w('Deal access denied'), 403);
+                throw new waAPIException('access_denied', _w('Access to deal denied.'), 403);
             }
         } elseif (!$this->getCrmRights()->contact($message['contact_id'])) {
             throw new waAPIException('access_denied', _w('Access denied'), 403);
         } elseif (!($message['source_id'] > 0 || $message['transport'] == crmMessageModel::TRANSPORT_EMAIL)) {
-            throw new waAPIException('access_denied', _w('Access denied. Reply is not allowed'), 403);
+            throw new waAPIException('access_denied', _w('Access denied. Reply is not allowed.'), 403);
         }
 
         if ($message['transport'] === crmMessageModel::TRANSPORT_IM) {
             if ($message['source_id'] < 1) {
-                throw new waAPIException('invalid_reply_message_id', _w('Message source not found'), 400);
+                throw new waAPIException('invalid_reply_message_id', _w('Message source not found.'), 400);
             }
             $source = crmSource::factory($message['source_id']);
             if (empty($source) || $source->isDisabled()) {
-                throw new waAPIException('source_switched_off', _w('Source switched off'), 400);
+                throw new waAPIException('source_switched_off', _w('Source disabled.'), 400);
             }
             $data = [
                 'body' => $reply_body,
@@ -59,7 +59,7 @@ class crmMessageSendMethod extends crmApiAbstractMethod
             }
         } else {
             if (!in_array($content_type, ['plain-text', 'html'])) {
-                throw new waAPIException('invalid_content_type', _w('Invalid content_type'), 400);
+                throw new waAPIException('invalid_content_type', sprintf_wp('Invalid “%s” value.', 'content_type'), 400);
             } elseif ($content_type === 'plain-text') {
                 $reply_body = nl2br(htmlspecialchars($reply_body));
             }
@@ -67,7 +67,7 @@ class crmMessageSendMethod extends crmApiAbstractMethod
             $user_emails = waUtils::getFieldValues($this->getUser()->get('email'), 'value');
             $from = reset($user_emails);
             if (empty($from)) {
-                throw new waAPIException('empty_email', 'User email empty', 400);
+                throw new waAPIException('empty_email', _w('Empty user email address.'), 400);
             }
 
             $cc = [];
@@ -105,7 +105,22 @@ class crmMessageSendMethod extends crmApiAbstractMethod
             $message_id = $email_send_controller->getMessageId();
 
             if (empty($message_id)) {
-                throw new waAPIException('send_error', waUtils::jsonEncode($email_send_controller->getError()), 400);
+                $error = $email_send_controller->getError();
+                $error_str = '';
+                if (is_array($error)) {
+                    $error_str = array_reduce($error, function ($res, $item) {
+                        if (is_string($item)) {
+                            return empty($res) ? $item : $res." \r\n".$item;
+                        }
+                        return $res;
+                    });
+                } elseif (is_string($error)) {
+                    $error_str = trim($error);
+                }
+                if (empty($error_str)) {
+                    $error_str = _w('Unknown error.');
+                }
+                throw new waAPIException('send_error', $error_str, 500);
             } else {
                 $this->response = ['message_id' => $message_id];
             }
@@ -149,16 +164,16 @@ class crmMessageSendMethod extends crmApiAbstractMethod
         foreach ((array) $attachments as $_attachment) {
             $_attachment['type'] = ifempty($_attachment, 'type', self::FILE_TYPE_OTHER);
             if (empty($_attachment['file'])) {
-                throw new waAPIException('empty_file', 'Required parameter is missing: file', 400);
+                throw new waAPIException('empty_file', sprintf_wp('Missing required parameter: “%s”.', 'file'), 400);
             } elseif (empty($_attachment['file_name'])) {
-                throw new waAPIException('empty_file_name', 'Required parameter is missing: file_name', 400);
+                throw new waAPIException('empty_file_name', sprintf_wp('Missing required parameter: “%s”.', 'file_name'), 400);
             } elseif (!in_array(strtoupper($_attachment['type']), [self::FILE_TYPE_IMAGE, self::FILE_TYPE_OTHER])) {
-                throw new waAPIException('invalid_file_type', 'Invalid file type', 400);
+                throw new waAPIException('invalid_file_type', _w('Invalid file type.'), 400);
             } elseif (
                 in_array(trim($_attachment['file_name']), ['.', '..'])
                 || !preg_match('#^[^:*?"<>|/\\\\]+$#', $_attachment['file_name'])
             ) {
-                throw new waAPIException('invalid_file_name', 'Invalid file name', 400);
+                throw new waAPIException('invalid_file_name', _w('Invalid file name.'), 400);
             }
 
             if ($transport === crmMessageModel::TRANSPORT_IM) {
@@ -168,7 +183,7 @@ class crmMessageSendMethod extends crmApiAbstractMethod
             waFiles::create($temp_path, true);
             $n = file_put_contents($temp_path."/".$_attachment['file_name'], base64_decode($_attachment['file']));
             if (!$n) {
-                throw new waAPIException('server_error', 'Can\'t save the file', 500);
+                throw new waAPIException('server_error', _w('File could not be saved.'), 500);
             }
         }
 

@@ -288,6 +288,13 @@ class crmDealInfoMethod extends crmApiAbstractMethod
                         $tmp = (string) $_address['data'][$f_id];
                     }
                     if (!in_array($f_id, ['country', 'region', 'zip', 'street', 'city'])) {
+                        if ($field instanceof waContactSelectField) {
+                            try {
+                                $tmp = $field->getOptions($tmp);
+                            } catch (Exception $e) {
+                                //
+                            }
+                        }
                         $tmp = $field->getName().' '.$tmp;
                     }
                     $value[$f_id] = $tmp;

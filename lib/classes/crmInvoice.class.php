@@ -86,7 +86,7 @@ class crmInvoice
         self::getSettingsModel()->set('crm', 'invoices_archive_cli_start', date('Y-m-d H:i:s'));
 
         /**
-         * @event start_reminders_recap_worker
+         * @event start_invoices_archive_worker
          */
         wa('crm')->event('start_invoices_archive_worker');
 
@@ -399,7 +399,7 @@ class crmInvoice
         $tm = new waTransactionModel();
         $transactions = $tm->select('*')->where("
             app_id = 'crm' AND order_id = i:invoice_id
-            AND state = s:captured 
+            AND state = s:captured
             AND (type = s:type_1 OR type = s:type_2)
         ", [
             'invoice_id' => $invoice['id'],

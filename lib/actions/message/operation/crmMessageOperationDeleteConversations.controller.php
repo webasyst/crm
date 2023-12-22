@@ -38,8 +38,22 @@ class crmMessageOperationDeleteConversationsController extends crmMessageOperati
             return;
         }
 
+        $cm = $this->getConversationModel();
+        $contact_ids = [];
+        if ($this->needToBanContacts()) {
+            $res = $cm->select('contact_id')->where('id IN ('.join(',', $cm->escape($conversation_ids)).')')->fetchAll('contact_id');
+            $contact_ids = array_keys($res);
+            $contact_ids = array_unique($contact_ids);
+        }
 
-        $this->getConversationModel()->delete($conversation_ids);
+        $cm->delete($conversation_ids);
+
+        if ($this->needToBanContacts() && !empty($contact_ids)) {
+            $contacts = $this->getContactModel()->getById($contact_ids);
+            foreach ($contacts as $contact) {
+                crmContactBlocker::ban($contact, _w('Banned during conversations deletion.'));
+            }
+        }
 
         $this->response = [
             'conversation_ids' => $conversation_ids
@@ -57,5 +71,10 @@ class crmMessageOperationDeleteConversationsController extends crmMessageOperati
             'text' => '',
         ];
         $this->response = array_merge($empty, $this->response);
+    }
+
+    private function needToBanContacts()
+    {
+        return wa()->getUser()->isAdmin('crm') && (bool)$this->getRequest()->post('ban_contacts');
     }
 }

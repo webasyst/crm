@@ -8,6 +8,7 @@
 {if $segment}
     {$_button_name = '[`Save`]'}
 {/if}
+{$_locale_string = substr($wa->locale(), 0, 2)}
 {if !empty($iframe)}
 <!DOCTYPE html>
 <html style="height: 100%;">
@@ -27,6 +28,9 @@
 <script type="text/javascript" src="{$wa_app_static_url}js/search/jquery.combobox.js?v={$wa->version()}"></script>
 <script type="text/javascript" src="{$wa_app_static_url}js/search/period.dialog.js?v={$wa->version()}"></script>
 <script type="text/javascript" src="{$wa_app_static_url}js/crm.autocomplete.js"></script>
+{if $_locale_string != 'en'}
+    <script src="{$wa_app_static_url}js/jquery/i18n/datepicker-{$_locale_string}.js?v={$wa->version()}"></script>
+{/if}
 <script>
     (function ($) {
         window.wa_url = {$wa_url|json_encode};

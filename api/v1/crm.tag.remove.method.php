@@ -19,7 +19,7 @@ class crmTagRemoveMethod extends crmApiAbstractMethod
         $contact_ids = crmHelper::dropNotPositive($contact_ids);
         $deal_ids = crmHelper::dropNotPositive($deal_ids);
         if (!empty($contact_ids) && !empty($deal_ids)) {
-            throw new waAPIException('error', 'One of the parameters is required: contact_id or deal_id', 400);
+            throw new waAPIException('error', sprintf_wp('Only one of the parameters is required: %s.', sprintf_wp('“%s” or “%s”', 'contact_id', 'deal_id')), 400);
         }
         if ((empty($contact_ids) && empty($deal_ids)) || empty($tags)) {
             return;
