@@ -19,7 +19,7 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
             /** Если user_id = 0, то ответственного удаляем */
             throw new waAPIException('invalid_request', _w('Invalid user identifier.'), 400);
         }
-        
+
         if (empty($contact_ids) && empty($deal_ids) && empty($conversation_ids)) {
             throw new waAPIException(
                 'empty_param',
@@ -35,7 +35,7 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
                 400
             );
         }
-        
+
         if (!empty($contact_ids) + !empty($deal_ids) + !empty($conversation_ids) > 1) {
             throw new waAPIException(
                 'error',
@@ -53,7 +53,7 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
         }
 
         if ($user_id !== 0 && !(new crmContact($user_id))->exists()) {
-            throw new waAPIException('invalid_request', _w('Spicified user does not exist.'), 400);
+            throw new waAPIException('invalid_request', _w('Specified user does not exist.'), 400);
         }
 
         if (!empty($contact_ids)) {
@@ -110,8 +110,8 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
         $response = [];
         if ($unsuccess_contacts) {
             $message = _w(
-                'The responsible person is not assigned to this client, since he has no access rights.',
-                'The responsible person is not assigned to these clients, since he has no access rights.',
+                'The responsible user is not assigned to this client because of insufficient access rights.',
+                'The responsible user is not assigned to these clients because of insufficient access rights.',
                 count($unsuccess_contacts)
             );
             $response = [

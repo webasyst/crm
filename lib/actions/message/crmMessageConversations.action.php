@@ -24,6 +24,7 @@ class crmMessageConversationsAction extends crmBackendViewAction
                 if (!empty($available_conversations)) {
                     $conversation = reset($available_conversations);
                     $conversation_id = $conversation['id'];
+                    waRequest::setParam('short_link', 1);
                 }
             }
         }

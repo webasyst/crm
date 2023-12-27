@@ -107,7 +107,7 @@
                                             {if $_reminder.due_datetime}
                                                 {waDateTime::format('humandatetime', $_reminder.due_datetime)}
                                             {elseif $_reminder.due_date}
-                                                {waDateTime::format('humandate', $_reminder.due_date)}
+                                                {waDateTime::format('humandate', $_reminder.due_date, 'server')}
                                             {/if}
                                         </div>
                                         </div>
@@ -118,7 +118,7 @@
                                     {if $_reminder.due_datetime}
                                         {waDateTime::format('humandatetime', $_reminder.due_datetime)}
                                     {elseif $_reminder.due_date}
-                                        {waDateTime::format('humandate', $_reminder.due_date)}
+                                        {waDateTime::format('humandate', $_reminder.due_date, 'server')}
                                     {/if}
                                 </div>
                             {/if}

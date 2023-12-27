@@ -20,7 +20,9 @@ class crmContactRecentMethod extends crmApiAbstractMethod
             ->fetchAll('contact_id');
 
         $collection = new waContactsCollection('/id/'.join(',', array_keys($all_recent)));
-        $contacts = $collection->getContacts('name,firstname,lastname,middlename,photo');
+        $contacts = $collection->getContacts('name,firstname,lastname,middlename,photo,crm_vault_id,crm_user_id,create_contact_id');
+        $contacts = $this->getCrmRights()->dropUnallowedContacts($contacts);
+
         foreach ($all_recent as $_id => $_contact) {
             if (empty($contacts[$_id])) {
                 continue;

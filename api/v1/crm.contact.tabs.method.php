@@ -20,11 +20,16 @@ class crmContactTabsMethod extends crmApiAbstractMethod
 
     public function execute()
     {
-        $contact_id = waRequest::get('id', 0, waRequest::TYPE_INT);
-        if ($contact_id < 1) {
+        $contact_id = $this->get('id', true);
+        if (!is_numeric($contact_id) || $contact_id < 1) {
             throw new waAPIException('invalid_param', _w('Invalid contact ID.'), 400);
-        } else if (null === $this->getContactModel()->getById($contact_id)) {
+        }
+        $contact = new waContact($contact_id);
+        if (!$contact->exists()) {
             throw new waAPIException('not_found', _w('Contact not found'), 404);
+        }
+        if (!$this->getCrmRights()->contact($contact)) {
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
         $view = waSystem::getInstance()->getView();
         $tabs = $view->getHelper()->getContactTabs($contact_id);

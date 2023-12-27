@@ -380,7 +380,7 @@ var CRMReminders = (function ($) {
                 $autocomplete
                     .autocomplete({
                         appendTo:  $combobox,
-                        position: {my: "right top", at: "right bottom"},
+                        //position: {my: "right top", at: "right bottom"},
                         source: $.crm.app_url + "?module=autocomplete&type=user",
                         minLength: 0,
                         html: true,
@@ -701,12 +701,13 @@ var CRMReminders = (function ($) {
             is_open = false,
             is_locked = false;
 
-            adjustWidth()
+            if (!that.$iframe) {
+                adjustWidth();
 
             $(window).on('resize', function() {
                   adjustWidth();
                 })
-
+            }
             function adjustWidth() {
                 var parentwidth = $article_body.width();
                 $section.width(parentwidth);

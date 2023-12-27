@@ -3457,8 +3457,8 @@ msgstr "Удалить назначение ответственного"
 msgid "Change the access to the contact."
 msgstr "Измените доступ к контакту."
 
-msgid "The responsible person is not assigned to this client, since he has no access rights."
-msgid_plural "The responsible person is not assigned to these clients, since he has no access rights."
+msgid "The responsible user is not assigned to this client because of insufficient access rights."
+msgid_plural "The responsible user is not assigned to these clients because of insufficient access rights."
 msgstr[0] "Этому клиенту ответственный не назначен, так как у него нет прав доступа."
 msgstr[1] "Этим клиентам ответственный не назначен, так как у него нет прав доступа."
 msgstr[2] "Этим клиентам ответственный не назначен, так как у него нет прав доступа."
@@ -5187,3 +5187,33 @@ msgstr "удалил исполнителя из сделки"
 
 msgid "deal stage overdue"
 msgstr "превышен лимит времени этапа сделки"
+
+msgid "The specified user does not have access to the deal funnel."
+msgstr "У указанного пользователя нет доступа к воронке сделки."
+
+msgid "Deal identifier is required."
+msgstr "Идентификатор сделки обязателен."
+
+msgid "Invalid deal identifiers submitted."
+msgstr "Отправлены недопустимые идентификаторы сделок."
+
+msgid "Invalid user identifier."
+msgstr "Недопустимый идентификатор пользователя."
+
+msgid "Specified user does not exist."
+msgstr "Указанный пользователь не существует."
+
+msgid "Invalid deals specified."
+msgstr "Указаны недопустимые сделки."
+
+msgid "Invalid conversations specified."
+msgstr "Указаны недопустимые переписки."
+
+msgid "Only one of the parameters can be specified: %s."
+msgstr "Можно указать только один из параметров: %s."
+
+msgid "Invalid contact identifier."
+msgstr "Недопустимый идентификатор контакта."
+
+msgid "Deal not found."
+msgstr "Сделка не найдена."

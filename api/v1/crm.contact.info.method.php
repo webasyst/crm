@@ -7,6 +7,9 @@ class crmContactInfoMethod extends crmApiAbstractMethod
     public function execute()
     {
         $contact_id = $this->get('id', true);
+        if (!is_numeric($contact_id) || $contact_id < 1) {
+            throw new waAPIException('invalid_param', _w('Invalid contact ID.'), 400);
+        }
 
         $contact = new waContact($contact_id);
         if (!$contact->exists()) {
@@ -14,7 +17,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
         }
 
         $rights = $this->getCrmRights();
-        if (!$rights->contactVaultId($contact['crm_vault_id'])) {
+        if (!$rights->contact($contact)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 

@@ -13,8 +13,10 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
         wa('crm')->getConfig()->setLastVisitedUrl('message/');
 
         $old_message_id = waRequest::param('old_message_id', waRequest::get('old_message_id', null, waRequest::TYPE_INT), waRequest::TYPE_INT);
+        $new_message_id = waRequest::param('new_message_id', waRequest::get('new_message_id', null, waRequest::TYPE_INT), waRequest::TYPE_INT);
         $conversation_id = waRequest::param('id', waRequest::get('id', null, waRequest::TYPE_INT), waRequest::TYPE_INT);
         $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
+        $short_link = waRequest::param('short_link', null, waRequest::TYPE_INT);
 
         $is_ui13 = (wa()->whichUI('crm') === '1.3');
 
@@ -41,6 +43,9 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
             $query = $mm->select('*')->where('conversation_id = ?', (int) $conversation_id);
             if ($old_message_id > 0) {
                 $query->where('id < ?', $old_message_id);
+            }
+            if ($new_message_id > 0) {
+                $query->where('id > ?', $new_message_id);
             }
             $messages = $query->order('create_datetime DESC')->limit(self::MESSAGE_PER_PAGE)->fetchAll('id');
             ksort($messages);
@@ -148,6 +153,7 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
             'hash'            => md5(time().wa()->getUser()->getId()),
             'send_action_url' => wa()->getAppUrl().'?module=message&action=sendReply',
             'can_edit_conversation' => $can_edit_conversation,
+            'short_link' => $short_link,
         ));
 
         if ($conversation['type'] == crmConversationModel::TYPE_EMAIL) {

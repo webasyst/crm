@@ -1757,6 +1757,15 @@ paths:
           description: Required size of userpic in pixels
           schema:
             type: integer
+        - in: query
+          name: with_aux_info
+          description: Flag to get additional deal info from external apps & plugins (call hook)
+          schema:
+            type: integer
+            enum:
+              - 0
+              - 1
+            default: 0
       responses:
         200:
           description: Returns deal info.
@@ -5184,10 +5193,6 @@ paths:
 
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: query
-      name: access_token
     BearerAuth:
       type: http
       scheme: bearer
@@ -6306,6 +6311,35 @@ components:
         source:
           description: Deal source
           $ref: '#/components/schemas/source'
+        aux_tabs:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: String tab identifier
+              title:
+                type: string
+                description: Tab title
+              url:
+                type: string
+                format: uri
+                description: URL frame with content
+        aux_blocks:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: String block identifier
+              title:
+                type: string
+                description: Block title
+              html:
+                type: string
+                description: Block content
     dealParticipant:
       type: object
       properties:

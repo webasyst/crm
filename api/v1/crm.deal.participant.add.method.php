@@ -134,7 +134,7 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
                     ['contact_id' => $contact_id]
                 );
             } else {
-                throw new waAPIException('server_error', _w('Participant was not added.'), 500);
+                throw new waAPIException('server_error', _w('Participant not added.'), 500);
             }
         }
 
@@ -360,7 +360,7 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
         if ($user->getId() == $this->getUser()->getId()) {
             return [];
         }
-        
+
         $updated_deal = $deal;
         if ($deal['user_contact_id'] == $replace_contact_id) {
             $updated_deal = array_merge($updated_deal, [
@@ -372,7 +372,7 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
                 $_participant['contact_id'] = $user->getId();
             }
         }
-        
+
         if ($this->getCrmRights()->deal($updated_deal) <= crmRightConfig::RIGHT_DEAL_VIEW) {
             $this->http_status_code = 409;
             return [

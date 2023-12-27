@@ -17,24 +17,20 @@ class crmMessageSendMethod extends crmApiAbstractMethod
 
         if (empty($reply_body) && empty($attachments)) {
             throw new waAPIException('empty_param', sprintf_wp('One of the parameters is required: %s.', sprintf_wp('“%s” or “%s”', 'body', 'attachments')), 400);
-        } elseif (empty($reply_message_id)) {
+        }
+        if (empty($reply_message_id)) {
             throw new waAPIException('empty_reply_message_id', sprintf_wp('Missing required parameter: “%s”.', 'reply_message_id'), 400);
-        } elseif ($reply_message_id < 0) {
+        }
+        if ($reply_message_id < 0) {
             throw new waAPIException('invalid_reply_message_id', sprintf_wp('Invalid “%s” value.', 'reply_message_id'), 400);
         }
 
         $message = $this->getMessageModel()->getMessage($reply_message_id);
         if (!$message) {
             throw new waAPIException('invalid_reply_message_id', _w('Message not found'), 400);
-        } elseif ($message['deal_id'] > 0) {
-            $deal = $this->getDealModel()->getDeal($message['deal_id']);
-            if (!$this->getCrmRights()->deal($deal)) {
-                throw new waAPIException('access_denied', _w('Access to deal denied.'), 403);
-            }
-        } elseif (!$this->getCrmRights()->contact($message['contact_id'])) {
+        }
+        if (!$this->getCrmRights()->canViewMessage($message)) {
             throw new waAPIException('access_denied', _w('Access denied'), 403);
-        } elseif (!($message['source_id'] > 0 || $message['transport'] == crmMessageModel::TRANSPORT_EMAIL)) {
-            throw new waAPIException('access_denied', _w('Access denied. Reply is not allowed.'), 403);
         }
 
         if ($message['transport'] === crmMessageModel::TRANSPORT_IM) {

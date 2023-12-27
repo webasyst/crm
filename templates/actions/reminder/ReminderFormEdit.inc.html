@@ -136,7 +136,7 @@
                         {strip}
                         <span class="flexbox middle c-date hint {if !empty($_reminder.due_date|wa_date)}is-active{/if}">
                             <span class="icon calendar"><i class="fas fa-calendar-alt"></i></span>
-                            <input class="c-datepicker js-datepicker input-blank" name="data[due_date]" type="text" value="{$_reminder.due_date|wa_date}" placeholder="[`Term`]" autocomplete="off">
+                            <input class="c-datepicker js-datepicker input-blank" name="data[due_date]" type="text" value="{waDateTime::format('date', $_reminder.due_date, 'server')}" placeholder="[`Term`]" autocomplete="off">
                             {*<input type="hidden" value="{$_reminder.due_date}">*}
                             <span class="c-hidden custom-pl-4">
                                 <span class="icon cursor-pointer js-reset-date"><i class="fas fa-times-circle"></i></span>
@@ -238,7 +238,7 @@
                 reminder_data: {
                     content: `{$_reminder.content|escape}`,
                     type: "{$_active_reminder_type.id}",
-                    due_date: "{$_reminder.due_date|wa_date}",
+                    due_date: "{waDateTime::format('humandate', $_reminder.due_date, 'server')}",
                     due_time: "{$_time}",
                     contact: { id: "{if !empty($_deal_id)}{$_deal_id}{else}{$_contact_id}{/if}",
                                 photo_url: "{if !empty($_userpic_deal)}{$_userpic_deal}{/if}",

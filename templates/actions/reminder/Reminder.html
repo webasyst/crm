@@ -189,7 +189,11 @@
     {/function}
     <div class="content blank content-mobile-friendly">
         <div class="c-reminder-content-area article" id="js-content-block">
+            
             <div class="article-body" {if !empty($iframe)}style="padding: 0;"{/if}>
+                <div class="content-list-wrapper">
+
+                
                 {skeleton}
                 {$_user_title = $_title}
                 {if $is_all_reminders}
@@ -212,40 +216,7 @@
                         <h1 class="c-page-header">{$_user_title}</h1>
                     </div>
                     {/if}
-                    {*<div class="c-column flexbox middle space-16 nowrap hidden">
-                        <div class="dropdown" id="dropdown-filter">
-                            <button class="dropdown-toggle button smaller rounded light-gray c-page-actions">
-                                {$_selected_type_filter.name|escape}
-                            </button>
-                            <div class="dropdown-body right">
-                                <ul class="menu">
-                                    {foreach $_filter_types as $_type}
-                                    <li class="{if $_type.id === $_selected_type_filter.id}selected{/if}">
-                                        <a href="{crmHelper::getUrl("type", $_type.id)}">
-                                            {if !empty($_type.icon)}
-                                            <span class="icon size-14"><i class="fas fa-{$_type.icon}"></i></span>
-                                            {else}
-                                            <span class="icon size-14"><i class="fas fa-blank" style="visibility: hidden;"></i></span>
-                                            {/if}
-                                            {$_type.name|escape}
-                                        </a>
-                                    </li>
-                                {/foreach}
-                                </ul>
-                            </div>
-                        </div>
 
-                        <div>
-                            <i class="fas fa-cog js-show-settings"></i>
-                        </div>
-
-                        <script>
-                            ( function($) {
-                                $("#dropdown-filter").waDropdown();
-                            })(jQuery);
-                        </script>
-
-                    </div>*}
                 </div>
 
                 <div class="c-add-form-wrapper" id="c-add-reminder-form">
@@ -527,7 +498,7 @@
                                                                 {if $_reminder.due_datetime}
                                                                     {waDateTime::format('humandatetime', $_reminder.due_datetime)}
                                                                 {elseif $_reminder.due_date}
-                                                                    {waDateTime::format('humandate', $_reminder.due_date)}
+                                                                    {waDateTime::format('humandate', $_reminder.due_date, 'server')}
                                                                 {/if}
                                                             </div>
                                                             </div>
@@ -538,7 +509,7 @@
                                                         {if $_reminder.due_datetime}
                                                             {waDateTime::format('humandatetime', $_reminder.due_datetime)}
                                                         {elseif $_reminder.due_date}
-                                                            {waDateTime::format('humandate', $_reminder.due_date)}
+                                                            {waDateTime::format('humandate', $_reminder.due_date, 'server')}
                                                         {/if}
                                                     </div>
                                                 {/if}
@@ -666,7 +637,7 @@
                 <div class="drawer">
                     <div class="drawer-background"></div>
                 </div>
-
+                </div>
                     <section class="c-completed-reminders-section bottombar sticky {if !$completed_reminders_count}hidden{/if}">
                         <div class="flexbox middle c-actions custom-p-20">
                             <a class="custom-mr-4 bold js-load-completed-reminders" href="javascript:void(0);">

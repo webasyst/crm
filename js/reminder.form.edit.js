@@ -78,7 +78,7 @@ var CRMReminderFormEdit = ( function($) {
             $autocomplete
                 .autocomplete({
                     appendTo: $wrapper,
-                    position: { my : "right top", at: "right bottom" },
+                    //position: { my : "right top", at: "right bottom" },
                     source: that.app_url + "?module=autocomplete&type=user",
                     minLength: 0,
                     html: true,

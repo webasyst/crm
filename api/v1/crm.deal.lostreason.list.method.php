@@ -4,10 +4,13 @@ class crmDealLostreasonListMethod extends crmApiAbstractMethod
 {
     public function execute()
     {
-        $funnel_id = (int) $this->get('funnel_id');
-
-        if ($funnel_id < 0) {
-            throw new waAPIException('not_found', _w('Funnel not found.'), 404);
+        $funnel_id = $this->get('funnel_id');
+        if (!is_numeric($funnel_id) || $funnel_id < 0) {
+            throw new waAPIException('invalid_param', _w('Invalid funnel ID.'), 400);
+        }
+        $funnel_id = (int) $funnel_id;
+        if (!$this->getCrmRights()->funnel($funnel_id)) {
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
         $lost_list = $this->getDealLostModel()

@@ -19,13 +19,17 @@ class crmMessageSendFileMethod extends crmApiAbstractMethod
 
         if (empty($message_id)) {
             throw new waAPIException('empty_reply_message_id', sprintf_wp('Missing required parameter: “%s”.', 'reply_message_id'), 400);
-        } else if (empty($file)) {
+        }
+        if (empty($file)) {
             throw new waAPIException('empty_file', sprintf_wp('Missing required parameter: “%s”.', 'file'), 400);
-        } else if (empty($file_name)) {
+        }
+        if (empty($file_name)) {
             throw new waAPIException('empty_file_name', sprintf_wp('Missing required parameter: “%s”.', 'file_name'), 400);
-        } else if (!in_array($type, [self::FILE_TYPE_IMAGE, self::FILE_TYPE_OTHER])) {
+        }
+        if (!in_array($type, [self::FILE_TYPE_IMAGE, self::FILE_TYPE_OTHER])) {
             throw new waAPIException('invalid_file_type', _w('Invalid file type.'), 400);
-        } else if (
+        }
+        if (
             in_array(trim($file_name), ['.', '..'])
             || !preg_match('#^[^:*?"<>|/\\\\]+$#', $file_name)
         ) {
@@ -36,7 +40,7 @@ class crmMessageSendFileMethod extends crmApiAbstractMethod
         if (!$message) {
             throw new waAPIException('invalid_reply_message_id', _w('Message not found'), 400);
         }
-        if (!$this->getCrmRights()->contact($message['contact_id'])) {
+        if (!$this->getCrmRights()->canViewMessage($message)) {
             throw new waAPIException('access_denied', _w('Access denied'), 403);
         }
         if ($message['transport'] !== crmMessageModel::TRANSPORT_IM) {

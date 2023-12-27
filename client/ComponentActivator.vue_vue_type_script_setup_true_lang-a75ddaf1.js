@@ -1,0 +1,1 @@
+import{d as n,a as o,aQ as r,a_ as i,P as u,r as c,f as l}from"./main-49799bbb.js";const p=n({__name:"ComponentActivator",setup(m){const t=o(!1),s=r(i()),a=u(s,e=>{e&&(t.value=!0,a())});return(e,_)=>t.value?c(e.$slots,"default",{key:0}):l("",!0)}});export{p as _};

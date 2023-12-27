@@ -7,16 +7,16 @@ class crmContactUnpinMethod extends crmApiAbstractMethod
     public function execute()
     {
         $_json = $this->readBodyAsJson();
-        $contact_id = ifempty($_json, 'id', 0);
+        $contact_id = ifempty($_json, 'id', null);
 
         if (empty($contact_id)) {
             throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'id'), 400);
-        } elseif (!is_numeric($contact_id)) {
+        }
+        if (!is_numeric($contact_id) || $contact_id < 1) {
             throw new waAPIException('invalid_param', _w('Invalid contact ID.'), 400);
-        } elseif ($contact_id < 1) {
-            throw new waAPIException('not_found', _w('Contact not found'), 404);
         }
 
+        $contact_id = (int) $contact_id;
         try {
             $this->getRecentModel()->updateByField(
                 [

@@ -69,6 +69,12 @@ class crmDealInfoMethod extends crmApiAbstractMethod
 
         $this->getRecentModel()->update($deal_id * -1);
 
+        if (waRequest::get('with_aux_info', false)) {
+            list($blocks, $tabs) = $this->callEvent();
+            $this->deal['aux_blocks'] = $blocks;
+            $this->deal['aux_tabs'] = $tabs;
+        }
+
         $this->response = $this->filterFields(
             $this->deal,
             [
@@ -103,6 +109,8 @@ class crmDealInfoMethod extends crmApiAbstractMethod
                 'fields',
                 'tags',
                 'source',
+                'aux_blocks',
+                'aux_tabs',
             ], [
                 'id' => 'integer',
                 'creator_contact_id' => 'integer',
@@ -305,5 +313,45 @@ class crmDealInfoMethod extends crmApiAbstractMethod
         }
 
         return $addresses;
+    }
+
+    private function callEvent()
+    {
+        $params = ['deal' => $this->deal];
+        $blocks = $tabs = [];
+        $aux_data = wa('crm')->event('deal_view', $params);
+        
+        foreach ($aux_data as $app_id => $data) {
+            if (!is_array($data)) {
+                continue;
+            }
+            if (isset($data['blocks']) && is_array($data['blocks'])) {
+                $_blocks = array_filter($data['blocks'], function ($block) {
+                    return !empty($block['id']) && !empty($block['title']) && !empty($block['html']);
+                });
+                $_blocks = array_map(function ($block) use ($app_id) {
+                    return [
+                        'id' => $app_id . '-' . $block['id'],
+                        'title' => $block['title'],
+                        'html' => $block['html'],
+                    ];
+                }, $_blocks);
+                $blocks = array_merge($blocks, $_blocks);
+            }
+            if (isset($data['tabs']) && is_array($data['tabs'])) {
+                $_tabs = array_filter($data['tabs'], function ($tab) {
+                    return !empty($tab['id']) && !empty($tab['title']) && !empty($tab['url']);
+                });
+                $_tabs = array_map(function ($tab) use ($app_id) {
+                    return [
+                        'id' => $app_id . '-' . $tab['id'],
+                        'title' => $tab['title'],
+                        'tab' => $tab['url'],
+                    ];
+                }, $_tabs);
+                $tabs = array_merge($tabs, $_tabs);
+            }
+        }
+        return [$blocks, $tabs];
     }
 }

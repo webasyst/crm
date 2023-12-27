@@ -32,13 +32,23 @@ class crmMessageSendEmailMethod extends crmApiAbstractMethod
         if (!$contact->exists()) {
             throw new waAPIException('not_found', _w('Contact not found'), 404);
         }
+        if (!$this->getCrmRights()->contact($contact)) {
+            throw new waAPIException('access_denied', _w('Access denied'), 403);
+        }
+
         if (!in_array($content_type, ['plain-text', 'html'])) {
             throw new waAPIException('invalid_content_type', sprintf_wp('Invalid “%s” value.', 'content_type'), 400);
         } elseif ($content_type === 'plain-text') {
             $body = nl2br(htmlspecialchars($body));
         }
-        if (!empty($deal_id) && !$this->getDealModel()->getDeal($deal_id)) {
-            throw new waAPIException('not_found', _w('Deal not found'), 404);
+        if (!empty($deal_id)) {
+            $deal = $this->getDealModel()->getDeal($deal_id);
+            if (empty($deal)) {
+                throw new waAPIException('not_found', _w('Deal not found'), 404);
+            }
+            if (!$this->getCrmRights()->deal($deal)) {
+                throw new waAPIException('access_denied', _w('Access denied'), 403);
+            }
         }
 
         /** from */

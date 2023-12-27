@@ -10295,11 +10295,14 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   background-color: var(--dialog-background-color);
   backdrop-filter: blur(0.25rem);
 }
+.c-reminders-page .c-reminder-content-area .article-body .content-list-wrapper {
+  position: relative;
+}
 .c-reminders-page .c-reminder-content-area .skeleton-wrapper {
   position: absolute;
   height: calc(100% - 3rem);
   background: var(--background-color-blank);
-  z-index: 1001;
+  z-index: 1045;
   width: 100%;
   text-align: center;
   padding-left: inherit;
@@ -10438,7 +10441,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .c-reminders-page .c-reminder-content-area .c-add-form-wrapper .c-hidden-form .dropdown-body {
   width: 150px;
-  z-index: 1001 !important;
+  z-index: 1045 !important;
 }
 .c-reminders-page .c-reminder-content-area .c-add-form-wrapper .inline-link.selected {
   color: #f00;
@@ -10500,7 +10503,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   display: -ms-flexbox;
   display: box;
   display: flex;
-  z-index: 1001;
+  z-index: 1045;
 }
 .c-reminders-page .c-reminder-content-area .c-add-form-wrapper .c-contact-wrapper .c-contact {
   padding: 0;
@@ -10548,7 +10551,11 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 .c-reminders-page .c-reminder-content-area .c-add-form-wrapper .c-contact-wrapper .ui-autocomplete {
   padding-top: 8px;
   max-height: 245px;
-  overflow: auto;
+  overflow-y: auto;
+  max-width: 224px;
+  min-width: 192px;
+  width: 224px !important;
+  z-index: 1045;
 }
 .c-reminders-page .c-reminder-content-area .c-add-form-wrapper .c-contact-wrapper .ui-menu-item-wrapper {
   display: -webkit-box;
@@ -10563,18 +10570,28 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   -ms-flex-align: center;
   -webkit-align-items: center;
   align-items: center;
-  -webkit-box-lines: multiple;
-  -moz-box-lines: multiple;
-  -o-box-lines: multiple;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
 }
-.c-reminders-page .c-reminder-content-area .c-add-form-wrapper .c-contact-wrapper .ui-menu-item-wrapper span {
+.c-reminders-page .c-reminder-content-area .c-add-form-wrapper .c-contact-wrapper .ui-menu-item-wrapper .c-layout-contact {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -o-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+}
+.c-reminders-page .c-reminder-content-area .c-add-form-wrapper .c-contact-wrapper .ui-menu-item-wrapper .c-layout-contact-name {
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
+  max-width: 165px;
 }
 .c-reminders-page .c-reminder-content-area .c-add-form-wrapper .c-contact-wrapper .ui-menu-item-wrapper .icon {
   padding-right: 0.5rem;
@@ -10659,7 +10676,14 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   -webkit-align-items: center;
   align-items: center;
 }
-.c-reminders-page .c-reminder-content-area .c-reminders-list .c-reminder-wrapper .ui-menu-item-wrapper .c-layout-contact-name,
+.c-reminders-page .c-reminder-content-area .c-reminders-list .c-reminder-wrapper .ui-menu-item-wrapper .c-layout-contact-name {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  max-width: 165px;
+}
 .c-reminders-page .c-reminder-content-area .c-reminders-list .c-reminder-wrapper .ui-menu-item-wrapper .c-layout-deal-name {
   max-width: 100%;
   text-wrap: wrap;
@@ -11020,7 +11044,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  z-index: 1001;
+  z-index: 1042;
   border-radius: 4px;
 }
 .c-reminders-page .c-reminder-content-area .c-reminders-list .c-reminder-wrapper .c-dots-detail .c-create-date .first-part {
@@ -11113,7 +11137,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 .c-reminders-page .c-reminder-content-area .c-search-contact-wrapper .ui-widget-content {
   left: 0 !important;
   top: 25px !important;
-  z-index: 1001;
+  z-index: 1045;
   max-height: 245px;
   overflow: auto;
 }
@@ -11138,7 +11162,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  z-index: 1001;
+  z-index: 1045;
   border-radius: 4px;
 }
 .c-reminders-page .c-reminder-content-area .c-search-contact-wrapper.is-hidden.is-shown .c-hidden {
@@ -11149,6 +11173,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   top: 37px !important;
   max-height: 245px;
   overflow: auto;
+  z-index: 1045;
 }
 .c-reminders-page .c-reminder-content-area .c-search-contact-wrapper .c-hidden {
   display: none;
@@ -11160,16 +11185,17 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   margin-right: 0.5rem;
 }
 .c-reminders-page .c-reminder-content-area .c-completed-reminders-section.bottombar.sticky {
-  position: fixed;
+  position: sticky;
   left: unset;
   right: unset;
   height: fit-content;
   z-index: 1041;
   border-radius: 0.375rem 0.375rem 0 0;
   margin-top: 1.25rem;
-  top: unset;
+  top: calc(100% - 4rem);
 }
 .c-reminders-page .c-reminder-content-area .c-completed-reminders-section.bottombar.sticky.is-shown {
+  top: unset;
   margin-top: 0;
   -webkit-box-shadow: 0 -6px 12px -7px rgba(0,0,0,0.2);
   box-shadow: 0 -6px 12px -7px rgba(0,0,0,0.2);
@@ -11257,12 +11283,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 .iframe-style .c-reminders-page .c-reminder-content-area {
   height: 100vh;
 }
-.iframe-style .c-reminders-page .c-reminder-content-area .article-body {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
 .iframe-style .c-reminders-page .c-reminder-content-area .skeleton-wrapper {
-  position: fixed;
   height: 100%;
 }
 .iframe-style .c-reminders-page .c-reminder-content-area .c-user,
@@ -11278,7 +11299,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 @media (max-width: 760px) {
   .iframe-style .c-reminders-page .c-reminder-content-area .c-user,
   .iframe-style .c-reminders-page .c-reminder-content-area .js-float-text {
-    max-width: calc(100vw - 118px);
+    max-width: calc(100vw - 156px);
   }
 }
 .iframe-style .c-reminders-page .c-reminder-content-area .with-userblock .c-user,
@@ -11299,6 +11320,10 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .iframe-style .c-reminders-page .c-completed-reminders-section.bottombar.sticky {
   position: sticky;
+  top: calc(100% - 4rem);
+}
+.iframe-style .c-reminders-page .c-completed-reminders-section.bottombar.sticky.is-shown {
+  top: unset;
 }
 .iframe-style .c-reminders-page .c-completed-reminders-section.bottombar.sticky.is-shown .c-reminders-list {
   max-height: calc(100vh - 8rem);
@@ -12069,9 +12094,12 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .c-reminder-edit-form-wrapper .c-contact-wrapper .ui-widget {
   text-align: left;
-  z-index: 1001;
+  z-index: 1045;
   max-height: 245px;
-  overflow: auto;
+  max-width: 224px;
+  min-width: 192px;
+  width: 224px !important;
+  overflow-y: auto;
 }
 .c-reminder-edit-form-wrapper .c-contact-wrapper.is-shown .c-combobox {
   display: -webkit-box;
@@ -12118,7 +12146,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  z-index: 1001;
+  z-index: 1045;
   border-radius: 4px;
 }
 .c-reminder-edit-form-wrapper .c-contact-wrapper .c-combobox .user-plus {
@@ -12169,7 +12197,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .c-reminder-edit-form-wrapper .dropdown-body {
   width: 150px;
-  z-index: 1001 !important;
+  z-index: 1045 !important;
 }
 .noscroll {
   overflow-x: hidden;

@@ -219,7 +219,7 @@
     {skeleton}
 <div class="c-messages-page-content-wrapper">
 
-    <div class="c-message-conversation-page shadowed" id="js-message-conversation-page">
+    <div class="c-message-conversation-page shadowed" id="js-message-conversation-page" data-conv-id="{$conversation.id}">
         {strip}
         <header class="flexbox middle space-12 c-page-header-section">
             <div class="align-center custom-my-12 mobile-only">
@@ -816,7 +816,8 @@
                     filter_deal_id: {$filter_deal_id|default:0},
                     last_message_id: {$last_id|default:0},
                     check_interval: {if $conversation.type == 'EMAIL'}300000{else}20000{/if},
-                    locales: {$_locales|json_encode}
+                    locales: {$_locales|json_encode},
+                    short_link: {$short_link|default: 0}
                 });
 
             })(jQuery);
