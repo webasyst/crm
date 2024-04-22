@@ -67,8 +67,45 @@ var CRMSettingsSourceIm = ( function($) {
             }
         }).trigger('change');*/
 
+        that.initVerifyToggle();
         that.initDealCreateToggle();
     };
+
+    CRMSettingsSourceIm.prototype.initVerifyToggle = function() {
+        var that = this,
+        $switches = that.$wrapper.find('.js-crm-value-switch .switch');
+        $switches.each(function(index, el){
+            $(el).waSwitch({
+                ready: function (wa_switch) {
+                    let $label = wa_switch.$wrapper.siblings('label');
+                    let $input_hidden = wa_switch.$wrapper.siblings('input');
+                    let $input = wa_switch.$wrapper.find('input');
+                    wa_switch.$label = $label;
+                    wa_switch.$input = $input;
+                    wa_switch.$input_hidden = $input_hidden;
+                    wa_switch.active_text = $label.data('active-text');
+                    wa_switch.inactive_text = $label.data('inactive-text');
+                },
+                change: function(active, wa_switch) {
+                    var $field = wa_switch.$wrapper.closest('.fields-group'),
+                        $block = $field.find('.params');
+
+                    if (active) {
+                        $block.slideDown();
+                        wa_switch.$input_hidden.val(1);
+                        wa_switch.$input.val(1);
+                        wa_switch.$label.text(wa_switch.active_text);
+                    }
+                    else {
+                        $block.slideUp();
+                        wa_switch.$input_hidden.val(0);
+                        wa_switch.$input.val(0);
+                        wa_switch.$label.text(wa_switch.inactive_text); 
+                    }
+                }
+            });
+        });
+    }
 
     CRMSettingsSourceIm.prototype.initDealCreateToggle = function() {
         var that = this,
@@ -238,7 +275,7 @@ var CRMSettingsSourceIm = ( function($) {
                 $field = !name ? $() : $wrapper.find('[name="' + name + '"]');
             $field.addClass('state-error');
             $.each(errors, function (index, error) {
-                $error.append('<span class="errormsg">' + error + '</span>');
+                $error.append('<span class="errormsg error">' + error + '</span>');
             });
             if ($field.length) {
                 $field.after($error);

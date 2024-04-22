@@ -1,13 +1,13 @@
 <?php
 
-/**
- */
 class crmContactUpdateController extends waJsonController
 {
     public function execute()
     {
         $contact = waRequest::post('contact', null, waRequest::TYPE_ARRAY_TRIM);
         $call = waRequest::post('call', null, waRequest::TYPE_ARRAY_TRIM);
+        $client_delete_phone = !!waRequest::post('client_delete_phone', '', waRequest::TYPE_STRING_TRIM);
+
         if (!wa()->getUser()->getRights('crm', 'edit')) {
             throw new waRightsException();
         }
@@ -23,9 +23,36 @@ class crmContactUpdateController extends waJsonController
             throw new waException('Invalid data');
         }
 
-        //$contact['phone'] = $call['plugin_client_number'];
-        $contact->set('phone', $call['plugin_client_number'], true);
+        $phone_exist = false;
+        $contact_phones = (array) $contact->get('phone');
+        foreach ($contact_phones as $_phone) {
+            if (waContactPhoneField::isPhoneEquals(ifset($_phone, 'value', ''), $call['plugin_client_number'])) {
+                $phone_exist = true;
+                break;
+            }
+        }
+        if (!$phone_exist) {
+            $contact->add('phone', [
+                'value' => waContactPhoneField::cleanPhoneNumber($call['plugin_client_number']),
+                'ext' => '',
+                'status' => 'confirmed',
+            ]);
+        }
         $contact->save();
+
+        if ($client_delete_phone && !empty($call['client_contact_id'])) {
+            $client = new waContact($call['client_contact_id']);
+            if ($client->exists()) {
+                $phones = (array) $client->get('phone');
+                foreach ($phones as $_key => $_phone) {
+                    if (waContactPhoneField::isPhoneEquals(ifset($_phone, 'value', ''), $call['plugin_client_number'])) {
+                        unset($phones[$_key]);
+                    }
+                }
+                $client->set('phone', array_values($phones));
+                $client->save();
+            }
+        }
 
         $cm->updateById($call['id'], array(
             'client_contact_id' => $contact['id'],

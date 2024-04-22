@@ -22,6 +22,13 @@
 
             {$blocks.responsible|default:''}
 
+            <input type="hidden" name="source[params][ask_verify]" value="{$source.params.ask_verify|default:'0'|escape}">
+            <input type="hidden" name="source[params][verify_request]" value="{$source.params.verify_request|default:$default_verify_request|escape}">
+            <input type="hidden" name="source[params][verify_request_button]" value="{$source.params.verify_request_button|default:$default_verify_request_button|escape}">
+            <input type="hidden" name="source[params][verify_done_response]" value="{$source.params.verify_done_response|default:$default_verify_done_response|escape}">
+            <input type="hidden" name="source[params][verify_been_response]" value="{$source.params.verify_been_response|default:$default_verify_been_response|escape}">
+            <input type="hidden" name="source[params][verification_key]" value="{$verification_key|escape}">
+
             <div class="crm-form-buttons">
                 <div class="c-layout">
                     <div class="c-column">

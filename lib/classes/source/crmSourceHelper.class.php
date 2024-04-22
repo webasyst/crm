@@ -109,6 +109,13 @@ abstract class crmSourceHelper
         return $conversation;
     }
 
+    public function getUI20ConversationAuxItems($conversation)
+    {
+        return [
+            'reply_form_dropdown_items' => [],
+        ];
+    }
+
     /**
      * @override
      * @param $conversation

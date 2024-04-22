@@ -2894,11 +2894,26 @@ var CRMContactUpdateDialog = ( function($) {
         that.initSubmit();
     };
 
+
+
     CRMContactUpdateDialog.prototype.initAutocomplete = function() {
         var that = this,
             $wrapper = that.$wrapper.find(".js-autocomplete-wrapper"),
             $autocomplete = $wrapper.find(".js-autocomplete"),
-            $idField = $wrapper.find(".js-field");
+            $idField = $wrapper.find(".js-field"),
+            $selectHtmlField = that.$wrapper.find(".js-field-autocomplete");
+
+        function setContactData(contact) {
+            return contactHtml = `        
+            <div class="c-column c-column-image">
+                <a class="flexbox middle" href="${$.crm.app_url}${contact.link}" target="_top" data-link="top" >
+                    <img src="${contact.photo_url}" alt="${contact.name}">
+                </a>
+            </div>
+            <div class="c-column middle nowrap">
+                <a href="${$.crm.app_url}${contact.link}" target="_top" data-link="top" title="${contact.name}">${contact.name}</a>
+            </div>`
+        }
 
         $autocomplete
             .autocomplete({
@@ -2913,6 +2928,7 @@ var CRMContactUpdateDialog = ( function($) {
                     var text = $("<div />").text(ui.item.name).text();
                     $autocomplete.val(text).blur();
                     $idField.val(ui.item.id).trigger("change");
+                    $selectHtmlField.html(setContactData(ui.item));
                     return false;
                 }
             }).data("ui-autocomplete")._renderItem = function (ul, item) {
@@ -2995,9 +3011,9 @@ var CRMContactUpdateDialog = ( function($) {
                 is_locked = true;
 
                 var href = "?module=contact&action=update";
-
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
+                        that.$wrapper.find(".js-field-autocomplete").data('success', true);
                        that.$dialog.close();
                     } else {
                         showErrors(response.errors);

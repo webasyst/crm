@@ -64,7 +64,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
     {
         return array_map(function ($el) use ($fields, $userpic_size) {
             if (in_array('name', $fields)) {
-                $el['name'] = (empty($el['name']) ? '('._w('no name').')' : waContactNameField::formatName($el, true));
+                $el['name'] = (trim((string) $el['name']) === '' ? '('._w('no name').')' : waContactNameField::formatName($el, true));
             }
             $el['userpic'] = $this->getDataResourceUrl(waContact::getPhotoUrl($el['id'], $el['photo'], $userpic_size, $userpic_size, ifset($el['is_company'], false) ? 'company' : 'person', true));
             

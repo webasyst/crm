@@ -42,7 +42,7 @@
 
                 </div>
             </div>
-            <input type="hidden" name="{input_name id='responsible_contact_id'}" class="crm-responsible-contact_id" value="{if $group_id > 0}-{$group_id}{else}{$user.id}{/if}">
+            <input type="hidden" name="{input_name id='responsible_contact_id'}" class="crm-responsible-contact_id" value="{if intval($group_id) > 0}-{$group_id}{else}{$user.id}{/if}">
         </div>
     </div>
    

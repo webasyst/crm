@@ -16,9 +16,9 @@
             <tr class="item-row">
                 <td class="min-width"><i class="icon16 sort ui-sortable-handle"></i></td>
                 <td>
-                    <input type="text" name="{$prefix}[{$fid}][options][{$value}]" value="{$label|escape}" class="small short">
+                    <input type="text" name="{$prefix}[{$fid}][options][{$value|escape}]" value="{$label|escape}" class="small short">
                     {if $ftype == 'branch'}
-                    <input type="hidden" name="{$prefix}[{$fid}][hide][{$value}]" value="{implode(',', ifempty($hide[$value], array()))}">
+                    <input type="hidden" name="{$prefix}[{$fid}][hide][{$value|escape}]" value="{implode(',', ifempty($hide[$value], array()))}">
                     {/if}
                 </td>
                 <td class="min-width"><a href="#" title="[`Delete`]" onClick="return false;"><i class="icon10 delete"></i></a></td>

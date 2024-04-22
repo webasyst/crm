@@ -50,7 +50,7 @@
             <div class="name">[`To`]</div>
             <div class="value">
 
-                <div class="dropdown checklist no-click-close c-message-to-selector" data-field-name="{$to_name|escape}" style="margin-top: 0px;" id="dropdown-to-selector">
+                <div class="dropdown checklist no-click-close c-message-to-selector cursor-pointer" data-field-name="{$to_name|escape}" style="margin-top: 0px;" id="dropdown-to-selector-{$uniqid}">
                     <span class="dropdown-toggle selected-items c-label">[`Select`]</span>
                     {if $to_value && !is_array($to_value)}
                         {$to_value = [$to_value => 1]}
@@ -116,7 +116,7 @@
                 </div>
                 <script>
                     ( function($) {
-                        $("#dropdown-to-selector").waDropdown({
+                        $("#dropdown-to-selector-{$uniqid}").waDropdown({
                             hover: false,
                             items: ".menu > li > a",
                         });

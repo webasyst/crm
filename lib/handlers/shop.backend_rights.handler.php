@@ -81,9 +81,15 @@ class crmShopBackend_rightsHandler extends waEventHandler
             echo '<div class="block double-padded"><h2 id="Title">' . _w('The order is not available because of insufficient access rights for deal editing.') . '</h2></div>';
             exit;
         } else {
-            return array(
-                'orders' => shopRightConfig::RIGHT_ORDERS_FULL,
-            );
+            if (defined('shopRightConfig::RIGHT_ORDERS_FULL')) {
+                return [
+                    'orders' => shopRightConfig::RIGHT_ORDERS_FULL,
+                ];
+            } else {
+                return [
+                    'orders' => 1,
+                ];
+            }
         }
     }
 }

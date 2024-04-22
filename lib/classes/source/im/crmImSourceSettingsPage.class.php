@@ -18,9 +18,14 @@ abstract class crmImSourceSettingsPage extends crmSourceSettingsPage
 
     protected function getAssigns()
     {
-        return array(
+        return [
             'blocks' => $this->getBlocks(),
-        );
+            'default_verify_request' => _w('Please verify your client profile.'),
+            'default_verify_request_button'=> _w('Verify client profile'),
+            'default_verify_done_response' => _w('Your client profile has been verified.'),
+            'default_verify_been_response' => _w('Your client profile was already verified.'),
+            'verification_key' => $this->source->getParam('verification_key') ?: waUtils::getRandomHexString(16),
+        ];
     }
 
     protected function getTemplate()

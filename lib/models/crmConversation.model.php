@@ -326,12 +326,10 @@ class crmConversationModel extends crmModel
         unset($l);
 
         $source_ids = array();
-        $is_ui2 = wa()->whichUI() === '2.0';
         foreach ($list as &$item) {
-
             $item['icon_url'] = null;
-            $item['icon'] = 'exclamation';
-            $item['icon_fa'] = 'exclamation-circle';
+            $item['icon'] = null;
+            $item['icon_fa'] = null;
             $item['icon_color'] = '#BB64FF';
             $item['transport_name'] = _w('Unknown');
 
@@ -366,6 +364,16 @@ class crmConversationModel extends crmModel
             $source_helper = $source_helpers[$item['source_id']];
             $res = $source_helper->workupConversationInList($item);
             $item = $res ? $res : $item;
+        }
+        unset($item);
+
+        foreach ($list as &$item) {
+            if (empty($item['icon_url']) && empty($item['icon'])) {
+                $item['icon'] = 'exclamation';
+            }
+            if (empty($item['icon_url']) && empty($item['icon_fa'])) {
+                $item['icon_fa'] = 'exclamation-circle';
+            }
         }
         unset($item);
 

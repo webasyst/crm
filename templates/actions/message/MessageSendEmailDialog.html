@@ -16,7 +16,7 @@
     <link href="{$wa_app_static_url}css/crm2.css?v={$wa->version()}" rel="stylesheet">
     <link href="{$wa_url}wa-content/js/redactor/2/redactor.css?v{$wa->version(true)}" rel="stylesheet">
 
-    {wa_js file="js/min/vendor.min.js"}
+    {wa_js}
         {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
         {$wa_app_static_url}js/jquery/jquery-ui.min.js
         {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
@@ -32,7 +32,7 @@
     {/if}
 
     {/strip}
-    {wa_js file="js/min/crm.min.js"}
+    {wa_js}
         {$wa_app_static_url}js/crmDialog/crmDialog.js
         {$wa_app_static_url}js/crm.js
         {$wa_app_static_url}js/message/message.sendEmailDialog.js

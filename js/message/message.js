@@ -538,18 +538,25 @@ var CRMMessagesSidebar = ( function($) {
             });
         });
 
+        var is_locked = false;
         that.$wrapper.on('click', '.js-write-message', function(event) {
             event.preventDefault();
-
-            var url = $.crm.app_url + '?module=message&action=writeNewDialog';
-            const contact_id = that.$settings_contact_id ? that.$settings_contact_id : null;
-            const deal_id = that.$settings_deal_id ? that.$settings_deal_id : null;
-            data = {contact_id: contact_id, deal_id: deal_id};
-            $.get(url, data, function(html) {
-                $.waDialog({
-                    html: html
+            
+            if (!is_locked) {
+                is_locked = true;
+                var url = $.crm.app_url + '?module=message&action=writeNewDialog';
+                const contact_id = that.$settings_contact_id ? that.$settings_contact_id : null;
+                const deal_id = that.$settings_deal_id ? that.$settings_deal_id : null;
+                data = {contact_id: contact_id, deal_id: deal_id};
+                $.get(url, data, function(html) {
+                    
+                    $.waDialog({
+                        html: html,
+                        onOpen: function() {is_locked = false}
+                    });
                 });
-            });
+            }
+           
         });
 
         that.$wrapper.on('click', '.js-filter-open', function() {
@@ -631,8 +638,6 @@ var CRMMessagesSidebar = ( function($) {
         });
 
         $(document).on('msg_sidebar_upd_needed', function() {
-            console.log('msg_sidebar_upd_needed');
-            //reload();
             runner(true);
         });
 
@@ -732,11 +737,10 @@ var CRMMessagesSidebar = ( function($) {
             let target_id = $link.parent().data('id');
 
             const contact_id = that.$settings_contact_id ? '&contact='+that.$settings_contact_id : that.$settings_deal_id ? '&deal='+that.$settings_deal_id : '';
-            const iframe = that.iframe ? '&view=chat' : '?view=chat';
+            //const iframe = that.iframe ? '&view=chat' : '?view=chat';
             const iframe2 = that.iframe ? '&iframe=1&view=chat' : '&view=chat';
-            target_link += iframe + contact_id;
+            //target_link += iframe + contact_id;
             target_props = target_id + iframe2 + contact_id;
-
 
             /*$(document).trigger('changeActiveConversation', {
                 target_id: target_id
@@ -781,8 +785,16 @@ var CRMMessagesSidebar = ( function($) {
             is_locked = false,
             $window = $(window),
             $sidebar =  that.$sidebar,
+            list_height = $sidebar.find('.c-messages-conversation-list').height(),
             $list = that.$list,
-            page_of_item = that.page_of_item;           
+            page_of_item = that.page_of_item;
+            
+        function checkBigWindow() {
+            if (that.current_page == 1 && ($window.height() - 64) > list_height) {
+                return true
+            }
+            else return false
+        }
             
         function startLazyLoading() {
             var $loader = $list.find(".js-lazy-load");
@@ -799,9 +811,14 @@ var CRMMessagesSidebar = ( function($) {
             }
 
             if ($loader.length) {
-
+                if (checkBigWindow()) {
+                    useMain();
+                    return
+                }
                 $sidebar.on("scroll touchmove", useMain);
             }
+
+
 
             function useMain() {
                 var is_exist = $.contains(document, $loader[0]);

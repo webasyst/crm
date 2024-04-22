@@ -12,14 +12,14 @@
     {$wa->css()}
     <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
 
-    {wa_js file="js/min/vendor.min.js"}
+    {wa_js}
         {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
         {$wa_app_static_url}js/jquery/jquery-ui.min.js
         {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
         {$wa_url}wa-content/js/jquery-wa/wa.js
     {/wa_js}
 
-    {wa_js file="js/min/crm.min.js"}
+    {wa_js}
         {$wa_app_static_url}js/crm.js
         {$wa_app_static_url}js/crm.autocomplete.js
         {$wa_app_static_url}js/call.js
@@ -574,35 +574,39 @@
                                 <div class="flexbox middle c-column-second">
                                     <div class="c-column-phone">
                                         <div class="nowrap single-line">
+                                            <div class="flexbox middle space-0">
                                             {if !empty($_client)}
                                                 {_renderContact _contact=$_client _number=$_call.client_number}
                                             {else}
-                                            <div class="flexbox middle space-8">
+                                                
                                                 <img class="icon size-24" src="{$site_url}wa-content/img/userpic.svg" />
 
-                                                <span class="call-number">
-                                                    {if !empty($_client) && !$contacts[$_call.client_contact_id]['is_visible']}
-                                                        <span class="">[`hidden phone number`]</span>
-                                                    {else}
+                                                <span class="call-number custom-pl-8 custom-pr-20">
                                                         {$_call.client_number|escape|default:"[`unknown`]"}
-                                                    {/if}
                                                 </span>
-
+                                            {/if}
+                                            {if empty($iframe)}
                                                 <div class="c-dots js-phone-menu-wrapper">
                                                     <div class="dropdown " id="dropdown-phone-menu-{$_call.id}">
                                                         <a class="dropdown-toggle without-arrow " href="javascript:void(0);">
-                                                            <span class="icon size-14 hint js-phone-menu cursor-pointer"><i class="fas fa-ellipsis-h"></i></span>
+                                                            <span class="icon size-14 hint js-phone-menu cursor-pointer {if empty($_client)}without-contact{/if}"><i class="fas fa-ellipsis-h"></i></span>
                                                         </a>
                                                         <div class="dropdown-body">
                                                             <ul class="menu">
-                                                                <li>
-                                                                    <a href="javascript:void(0);" class="js-show-create-dialog" data-number="{$_call.client_number|escape}">
-                                                                        Создать новый контакт
-                                                                    </a>
-                                                                </li>
+                                                                {if empty($_client)}
+                                                                    <li>
+                                                                        <a href="javascript:void(0);" class="js-show-create-dialog" data-number="{$_call.client_number|escape}">
+                                                                            [`Create a new contact`]
+                                                                        </a>
+                                                                    </li>
+                                                                {/if}
                                                                 <li>
                                                                     <a href="javascript:void(0);" class="js-show-update-dialog" data-id="{$_call.id}">
-                                                                        Подключить к существующему
+                                                                        {if empty($_client)}
+                                                                            [`Connect to an existing one`]
+                                                                        {else}
+                                                                            [`Link to another contact`]
+                                                                        {/if}
                                                                     </a>
                                                                 </li>
                                                             </ul>
@@ -615,18 +619,19 @@
                                                                 hover: false,
                                                                 //items: ".menu > li > i",
                                                                 open: function(dropdown_instance) {
-                                                                    $dropdown.closest('.c-column-phone').css('overflow', 'visible');
+                                                                    //$dropdown.closest('.c-column-phone').css('overflow', 'visible');
                                                                 },
                                                                 close: function(event, active_item, dropdown_instance) {
-                                                                    $dropdown.closest('.c-column-phone').css('overflow', 'hidden')
+                                                                    //$dropdown.closest('.c-column-phone').css('overflow', 'hidden')
                                                                 }
                                                             });
                                                         })(jQuery);
                                                     </script>
                                                 </div>
+                                            {/if}
                                             </div>
 
-                                            {/if}
+                                           
                                         </div>
 
                                     </div>

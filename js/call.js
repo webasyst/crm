@@ -53,14 +53,14 @@ var CRMCallPage = ( function($) {
         that.initCustomAudioPlayer();
 
         that.initDotsDetail();
-
+        
         if (!that.iframe && !that.is_lazy_load) {
+            that.initContactUpdateDialog();
+            that.initContactCreateDialog();
             that.initFilterDrawer();
         }
+        
 
-        that.initContactUpdateDialog();
-
-        that.initContactCreateDialog();
         //that.initDownloadLink();
 
        /* $(document).on('wa_loaded', function () {
@@ -119,11 +119,12 @@ var CRMCallPage = ( function($) {
 
         that.$wrapper.on("click", ".js-show-update-dialog", function(event) {
             event.preventDefault();
-            const call_id = $(event.target).data('id');
-            showDialog(call_id);
+            const $call_wrapper = $(event.target);
+            const call_id = $call_wrapper.data('id');
+            showDialog(call_id, $call_wrapper);
         });
 
-        function showDialog(call_id) {
+        function showDialog(call_id, $call_wrapper) {
             if (!is_locked) {
                 is_locked = true;
 
@@ -131,10 +132,18 @@ var CRMCallPage = ( function($) {
                     data = {
                         call_id: call_id
                     };
-
                 $.post(href, data, function(html) {
                     $.waDialog({
-                        html: html
+                        html: html,
+                        onClose: function($dialog, dialog_inst) {
+                            var $contactField = $dialog.$content.find('.js-field-autocomplete');
+                            var isSubmit = $contactField.data('success');
+                            if (isSubmit) {
+                                var contactHtml = $contactField.html();
+                                $call_wrapper.closest('.c-column-phone').find('.c-user-wrapper .flexbox.middle.space-8').html(contactHtml);
+                            }
+                           
+                        }
                     });
                 }).always( function() {
                     is_locked = false;
@@ -144,6 +153,7 @@ var CRMCallPage = ( function($) {
     };
 
     CRMCallPage.prototype.initFilterDrawer = function() {
+        
         var that = this,
             $filter_button = that.$wrapper.find(".js-filter-button"),
             $filter_reload_button = that.$wrapper.find(".js-reload-filter-button"),
@@ -178,6 +188,7 @@ var CRMCallPage = ( function($) {
         $filter_button.on('click', function (event) {
         event.preventDefault();
         openDrawer();
+        
         });
 
         $filter_reload_button.on('click', function (event) {

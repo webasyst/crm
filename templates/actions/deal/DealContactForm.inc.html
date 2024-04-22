@@ -1,18 +1,16 @@
 <div class="c-contact-form-wrapper" id="c-contact-add-form">
 
-    <div class="c-contact-toggle-wrapper">
-        <ul class="c-contact-view-toggle js-contact-view-toggle">
-            <li class="c-toggle js-show-fio" data-mode="fio" style="{if !empty($is_wide)}display: none;{/if}">
-                <a href="javascript:void(0);" class="inline-link">
-                    <i class="fas fa-plus-circle text-green add"></i> [`Add new contact`]
-                </a>
-            </li>
-            <li class="c-toggle is-active" data-mode="name">
-                <a href="javascript:void(0);" class="inline-link">
-                    <i class="fas fa-search text-dark-gray"></i> [`Find existing contact`]
-                </a>
-            </li>
-        </ul>
+    <div class="c-contact-toggle-wrapper switch-with-text">
+        <span class="switch small js-contact-view-toggle" id="switch-toggle-wrapper" >
+            <input type="checkbox" name="" id="input-toggle-wrapper">
+        </span>
+        <label for="input-toggle-wrapper" data-active-text="[`Find existing contact`]" data-inactive-text="[`Add new contact`]">
+            [`Add new contact`]</label>
+        <script>
+        ( function($) {
+
+        })(jQuery);
+        </script>
 
         <input class="js-action-field" name="contact_action" type="hidden" value="search">
     </div>
@@ -65,7 +63,7 @@
                 <div class="field">
                     <div class="name">[`Contact`]</div>
                     <div class="value">
-                        <input class="long js-contact-autocomplete custom-m-0" type="text" placeholder="[`Enter name, email or phone`]" value="{$contact.name|default:""|escape}" {if !empty($contact_is_locked)}disabled{/if}>
+                        <input class="long js-contact-autocomplete custom-m-0" type="text" placeholder="[`Start typing a name`]..." value="{$contact.name|default:""|escape}" {if !empty($contact_is_locked)}disabled{/if}>
                         <input class="js-contact-id-field" type="hidden" name="{$id_field_name|default:"contact[id]"}" value="{$contact.id|default:""}">
                     </div>
                 </div>
@@ -140,7 +138,11 @@
     <script>
         ( function($) {
             new CRMContactAddForm({
-                $wrapper: $("#c-contact-add-form")
+                $wrapper: $("#c-contact-add-form"),
+                locales: {
+                    select: "[`Select`]",
+                    add: "[`Add`]",
+                }
             });
         })(jQuery);
     </script>

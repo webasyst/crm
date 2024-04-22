@@ -400,14 +400,13 @@ class crmMessageModel extends crmModel
             $replace_img_src[$attachment['id']] = $src;
         }
 
-        $message['body_sanitized'] = crmHtmlSanitizer::work(
-            $message['body'],
-            array(
-                'replace_img_src' => $replace_img_src
-            )
-        );
-
         $message['params'] = $this->getMessageParamsModel()->get($message['id']);
+
+        $message['body_sanitized'] = ifset($message['params'], 'internal', false) 
+            ? $message['body'] 
+            : crmHtmlSanitizer::work($message['body'], [
+                'replace_img_src' => $replace_img_src, 
+            ]);
 
         return $message;
     }
@@ -419,7 +418,7 @@ class crmMessageModel extends crmModel
      * @return array
      * @throws waException
      */
-    public function getExtMessages($messages)
+    public function getExtMessages($messages, $source)
     {
         if (!is_array($messages) || empty($messages)) {
             return [];
@@ -428,6 +427,8 @@ class crmMessageModel extends crmModel
         $message_attachments = $this->getMessageAttachmentsModel()->getFilesByMessages($message_ids);
         $message_recipients = $this->getMessageRecipientsModel()->getRecipientsByMessages($message_ids, null, 'message_id');
         $message_params = $this->getMessageParamsModel()->get($message_ids);
+        $verification_key = empty($source) ? false : $source->getParam('verification_key');
+
         foreach ($messages as &$_message) {
             $_message['attachments'] = ifset($message_attachments, $_message['id'], []);
             $_message['recipients'] = ifset($message_recipients, $_message['id'], []);
@@ -437,10 +438,14 @@ class crmMessageModel extends crmModel
                 $src = "{$app_url}?module=file&action=download&id={$attachment['id']}";
                 $replace_img_src[$attachment['id']] = $src;
             }
-            $_message += [
-                'body_sanitized' => crmHtmlSanitizer::work($_message['body'], ['replace_img_src' => $replace_img_src]),
-                'params'         => ifset($message_params, $_message['id'], [])
-            ];
+            $_message['params'] = ifset($message_params, $_message['id'], []);
+            $_message['body_sanitized'] = ifset($_message['params'], 'internal', false) 
+                ? $_message['body'] 
+                : crmHtmlSanitizer::work($_message['body'], [
+                    'replace_img_src' => $replace_img_src, 
+                    'verification_key' => $verification_key,
+                ]);
+
         }
 
         return $messages;

@@ -103,6 +103,8 @@
                     <span class="name">[`Reports`]</span>
                 </a>
             </li>
+            {* @event backend_sidebar.%plugin_id%.top_li *}
+            {foreach $backend_sidebar as $_}{ifset($_.top_li)}{/foreach}
         </ul>
 {if !$is_reload}
     </div>
@@ -110,6 +112,8 @@
   
     <div class="sidebar-footer shadowed">
         <ul class="menu">
+            {* @event backend_sidebar.%plugin_id%.bottom_li *}
+            {foreach $backend_sidebar as $_}{ifset($_.bottom_li)}{/foreach}
             {if $_is_admin}
                 <li{if waRequest::param('module') == 'plugins'} class="selected"{/if}>
                     <a href="{$wa_app_url}plugins/#/" data-wa-tooltip-content="[`Plugins`]">

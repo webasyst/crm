@@ -35,202 +35,203 @@
                 </div>
             </div>
         </header>
-
-        <form class="js-form fields">
-            <section class="c-company-section block double-padded custom-pt-24">
-                <div class="field">
-                    <div class="name">[`Company name`]</div>
-                    <div class="value">
-                        <input class="large" type="text" name="company[name]" value="{$company.name|default: ''|escape}" placeholder="[`Name`]" required>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="name">[`Logo`]</div>
-                    <div class="value">
-                        <div class="c-image-section js-logo-section {if empty($logo_url)}is-empty{/if}">
-
-                            {* IMAGE *}
-                            <div class="c-image-wrapper">
-                                <img class="js-image" src="{$logo_url}?{rand(1,1000)}" alt="">
-                            </div>
-
-                            {* DROPAREA + INPUT *}
-                            <div class="c-drop-area js-drop-area">
-                                <div class="c-drop-hint">[`Drag-n-drop company logo here`]</div>
-                                <input class="js-field" type="file" name="{if !empty($logo_url)}company[logo]{/if}" title="[`Change logo`]">
-                            </div>
-
-                            {* DELETE *}
-                            <span class="c-delete-image js-delete-logo" title="[`Delete logo`]">
-                            <i class="fas fa-times"></i>
-                        </span>
+        <section class="c-companies-section" id="c-companies-section">
+            <form class="js-form fields">
+                <div class="c-company-section block double-padded custom-pt-24">
+                    <div class="field">
+                        <div class="name">[`Company name`]</div>
+                        <div class="value">
+                            <input class="large" type="text" name="company[name]" value="{$company.name|default: ''|escape}" placeholder="[`Name`]" required>
                         </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">[`Logo`]</div>
+                        <div class="value">
+                            <div class="c-image-section js-logo-section {if empty($logo_url)}is-empty{/if}">
 
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="name">[`Phone`]</div>
-                    <div class="value">
-                        <input type="text" name="company[phone]" value="{$company.phone|default: ''|escape}" placeholder="[`Phone`]">
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="name">[`Address`]</div>
-                    <div class="value">
-                        <textarea name="company[address]" placeholder="[`Address`]">{$company.address|default: ''|escape}</textarea>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="name">[`Tax name`]</div>
-                    <div class="value">
-                        <input class="js-tax-name" type="text" name="company[tax_name]" value="{$company.tax_name|default: ''|escape}" placeholder="[`Tax name`]"
-                               {if !empty($company.tax_options)}required{/if}>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="name">[`Tax options`]</div>
-                    <div class="value">
-
-                        {$_types = [
-                        "INCLUDE" => _w('include'),
-                        "APPEND" => _w('append'),
-                        "NONE" => _w('none')
-                        ]}
-
-                        {function _renderOption}
-                            <li class="flexbox middle c-tax-option">
-                                <i class="fas fa-grip-vertical text-light-gray js-sort-toggle"></i>
-                                <div class="wa-select">
-                                    <select name="" class="js-type">
-                                        {foreach $_types as $_type => $_name}
-                                            <option value="{$_type}" {if !empty($_option.tax_type) && $_option.tax_type == $_type}selected{/if}>{$_name}</option>
-                                        {/foreach}
-                                    </select>
+                                {* IMAGE *}
+                                <div class="c-image-wrapper">
+                                    <img class="js-image" src="{$logo_url}?{rand(1,1000)}" alt="">
                                 </div>
-                                <input class="js-percent" type="text" name="" value="{if !empty($_option.tax_type) && $_option.tax_percent >= 0}{$_option.tax_percent}{/if}" placeholder="20">
-                                <span class="c-label">%</span>
-                                <a class="inline-link c-delete-link js-delete-option" href="javascript:void(0);">
-                                    <i class="fas fa-times"></i><span> [`delete`]</span>
-                                </a>
-                            </li>
-                        {/function}
 
-                        {capture assign=tax_option_template}{_renderOption _option=[]}{/capture}
+                                {* DROPAREA + INPUT *}
+                                <div class="c-drop-area js-drop-area">
+                                    <div class="c-drop-hint">[`Drag-n-drop company logo here`]</div>
+                                    <input class="js-field" type="file" name="{if !empty($logo_url)}company[logo]{/if}" title="[`Change logo`]">
+                                </div>
 
-                        <ul class="c-options-list list compact">
-                            {if !empty($company.tax_options)}
-                                {foreach $company.tax_options as $_option}
-                                    {_renderOption _option=$_option}
-                                {/foreach}
-                            {/if}
-                        </ul>
+                                {* DELETE *}
+                                <span class="c-delete-image js-delete-logo" title="[`Delete logo`]">
+                                <i class="fas fa-times"></i>
+                            </span>
+                            </div>
 
-                        <div class="c-add-wrapper custom-mt-0">
-                            <a class="button small rounded light-gray c-add-option js-add-option" href="javascript:void(0);">
-                                <i class="fas fa-plus-circle text-green"></i> [`Add tax option`]
-                            </a>
                         </div>
-
                     </div>
-                </div>
+                    <div class="field">
+                        <div class="name">[`Phone`]</div>
+                        <div class="value">
+                            <input type="text" name="company[phone]" value="{$company.phone|default: ''|escape}" placeholder="[`Phone`]">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">[`Address`]</div>
+                        <div class="value">
+                            <textarea name="company[address]" placeholder="[`Address`]">{$company.address|default: ''|escape}</textarea>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">[`Tax name`]</div>
+                        <div class="value">
+                            <input class="js-tax-name" type="text" name="company[tax_name]" value="{$company.tax_name|default: ''|escape}" placeholder="[`Tax name`]"
+                                {if !empty($company.tax_options)}required{/if}>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">[`Tax options`]</div>
+                        <div class="value">
 
-                <section class="c-templates-section">
-                    <header class="c-layout">
-                        <div class="c-column">
-                            <h3 class="heading">[`Invoice template`]</h3>
-                        </div>
-                        <div class="c-column middle right">
-                            <a class="button small rounded light-gray" href="{$wa_app_url}settings/templates/"><i class="fas fa-cog text-blue"></i> [`Template settings`]</a>
-                        </div>
-                    </header>
-                    <div class="c-templates-slider">
-                        <ul class="tabs c-templates-list">
-                            {foreach $templates as $_template}
-                                <li class="c-template-wrapper js-template-wrapper {if $company.template_id === $_template.id}is-active{/if}" data-id="{$_template.id|escape}">
-                                    <div class="card c-template-block">
-                                        <div class="image c-frame-wrapper">
-                                            <iframe scrolling="no" src="?module=invoice&action=templatesRender&template_id={$_template.id|escape}&company_id={$company.id|escape}"></iframe>
-                                        </div>
-                                        <div class="details">
-                                            <h3 class="c-title">{$_template.name|escape}</h3>
-                                        </div>
-                                        <input class="js-field" type="radio" name="company[template_id]" value="{$_template.id|escape}" {if $company.template_id === $_template.id}checked{/if}>
+                            {$_types = [
+                            "INCLUDE" => _w('include'),
+                            "APPEND" => _w('append'),
+                            "NONE" => _w('none')
+                            ]}
+
+                            {function _renderOption}
+                                <li class="flexbox middle c-tax-option">
+                                    <i class="fas fa-grip-vertical text-light-gray js-sort-toggle"></i>
+                                    <div class="wa-select">
+                                        <select name="" class="js-type">
+                                            {foreach $_types as $_type => $_name}
+                                                <option value="{$_type}" {if !empty($_option.tax_type) && $_option.tax_type == $_type}selected{/if}>{$_name}</option>
+                                            {/foreach}
+                                        </select>
                                     </div>
+                                    <input class="js-percent" type="text" name="" value="{if !empty($_option.tax_type) && $_option.tax_percent >= 0}{$_option.tax_percent}{/if}" placeholder="20">
+                                    <span class="c-label">%</span>
+                                    <a class="inline-link c-delete-link js-delete-option" href="javascript:void(0);">
+                                        <i class="fas fa-times"></i><span> [`delete`]</span>
+                                    </a>
                                 </li>
-                            {/foreach}
-                        </ul>
-                        <span class="c-action left js-arrow-left" title="&larr;"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
-                        <span class="c-action right js-arrow-right" title="&rarr;"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
+                            {/function}
+
+                            {capture assign=tax_option_template}{_renderOption _option=[]}{/capture}
+
+                            <ul class="c-options-list list compact">
+                                {if !empty($company.tax_options)}
+                                    {foreach $company.tax_options as $_option}
+                                        {_renderOption _option=$_option}
+                                    {/foreach}
+                                {/if}
+                            </ul>
+
+                            <div class="c-add-wrapper custom-mt-0">
+                                <a class="button small rounded light-gray c-add-option js-add-option" href="javascript:void(0);">
+                                    <i class="fas fa-plus-circle text-green"></i> [`Add tax option`]
+                                </a>
+                            </div>
+
+                        </div>
                     </div>
 
-                    <div class="fields">
-                        <div class="c-template-options-wrapper">
-                            <div class="field">
-                                <div class="name">[`Public links URL`]</div>
-                                <div class="value">
-                                    {if $has_storefronts}
-                                        <div class="wa-select">
-                                            <select name="company[invoice_options][domain]" class="not-styled">
-                                                {foreach $storefront_list as $domain => $storefront}
-                                                    <option value="{$domain}"
-                                                            {if isset($company_params.domain) && $company_params.domain == $domain}selected{/if}
-                                                    >{$storefront}</option>
-                                                {/foreach}
-                                            </select>
+                    <div class="c-templates-section">
+                        <div class="flexbox full-width">
+                            <div class="c-column">
+                                <h3 class="heading">[`Invoice template`]</h3>
+                            </div>
+                            <div class="c-column middle right">
+                                <a class="button small rounded light-gray" href="{$wa_app_url}settings/templates/"><i class="fas fa-cog text-blue"></i> [`Template settings`]</a>
+                            </div>
+                        </div>
+                        <div class="c-templates-slider">
+                            <ul class="tabs c-templates-list">
+                                {foreach $templates as $_template}
+                                    <li class="c-template-wrapper js-template-wrapper {if $company.template_id === $_template.id}is-active{/if}" data-id="{$_template.id|escape}">
+                                        <div class="card c-template-block">
+                                            <div class="image c-frame-wrapper">
+                                                <iframe scrolling="no" src="?module=invoice&action=templatesRender&template_id={$_template.id|escape}&company_id={$company.id|escape}"></iframe>
+                                            </div>
+                                            <div class="details">
+                                                <h3 class="c-title">{$_template.name|escape}</h3>
+                                            </div>
+                                            <input class="js-field" type="radio" name="company[template_id]" value="{$_template.id|escape}" {if $company.template_id === $_template.id}checked{/if}>
                                         </div>
-                                    {else}
-                                        <div class="alert small custom-mt-0 custom-mb-4">
-                                            <div class="flexbox space-8">
-                                                <span class=""><i class="fas fa-exclamation-triangle text-orange"></i></span>
-                                                <div class="wide">                  
-                                                    [`A CRM settlement is required to publish invoices.`]
-                                                    <a href="{$wa_backend_url}site/#/routing/">
-                                                        [`Use Site app to add a settlement for CRM.`]
-                                                    </a>
+                                    </li>
+                                {/foreach}
+                            </ul>
+                            <span class="c-action left js-arrow-left" title="&larr;"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
+                            <span class="c-action right js-arrow-right" title="&rarr;"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
+                        </div>
+
+                        <div class="fields">
+                            <div class="c-template-options-wrapper">
+                                <div class="field">
+                                    <div class="name">[`Public links URL`]</div>
+                                    <div class="value">
+                                        {if $has_storefronts}
+                                            <div class="wa-select">
+                                                <select name="company[invoice_options][domain]" class="not-styled">
+                                                    {foreach $storefront_list as $domain => $storefront}
+                                                        <option value="{$domain}"
+                                                                {if isset($company_params.domain) && $company_params.domain == $domain}selected{/if}
+                                                        >{$storefront}</option>
+                                                    {/foreach}
+                                                </select>
+                                            </div>
+                                        {else}
+                                            <div class="alert small custom-mt-0 custom-mb-4">
+                                                <div class="flexbox space-8">
+                                                    <span class=""><i class="fas fa-exclamation-triangle text-orange"></i></span>
+                                                    <div class="wide">                  
+                                                        [`A CRM settlement is required to publish invoices.`]
+                                                        <a href="{$wa_backend_url}site/#/routing/">
+                                                            [`Use Site app to add a settlement for CRM.`]
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    {/if}
+                                        {/if}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="c-template-options-wrapper js-template-options-wrapper">
-                        {include file="./SettingsCompaniesRenderParams.html" inline}
-                    </div>
-                </section>
-
-                <input name="company[id]" type="hidden" value="{$company.id}">
-                <div class="js-errors-place"></div>
-            </section>
-
-            <footer class="c-companies-footer">
-                <div class="c-layout">
-                    <div class="c-column">
-
-                        <div class="js-footer-actions">
-                            <input class="button js-submit-button" type="submit" value="[`Save`]">
-                            {if !empty($company.id)}
-                            <span class="js-edit-actions" style="display: none;">
-                                <a href="{$wa_app_url}settings/companies/{$company.id}/" class="button light-gray">[`Cancel`]</a>
-                            </span>
-                            {else}
-                            <span class="js-edit-actions">
-                                <a href="{$wa_app_url}settings/companies/" class="button light-gray">[`Cancel`]</a>
-                            </span>
-                            {/if}
+                        <div class="c-template-options-wrapper js-template-options-wrapper">
+                            {include file="./SettingsCompaniesRenderParams.html" inline}
                         </div>
-
                     </div>
-                    {if count($companies) > 1}
-                        <div class="c-column middle right">
-                            <a class="button small red outlined js-company-delete" href="javascript:void(0);"><i class="fas fa-times-circle"></i> [`Delete company`]</a>
-                        </div>
-                    {/if}
+
+                    <input name="company[id]" type="hidden" value="{$company.id}">
+                    <div class="js-errors-place"></div>
                 </div>
-            </footer>
-        </form>
+
+                <footer class="c-companies-footer">
+                    <div class="c-footer-layout flexbox nowrap full-width middle">
+                        <div class="">
+
+                            <div class="js-footer-actions">
+                                <input class="button js-submit-button" type="submit" value="[`Save`]">
+                                {if !empty($company.id)}
+                                <span class="js-edit-actions" style="display: none;">
+                                    <a href="{$wa_app_url}settings/companies/{$company.id}/" class="button light-gray">[`Cancel`]</a>
+                                </span>
+                                {else}
+                                <span class="js-edit-actions">
+                                    <a href="{$wa_app_url}settings/companies/" class="button light-gray">[`Cancel`]</a>
+                                </span>
+                                {/if}
+                            </div>
+
+                        </div>
+                        {if count($companies) > 1}
+                            <div class="">
+                                <a class="button small red outlined js-company-delete" href="javascript:void(0);"><i class="fas fa-times-circle"></i> [`Delete company`]</a>
+                            </div>
+                        {/if}
+                    </div>
+                </footer>
+            </form>
+        </section>
     </div>
     <script>
         (function ($) {

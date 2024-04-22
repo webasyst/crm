@@ -169,7 +169,7 @@
                                 {$_phone_number = $_phones[$_i]["value"]|default:""|escape}
                                 {$_phone_status = $_phones[$_i]["status"]|default:""}
                                 <li>
-                                    <a class="c-phone{if $is_init_call} js-show-call-dialog{/if}" href="{if $is_init_call}javascript:void(0);{else}tel:+{$_phone_number}{/if}" data-phone="{$_phone_number}" data-id="{$contact.id}" style="display: inline; padding: 0; margin: 0;">
+                                    <a class="c-phone{if $is_init_call} js-show-call-dialog{/if}" href="{if $is_init_call}javascript:void(0);{else}tel:{$wa->crm->phonePrefix($_phone_number)}{/if}" data-phone="{$_phone_number}" data-id="{$contact.id}" style="display: inline; padding: 0; margin: 0;">
                                         {if $_phone_status == waContactDataModel::STATUS_CONFIRMED}
                                             <i class="icon16 phone-confirmed" title="[`Confirmed`]"></i>
                                         {else}

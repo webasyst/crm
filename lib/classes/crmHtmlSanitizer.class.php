@@ -50,6 +50,7 @@ class crmHtmlSanitizer
      */
     public function sanitize($content)
     {
+        //wa_dumpc($content);
         // Make sure it's a valid UTF-8 string
         $content = preg_replace('~\\xED[\\xA0-\\xBF][\\x80-\\xBF]~', '?', mb_convert_encoding((string) $content, 'UTF-8', 'UTF-8'));
 
@@ -195,6 +196,9 @@ class crmHtmlSanitizer
     protected function sanitizeHtmlAHref($m)
     {
         $url = $this->sanitizeUrl(ifset($m[1]));
+        if (ifset($this->options['verification_key'], false) && strpos($url, '/verification/'.$this->options['verification_key'].'/') !== false) {
+            return '<a href="'.$this->attr_start.'javascript:void(0);'.$this->attr_end.'" class="gray">';
+        }
         return '<a href="'.$this->attr_start.$url.$this->attr_end.'" target="_blank" rel="nofollow">';
     }
 
@@ -349,7 +353,13 @@ class crmHtmlSanitizer
                 }
                 $link = $match[2] ?: $match[3];
                 $link_string = mb_strlen($link) <= 64 ? $link : mb_substr($link, 0, 50) . '...';
-                return '<' . array_push($links, "<a $attr href=\"$protocol://$link\">$link_string</a>") . '>'; 
+                if (ifset($this->options['verification_key'], false) && strpos($link, '/verification/'.$this->options['verification_key'].'/') !== false) {
+                    $link = 'javascript:void(0);';
+                    $attr = '';
+                } else {
+                    $link = $protocol . '://' . $link;
+                }
+                return '<' . array_push($links, "<a $attr href=\"$link\">$link_string</a>") . '>'; 
             }, 
             $value
         );

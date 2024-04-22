@@ -79,7 +79,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
             $field_data += array_fill_keys(['field', 'value', 'ext'], '');
             $field_data['is_composite'] = (is_array($field_data['value']));
 
-            if (!empty($required) && in_array($field_data['field'], $required) && !!trim((string) $field_data['value'])) {
+            if (!empty($required) && in_array($field_data['field'], $required) && trim((string) $field_data['value']) !== '') {
                 unset($required);
             }
             if ($field_data['is_composite']) {
@@ -303,7 +303,7 @@ class crmContactAddMethod extends crmApiAbstractMethod
     private function setData($fields_data, $is_company)
     {
         foreach ($fields_data as $_data) {
-            if (empty($_data['value'])) {
+            if (!isset($_data['value'])) {
                 continue;
             }
             $field_is_multi = ifset($this->all_columns, $_data['field'], 'is_multi', false);
@@ -333,7 +333,24 @@ class crmContactAddMethod extends crmApiAbstractMethod
         }
 
         $this->data['crm_user_id'] = $this->getUser()->getId();
-        if (!$is_company) {
+        if ($is_company) {
+            $this->data['name'] = ifset($this->data, 'company', '');
+        } else {
+            $one_name_field = wa()->getSetting('one_name_field', '', 'crm');
+            if ($one_name_field) {
+                $name = explode(' ', $this->data['name']);
+                if (count($name) > 1) {
+                    $name_order = waContactNameField::getNameOrder();
+                    foreach ($name_order as $_part) {
+                        $_name = (string) array_shift($name);
+                        $this->data[$_part] = $_name;
+                    }
+                } else {
+                    $this->data['firstname'] = (string) reset($name);
+                }
+            } else {
+                $this->data['name'] = waContactNameField::formatName($this->data, true);
+            }
             if (isset($this->data['company'])) {
                 $this->data['company_contact_id'] = $this->getCompanyIdByName($this->data['company']);
             } elseif (isset($this->data['company_contact_id'])) {

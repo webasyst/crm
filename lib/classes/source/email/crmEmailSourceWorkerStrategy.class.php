@@ -560,7 +560,7 @@ abstract class crmEmailSourceWorkerStrategy
     {
         $parts = explode('@', $message_id, 2);
         $middle = substr($parts[0], 16, -16);
-        if ($middle[0] != '.' || substr($middle, -1) != '.') {
+        if (empty($middle) || $middle[0] != '.' || substr($middle, -1) != '.') {
             return null;
         }
         return (int) substr($middle, 1, -1);

@@ -334,4 +334,24 @@ class crmViewHelper
 
         return ifset($icon_map[$icon_class], $icon_class);
     }
+
+    public function phonePrefix($phone_number, $do_replace_prefix = false)
+    {
+        $phone_prefix = wa('crm')->getConfig()->getPhoneTransformPrefix();
+        $phone_digits = ltrim($phone_number, '+');
+        $phone_number = '+'.$phone_digits;
+        if (empty($phone_prefix['input_code']) || empty($phone_prefix['output_code']) || strpos($phone_digits, $phone_prefix['input_code']) !== 0) {
+            // return phone with garantee leading plus (international format)
+            return $phone_number;
+        }
+
+        // case when we have non international format phone number
+        if (!$do_replace_prefix) {
+            // return phone without leading plus in non international format
+            return $phone_digits;
+        }
+
+        // return phone converted to international format
+        return '+'.$phone_prefix['output_code'].ltrim($phone_digits, $phone_prefix['input_code']);
+    }
 }

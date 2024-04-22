@@ -187,7 +187,7 @@
                             {$_phone_number = $contact.phone[$_index]["value"]|default:""|escape}
                             {$_phone_status = $contact.phone[$_index]["status"]|default:""}
                             <li>
-                                <a class="c-phone {if $is_init_call}js-show-call-dialog{/if}" href="{if $is_init_call}javascript:void(0);{else}tel:+{$_phone_number}{/if}" data-phone="{$_phone_number}" data-id="{$contact.id}"  style="display: inline;">
+                                <a class="c-phone {if $is_init_call}js-show-call-dialog{/if}" href="{if $is_init_call}javascript:void(0);{else}tel:{$wa->crm->phonePrefix($_phone_number)}{/if}" data-phone="{$_phone_number}" data-id="{$contact.id}"  style="display: inline;">
 
                                     {if $_phone_status == waContactDataModel::STATUS_CONFIRMED}
                                         <i class="icon16 phone-confirmed" title="[`Confirmed`]"></i>

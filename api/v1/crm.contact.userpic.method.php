@@ -54,10 +54,10 @@ class crmContactUserpicMethod extends crmApiAbstractMethod
             if (empty($crop_size) || $crop_size >= max($img->height, $img->width)) {
                 $crop_size = min($img->height, $img->width);
             }
-            if (empty($crop_x) || $crop_x >= $img->width) {
+            if ($crop_x >= $img->width) {
                 $crop_x = (int) max(0, ($img->width - $crop_size)/2);
             }
-            if (empty($crop_y) || $crop_y >= $img->height) {
+            if ($crop_y >= $img->height) {
                 $crop_y = (int) max(0, ($img->height - $crop_size)/2);
             }
             if (empty($userpic_size) || $userpic_size >= $crop_size) {
@@ -65,7 +65,11 @@ class crmContactUserpicMethod extends crmApiAbstractMethod
             }
 
             $thumb_file_name = "$rand.${userpic_size}x$userpic_size.$pic_ext";
-            $img->crop($crop_size, $crop_size, $crop_x, $crop_y)->save($path.$cropped_file_name);
+            if (method_exists($img, 'fixImageOrientation')) {
+                $img->fixImageOrientation();
+            }
+            $img->crop($crop_size, $crop_size, $crop_x, $crop_y);
+            $img->save($path.$cropped_file_name);
         } catch (Exception $ex) {
             throw new waAPIException('server_error', sprintf_wp('Unable to crop image: %s', $ex->getMessage()), 500);
         }

@@ -7,9 +7,6 @@ class crmTempModel extends crmModel
 
     public function getByHash($hash, $to_unserialize = true)
     {
-        if (strlen($hash) != 32) {
-            return false;
-        }
         $data = $this->getByField('hash', $hash);
         if (!$data) {
             return false;
@@ -49,12 +46,7 @@ class crmTempModel extends crmModel
 
     public function deleteByHash($hash)
     {
-        if (strlen($hash) != 32) {
-            return false;
-        }
-        else {
-            $this->deleteByField('hash', $hash);
-        }
+        $this->deleteByField('hash', $hash);
     }
 
     /**

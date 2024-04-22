@@ -34,6 +34,7 @@ class crmInvoiceEditAction extends crmInvoiceIdAction
             'shop_supported'       => $shop_supported,
             'supported_currencies' => $supported_currencies,
             'has_shop_rights'      => crmShop::hasRights(),
+            'site_url'             => wa()->getRootUrl(true),
         ));
     }
 

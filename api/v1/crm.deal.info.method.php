@@ -327,12 +327,12 @@ class crmDealInfoMethod extends crmApiAbstractMethod
             }
             if (isset($data['blocks']) && is_array($data['blocks'])) {
                 $_blocks = array_filter($data['blocks'], function ($block) {
-                    return !empty($block['id']) && !empty($block['title']) && !empty($block['html']);
+                    return !empty($block['id']) && !empty($block['html']);
                 });
                 $_blocks = array_map(function ($block) use ($app_id) {
                     return [
                         'id' => $app_id . '-' . $block['id'],
-                        'title' => $block['title'],
+                        'title' => ifset($block, 'title', null),
                         'html' => $block['html'],
                     ];
                 }, $_blocks);

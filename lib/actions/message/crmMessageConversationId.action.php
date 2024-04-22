@@ -7,6 +7,8 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
     /** @var array */
     protected $conversation;
 
+    protected $source;
+
     public function execute($contact_id = null)
     {
         // before exceptions
@@ -24,6 +26,10 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
         if (!$conversation_id || !$conversation) {
             $this->notFound(_w('Conversation not found'));
         }
+        if ($conversation['source_id']) {
+            $this->source = crmSource::factory($conversation['source_id']);
+        }
+
         $mm = new crmMessageModel();
         $cs = new crmSourceModel();
 
@@ -63,7 +69,7 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
         }
         $source_emails = $this->getSourceEmailAddresses($source_ids);
 
-        $messages = $mm->getExtMessages($messages);
+        $messages = $mm->getExtMessages($messages, $this->source);
         foreach ($messages as &$m) {
             $message_ids[$m['id']] = $m['id'];
             if ($m['contact_id']) {
@@ -99,6 +105,8 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
         $contact_ids[wa()->getUser()->getId()] = intval(wa()->getUser()->getId());
 
         $contacts = $this->getContacts($contact_ids);
+        $conversation['contacts'] = $contacts;
+        $this->conversation = $conversation = $this->workup($conversation);
 
         // Add userpic for recipients
         if ($is_ui13) {
@@ -136,6 +144,7 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
         $can_edit_conversation = $this->getCrmRights()->canEditConversation($conversation);
 
         $messages = $this->workupMessages($conversation, $messages);
+        $do_confirm_verification = !(new waContactSettingsModel())->getOne(wa()->getUser()->getId(), 'crm', 'verify_no_more_confirmation');
         $this->view->assign(array(
             'recipients'      => [],
             'participants'    => [],
@@ -154,6 +163,7 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
             'send_action_url' => wa()->getAppUrl().'?module=message&action=sendReply',
             'can_edit_conversation' => $can_edit_conversation,
             'short_link' => $short_link,
+            'do_confirm_verification' => $do_confirm_verification ? 1 : 0,
         ));
 
         if ($conversation['type'] == crmConversationModel::TYPE_EMAIL) {
@@ -209,15 +219,21 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
             $this->accessDenied();
         }
 
-        $this->conversation = $this->workup($conversation);
+        // Get conversation source
+        $conversation['source'] = null;
+        if ($conversation['source_id']) {
+            $conversation['source'] = $this->getSourceModel()->getSource($conversation['source_id']);
+        }
+
+        $this->conversation = $conversation;
         return $this->conversation;
     }
 
     protected function workup($conversation)
     {
         $conversation['icon_url'] = null;
-        $conversation['icon'] = 'exclamation';
-        $conversation['icon_fa'] = 'exclamation-circle';
+        $conversation['icon'] = null;
+        $conversation['icon_fa'] = null;
         $conversation['transport_name'] = _w('Unknown');
 
         if ($conversation['type'] == crmMessageModel::TRANSPORT_EMAIL) {
@@ -230,23 +246,44 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
             $conversation['transport_name'] = 'SMS';
         }
         if ($conversation['source_id']) {
-            $source_helper = crmSourceHelper::factory(crmSource::factory($conversation['source_id']));
+            $source_helper = crmSourceHelper::factory($this->source);
             $res = $source_helper->workupConversation($conversation);
             $conversation = $res ? $res : $conversation;
             $conversation['features'] = $source_helper->getFeatures();
+            if (wa()->whichUI('crm') === '2.0') {
+                $aux_items = [];
+                $contact = ifset($conversation['contacts'][$conversation['contact_id']]);
+                if (!empty($contact) && $this->source->getParam('ask_verify') && !$contact['has_password']) {
+                    $aux_items = [
+                        'reply_form_dropdown_items' => [
+                            '<a href="javascript:void(0);" class="inline-link js-request-auth"><span class="icon"><i class="fas fa-user-check"></i></span><span class="nowrap">' . _w('Request authorization').'</span></a>'
+                        ]
+                    ];
+                }
+                $source_aux = ['source' => $source_helper->getUI20ConversationAuxItems($conversation)];
+                $plugins_aux = wa('crm')->event('conversation_view', $conversation, [ 'reply_form_dropdown_items' ]);
+                $plugins_aux = array_merge($source_aux, $plugins_aux);
+                foreach ($plugins_aux as $_plugin_aux) {
+                    foreach ((array) $_plugin_aux as $_key => $_aux_items) {
+                        if (!empty($_aux_items) && is_array($_aux_items)) {
+                            $aux_items[$_key] = array_merge(ifset($aux_items, $_key, []), $_aux_items);
+                        }
+                    }
+                }
+                $conversation['aux_items'] = $aux_items;
+            }
+        }
+        if (empty($conversation['icon_url']) && empty($conversation['icon'])) {
+            $conversation['icon'] = 'exclamation';
+        }
+        if (empty($conversation['icon_url']) && empty($conversation['icon_fa'])) {
+            $conversation['icon_fa'] = 'exclamation-circle';
         }
 
         // In the last message, we store only the last incoming message.
         // Let's get the last letter, it will be incoming or outgoing.
         $last_message = $this->getMessageModel()->select('*')->where('conversation_id = '.(int)$conversation['id'])->order('id DESC')->limit(1)->fetchAssoc();
         $conversation['conversation_last_message'] = $last_message;
-
-        // Get conversation source
-        $conversation['source'] = null;
-        if ($conversation['source_id']) {
-            $conversation['source'] = $this->getSourceModel()->getSource($conversation['source_id']);
-        }
-
         return $conversation;
     }
 
@@ -298,10 +335,12 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
     protected function getContacts($ids)
     {
         $collection = new crmContactsCollection('/id/'.join(',', $ids));
-        $col = $collection->getContacts('email,photo_url_16', 0, count($ids));
+        $col = $collection->getContacts('name,firstname,lastname,middlename,email,password,photo_url_16', 0, count($ids));
 
         $contacts = array();
         foreach ($col as $id => $c) {
+            $c['has_password'] = !empty($c['password']);
+            unset($c['password']);
             $contacts[$id] = new crmContact($c);
         }
         return $contacts;

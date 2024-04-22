@@ -807,6 +807,7 @@ var CRMContactAddForm = ( function($) {
 
         // DOM
         that.$wrapper = options["$wrapper"];
+        that.$locales = options["locales"];
         that.$toggleW = that.$wrapper.find(".js-contact-view-toggle");
 
         // VARS
@@ -839,7 +840,7 @@ var CRMContactAddForm = ( function($) {
         var is_selected = false;
 
         $field.autocomplete({
-            appendTo: that.$wrapper,
+            appendTo: $field.closest('.value'),
             source: source,
             minLength: 2,
             html: true,
@@ -872,7 +873,10 @@ var CRMContactAddForm = ( function($) {
 
         function onSelect(item) {
             if (item.id > 0) {
+                
                 $field.val(item.name);
+                $field.data('photo_url', item.photo_url);
+                $field.data('is_company', item.data.is_company);
                 $idField.val(item.id);
                 setData(item.data);
             } else if (item.id < 0) {
@@ -975,16 +979,37 @@ var CRMContactAddForm = ( function($) {
             $toggleW = that.$toggleW,
             $activeToggle = $toggleW.find("." + active_class),
             $field = that.$wrapper.find(".js-action-field"),
+            $submitButton = that.$wrapper.closest('.dialog-body').find(".js-some-action"),
             $fields = that.$wrapper.find(".js-field");
 
         var $fio = that.$wrapper.find(".js-fio"),
             $comboName = that.$wrapper.find(".js-combo-name");
 
-        $toggleW.on("click", ".c-toggle", setToggle);
+        //$toggleW.on("click", ".c-toggle", setToggle);
 
-        function setToggle(event, reset_form) {
+        $toggleW.waSwitch({
+            ready: function (wa_switch) {
+                let $label = wa_switch.$wrapper.siblings('label');
+                wa_switch.$label = $label;
+                wa_switch.active_text = $label.data('active-text');
+                wa_switch.inactive_text = $label.data('inactive-text');
+            },
+            change: function(active, wa_switch) { 
+                //reset_form = !reset_form;
+                var reset_form = false;
+                if (active) {
+                    showContent("fio", reset_form)
+                    wa_switch.$label.text(wa_switch.active_text);
+                }
+                else {
+                    showContent("name", reset_form)
+                    wa_switch.$label.text(wa_switch.inactive_text);
+                }
+             }
+        });
+
+        /*function setToggle(event, reset_form) {
             event.preventDefault();
-
             reset_form = !reset_form;
 
             var $toggle = $(this),
@@ -1004,7 +1029,7 @@ var CRMContactAddForm = ( function($) {
                 // render content
                 showContent(mode, reset_form);
             }
-        }
+        }*/
 
         function showContent(mode, reset_form) {
             if (reset_form) {
@@ -1015,12 +1040,14 @@ var CRMContactAddForm = ( function($) {
                 $fio.show();
                 $comboName.hide();
                 $field.val("new");
+                $submitButton.val(that.$locales['add']);
                 $fields.attr("disabled", false);
 
             } else {
                 $fio.hide();
                 $comboName.show();
                 $field.val("search");
+                $submitButton.val(that.$locales['select']);
             }
 
             $(document).trigger("toggleChanged");

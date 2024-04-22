@@ -13,33 +13,36 @@
                         <br>
                         {sprintf('[`<a href="%s" target="_blank">See documentation</a> for details.`]', '[`https://support.webasyst.com/22505/crm-sms-notifications/`]')}
                     </p>
+                
+                {/if}
 
-                    <div class="field-group">
-                        <div class="field">
-                            <div class="name">[s`National direct-dialing code (NDD)`]</div>
+                <div class="field-group">
+                    <div class="field">
+                        <div class="name">[s`National direct-dialing code (NDD)`]</div>
 
-                            {$_phone_transform_prefix = $phone_transform_prefix|default:[]}
+                        {$_phone_transform_prefix = $phone_transform_prefix|default:[]}
 
-                            <div class="value">
-                                {$_input_code = $_phone_transform_prefix['input_code']|default:''}
-                                <input type="text" class="short" name="phone_transform_prefix[input_code]" value="{$_input_code}">
-                                <div class="hint" style="margin-top: 10px;">
-                                    [s`Enter the NDD code which is used for making calls within your country.`]<br>
-                                    [s`The NDD, if specified, will be replaced with the country code in website visitors’ phone numbers.`]
-                                </div>
+                        <div class="value">
+                            {$_input_code = $_phone_transform_prefix['input_code']|default:''}
+                            <input type="text" class="short" name="phone_transform_prefix[input_code]" value="{$_input_code}">
+                            <div class="hint" style="margin-top: 10px;">
+                                [s`Enter the NDD code which is used for making calls within your country.`]<br>
+                                [s`The NDD, if specified, will be replaced with the country code in website visitors’ phone numbers.`]
                             </div>
+                        </div>
 
-                            <div class="name">[s`Country code`]</div>
-                            <div class="value">
-                                {$_output_code = $_phone_transform_prefix['output_code']|default:''}
-                                + <input type="text" class="short" name="phone_transform_prefix[output_code]" value="{$_output_code}">
-                                <div class="hint" style="margin-top: 10px;">
-                                    [s`Enter your country’s phone number code to be used in website visitors’ phone numbers instead of the NDD.`]
-                                </div>
+                        <div class="name">[s`Country code`]</div>
+                        <div class="value">
+                            {$_output_code = $_phone_transform_prefix['output_code']|default:''}
+                            + <input type="text" class="short" name="phone_transform_prefix[output_code]" value="{$_output_code}">
+                            <div class="hint" style="margin-top: 10px;">
+                                [s`Enter your country’s phone number code to be used in website visitors’ phone numbers instead of the NDD.`]
                             </div>
                         </div>
                     </div>
+                </div>
 
+                {if count($sms_adapters)}
                     {foreach $sms_adapters as $i => $a}
                         <div class="field-group">
                             <div class="field">
@@ -91,18 +94,16 @@
                     </div>
                 {/if}
             </div>
-
-            {if count($sms_adapters)}
-                <div class="crm-form-buttons">
-                    <div class="crm-submit">
-                        <input class="button green" type="submit" name="" value="[`Save`]">
-                        <i class="icon16 loading crm-loading" style="display: none;"></i>
-                        <span class="crm-success-status" style="display: none;">
-                            [`Saved`] <i class="icon16 yes crm-yes-status"></i>
-                        </span>
-                    </div>
+            
+            <div class="crm-form-buttons">
+                <div class="crm-submit">
+                    <input class="button green" type="submit" name="" value="[`Save`]">
+                    <i class="icon16 loading crm-loading" style="display: none;"></i>
+                    <span class="crm-success-status" style="display: none;">
+                        [`Saved`] <i class="icon16 yes crm-yes-status"></i>
+                    </span>
                 </div>
-            {/if}
+            </div>
 
         </form>
     </div>

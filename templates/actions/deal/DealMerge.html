@@ -16,14 +16,14 @@
         <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
         <link href="{$wa_app_static_url}css/crm2.css?v={$wa->version()}" rel="stylesheet">
 
-    {wa_js file="js/min/vendor.min.js"}
+    {wa_js}
         {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
         {$wa_url}wa-content/js/jquery/jquery-migrate-1.2.1.min.js
         {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
     {/wa_js}{strip}
 
     {/strip}
-    {wa_js file="js/min/crm.min.js"}
+    {wa_js}
         {$wa_app_static_url}js/crmDialog/crmDialog.js
         {$wa_app_static_url}js/crm.js
         {$wa_app_static_url}js/deal.js

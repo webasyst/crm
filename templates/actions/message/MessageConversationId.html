@@ -129,6 +129,7 @@
                     {foreach $extras_videos as $_video}
                     {if isset($_video.id)}
                         {$extra_link = "`$wa_app_url`?module=file&action=download&id=`$_video.id`"}
+                        {*$extra_link_1 = "{$_video.path}/{$_video.name}"*}
                     {elseif isset($_video.url)}
                         {$extra_link = $_video.url}
                     {/if}
@@ -218,8 +219,8 @@
 <div class="c-messages-conversation-wrapper">
     {skeleton}
 <div class="c-messages-page-content-wrapper">
-
     <div class="c-message-conversation-page shadowed" id="js-message-conversation-page" data-conv-id="{$conversation.id}">
+        <div class="c-conversation-body">
         {strip}
         <header class="flexbox middle space-12 c-page-header-section">
             <div class="align-center custom-my-12 mobile-only">
@@ -457,11 +458,11 @@
 
         {$current_user_id = $wa->userId()}
 
-        <div class="c-conversation-body">
 
             {if $conversation.type == 'EMAIL'}
                 <section class="c-email-conversation-section" id="js-email-conversation-section">
-                    <div class="c-messages-list js-messages-list custom-py-8">
+                    <div>
+                    <div class="c-messages-list js-messages-list hide-scrollbar">
                         <div class="custom-pt-8 custom-pb-8 js-lazy-load">
                             <div class="spinner custom-p-4"></div>
                         </div>
@@ -472,7 +473,10 @@
                             {$message_date = waDateTime::format('date', $_m.create_datetime)}
                             {$current_date = $message_date}
                             {$is_another_user = ($_m.direction == crmMessageModel::DIRECTION_OUT && $_m.creator_contact_id !== $current_user_id)}
-                            <div class="c-message-wrapper js-message-wrapper {if $_m.direction == 'IN'}left{else}right{/if}" data-id="{$_m.id}">
+                            {$is_verification_message = !empty($_m.params) && !empty($_m.params.is_contact_updated) && $_m.params.is_contact_updated == '1'}
+
+                            <div class="c-message-wrapper js-message-wrapper {if $_m.direction == 'IN'}left{else}right{/if} {if $is_verification_message}verification_message{/if}"
+                            data-id="{$_m.id}" {if $is_verification_message}data-verification="{$_m.contact_id}"{/if}>
                                 <div class="fields c-message-item {if $_m.direction == 'IN'}c-message-in{else}c-message-out{/if} {if $is_another_user}another-user{/if}">
                                     <div class="c-message-tail">
                                         <svg width="13" height="18" viewBox="0 0 13 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -544,7 +548,9 @@
                         {/foreach}
 
                     </div>
-                    {if $source_is_disabled}
+                    </div>
+                </section>
+                {if $source_is_disabled}
                     <section class="c-reply-section">
                         <button class="button light-gray rounded js-messages-list--to-bottom-button">
                             <i class="fas fa-angle-down"></i>
@@ -564,11 +570,11 @@
                             </div>
                         </section>
                     {/if}
-                </section>
 
             {elseif $conversation.type == 'IM'}
                 <section class="c-im-conversation-section" id="js-im-conversation-section">
-                    <div class="c-messages-list js-messages-list custom-py-8">
+                    <div>
+                    <div class="c-messages-list js-messages-list hide-scrollbar">
                         <div id="js-messages-list--transparent-layer"></div>
                         <div class="custom-pt-8 custom-pb-8 js-lazy-load">
                             <div class="spinner custom-p-4"></div>
@@ -581,6 +587,7 @@
                             {$current_date = $message_date}
                             {$_contact_name = null}
                             {$is_another_user = ($_m.direction == crmMessageModel::DIRECTION_OUT && $_m.creator_contact_id !== $current_user_id)}
+                            {$is_verification_message = !empty($_m.params) && !empty($_m.params.is_contact_updated) && $_m.params.is_contact_updated == '1'}
 
                             {if $_m.direction == crmMessageModel::DIRECTION_OUT}
                                 {if isset($_m.from_formatted)}
@@ -593,7 +600,8 @@
                                 {/if}
                             {/if}
 
-                            <div class="c-message-wrapper js-message-wrapper {if $_m.direction == 'IN'}left{else}right{/if}" data-id="{$_m.id}">
+                            <div class="c-message-wrapper js-message-wrapper {if $_m.direction == 'IN'}left{else}right{/if} {if $is_verification_message}verification_message{/if}"
+                            data-id="{$_m.id}" {if $is_verification_message}data-verification="{$_m.contact_id}"{/if}>
                                 <div class="fields c-message-item {if $_m.direction == 'IN'}c-message-in{else}c-message-out{/if} {if $is_another_user}another-user{/if}">
                                     <div class="c-message-tail">
                                         <svg width="13" height="18" viewBox="0 0 13 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -654,32 +662,33 @@
                         {/foreach}
 
                     </div>
-
-                    {if $source_is_disabled}
+                    </div>
+                </section>
+                {if $source_is_disabled}
+                <section class="c-reply-section">
+                    <button class="button light-gray rounded js-messages-list--to-bottom-button">
+                        <i class="fas fa-angle-down"></i>
+                    </button>
+                    <div class="flexbox middle custom-p-16 source-not-found">[`Oops, sorry, this messenger is disabled :(`]</div>
+                </section>
+                {elseif $conversation.contact_id && !empty($contacts[$conversation.contact_id])}
                     <section class="c-reply-section">
                         <button class="button light-gray rounded js-messages-list--to-bottom-button">
                             <i class="fas fa-angle-down"></i>
                         </button>
-                        <div class="flexbox middle custom-p-16 source-not-found">[`Oops, sorry, this messenger is disabled :(`]</div>
-                    </section>
-                    {elseif $conversation.contact_id && !empty($contacts[$conversation.contact_id])}
-                        <section class="c-reply-section">
-                            <button class="button light-gray rounded js-messages-list--to-bottom-button">
-                                <i class="fas fa-angle-down"></i>
-                            </button>
-                            <div class="c-reply-form-wrapper js-reply-wrapper">
-                                <div class="flexbox middle c-visible">
-                                    {* RENDER OVERLOADED REPLY FORM *}
-                                    {$is_images_enabled = $conversation.features.images}
-                                    {$is_files_enabled = $conversation.features.attachments}
-                                    {*if empty($conversation.reply_form_html)}
-                                        {$conversation.reply_form_html}
-                                        <div class="c-column middle right">
-                                            <a class="button light-gray js-revert" href="javascript:void(0);">[`Cancel`]</a>
-                                        </div> *}
-                                    {* RENDER DEFAULT REPLY FORM *}
-                                    {if isset($conversation.source.id)}
-                                        <form class="flexbox full-width space-8 middle width-100" action="">
+                        <div class="c-reply-form-wrapper js-reply-wrapper">
+                            <div class="flexbox middle c-visible">
+                                {* RENDER OVERLOADED REPLY FORM *}
+                                {$is_images_enabled = $conversation.features.images}
+                                {$is_files_enabled = $conversation.features.attachments}
+                                {*if empty($conversation.reply_form_html)}
+                                    {$conversation.reply_form_html}
+                                    <div class="c-column middle right">
+                                        <a class="button light-gray js-revert" href="javascript:void(0);">[`Cancel`]</a>
+                                    </div> *}
+                                {* RENDER DEFAULT REPLY FORM *}
+                                {if isset($conversation.source.id)}
+                                    <form class="flexbox full-width space-8 middle width-100" action="">
 
                                             {* Hidden fields *}
                                             <input name="deal_id" type="hidden" value="{$conversation.deal_id|default:"none"}" class="js-field js-deal-id">
@@ -691,13 +700,34 @@
                                                 <div class="flexbox js-default-drop-area">
                                                     <div class="c-files-wrapper js-files-wrapper">
                                                         <div class="c-drop-wrapper js-drop-area">
-                                                            <span class="custom-pr-12 icon size-16 js-message-attachment {if !$is_images_enabled && !$is_images_enabled}is-disabled{/if}">
+                                                            <span class="{if empty($conversation.aux_items.reply_form_dropdown_items)}custom-pr-12 {/if}icon size-16 js-message-attachment {if !$is_images_enabled && !$is_images_enabled}is-disabled{/if}">
                                                                 <i class="fas fa-paperclip"></i>
                                                             </span>
                                                             {*<div class="js-drop-text" data-default="[`Attach file`]" data-hover="[`Drop file here`]">[`Attach file`]</div>*}
                                                             <input class="c-drop-field js-drop-field" type="file" multiple {if !$is_images_enabled && !$is_files_enabled}disabled{/if}>
                                                         </div>
                                                     </div>
+                                                    {if !empty($conversation.aux_items.reply_form_dropdown_items)}
+                                                    <div class="c-plugin-dropdown ">
+                                                        <div class="dropdown" id="js-message-form-dropdown">
+                                                            <a href="javascript:void(0);" class="dropdown-toggle without-arrow flexbox c-name">
+                                                                <span class="icon size-14 text-light-gray"><i class="fas fa-ellipsis-h"></i></span>
+                                                            </a>
+                                                            <div class="dropdown-body right" style="width: auto; min-width: 200px;">
+                                                                <ul class="menu" style="margin: 0;">
+                                                                    {foreach $conversation.aux_items.reply_form_dropdown_items as $_item}
+                                                                        <li>{$_item}</li>
+                                                                    {/foreach}
+                                                                </ul>
+                                                            </div>
+                                                            <script>
+                                                                ( function($) {
+                                                                    $("#js-message-form-dropdown").waDropdown();
+                                                                })(jQuery);
+                                                            </script>
+                                                        </div>
+                                                    </div>
+                                                    {/if}
                                                     <div class="width-100 flexbox middle">
                                                         <textarea class="c-textarea js-textarea" name="body" placeholder="[`Message`]"></textarea>
                                                     </div>
@@ -712,71 +742,70 @@
                                                     </div>
                                                 </div>
 
-                                                {* FILES *}
+                                            {* FILES *}
 
-                                                    <div class="flexbox wrap c-upload-list js-upload-list">
-                                                        {capture assign="_file_template_html"}
-                                                            <div class="small c-upload-item flexbox space-4 middle ">
-                                                                <i class="icon fas fa-file"></i>
-                                                                <span class="c-name js-name"></span>
-                                                                <div class="c-progress-wrapper progress js-bar">
-                                                                    <progress class="bar js-progress" id="js-progress" min="0" max="100" value=""></progress>
-                                                                    <span class="icon text-green size-14 js-progress-success-icon"><i class="fas fa-check-circle"></i></span>
-                                                                </div>
-                                                                <button class="nobutton flexbox middle text-gray js-file-delete"><i class="icon fas fa-times-circle delete"></i></button>
-                                                                <div class="js-status" id="tooltip-error" data-wa-tooltip-content="[`Your file is too large. You need to increase the file upload size limit in the PHP configuration.`]">
-                                                                    <i class="fas fa-exclamation-triangle state-error"></i>
-                                                                </div>
+                                                <div class="flexbox wrap c-upload-list js-upload-list">
+                                                    {capture assign="_file_template_html"}
+                                                        <div class="small c-upload-item flexbox space-4 middle ">
+                                                            <i class="icon fas fa-file"></i>
+                                                            <span class="c-name js-name"></span>
+                                                            <div class="c-progress-wrapper progress js-bar">
+                                                                <progress class="bar js-progress" id="js-progress" min="0" max="100" value=""></progress>
+                                                                <span class="icon text-green size-14 js-progress-success-icon"><i class="fas fa-check-circle"></i></span>
                                                             </div>
-                                                            <script>
-                                                                ( function($) {
-                                                                    $("#tooltip-error").waTooltip();
-                                                                })(jQuery);
-                                                            </script>
-                                                        {/capture}
-                                                        <div class="js-status-message" id="tooltip-error-message" >
+                                                            <button class="nobutton flexbox middle text-gray js-file-delete"><i class="icon fas fa-times-circle delete"></i></button>
+                                                            <div class="js-status" id="tooltip-error" data-wa-tooltip-content="[`Your file is too large. You need to increase the file upload size limit in the PHP configuration.`]">
+                                                                <i class="fas fa-exclamation-triangle state-error"></i>
+                                                            </div>
                                                         </div>
+                                                        <script>
+                                                            ( function($) {
+                                                                $("#tooltip-error").waTooltip();
+                                                            })(jQuery);
+                                                        </script>
+                                                    {/capture}
+                                                    <div class="js-status-message" id="tooltip-error-message" >
                                                     </div>
-                                            </div>
-                                        </form>
-                                        <script>
-                                            ( function($) {
-                                                new CRMImConversationSection({
-                                                    $wrapper: $("#js-im-conversation-section .js-reply-wrapper"),
-                                                    send_action_url: {$send_action_url|default:''|json_encode},
-                                                    hash: "{$hash|default:""}",
-                                                    file_template_html: {$_file_template_html|json_encode},
-                                                    max_upload_size: {waRequest::getUploadMaxFilesize()},
-                                                    is_images_enabled: {$is_images_enabled|json_encode},
-                                                    is_files_enabled: {$is_files_enabled|json_encode}
-                                                });
-                                            })(jQuery);
-                                        </script>
-                                    {else}
-                                        <div class="c-reply-form-error">[`Source not found`]</div>
-                                    {/if}
-
-                                </div>
-                                {*<div class="flexbox middle c-invisible">
-                                    <span class="custom-pr-12 icon size-16">
-                                    {if !empty($conversation.icon_fab)}
-                                        <i class="fab fa-{$conversation.icon_fab}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
-                                    {elseif !empty($conversation.icon_fa)}
-                                        <i class="fas fa-{$conversation.icon_fa}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
-                                    {else}
-                                        <img src="{$conversation.icon_url}" data-fa-i2svg>
-                                    {/if}
-                                    </span>
-                                    <span class="custom-pr-12 icon size-16">
-                                        <i class="fas fa-plus"></i>
-                                    </span>
-                                    <textarea class="c-textarea js-visible-textarea-old" placeholder="[`Message`]"></textarea>
-                                </div>*}
+                                                </div>
+                                        </div>
+                                    </form>
+                                    <script>
+                                        ( function($) {
+                                            new CRMImConversationSection({
+                                                $wrapper: $(".c-reply-form-wrapper.js-reply-wrapper"),
+                                                send_action_url: {$send_action_url|default:''|json_encode},
+                                                hash: "{$hash|default:""}",
+                                                file_template_html: {$_file_template_html|json_encode},
+                                                max_upload_size: {waRequest::getUploadMaxFilesize()},
+                                                is_images_enabled: {$is_images_enabled|json_encode},
+                                                is_files_enabled: {$is_files_enabled|json_encode}
+                                            });
+                                        })(jQuery);
+                                    </script>
+                                {else}
+                                    <div class="c-reply-form-error">[`Source not found`]</div>
+                                {/if}
 
                             </div>
-                        </section>
-                    {/if}
-                </section>
+                            {*<div class="flexbox middle c-invisible">
+                                <span class="custom-pr-12 icon size-16">
+                                {if !empty($conversation.icon_fab)}
+                                    <i class="fab fa-{$conversation.icon_fab}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
+                                {elseif !empty($conversation.icon_fa)}
+                                    <i class="fas fa-{$conversation.icon_fa}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
+                                {else}
+                                    <img src="{$conversation.icon_url}" data-fa-i2svg>
+                                {/if}
+                                </span>
+                                <span class="custom-pr-12 icon size-16">
+                                    <i class="fas fa-plus"></i>
+                                </span>
+                                <textarea class="c-textarea js-visible-textarea-old" placeholder="[`Message`]"></textarea>
+                            </div>*}
+
+                        </div>
+                    </section>
+                {/if}
             {/if}
             <div class="c-conversation-body--blank" style="opacity: 0; position: absolute; top: 0;">
 
@@ -802,7 +831,11 @@
                     "deal_detach_confirm_button"    => {_w("Detach")},
                     "funnel_deleted"                => {_w("Funnel deleted")},
                     "owner"                         => {_w("Owner")},
-                    "close"                         => {_w("Close")}
+                    "close"                         => {_w("Close")},
+                    "verify_confirm_title"          => {_w("Client verification request")},
+                    "verify_confirm_text"           => {_w("A verification link will be sent to the client.")},
+                    "verify_confirm_button"         => {_w("Send verification request")},
+                    "verify_no_more_confirmation_label" => {_w("Don’t show again")}
                 ]}
 
                 new CRMMessageConversationPage({
@@ -817,7 +850,8 @@
                     last_message_id: {$last_id|default:0},
                     check_interval: {if $conversation.type == 'EMAIL'}300000{else}20000{/if},
                     locales: {$_locales|json_encode},
-                    short_link: {$short_link|default: 0}
+                    short_link: {$short_link|default: 0},
+                    do_confirm_verification: {$do_confirm_verification|default: true}
                 });
 
             })(jQuery);
@@ -831,9 +865,9 @@
 {/if}
 
 {if !$iframe}
-<div class="sidebar right width-20rem not-blank bordered-left desktop-only" id="c-messages-sidebar-right" >
+<div class="sidebar right width-20rem not-blank bordered-left desktop-only" id="c-messages-sidebar-right" style="top: 0;">
     {if $_contact.id|default:null}
-        {* Попробуем вместо SSR подтянуть SPA с ипрофилем в iframe *}
+        {* Попробуем вместо SSR подтянуть SPA с профилем в iframe *}
 
         <div class="custom-px-16 c-info-additional js-info-additional hidden" id="c-messages-info-additional">
             <div class="small gray cursor-pointer c-info-toggle js-info-toggle custom-mb-24">

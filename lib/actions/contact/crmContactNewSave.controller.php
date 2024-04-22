@@ -38,7 +38,7 @@ class crmContactNewSaveController extends crmContactSaveController
                 $this->errors = $controller->errors;
                 return;
             }
-            $post_deal['contact_id'] = ifset($contact['id']);
+            $post_deal['contact_id'] = $contact['id'];
             $post_deal['id'] = $controller->saveDeal($post_deal);
             $this->response['redirect_url'] = wa()->getAppUrl().'deal/'.$post_deal['id'];
         } else {

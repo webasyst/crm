@@ -714,13 +714,16 @@ var CRMReminders = (function ($) {
                 }
 
             $(document).on('is_completed_loaded_false', function(event, data) {
-                is_loaded = false;
-                //append new compl text from response
-                if (data.new_text) $section.find('.js-completed-reminders-btn-text').text(data.new_text);
-                
-                if ($section.hasClass('hidden')) $section.removeClass('hidden');
-                //reduce sidebar counters
-                reduceCounter(data.user_id, data.state);
+                if (data) {
+                    //append new compl text from response
+                    if (data.new_text) $section.find('.js-completed-reminders-btn-text').text(data.new_text);
+                    
+                    if ($section.hasClass('hidden')) $section.removeClass('hidden');
+                    //reduce sidebar counters
+                    reduceCounter(data.user_id, data.state);
+                } else {
+                    is_loaded = false;
+                }
              });
 
         // EVENT
@@ -789,8 +792,8 @@ var CRMReminders = (function ($) {
 
         function onToggleClick(event) {
             event.preventDefault();
-            //$('body').toggleClass('is-locked');
-            if (is_loaded) {
+            
+            if (is_loaded || is_open) {
                 show(false, true);
             } else {
                 if (!is_locked) {
@@ -859,8 +862,6 @@ var CRMReminders = (function ($) {
                 is_open = false;
                 $list.slideUp(300);
             }
-
-            
         }
 
         function completedClickWatcher(e) {
@@ -1183,6 +1184,8 @@ var CRMReminder = (function ($) {
         $reminder.css('display','none'); // Hide the reminder without waiting for the server's response;
         $marker.addClass("is-done");
 
+        $(document).trigger('is_completed_loaded_false', false);
+
         var id = that.id,
             href_params = (that.setting_deal_id > 0 ? '&deal=' + that.setting_deal_id : '') + (that.setting_contact_id > 0 ? '&contact=' + that.setting_contact_id : '');
             href = "?module=reminder&action=markAsDone" + href_params,
@@ -1196,12 +1199,10 @@ var CRMReminder = (function ($) {
             if (response.status === "ok") {
                 const new_count_text = response?.data?.completed_title;
                 $reminder.remove();
-                
                 if (!that.$iframe) {
                     //reduceCounter();
                     $.crm.sidebar.reload();
                 }
-               
                 //trigger is_loaded false
                 $(document).trigger('is_completed_loaded_false', {user_id: that.reminder_user_id, state: that.state, new_text: new_count_text});
 

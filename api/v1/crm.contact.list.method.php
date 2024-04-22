@@ -355,6 +355,7 @@ class crmContactListMethod extends crmApiAbstractMethod
                 'create_app_id',
                 'create_method',
                 'is_user',
+                'company'
             ],
             $fields
         );

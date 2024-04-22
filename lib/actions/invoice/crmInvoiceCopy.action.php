@@ -23,7 +23,8 @@ class crmInvoiceCopyAction extends crmInvoiceIdAction
             'shop_autocomplete_url' => wa()->getAppUrl('shop').'?action=autocomplete&with_counts=1',
             'shop_get_product_url'  => wa()->getAppUrl('shop').'?module=orders&action=getProduct',
             'has_shop_rights'       => crmShop::hasRights(),
-            'invoice_template' => 'templates/'.$actions_path.'/invoice/InvoiceEdit.html'
+            'invoice_template' => 'templates/'.$actions_path.'/invoice/InvoiceEdit.html',
+            'site_url'             => wa()->getRootUrl(true),
         ));
     }
 

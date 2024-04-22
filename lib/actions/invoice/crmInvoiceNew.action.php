@@ -102,6 +102,7 @@ class crmInvoiceNewAction extends crmInvoiceViewAction
             'shop_autocomplete_url' => wa()->getAppUrl('shop').'?action=autocomplete&with_counts=1',
             'shop_get_product_url'  => wa()->getAppUrl('shop').'?module=orders&action=getProduct',
             'has_shop_rights'       => crmShop::hasRights(),
+            'site_url'             => wa()->getRootUrl(true),
         ));
 
         wa('crm')->getConfig()->setLastVisitedUrl('invoice/');

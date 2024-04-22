@@ -27,7 +27,7 @@
     <link href="{$wa_app_static_url}css/crm2.css?v={$wa->version()}" rel="stylesheet">
     <link href="{$wa_url}wa-content/js/redactor/2/redactor.css?v{$wa->version(true)}" rel="stylesheet">
 
-    {wa_js file="js/min/vendor.min.js"}
+    {wa_js}
         {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
         {$wa_app_static_url}js/jquery/jquery-ui.min.js
         {$wa_url}wa-content/js/jquery-plugins/jquery.store.js
@@ -40,7 +40,7 @@
         <script src="{$wa_url}wa-content/js/redactor/2/{$_locale_string}.js?v{$wa->version(true)}"></script>
     {/if}
 
-    {wa_js file="js/min/crm.min.js"}
+    {wa_js}
         {$wa_app_static_url}js/crm.js
         {$wa_app_static_url}js/invoice.js
         {$wa_app_static_url}js/contact.add.js
@@ -69,9 +69,13 @@
 
 {$_contact_id = ""}
 {$_contact_name = ""}
+{$_company_name = ""}
 {if !empty($contact)}
+    {$_exists = $contact->exists()}
+    {$_userpic = $contact->getPhoto(32)}
     {$_contact_id = $contact.id}
     {$_contact_name = $contact->getName()}
+    {$_company_name = $contact->get('company')}
 {/if}
 {$_is_admin = $wa->user()->isAdmin($wa->app())}
 {$_can_use_shop = ( !empty($shop_supported) && !empty($has_shop_rights) )}
@@ -89,16 +93,16 @@
 <div class="c-invoice-edit-page " id="c-invoice-edit-page">
 
     <form action="/">
-        <h1 class="c-header flexbox middle space-8 wrap">
+        <h1 class="c-header flexbox middle space-12 wrap">
             <a href="javascript:void(0);"class="mobile-only back middle js-invoice-hide-mobile"><i class="fas fa-arrow-circle-left"></i></a>
             <span class="h3-mobile">
                 [`Invoice`] [`#`]
-                <input class="c-number js-invoice-number short" type="text" name="invoice[number]" placeholder="123" value="{$invoice.number|escape}">
+                <input class="c-number js-invoice-number shorter" type="text" name="invoice[number]" placeholder="123" value="{$invoice.number|escape}">
             </span>
             <span class="h3-mobile">
                 [`issued on`]
                 <span>
-                    <input class="c-date js-invoice-datepicker" type="text" value="{$invoice.invoice_date|wa_date}">
+                    <input class="c-date js-invoice-datepicker shorter" type="text" value="{$invoice.invoice_date|wa_date}">
                     <input name="invoice[invoice_date]" type="hidden" value="{$invoice.invoice_date}">
                 </span>
             </span>
@@ -109,50 +113,60 @@
             <div class="field">
                 <div class="name">
                     [`Expires in`]
+                    <span id="tooltip-expires" data-wa-tooltip-content="[`Optional field`]">
+                        <i class="fas fa-question-circle text-light-gray"></i>
+                    </span>
+                    <script>
+                        ( function($) {
+                            $("#tooltip-expires").waTooltip();
+                        })(jQuery);
+                    </script>
                 </div>
+                {$not_empty_date = !empty($invoice.due_days) || !empty($invoice.due_date)}
                 <div class="value">
-                    <input class="js-due-days-field" type="text" name="invoice[due_days]" value="{if !empty($invoice.due_days) && $invoice.due_days > 0}{$invoice.due_days|escape}{/if}" pattern="^\d*$" style="width: 38px; text-align: center;">&nbsp;[`days`]
-
-                    <div class="c-due-date-wrapper state-with-inner-icon c-datepicker left">
-                        <input class="js-invoice-due-datepicker" value="{$invoice.due_date|wa_date|default:""}" type="text">
-                        <span class="icon js-focus-on-field"><i class="fas fa-calendar-alt"></i></span>
-                        <input name="invoice[due_date]" type="hidden" value="{$invoice.due_date|default:""}">
-                    </div>
-
-                    <a href="javascript:void(0);" class="inline-link small js-clear-due-date" style="{if empty($invoice.due_date)}display: none;{/if}"> <span class="c-dotted">[`clear due date`]</span></a>
-                </div>
-            </div>
-            <div class="field">
-                <div class="name">[`Company`]</div>
-                <div class="value flexbox wrap-mobile">
-                    {if $companies}
-                        <div class="wa-select">
-                            <select class="js-company-select not-styled text-ellipsis" name="invoice[company_id]">
-                                {foreach $companies as $_company}
-                                    <option value="{$_company.id}"{if $_company.id == $company.id} selected{/if}>
-                                        {$_company.name|escape}
-                                    </option>
-                                {/foreach}
-                            </select>
+                    <span class="switch small" id="switch-due-date-show">
+                        <input type="checkbox" name="invoice[due_date_show]" {if $not_empty_date}checked{/if}>
+                    </span>
+                    <script>
+                    ( function($) {
+                        $("#switch-due-date-show").waSwitch({
+                            change: function(active, wa_switch) { 
+                                if (active) {
+                                    $(".c-due-date").removeClass('hidden');
+                                }
+                                else {
+                                    $(".c-due-date").addClass('hidden');
+                                }
+                             }
+                        });
+                    })(jQuery);
+                    </script>
+                    <div class="c-due-date custom-pt-8 {if !$not_empty_date}hidden{/if}">
+                        <input class="js-due-days-field shortest" type="text" name="invoice[due_days]" value="{if !empty($invoice.due_days) && $invoice.due_days > 0}{$invoice.due_days|escape}{/if}" pattern="^\d*$">
+                        [`days`]
+                        <div class="c-due-date-wrapper state-with-inner-icon c-datepicker right custom-pl-12">
+                            <input class="js-invoice-due-datepicker" value="{$invoice.due_date|wa_date|default:""}" type="text">
+                            <span class="icon js-focus-on-field"><i class="fas fa-calendar-alt"></i></span>
+                            <input name="invoice[due_date]" type="hidden" value="{$invoice.due_date|default:""}">
                         </div>
-                    {else}
-                        <span class="small"><i class="fas fa-exclamation-triangle text-orange"></i>[`To add invoices, set up at least one company.`]</span>
-                        <input type="text" name="invoice[company_id]" value="" style="{$hidden_input_style}">
-                    {/if}
-
-                    {if !empty($_is_admin)}
-                        <a href="{$wa_app_url}settings/companies/" class="custom-ml-4 custom-ml-0-mobile custom-mt-4-mobile small"><i class="fas fa-cog text-gray"></i> [`Company settings`]</a>
-                    {/if}
+                        <a href="javascript:void(0);" class="inline-link small js-clear-due-date" style="{if empty($invoice.due_date)}display: none;{/if}"> <span class=""><i class="fas fa-times-circle"></i> [`clear`]</span></a>
+                    </div>
                 </div>
             </div>
             <div class="field">
-                <div class="name">[`Client`]</div>
+                <div class="name">[`Billed To`]</div>
                 <div class="value">
-                    <div class="c-contact-toggle js-contact-toggle">
+                    <div class="c-contact-toggle js-contact-toggle flexbox wrap space-20">
                         {strip}
-                        <span class="bold js-name">{if !empty($contact)}{$_contact_name|escape}{/if}</span>
+                        <div class="c-profile-block flexbox space-8" {if empty($contact)}style="display: none"{/if}>
+                            <div class="js-profile-image flexbox middle">
+                                <img src="{if !empty($_userpic)}{$_userpic}{/if}" class="userpic userpic-20">
+                            </div>
+                            <span class="js-name bold">{if !empty($contact)}{$_contact_name|escape}{/if}</span>
+                            <span class="js-company-name">{if !empty($contact) && $_company_name}{$_company_name|escape}{/if}</span>
+                        </div>
                         {/strip}
-                        <a class="inline-link js-change-contact" href="javascript:void(0);"><span class="js-label" data-change-text="[`change client`]">{if !empty($contact)}<span class="c-dotted">[`change client`]</span>{else}<i class="fas fa-address-book text-gray"></i> [`Set client`]{/if}</span></a>
+                        <a class="inline-link js-change-contact" href="javascript:void(0);"><span class="js-label" data-change-text="[`Change`]">{if !empty($contact)}<i class="fas fa-pen custom-pr-8"></i><span class="">[`Change`]</span>{else}<i class="fas fa-users custom-pr-8"></i><span class="">[`Set contact`]</span>{/if}</span></a>
                         <input class="js-contact-id" type="text" name="invoice[contact_id]" value="{if !empty($contact)}{$_contact_id}{/if}" style="{$hidden_input_style}">
                     </div>
                 </div>
@@ -164,7 +178,7 @@
                 <div class="value">
                     <div class="c-deal-toggle js-deal-toggle">
                     {if $deal}
-                        <b class="break-words js-deal-name">{$deal.name|escape}</b>
+                        <b class="break-words js-deal-name"><i class="fas fa-flag text-green custom-pr-4"></i> {$deal.name|escape}</b>
 {* 83.6957 *}
 {*                        <a href="javascript:void(0);" class="c-deal-wrapper c-dotted js-attach-other-deal">*}
 {*                            <i class="icon fas fa-pen"></i> [`link to another deal`]*}
@@ -185,6 +199,30 @@
             <input name="invoice[deal_id]" type="hidden" value="{$invoice.deal_id}">
 
             <div class="field">
+                <div class="name">[`Payment recipient`]</div>
+                <div class="value flexbox wrap-mobile">
+                    {if $companies}
+                        <div class="wa-select">
+                            <select class="js-company-select not-styled text-ellipsis" name="invoice[company_id]">
+                                {foreach $companies as $_company}
+                                    <option value="{$_company.id}"{if $_company.id == $company.id} selected{/if}>
+                                        {$_company.name|escape}
+                                    </option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    {else}
+                        <span class="small"><i class="fas fa-exclamation-triangle text-orange"></i>[`To add invoices, set up at least one company.`]</span>
+                        <input type="text" name="invoice[company_id]" value="" style="{$hidden_input_style}">
+                    {/if}
+
+                    {if !empty($_is_admin)}
+                        <span onclick='window.open("{$wa_app_url}settings/companies/")' class="company-settings-link custom-ml-4 custom-ml-0-mobile custom-mt-4-mobile semibold cursor-pointer"><i class="fas fa-cog small"></i> [`Company settings`] <i class="fas fa-external-link-alt smaller"></i></span>
+                    {/if}
+                </div>
+            </div>
+            
+            <div class="field {if $currencies|@count <= 1}hidden{/if}" >
                 <div class="name">[`Currency`]</div>
                 <div class="value">
                     <div class="wa-select">
@@ -196,11 +234,12 @@
                     </div>
                 </div>
             </div>
+            
         </div>
         </div>
 
 
-        <div class="c-product-table">
+        <div class="c-product-table fields">
             {function tableRow}
                 <tr>
                     <td class="c-number" aria-label="[`#`]">
@@ -262,8 +301,9 @@
             {/function}
 
             {capture assign="_row_template_html"}{tableRow}{/capture}
-
+            <div class="fields-group blank">
             <table class="c-products-table">
+               
                 <thead>
                     <tr>
                         <th class="c-number">[`#`]</th>
@@ -286,6 +326,9 @@
                     {/if}
                     {tableRow _item=[] _index=$_index}
                 </tbody>
+            </table>
+            </div>
+                <table class="c-products-table">
                 <tfoot>
                     <tr>
                         <td colspan="5" class="right">[`Subtotal`]</td>
@@ -314,7 +357,7 @@
                             <span class="js-tax">0,00</span>
                         </td>
                     </tr>
-                    <tr class="large semibold">
+                    <tr class="large bold">
                         <td colspan="5" class="right">[`Total`]</td>
                         <td class="c-total right">
                             <span class="js-total">0,00</span>
@@ -329,7 +372,7 @@
         </div>
 
         <footer class="c-actions js-footer-actions bottombar sticky c-fixed-bottombar">
-            <button class="button green js-submit-button" type="submit">{if !empty($invoice.id)}[`Save`]{else}[`Create`]{/if}</button>
+            <button class="button js-submit-button" type="submit">{if !empty($invoice.id)}[`Save`]{else}[`Create`]{/if}</button>
             {if empty($invoice.id)}
                 <a href="{$wa_app_url}invoice/{if !empty($invoice_id)}{$invoice_id}/{/if}" class="button light-gray js-cancel-button">[`Cancel`]</a>
             {else}
@@ -352,7 +395,7 @@
                 </div>
                 <footer class="dialog-footer">
                     <div class="crm-actions">
-                        <button class="button green js-change-currency-with-price">[`Recalculate`]</button>
+                        <button class="button js-change-currency-with-price">[`Recalculate`]</button>
                         <button class="button js-change-currency">[`Do not change prices`]</button>
                         <button class="button light-gray js-close-dialog js-cancel-dialog">[`Cancel`]</button>
                     </div>
@@ -393,6 +436,7 @@
 
             new CRMInvoiceEdit({
                 $wrapper: $("#c-invoice-edit-page"),
+                $wa_app_url: {$site_url|json_encode},
                 companies: {$companies|json_encode},
                 company_id: {if !empty($invoice.company_id)}{$invoice.company_id}{else}false{/if},
                 shop_supported: {if !empty($_can_use_shop)}true{else}false{/if},

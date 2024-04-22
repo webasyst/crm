@@ -179,11 +179,12 @@ class crmAutocompleteController extends waController
                     $phone && $phone = '<i class="icon16 phone"></i>'.$phone;
                     $email && $email = '<i class="icon16 email"></i>'.$email;
                     $tag && $tag = '<i class="icon16 tags"></i>'.$tag;
+                    $contact_add = new waContact($c['id']);
                     $result[$c['id']] = array(
                         'id'        => $c['id'],
                         'name'      => $c['name'],
                         'login'     => $c['login'],
-                        'photo_url' => waContact::getPhotoUrl($c['id'], $c['photo'], 96),
+                        'photo_url' => $contact_add->getPhoto(96), //waContact::getPhotoUrl($c['id'], $c['photo'], 96),
                         'label'     => implode(' ', array_filter(array($name, $company, $email, $phone, $tag))),
                         'criteria'  => array(
                             'email' => ifset($c['email'])

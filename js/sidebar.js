@@ -41,6 +41,8 @@ var CRMSidebar = (function ($) {
         if (!that.$activeMenuItem.length) {
             that.selectLink();
         }
+
+
         // click on link
         that.$wrapper.on("click", "li > a", function () {
             var $link = $(this),
@@ -92,10 +94,18 @@ var CRMSidebar = (function ($) {
                 $(this).waTooltip({placement:"right"});
             })
             that.$footer.find('li > a').each(function() {
-                $(this).waTooltip({placement:"right"});
+                $(this).waTooltip({placement: "right"});
+            })
+            
+            that.$body.on("scroll", function () {
+                $('.wa-tooltip-box').parent().remove()
+            })
+    
+            that.$footer.on("scroll", function () {
+                $('.wa-tooltip-box').parent().remove()
             })
         }
-    };
+        };
 
     CRMSidebar.prototype.setItem = function ($item) {
         var that = this;

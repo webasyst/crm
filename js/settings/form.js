@@ -97,16 +97,16 @@ var crmSettingsForm = (function ($) {
         that.initMessagesBlock();
         that.initCancelLink();
         that.initBlocks();
-        that.initBackButton();
+        //that.initBackButton();
     };
 
-    crmSettingsForm.prototype.initBackButton = function () {
+    /*crmSettingsForm.prototype.initBackButton = function () {
         var that = this;
         that.$back_button.on('click', function (e) {
             e.preventDefault();
             history.back();
         })
-    }
+    }*/
 
     crmSettingsForm.prototype.renderDealDescription = function (field) {
         var that = this,
@@ -695,29 +695,32 @@ var crmSettingsForm = (function ($) {
             handle: '.sort',
             tolerance: 'pointer',
             containment: that.$form_fields,
-            update: function () {
-                var fields = that.form.params.fields,
-                    len = fields.length,
-                    map = {},
-                    new_fields = [],
-                    $fields = that.$form_fields.find('.crm-form-field:not(.crm-form-field-template)');
-                for (var i = 0; i < len; i += 1) {
-                    var key = fields[i].id + '-' + fields[i].checked;
-                    map[key] = i;
-                }
-                $fields.each(function () {
-                    var $el = $(this),
-                        id = $el.data('id'),
-                        checked = $el.data('checked'),
-                        key = id + '-' + checked,
-                        index = map[key],
-                        field = fields[index];
-                    new_fields.push(field);
-                });
-                that.form.params.fields = new_fields;
-                that.setFormChanged();
-            }
+            stop: save,
+            onUpdate: save,
         });
+
+        function save() {
+            var fields = that.form.params.fields,
+                len = fields.length,
+                map = {},
+                new_fields = [],
+                $fields = that.$form_fields.find('.crm-form-field:not(.crm-form-field-template)');
+            for (var i = 0; i < len; i += 1) {
+                var key = fields[i].id + '-' + fields[i].checked;
+                map[key] = i;
+            }
+            $fields.each(function () {
+                var $el = $(this),
+                    id = $el.data('id'),
+                    checked = $el.data('checked'),
+                    key = id + '-' + checked,
+                    index = map[key],
+                    field = fields[index];
+                new_fields.push(field);
+            });
+            that.form.params.fields = new_fields;
+            that.setFormChanged();
+        }
     };
 
     crmSettingsForm.prototype.initDeleteFieldLinks = function () {

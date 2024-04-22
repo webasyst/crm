@@ -312,8 +312,20 @@
                         {/if}
                         {$_is_active = ($_c.id == $_active_c)}
                         {$_can_view = $_c.can_view|default:false}
-
-                        {$_conversation_url = "{$wa_app_url}message/conversation/{$_c.id}/{$_page_tail}{if $iframe}{if $_page_tail == ''}?{else}&{/if}iframe=1{/if}"}
+                        {$_view_prop = '?view=chat'}
+                        {if $_page_tail != '' || $iframe}
+                            {$_view_prop = '&view=chat'}
+                        {/if}
+                        {$_iframe_prop = ''}
+                        {if $iframe}
+                            {if $_page_tail == ''}
+                                {$_iframe_prop = '?iframe=1'}
+                            {else}
+                                {$_iframe_prop = '&iframe=1'}
+                            {/if}
+                        {/if}
+                
+                        {$_conversation_url = "{$wa_app_url}message/conversation/{$_c.id}/{$_page_tail}{$_iframe_prop}{$_view_prop}"}
                         {if !$_can_view}
                             {$_conversation_url = "javascript:void(0);"}
                         {/if}
@@ -335,6 +347,9 @@
                             data-id="{$_c.id}"
                             data-has-deal="{if !empty($_deal)}1{else}0{/if}"
                             data-active="{$_is_active}"
+                            {if $page && $page != 1}
+                            data-page_tail="{$_page_tail}"
+                            {/if}
                             {if $_c.read != 1}
                                 data-read="0"
                             {else}

@@ -27,6 +27,7 @@ var CRMInvoiceEdit = ( function($) {
         that.confirm_dialog_template = options["confirm_dialog_template"];
         that.shop_supported = options["shop_supported"];
         that.tax_set_class = "is-changed";
+        that.wa_app_url = options["$wa_app_url"];
 
         that.currencies = options["currencies"];
         that.supported_currencies = options["supported_currencies"];
@@ -645,6 +646,8 @@ var CRMInvoiceEdit = ( function($) {
         var that = this,
             $toggle = that.$wrapper.find(".js-contact-toggle"),
             $name = $toggle.find(".js-name"),
+            $company_name = $toggle.find(".js-company-name"),
+            $contact_image = $toggle.find(".js-profile-image img"),
             $field = $toggle.find(".js-contact-id"),
             is_set = false;
 
@@ -660,15 +663,18 @@ var CRMInvoiceEdit = ( function($) {
                 $.waDialog({
                     html: html,
                     options: {
-                        onAdd: function(id, name) {
+                        onAdd: function(id, name, photo, company) {
                             $field.val(id).trigger("change");
                             $name.text(name);
+                            $company_name.length && company ? $company_name.text(company) : $company_name.text('');
+                            $contact_image.length && photo ? $contact_image.attr('src', photo) : $contact_image.attr('src', `${that.wa_app_url}wa-content/img/userpic.svg`);
 
                             if (!is_set) {
                                 var $label = $link.find(".js-label"),
                                     text = $label.data("change-text");
-
-                                $label.html(`<span class="c-dotted">${text}</span>`);
+                                $toggle.find('.c-profile-block').show();
+                                $label.find('span').text(text);
+                                $label.find('svg').addClass('fa-pen');
                                 is_set = true;
                             }
                         }
@@ -1569,18 +1575,26 @@ var CRMInvoiceContactAdd = ( function($) {
 
             var $id = that.$wrapper.find(".js-contact-id-field"),
                 contact_id = $id.val(),
-                contact_name;
+                contact_name,
+                contact_company = false,
+                contact_photo;
 
             if (contact_id) {
-                contact_name = that.$wrapper.find(".js-contact-autocomplete").val();
-                setContact(contact_id, contact_name);
+                var $contact_autocomplete = that.$wrapper.find(".js-contact-autocomplete");
+                contact_name = $contact_autocomplete.val();
+                is_company = $contact_autocomplete.data('is_company');
+                if (!+is_company) {
+                    contact_company = that.$wrapper.find(".js-company-autocomplete").val();
+                }
+                contact_photo = $contact_autocomplete.data('photo_url');
+                setContact(contact_id, contact_name, contact_photo, contact_company);
             } else {
                 createContact();
             }
         }
 
-        function setContact(id, name) {
-            that.dialog.options.onAdd(id, name);
+        function setContact(id, name, photo, company) {
+            that.dialog.options.onAdd(id, name, photo, company);
             that.dialog.close();
         }
 
@@ -1655,7 +1669,7 @@ var CRMInvoiceContactAdd = ( function($) {
 
             $.post(href, data, function(response) {
                 if (response.status === "ok") {
-                    setContact(response.data.id, response.data.name);
+                    setContact(response.data.id, response.data.name, false, false);
                 } else {
                     showErrors(response.errors);
                 }

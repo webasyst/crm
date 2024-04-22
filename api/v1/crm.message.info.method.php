@@ -177,7 +177,9 @@ class crmMessageInfoMethod extends crmApiAbstractMethod
             return $res;
         }, []);
 
-        return crmHtmlSanitizer::work($message['body'], ['replace_img_src' => $replace_img_src]);
+        return crmHtmlSanitizer::work($message['body'], [
+            'replace_img_src' => $replace_img_src,
+        ]);
     }
 
     private function getDeal($deal_id)

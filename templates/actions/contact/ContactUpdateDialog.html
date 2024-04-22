@@ -1,11 +1,12 @@
-{$_number = $call.plugin_client_number|escape}
+{$_number = $client_number|escape}
+{$_name = $client_name|escape}
 
 <div class="dialog c-contact-update-dialog" id="js-contact-update-dialog">
     <div class="dialog-background"></div>
     <div class="dialog-body">
         <form>
             <header class="dialog-header">
-                <h2>{sprintf(_w("Add phone %s to contact"), $_number)}</h2>
+                <h3>{sprintf(_w('Add phone <span class="nowrap">%s</span> to contact'), $_number)}</h3>
             </header>
             <div class="dialog-content fields" style="min-height: 100px;">
 
@@ -19,6 +20,27 @@
                     </div>
                 </div>
 
+                {if $bonded_call}
+                    <div class="field">
+                        <div class="name for-checkbox"></div>
+                        <div class="value">
+                            <label class="flexbox space-8">
+                                <span class="wa-checkbox">
+                                    <input type="checkbox" name="client_delete_phone" id="delete-phone">
+                                    <span>
+                                        <span class="icon">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    </span>
+                                </span>
+                                <span>{sprintf(_w('Remove phone <span class="nowrap">%s</span> from %s data'), $_number, $_name)}</span>
+                                
+                            </label>
+                        </div>
+                    </div>
+                {/if}
+
+                <div class="js-field-autocomplete hidden"></div>
                 <div class="js-errors-place"></div>
             </div>
             <footer class="dialog-footer js-dialog-footer">
@@ -31,7 +53,8 @@
     </div>
 
     <script>
-        ( function($) {
+        (function ($) {
+            $('.js-delete-phone-switch').waSwitch();
             new CRMContactUpdateDialog({
                 $wrapper: $("#js-contact-update-dialog")
             });

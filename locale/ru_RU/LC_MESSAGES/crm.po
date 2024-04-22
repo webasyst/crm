@@ -817,6 +817,9 @@ msgstr "Новый счет"
 msgid "Set client"
 msgstr "Выбрать клиента"
 
+msgid "Set contact"
+msgstr "Выбрать контакт"
+
 msgid "Invoice"
 msgstr "Счет"
 
@@ -1767,6 +1770,9 @@ msgstr "Неизвестная локаль: %s"
 
 msgid "Required field"
 msgstr "Обязательное поле"
+
+msgid "Optional field"
+msgstr "Необязательное поле"
 
 msgid "Only English alphanumeric, hyphen and underline symbols are allowed"
 msgstr "Разрешены только латинские буквы, дефисы и символы подчеркивания."
@@ -3429,6 +3435,12 @@ msgstr "Список"
 
 msgid "Add phone %s to contact"
 msgstr "Добавить номер телефона %s в данные контакта"
+
+msgid "Add phone <span class=\"nowrap\">%s</span> to contact"
+msgstr "Добавить номер телефона <span class=\"nowrap\">%s</span> в данные контакта"
+
+msgid "Remove phone <span class=\"nowrap\">%s</span> from %s data"
+msgstr "Удалить номер <span class=\"nowrap\">%s</span> из данных контакта «%s»"
 
 msgid "The following <tt>cron</tt> job command is currently in use (%ssetting up a cron job%s):"
 msgstr "Это задание <tt>cron</tt> уже используется (%sкак настроить%s):"
@@ -5217,3 +5229,63 @@ msgstr "Недопустимый идентификатор контакта."
 
 msgid "Deal not found."
 msgstr "Сделка не найдена."
+
+msgid "Create a new contact"
+msgstr "Создать новый контакт"
+
+msgid "Connect to an existing one"
+msgstr "Подключить к существующему"
+
+msgid "Link to another contact"
+msgstr "Связать с другим контактом"
+
+msgid "Request authorization"
+msgstr "Запросить авторизацию"
+
+msgid "A CRM settlement is required."
+msgstr "Требуется настроенное поселение CRM."
+
+msgid "Verify client profile"
+msgstr "Подтвердить профиль клиента"
+
+msgid "Please verify your client profile."
+msgstr "Пожалуйста, подтвердите свой профиль клиента."
+
+msgid "Your client profile has been verified."
+msgstr "Ваш профиль клиента подтверждён."
+
+msgid "Your client profile was already verified."
+msgstr "Ваш профиль клиента уже был подтверждён."
+
+msgid "Allow client verification requests"
+msgstr "Разрешить запрашивать проверку клиента"
+
+msgid "Verification request text"
+msgstr "Текст для запроса проверки клиента"
+
+msgid "Button text"
+msgstr "Надпись на кнопке"
+
+msgid "Verification link text"
+msgstr "Текст ссылки подтверждения"
+
+msgid "Successful verification response text"
+msgstr "Текст ответа об успешном подтверждении"
+
+msgid "Response text sent when a client was already verified"
+msgstr "Текст ответа для случаев, когда контакт уже был подтверждён"
+
+msgid "A verification link will be sent to the client."
+msgstr "Клиенту будет отправлено сообщение со ссылкой для подтверждения авторизации."
+
+msgid "Client verification request"
+msgstr "Запрос авторизации клиента"
+
+msgid "Send verification request"
+msgstr "Отправить запрос авторизации"
+
+msgid "Don’t show again"
+msgstr "Больше не показывать"
+
+msgid "Invalid funnel ID."
+msgstr "Недопустимый ID воронки."

@@ -6,13 +6,20 @@
         <form action="?module=settings&action=smsSave" method="post">
 
             <div class="fields">
+                
                 {if count($sms_adapters)}
-
                     <p>
                         {sprintf('[`Once connection to a gateway is set up, add SMS notifications in “<a href="%s">Notifications</a>” settings.`]', "{$wa_app_url}settings/notifications/")}
                         <br>
                         {sprintf('[`<a href="%s" target="_blank">See documentation</a> for details.`]', '[`https://support.webasyst.com/22505/crm-sms-notifications/`]')}
                     </p>
+                {else}
+                    <div class="value no-shift">
+                        <p>
+                            {sprintf('[`To enable SMS message sending, install and configure sending plugin for your preferred SMS gateway.<br /> <a href="%s">Browse for SMS gateway plugins</a> in Installer app.`]', $wa_backend_url|cat:'installer/#/plugins/wa-plugins/sms/')}
+                        </p>
+                    </div>
+                {/if}
 
                     <div class="fields-group">
                         <div class="field">
@@ -41,6 +48,7 @@
                         </div>
                     </div>
 
+                {if count($sms_adapters)}
                     {foreach $sms_adapters as $i => $a}
                         <div class="fields-group">
                             <!--<div class="field">
@@ -92,16 +100,9 @@
 
                         <input name="sms[{$i}][adapter]" type="hidden" value="{$a.id}">
                     {/foreach}
-                {else}
-                    <div class="value no-shift">
-                        <p>
-                            {sprintf('[`To enable SMS message sending, install and configure sending plugin for your preferred SMS gateway.<br /> <a href="%s">Browse for SMS gateway plugins</a> in Installer app.`]', $wa_backend_url|cat:'installer/#/plugins/wa-plugins/sms/')}
-                        </p>
-                    </div>
                 {/if}
             </div>
 
-            {if count($sms_adapters)}
                 <div class="crm-form-buttons custom-mt-20">
                     <div class="crm-submit">
                         <input class="button" type="submit" name="" value="[`Save`]">
@@ -111,8 +112,6 @@
                         </span>
                     </div>
                 </div>
-            {/if}
-
         </form>
     </div>
 </div>

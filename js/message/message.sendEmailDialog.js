@@ -87,7 +87,6 @@ var CRMSendEmailDialog = ( function($) {
         !that.iframe && that.dialog.resize();
 
         if (that.iframe) {
-            console.log($(window.parent).width());
             if ($(window.parent).width() < 760) {
                 $('.dialog .dialog-content', window.parent.document).css('padding',  '0 0.75rem')
             }

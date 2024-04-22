@@ -13,6 +13,59 @@
 
             {$blocks.specific_settings_block|default:''}
 
+            <div class="fields-group">
+                <div class="custom-mb-24">
+                    <div class="name crm-section">
+                        <label for="c-askverify-checkbox">
+                            [`Allow client verification requests`]
+                        </label>
+                    </div>
+                    <div class="value switch-with-text js-crm-value-switch">
+                        <input type="hidden" name="source[params][ask_verify]" value="{if !empty($source.params.ask_verify)}1{else}0{/if}" id="c-askverify-checkbox-hidden" class="js-askverify-checkbox-hidden">
+                        <span class="switch smaller" id="js-askverify-switch">
+                            <input type="checkbox" name="source[params][ask_verify]" value="{if !empty($source.params.ask_verify)}1{else}0{/if}" id="c-askverify-checkbox" class="js-askverify-checkbox"
+                            {if !empty($source.params.ask_verify)}checked="checked"{/if}>
+                        </span>
+                        <label for="c-askverify-checkbox" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">{if !empty($source.params.ask_verify)}[`Enabled`]{else}[`Disabled`]{/if}</label>
+                    </div>
+                </div>
+                <div class="js-askverify-params crm-askverify-params params" style="{if empty($source.params.ask_verify)}display: none{/if}">
+                    <div class="field top-padded" style="margin-bottom: 16px;">
+                        <div class="name">
+                            [`Verification request text`]
+                        </div>
+                        <div class="value">
+                            <textarea class="verify_request_textarea" name="source[params][verify_request]">{$source.params.verify_request|default:$default_verify_request|escape}</textarea>
+                        </div>
+                    </div>
+                    <div class="field top-padded" style="margin-bottom: 16px;">
+                        <div class="name">
+                            [`Verification link text`]
+                        </div>
+                        <div class="value">
+                            <input class="equal-width" type="text" name="source[params][verify_request_button]" value="{$source.params.verify_request_button|default:$default_verify_request_button|escape}">
+                        </div>
+                    </div>
+                    <div class="field top-padded" style="margin-bottom: 16px;">
+                        <div class="name">
+                            [`Successful verification response text`]
+                        </div>
+                        <div class="value">
+                            <textarea name="source[params][verify_done_response]">{$source.params.verify_done_response|default:$default_verify_done_response|escape}</textarea>
+                        </div>
+                    </div>
+                    <div class="field top-padded" style="margin-bottom: 16px;">
+                        <div class="name">
+                            [`Response text sent when a client was already verified`]
+                        </div>
+                        <div class="value">
+                            <textarea name="source[params][verify_been_response]">{$source.params.verify_been_response|default:$default_verify_been_response|escape}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="source[params][verification_key]" value="{$verification_key|escape}">
+            </div>
+
             {*<div class="field"><hr></div>*}
 
             {$blocks.with_contact|default:''}

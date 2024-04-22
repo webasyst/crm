@@ -163,11 +163,20 @@ class crmSidebarAction extends crmViewAction
     protected function pluginHook()
     {
         $event_params = array();
-        return array_filter(wa('crm')->event('backend_sidebar', $event_params, array(
-            'top_li',
-            'middle_li',
-            'bottom_li',
-        )), 'is_array');
+        if (wa('crm')->whichUI('crm') === '1.3') {
+            $backend_sidebar = wa('crm')->event('backend_sidebar', $event_params, [
+                'top_li',
+                'middle_li',
+                'bottom_li',
+            ]);
+        } else {
+            $backend_sidebar = wa('crm')->event('backend_sidebar20', $event_params, [
+                'top_li',
+                'bottom_li'
+            ]);
+        }
+
+        return array_filter($backend_sidebar, 'is_array');
     }
 
     protected function assignCallSectionVars()

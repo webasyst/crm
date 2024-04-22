@@ -77,7 +77,6 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
 
         if ($is_company) {
             $this->required_fields = ['company' => true];
-
         } else {
             $one_name_field = wa()->getSetting('one_name_field', '', 'crm');
             $this->required_fields = (empty($one_name_field) ? array_fill_keys(['firstname', 'middlename', 'lastname'], true) : ['name' => true]);
@@ -133,15 +132,9 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
                 $suitcase[$field_data['field']]['is_composite'] = $field_data['is_composite'];
             }
 
-            if (isset($this->required_fields[$field_data['field']]) && !empty($field_data['value'])) {
-                if (in_array($field_data['field'], ['firstname', 'middlename', 'lastname'])) {
-                    unset(
-                        $this->required_fields['firstname'],
-                        $this->required_fields['middlename'],
-                        $this->required_fields['lastname']
-                    );
-                } else {
-                    unset($this->required_fields[$field_data['field']]);
+            if (isset($this->required_fields[$field_data['field']]) && trim((string) $field_data['value']) !== '') {
+                if (ifset($this->required_fields, $field_data['field'], null)) {
+                    unset($this->required_fields);
                 }
             }
 
@@ -182,7 +175,7 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
         if (!empty($this->required_fields)) {
             $this->errors = [
                 'error' => 'invalid_param',
-                'error_description' => _w('Please fill in the required fields'),//'Required field: '.implode(', ', array_keys($this->required_fields)),
+                'error_description' => _w('Please fill in the required fields'),
                 'error_fields' => array_map(function ($_f) {
                     return [
                         'field' => $_f,
@@ -346,7 +339,10 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
                 $this->data[$_data['field']] = $_data['value'];
             }
         }
-        if (!$is_company) {
+
+        if ($is_company) {
+            $this->data['name'] = ifset($this->data, 'company', '');
+        } else {
             if (isset($this->data['company_contact_id'])) {
                 $company = $this->getContactModel()->getById($this->data['company_contact_id']);
                 $this->data['company'] = ifset($company, 'company', '');
@@ -354,19 +350,14 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
             } elseif (isset($this->data['company'])) {
                 $this->data['company_contact_id'] = $this->getCompanyIdByName($this->data['company']);
             }
-        }
 
-        if ($is_company) {
-            $this->data['name'] = ifset($this->data, 'company', '');
-        } else {
             $one_name_field = wa()->getSetting('one_name_field', '', 'crm');
             if ($one_name_field) {
                 $name = explode(' ', $this->data['name']);
                 $name_order = waContactNameField::getNameOrder();
                 foreach ($name_order as $_part) {
-                    if ($_name = array_shift($name)) {
-                        $this->data[$_part] = $_name;
-                    }
+                    $_name = (string) array_shift($name);
+                    $this->data[$_part] = $_name;
                 }
             } else {
                 $this->data['name'] = waContactNameField::formatName($this->data, true);

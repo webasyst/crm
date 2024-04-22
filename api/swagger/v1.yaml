@@ -6337,6 +6337,7 @@ components:
               title:
                 type: string
                 description: Block title
+                nullable: true
               html:
                 type: string
                 description: Block content

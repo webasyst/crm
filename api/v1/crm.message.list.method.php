@@ -123,6 +123,11 @@ class crmMessageListMethod extends crmApiAbstractMethod
 
         $message_params = $this->getMessageParams($message_ids);
 
+        // exclude internal messages
+        $messages = array_filter($messages, function ($m) use ($message_params) {
+            return !ifset($message_params, $m['id'], 'internal', false);
+        });
+
         $messages = array_map(function ($m) use ($source_emails, $recipients, $contacts, $sources, $attachments, $message_params) {
             $m['recipients'] = ifset($recipients[$m['id']], []);
             $m['params'] = ifset($message_params[$m['id']], []);
@@ -137,7 +142,7 @@ class crmMessageListMethod extends crmApiAbstractMethod
             }, []);
             $m['body_sanitized'] = crmHtmlSanitizer::work(
                 $m['body'],
-                ['replace_img_src' => $replace_img_src]
+                ['replace_img_src' => $replace_img_src, 'hide_verification_links' => true]
             );
 
             // if message is input and source is of EMAIL type then insert structure in [recipients][to] list
@@ -221,18 +226,6 @@ class crmMessageListMethod extends crmApiAbstractMethod
     {
         $message_params = (new crmMessageParamsModel)->getParamsByMessage($message_ids);
         return $message_params;
-        /*
-wa_dumpc($message_params);
-        $message_params = (new crmMessageParamsModel)->getByField(['message_id' => $message_ids], true);
-        $res = array_reduce($message_params, function ($res, $el) {
-            if (!isset($res[$el['message_id']])) {
-                $res[$el['message_id']] = [];
-            }
-            $res[$el['message_id']][] = $this->filterFields($el, ['name', 'value']);
-            return $res;
-        }, []);
-wa_dumpc($res);
-        return $res; */
     }
 
     protected function getSourceEmailAddresses(array $messages)
