@@ -43,9 +43,50 @@ class crmContactTabsController extends crmJsonController
             if (is_string($_tab['count'])) {
                 $_tab['count'] = (empty($_tab['count']) ? null : (int) $_tab['count']);
             }
+            $_tab['title'] = strip_tags($_tab['title']);
+            $_tab['title'] = preg_replace('/\s*\([\d\/\\\\]+\)/', '', $_tab['title']);
         }
 
-        $this->response = array_values($tabs);
+        $this->response['tabs'] = array_values($tabs);
+
+        $deal_ids = array_keys($this->getDealParticipantsModel()->getByField([
+            'contact_id' => $contact_id, 
+            'role_id' => crmDealParticipantsModel::ROLE_CLIENT
+        ], 'deal_id'));
+        $condition_ids = array_map(function($deal_id) {
+            return $deal_id * -1;
+        }, $deal_ids);
+        $condition_ids[] = $contact_id;
+
+        $this->response['counters'] = [
+            [
+                'name' => 'deals',
+                'value' => count($deal_ids),
+            ],
+            [
+                'name' => 'reminders',
+                'value' => (int) $this->getReminderModel()->countByField([
+                    'contact_id' => $contact_id,
+                    'complete_datetime' => null,
+                ]),
+            ],
+            [
+                'name' => 'invoices',
+                'value' => (int) $this->getInvoiceModel()->countByField('contact_id', $contact_id),
+            ],
+            [
+                'name' => 'calls',
+                'value' => (int) $this->getCallModel()->countByField('client_contact_id', $contact_id),
+            ],
+            [
+                'name' => 'notes',
+                'value' => (int) $this->getNoteModel()->countByField('contact_id', $contact_id),
+            ],
+            [
+                'name' => 'files',
+                'value' => (int) $this->getFileModel()->countByField('contact_id', $condition_ids),
+            ],
+        ];
     }
 
     private function getUrl($app, $url)

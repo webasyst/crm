@@ -11,7 +11,6 @@ class crmFileUploadTmpController extends crmJsonController
         }
 
         foreach (waRequest::file('files') as $f) {
-            $f->transliterateFilename();
             if ($f->uploaded()) {
                 if (!self::saveFile($f, $hash)) {
                     $this->errors[] = sprintf(_w('Failed to upload file %s.'), $f->name);

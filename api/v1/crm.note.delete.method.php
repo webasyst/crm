@@ -17,8 +17,14 @@ class crmNoteDeleteMethod extends crmApiAbstractMethod
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
-        $action = 'note_delete';
         $this->getNoteModel()->deleteById($note_id);
+        $file_ids = array_keys($this->getNoteAttachmentsModel()->getByField(['note_id' => $note_id], 'file_id'));
+        if (!empty($file_ids)) {
+            $this->getNoteAttachmentsModel()->deleteByField(['note_id' => $note_id]);
+            $this->getFileModel()->delete($file_ids);
+        }
+
+        $action = 'note_delete';
         $this->getLogModel()->log($action, $note['contact_id']);
         if (!class_exists('waLogModel')) {
             wa('webasyst');

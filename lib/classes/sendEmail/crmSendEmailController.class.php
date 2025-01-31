@@ -45,15 +45,20 @@ abstract class crmSendEmailController extends crmJsonController
 
     protected function prepareData()
     {
-        return array(
+        $data = [
             'subject'      => $this->getSubject(),
-            'body'         => $this->getBody(),
             'email'        => $this->getEmail(),
             'sender_email' => $this->getSenderEmail(),
             'file_id'      => $this->getFileIds(),
             'cc'           => $this->getCc(),
             'hash'         => $this->getHash(),
-        );
+        ];
+        $is_plain_text = (bool)$this->getParameter('is_plain_text', false, waRequest::TYPE_STRING_TRIM);
+        $body_raw = (string)$this->getParameter('body', '', waRequest::TYPE_STRING_TRIM);
+        $data['is_plain_text'] = $is_plain_text;
+        $data['body_raw'] = $body_raw;
+        $data['body'] = $is_plain_text ? htmlspecialchars($body_raw, ENT_QUOTES, 'UTF-8') : $body_raw;
+        return $data;
     }
 
     /**
@@ -308,11 +313,6 @@ abstract class crmSendEmailController extends crmJsonController
     protected function getHash()
     {
         return trim((string)$this->getParameter('hash'));
-    }
-
-    protected function getBody()
-    {
-        return trim((string)$this->getParameter('body'));
     }
 
     /**

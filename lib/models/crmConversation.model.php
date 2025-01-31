@@ -349,9 +349,10 @@ class crmConversationModel extends crmModel
         unset($item);
 
         $source_ids = array_unique($source_ids);
-        $source_helpers = array();
+        $sources = (new crmSourceModel)->getByField([ 'id' => $source_ids ], 'id');
+        $source_helpers = [];
         foreach ($source_ids as $source_id) {
-            $source_helpers[$source_id] = crmSourceHelper::factory(crmSource::factory($source_id));
+            $source_helpers[$source_id] = crmSourceHelper::factory(crmSource::factory(ifset($sources[$source_id], $source_id)));
         }
 
         foreach ($list as &$item) {

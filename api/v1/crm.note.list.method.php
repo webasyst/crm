@@ -12,13 +12,6 @@ class crmNoteListMethod extends crmFileListMethod
             ->fetchAll();
 
         $contact_ids = array_unique(array_column($note_list, 'creator_contact_id'));
-
-        $file_list = [];
-        if ($this->get('with_files')) {
-            $file_list = $this->getFiles();
-            $contact_ids = array_merge($contact_ids, array_unique(array_column($file_list, 'creator_contact_id')));
-        }
-
         $contact_list = $this->getContacts($contact_ids);
 
         $note_list = array_map(function ($_note) use ($contact_list) {
@@ -39,73 +32,57 @@ class crmNoteListMethod extends crmFileListMethod
             ]
         );
 
-        if ($this->get('with_files')) {
-            $file_list = $this->prepareFileList($file_list, $contact_list);
-
-            // Put files into notes if created at the same time by the same creator
-            $note_list = array_map(function ($_note) use (&$file_list) {
-                $note_dt = strtotime($_note['create_datetime']);
-                $files = array_filter($file_list, function ($_file) use ($_note, $note_dt) {
-                    $file_dt = strtotime($_file['create_datetime']);
-                    return ($file_dt >= $note_dt && $file_dt - $note_dt < 20 
-                            || $file_dt <= $note_dt && $note_dt -$file_dt < 2)
-                        && ifset($_file, 'creator', 'id', null) == ifset($_note, 'creator', 'id', null);
-                });
-                if (!empty($files)) {
-                    $file_list = array_filter($file_list, function ($_file) use ($files) {
-                        return !in_array($_file['id'], array_column($files, 'id'));
-                    });
-                    $_note['files'] = array_values($this->filterData(
-                        $files,
-                        [
-                            'id',
-                            'name',
-                            'create_datetime',
-                            'size',
-                            'ext',
-                            'comment',
-                            'url',
-                        ])
-                    );
-                }
-                return $_note;
-            }, $note_list);
-
-            // Exclude files included into notes from the file list
-            $extracted_files = array_column($note_list, 'files');
-            $extracted_files = array_merge(...$extracted_files);
-            $extracted_file_ids = array_column($extracted_files, 'id');
-            $file_list = array_filter($file_list, function ($_file) use ($extracted_file_ids) {
-                return !in_array($_file['id'], $extracted_file_ids);
+        $file_list = $this->getNoteFiles();
+        $note_list = array_map(function ($_note) use ($file_list) {
+            $files = array_filter($file_list, function ($_file) use ($_note) {
+                return $_file['note_id'] == $_note['id'];
             });
-
-            // Convert file list to note list (with empty content and attached file)
-            $file_list = array_map(function ($el) {
-                return [
-                    'id' => 0,
-                    'create_datetime' => $el['create_datetime'],
-                    'creator' => $el['creator'],
-                    'content' => '',
-                    'files' => $this->filterData(
-                            [$el],
-                            [
-                                'id',
-                                'name',
-                                'create_datetime',
-                                'size',
-                                'ext',
-                                'comment',
-                                'url',
-                            ])
-                ];
-            }, $file_list);
-
-            // Union notes & files into one list 
-            $note_list = array_merge($note_list, $file_list);
-            array_multisort(array_column($note_list, 'create_datetime'), $note_list);
-            $note_list = array_reverse($note_list);
-        }
+            if (!empty($files)) {
+                $_note['files'] = array_values($this->filterData(
+                    $files,
+                    [
+                        'id',
+                        'name',
+                        'create_datetime',
+                        'size',
+                        'ext',
+                        'comment',
+                        'url',
+                        'thumb_url',
+                    ], [
+                        'id' => 'integer',
+                        'create_datetime' => 'datetime',
+                        'size' => 'integer'
+                    ])
+                );
+            }
+            return $_note;
+        }, $note_list);
 
         $this->response = $note_list;
+    }
+
+    protected function getNoteFiles()
+    {
+        $file_list = $this->getFileModel()->query("SELECT f.*, a.note_id
+            FROM crm_file f 
+            INNER JOIN crm_note_attachments a ON a.file_id = f.id 
+            WHERE f.contact_id = i:contact_id
+            ORDER BY f.create_datetime DESC", 
+            ['contact_id' => $this->contact_id])->fetchAll();
+        
+        if (empty($file_list)) {
+            return [];
+        }
+
+        $thumb_size = waRequest::get('thumb_size', self::THUMB_SIZE, waRequest::TYPE_INT);
+        $host_backend = rtrim(wa()->getConfig()->getHostUrl(), '/').wa()->getConfig()->getBackendUrl(true);
+        return array_map(function ($_file) use ($host_backend, $thumb_size) {
+            $_file['url'] = $host_backend.'crm/?module=file&action=download&id='.$_file['id'];
+            if (in_array($_file['ext'], ['jpg', 'jpeg', 'png'])) {
+                $_file['thumb_url'] = $host_backend.'crm/?module=file&action=download&id='.$_file['id'].'&thumb='.$thumb_size;
+            }
+            return $_file;
+        }, $file_list);
     }
 }

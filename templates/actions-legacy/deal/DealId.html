@@ -143,6 +143,7 @@
                             {$_undone_count = $_stage_count - $_stage@iteration - 1}
                             {if $_undone_count > 1}
                                 {foreach range(0xdd, 0xaa, (0xaa - 0xdd) / $_undone_count) as $part}
+                                    {$part = intval($part)}
                                     {$_gray_range[] = "#{$part|dechex}{$part|dechex}{$part|dechex}"}
                                 {/foreach}
                             {else}

@@ -307,6 +307,15 @@ paths:
             type: integer
           required: true
         - in: query
+          name: with_counters
+          description: Flag to get additional contact info - counters of contact deals, calls, invoices, notes, reminders
+          schema:
+            type: integer
+            enum:
+              - 0
+              - 1
+            default: 0
+        - in: query
           name: userpic_size
           description: Required size of userpic in pixels
           schema:
@@ -826,6 +835,44 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
         500:
           description: Internal server error.
+  /crm.contact.ui.actions:
+    get:
+      security:
+        - BearerAuth: [ ]
+      summary: Get contact profile context UI actions
+      parameters:
+        - in: query
+          name: id
+          required: true
+          description: Contact identifier
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Returns contact actions list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plus_dropdown:
+                    type: array
+                    description: Plus dropdown actions
+                    items:
+                      type: string
+                      description: Dropdown item HTML code
+        403:
+          description: Access denied to the CRM app or this API method.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        404:
+          description: Contact not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /crm.contact.unban:
     post:
       security:
@@ -2779,6 +2826,13 @@ paths:
           description: Size of userpic in pixels
           schema:
             type: integer
+            default: 32
+        - in: query
+          name: thumb_size
+          description: Size of image thumbs in pixels
+          schema:
+            type: integer
+            default: 64
       responses:
         200:
           description: Returns files data.
@@ -2792,7 +2846,11 @@ paths:
                     - type: object
                       properties:
                         creator:
+                          description: User who upload the file
                           $ref: '#/components/schemas/contactMinimal'
+                        deal:
+                          description: Deal linked to the file (optional)
+                          $ref: '#/components/schemas/dealShort'
         400:
           description: Invalid request data.
           content:
@@ -3557,6 +3615,19 @@ paths:
                   type: string
                   format: text
                   description: Note content
+                attachments:
+                  type: array
+                  description: Files
+                  items:
+                    type: object
+                    properties:
+                      file:
+                        type: string
+                        format: byte
+                        description: File binary content
+                      file_name:
+                        type: string
+                        description: File name
               required:
                 - content
       responses:
@@ -3648,15 +3719,13 @@ paths:
           description: Size of userpic in pixels
           schema:
             type: integer
+            default: 32
         - in: query
-          name: with_files
-          description: Flag to get files also
+          name: thumb_size
+          description: Size of image thumbs in pixels
           schema:
             type: integer
-            enum:
-              - 0
-              - 1
-            default: 0
+            default: 64
       responses:
         200:
           description: Returns notes list.
@@ -5408,6 +5477,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/tag'
+        counters:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: integer
         userpic:
           type: object
           properties:
@@ -7017,6 +7095,17 @@ components:
           type: string
           format: uri
           description: File download URL
+        thumb_url:
+          type: string
+          format: uri
+          description: Image thumb URL (for image files)
+        source_type:
+          type: string
+          description: Source type
+          enum:
+            - FILE
+            - MESSAGE
+            - NOTE
     source:
       type: object
       properties:

@@ -17,14 +17,20 @@
                     <div class="c-column">
                         <div class="flexbox middle space-8 c-source-details">
                             <a href="{$wa_app_url}settings/message-source/{$_source.id}/">
-                               <span class="c-source-icon-wrapper"><img class="{if $_source.type === crmSourceModel::TYPE_IM}c-source-im-icon{else}c-source-icon{/if}" src="{$_source.icon_url}"></span>
-                                <span class="c-source-name">{$_source.name|escape}</span>
+                               <span class="c-source-icon-wrapper{if $source_type === 'email'} desktop-only{/if}"><img class="{if $_source.type === crmSourceModel::TYPE_IM}c-source-im-icon{else}c-source-icon{/if}" src="{$_source.icon_url}"></span>
+                                <span class="c-source-name">
+                                    {if $source_type === 'email'}
+                                        {$_source.name|escape|replace:"@":"@&#8203;"|replace:".":".&#8203;"}
+                                    {else}
+                                        {$_source.name|escape}
+                                    {/if}
+                                </span>
                             </a>
 
                             {if !empty($_source.funnel)}
                                 {$funnel_name = $_source.funnel.name|escape}
                                 {$funnel_color = $_source.funnel.color}
-                                <span class="icon size-16"><i class="fas fa-circle funnel-state" style="color: {$funnel_color}" title="{$funnel_name}"></i></span>
+                                <span class="icon size-16 desktop-only"><i class="fas fa-circle funnel-state" style="color: {$funnel_color}" title="{$funnel_name}"></i></span>
 
                                 {if !empty($_source.stage)}
                                     {$stage_id = $_source.stage.id}
@@ -35,7 +41,7 @@
                             {/if}
 
                             {if $_is_email || $_is_im}
-                                <span class="c-hidden">([`disabled`])</span>
+                                <span class="desktop-only"><span class="c-hidden">([`disabled`])</span></span>
                             {/if}
                         </div>
                     </div>
@@ -44,7 +50,7 @@
                             <span class="flexbox middle space-8 wrap c-disable-link-wrapper">
                                 <span class="icon size-16 loading c-loading" style="display: none"><i class="fas fa-spinner fa-spin"></i></span>
                                 <div class="switch-with-text js-c-disable-link">
-                                    <label for="switch-im-input" data-active-text="[`enable`]" data-inactive-text="[`disable`]">{if $_source.disabled}[`enable`]{else}[`disable`]{/if}</label>
+                                    <label for="switch-im-input" class="desktop-only" data-active-text="[`enable`]" data-inactive-text="[`disable`]">{if $_source.disabled}[`enable`]{else}[`disable`]{/if}</label>
                                     <span class="switch" id="switch-{$_source.id}">
                                         <input type="checkbox" name="" id="switch-im-input" {if !$_source.disabled}checked{/if}>
                                     </span>
@@ -141,12 +147,12 @@
             {if $source_type === 'im'}
 
                 {capture assign=links}
-                <div class="dropdown custom-pt-4" id="dropdown-im-source">
-                    <button class="dropdown-toggle button small rounded light-gray"><i class="fas fa-plus-circle text-green add"></i> [`Add messenger`]</button>
-                    <div class="dropdown-body">
-                        <ul class="menu">
-                            {render_plugin_source_links type=crmSourceModel::TYPE_IM}
-                        </ul>
+                    <div class="dropdown custom-pt-4" id="dropdown-im-source">
+                        <button class="dropdown-toggle button small rounded light-gray"><i class="fas fa-plus-circle text-green add"></i> [`Add messenger`]</button>
+                        <div class="dropdown-body">
+                            <ul class="menu">
+                                {render_plugin_source_links type=crmSourceModel::TYPE_IM}
+                            </ul>
                         </div>
                     </div>
                     <script>

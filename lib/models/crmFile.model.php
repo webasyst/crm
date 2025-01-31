@@ -2,6 +2,10 @@
 
 class crmFileModel extends crmModel
 {
+    const SOURCE_TYPE_MESSAGE = 'MESSAGE';
+    const SOURCE_TYPE_NOTE = 'NOTE';
+    const SOURCE_TYPE_FILE = 'FILE';
+    
     protected $table = 'crm_file';
 
     protected $link_contact_field = array('contact_id', 'creator_contact_id');
@@ -62,14 +66,14 @@ class crmFileModel extends crmModel
     {
         $data = array_merge($this->prepareDataByFile($file), $data);
 
-        $data['creator_contact_id'] = (int) wa()->getUser()->getId();
         $data['create_datetime'] = date('Y-m-d H:i:s');
-
+        if (!array_key_exists('creator_contact_id', $data)) {
+            $data['creator_contact_id'] = (int) wa()->getUser()->getId();
+        }
         if (!array_key_exists('contact_id', $data)) {
             $data['contact_id'] = $data['creator_contact_id'];
         }
         $data['contact_id'] = (int) ifset($data['contact_id']);
-
         $data['name'] = (string)ifset($data['name']);
         $data['size'] = (int)ifset($data['size']);
         $data['ext'] = strtolower((string)ifset($data['ext']));

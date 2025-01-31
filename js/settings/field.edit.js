@@ -168,7 +168,11 @@ var crmSettingsFieldEdit = (function ($) {
     $form.find('.state-error').removeClass('state-error');
     $('[name$="[localized_names]"]').each(function () {
       var self = $(this);
-      if (!self.val() && self.parents('.template').length <= 0) {
+      var val = self.val();
+      if (typeof val === 'string' || val instanceof String) {
+        val = val.trim();
+      }
+      if (!val && self.parents('.template').length <= 0) {
         if (self.closest('tr').find('[name$="[_disabled]"]:checked').length) {
           validation_passed = false;
           self.addClass('state-error').parent().append($('<span class="errormsg"></span>').text(that.locales["field_is_required"]));

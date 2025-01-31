@@ -82,7 +82,7 @@ var CRMSidebar = (function ($) {
                 const strUrlTemp = stateUrl.slice(startIndex + 4);
                 const endIndex = strUrlTemp.indexOf('/');
                 const strUrl = strUrlTemp.slice(0, endIndex);
-                $item = ( that.$wrapper.find(`a[href*="${strUrl}"]`) || false );
+                $item = ( that.$wrapper.find(`a[href*="crm/${strUrl}/"]`) || false );
                 that.setItem($item.closest("li"));
                 $.crm.title.set($item.data('wa-tooltip-content'));
             }

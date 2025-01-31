@@ -410,23 +410,26 @@
 
                                         {* SUBJECT *}
                                         <div class="flexbox middle space-8 full-width c-column-subject">
-                                                <div class="c-subject-wrapper">
-                                                    <span class="icon enable-animation size-16 custom-ml-0 custom-mr-4">
-                                                    {if !empty($_c.icon_fab)}
-                                                        <i class="fab fa-{$_c.icon_fab}" title="{$_c.transport_name|escape}" style="color:{$_c.icon_color}"></i>
-                                                    {elseif !empty($_c.icon_fa)}
-                                                        <i class="fas fa-{$_c.icon_fa}" title="{$_c.transport_name|escape}" style="color:{$_c.icon_color}"></i>
-                                                    {else}
-                                                        <img src="{$_c.icon_url}" title="{$_c.transport_name|escape}" data-fa-i2svg>
-                                                    {/if}
-                                                    </span>
-                                                    {$_c.summary|default:'[`no subject`]'|truncate:50:'':true|escape}
-
-                                                </div>
-                                                {if $_c.count > 1}
-                                                    <div class="hint nowrap">({$_c.count})</div>
+                                            <div class="c-subject-wrapper">
+                                                <span class="icon enable-animation size-16 custom-ml-0 custom-mr-4">
+                                                {if !empty($_c.icon_fab)}
+                                                    <i class="fab fa-{$_c.icon_fab}" title="{$_c.transport_name|escape}" style="color:{$_c.icon_color}"></i>
+                                                {elseif !empty($_c.icon_fa)}
+                                                    <i class="fas fa-{$_c.icon_fa}" title="{$_c.transport_name|escape}" style="color:{$_c.icon_color}"></i>
+                                                {else}
+                                                    <img src="{$_c.icon_url}" title="{$_c.transport_name|escape}" data-fa-i2svg>
                                                 {/if}
-
+                                                </span>
+                                                {if !empty($_c.summary_icon)}
+                                                    <span class="icon size-16 custom-ml-0 custom-mr-4">
+                                                        {$_c.summary_icon}
+                                                    </span>
+                                                {/if}
+                                                {$_c.summary_html|default:'[`no subject`]'|truncate:50:'':true}
+                                            </div>
+                                            {if $_c.count > 1}
+                                                <div class="hint nowrap">({$_c.count})</div>
+                                            {/if}
                                         </div>
                                         <div class="c-subject-unread-icon" title="[`not read`]">
                                             <i class="fas fa-circle text-red"></i>
@@ -487,22 +490,64 @@
 
         {else}
             {if $active_sources}
+                {$email_source_active = false}
+                {foreach $active_sources as $_a => $_b}
+                    {if $_b.type == crmSourceModel::TYPE_EMAIL}
+                        {$email_source_active = true}
+                    {/if}
+                {/foreach}
 
-            {$email_source_active = false}
-            {foreach $active_sources as $_a => $_b}
-                {if $_b.type == 'EMAIL'}
-                    {$email_source_active = true}
+                {$_write_items = []}
+                {if $email_source_active && !$noemail}
+                    {capture assign="_email_write_item"}
+                        <a href="javascript:void(0);" class="c-write-message js-write-message">
+                            <span class="icon"><i class="fas fa-envelope"></i></span>
+                            <span>[`Write email letter`]</span>
+                        </a>
+                    {/capture}
+                    {$_write_items[] = $_email_write_item}
                 {/if}
-            {/foreach}
-       
-            <div class="flexbox vertical middle no-messages">
-                <span class="icon size-80 text-light-gray"><i class="fas fa-comments"></i></span>
-                <span class="custom-my-16 gray">[`No messages`]</span>
-                {if !empty($available_funnel) && $empty_conversations && $email_source_active && !$noemail}
-                    <div class="custom-mt-4 c-add-wrapper">
-                        <a href="javascript:void(0);" class="button rounded light-gray c-write-message js-write-message">[`Write message`]</a>
-                    </div>
+                {if !empty($contact)}
+                    {foreach $active_sources as $_a => $_b}
+                        {if $_b.type == crmSourceModel::TYPE_IM}
+                            {if $_b.source->canInitConversation()}
+                                {$_item = $_b.source->renderInitConversationLink($contact.object)}
+                                {if $_item}
+                                    {$_write_items[] = $_item}
+                                {/if}
+                            {/if}
+                        {/if}
+                    {/foreach}
                 {/if}
+        
+                <div class="flexbox vertical middle no-messages">
+                    <span class="icon size-80 text-light-gray"><i class="fas fa-comments"></i></span>
+                    <span class="custom-my-16 gray">[`No messages`]</span>
+
+                    {if sizeof($_write_items) == 1}
+                        <div class="custom-mt-4 c-add-wrapper button rounded light-gray">
+                            {$_write_items[0]}
+                        </div>
+                    {elseif sizeof($_write_items) > 1}
+                        <div class="dropdown custom-pt-16" id="dropdown-write-message">
+                            <button class="dropdown-toggle button small rounded light-gray">
+                                <span class="icon"><i class="fas fa-feather-alt"></i></span>
+                                <span>[`Write message`]</span>
+                            </button>
+                            <div class="dropdown-body" style="width: auto; min-width: 200px;">
+                                <ul class="menu">
+                                    {foreach $_write_items as $_item}
+                                        <li>{$_item}</li>
+                                    {/foreach}
+                                </ul>
+                            </div>
+                        </div>
+                        <script>
+                            ( function($) {
+                                $("#dropdown-write-message").waDropdown();
+                            })(jQuery);
+                        </script>
+                    {/if}
                 </div>
             {/if}
         {/if}
@@ -537,7 +582,8 @@
                 total_count: {$total_count|json_encode},
                 limit: {$list_params.limit},
                 last_message_id: {$last_message_id|json_encode},
-                iframe: {$iframe|default:0}
+                iframe: {$iframe|default:0},
+                noemail: {$noemail|default:0}
             });
         })(jQuery);
     </script>

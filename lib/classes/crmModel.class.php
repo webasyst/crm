@@ -69,7 +69,7 @@ class crmModel extends waModel
                 self::$static_cache['columns_full_info'][$table] = $info;
             }
             foreach (self::$static_cache['columns_full_info'][$table] as &$column) {
-                $column['is_mb4'] = preg_match('~^(utf8mb4_)~ui', $column['Collation']) ? true : false;
+                $column['is_mb4'] = !empty($column['Collation']) && preg_match('~^(utf8mb4_)~ui', $column['Collation']) ? true : false;
             }
             unset($column);
         }

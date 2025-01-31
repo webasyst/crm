@@ -13,7 +13,7 @@
                     {foreach $forms as $_form}
                         <li data-id="{$_form.id}" class="c-form-item">
                             <a href="{$wa_app_url}settings/form/{$_form.id}/" class="flexbox middle">
-                                <img src="{$wa_app_static_url}img/source/source-form.png" alt="">
+                                <img src="{$wa_app_static_url}img/source/source-form.png" alt="" class="desktop-only">
                                 <span class='c-name'>{$_form.name|escape}</span>
 
                             {if !empty($_form.funnel)}

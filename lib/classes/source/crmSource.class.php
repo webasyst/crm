@@ -76,7 +76,7 @@ abstract class crmSource
     }
 
     /**
-     * @param string|int $id
+     * @param string|int|array $id
      * @param array $options
      * @return crmSource
      */
@@ -86,10 +86,17 @@ abstract class crmSource
             return null;
         }
 
-        $type = strtolower((string)$id);
+        $type = null;
         $provider = null;
+        if (is_array($id)) {
+            $type = $id['type'];
+            $provider = $id['provider'];
+            $id = $id['id'];
+        } else {
+            $type = strtolower((string)$id);
+        }
 
-        if (wa_is_int($id) && $id > 0) {
+        if (wa_is_int($id) && $id > 0 && (empty($type) || empty($provider))) {
             $res = self::getSourceModel()->select('type, provider')->where('id = ?', $id)->fetchAssoc();
             if ($res) {
                 $type = strtolower($res['type']);

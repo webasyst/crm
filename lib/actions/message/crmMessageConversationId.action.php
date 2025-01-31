@@ -143,6 +143,39 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
 
         $can_edit_conversation = $this->getCrmRights()->canEditConversation($conversation);
 
+        $conversation['summary_html'] = '';
+        if (!empty($conversation['summary'])) {
+            $conversation['summary_html'] = $conversation['summary'] = htmlentities($conversation['summary'], ENT_QUOTES, 'UTF-8', false);
+            if (mb_strpos($conversation['summary'], '[image]') === 0) {
+                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[image]'));
+                $conversation['summary'] = $_summary_tail ?: _w('Image');
+                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fas fa-camera"></i></span> '.$conversation['summary'];
+            } elseif (mb_strpos($conversation['summary'], '[video]') === 0) {
+                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[video]'));
+                $conversation['summary'] = $_summary_tail ?: _w('Video');
+                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fab fa-youtube"></i></span> '.$conversation['summary'];
+            } elseif (mb_strpos($conversation['summary'], '[audio]') === 0) {
+                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[audio]'));
+                $conversation['summary'] = $_summary_tail ?: _w('Audio');
+                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fas fa-microphone"></i></span> '.$conversation['summary'];
+            } elseif (mb_strpos($conversation['summary'], '[file]') === 0) {
+                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[file]'));
+                $conversation['summary'] = $_summary_tail ?: _w('File');
+                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="far fa-file-alt"></i></span> '.$conversation['summary'];
+            } elseif (mb_strpos($conversation['summary'], '[geolocation]') === 0) {
+                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[geolocation]'));
+                $conversation['summary'] = $_summary_tail ?: _w('Geolocation');
+                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fas fa-map-marker-alt"></i></span> '.$conversation['summary'];
+            } elseif (mb_strpos($conversation['summary'], '[sticker]') === 0) {
+                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[sticker]'));
+                $conversation['summary'] = $_summary_tail ?: _w('Sticker');
+                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fas fa-sticky-note"></i></span> '.$conversation['summary'];
+            } elseif ($conversation['summary'] === '[empty]') {
+                $conversation['summary'] = _w('Empty message');
+                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fas fa-battery-empty"></i></span> '._w('Empty message');
+            }
+        }
+
         $messages = $this->workupMessages($conversation, $messages);
         $do_confirm_verification = !(new waContactSettingsModel())->getOne(wa()->getUser()->getId(), 'crm', 'verify_no_more_confirmation');
         $this->view->assign(array(
@@ -407,7 +440,7 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
         } catch (waException $e) {
             $name = _w('Deleted contact');
         }
-        $text = _w('<section data-role="c-email-signature"><p><br></p><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>');
+        $text = _w('<section><p><br></p></section><section data-role="c-email-signature"><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>');
         $text = str_replace(':MESSAGE_TIME:', wa_date('datetime', $create_datetime), $text);
         $text = str_replace(':CLIENT:', $name, $text);
         $text = str_replace(':BODY:', $body, $text);

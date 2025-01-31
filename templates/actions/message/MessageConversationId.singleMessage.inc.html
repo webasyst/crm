@@ -45,13 +45,17 @@
         {/if}
 
         <div class="c-message-body">
+            {if !empty($message.header)}
+                <p class="bold custom-mb-4">{$message.header}</p>
+            {/if}
+
             {$body_formatted}
             {if !empty($message.caption)}
                 {$extra_caption = $message.caption}
             {/if}
             {if !empty($message.extras.images)}
                 {$extras_images = $message.extras.images}
-                <div class="c-message-body-images {if $message.extras|@count > 1 || isset($extra_caption) || !empty($message.attachments)}with-caption{/if}">
+                <div class="c-message-body-images{if $message.extras|@count > 1 || isset($extra_caption) || !empty($message.attachments)} with-caption{/if}{if !empty($body_formatted)} custom-mt-4{/if}">
                     {foreach $extras_images as $_image}
                     {if isset($_image.id)}
                         {$extra_link = "`$wa_app_url`?module=file&action=download&id=`$_image.id`"}
@@ -158,6 +162,10 @@
                     {$extra_caption}
                 </div>
             {/if}
+
+            {if !empty($message.footer)}
+                <p class="hint custom-mt-4">{$message.footer}</p>
+            {/if}
         </div>
     {/strip}
 {/function}
@@ -211,19 +219,37 @@
                 <div class="c-message-attachments">
                     <ul class="menu c-restored-list c-attachments-list">
                         {foreach $message.attachments as $a}
-                        {if isset($a.id)}
-                            {$file_link = "?module=file&action=download&id=`$a.id`"}
-                        {elseif isset($a.url)}
-                            {$file_link = $a.url}
-                        {/if}
-                            <li>
-                                <a class="js-disable-router" href="{$file_link}">
-                                    <span class="attachments-icon"><svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M3.31445 19.1816H12.6836C14.5732 19.1816 15.5488 18.1885 15.5488 16.29V8.30957C15.5488 7.0791 15.3906 6.5166 14.626 5.73438L10.0293 1.06738C9.28223 0.311523 8.66699 0.135742 7.55957 0.135742H3.31445C1.43359 0.135742 0.449219 1.12891 0.449219 3.03613V16.29C0.449219 18.1885 1.43359 19.1816 3.31445 19.1816ZM3.46387 17.4238C2.62012 17.4238 2.19824 16.9844 2.19824 16.1758V3.1416C2.19824 2.3418 2.62012 1.89355 3.47266 1.89355H7.19922V6.6748C7.19922 7.94922 7.82324 8.56445 9.08887 8.56445H13.7998V16.1758C13.7998 16.9844 13.3779 17.4238 12.5254 17.4238H3.46387ZM9.25586 7.02637C8.88672 7.02637 8.72852 6.86816 8.72852 6.50781V2.12207L13.5625 7.02637H9.25586ZM11.0928 10.8672H4.74707C4.41309 10.8672 4.17578 11.1045 4.17578 11.4121C4.17578 11.7285 4.41309 11.9746 4.74707 11.9746H11.0928C11.4092 11.9746 11.6465 11.7285 11.6465 11.4121C11.6465 11.1045 11.4092 10.8672 11.0928 10.8672ZM11.0928 13.8027H4.74707C4.41309 13.8027 4.17578 14.0488 4.17578 14.3652C4.17578 14.6729 4.41309 14.9102 4.74707 14.9102H11.0928C11.4092 14.9102 11.6465 14.6729 11.6465 14.3652C11.6465 14.0488 11.4092 13.8027 11.0928 13.8027Z" fill="#8E8E93"/>
-                                        </svg></span>
-                                        <span class="attachments-name" title="{$a.name|escape}">{$a.name|escape}</span>
+                            {if isset($a.id)}
+                                {$file_link = "?module=file&action=download&id=`$a.id`"}
+                            {elseif isset($a.url)}
+                                {$file_link = $a.url}
+                            {/if}
+                            {if isset($a.name)}
+                                {assign var="clean_file_name" value=$a.name|escape}
+                                {assign var="offset_last_dot" value=$clean_file_name|strrpos:"."}
+                                {if $offset_last_dot !== False}
+                                    {assign var="name_without_ext" value=$clean_file_name|substr:0:($offset_last_dot)}
+                                {else}
+                                    {assign var="name_without_ext" value=$clean_file_name}
+                                {/if}
+                            {/if}
+                            <li class="custom-pt-4">
+                                <a class="js-disable-router flexbox space-4" href="{$file_link}">
+                                    <span class="attachments-icon"{if isset($a.id) && in_array($a.ext, ['jpg', 'jpeg', 'png'])} style="background-image: url('?module=file&action=download&id={$a.id}&thumb=48');"{/if}>
+                                        <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        {if !isset($a.id) || !in_array($a.ext, ['jpg', 'jpeg', 'png'])}
+                                            <path d="M3.31445 19.1816H12.6836C14.5732 19.1816 15.5488 18.1885 15.5488 16.29V8.30957C15.5488 7.0791 15.3906 6.5166 14.626 5.73438L10.0293 1.06738C9.28223 0.311523 8.66699 0.135742 7.55957 0.135742H3.31445C1.43359 0.135742 0.449219 1.12891 0.449219 3.03613V16.29C0.449219 18.1885 1.43359 19.1816 3.31445 19.1816ZM3.46387 17.4238C2.62012 17.4238 2.19824 16.9844 2.19824 16.1758V3.1416C2.19824 2.3418 2.62012 1.89355 3.47266 1.89355H7.19922V6.6748C7.19922 7.94922 7.82324 8.56445 9.08887 8.56445H13.7998V16.1758C13.7998 16.9844 13.3779 17.4238 12.5254 17.4238H3.46387ZM9.25586 7.02637C8.88672 7.02637 8.72852 6.86816 8.72852 6.50781V2.12207L13.5625 7.02637H9.25586ZM11.0928 10.8672H4.74707C4.41309 10.8672 4.17578 11.1045 4.17578 11.4121C4.17578 11.7285 4.41309 11.9746 4.74707 11.9746H11.0928C11.4092 11.9746 11.6465 11.7285 11.6465 11.4121C11.6465 11.1045 11.4092 10.8672 11.0928 10.8672ZM11.0928 13.8027H4.74707C4.41309 13.8027 4.17578 14.0488 4.17578 14.3652C4.17578 14.6729 4.41309 14.9102 4.74707 14.9102H11.0928C11.4092 14.9102 11.6465 14.6729 11.6465 14.3652C11.6465 14.0488 11.4092 13.8027 11.0928 13.8027Z" fill="#8E8E93"/>
+                                        {/if}
+                                        </svg>
+                                    </span>
+                                    <div class="custom-pt-8 attachments-name-wrapper">
+                                        <div class="flexbox attachments-name">
+                                            <div class="text-ellipsis">{$name_without_ext}</div>
+                                            <span class="nowrap">.{$a.ext}</span>
+                                        </div>
+                                        <div class="c-size hint">{crmHelper::formatFileSize($a.size)}</div>
+                                    </div>
                                 </a>
-                                <span class="c-size hint">{crmHelper::formatFileSize($a.size)}</span>
                             </li>
                         {/foreach}
                     </ul>
@@ -272,32 +298,38 @@
                 <div class="c-message-attachments">
                     <ul class="menu c-restored-list c-attachments-list">
                         {foreach $message.attachments as $a}
-                        {if isset($a.id)}
-                            {$file_link = "?module=file&action=download&id=`$a.id`"}
-                        {elseif isset($a.url)}
-                            {$file_link = $a.url}
-                        {/if}
-                        {if isset($a.name)}
-                            {assign var="clean_file_name" value=$a.name|escape}
-                            {assign var="offset_last_dot" value=$clean_file_name|strrpos:"."}
-                            {if $offset_last_dot !== False}
-                                {assign var="name_without_ext" value=$clean_file_name|substr:0:($offset_last_dot)}
-                            {else}
-                                {assign var="name_without_ext" value=$clean_file_name}
+                            {if isset($a.id)}
+                                {$file_link = "?module=file&action=download&id=`$a.id`"}
+                            {elseif isset($a.url)}
+                                {$file_link = $a.url}
                             {/if}
-                        {/if}
+                            {if isset($a.name)}
+                                {assign var="clean_file_name" value=$a.name|escape}
+                                {assign var="offset_last_dot" value=$clean_file_name|strrpos:"."}
+                                {if $offset_last_dot !== False}
+                                    {assign var="name_without_ext" value=$clean_file_name|substr:0:($offset_last_dot)}
+                                {else}
+                                    {assign var="name_without_ext" value=$clean_file_name}
+                                {/if}
+                            {/if}
 
                             <li>
                                 <a class="js-disable-router" href="{$file_link}">
-                                    <span class="attachments-icon"><svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M3.31445 19.1816H12.6836C14.5732 19.1816 15.5488 18.1885 15.5488 16.29V8.30957C15.5488 7.0791 15.3906 6.5166 14.626 5.73438L10.0293 1.06738C9.28223 0.311523 8.66699 0.135742 7.55957 0.135742H3.31445C1.43359 0.135742 0.449219 1.12891 0.449219 3.03613V16.29C0.449219 18.1885 1.43359 19.1816 3.31445 19.1816ZM3.46387 17.4238C2.62012 17.4238 2.19824 16.9844 2.19824 16.1758V3.1416C2.19824 2.3418 2.62012 1.89355 3.47266 1.89355H7.19922V6.6748C7.19922 7.94922 7.82324 8.56445 9.08887 8.56445H13.7998V16.1758C13.7998 16.9844 13.3779 17.4238 12.5254 17.4238H3.46387ZM9.25586 7.02637C8.88672 7.02637 8.72852 6.86816 8.72852 6.50781V2.12207L13.5625 7.02637H9.25586ZM11.0928 10.8672H4.74707C4.41309 10.8672 4.17578 11.1045 4.17578 11.4121C4.17578 11.7285 4.41309 11.9746 4.74707 11.9746H11.0928C11.4092 11.9746 11.6465 11.7285 11.6465 11.4121C11.6465 11.1045 11.4092 10.8672 11.0928 10.8672ZM11.0928 13.8027H4.74707C4.41309 13.8027 4.17578 14.0488 4.17578 14.3652C4.17578 14.6729 4.41309 14.9102 4.74707 14.9102H11.0928C11.4092 14.9102 11.6465 14.6729 11.6465 14.3652C11.6465 14.0488 11.4092 13.8027 11.0928 13.8027Z" fill="#8E8E93"/>
-                                        </svg></span>
-                                        <div class="flexbox wrap attachments-name">
-                                            <div class="attachments-name--name">{$name_without_ext}</div>
-                                            <span>.{$a.ext}</span>
+                                    <span class="attachments-icon"{if isset($a.id) && in_array($a.ext, ['jpg', 'jpeg', 'png'])} style="background-image: url('?module=file&action=download&id={$a.id}&thumb=48');"{/if}>
+                                        <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        {if !isset($a.id) || !in_array($a.ext, ['jpg', 'jpeg', 'png'])}
+                                            <path d="M3.31445 19.1816H12.6836C14.5732 19.1816 15.5488 18.1885 15.5488 16.29V8.30957C15.5488 7.0791 15.3906 6.5166 14.626 5.73438L10.0293 1.06738C9.28223 0.311523 8.66699 0.135742 7.55957 0.135742H3.31445C1.43359 0.135742 0.449219 1.12891 0.449219 3.03613V16.29C0.449219 18.1885 1.43359 19.1816 3.31445 19.1816ZM3.46387 17.4238C2.62012 17.4238 2.19824 16.9844 2.19824 16.1758V3.1416C2.19824 2.3418 2.62012 1.89355 3.47266 1.89355H7.19922V6.6748C7.19922 7.94922 7.82324 8.56445 9.08887 8.56445H13.7998V16.1758C13.7998 16.9844 13.3779 17.4238 12.5254 17.4238H3.46387ZM9.25586 7.02637C8.88672 7.02637 8.72852 6.86816 8.72852 6.50781V2.12207L13.5625 7.02637H9.25586ZM11.0928 10.8672H4.74707C4.41309 10.8672 4.17578 11.1045 4.17578 11.4121C4.17578 11.7285 4.41309 11.9746 4.74707 11.9746H11.0928C11.4092 11.9746 11.6465 11.7285 11.6465 11.4121C11.6465 11.1045 11.4092 10.8672 11.0928 10.8672ZM11.0928 13.8027H4.74707C4.41309 13.8027 4.17578 14.0488 4.17578 14.3652C4.17578 14.6729 4.41309 14.9102 4.74707 14.9102H11.0928C11.4092 14.9102 11.6465 14.6729 11.6465 14.3652C11.6465 14.0488 11.4092 13.8027 11.0928 13.8027Z" fill="#8E8E93"/>
+                                        {/if}
+                                        </svg>
+                                    </span>
+                                    <div class="custom-pt-8 attachments-name-wrapper">
+                                        <div class="flexbox attachments-name">
+                                            <div class="text-ellipsis">{$name_without_ext}</div>
+                                            <span class="nowrap">.{$a.ext}</span>
                                         </div>
+                                        <div class="c-size hint">{crmHelper::formatFileSize($a.size)}</div>
+                                    </div>
                                 </a>
-                                <span class="c-size hint">{crmHelper::formatFileSize($a.size)}</span>
                             </li>
                         {/foreach}
                     </ul>

@@ -139,7 +139,7 @@ class crmHtmlSanitizer
         $content = preg_replace(
             '~
                 &lt;
-                    (/?(?:a|b|i|u|pre|blockquote|p|strong|section|em|del|strike|span|ul|ol|li|div|font|br|table|thead|tbody|tfoot|tr|td|th|hr|h1|h2|h3|h4|h5|h6)/?)
+                    (/?(?:a|b|i|u|pre|blockquote|p|strong|section|em|del|code|strike|span|ul|ol|li|div|font|br|table|thead|tbody|tfoot|tr|td|th|hr|h1|h2|h3|h4|h5|h6)/?)
                     ((?!&gt;)[^a-z\-\_]((?!&gt;)(\s|.))+)?
                 &gt;
             ~iux',
@@ -180,6 +180,8 @@ class crmHtmlSanitizer
         // Being paranoid... remove $attr_start and $attr_end if still present anywhere.
         // Should not ever happen.
         $content = str_replace(array($attr_start, $attr_end), '', $content);
+
+        $content = str_replace('<pre>', '<pre class="prettyprint">', $content);
 
         // Remove \n around <blockquote> startting and ending tags
         $content = preg_replace('~(?U:\n\s*){0,2}<(/?blockquote)>(?U:\s*\n){0,2}~i', '<\1>', $content);
@@ -370,21 +372,30 @@ class crmHtmlSanitizer
         }, $value);
     }
 
-    function closeBrokenTags($string) {
+    protected function closeBrokenTags($string) {
         preg_match_all('#<([a-z]+)(?: .*)?(?<![/|/ ])>#iU', $string, $result);
         $opened_tags = $result[1];
+        $opened_tags = array_values(array_filter($opened_tags, function($tag) { return !in_array($tag, ['br', 'p', 'hr']); }));
 
         preg_match_all('#</([a-z]+)>#iU', $string, $result);
         $closed_tags = $result[1];
+        $closed_tags = array_values(array_filter($closed_tags, function($tag) { return !in_array($tag, ['br', 'p', 'hr']); }));
     
         if (count($closed_tags) == count($opened_tags)) {
             return $string;
         }
-
+        
         // We have a mismatched opening and closing tags
         try {
             libxml_use_internal_errors(true);
-            $string = mb_convert_encoding($string, 'HTML-ENTITIES', 'UTF-8');
+            $string = mb_encode_numericentity(
+                htmlspecialchars_decode(
+                    htmlentities($string, ENT_NOQUOTES, 'UTF-8', true),
+                    ENT_NOQUOTES
+                ), 
+                [0x80, 0x10FFFF, 0, ~0],
+                'UTF-8'
+            );
             $dom = new DOMDocument( "1.0", "UTF-8" );
             $dom->encoding = 'UTF-8';
             $dom->loadHTML($string, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);

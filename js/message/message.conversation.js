@@ -221,7 +221,7 @@ var CRMMessageConversationPage = ( function($) {
 
     CRMMessageConversationPage.prototype.initBlockquotToggle = function () {
         var that = this,
-            $messages = that.$wrapper.find('.c-message-body');
+            $messages = that.$wrapper.find('.c-email-messages-list').find('.c-message-body');
            
             $.each($messages, function (i, message) {
                 
@@ -1490,14 +1490,19 @@ var CRMMessagesProfileAdditional = ( function($) {
                     "app_id": "custom"
                 }
                 response.data.push(custom_obj);*/
-                $.each(response.data, function (i, item) {
-                    var item_count = item.count !== null ? `<span class="hint custom-ml-4">${item.count}</span>` : '';
+                $.each(response.data.tabs, function (i, item) {
+                    var item_count = !!item.count ? `<span class="hint custom-ml-4">${item.count}</span>` : '';
                     var link_html = `<li class="custom-mb-16 bold">
                     <a href="javascript:void(0);" class="js-drawer-list-link js-drawer-list--${item.app_id} additional" data-dialog-url="${item.url || ''}" data-class-name="custom" data-id="${item.app_id}">
                     <span class="js-drawer-list-link--header" >${item.title}</span>${item_count}</a></li>`;
                     $link_list.append(link_html);
                     that.item_html[item.app_id] = item.html;
                 });
+                $.each(response.data.counters, function (i, item) {
+                    if (!!item.value) {
+                        $link_list.find(`.js-drawer-list-counter--${item.name}`).text(item.value);
+                    }
+                }); 
                 $link_list.find('.skeleton').hide();
                 that.$main_wrapper.animate({scrollTop: that.$main_wrapper[0].scrollHeight}, 450);
             });
@@ -2354,8 +2359,13 @@ var CRMEmailConversationEmailSender = ( function($) { //форма ответа 
                 }
             }
             toggleHeight();
-            that.$body_redactor_p.html($textarea_small.val());
-
+            that.$body_redactor_p.html($textarea_small.val()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;")
+                .replace(/\n/g, '<br>'));
         });
 
         function toggleHeight() {

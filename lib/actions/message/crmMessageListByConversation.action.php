@@ -72,21 +72,30 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         }, $conversations);
 
         // Get Sources
-        $cs = new crmSourceModel();
-        $active_sources = $cs->select("*")->where("type IN ('".crmSourceModel::TYPE_EMAIL."','".crmSourceModel::TYPE_IM."') AND disabled=0")->fetchAll();
+        $active_sources = (new crmSourceModel)->getByField([
+            'type' => [crmSourceModel::TYPE_EMAIL, crmSourceModel::TYPE_IM],
+            'disabled' => 0
+        ], true);
         $pages_count = ceil($total_count / $list_params['limit']);
         $current_page = ceil($list_params['offset'] / $list_params['limit']) + 1;
         $contacts = $this->getContacts($contact_ids);
 
         $contact = [];
         if ($contact_id && isset($contacts[$contact_id])) {
+            $active_sources = array_map(function ($el) {
+                $el['source'] = crmSource::factory($el);
+                return $el;
+            }, $active_sources);
+
             $email = $contacts[$contact_id]->getFirst('email');
             $socialnetwork = $contacts[$contact_id]->getFirst('socialnetwork');
             $contact = [
+                'id'      => $contact_id,
                 'name'    => $contacts[$contact_id]->getName(),
                 'userpic' => rtrim(wa()->getConfig()->getHostUrl(), '/').$contacts[$contact_id]->getPhoto(self::USERPIC),
                 'email'   => ifempty($email, 'value', ''),
-                'im'      => ifempty($socialnetwork, 'value', '')
+                'im'      => ifempty($socialnetwork, 'value', ''),
+                'object'  => $contacts[$contact_id],
             ];
         }
 
@@ -179,6 +188,47 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         $allowed = $this->getCrmRights()->dropUnallowedConversations($conversations);
         foreach ($conversations as &$conversation) {
             $conversation['can_view'] = !empty($allowed[$conversation['id']]);
+
+            $conversation['summary_html'] = '';
+            $conversation['summary_icon'] = '';
+            if (!empty($conversation['summary'])) {
+                $conversation['summary_html'] = $conversation['summary'] = htmlentities($conversation['summary'], ENT_QUOTES, 'UTF-8', false);
+                if (mb_strpos($conversation['summary'], '[image]') === 0) {
+                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[image]'));
+                    $conversation['summary'] = _w('Image').$_summary_tail;
+                    $conversation['summary_icon'] = '<i class="fas fa-camera" title="'._w('Image').'"></i>';
+                    $conversation['summary_html'] = $_summary_tail ?: _w('Image');
+                } elseif (mb_strpos($conversation['summary'], '[video]') === 0) {
+                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[video]'));
+                    $conversation['summary'] = _w('Video').$_summary_tail;
+                    $conversation['summary_icon'] = '<i class="fab fa-youtube" title="'._w('Video').'"></i>';
+                    $conversation['summary_html'] = $_summary_tail ?: _w('Video');
+                } elseif (mb_strpos($conversation['summary'], '[audio]') === 0) {
+                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[audio]'));
+                    $conversation['summary'] = _w('Audio').$_summary_tail;
+                    $conversation['summary_icon'] = '<i class="fas fa-microphone" title="'._w('Audio').'"></i>';
+                    $conversation['summary_html'] = $_summary_tail ?: _w('Audio');
+                } elseif (mb_strpos($conversation['summary'], '[file]') === 0) {
+                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[file]'));
+                    $conversation['summary'] = _w('File').$_summary_tail;
+                    $conversation['summary_icon'] = '<i class="far fa-file-alt" title="'._w('File').'"></i>';
+                    $conversation['summary_html'] = $_summary_tail ?: _w('File');
+                } elseif (mb_strpos($conversation['summary'], '[geolocation]') === 0) {
+                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[geolocation]'));
+                    $conversation['summary'] = _w('Geolocation').$_summary_tail;
+                    $conversation['summary_icon'] = '<i class="fas fa-map-marker-alt" title="'._w('Geolocation').'"></i>';
+                    $conversation['summary_html'] = $_summary_tail ?: _w('Geolocation');
+                } elseif (mb_strpos($conversation['summary'], '[sticker]') === 0) {
+                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[sticker]'));
+                    $conversation['summary'] = _w('Sticker').$_summary_tail;
+                    $conversation['summary_icon'] = '<i class="fas fa-sticky-note" title="'._w('Sticker').'"></i>';
+                    $conversation['summary_html'] = $_summary_tail ?: _w('Sticker');
+                } elseif ($conversation['summary'] === '[empty]') {
+                    $conversation['summary'] = _w('Empty message');
+                    $conversation['summary_icon'] = '<i class="fas fa-battery-empty" title="'._w('Empty message').'"></i>';
+                    $conversation['summary_html'] = _w('Empty message');
+                }
+            }
         }
         unset($conversation);
     }

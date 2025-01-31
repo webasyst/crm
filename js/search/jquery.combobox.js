@@ -6,7 +6,7 @@
             if (this.element.data('custom.combobox.inited')) {
                 return;
             }
-            this.wrapper = $("<div style='position:relative;'>")
+            this.wrapper = $("<div style='position:relative; width: 280px'>")
                 .addClass("custom-combobox")
                 .insertAfter(this.element);
 
@@ -51,7 +51,7 @@
 
             this.offset = this.limit = this.element.data('limit');
             this.count = this.element.data('count');
-            this.wrapper.width(this.input.width() + 30);
+            //setTimeout(() => this.wrapper.width(this.input.width() + 30), 100)
             this.ul.css({
                 overflowY: 'auto',
                 overflowX: 'hidden',

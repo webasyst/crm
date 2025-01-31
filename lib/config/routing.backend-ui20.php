@@ -39,6 +39,7 @@ return array(
     'frame/contact-new/?'                             => 'spaFrame/',
     'frame/contact-edit/<id>/?'                       => 'spaFrame/',
     'frame/note/?'                                    => 'spaFrame/',
+    'frame/file/?'                                    => 'spaFrame/',
     'frame/invoice/?'                                 => 'spaFrame/',
     'frame/history/?'                                 => 'spaFrame/',
     'report/'                                         => 'report/',

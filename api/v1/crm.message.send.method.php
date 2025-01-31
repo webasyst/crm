@@ -24,6 +24,9 @@ class crmMessageSendMethod extends crmApiAbstractMethod
         if ($reply_message_id < 0) {
             throw new waAPIException('invalid_reply_message_id', sprintf_wp('Invalid “%s” value.', 'reply_message_id'), 400);
         }
+        if (!in_array($content_type, ['plain-text', 'html'])) {
+            throw new waAPIException('invalid_content_type', sprintf_wp('Invalid “%s” value.', 'content_type'), 400);
+        }
 
         $message = $this->getMessageModel()->getMessage($reply_message_id);
         if (!$message) {
@@ -41,6 +44,14 @@ class crmMessageSendMethod extends crmApiAbstractMethod
             if (empty($source) || $source->isDisabled()) {
                 throw new waAPIException('source_switched_off', _w('Source disabled.'), 400);
             }
+
+            if ($content_type === 'plain-text') {
+                $source_features = crmSourceHelper::factory(crmSource::factory($message['source_id']))->getFeatures();
+                if ($source_features['html']) {
+                    $reply_body = nl2br(htmlspecialchars($reply_body));
+                }
+            }
+
             $data = [
                 'body' => $reply_body,
             ];
@@ -54,12 +65,6 @@ class crmMessageSendMethod extends crmApiAbstractMethod
                 throw new waAPIException('send_error', ifset($result, 'errors', waUtils::jsonEncode($result)), 400);
             }
         } else {
-            if (!in_array($content_type, ['plain-text', 'html'])) {
-                throw new waAPIException('invalid_content_type', sprintf_wp('Invalid “%s” value.', 'content_type'), 400);
-            } elseif ($content_type === 'plain-text') {
-                $reply_body = nl2br(htmlspecialchars($reply_body));
-            }
-
             $user_emails = waUtils::getFieldValues($this->getUser()->get('email'), 'value');
             $from = reset($user_emails);
             if (empty($from)) {
@@ -84,6 +89,10 @@ class crmMessageSendMethod extends crmApiAbstractMethod
                 ];
             }
 
+            if ($content_type === 'plain-text') {
+                $reply_body = nl2br(htmlspecialchars($reply_body));
+            }
+
             /** uses in crmSendEmailController */
             waRequest::setParam([
                 'subject'      => $this->getSubject($message),
@@ -94,7 +103,7 @@ class crmMessageSendMethod extends crmApiAbstractMethod
                 'deal_id'      => $message['deal_id'],
                 'hash'         => (empty($attachments) ? '' : $this->getFiles($message['transport'], $attachments)),
                 'contact_id'   => ifset($message, 'contact_id', ''),
-                'conversation_id' => ifset($message, 'conversation_id', null)
+                'conversation_id' => ifset($message, 'conversation_id', null),
             ]);
             $email_send_controller = new crmMessageSendReplyController();
             $email_send_controller->execute($message);

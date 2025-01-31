@@ -352,6 +352,11 @@ abstract class crmEmailSourceWorkerStrategy
         if ($contact_id <= 0 || !$attachments) {
             return array();
         }
+
+        $creator_contact_id = wa()->getUser()->getId();
+        if ($this instanceof crmEmailSourceWorkerIncomingStrategy) {
+            $creator_contact_id = $contact_id;
+        }
         $files = waUtils::getFieldValues($attachments, 'request_file');
 
         // attach files
@@ -359,7 +364,11 @@ abstract class crmEmailSourceWorkerStrategy
         $fm = new crmFileModel();
         foreach ($files as $index => $file) {
             if ($file instanceof waRequestFile) {
-                $file_id = $fm->add(array('contact_id' => $contact_id), $file);
+                $file_id = $fm->add([
+                    'creator_contact_id' => $creator_contact_id,
+                    'contact_id' => $contact_id,
+                    'source_type' => crmFileModel::SOURCE_TYPE_MESSAGE,
+                ], $file);
                 if ($file_id > 0) {
                     $file_ids[$index] = $file_id;
                 }

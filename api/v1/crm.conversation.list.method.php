@@ -93,6 +93,23 @@ class crmConversationListMethod extends crmApiAbstractMethod
                 }
             }
             unset($el['deal_id']);
+            if (!empty($el['summary'])) {
+                if (mb_strpos($el['summary'], '[image]') === 0) {
+                    $el['summary'] = _w('Image').mb_substr($el['summary'], mb_strlen('[image]'));
+                } elseif (mb_strpos($el['summary'], '[video]') === 0) {
+                    $el['summary'] = _w('Video').mb_substr($el['summary'], mb_strlen('[video]'));
+                } elseif (mb_strpos($el['summary'], '[audio]') === 0) {
+                    $el['summary'] = _w('Audio').mb_substr($el['summary'], mb_strlen('[audio]'));
+                } elseif (mb_strpos($el['summary'], '[file]') === 0) {
+                    $el['summary'] = _w('File').mb_substr($el['summary'], mb_strlen('[file]'));
+                } elseif (mb_strpos($el['summary'], '[geolocation]') === 0) {
+                    $el['summary'] = _w('Geolocation').mb_substr($el['summary'], mb_strlen('[geolocation]'));
+                } elseif (mb_strpos($el['summary'], '[sticker]') === 0) {
+                    $el['summary'] = _w('Sticker').mb_substr($el['summary'], mb_strlen('[sticker]'));
+                } elseif ($el['summary'] === '[empty]') {
+                    $el['summary'] = _w('Empty message');
+                }
+            }
             return $el;
         }, $conversations));
 

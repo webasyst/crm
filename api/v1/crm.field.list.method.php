@@ -43,7 +43,7 @@ class crmFieldListMethod extends crmApiAbstractMethod
             $is_multi = ifset($column_info, 'multi', false);
             $_response = [
                 'id'          => (string) $column_id,
-                'name'        => ifset($column_info, 'name', ''),
+                'name'        => trim(ifset($column_info, 'name', '')),
                 'type'        => $type,
                 'is_multi'    => $is_multi,
                 'is_unique'   => ifset($column_info, 'unique', false),
@@ -79,7 +79,7 @@ class crmFieldListMethod extends crmApiAbstractMethod
                     }
                     $fields = [
                         'id'   => (string) $sub_name,
-                        'name' => ifset($sub_field, 'name', ''),
+                        'name' => trim(ifset($sub_field, 'name', '')),
                         'type' => $sub_type
                     ];
                     if ($o_order = ifset($sub_field, 'oOrder', [])) {

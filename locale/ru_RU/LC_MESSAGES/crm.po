@@ -2233,6 +2233,9 @@ msgstr "Отправить сообщение"
 msgid "Write"
 msgstr "Написать"
 
+msgid "Write email letter"
+msgstr "Написать письмо email"
+
 msgid "Write message"
 msgstr "Написать сообщение"
 
@@ -5289,3 +5292,21 @@ msgstr "Больше не показывать"
 
 msgid "Invalid funnel ID."
 msgstr "Недопустимый ID воронки."
+
+msgid "optional"
+msgstr "необязательно"
+
+msgid "Empty message"
+msgstr "Пустое сообщение"
+
+msgid "<section><p><br></p></section><section data-role=\"c-email-signature\"><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>"
+msgstr "<section><p><br></p></section><section data-role=\"c-email-signature\"><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: писал:</p><blockquote>:BODY:</blockquote>"
+
+msgid "Not implemented yet."
+msgstr "Ещё не реализовано."
+
+msgid "Webasyst ID services are not connected."
+msgstr "Сервисы Webasyst ID не подключены."
+
+msgid "Webasyst websocket API error."
+msgstr "Ошибка веб-сокета Webasyst ID."

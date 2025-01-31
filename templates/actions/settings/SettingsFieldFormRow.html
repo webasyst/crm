@@ -47,7 +47,7 @@
         </td>
         <td>
             <label for="enbl-{$uniqid}" class="name-label">{$f->getName()|escape}</label>
-            <input type="text" class="name-input" placeholder="[`Field name`]" name="{$prefix}[{$fid}][localized_names]" value="{$f->getName()|escape}">
+            <input type="text" class="name-input" placeholder="[`Field name`]" name="{$prefix}[{$fid}][localized_names]" value="{$f->getName()|trim|escape}">
 
             {if !$new_field}
                 <p class="name-hint hint">{localizedType f=$f}</p>

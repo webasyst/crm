@@ -506,6 +506,7 @@ var CRMMessagesSidebar = ( function($) {
         that.settings = options;
         // VARS
         that.iframe = options["iframe"];
+        that.noemail = options["noemail"];
 
         // DYNAMIC VARS
 
@@ -703,9 +704,10 @@ var CRMMessagesSidebar = ( function($) {
             //$.crm.content.reload();
             const active_id = that.active_id ? 'conversation/' + that.active_id + '/' : '';
             const iframe = that.iframe ? '&iframe=' + that.iframe : '';
+            const noemail = that.noemail ? '&noemail=1' : '';
             const contact_id = that.$settings_contact_id ? '&contact='+that.$settings_contact_id : that.$settings_deal_id ? '&deal='+that.$settings_deal_id : '';
 
-            var content_uri = $.crm.app_url + "message/" + active_id + "?reload=1" + contact_id + iframe;
+            var content_uri = $.crm.app_url + "message/" + active_id + "?reload=1" + contact_id + iframe + noemail;
             var data = {
                 ui: that.$ui,
                 id: +that.active_id};

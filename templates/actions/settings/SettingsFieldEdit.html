@@ -3,7 +3,7 @@
 {function localized_name_input_block locale=[] localized_name_value='' is_main_locale='' editable=''}
 <li class="crm-local-input-wrapper">
   <input type="text" name="name[{$locale.id}]" data-error-id="{$locale.id}"
-    value="{ifset($localized_name_value, '')|escape}" {if $is_main_locale}data-main-locale="1" {/if} {if
+    value="{ifset($localized_name_value, '')|trim|escape}" {if $is_main_locale}data-main-locale="1" {/if} {if
     !$editable}disabled="disabled" {/if}>
   <span class="state-error-hint"></span>
   <p class="hint ellipsis small crm-name-region">{$locale.name_region}</p>

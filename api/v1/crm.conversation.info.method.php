@@ -36,6 +36,24 @@ class crmConversationInfoMethod extends crmMessageListMethod
             ['id' => 'integer', 'count' => 'integer', 'last_message_id' => 'integer', 'is_closed' => 'boolean', 'read' => 'boolean', 'create_datetime' => 'datetime', 'update_datetime' => 'datetime']
         );
 
+        if (!empty($conversation['summary'])) {
+            if (mb_strpos($conversation['summary'], '[image]') === 0) {
+                $conversation['summary'] = _w('Image').mb_substr($conversation['summary'], mb_strlen('[image]'));
+            } elseif (mb_strpos($conversation['summary'], '[video]') === 0) {
+                $conversation['summary'] = _w('Video').mb_substr($conversation['summary'], mb_strlen('[video]'));
+            } elseif (mb_strpos($conversation['summary'], '[audio]') === 0) {
+                $conversation['summary'] = _w('Audio').mb_substr($conversation['summary'], mb_strlen('[audio]'));
+            } elseif (mb_strpos($conversation['summary'], '[file]') === 0) {
+                $conversation['summary'] = _w('File').mb_substr($conversation['summary'], mb_strlen('[file]'));
+            } elseif (mb_strpos($conversation['summary'], '[geolocation]') === 0) {
+                $conversation['summary'] = _w('Geolocation').mb_substr($conversation['summary'], mb_strlen('[geolocation]'));
+            } elseif (mb_strpos($conversation['summary'], '[sticker]') === 0) {
+                $conversation['summary'] = _w('Sticker').mb_substr($conversation['summary'], mb_strlen('[sticker]'));
+            } elseif ($conversation['summary'] === '[empty]') {
+                $conversation['summary'] = _w('Empty message');
+            }
+        }
+
         $this->response = [
             'conversation' => $conversation,
             'params' => [

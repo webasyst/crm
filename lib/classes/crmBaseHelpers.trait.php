@@ -259,6 +259,14 @@ trait crmBaseHelpersTrait
     }
 
     /**
+     * @return crmNoteAttachmentsModel
+     */
+    protected function getNoteAttachmentsModel()
+    {
+        return $this->getModel('note_attachments', 'crmNoteAttachmentsModel');
+    }
+
+    /**
      * @return crmNotificationModel
      */
     protected function getNotificationModel()

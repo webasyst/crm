@@ -64,7 +64,7 @@ class crmContactUserpicMethod extends crmApiAbstractMethod
                 $userpic_size = self::USERPIC_SIZE;
             }
 
-            $thumb_file_name = "$rand.${userpic_size}x$userpic_size.$pic_ext";
+            $thumb_file_name = "$rand.{$userpic_size}x$userpic_size.$pic_ext";
             if (method_exists($img, 'fixImageOrientation')) {
                 $img->fixImageOrientation();
             }

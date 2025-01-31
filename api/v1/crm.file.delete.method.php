@@ -20,6 +20,10 @@ class crmFileDeleteMethod extends crmApiAbstractMethod
         }
 
         $file_model->delete($file['id']);
+
+        $this->getMessageAttachmentsModel()->deleteByField(['file_id' => $file['id']]);
+        $this->getNoteAttachmentsModel()->deleteByField(['file_id' => $file['id']]);
+
         $action = 'file_delete';
         $lm = new crmLogModel();
         $lm->log(

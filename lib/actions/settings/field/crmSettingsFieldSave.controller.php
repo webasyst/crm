@@ -141,6 +141,9 @@ class crmSettingsFieldSaveController extends crmJsonController
                     // update
                     $subfield = $old_fields[$subfield_id];
                     foreach ($params as $param_key => $param_value) {
+                        if ($param_key === 'localized_names' && is_scalar($param_value)) {
+                            $param_value = trim($param_value);
+                        }
                         $subfield->setParameter($param_key, $param_value);
                         $new_fields[$subfield_id] = $subfield;
                     }

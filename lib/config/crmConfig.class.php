@@ -150,6 +150,7 @@ class crmConfig extends waAppConfig
                 if (!array_key_exists('plugin', $route)) {
                     $route['plugin'] = $plugin;
                 }
+                $route['url'] = $url = ifempty($route, 'url', $url);
                 $all_plugins_routes[$url] = $route;
             }
             unset($route);

@@ -79,8 +79,8 @@
                     {/if}
 
                     {if $message.original}
-                        <button class="button circle light-gray js-disable-router" href="?module=file&action=downloadEml&id={$message.id}"
-                            title="[`Download original`]"><i class="icon fas fa-download"></i></button>
+                        <a class="button circle light-gray js-disable-router" href="?module=file&action=downloadEml&id={$message.id}"
+                            title="[`Download original`]"><i class="icon fas fa-download"></i></a>
                     {/if}
                     
                     {if $message.transport === crmMessageModel::TRANSPORT_IM || $message.transport === crmMessageModel::TRANSPORT_EMAIL && $message.conversation_id}

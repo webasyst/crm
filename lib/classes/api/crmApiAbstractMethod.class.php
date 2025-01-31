@@ -11,6 +11,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
     public const METHOD_PATCH  = 'PATCH';
 
     const USERPIC_SIZE = 32;
+    const THUMB_SIZE   = 64;
     protected $request_body = null;
 
     protected $default_fa_segment_static_icon = 'user-friends';

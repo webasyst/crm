@@ -248,7 +248,7 @@ class crmFieldConstructor
                 if (!isset($locales[$l])) {
                     return array(null, array(sprintf(_w('Unknown locale: %s'), $l)));
                 }
-                $value = (string)$value;
+                $value = trim((string)$value);
                 if (strlen($value) > 0) {
                     $n[$l] = $value;
                 }
@@ -572,7 +572,7 @@ class crmFieldConstructor
             if (in_array($field_id, $this->noneditable_fields)) {
                 $contactFields[$field_id]['editable'] = false;
                 foreach (waLocale::getAll() as $locale_id) {
-                    $contactFields[$field_id]['localized_names'][$locale_id] = $field->getName($locale_id);
+                    $contactFields[$field_id]['localized_names'][$locale_id] = trim($field->getName($locale_id));
                 }
             } else {
                 $contactFields[$field_id]['editable'] = true;

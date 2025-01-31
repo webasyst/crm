@@ -46,10 +46,10 @@ abstract class crmImSource extends crmSource
     {
         $message = $this->getMessageModel()->getMessage($message_id);
         if (!$message) {
-            return null;
+            return;
         }
         if (!isset($message['source_id'])) {
-            return null;
+            return;
         }
 
         $update = array();
@@ -65,6 +65,18 @@ abstract class crmImSource extends crmSource
 
         $message['conversation_id'] = $conversation['id'];
         (new crmPushService)->notifyAboutMessage(null, $message, $conversation);
+
+        if (!class_exists('waServicesApi')) {
+            return;
+        }
+        $servicesApi = new waServicesApi();
+        if ($servicesApi->isConnected()) {
+            try {
+                $servicesApi->sendWebsocketMessage(['new_message' => $message], 'conversation-'.$conversation['id']);
+            } catch (Throwable $e) {
+                //waLog::log($e->getMessage()."\n".$e->getTraceAsString(), 'error.log');
+            }
+        }
     }
 
     /**
@@ -75,11 +87,12 @@ abstract class crmImSource extends crmSource
     protected function createConversation($message)
     {
         $data = array_merge(
-            $this->prepareConversationBeforeCreate($message),array(
+            $this->prepareConversationBeforeCreate($message),
+            [
                 'source_id' => $this->getId(),
                 'deal_id' => ifset($message['deal_id']) > 0 ? $message['deal_id'] : null,
                 'contact_id' => $message['contact_id']
-            )
+            ]
         );
         if ($message['direction'] == crmMessageModel::DIRECTION_IN) {
             $cm = new waContactModel();
@@ -98,40 +111,67 @@ abstract class crmImSource extends crmSource
 
     protected function prepareConversationBeforeCreate($message)
     {
-        $summary = (string)ifset($message['body']);
-        if (!crmConversationModel::isColumnMb4('summary')) {
-            $summary = crmHelper::removeEmoji($summary);
-        }
-
-        $summary = trim(strip_tags($summary));
-
-        $result = array();
-        if (strlen($summary) > 0) {
-            $result['summary'] = strip_tags($summary);
-        }
-
-        return $result;
+        return [ 'summary' => $this->prepareConversationSummaryFromMessage($message) ];
     }
 
     protected function prepareConversationBeforeUpdate($message, $message_id = null)
     {
         $direction = !empty($message['direction']) ? $message['direction'] : null;
         if ($direction !== crmMessageModel::DIRECTION_IN) {
-            return array();
+            return [];
         }
 
-        $summary = (string)ifset($message['body']);
-        if (!crmConversationModel::isColumnMb4('summary')) {
-            $summary = crmHelper::removeEmoji($summary);
-        }
-        $summary = trim(strip_tags($summary));
+        return [ 'summary' => $this->prepareConversationSummaryFromMessage($message) ];
+    }
 
-        $result = array();
-        if (strlen($summary) > 0) {
-            $result['summary'] = strip_tags($summary);
+    protected function prepareConversationSummaryFromMessage($message)
+    {
+        $summary = '';
+        $source_helper = crmSourceHelper::factory($this);
+        $res = $source_helper->normalazeMessagesExtras([$message]);
+        if (ifset($res[0]['extras']['images'])) {
+            $summary = '[image]';
+        } elseif (ifset($res[0]['extras']['videos'])) {
+            $summary = '[video]';
+        } elseif (ifset($res[0]['extras']['audios'])) {
+            $summary = '[audio]';
+        } elseif (ifset($res[0]['extras']['stickers'])) {
+            $summary = '[sticker]';
+        } elseif (ifset($res[0]['extras']['locations'])) {
+            $summary = '[geolocation]';
+        } elseif (!empty($message['attachments'])) {
+            $summary = '[file]';
         }
 
-        return $result;
+        $is_emoji_copatible = crmConversationModel::isColumnMb4('summary');
+        $body = (string)ifset($message['body'], '');
+        if (!empty($body)) {
+            if (!$is_emoji_copatible) {
+                $body = crmHelper::removeEmoji($body);
+            }
+            $body = trim(strip_tags($body));
+            return empty($summary) ? $body : $summary . ' ' . $body;
+        }
+
+        $caption = (string)ifset($res[0]['caption'], '');
+        if (!empty($caption)) {
+            if (!$is_emoji_copatible) {
+                $caption = crmHelper::removeEmoji($caption);
+            }
+            $caption = trim(strip_tags($caption));
+            return empty($summary) ? $caption : $summary . ' ' . $caption;
+        }
+        if (!empty($message['attachments'])) {
+            $file = reset($message['attachments']);
+            if (!empty($file['name'])) {
+                return empty($summary) ? $file['name'] : $summary . ' ' . $file['name'];
+            }
+        }
+        if (empty($summary)) {
+            $summary = '[empty]';
+        }
+
+        return $summary;
     }
 
     /**
@@ -196,4 +236,24 @@ abstract class crmImSource extends crmSource
         }
         return (int)$contact_id;
     }
+
+    /**
+     * Can source init new conversation
+     * @return bool
+     */
+    public function canInitConversation()
+    {
+        return false;
+    }
+
+    /**
+     * Render link (html code) to init new conversation with given contact
+     * @param string|int|array|waContact $contact
+     * @return string
+     */
+    public function renderInitConversationLink($contact)
+    {
+        return null;
+    }
+
 }

@@ -188,6 +188,7 @@ return array(
         'ext' => array('varchar', 10),
         'name' => array('varchar', 255, 'null' => 0),
         'comment' => array('text'),
+        'source_type' => array('enum', "'MESSAGE','NOTE','FILE'", 'null' => 0, 'default' => 'FILE'),
         ':keys' => array(
             'PRIMARY' => 'id',
             'contact_id' => 'contact_id',
@@ -373,6 +374,14 @@ return array(
         ':keys' => array(
             'PRIMARY' => 'id',
             'contact_id' => 'contact_id',
+        ),
+    ),
+    'crm_note_attachments' => array(
+        'note_id' => array('int', 11, 'null' => 0),
+        'file_id' => array('int', 11, 'null' => 0),
+        ':keys' => array(
+            'note_file' => array('note_id', 'file_id', 'unique' => 1),
+            'note_id' => 'note_id',
         ),
     ),
     'crm_notification' => array(

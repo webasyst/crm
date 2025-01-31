@@ -278,7 +278,10 @@ class crmMessageSendReplyController extends crmSendEmailController
         $file_ids = array();
         $file_paths = $this->getUploadedFiles();
         foreach ($file_paths as $file_path) {
-            $file_id = $this->getFileModel()->add(array('contact_id' => $contact_id), $file_path);
+            $file_id = $this->getFileModel()->add([
+                'contact_id' => $contact_id,
+                'source_type' => crmFileModel::SOURCE_TYPE_MESSAGE,
+            ], $file_path);
             $file_ids[] = $file_id;
             try {
                 waFiles::delete($file_path);

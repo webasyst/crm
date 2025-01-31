@@ -223,7 +223,7 @@
                         </label>
                     </div>
                     <div class="value">
-                        <input type="text" name="form[params][redirect_after_submit]" value="{$form.params.redirect_after_submit|default:''}" placeholder="http://" style="min-width: 400px;">
+                        <input type="text" name="form[params][redirect_after_submit]" value="{$form.params.redirect_after_submit|default:''}" placeholder="http://" style="width: 100%;">
                     </div>
                 </div>
 
@@ -235,7 +235,7 @@
                         </label>
                     </div>
                     <div class="value">
-                        <textarea name="form[params][html_after_submit]" class="equal-width" style="min-width: 400px;">{$form.params.html_after_submit|escape|default:'[`Thanks for subscribing!`]'}</textarea>
+                        <textarea name="form[params][html_after_submit]" class="equal-width" style="width: 100%;">{$form.params.html_after_submit|escape|default:'[`Thanks for subscribing!`]'}</textarea>
                     </div>
                 </div>
 
@@ -306,7 +306,7 @@
                                 </label>
                             </div>
                             <div class="value">
-                                <input type="text" name="form[params][after_antispam_confirm_url]" value="{$form.params.after_antispam_confirm_url|default:''}" placeholder="http://">
+                                <input type="text" name="form[params][after_antispam_confirm_url]" value="{$form.params.after_antispam_confirm_url|default:''}" placeholder="http://" style="width: 100%; min-width: auto;">
                             </div>
                         </div>
 
@@ -317,7 +317,7 @@
                                 </label>
                             </div>
                             <div class="value">
-                                <textarea name="form[params][after_antispam_confirm_text]">{$form.params.after_antispam_confirm_text|default:'[`Confirmed`]'}</textarea>
+                                <textarea name="form[params][after_antispam_confirm_text]" style="width: 100%; min-width: auto;">{$form.params.after_antispam_confirm_text|default:'[`Confirmed`]'}</textarea>
                             </div>
                         </div>
                     </div>
@@ -380,11 +380,16 @@
                 {if $form.id > 0}
                     <div class="c-column middle right">
                         <div class="crm-delete-link-wrapper">
-                            <a href="javascript:void(0);" class="button gray outlined crm-delete-form-link">
-                                <i class="fas fa-times-circle delete"></i> [`Delete this form`]
+                            <a href="javascript:void(0);" class="button light-gray smaller crm-delete-form-link desktop-only">
+                                <i class="fas fa-trash-alt delete custom-mr-4"></i> [`Delete this form`]
+                            </a>
+                            <a href="javascript:void(0);" class="button light-gray circle crm-delete-form-link mobile-only" title="[`Delete this form`]">
+                                <i class="fas fa-trash-alt delete"></i>
+                            </a>
+                            <a href="javascript:void(0);" class="button light-gray circle crm-delete-form-link tablet-only" title="[`Delete this form`]">
+                                <i class="fas fa-trash-alt delete"></i>
                             </a>
                         </div>
-
                     </div>
                 {/if}
             </div>

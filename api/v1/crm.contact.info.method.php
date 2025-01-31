@@ -171,6 +171,57 @@ class crmContactInfoMethod extends crmApiAbstractMethod
             }
         }
 
+        if (waRequest::get('with_counters', false)) {
+            $deal_ids = array_keys($this->getDealParticipantsModel()->getByField([
+                'contact_id' => $contact_id, 
+                'role_id' => crmDealParticipantsModel::ROLE_CLIENT
+            ], 'deal_id'));
+            $condition_ids = array_map(function($deal_id) {
+                return $deal_id * -1;
+            }, $deal_ids);
+            $condition_ids[] = $contact_id;
+
+            $this->response['counters'] = [
+                [
+                    'name' => 'deals',
+                    'value' => count($deal_ids),
+                ],
+                [
+                    'name' => 'reminders',
+                    'value' => (int) $this->getReminderModel()->countByField([
+                        'contact_id' => $contact_id,
+                        'complete_datetime' => null,
+                    ]),
+                ],
+                [
+                    'name' => 'invoices',
+                    'value' => (int) $this->getInvoiceModel()->countByField('contact_id', $contact_id),
+                ],
+                [
+                    'name' => 'calls',
+                    'value' => (int) $this->getCallModel()->countByField('client_contact_id', $contact_id),
+                ],
+                [
+                    'name' => 'notes',
+                    'value' => (int) $this->getNoteModel()->countByField('contact_id', $contact_id),
+                ],
+                [
+                    'name' => 'files',
+                    'value' => (int) $this->getFileModel()->countByField('contact_id', $condition_ids),
+                ],
+                [
+                    'name' => 'messages',
+                    'value' => (int) $this->getMessageModel()->select('COUNT(*)')->where('contact_id = '.(int)$contact_id.' AND conversation_id IS NOT NULL')->fetchField(),
+                ],
+            ];
+            if ($contact['is_company']) {
+                $this->response['counters'][] = [
+                    'name' => 'employees',
+                    'value' => (int) $this->getContactModel()->countByField('company_contact_id', $contact_id),
+                ];
+            }
+        }
+
         // Update list of recently viewed contacts
         $this->getRecentModel()->update($contact_id);
     }
@@ -290,7 +341,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                             }
                             $sub_field_data = [
                                 'id' => $sub_field['id'],
-                                'name' => $sub_field['name'],
+                                'name' => trim($sub_field['name']),
                                 'type' => $this->normalizeFieldType($sub_field['type']),
                             ];
 
@@ -322,7 +373,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
             }
             $data_field = [
                 'id' => $field['id'],
-                'name' => $field['name'],
+                'name' => trim($field['name']),
                 'type' => $this->normalizeFieldType($field['type']),
             ];
 
@@ -474,7 +525,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                                 //
                             }
                         }
-                        $tmp = $field->getName().' '.$tmp;
+                        $tmp = trim($field->getName()).' '.$tmp;
                     }
                     $value[$f_id] = $tmp;
                 }
