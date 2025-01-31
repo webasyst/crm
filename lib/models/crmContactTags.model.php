@@ -23,12 +23,14 @@ class crmContactTagsModel extends crmModel
 
     /**
      * @param int|array[] int $contact_id
-     * @return bool
+     * @return array
      */
-    public function getByContact($contact_id)
+    public function getByContact($contact_id, $drop_negative = true)
     {
         $contact_ids = crmHelper::toIntArray($contact_id);
-        $contact_ids = crmHelper::dropNotPositive($contact_ids);
+        if ($drop_negative) {
+            $contact_ids = crmHelper::dropNotPositive($contact_ids);
+        }
         return $this->getByField(array('contact_id' => $contact_ids), true);
     }
 }

@@ -21,7 +21,22 @@ class crmFileDeleteMethod extends crmApiAbstractMethod
 
         $file_model->delete($file['id']);
 
-        $this->getMessageAttachmentsModel()->deleteByField(['file_id' => $file['id']]);
+        $message_link = $this->getMessageAttachmentsModel()->getByField(['file_id' => $file['id']]);
+        if (!empty($message_link)) {
+            $this->getMessageAttachmentsModel()->deleteByField(['file_id' => $file['id']]);
+            $message_footer_param = $this->getMessageParamsModel()->getByField([
+                'message_id' => $message_link['message_id'], 
+                'name' => 'footer',
+            ]);
+            $message_footer_param = empty($message_footer_param['value']) ? '' : $message_footer_param['value'] . '<br>';
+            $message_footer_param .= sprintf_wp('File <b>%s</b> was deleted by <b>%s</b>.', $file['name'], wa()->getUser()->getName());
+            $this->getMessageParamsModel()->replace([
+                'message_id' => $message_link['message_id'],
+                'name' => 'footer',
+                'value' => $message_footer_param,
+            ]);
+        }
+        
         $this->getNoteAttachmentsModel()->deleteByField(['file_id' => $file['id']]);
 
         $action = 'file_delete';

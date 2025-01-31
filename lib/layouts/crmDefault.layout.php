@@ -111,9 +111,7 @@ class crmDefaultLayout extends waLayout
 
     protected function isSMSConfigured()
     {
-        $config = wa()->getConfig()->getConfigFile('sms');
-
-        return !empty($config);
+        return waSMS::adapterExists();
     }
 
     protected function isEmailConfigured()

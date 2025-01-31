@@ -280,12 +280,6 @@ class crmContactIdAction extends crmBackendViewAction
         return $fm->select('*')->where("contact_id = ".(int)$contact_id)->order('name')->fetchAll('id');
     }
 
-    protected function isSMSConfigured()
-    {
-        $config = wa()->getConfig()->getConfigFile('sms');
-        return !empty($config);
-    }
-
     protected function getEmailDuplicatesCounters($contact_id, $email)
     {
         if (!wa_is_int($contact_id) || $contact_id < 0) {

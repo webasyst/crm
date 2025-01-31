@@ -1,0 +1,107 @@
+body.wa-gallery-is-shown {
+  overflow: hidden;
+}
+.wa-gallery-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 0;
+  height: 0;
+  z-index: 1312;
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05), 0 0.5rem 0.5rem -0.5rem rgba(0, 0, 0, 0.13);
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.wa-gallery-preview.is-animated {
+  -webkit-transition: all 333ms ease-in-out;
+  -moz-transition: all 333ms ease-in-out;
+  -o-transition: all 333ms ease-in-out;
+  -ms-transition: all 333ms ease-in-out;
+  transition: all 333ms ease-in-out;
+}
+.wa-gallery-preview.is-invisible {
+  opacity: 0;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+  z-index: -1;
+}
+.wa-gallery-preview.is-shown {
+  border: 0;
+}
+.wa-gallery-preview .wa-gallery-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--background-color) 50% no-repeat;
+  border-radius: 0.5rem;
+  -webkit-background-size: contain;
+  -moz-background-size: contain;
+  background-size: contain;
+  cursor: pointer;
+  opacity: 0;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+}
+.wa-gallery-preview .wa-gallery-item img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: alpha(opacity=0);
+}
+.wa-gallery-preview .wa-gallery-item.is-active {
+  z-index: 1;
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+  -webkit-transition: opacity 300ms linear;
+  -moz-transition: opacity 300ms linear;
+  -o-transition: opacity 300ms linear;
+  -ms-transition: opacity 300ms linear;
+  transition: opacity 300ms linear;
+}
+.wa-gallery-preview .wa-gallery-controls {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  z-index: 2;
+  background: rgba(127,127,127,0.2);
+  opacity: 0.66;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=66)";
+  filter: alpha(opacity=66);
+  text-align: right;
+  -webkit-transition: opacity 333ms linear;
+  -moz-transition: opacity 333ms linear;
+  -o-transition: opacity 333ms linear;
+  -ms-transition: opacity 333ms linear;
+  transition: opacity 333ms linear;
+}
+.wa-gallery-preview .wa-gallery-controls:hover {
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+}
+.wa-gallery-preview .wa-gallery-controls.top {
+  top: 0;
+  padding-right: 1rem;
+}
+.wa-gallery-preview .wa-gallery-controls.bottom {
+  bottom: 0;
+  padding-right: 1rem;
+}
+.wa-gallery-preview .wa-gallery-controls .wa-gallery-close,
+.wa-gallery-preview .wa-gallery-controls .wa-gallery-download,
+.wa-gallery-preview .wa-gallery-controls .wa-gallery-arrow {
+  display: inline-block;
+  vertical-align: top;
+  padding: 0.5rem;
+}

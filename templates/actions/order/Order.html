@@ -54,12 +54,14 @@
 
                         {* TITLE *}
                         <div class="flexbox full-width">
-                            <h1 id="s-order-title">
+                            <h1 id="s-order-title" class="wide">
                                 {$wa->shop->orderId($order.id)}
 
                                 {if $order.state}
                                     <span style="font-size: 18px; margin-left: 10px; position: relative; top: -2px; {$order.state->getStyle()}">
-                                        <i class="{$wa->shop->convertIcon($order.state->getOption('icon'))}"></i><span class="custom-ml-4 custom-mr-12">{$order.state->getName()|escape}</span>
+                                        <span class="nowrap">
+                                            <i class="{$wa->shop->convertIcon($order.state->getOption('icon'))}"></i><span class="custom-ml-4 custom-mr-12">{$order.state->getName()|escape}</span>
+                                        </span>
                                         {if $last_action_datetime}
                                             <em class="hint nowrap s-print-only">{$last_action_datetime|wa_datetime:'datetime'}</em>
                                         {/if}
@@ -68,13 +70,19 @@
                                     [`Unknown state`]: {$order.state_id}
                                 {/if}
                             </h1>
-                            <div class="custom-mt-8">
+                            <div class="custom-mt-8 nowrap">
                                 {* PAID BADGE *}
                                 {if !empty($order.paid_date)}
                                     <div class="s-badge-payd rounded" title="{sprintf('[`Order was paid on %s`]', $order.paid_date|wa_date:'humandate')}"><i class="fas fa-check-circle text-green"></i><span class="custom-pl-4">[`Paid`]</span></div>
                                 {elseif !empty($order.auth_date)}
                                     <div class="s-badge-payd rounded" title="{sprintf('[`Payment was authorized on %s.`]', $order.auth_date|wa_date:'humandate')}"><i class="fas fa-check-circle text-green"></i><span class="custom-pl-4">[`Payment authorized`]</span></div>
                                 {/if}
+                            </div>
+                            <div class="custom-mt-16 custom-ml-16 nowrap">
+                                <a target="_blank" href="{$wa_backend_url}shop/?action=orders#/order/{$order.id}/">
+                                    <i class="icon userpic shop-icon" style="background-image: url('/wa-apps/shop/img/shop.svg'); border-radius: 0;"></i>
+                                    [`Open in Shop-Script`]
+                                </a>
                             </div>
                         </div>
 

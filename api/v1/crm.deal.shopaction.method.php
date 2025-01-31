@@ -28,7 +28,7 @@ class crmDealShopactionMethod extends crmApiAbstractMethod
 
         $workflow = new shopWorkflow();
         if (!$action = $workflow->getActionById($action_id)) {
-            throw new waAPIException('unknown_parameter', sprintf_wp('Unknown “%s” value.', 'action_id'), 400);
+            throw new waAPIException('unknown_parameter', sprintf(_wd('crm', 'Unknown “%s” value.'), 'action_id'), 400);
         }
 
         $state = $workflow->getStateById($order['state_id']);

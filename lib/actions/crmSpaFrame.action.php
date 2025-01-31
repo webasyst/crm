@@ -12,10 +12,10 @@ class crmSpaFrameAction extends crmBackendViewAction
 
         // Locale for SPA
         $locale = str_replace('_', '-', wa()->getLocale());
-
         $this->view->assign([
             'spa_api_token'        => $token,
             'spa_locale'           => $locale,
+            'is_contact_profile'   => strpos(waRequest::server('REQUEST_URI'), '/frame/contact/') !== false,
         ]);
     }
 

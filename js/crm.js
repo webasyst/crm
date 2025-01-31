@@ -950,6 +950,25 @@
 
 })(jQuery);
 
+// URL CHANGE OBSERVER
+(function() {
+    const doGallery = (options) => {
+        const isFrame = options?.isFrame || false;
+        const $gallery = isFrame ? $("iframe").contents().find(".js-wa-gallery") : $(".js-wa-gallery");
+        if (!$gallery.length) {
+            setTimeout(() => doGallery(options), 200);
+        }
+        const $images = $gallery.find(".js-wa-gallery-image");
+        if ($images.length) {
+            new waGallery($images, options);
+        }
+    }
+    window.document.documentElement.addEventListener("wa-gallery-load", (e) => {
+        let timeout = e.detail?.timeout || 200;
+        setTimeout(() => doGallery(e.detail), timeout);
+    }, false);
+})(jQuery);
+
 // CRM :: ContentRouter
 // Initialized in layouts/Default.html
 var ContentRouter = ( function($) {

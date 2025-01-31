@@ -27,6 +27,7 @@ class crmConfig extends waAppConfig
     protected static $max_execution_time;
 
     protected $push_adapter = null;
+    protected $onesignal_adapter = null;
 
     // see also a hack in FrontController->dispatch()
     public function getRouting($route = array())
@@ -640,27 +641,34 @@ class crmConfig extends waAppConfig
         return $explainer->explain();
     }
 
-    public function getPushAdapter()
+    public function getPushAdapter($force_adapter = null)
     {
-        if (!empty($this->push_adapter)) {
+        if (!empty($this->push_adapter) && $force_adapter !== 'onesignal') {
             return $this->push_adapter;
+        }
+        if (!empty($this->onesignal_adapter) && $force_adapter === 'onesignal') {
+            return $this->onesignal_adapter;
         }
 
         $push_adptr = null;
-        try {
-            $push_adptr = wa()->getPush();
-            if (empty($push_adptr) || $push_adptr->getId() == 'pushcrew' || !$push_adptr->isEnabled()) {
-                $push_adptr = null;
+        if ($force_adapter !== 'onesignal') {
+            try {
+                $push_adptr = wa()->getPush();
+                if (empty($push_adptr) || $push_adptr->getId() == 'pushcrew' || !$push_adptr->isEnabled()) {
+                    $push_adptr = null;
+                }
+            } catch (waException $ex) {
             }
-        } catch (waException $ex) {
         }
 
-        if (empty($push_adptr)) {
+        if (empty($push_adptr) || $push_adptr->getId() == 'onesignal') {
+            $mobile_push_only = empty($push_adptr);
             $onesignalPushClassFile = $this->getPath('system'). '/push/adapters/onesignal/onesignalPush.class.php';
             if (file_exists($onesignalPushClassFile)) {
                 require_once($onesignalPushClassFile);
                 if (class_exists('onesignalPush')) {
                     $push_adptr = new crmPushAdapter();
+                    $push_adptr->setMobilePushOnly($mobile_push_only);
                 }
             }
         }

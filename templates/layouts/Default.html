@@ -22,6 +22,7 @@
     <!--<link href="{$wa_url}wa-content/css/wa/design.css?{$wa->version()}" rel="stylesheet">-->
     <link href="{$wa_url}wa-content/js/jquery-plugins/jquery-tagsinput/jquery.tagsinput.css" rel="stylesheet">
     <link href="{$wa_url}wa-content/js/jquery-plugins/ibutton/jquery.ibutton.min.css" rel="stylesheet">
+    <link href="{$wa_app_static_url}js/waGallery/waGallery.css" type="text/css" rel="stylesheet">
 
     {wa_js file="js/min/vendor.min.js"}
         {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
@@ -140,8 +141,8 @@
         {$wa_app_static_url}js/settings/templates.js
         {$wa_app_static_url}js/emailPersonalSettings.js
         {$wa_app_static_url}js/websocket.js
+        {$wa_app_static_url}js/waGallery/waGallery.js
     {/wa_js}{strip}
-
 
     {capture assign="_confirm_template"}{include file="../actions/DialogConfirm.html"}{/capture}
 

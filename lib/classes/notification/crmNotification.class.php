@@ -492,13 +492,17 @@ class crmNotification
 
     public static function getSMSSenders()
     {
-        $sms_config = wa()->getConfig()->getConfigFile('sms');
-
         $sms_from = array(
             crmNotificationModel::SENDER_SYSTEM => array(
                 'name' => _w('System default'),
             ),
         );
+
+        if (!waSMS::adapterExists()) {
+            return $sms_from;
+        }
+        
+        $sms_config = wa()->getConfig()->getConfigFile('sms');
 
         // sender '*' in CRM names "System default", so in foreach skip '*'
 
@@ -515,7 +519,6 @@ class crmNotification
         );
 
         return $sms_from;
-
     }
 
     /**

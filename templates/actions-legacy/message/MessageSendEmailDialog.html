@@ -352,7 +352,7 @@
                 <p class="js-error-text"></p>
                 {if $wa->user()->isAdmin()}
                     <p class="js-technical-info-block js-unknown-error" style="display: none">
-                        {sprintf(_w('See detailed error-related information in log file <em>%s</em>.', "mail.log"))}
+                        {sprintf(_w('See detailed error-related information in log file <em>%s</em>.'), "mail.log")}
                     </p>
                     <p class="js-technical-info-block js-known-error" style="display: none">
                         <a class="js-technical-info-link inline-link" href="javascript:void(0)"><b><i>[`Technical information about the error`]</i></b></a>

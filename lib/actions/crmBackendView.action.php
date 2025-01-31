@@ -23,4 +23,9 @@ abstract class crmBackendViewAction extends crmViewAction
             waRequest::setParam('skip_update_last_page', '1');
         }
     }
+
+    protected function isSMSConfigured()
+    {
+        return waSMS::adapterExists();
+    }
 }

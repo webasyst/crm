@@ -76,22 +76,13 @@ class crmMailMessage
 
     public function getReferences()
     {
-        $_references = array();
         $references = (string)ifset($this->mail['headers']['references']);
-        foreach (explode(' ', $references) as $item) {
-            $item = trim($item);
-            if (substr($item, 0, 1) === '<') {
-                $item = substr($item, 1);
-            }
-            if (substr($item, -1, 1) === '>') {
-                $item = substr($item, 0, -1);
-            }
-            $item = trim($item);
-            if (strlen($item) > 0) {
-                $_references[] = $item;
-            }
-        }
-        return $_references;
+        $references = preg_split('/[\s<>]+/', $references);
+        $references = array_map(function ($item) {
+            return trim($item, '<>'); 
+        }, $references);
+        
+        return array_values(array_filter($references));
     }
 
     /**

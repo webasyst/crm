@@ -192,6 +192,22 @@ class crmFormProcessor
 
         $contact = $result['contact'];
 
+        $messages = $this->getForm()->getMessages();
+        $messages_with_attachements = array_filter($messages, function($message) { return !empty($message['add_attachments']); });
+        $attachements = [];
+        if (!empty($messages_with_attachements) && !empty($data['!deal_attachments'])) {
+            $dir = wa()->getTempPath('attachements', 'crm');
+            foreach($data['!deal_attachments'] as $attachement) {
+                $filepath = tempnam($dir, 'i');
+                waFiles::delete($filepath);
+                $attachement->copyTo($filepath);
+                $attachements[] = [
+                    'name' => $attachement->name,
+                    'path' => $filepath,
+                ];
+            }
+        }
+
         // processing deal data if need
         $deal = null;
         if ($this->getForm()->getParam('create_deal')) {
@@ -207,8 +223,11 @@ class crmFormProcessor
             }
         }
 
-        $messages = $this->getForm()->getMessages();
-        $this->sendMessages($messages, $contact, $deal);
+        $this->sendMessages($messages, $contact, $deal, $attachements);
+
+        foreach ($attachements as $attachement) {
+            waFiles::delete($attachement['path']);
+        }
 
         return array(
             'contact' => $contact,
@@ -355,7 +374,7 @@ class crmFormProcessor
      * @param crmContact $contact
      * @param array|null $deal
      */
-    protected function sendMessages($messages, crmContact $contact, $deal)
+    protected function sendMessages($messages, crmContact $contact, $deal, $attachements)
     {
         $vars = null;
         $assign = null;
@@ -385,6 +404,7 @@ class crmFormProcessor
 
             $body = $compiled['body'];
             $subject = $compiled['subject'];
+            $attaches = empty($message['add_attachments']) ? [] : $attachements;
 
             foreach ((array) ifset($message['to']) as $to => $on) {
                 if (!$on) {
@@ -416,7 +436,7 @@ class crmFormProcessor
                 $to = array($email => $to_contact->getName());
                 $from = waMail::getDefaultFrom();
 
-                $this->sendEmail($subject, $body, $from, $to);
+                $this->sendEmail($subject, $body, $from, $to, $attaches);
             }
         }
     }
@@ -490,11 +510,14 @@ class crmFormProcessor
         return $message;
     }
 
-    protected function sendEmail($subject, $body, $from, $to)
+    protected function sendEmail($subject, $body, $from, $to, $attachments = [])
     {
         try {
             $m = new waMailMessage(htmlspecialchars_decode($subject), $body);
             $m->setTo($to)->setFrom($from);
+            foreach ($attachments as $attachment) {
+                $m->addAttachment($attachment['path'], $attachment['name']);
+            }
             $sent = $m->send();
             $reason = 'waMailMessage->send() returned FALSE';
         } catch (Exception $e) {

@@ -17,7 +17,7 @@ class crmWsUrlController extends waJsonController
         $servicesApi = new waServicesApi();
         if ($servicesApi->isConnected()) {
             try {
-                $ws_url = (new waServicesApi())->getWebsocketUrl($channel);
+                $ws_url = $servicesApi->getWebsocketUrl($channel);
             } catch (waException $e) {
                 $this->errors = [
                     'error_code' => 'no_ws_url',

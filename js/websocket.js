@@ -21,6 +21,13 @@ var CRMWebSocket = ( function($) {
                     that.initWS();
                 };
                 that.ws.onmessage = that.onmessage;
+
+                that.ws.addEventListener("error", (event) => {
+                    console.log("WebSocket error: ", event);
+                    if (typeof that.onerror === 'function') {
+                        that.onerror("WebSocket error");
+                    }
+                });
             } else {
                 if (typeof that.onerror === 'function') {
                     that.onerror("WebSocket connection fail");

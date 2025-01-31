@@ -78,10 +78,4 @@ class crmDealContactUpdateController extends crmContactSaveController
             ),
         );
     }
-
-    protected function isSMSConfigured()
-    {
-        $config = wa()->getConfig()->getConfigFile('sms');
-        return !empty($config);
-    }
 }

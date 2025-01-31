@@ -55,10 +55,6 @@ class crmContactAddMethod extends crmApiAbstractMethod
 
     private function validate($fields_data)
     {
-        if (empty($fields_data)) {
-            return false;
-        }
-
         $is_company = false;
         foreach ($fields_data as $_field_data) {
             if ($_field_data['field'] == 'is_company' && $_field_data['value']) {
@@ -100,12 +96,14 @@ class crmContactAddMethod extends crmApiAbstractMethod
         }
         if (!empty($required)) {
             foreach ($required as $_req) {
-                $this->errors[] = [
-                    'field' => $_req,
-                    'value' => '',
-                    'code' => 'invalid_param',
-                    'description' => _w('This field is required')
-                ];
+                if ($_req !== 'middlename') {
+                    $this->errors[] = [
+                        'field' => $_req,
+                        'value' => '',
+                        'code' => 'invalid_param',
+                        'description' => _w('This field is required')
+                    ];
+                }
             }
         }
         $fields_data = array_values($fields_data);

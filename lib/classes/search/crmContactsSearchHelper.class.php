@@ -29,8 +29,40 @@ class crmContactsSearchHelper
                     'activity'
                 ];
                 $user = wa()->getUser();
+                $app_ids = array_keys(wa()->getApps());
+                $crm_plugin_ids = array_keys(wa('crm')->getConfig()->getPlugins());
                 foreach ($data as $app_name => $_item) {
-                    if (in_array($app_name, $enabled) || $user->getRights($app_name)) {
+                    if (preg_match('/-plugin$/', $app_name)) {
+                        $app_id = preg_replace('/-plugin$/', '', $app_name);
+                        if (in_array($app_id, $crm_plugin_ids)) {
+                            // crm plugin case
+                            $items[$app_name] = $_item;
+                            continue;
+                        }
+                        
+                        $parts = explode('_', $app_id);
+                        if (count($parts) == 1) {
+                            // invalid case - non existed plugin
+                            continue;
+                        }
+                        array_pop($parts);
+                        $potential_app_ids = array_reduce($parts, function($res, $p) {
+                            $res[] = empty($res) ? $p : end($res) . '_' . $p;
+                            return $res;
+                        }, []);
+                        $found_app_ids = array_filter($potential_app_ids, function($p) use ($app_ids) {
+                            return in_array($p, $app_ids);
+                        });
+                        if (empty($found_app_ids)) {
+                            // invalid case - non existed app
+                            continue;
+                        }
+
+                        $app_id = $found_app_ids[0];
+                        if ($user->getRights($app_id)) {
+                            $items[$app_name] = $_item;
+                        }
+                    } elseif (in_array($app_name, $enabled) || $user->getRights($app_name)) {
                         $items[$app_name] = $_item;
                     }
                 }
@@ -824,7 +856,7 @@ class crmContactsSearchHelper
                 $count = $instance->count($options);
             } else {
 
-                $sql = str_replace(':limit', "", ifset($item['items'][':values']['count']));
+                $sql = str_replace(':limit', "", ifset($item['items'][':values']['count'], ''));
 
                 if ($sql) {
                     $m = self::getModel();

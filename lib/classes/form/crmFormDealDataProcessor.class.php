@@ -86,7 +86,7 @@ class crmFormDealDataProcessor
         $dm = new crmDealModel();
 
         $deal = $dm->getById($id);
-        $this->logCreateDeal($deal) ;
+        $this->logCreateDeal($deal);
 
         return $deal;
     }

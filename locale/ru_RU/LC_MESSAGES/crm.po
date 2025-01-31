@@ -12,7 +12,7 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
 "Language: ru_RU\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.3\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -3472,8 +3472,8 @@ msgstr "Удалить назначение ответственного"
 msgid "Change the access to the contact."
 msgstr "Измените доступ к контакту."
 
-msgid "The responsible user is not assigned to this client because of insufficient access rights."
-msgid_plural "The responsible user is not assigned to these clients because of insufficient access rights."
+msgid "The responsible user has not been assigned to this client because of insufficient access rights."
+msgid_plural "The responsible user has not been assigned to these clients because of insufficient access rights."
 msgstr[0] "Этому клиенту ответственный не назначен, так как у него нет прав доступа."
 msgstr[1] "Этим клиентам ответственный не назначен, так как у него нет прав доступа."
 msgstr[2] "Этим клиентам ответственный не назначен, так как у него нет прав доступа."
@@ -4378,8 +4378,8 @@ msgstr "См. подробную информацию об ошибке в ло�
 msgid "Check <a href=\"%s\">email sending settings</a>."
 msgstr "Проверьте <a href=\"%s\">настройки отправки email-сообщений</a>."
 
-msgid "Check <a href=\"%s\">SMS sending settings</a>."
-msgstr "Проверьте <a href=\"%s\">настройки отправки sms-сообщений</a>."
+msgid "Check <a target=\"_top\" href=\"%s\">SMS sending settings</a>."
+msgstr "Проверьте <a target=\"_top\" href=\"%s\">настройки отправки sms-сообщений</a>."
 
 msgid "Open in Shop-Script"
 msgstr "Открыть в Shop-Script"
@@ -5110,8 +5110,8 @@ msgstr "Пустое поле."
 msgid "Empty width."
 msgstr "Пустая ширина."
 
-msgid "Empty sorting field."
-msgstr "Пустое поле сортировки."
+msgid "Empty contacts sorting field."
+msgstr "Пустое поле сортировки контактов."
 
 msgid "Empty deal sorting field."
 msgstr "Пустое поле сортировки сделок."
@@ -5299,6 +5299,9 @@ msgstr "необязательно"
 msgid "Empty message"
 msgstr "Пустое сообщение"
 
+msgid "Unsupported message"
+msgstr "Неподдерживаемое сообщение"
+
 msgid "<section><p><br></p></section><section data-role=\"c-email-signature\"><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>"
 msgstr "<section><p><br></p></section><section data-role=\"c-email-signature\"><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: писал:</p><blockquote>:BODY:</blockquote>"
 
@@ -5310,3 +5313,30 @@ msgstr "Сервисы Webasyst ID не подключены."
 
 msgid "Webasyst websocket API error."
 msgstr "Ошибка веб-сокета Webasyst ID."
+
+msgid "File <b>%s</b> was deleted by <b>%s</b>."
+msgstr "Файл <b>%s</b> был удален пользователем <b>%s</b>."
+
+msgid "Responsible user not found: %s."
+msgstr "Ответственный сотрудник не найден: %s."
+
+msgid "The customer cannot be responsible."
+msgstr "Заказчик не может быть ответственным."
+
+msgid "delivered"
+msgstr "доставлено"
+
+msgid "read"
+msgstr "прочитано"
+
+msgid "not delivered"
+msgstr "не доставлено"
+
+msgid "The message was not sent."
+msgstr "Сообщение не было отправлено."
+
+msgid "edited"
+msgstr "изменено"
+
+msgid "Edited"
+msgstr "Изменено"

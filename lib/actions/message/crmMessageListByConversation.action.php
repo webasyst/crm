@@ -188,47 +188,8 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         $allowed = $this->getCrmRights()->dropUnallowedConversations($conversations);
         foreach ($conversations as &$conversation) {
             $conversation['can_view'] = !empty($allowed[$conversation['id']]);
-
-            $conversation['summary_html'] = '';
-            $conversation['summary_icon'] = '';
-            if (!empty($conversation['summary'])) {
-                $conversation['summary_html'] = $conversation['summary'] = htmlentities($conversation['summary'], ENT_QUOTES, 'UTF-8', false);
-                if (mb_strpos($conversation['summary'], '[image]') === 0) {
-                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[image]'));
-                    $conversation['summary'] = _w('Image').$_summary_tail;
-                    $conversation['summary_icon'] = '<i class="fas fa-camera" title="'._w('Image').'"></i>';
-                    $conversation['summary_html'] = $_summary_tail ?: _w('Image');
-                } elseif (mb_strpos($conversation['summary'], '[video]') === 0) {
-                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[video]'));
-                    $conversation['summary'] = _w('Video').$_summary_tail;
-                    $conversation['summary_icon'] = '<i class="fab fa-youtube" title="'._w('Video').'"></i>';
-                    $conversation['summary_html'] = $_summary_tail ?: _w('Video');
-                } elseif (mb_strpos($conversation['summary'], '[audio]') === 0) {
-                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[audio]'));
-                    $conversation['summary'] = _w('Audio').$_summary_tail;
-                    $conversation['summary_icon'] = '<i class="fas fa-microphone" title="'._w('Audio').'"></i>';
-                    $conversation['summary_html'] = $_summary_tail ?: _w('Audio');
-                } elseif (mb_strpos($conversation['summary'], '[file]') === 0) {
-                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[file]'));
-                    $conversation['summary'] = _w('File').$_summary_tail;
-                    $conversation['summary_icon'] = '<i class="far fa-file-alt" title="'._w('File').'"></i>';
-                    $conversation['summary_html'] = $_summary_tail ?: _w('File');
-                } elseif (mb_strpos($conversation['summary'], '[geolocation]') === 0) {
-                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[geolocation]'));
-                    $conversation['summary'] = _w('Geolocation').$_summary_tail;
-                    $conversation['summary_icon'] = '<i class="fas fa-map-marker-alt" title="'._w('Geolocation').'"></i>';
-                    $conversation['summary_html'] = $_summary_tail ?: _w('Geolocation');
-                } elseif (mb_strpos($conversation['summary'], '[sticker]') === 0) {
-                    $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[sticker]'));
-                    $conversation['summary'] = _w('Sticker').$_summary_tail;
-                    $conversation['summary_icon'] = '<i class="fas fa-sticky-note" title="'._w('Sticker').'"></i>';
-                    $conversation['summary_html'] = $_summary_tail ?: _w('Sticker');
-                } elseif ($conversation['summary'] === '[empty]') {
-                    $conversation['summary'] = _w('Empty message');
-                    $conversation['summary_icon'] = '<i class="fas fa-battery-empty" title="'._w('Empty message').'"></i>';
-                    $conversation['summary_html'] = _w('Empty message');
-                }
-            }
+            $conversation['summary_html'] = crmHelper::renderSummary($conversation['summary'], 64);
+            $conversation['summary'] = htmlentities(ifset($conversation['summary'], ''), ENT_QUOTES, 'UTF-8', false);
         }
         unset($conversation);
     }

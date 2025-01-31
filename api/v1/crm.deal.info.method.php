@@ -48,9 +48,9 @@ class crmDealInfoMethod extends crmApiAbstractMethod
         $this->deal['tags'] = $this->getTags();
 
         if (!empty($this->deal['participants'])) {
-            $contacts = $this->getContacts();
-            $this->deal['users'] = $this->getDealUsers($contacts, $userpic_size);
-            $this->deal['contacts'] = $this->getDealContacts($contacts, $userpic_size, !empty($order));
+            list($users, $clients) = $this->getContacts();
+            $this->deal['users'] = $this->getDealUsers($users, $userpic_size);
+            $this->deal['contacts'] = $this->getDealContacts($clients, $userpic_size, !empty($order));
         }
 
         $funnel_rights_value = $this->getCrmRights()->funnel($this->deal['funnel_id']);
@@ -133,22 +133,33 @@ class crmDealInfoMethod extends crmApiAbstractMethod
 
     private function getContacts()
     {
-        $participants = array_combine(
-            array_column($this->deal['participants'], 'contact_id'),
-            $this->deal['participants']
-        );
-        $ids = array_keys($participants);
+        $users = array_values(array_filter($this->deal['participants'], function($el) {
+            return $el['role_id'] === crmDealParticipantsModel::ROLE_USER;
+        }));
+
+        $clients = array_values(array_filter($this->deal['participants'], function($el) {
+            return $el['role_id'] === crmDealParticipantsModel::ROLE_CLIENT;
+        }));
+
+        $ids = array_column($this->deal['participants'], 'contact_id');
         $collection = new crmContactsCollection('/id/'.join(',', $ids), [
             'check_rights' => true,
             'transform_phone_prefix' => 'all_domains'
         ]);
         $contacts = $collection->getContacts('*,phone,address,email.*', 0, 10);
 
-        return array_map(function ($_contact) use ($participants) {
-            $_contact['assigned_at'] = $_contact['create_datetime'];
-            $_contact += ifset($participants, $_contact['id'], []);
-            return $_contact;
-        }, $contacts);
+        $users = array_map(function ($_participant) use ($contacts) {
+            $_participant['assigned_at'] = $_participant['create_datetime'];
+            $_participant += ifset($contacts, $_participant['contact_id'], []);
+            return $_participant;
+        }, $users);
+        $clients = array_map(function ($_participant) use ($contacts) {
+            $_participant['assigned_at'] = $_participant['create_datetime'];
+            $_participant += ifset($contacts, $_participant['contact_id'], []);
+            return $_participant;
+        }, $clients);
+
+        return [ $users, $clients ];
     }
 
     private function getDealUsers($contacts, $userpic_size)
@@ -176,7 +187,7 @@ class crmDealInfoMethod extends crmApiAbstractMethod
         $counters = crmDeal::getDealPageContactCounters(ifset($contacts, $this->deal['contact_id'], []), $contacts, $has_order);
         $counters_deal = ifset($counters, 'deal_counters', []);
         $counters_shop = ifset($counters, 'order_counters', []);
-        foreach ($contacts as $id => $_contact) {
+        foreach ($contacts as $_contact) {
             if ($_contact['role_id'] === crmDealParticipantsModel::ROLE_CLIENT) {
                 $_contact['name'] = waContactNameField::formatName($_contact, true);
                 if (!!ifempty($_contact, 'is_company', '')) {
@@ -206,8 +217,8 @@ class crmDealInfoMethod extends crmApiAbstractMethod
                     'label'       => $_contact['label'],
                     'assigned_at' => $this->formatDatetimeToISO8601($_contact['assigned_at']),
                     'counters'    => [
-                        'deal'       => ifset($counters_deal, $id, null),
-                        'shop_order' => ifset($counters_shop, $id, null)
+                        'deal'       => ifset($counters_deal, $_contact['id'], null),
+                        'shop_order' => ifset($counters_shop, $_contact['id'], null)
                     ],
                     'contact' => $this->filterFields(
                         $_contact,

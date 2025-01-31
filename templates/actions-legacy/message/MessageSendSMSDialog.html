@@ -106,9 +106,9 @@
                 <p class="js-error-text"></p>
                 {if $wa->user()->isAdmin()}
                     <p class="js-technical-info-block js-unknown-error">
-                        {sprintf(_w('See detailed error-related information in log file <em>%s</em>.', "sms.log"))}
+                        {sprintf(_w('See detailed error-related information in log file <em>%s</em>.'), "sms.log")}
                     </p>
-                    <p>{sprintf(_w('Check <a href="%s">SMS sending settings</a>.'), "`$wa_backend_url`webasyst/settings/sms/")}</a></p>
+                    <p>{sprintf(_w('Check <a target="_top" href="%s">SMS sending settings</a>.'), "`$wa_backend_url`webasyst/settings/sms/")}</a></p>
                 {else}
                     <p>{_ws('Please refer to your system administrator.')}</p>
                 {/if}

@@ -5,6 +5,8 @@ class crmFileListMethod extends crmApiAbstractMethod
     protected $contact_id;
     protected $userpic_size;
 
+    const PREVIEW_SIZE = 512;
+
     public function execute()
     {
         $this->validateParams();
@@ -12,7 +14,7 @@ class crmFileListMethod extends crmApiAbstractMethod
         $deal_ids = [];
         if ($this->contact_id > 0) {
             $deal_ids = array_keys($this->getDealParticipantsModel()->getByField([
-                'contact_id' => $this->contact_id, 
+                'contact_id' => $this->contact_id,
                 'role_id' => crmDealParticipantsModel::ROLE_CLIENT
             ], 'deal_id'));
         }
@@ -38,7 +40,7 @@ class crmFileListMethod extends crmApiAbstractMethod
         $this->userpic_size = ifempty($userpic_size, self::USERPIC_SIZE);
 
         if (empty($contact_id) && empty($deal_id)) {
-            throw new waAPIException('empty_id', sprintf_wp('Missing required parameter: “%s”.', sprintf_wp('“%s” or “%s”', 'contact_id', 'deal_id')), 400);
+            throw new waAPIException('empty_id', sprintf_wp('Missing required parameter: %s.', sprintf_wp('“%s” or “%s”', 'contact_id', 'deal_id')), 400);
         } elseif (!empty($contact_id) && !empty($deal_id)) {
             throw new waAPIException('error', sprintf_wp('Only one of the parameters is required: %s.', sprintf_wp('“%s” or “%s”', 'contact_id', 'deal_id')), 400);
         } elseif (!$this->getCrmRights()->contactOrDeal($this->getUser()->getId())) {
@@ -132,13 +134,15 @@ class crmFileListMethod extends crmApiAbstractMethod
             return [];
         }
         $thumb_size = waRequest::get('thumb_size', self::THUMB_SIZE, waRequest::TYPE_INT);
+        $preview_size = waRequest::get('preview_size', self::PREVIEW_SIZE, waRequest::TYPE_INT);
         $host_backend = rtrim(wa()->getConfig()->getHostUrl(), '/').wa()->getConfig()->getBackendUrl(true);
         $img_ext = ['jpg', 'jpeg', 'png', 'gif'];
         if (class_exists('Imagick')) {
             $img_ext[] = 'pdf';
         }
         $file_list = array_map(function ($_file) use ($contact_list, $deals, $host_backend, $thumb_size, $img_ext) {
-            $_file['url'] = $host_backend.'crm/?module=file&action=download&id='.$_file['id'];
+            //$_file['url'] = $host_backend.'crm/?module=file&action=download&id='.$_file['id'];
+            $_file['url'] = wa()->getConfig()->getBackendUrl(true).'crm/?module=file&action=download&id='.$_file['id'];
             if (isset($contact_list[$_file['creator_contact_id']])) {
                 $_file['creator'] = $contact_list[$_file['creator_contact_id']];
             }
@@ -146,7 +150,9 @@ class crmFileListMethod extends crmApiAbstractMethod
                 $_file['deal'] = $deals[abs($_file['contact_id'])];
             }
             if (in_array($_file['ext'], $img_ext)) {
-                $_file['thumb_url'] = $host_backend.'crm/?module=file&action=download&id='.$_file['id'].'&thumb='.$thumb_size;
+                //$_file['thumb_url'] = $host_backend.'crm/?module=file&action=download&id='.$_file['id'].'&thumb='.$thumb_size;
+                $_file['thumb_url'] = wa()->getConfig()->getBackendUrl(true).'crm/?module=file&action=download&id='.$_file['id'].'&thumb='.$thumb_size;
+                $_file['preview_url'] = wa()->getConfig()->getBackendUrl(true).'crm/?module=file&action=download&id='.$_file['id'].'&thumb='.$preview_size;
             }
             return $_file;
         }, $file_list);
@@ -162,6 +168,7 @@ class crmFileListMethod extends crmApiAbstractMethod
                 'comment',
                 'url',
                 'thumb_url',
+                'preview_url',
                 'creator',
                 'source_type',
                 'deal',

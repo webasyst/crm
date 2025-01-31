@@ -23,18 +23,26 @@ class crmContactRecentMethod extends crmApiAbstractMethod
         $contacts = $collection->getContacts('name,firstname,lastname,middlename,photo,crm_vault_id,crm_user_id,create_contact_id');
         $contacts = $this->getCrmRights()->dropUnallowedContacts($contacts);
 
+        $old_recent = [];
         foreach ($all_recent as $_id => $_contact) {
             if (empty($contacts[$_id])) {
                 continue;
             }
             if (!empty($_contact['is_pinned'])) {
                 $pinned[$_id] = $contacts[$_id];
-            } elseif ($recent_limit) {
+            } elseif ($recent_limit > 0) {
                 $recent[$_id] = $contacts[$_id];
                 $recent_limit--;
             } else {
-                $this->getRecentModel()->deleteByField($_contact);
+                $old_recent[] = $_id;
             }
+        }
+        if (!empty($old_recent)) {
+            $this->getRecentModel()->deleteByField([
+                'user_contact_id' => $this->getUser()->getId(),
+                'contact_id' => $old_recent,
+                'is_pinned' => 0,
+            ]);
         }
 
         $this->response = [

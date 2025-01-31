@@ -9,7 +9,7 @@ class crmReminderMarkAsDoneController extends crmJsonController
         $id = waRequest::request('id', null, waRequest::TYPE_INT);
         $user_id = waRequest::request('user_id', wa()->getUser()->getId(),waRequest::TYPE_STRING_TRIM);
         $contact_id = waRequest::get('contact', null, waRequest::TYPE_INT);
-        $deal_id = abs(waRequest::get('deal', null, waRequest::TYPE_INT));
+        $deal_id = abs(waRequest::get('deal', 0, waRequest::TYPE_INT));
 
         $rm = new crmReminderModel();
         $reminder = $rm->getById($id);

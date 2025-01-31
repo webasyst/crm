@@ -26,25 +26,9 @@ class crmContactPinMethod extends crmApiAbstractMethod
         }
 
         try {
-            $result = $this->getRecentModel()->insert([
-                'user_contact_id' => $this->getUser()->getId(),
-                'contact_id'      => $contact_id,
-                'is_pinned'       => 1,
-                'view_datetime'   => date('Y-m-d H:i:s')
-            ]);
-        } catch (waDbException $db_exception) {
-            try {
-                $result = $this->getRecentModel()->updateByField(
-                    [
-                        'user_contact_id' => $this->getUser()->getId(),
-                        'contact_id'      => $contact_id
-                    ], [
-                        'is_pinned' => 1,
-                    ]
-                );
-            } catch (waDbException $db_ex) {
-                throw new waAPIException('error_db', $db_exception->getMessage(), 500);
-            }
+            $result = $this->getRecentModel()->pin($contact_id);
+        } catch (waDbException $db_ex) {
+            throw new waAPIException('error_db', $db_exception->getMessage(), 500);
         }
 
         if (!$result) {

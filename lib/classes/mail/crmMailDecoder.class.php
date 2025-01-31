@@ -2,6 +2,13 @@
 
 class crmMailDecoder extends waMailDecode
 {
+    protected function cleanHTML($html_orig)
+    {
+        // clean broken html possible case like <table ... role=""presentation" ...>
+        $html = preg_replace("~(<[^><]+\s\w+=\")\"(\w*\"[^><]*>)~is", '\1\2', $html_orig);
+        return parent::cleanHTML($html);
+    }
+    
     protected function decodePart($part)
     {
         if ($part['type'] === self::TYPE_ATTACH) {

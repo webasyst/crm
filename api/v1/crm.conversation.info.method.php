@@ -49,6 +49,10 @@ class crmConversationInfoMethod extends crmMessageListMethod
                 $conversation['summary'] = _w('Geolocation').mb_substr($conversation['summary'], mb_strlen('[geolocation]'));
             } elseif (mb_strpos($conversation['summary'], '[sticker]') === 0) {
                 $conversation['summary'] = _w('Sticker').mb_substr($conversation['summary'], mb_strlen('[sticker]'));
+            } elseif ($conversation['summary'] === '[unsupported]') {
+                $conversation['summary'] = _w('Unsupported message');
+            } elseif ($conversation['summary'] === '[error]') {
+                $conversation['summary'] = _w('Error');
             } elseif ($conversation['summary'] === '[empty]') {
                 $conversation['summary'] = _w('Empty message');
             }

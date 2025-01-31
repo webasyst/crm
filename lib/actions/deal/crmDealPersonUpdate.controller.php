@@ -106,12 +106,6 @@ class crmDealPersonUpdateController extends crmContactSaveController
         return $this->dm !== null ? $this->dm : ($this->dm = new crmDealModel());
     }
 
-    protected function isSMSConfigured()
-    {
-        $config = wa()->getConfig()->getConfigFile('sms');
-        return !empty($config);
-    }
-
     /**
      * Create new waContact instance by contact ID, take into account possible not existing
      * @param int $contact_id

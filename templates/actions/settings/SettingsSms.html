@@ -51,51 +51,50 @@
                 {if count($sms_adapters)}
                     {foreach $sms_adapters as $i => $a}
                         <div class="fields-group">
-                            <!--<div class="field">
-                                <div class="name">[`Name`]</div>
-                                <div class="value">
-                                    <strong><i class="icon16" style="background-image: url('{$a.icon}');"></i>{$a.name}</strong><br>
-                                </div>
-                            </div>-->
                             <input name="sms[{$i}][adapter]" type="hidden" value="{$a.id}">
                             <h3>{if $a.icon}<span class="icon middle size-16"><img src="{$a.icon}" alt=""></span> {/if}{$a.name}</h3>
 
-                            <div class="field">
-                                <div class="name">{if isset($a.controls.from.title)}{$a.controls.from.title}{else}[`Sender IDs`]{/if}</div>
-                                <div class="value">
-                                    {strip}
-                                        <textarea name="sms[{$i}][from]">
-                                            {if !empty($a.config.from)}{implode("\n", $a.config.from)}{/if}
-                                        </textarea>
-                                    {/strip}
-                                    <p class="hint">{if isset($a.controls.from.description)}{$a.controls.from.description}{else}[`Enter Sender IDs to use with this SMS gateway (Sender ID is either your phone number or up-to-11-characters text label). Enter * to use default Sender ID issued for your account by the gateway.`]{/if}</p>
-                                </div>
-                            </div>
+                            {if !empty($a.controls_html)}
+                                {$a.controls_html}
+                            {else}
 
-                            {foreach $a.controls as $k => $v}
-                                {if $k != 'from'}
-                                    <div class="field">
-                                        <div class="name">{$v.title}</div>
-                                        <div class="value">
-                                            {if ifset($v.control_type) == 'checkbox'}
-                                                <input type="hidden" name="sms[{$i}][{$k}]" value="">
-                                                <span class="wa-checkbox"><input type="checkbox" name="sms[{$i}][{$k}]" value="1" {if !empty($a.config[$k])}checked{/if}>
-                                                    <span>
-                                                        <span class="icon">
-                                                            <i class="fas fa-check"></i>
+                                <div class="field">
+                                    <div class="name">{if isset($a.controls.from.title)}{$a.controls.from.title}{else}[`Sender IDs`]{/if}</div>
+                                    <div class="value">
+                                        {strip}
+                                            <textarea name="sms[{$i}][from]">
+                                                {if !empty($a.config.from)}{implode("\n", $a.config.from)}{/if}
+                                            </textarea>
+                                        {/strip}
+                                        <p class="hint">{if isset($a.controls.from.description)}{$a.controls.from.description}{else}[`Enter Sender IDs to use with this SMS gateway (Sender ID is either your phone number or up-to-11-characters text label). Enter * to use default Sender ID issued for your account by the gateway.`]{/if}</p>
+                                    </div>
+                                </div>
+
+                                {foreach $a.controls as $k => $v}
+                                    {if $k != 'from'}
+                                        <div class="field">
+                                            <div class="name">{$v.title}</div>
+                                            <div class="value">
+                                                {if ifset($v.control_type) == 'checkbox'}
+                                                    <input type="hidden" name="sms[{$i}][{$k}]" value="">
+                                                    <span class="wa-checkbox"><input type="checkbox" name="sms[{$i}][{$k}]" value="1" {if !empty($a.config[$k])}checked{/if}>
+                                                        <span>
+                                                            <span class="icon">
+                                                                <i class="fas fa-check"></i>
+                                                            </span>
                                                         </span>
                                                     </span>
-                                                </span>
-                                            {else}
-                                                <input type="text" name="sms[{$i}][{$k}]" value="{if !empty($a.config[$k])}{$a.config[$k]|escape}{/if}">
-                                            {/if}
-                                            {if !empty($v.description)}
-                                                <p class="hint">{$v.description}</p>
-                                            {/if}
+                                                {else}
+                                                    <input type="text" name="sms[{$i}][{$k}]" value="{if !empty($a.config[$k])}{$a.config[$k]|escape}{/if}">
+                                                {/if}
+                                                {if !empty($v.description)}
+                                                    <p class="hint">{$v.description}</p>
+                                                {/if}
+                                            </div>
                                         </div>
-                                    </div>
-                                {/if}
-                            {/foreach}
+                                    {/if}
+                                {/foreach}
+                            {/if}
                         </div>
 
                         <input name="sms[{$i}][adapter]" type="hidden" value="{$a.id}">
@@ -125,6 +124,7 @@
         var $status = $form.find('.crm-success-status').stop().css('opacity', 1).hide();
         var $loading = $form.find('.crm-loading').show();
         $.post($form.attr('action'), $form.serialize()).then(function() {
+            $.crm.content.reload();
             $status.show().fadeOut(500);
         }, function() {
             alert("Error saving data");

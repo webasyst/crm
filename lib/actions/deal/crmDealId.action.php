@@ -241,12 +241,6 @@ class crmDealIdAction extends crmBackendViewAction
         return $tm->getByContact(-$deal['id'], false);
     }
 
-    protected function isSMSConfigured()
-    {
-        $config = wa()->getConfig()->getConfigFile('sms');
-        return !empty($config);
-    }
-
 
     /**
      *

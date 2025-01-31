@@ -4,11 +4,11 @@ abstract class crmApiAbstractMethod extends waAPIMethod
 {
     use crmBaseHelpersTrait;
 
-    public const METHOD_GET    = 'GET';
-    public const METHOD_POST   = 'POST';
-    public const METHOD_DELETE = 'DELETE';
-    public const METHOD_PUT    = 'PUT';
-    public const METHOD_PATCH  = 'PATCH';
+    const METHOD_GET    = 'GET';
+    const METHOD_POST   = 'POST';
+    const METHOD_DELETE = 'DELETE';
+    const METHOD_PUT    = 'PUT';
+    const METHOD_PATCH  = 'PATCH';
 
     const USERPIC_SIZE = 32;
     const THUMB_SIZE   = 64;
@@ -61,11 +61,26 @@ abstract class crmApiAbstractMethod extends waAPIMethod
         return $this->prepareContactsList($list, $fields, $userpic_size);
     }
 
-    protected function prepareContactsList($raw_list, $fields, $userpic_size)
+    protected function prepareContactsList($raw_list, $fields, $userpic_size, $force_lfm_name_format = false)
     {
-        return array_map(function ($el) use ($fields, $userpic_size) {
+        return array_map(function ($el) use ($fields, $userpic_size, $force_lfm_name_format) {
             if (in_array('name', $fields)) {
-                $el['name'] = (trim((string) $el['name']) === '' ? '('._w('no name').')' : waContactNameField::formatName($el, true));
+                if (trim((string) $el['name']) === '') {
+                    $el['name'] = '('._w('no name').')';
+                } elseif ($force_lfm_name_format) {
+                    if (!empty($el['lastname'])) {
+                        $name = [];
+                        foreach(['lastname', 'firstname', 'middlename'] as $part) {
+                            $_name = trim((string) ifset($el, $part, ''));
+                            if ($_name !== '') {
+                                $name[] = $_name;
+                            }
+                        }
+                        $el['name'] = trim(implode(' ', $name));
+                    }
+                } else {
+                    $el['name'] = waContactNameField::formatName($el, true);
+                }
             }
             $el['userpic'] = $this->getDataResourceUrl(waContact::getPhotoUrl($el['id'], $el['photo'], $userpic_size, $userpic_size, ifset($el['is_company'], false) ? 'company' : 'person', true));
             

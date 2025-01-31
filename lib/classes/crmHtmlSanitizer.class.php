@@ -50,7 +50,6 @@ class crmHtmlSanitizer
      */
     public function sanitize($content)
     {
-        //wa_dumpc($content);
         // Make sure it's a valid UTF-8 string
         $content = preg_replace('~\\xED[\\xA0-\\xBF][\\x80-\\xBF]~', '?', mb_convert_encoding((string) $content, 'UTF-8', 'UTF-8'));
 
@@ -62,6 +61,11 @@ class crmHtmlSanitizer
 
         // Strip <style>...</style>
         $content = $this->stripTagWithContent($content, 'style');
+
+        $content = preg_replace_callback('~<(td|th)\s+([^>]*)>\s*</\1>~i',
+            array($this, 'handleEmptyTd'),
+            $content
+        );
 
         // Replace all &entities; with UTF8 chars, except for &, <, >.
         $content = str_replace(array('&amp;','&lt;','&gt;'), array('&amp;amp;','&amp;lt;','&amp;gt;'), $content);
@@ -134,6 +138,18 @@ class crmHtmlSanitizer
             $content
         );
 
+        // <td colspan="...">
+        $content = preg_replace_callback(
+            '~
+                &lt;
+                    (td|th)\s+
+                    (.*?)
+                &gt;
+            ~iuxs',
+            array($this, 'sanitizeTd'),
+            $content
+        );
+
         // Simple tags: <b>, <i>, <u>, <pre>, <blockquote> and closing counterparts.
         // All attributes are removed.
         $content = preg_replace(
@@ -202,6 +218,42 @@ class crmHtmlSanitizer
             return '<a href="'.$this->attr_start.'javascript:void(0);'.$this->attr_end.'" class="gray">';
         }
         return '<a href="'.$this->attr_start.$url.$this->attr_end.'" target="_blank" rel="nofollow">';
+    }
+
+    protected function handleEmptyTd($m)
+    {
+        $attrs = $m[2];
+        $attrs = preg_replace('~width=\S+~', '', $attrs);
+        $attrs .= ' width="1%"';
+        return '<'.$m[1].' '.$attrs.'></'.$m[1].'>';
+    }
+
+    protected function sanitizeTd($m)
+    {
+        $attributes = [];
+        $legal_attributes = [
+            'colspan',
+            'width',
+            'align',
+            'valign',
+        ];
+
+        foreach ($legal_attributes as $attribute) {
+            preg_match(
+                '~'.$attribute.'=&quot;([^"\'><]+?)&quot;~i',
+                $m[2],
+                $match
+            );
+
+            if ($match) {
+                $attributes[$attribute] = $match[1];
+            }
+        }
+
+        foreach ($attributes as $attribute => $val) {
+            $attributes[$attribute] = $attribute.'="'.$this->attr_start.$val.$this->attr_end.'"';
+        }
+        return '<' . $m[1] . ' ' . join(' ', $attributes) . '>';
     }
 
     protected function sanitizeHtmlImg($m)
@@ -284,6 +336,17 @@ class crmHtmlSanitizer
             return '';
         }
 
+        if (preg_match('~^mailto:~i', $url)) {
+            static $email_validator = null;
+            if (!$email_validator) {
+                $email_validator = new waEmailValidator();
+            }
+            if ($email_validator->isValid(substr($url, 7))) {
+                return $url;
+            }
+            return '';
+        }
+
         static $url_validator = null;
         if (!$url_validator) {
             $url_validator = new waUrlValidator();
@@ -361,6 +424,8 @@ class crmHtmlSanitizer
                 } else {
                     $link = $protocol . '://' . $link;
                 }
+                // remove zero width spaces from url
+                $link = preg_replace( '/[\x{200B}-\x{200D}]/u', '', $link);
                 return '<' . array_push($links, "<a $attr href=\"$link\">$link_string</a>") . '>'; 
             }, 
             $value
@@ -372,19 +437,19 @@ class crmHtmlSanitizer
         }, $value);
     }
 
-    protected function closeBrokenTags($string) {
-        preg_match_all('#<([a-z]+)(?: .*)?(?<![/|/ ])>#iU', $string, $result);
+    public function closeBrokenTags($string) {
+        //preg_match_all('#<([a-z]+)(?: .*)?(?<![/|/ ])>#iU', $string, $result);
+        preg_match_all('#<([a-z]+)(|\s+[^>]*)>#iU', $string, $result);
         $opened_tags = $result[1];
-        $opened_tags = array_values(array_filter($opened_tags, function($tag) { return !in_array($tag, ['br', 'p', 'hr']); }));
+        $opened_tags = array_values(array_filter($opened_tags, function($tag) { return !in_array(strtolower($tag), ['br', 'p', 'hr', 'img', 'td', 'th', 'tr', 'thead', 'tbody', 'tfoot', 'li', 'span']); }));
 
         preg_match_all('#</([a-z]+)>#iU', $string, $result);
         $closed_tags = $result[1];
-        $closed_tags = array_values(array_filter($closed_tags, function($tag) { return !in_array($tag, ['br', 'p', 'hr']); }));
-    
+        $closed_tags = array_values(array_filter($closed_tags, function($tag) { return !in_array(strtolower($tag), ['br', 'p', 'hr', 'img', 'td', 'th', 'tr', 'thead', 'tbody', 'tfoot', 'li', 'span']); }));
         if (count($closed_tags) == count($opened_tags)) {
             return $string;
         }
-        
+
         // We have a mismatched opening and closing tags
         try {
             libxml_use_internal_errors(true);

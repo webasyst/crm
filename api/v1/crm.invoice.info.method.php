@@ -5,7 +5,7 @@ class crmInvoiceInfoMethod extends crmApiAbstractMethod
 
     public function execute()
     {
-        $id = (int) $this->get('id');
+        $id = (int) $this->get('id', true);
         $userpic_size = waRequest::get('userpic_size', 32, waRequest::TYPE_INT);
 
         $cim = new crmInvoiceModel();

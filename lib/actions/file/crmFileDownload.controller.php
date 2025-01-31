@@ -9,8 +9,9 @@ class crmFileDownloadController extends crmJsonController
         wa()->getResponse()->addHeader("Cache-Control", "private, no-transform");
 
         $thumb = waRequest::get('thumb', 0, waRequest::TYPE_INT);
+        $do_not_crop_thumb = waRequest::get('do_not_crop_thumb', false, waRequest::TYPE_INT);
         if (in_array($file['ext'], ['jpg', 'jpeg', 'png', 'gif', 'pdf']) && $thumb > 10) {
-            list($is_success, $path, $name) = $this->getThumb($file, $thumb);
+            list($is_success, $path, $name) = $this->getThumb($file, $thumb, $do_not_crop_thumb);
             if ($is_success) {
                 waFiles::readFile($path, $name);
             } else {
@@ -43,45 +44,46 @@ class crmFileDownloadController extends crmJsonController
         return $file;
     }
 
-    protected function getThumb($file, $size)
+    protected function getThumb($file, $size, $do_not_crop = false)
     {
         if (!in_array($file['ext'], ['jpg', 'jpeg', 'png', 'gif', 'pdf'])) {
             return [ false, null, null ];
         }
 
         if ($file['ext'] == 'pdf') {
-            return $this->getPdfThumb($file, $size);
+            return $this->getPdfThumb($file, $size, $do_not_crop);
         }
-
-        $thumb_path = $file['path'].'-thumb-'.$size.'.'.$file['ext'];
-        $thumb_name = $file['name'].'-thumb-'.$size.'.'.$file['ext'];
+        $file_suffix = $do_not_crop ? '-nocrop-' : '-thumb-';
+        $thumb_path = $file['path'].$file_suffix.$size.'.'.$file['ext'];
+        $thumb_name = $file['name'].$file_suffix.$size.'.'.$file['ext'];
         if (file_exists($thumb_path)) {
             return [ true, $thumb_path, $thumb_name ];
         }
-
+        if (!file_exists($file['path'])) {
+            return [ false, null, null ];
+        }
         //waFiles::copy($file['path'], $file['path'].'.'.$file['ext']);
 
         $img = waImage::factory($file['path']);
         if (method_exists($img, 'fixImageOrientation')) {
             $img->fixImageOrientation();
         }
-        $crop_size = min($img->height, $img->width);
-        $crop_x = (int) max(0, ($img->width - $crop_size)/2);
-        $crop_y = (int) max(0, ($img->height - $crop_size)/2);
-        $img->crop($crop_size, $crop_size, $crop_x, $crop_y)->resize($size, $size);
+
+        $img = $this->scaleAndCrop($img, $size, $do_not_crop);
         $img->save($thumb_path);
 
         return [ true, $thumb_path, $thumb_name ];
     }
 
-    protected function getPdfThumb($file, $size)
+    protected function getPdfThumb($file, $size, $do_not_crop = false)
     {
         if (!class_exists('Imagick')) {
             return [ false, null, null ];
         }
 
-        $thumb_path = $file['path'].'-thumb-'.$size.'.jpg';
-        $thumb_name = $file['name'].'-thumb-'.$size.'.jpg';
+        $file_suffix = $do_not_crop ? '-nocrop-' : '-thumb-';
+        $thumb_path = $file['path'].$file_suffix.$size.'.jpg';
+        $thumb_name = $file['name'].$file_suffix.$size.'.jpg';
         if (file_exists($thumb_path)) {
             return [ true, $thumb_path, $thumb_name ];
         }
@@ -96,12 +98,27 @@ class crmFileDownloadController extends crmJsonController
         $imagick->writeImage($img_path);
 
         $img = waImage::factory($img_path);
-        $crop_size = min($img->height, $img->width);
-        $crop_x = (int) max(0, ($img->width - $crop_size)/2);
-        $crop_y = (int) max(0, ($img->height - $crop_size)/2);
-        $img->crop($crop_size, $crop_size, $crop_x, $crop_y)->resize($size, $size);
+        $img = $this->scaleAndCrop($img, $size, $do_not_crop);
         $img->save($thumb_path);
 
         return [ true, $thumb_path, $thumb_name ];
+    }
+
+    protected function scaleAndCrop(waImage $img, $size, $do_not_crop)
+    {
+        if ($do_not_crop) {
+            $aspect_ratio = floatval($img->height / $img->width);
+            if ($aspect_ratio > 1) {
+                $img->resize(intval($size / $aspect_ratio), $size);
+            } else {
+                $img->resize($size, intval($size * $aspect_ratio));
+            }
+        } else {
+            $crop_size = min($img->height, $img->width);
+            $crop_x = (int) max(0, ($img->width - $crop_size)/2);
+            $crop_y = (int) max(0, ($img->height - $crop_size)/2);
+            $img->crop($crop_size, $crop_size, $crop_x, $crop_y)->resize($size, $size);
+        }
+        return $img;
     }
 }

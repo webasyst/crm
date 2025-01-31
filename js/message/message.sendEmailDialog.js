@@ -22,6 +22,7 @@ var CRMSendEmailDialog = ( function($) {
         that.$sender_email = that.$wrapper.find(".js-sender-email");
         that.$to_input = that.$wrapper.find('.js-to-input');
         that.$to_id = that.$wrapper.find('.js-to-id');
+        that.$footer = that.$wrapper.find(".dialog-footer");
 
         // VARS
         that.dialog = that.$wrapper.data("dialog");
@@ -388,10 +389,10 @@ var CRMSendEmailDialog = ( function($) {
 
                 var $submitButton = that.$form.find(".js-submit-button"),
                     $dropField = that.$form.find(".js-drop-field"),
-                    $loading = $('<span class="icon size-16 submit-loader"><i class="fas fa-spinner wa-animation-spin custom-mr-4"></i></span>');
+                    $loading = $('<div class="spinner custom-ml-16"></div>');
 
                 $submitButton.attr("disabled", true);
-                $loading.insertAfter($submitButton);
+                that.$footer.append($loading);
                 $dropField.attr("disabled", true);
                 that.$form.find('button').prop("disabled", true);
 

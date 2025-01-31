@@ -420,12 +420,7 @@
                                                     <img src="{$_c.icon_url}" title="{$_c.transport_name|escape}" data-fa-i2svg>
                                                 {/if}
                                                 </span>
-                                                {if !empty($_c.summary_icon)}
-                                                    <span class="icon size-16 custom-ml-0 custom-mr-4">
-                                                        {$_c.summary_icon}
-                                                    </span>
-                                                {/if}
-                                                {$_c.summary_html|default:'[`no subject`]'|truncate:50:'':true}
+                                                <span class="js-summary">{$_c.summary_html|default:'[`no subject`]'}</span>
                                             </div>
                                             {if $_c.count > 1}
                                                 <div class="hint nowrap">({$_c.count})</div>
@@ -509,8 +504,8 @@
                 {/if}
                 {if !empty($contact)}
                     {foreach $active_sources as $_a => $_b}
-                        {if $_b.type == crmSourceModel::TYPE_IM}
-                            {if $_b.source->canInitConversation()}
+                        {if $_b.type === crmSourceModel::TYPE_IM}
+                            {if !empty($_b.source) && $_b.source->canInitConversation()}
                                 {$_item = $_b.source->renderInitConversationLink($contact.object)}
                                 {if $_item}
                                     {$_write_items[] = $_item}

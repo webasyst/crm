@@ -193,7 +193,8 @@ class crmContactListMethod extends crmApiAbstractMethod
                 'is_pinned',
                 'is_banned',
             ],
-            $userpic_size
+            $userpic_size,
+            $this->sort['key'] === 'name',
         );
 
         $this->response = [
@@ -602,7 +603,7 @@ class crmContactListMethod extends crmApiAbstractMethod
             } else {
                 $owner = new waContact($split[1]);
                 if (!$owner->exists()) {
-                    throw new waAPIException('responsible_not_found', sprintf_wp('Contact does not exist: %s.', $split[1]), 404);
+                    throw new waAPIException('responsible_not_found', sprintf_wp('Responsible user not found: %s.', $split[1]), 404);
                 }
                 return _w('Responsible').': '.$owner['name'];
             }

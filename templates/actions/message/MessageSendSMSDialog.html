@@ -107,7 +107,7 @@
                     </div>
                 </div>
 
-                <footer class="dialog-footer">
+                <footer class="dialog-footer flexbox middle space-4">
                     <input class="button js-submit-button" type="submit" value="[`Send SMS`]">
                     <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
                 </footer>
@@ -122,7 +122,7 @@
             </div>
 
             <footer class="dialog-footer">
-                <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
+                <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Close`]</a>
             </footer>
         {/capture}
 
@@ -131,16 +131,16 @@
                 <p class="js-error-text"></p>
                 {if $wa->user()->isAdmin()}
                     <p class="js-technical-info-block js-unknown-error">
-                        {sprintf(_w('See detailed error-related information in log file <em>%s</em>.', "sms.log"))}
+                        {sprintf(_w('See detailed error-related information in log file <em>%s</em>.'), "sms.log")}
                     </p>
-                    <p>{sprintf(_w('Check <a href="%s">SMS sending settings</a>.'), "`$wa_backend_url`webasyst/settings/sms/")}</a></p>
+                    <p>{sprintf(_w('Check <a target="_top" href="%s">SMS sending settings</a>.'), "`$wa_backend_url`webasyst/settings/sms/")}</a></p>
                 {else}
                     <p>{_ws('Please refer to your system administrator.')}</p>
                 {/if}
 
             </div>
             <footer class="dialog-footer">
-                <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
+                <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Close`]</a>
             </footer>
         {/capture}
 

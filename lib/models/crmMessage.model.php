@@ -223,7 +223,7 @@ class crmMessageModel extends crmModel
 
         $mam = $this->getMessageAttachmentsModel();
 
-        $existed_map = $mam->getByField('message_id', $message_id, 'file_id', true);
+        $existed_map = $mam->getByField('message_id', $message_id, 'file_id');
 
         $attachments = array();
         foreach ($file_ids as $file_id) {
@@ -236,6 +236,16 @@ class crmMessageModel extends crmModel
         $asm->set('crm', 'message_ts', time());
 
         $mam->multipleInsert($attachments);
+    }
+
+    public function deleteAttachments($message_id)
+    {
+        $mam = $this->getMessageAttachmentsModel();
+        $attachments = $mam->getByField('message_id', $message_id, 'file_id');
+        if (!empty($attachments)) {
+            $mam->deleteByField('message_id', $message_id);
+            $this->getFileModel()->delete(array_keys($attachments));
+        }
     }
 
     /**
@@ -1128,5 +1138,15 @@ class crmMessageModel extends crmModel
         return $this->select('conversation_id')
             ->where($this->getWhereByField(array('id' => $message_ids)))
             ->fetchAll(null, true);
+    }
+
+    public function getConversationLastIncomingMessage($conversation_id)
+    {
+        return $this->select('*')
+            ->where("direction = :direction AND conversation_id = :conversation_id", [
+                'direction' => crmMessageModel::DIRECTION_IN,
+                'conversation_id' => $conversation_id
+            ])
+            ->order("id DESC")->limit(1)->fetchAssoc();
     }
 }

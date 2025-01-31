@@ -292,6 +292,14 @@ class crmContactsCollection extends waContactsCollection
             $this->order_by = 'IFNULL(c.crm_last_log_datetime, c.create_datetime) ' . $order;
             return $this->order_by;
         }
+
+        if ($field === 'name') {
+            if (strtolower(trim($order)) !== 'asc') {
+                $order = 'DESC';
+            }
+            $this->order_by = 'IFNULL(NULLIF(c.lastname, \'\'), c.name) ' . $order . ', c.firstname ' . $order . ', c.middlename ' . $order;
+            return $this->order_by;
+        }
         
         if (!$field || $field == '~data' || $field[0] != '~' || false === strpos($field, '.')) {
             return parent::orderBy($field, $order);

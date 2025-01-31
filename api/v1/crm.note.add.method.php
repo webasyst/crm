@@ -17,7 +17,7 @@ class crmNoteAddMethod extends crmApiAbstractMethod
         if (empty($content)) {
             throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'content'), 400);
         } else if (empty($deal_id) && empty($contact_id)) {
-            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', sprintf_wp('“%s” or “%s”', 'deal_id', 'contact_id')), 400);
+            throw new waAPIException('required_param', sprintf_wp('Missing required parameter: %s.', sprintf_wp('“%s” or “%s”', 'deal_id', 'contact_id')), 400);
         } else if ($cnt_dl_id === 0) {
             throw new waAPIException('not_found', _w('Deal or contact not found.'), 404);
         } else if (!empty($deal_id) && !$this->getDealModel()->getById($deal_id)) {
@@ -82,7 +82,7 @@ class crmNoteAddMethod extends crmApiAbstractMethod
             throw new waAPIException('empty_file_name', sprintf_wp('Missing required parameter: “%s”.', 'file_name'), 400);
         } else if (
             in_array($file_name, ['.', '..'])
-            || !preg_match('#^[^:*?"<>|/\\\\]+$#', $file_name)  
+            || !preg_match('#^[^:*?"<>|/\\\\]+$#', $file_name)
         ) {
             throw new waAPIException('invalid_file_name', _w('Invalid file name.'), 400);
         }
@@ -114,7 +114,7 @@ class crmNoteAddMethod extends crmApiAbstractMethod
     {
         $file_model = $this->getFileModel();
         $file_id = (int) $file_model->add([
-            'contact_id' => $cnt_dl_id, 
+            'contact_id' => $cnt_dl_id,
             'source_type' => crmFileModel::SOURCE_TYPE_NOTE,
         ], $file);
 

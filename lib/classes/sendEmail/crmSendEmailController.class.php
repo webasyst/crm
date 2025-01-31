@@ -147,11 +147,19 @@ abstract class crmSendEmailController extends crmJsonController
             }
             // In-reply-to
             if (!empty($msg['in_reply_to'])) {
-                $m->getHeaders()->addIdHeader('In-Reply-To', $msg['in_reply_to']);
+                try {
+                    $m->getHeaders()->addIdHeader('In-Reply-To', $msg['in_reply_to']);
+                } catch (Exception $e) {
+                    // do nothing
+                }
             }
             // References
             if (!empty($msg['references']) && is_array($msg['references'])) {
-                $m->getHeaders()->addIdHeader('References', $msg['references']);
+                try {
+                    $m->getHeaders()->addIdHeader('References', $msg['references']);
+                } catch (Exception $e) {
+                    // do nothing
+                }
             }
             $success = (bool) $m->send();
             if (!$success) {

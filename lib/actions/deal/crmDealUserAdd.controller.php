@@ -85,10 +85,4 @@ class crmDealUserAddController extends crmJsonController
         }
         return $deal;
     }
-
-    protected function isSMSConfigured()
-    {
-        $config = wa()->getConfig()->getConfigFile('sms');
-        return !empty($config);
-    }
 }

@@ -35,8 +35,8 @@ class crmContactOperationAssignResponsibleProcessController extends crmContactOp
                 $result = 'no_vault_access';
                 $bad_users[] = array('id' => $contact['id'], 'name' => htmlspecialchars($contact['name']), 'photo' => $contact->getPhoto(20));
                 $message = _w(
-                    'The responsible user is not assigned to this client because of insufficient access rights.',
-                    'The responsible user is not assigned to these clients because of insufficient access rights.',
+                    'The responsible user has not been assigned to this client because of insufficient access rights.',
+                    'The responsible user has not been assigned to these clients because of insufficient access rights.',
                     count($bad_users)
                 );
             }

@@ -57,11 +57,20 @@ class crmPop3EmailSourceWorker extends crmEmailSourceWorker
             // get mail by POP
             $mail_reader->get($i_mail, $mail_path);
 
-            $message = new crmMailMessage($mail_path);
-            $messages[$unique_id] = $message;
-
-            // mark mail by POP as read
-            $mail_reader->delete($i_mail);
+            try {
+                $message = new crmMailMessage($mail_path);
+                $messages[$unique_id] = $message;
+    
+                // mark mail by POP as read
+                $mail_reader->delete($i_mail);
+            } catch (Exception $e) {
+                $message = join(PHP_EOL, array(
+                    'Exception',
+                    $e->getMessage(),
+                    $e->getTraceAsString()
+                ));
+                waLog::log($message, self::$LOG_FILE); 
+            }
         }
 
         $mail_reader->close();

@@ -3,6 +3,7 @@
 class crmPushService
 {
     protected $push_adapter = null;
+    protected $onesignal_adapter = null;
     protected $waid_client_id = null;
 
     public function __construct(array $options = [])
@@ -11,6 +12,12 @@ class crmPushService
             $push = wa('crm')->getConfig()->getPushAdapter();
             if ($push->isEnabled()) {
                 $this->push_adapter = $push;
+            }
+            if (empty($this->push_adapter) || $this->push_adapter->getId() !== 'onesignal') {
+                $onesignal = wa('crm')->getConfig()->getPushAdapter('onesignal');
+                if ($onesignal->isEnabled()) {
+                    $this->onesignal_adapter = $onesignal;
+                }
             }
         } catch (waException $e) {
             // TODO
@@ -23,7 +30,7 @@ class crmPushService
 
     public function notifyAboutMessage($contact, $message, $conversation)
     {
-        if (empty($this->push_adapter) || empty($message)) {
+        if ((empty($this->push_adapter) && empty($this->onesignal_adapter)) || empty($message)) {
             return;
         }
 
@@ -71,13 +78,26 @@ class crmPushService
                     wa()->setLocale($user->getLocale());
                 }
 
-                $this->push_adapter->sendByContact($conversation['user_contact_id'], [
-                    'title'   => sprintf_wp('New message from %s', $contact->getName()),
-                    'message' => $push_body,
-                    'url'     => $crm_app_url.'message/conversation/'.$conversation['id'].'/',
-                    'image_url' => $this->getDataResourceUrl($client_userpic_url),
-                    'data' => $data,
-                ]);
+                $image_url = $this->getDataResourceUrl($client_userpic_url);
+
+                if (!empty($this->onesignal_adapter)) {
+                    $this->onesignal_adapter->sendByContact($conversation['user_contact_id'], [
+                        'title'   => sprintf_wp('New message from %s', $contact->getName()),
+                        'message' => $push_body,
+                        'url'     => $crm_app_url.'message/conversation/'.$conversation['id'].'/',
+                        'image_url' => $image_url,
+                        'data' => $data,
+                    ]);
+                }
+                if (!empty($this->push_adapter)) {
+                    $this->push_adapter->sendByContact($conversation['user_contact_id'], [
+                        'title'   => sprintf_wp('New message from %s', $contact->getName()),
+                        'message' => $push_body,
+                        'url'     => $crm_app_url.'message/conversation/'.$conversation['id'].'/',
+                        'image_url' => $image_url,
+                        'data' => $data,
+                    ]);
+                }
 
                 if ($user->getLocale() !== $old_locale) {
                     wa()->setLocale($old_locale);
@@ -101,7 +121,7 @@ class crmPushService
 
     public function notifyAboutreminder($reminder, $user = null, $contact = null)
     {
-        if (empty($this->push_adapter) || empty($reminder)) {
+        if ((empty($this->push_adapter) && empty($this->onesignal_adapter)) || empty($reminder)) {
             return;
         }
 
@@ -147,14 +167,26 @@ class crmPushService
         }
         $push_title = $due_time_str . ' ' . $reminder_type_str;
         $push_body = ((empty($contact['name'])) ? '' : $contact['name'] . ': ') . ifset($reminder['content'], $push_title);
+        $image_url = $this->getDataResourceUrl($client_userpic_url);
 
-        $this->push_adapter->sendByContact($user['id'], [
-            'title'   => $push_title,
-            'message' => $push_body,
-            'url'     => $crm_app_url.'reminder/',
-            'image_url' => $this->getDataResourceUrl($client_userpic_url),
-            'data' => $data,
-        ]);
+        if (!empty($this->onesignal_adapter)) {
+            $this->onesignal_adapter->sendByContact($user['id'], [
+                'title'   => $push_title,
+                'message' => $push_body,
+                'url'     => $crm_app_url.'reminder/',
+                'image_url' => $image_url,
+                'data' => $data,
+            ]);
+        }
+        if (!empty($this->push_adapter)) {
+            $this->push_adapter->sendByContact($user['id'], [
+                'title'   => $push_title,
+                'message' => $push_body,
+                'url'     => $crm_app_url.'reminder/',
+                'image_url' => $image_url,
+                'data' => $data,
+            ]);
+        }
     }
 
     protected function getDataResourceUrl($relative_url)

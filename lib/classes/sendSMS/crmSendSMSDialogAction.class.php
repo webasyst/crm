@@ -62,14 +62,18 @@ class crmSendSMSDialogAction extends crmBackendViewAction
 
     protected function getSMSSenders()
     {
-        $sms_config = wa()->getConfig()->getConfigFile('sms');
-
         $sms_from = array(
             '' => array(
                 'name' => _w('System default'),
             ),
         );
 
+        if (!waSMS::adapterExists()) {
+            return $sms_from;
+        }
+
+        $sms_config = wa()->getConfig()->getConfigFile('sms');
+        
         // sender '*' in CRM names "System default", so in foreach skip '*'
 
         foreach ($sms_config as $from => $options) {

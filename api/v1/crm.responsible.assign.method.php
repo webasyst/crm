@@ -110,8 +110,8 @@ class crmResponsibleAssignMethod extends crmApiAbstractMethod
         $response = [];
         if ($unsuccess_contacts) {
             $message = _w(
-                'The responsible user is not assigned to this client because of insufficient access rights.',
-                'The responsible user is not assigned to these clients because of insufficient access rights.',
+                'The responsible user has not been assigned to this client because of insufficient access rights.',
+                'The responsible user has not been assigned to these clients because of insufficient access rights.',
                 count($unsuccess_contacts)
             );
             $response = [

@@ -2,7 +2,21 @@
 
 abstract class crmImSource extends crmSource
 {
+    const STATUS_NO = 'no';
+    const STATUS_SENT = 'sent';
+    const STATUS_FAILED = 'failed';
+    const STATUS_DELIVERED = 'delivered';
+    const STATUS_READ = 'read';
+
     protected $type = crmSourceModel::TYPE_IM;
+
+    protected static $message_statuses = [
+        self::STATUS_NO => -1,
+        self::STATUS_SENT => 1,
+        self::STATUS_FAILED => 2,
+        self::STATUS_DELIVERED => 3,
+        self::STATUS_READ => 4,
+    ];
 
     public function __construct($id = null, array $options = array())
     {
@@ -41,6 +55,140 @@ abstract class crmImSource extends crmSource
         $this->addMessageToConversation($message_id);
         return $message_id;
     }
+
+    public function handleMessageEdit($message, $update_ts = null)
+    {
+        if (empty($update_ts)) {
+            $update_ts = time();
+        } else {
+            $prev_update_ts_row = self::getMessageParamsModel()->getByField(['message_id' => $message['id'], 'name' => 'edit_ts']);
+            $prev_update_ts = ifset($update_ts_row, 'value', 0);
+            if ($prev_update_ts >= $update_ts) {
+                return;
+            }
+        }
+        if (!crmMessageModel::isColumnMb4('body')) {
+            $message['body'] = crmHelper::removeEmoji($message['body']);
+        }
+        self::getMessageModel()->updateById($message['id'], ['body' => $message['body']]);
+
+        if (isset($message['params']) && is_array($message['params'])) {
+            if (!crmMessageParamsModel::isColumnMb4('value')) {
+                $message['params'] = array_map(function ($value) { 
+                    if (is_string($value)) {
+                        $value = crmHelper::removeEmoji($value);
+                    }
+                    return $value;
+                }, $message['params']);
+            }
+            self::getMessageParamsModel()->set($message['id'], $message['params']);
+        }
+
+        // attach files to message
+        self::getMessageModel()->deleteAttachments($message['id']);
+        if (isset($message['attachments'])) {
+            $file_ids = array_unique($message['attachments']);
+            self::getMessageModel()->setAttachments($message['id'], $file_ids);
+        }
+
+        self::getMessageParamsModel()->replace(['message_id' => $message['id'], 'name' => 'edit_ts', 'value' => $update_ts]);
+        
+        if (empty($message['conversation_id'])) {
+            return;
+        }
+
+        $res = self::getMessageModel()->getExtMessages([$message], $this);
+        $message = $res ? reset($res) : $message;
+        $updated_summary = null;
+        $conversation_last_incoming_message = self::getMessageModel()->getConversationLastIncomingMessage($message['conversation_id']);
+        if (ifset($conversation_last_incoming_message['id']) == $message['id']) {
+            $updated_summary = $this->prepareConversationSummaryFromMessage($message);
+            self::getConversationModel()->updateById($message['conversation_id'], ['summary' => $updated_summary]);
+        }
+
+        if (!class_exists('waServicesApi')) {
+            return;
+        }
+        $servicesApi = new waServicesApi();
+        if ($servicesApi->isConnected()) {
+            $source_helper = crmSourceHelper::factory($this);
+            $res = $source_helper->normalazeMessagesExtras([$message]);
+            $message = $res ? reset($res) : $message;
+            $view = wa()->getView();
+            $view->assign('message', $message);
+            if (!empty(ifset($message, 'extras', 'locations', null))) {
+                try {
+                    $adapter = wa()->getSetting('backend_map_adapter', 'google', 'webasyst');
+                    if ($adapter !== 'disabled') {
+                        $view->assign('map', wa()->getMap($adapter));
+                    }
+                } catch (waException $ex) {}
+            }
+            try {
+                $servicesApi->sendWebsocketMessage(['message_edit' => [
+                    'message_id' => $message['id'],
+                    'message' => $message,
+                    'summary_html' => crmHelper::renderSummary($updated_summary),
+                    'message_html' => $view->fetch(wa()->getAppPath('templates/actions/message/MessageBody.inc.html', 'crm')),
+                    'edit_datetime' => date('Y-m-d H:i:s', $update_ts),
+                ]], 'conversation-'.$message['conversation_id']);
+            } catch (Throwable $e) {
+                //waLog::log($e->getMessage()."\n".$e->getTraceAsString(), 'error.log');
+            }
+        }
+    }
+
+    public function handleMessageStatus($message_id, $status, $error = null)
+    {
+        $message_params_model = self::getMessageParamsModel();
+        $message_status_record = $message_params_model->getByField([
+            'message_id' => $message_id,
+            'name' => 'status',
+        ]);
+        $prev_status = ifset($message_status_record, 'value', self::STATUS_NO);
+        if (ifset(self::$message_statuses[$prev_status], 0) >= ifset(self::$message_statuses[$status], 0)) {
+            return;
+        }
+        $message_params_model->replace([
+            'message_id' => $message_id,
+            'name' => 'status',
+            'value' => $status,
+        ]);
+        if ($status == 'failed') {
+            $message_params_model->replace([
+                'message_id' => $message_id,
+                'name' => 'error_code',
+                'value' => 'not_delivered',
+            ]);
+            $error = _w('The message was not sent.') . (empty($error) ? '' : "\n{$error}");
+        }
+        if (!empty($error)) {
+            $message_params_model->replace([
+                'message_id' => $message_id,
+                'name' => 'error_details',
+                'value' => $error,
+            ]);
+        }
+
+        if (!class_exists('waServicesApi')) {
+            return;
+        }
+        $servicesApi = new waServicesApi();
+        if ($servicesApi->isConnected()) {
+            $message = (new crmMessageModel)->getById($message_id);
+            if (!empty($message) && !empty($message['conversation_id'])) {
+                try {
+                    $servicesApi->sendWebsocketMessage(['new_message_status' => [
+                        'message_id' => $message_id,
+                        'status' => $status,
+                        'error' => $error,
+                    ]], 'conversation-'.$message['conversation_id']);
+                } catch (Throwable $e) {
+                    //waLog::log($e->getMessage()."\n".$e->getTraceAsString(), 'error.log');
+                }
+            }
+        }
+    } 
 
     protected function addMessageToConversation($message_id)
     {
@@ -145,21 +293,25 @@ abstract class crmImSource extends crmSource
 
         $is_emoji_copatible = crmConversationModel::isColumnMb4('summary');
         $body = (string)ifset($message['body'], '');
-        if (!empty($body)) {
+        if (!$this->isEmptyString($body)) {
             if (!$is_emoji_copatible) {
                 $body = crmHelper::removeEmoji($body);
             }
-            $body = trim(strip_tags($body));
-            return empty($summary) ? $body : $summary . ' ' . $body;
+            $features = $source_helper->getFeatures();
+            if (ifset($features['html'])) {
+                $body = strip_tags($body);
+            }
+            $body = trim($body);
+            return $this->isEmptyString($summary) ? $body : $summary . ' ' . $body;
         }
 
         $caption = (string)ifset($res[0]['caption'], '');
-        if (!empty($caption)) {
+        if (!$this->isEmptyString($caption)) {
             if (!$is_emoji_copatible) {
                 $caption = crmHelper::removeEmoji($caption);
             }
             $caption = trim(strip_tags($caption));
-            return empty($summary) ? $caption : $summary . ' ' . $caption;
+            return $this->isEmptyString($summary) ? $caption : $summary . ' ' . $caption;
         }
         if (!empty($message['attachments'])) {
             $file = reset($message['attachments']);
@@ -167,11 +319,22 @@ abstract class crmImSource extends crmSource
                 return empty($summary) ? $file['name'] : $summary . ' ' . $file['name'];
             }
         }
-        if (empty($summary)) {
+        if ($error_code = ifset($message['params']['error_code'])) {
+            if ($error_code == 'unsupported') {
+                $summary = '[unsupported]';
+            } else {
+                $summary = '[error]';
+            }
+        }
+        if ($this->isEmptyString($summary)) {
             $summary = '[empty]';
         }
 
         return $summary;
+    }
+
+    protected function isEmptyString($string) {
+        return $string === null || $string === '';
     }
 
     /**

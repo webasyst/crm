@@ -4,6 +4,6 @@ class crmPushDisableMethod extends webasystPushDisableMethod
 {
     protected function getPushAdapter()
     {
-        return wa('crm')->getConfig()->getPushAdapter();
+        return wa('crm')->getConfig()->getPushAdapter('onesignal');
     }
 }

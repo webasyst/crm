@@ -184,7 +184,7 @@ class crmTagModel extends crmModel
         $tag_ids = $this->getIds($tags);
 
         // simple kind of realization: delete all, than assign all
-        $items = $this->getContactTagsModel()->getByContact($contact_ids);
+        $items = $this->getContactTagsModel()->getByContact($contact_ids, $drop_negative);
         $tag_ids_for_recount = waUtils::getFieldValues($items, 'tag_id');
         $this->getContactTagsModel()->deleteByContact($contact_ids, $drop_negative);
 

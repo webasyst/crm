@@ -675,7 +675,7 @@ var CRMMessagesSidebar = ( function($) {
                 
                 if (is_exist) {
                     
-                    var href = "?module=message&action=listByConversation",
+                    var href = "?module=message&action=listByConversation&background_process=1",
                         data = {
                             check: 1
                         };
@@ -710,8 +710,11 @@ var CRMMessagesSidebar = ( function($) {
             var content_uri = $.crm.app_url + "message/" + active_id + "?reload=1" + contact_id + iframe + noemail;
             var data = {
                 ui: that.$ui,
-                id: +that.active_id};
-
+                id: +that.active_id,
+                background_process: 1,
+                no_need_to_get_the_conversation: 1
+            };
+            
             clearGlobalListeners();
             clearListeners();
            

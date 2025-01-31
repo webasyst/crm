@@ -448,4 +448,8 @@ class crmJsonController extends waJsonController
         return $this->models[$key];
     }
 
+    protected function isSMSConfigured()
+    {
+        return waSMS::adapterExists();
+    }
 }

@@ -28,7 +28,7 @@ class crmMessageConversationsAction extends crmBackendViewAction
                 }
             }
         }
-        if (!empty($conversation_id)) {
+        if (!empty($conversation_id) && !waRequest::get('no_need_to_get_the_conversation', 0, waRequest::TYPE_INT)) {
             waRequest::setParam('id', $conversation_id);
             $conversationAction = new crmMessageConversationIdAction();
             $conversationAction->execute();

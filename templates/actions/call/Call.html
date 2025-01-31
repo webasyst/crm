@@ -127,7 +127,7 @@
 {else}
     {$selected_filter_date = reset($filter_dates)}
 {/if}
-{function name="_renderContact" _contact=[] _number='' _gateway='' _full=false}
+{function name="_renderContact" _contact=[] _number='' _gateway='' _full=false _with_company=false}
 {$_name = waContactNameField::formatName($_contact, true)|escape}
 <div class="c-user-wrapper">
     <div class="flexbox middle space-8">
@@ -149,10 +149,13 @@
             {else}
                 {$_name}
             {/if}
+            {if !empty($_contact.company) && !$_contact.is_company && $_with_company}
+                <div class="c-jobtitle hint" title="{$_contact.company|escape}" style="padding-right: 21px;">{$_contact.company|escape}</div>
+            {/if}
         </div>
 
     </div>
-    <i class="shortener"></i>
+    <i class="shortener"{if !empty($_contact.company) && !$_contact.is_company && $_with_company} style="height: 3em;"{/if}></i>
 </div>
 {/function}
 {function name="_renderContactFull" _contact=[] _with_job=true}
@@ -576,7 +579,7 @@
                                         <div class="nowrap single-line">
                                             <div class="flexbox middle space-0">
                                             {if !empty($_client)}
-                                                {_renderContact _contact=$_client _number=$_call.client_number}
+                                                {_renderContact _contact=$_client _number=$_call.client_number _with_company=true}
                                             {else}
                                                 
                                                 <img class="icon size-24" src="{$site_url}wa-content/img/userpic.svg" />

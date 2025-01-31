@@ -53,7 +53,7 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
             if ($new_message_id > 0) {
                 $query->where('id > ?', $new_message_id);
             }
-            $messages = $query->order('create_datetime DESC')->limit(self::MESSAGE_PER_PAGE)->fetchAll('id');
+            $messages = $query->order('id DESC')->limit(self::MESSAGE_PER_PAGE)->fetchAll('id');
             ksort($messages);
         }
         $contact_ids = [];
@@ -143,38 +143,8 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
 
         $can_edit_conversation = $this->getCrmRights()->canEditConversation($conversation);
 
-        $conversation['summary_html'] = '';
-        if (!empty($conversation['summary'])) {
-            $conversation['summary_html'] = $conversation['summary'] = htmlentities($conversation['summary'], ENT_QUOTES, 'UTF-8', false);
-            if (mb_strpos($conversation['summary'], '[image]') === 0) {
-                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[image]'));
-                $conversation['summary'] = $_summary_tail ?: _w('Image');
-                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fas fa-camera"></i></span> '.$conversation['summary'];
-            } elseif (mb_strpos($conversation['summary'], '[video]') === 0) {
-                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[video]'));
-                $conversation['summary'] = $_summary_tail ?: _w('Video');
-                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fab fa-youtube"></i></span> '.$conversation['summary'];
-            } elseif (mb_strpos($conversation['summary'], '[audio]') === 0) {
-                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[audio]'));
-                $conversation['summary'] = $_summary_tail ?: _w('Audio');
-                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fas fa-microphone"></i></span> '.$conversation['summary'];
-            } elseif (mb_strpos($conversation['summary'], '[file]') === 0) {
-                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[file]'));
-                $conversation['summary'] = $_summary_tail ?: _w('File');
-                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="far fa-file-alt"></i></span> '.$conversation['summary'];
-            } elseif (mb_strpos($conversation['summary'], '[geolocation]') === 0) {
-                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[geolocation]'));
-                $conversation['summary'] = $_summary_tail ?: _w('Geolocation');
-                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fas fa-map-marker-alt"></i></span> '.$conversation['summary'];
-            } elseif (mb_strpos($conversation['summary'], '[sticker]') === 0) {
-                $_summary_tail = mb_substr($conversation['summary'], mb_strlen('[sticker]'));
-                $conversation['summary'] = $_summary_tail ?: _w('Sticker');
-                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fas fa-sticky-note"></i></span> '.$conversation['summary'];
-            } elseif ($conversation['summary'] === '[empty]') {
-                $conversation['summary'] = _w('Empty message');
-                $conversation['summary_html'] = '<span class="icon size-16 custom-ml-0 custom-mr-4"><i class="fas fa-battery-empty"></i></span> '._w('Empty message');
-            }
-        }
+        $conversation['summary_html'] = crmHelper::renderSummary($conversation['summary']);
+        $conversation['summary'] = htmlentities(ifset($conversation['summary'], ''), ENT_QUOTES, 'UTF-8', false);
 
         $messages = $this->workupMessages($conversation, $messages);
         $do_confirm_verification = !(new waContactSettingsModel())->getOne(wa()->getUser()->getId(), 'crm', 'verify_no_more_confirmation');

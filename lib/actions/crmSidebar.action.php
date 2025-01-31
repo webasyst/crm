@@ -41,7 +41,9 @@ class crmSidebarAction extends crmViewAction
 
         $this->view->assign(array(
             'contacts_count'      => $wcm->countAll(), // $collection->count(),
-            'contacts_new_count'  => $contact_max_id ? $wcm->select('COUNT(*) cnt')->where("id > $contact_max_id")->fetchField('cnt') : 0,
+            'contacts_new_count'  => ($contact_max_id && wa('crm')->whichUI('crm') === '1.3') 
+                ? $wcm->select('COUNT(*) cnt')->where("id > $contact_max_id")->fetchField('cnt') 
+                : 0, // show new contacts counter only for UI 1.3
             'reminders_count'     => ifset($reminders_counts, 'count', 0),
             'reminders_state'     => $reminders_state,
             'reminders_due_count' => ifset($reminders_counts, 'due_count', 0) + ifset($reminders_counts, 'burn_count', 0),

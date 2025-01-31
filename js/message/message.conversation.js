@@ -27,6 +27,25 @@ var CRMMessageConversationPage = ( function($) {
         that.initClass();
     };
 
+    CRMMessageConversationPage.prototype.handleYaMaps = function($messages) {
+        // yandex maps fix hack
+        var $ya_maps = $messages.find('.js-map-block');
+        if ($ya_maps.length > 0) {
+            setTimeout(() => hackYaMaps($ya_maps), 200);
+        }
+
+        function hackYaMaps($ya_maps, $last_call = false) {
+            if ($ya_maps.has( ":last-child" ).length === $ya_maps.length) {
+                $ya_maps.children().not( ":last-child" ).remove();
+                if (!$last_call) {
+                    setTimeout(() => hackYaMaps($ya_maps, true), 500);
+                }
+            } else {
+                setTimeout(() => hackYaMaps($ya_maps), 200);
+            }
+        }
+    }
+
     CRMMessageConversationPage.prototype.initClass = function() {
         var that = this;
 
@@ -133,6 +152,12 @@ var CRMMessageConversationPage = ( function($) {
                     });
                 }
             }
+
+            window.document.documentElement.dispatchEvent(new CustomEvent('wa-gallery-load', {
+                detail: {
+                    forceFullPreview: true,
+                },
+            }));
         }
 
         $(document).ready(onImagesLoaded);
@@ -223,21 +248,21 @@ var CRMMessageConversationPage = ( function($) {
         var that = this,
             $messages = that.$wrapper.find('.c-email-messages-list').find('.c-message-body');
            
-            $.each($messages, function (i, message) {
-                
-                if (!$(message).find('.js-blockquote-toggle').length) {
-                    const $bqElements = $(message).children('blockquote');
-                
-                    $.each($bqElements, function (i, bq) {
-    
-                        var $blockquote_icon = $('<span class="button light-gray custom-mb-4 size-14 js-blockquote-toggle"><i class="fas fa-ellipsis-h"></i></span>');
-                        $blockquote_icon.insertBefore(bq);
-                        $blockquote_icon.on('click', function(event) {
-                            $(bq).slideToggle(400);
-                        });
-                    })
-                }
-            })
+        $.each($messages, function (i, message) {
+            
+            if (!$(message).find('.js-blockquote-toggle').length) {
+                const $bqElements = $.merge($(message).children('blockquote'), $(message).children(':not(blockquote)').children('blockquote'));
+            
+                $.each($bqElements, function (i, bq) {
+
+                    var $blockquote_icon = $('<span class="button light-gray custom-mb-4 size-14 js-blockquote-toggle"><i class="fas fa-ellipsis-h"></i></span>');
+                    $blockquote_icon.insertBefore(bq);
+                    $blockquote_icon.on('click', function(event) {
+                        $(bq).slideToggle(400);
+                    });
+                })
+            }
+        });
     }
 
     CRMMessageConversationPage.prototype.initLazyLoading = function () {
@@ -312,7 +337,7 @@ var CRMMessageConversationPage = ( function($) {
                             that.old_message_id = $new_list_elements.eq(0).data('id');
                             if ($new_list_count < 10) $new_list.find(".js-lazy-load").remove();
                             var $new_list_html = $new_list.html();
-                           $blank_list.append($new_list_html)
+                            $blank_list.append($new_list_html)
                             onImagesLoaded();
                             
                             function onImagesLoaded() {
@@ -335,6 +360,12 @@ var CRMMessageConversationPage = ( function($) {
                                             if (newImagesCount == 0) {
                                                 scrollToTop()
                                             }
+                                            window.document.documentElement.dispatchEvent(new CustomEvent('wa-gallery-load', {
+                                                detail: {
+                                                    forceFullPreview: true,
+                                                    timeout: 500
+                                                },
+                                            }));
                                         });
 
                                         images[i].addEventListener("error", function() {
@@ -353,14 +384,17 @@ var CRMMessageConversationPage = ( function($) {
                             function scrollToTop() {
                                 if ($loader) $loader.remove();
                                 $list.prepend($blank_list.html());
+
+                                that.handleYaMaps($list);
+                                that.initBlockquotToggle();
+
                                 $blank_list.html('');
                                 $list.scrollTop($list.prop('scrollHeight') - prevScrollH);
                                 prevScrollH = $list.prop('scrollHeight');
                                 $transparent_cover.hide();
                                 startLazyLoading();
                             }
-                        }
-                        else {
+                        } else {
                             if ($loader) $loader.remove();
                         }
                         that.current_page++;
@@ -1031,9 +1065,19 @@ var CRMMessageConversationPage = ( function($) {
             $(document).off('wa_before_load');
         });
 
+        $(document).on('msg_conversation_updated', function() {
+            setTimeout(function() {
+                that.initBlockquotToggle();
+                that.scroll2bottom(true, true);
+            }, 500);
+        });
+
         $(document).on('msg_conversation_update', function() {
             updateMessages().then( function(new_messages) {
-                if (new_messages.length) { that.scroll2bottom(true, true); }
+                if (new_messages.length) {
+                    that.initBlockquotToggle();
+                    that.scroll2bottom(true, true);
+                }
                 runner();
             });
         });
@@ -1053,17 +1097,20 @@ var CRMMessageConversationPage = ( function($) {
         function request() {
             if (!is_locked) {
                 is_locked = true;
-                var href = "?module=message&action=conversationIdCheck",
+                var href = "?module=message&action=conversationIdCheck&background_process=1",
                     data = {
                         id: that.conversation_id
                     };
 
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
-                        var is_changed = (+response.data !== that.last_message_id);
+                        var is_changed = (1 * response.data !== 1 * that.last_message_id);
                         if (is_changed) {
                             updateMessages().then( function(new_messages) {
-                                if (new_messages.length) { that.scroll2bottom(true, true); }
+                                if (new_messages.length) { 
+                                    that.initBlockquotToggle();
+                                    that.scroll2bottom(true, true); 
+                                }
                                 runner();
                             });
 
@@ -1084,7 +1131,7 @@ var CRMMessageConversationPage = ( function($) {
         function updateMessages() {
             var $deferred = $.Deferred();
 
-            $.get(location.href, function(html) {
+            $.get(location.href, { background_process: 1 }, function(html) {
                 var last_message_id = that.last_message_id,
                     $list = that.$wrapper.find(".js-messages-list").first(),
                     $messages = $(html).find(".js-messages-list .js-message-wrapper"),
@@ -1093,11 +1140,12 @@ var CRMMessageConversationPage = ( function($) {
                 if ($list.length) {
                     $messages.each( function() {
                         var $message = $(this),
-                            $verification = false;
+                            $verification = false,
                             message_id = $message.data("id");
-                            if ($message.hasClass('verification_message')) {
-                                $verification = $message.data("verification");
-                            }
+                            
+                        if ($message.hasClass('verification_message')) {
+                            $verification = $message.data("verification");
+                        }
 
                         if (message_id > that.last_message_id) {
                             $list.append($message);
@@ -1114,6 +1162,14 @@ var CRMMessageConversationPage = ( function($) {
                     });
 
                     that.last_message_id = last_message_id;
+
+                    that.handleYaMaps($list);
+                    window.document.documentElement.dispatchEvent(new CustomEvent('wa-gallery-load', {
+                        detail: {
+                            forceFullPreview: true,
+                            timeout: 500
+                        },
+                    }));
                 }
 
                 $deferred.resolve(new_messages);
@@ -1320,17 +1376,13 @@ var CRMMessageConversationPage = ( function($) {
             var $page_content_for_scroll = $page_content;
             var document_h_offset = $page_content.height();
             var document_h = $page_content.get(0).scrollHeight;
-            console.log(document_h_offset, document_h);
             if (document_h > 0) {
-                //$(document).scrollTop(41);
                 if (document_h_offset < document_h) {
-
                     if (animate) {
                         $page_content_for_scroll.animate({
                             scrollTop: (document_h)
                         }, 500);
                         $.message.content.animate(false);
-
                     } else {
                         $page_content_for_scroll.scrollTop(document_h);
                         $.message.content.animate(false);
@@ -1344,7 +1396,6 @@ var CRMMessageConversationPage = ( function($) {
             else {
                 setTimeout(()=> render(), 100);
             }
-
         }
     };
 
@@ -1426,7 +1477,7 @@ var CRMMessagesProfileAdditional = ( function($) {
             if ($iframe_content.length) {
 
                 const resizeObserver = new ResizeObserver(entries => {
-                    const content_height = entries[0].target.scrollHeight;
+                    const content_height = entries[0].target.scrollHeight + 1;
                     $iframe.css('height', content_height);
                     if (content_height > 300) {
                         that.$wrapper.removeClass('hidden');
@@ -1480,16 +1531,6 @@ var CRMMessagesProfileAdditional = ( function($) {
             that.item_html = {};
             $.get(href)
             .done(function(response) {
-                /*console.log(response.data);
-                const custom_obj = {
-                    "html": `<div>Я тута <br><span class="custom-pr-12 icon size-16 js-message-attachment"><i class="fas fa-paperclip"></i></span></div>`,
-                    "url": null,
-                    "count": 0,
-                    "title": "Custom",
-                    "id": "custom",
-                    "app_id": "custom"
-                }
-                response.data.push(custom_obj);*/
                 $.each(response.data.tabs, function (i, item) {
                     var item_count = !!item.count ? `<span class="hint custom-ml-4">${item.count}</span>` : '';
                     var link_html = `<li class="custom-mb-16 bold">
@@ -2401,59 +2442,72 @@ var CRMEmailConversationEmailSender = ( function($) { //форма ответа 
 
         function submit() {
             var href = that.send_action_url,
+                $extendedFormLoading = $('<div class="spinner custom-ml-16 js-spinner"></div>'),
+                $extendedFormButton = that.$wrapper.find(".js-extended-form-actions").find(".js-save-button"),
                 data = that.$form.serializeArray();
             
-                $dropField.prop("disabled", true);
-                $textarea_small.attr("disabled", true);
-                $.ajax({
-                    method: 'POST',
-                    url: href,
-                    data: data,
-                    dataType: 'json',
-                }).done(function(response) {
-                        const response_html = jQuery.parseJSON(response.data.html);
-                        const response_id = response.data.id ? response.data.id :  response.data.message_id;
-                        loadNewList(response_id);
-                        
-                        clearInputForm();
-                        //onImagesLoaded(response_id);
-                       
-                        $submitButtonSmall.attr("disabled", true);
-                        $submitButton.attr("disabled", true);
-                        that.body = that.body_old;
-                        that.$replySection.find(".js-revert").trigger("click");
-                        toggleHeight();
-                        if ($('#c-messages-page #c-messages-sidebar').length) {
-                            $(document).trigger('msg_sidebar_upd_needed');
-                        }
-                        updateSendReply(response_html);
-                }).fail(function(data) {
-                    var error_box = that.$form.find('#tooltip-error-message'),
-                        error_msg = Object.values(response.errors);
-                        error_box.addClass('errormsg');
-                        $.each(error_msg, function(i, err){
-                            error_box.append(`<span><i class="fas fa-exclamation-triangle state-error"></i> <span class="small">${err}</span></span>`);
-                        })
+            $dropField.prop("disabled", true);
+            $textarea_small.attr("disabled", true);
+            $extendedFormButton.attr("disabled", true);
+            $extendedFormLoading.insertAfter(that.$wrapper.find(".js-extended-form-drop-area"));
+            $.ajax({
+                method: 'POST',
+                url: href,
+                data: data,
+                dataType: 'json',
+            }).done(function(response) {
+                if (response.status == 'ok') {
+                    const response_html = jQuery.parseJSON(response.data.html);
+                    const response_id = response.data.id ? response.data.id :  response.data.message_id;
+                    loadNewList(response_id);
+                    
                     clearInputForm();
+                    //onImagesLoaded(response_id);
+                    
                     $submitButtonSmall.attr("disabled", true);
                     $submitButton.attr("disabled", true);
                     that.body = that.body_old;
                     that.$replySection.find(".js-revert").trigger("click");
                     toggleHeight();
-
-                    that.is_locked = false;
-                    if (response.errors) {
-                        console.error(response.errors);
+                    if ($('#c-messages-page #c-messages-sidebar').length) {
+                        $(document).trigger('msg_sidebar_upd_needed');
                     }
+                    updateSendReply(response_html);
+                } else {
+                    failSend(response);
+                }
+            }).fail(function(data) {
+                failSend(data);
+            }).always(function () {
+                that.is_locked = false;
+                $extendedFormLoading.remove();
+                $extendedFormButton.removeAttr("disabled");
+            });
 
-                    that.$textarea.on('focus', clearErrors);
-                    $textarea_small.on('focus', clearErrors);
-                    that.$form.on('change', clearErrors);
+        }
+
+        function failSend(response) {
+            var error_box = that.$form.find('#tooltip-error-message'),
+                error_msg = Object.values(response.errors);
+                error_box.addClass('errormsg');
+                $.each(error_msg, function(i, err){
+                    error_box.append(`<span><i class="fas fa-exclamation-triangle state-error"></i> <span class="small">${err}</span></span>`);
                 })
-                .always(function () {
-                    that.is_locked = false;
-                });
+            clearInputForm();
+            $submitButtonSmall.attr("disabled", true);
+            $submitButton.attr("disabled", true);
+            that.body = that.body_old;
+            that.$replySection.find(".js-revert").trigger("click");
+            toggleHeight();
 
+            that.is_locked = false;
+            if (response.errors) {
+                console.error(response.errors);
+            }
+
+            that.$textarea.on('focus', clearErrors);
+            $textarea_small.on('focus', clearErrors);
+            that.$form.on('change', clearErrors);
         }
 
         function updateSendReply(response_html) {
@@ -2503,6 +2557,7 @@ var CRMEmailConversationEmailSender = ( function($) { //форма ответа 
                         if ($new_list_count < 10) $new_list.find(".js-lazy-load").remove();
                         var $new_list_html = $new_list.html();
                         $blank_list.append($new_list_html)
+                        $(document).trigger('msg_conversation_updated');
                         onImagesLoaded();
                         
                         function onImagesLoaded() {
@@ -3169,10 +3224,7 @@ var CRMImConversationSection = ( function($) { //форма ответа IM
                             
                         $.post(href, data, function(response) {
                             if (response.status === "ok") {
-                    
-                                    //const response_html = jQuery.parseJSON(response.data.html);
-                                    const response_id = response.data.message_id;
-                                    loadNewList(response_id)
+                                    $(document).trigger('msg_conversation_update');
                                     clearInput();
                                     
                                     $submitButton.prop('disabled', true);
@@ -3206,110 +3258,6 @@ var CRMImConversationSection = ( function($) { //форма ответа IM
                             that.is_locked = false;
                         });
                     }
-                }
-
-                function loadNewList(last_message_id) {
-                    var $conversation_wrapper = $main_wrapper.find('#js-message-conversation-page'),
-                        conversation_id = $conversation_wrapper.data('conv-id'),
-                        $blank_list = $conversation_wrapper.find('.c-conversation-body--blank'),
-                        $transparent_cover = $conversation_wrapper.find('.js-messages-list--transparent-layer'),
-                        href = $.crm.app_url + '?module=messageConversationId&id=' + conversation_id;
-                        //is_locked = true;
-                    
-                    $.ajax({
-                        url: href,
-                        type: 'POST',
-                        dataType: 'html',
-                        beforeSend: function(){
-                            //$transparent_cover.show();
-                            //prevScrollH = that.$wrapper.prop('scrollHeight');
-                        },
-                        complete: function(){
-                            //$transparent_cover.hide();
-                            //that.$wrapper.css('overflow-y', "overlay");
-                        },
-                        data: {
-                            delay: 1
-                        },
-                        success: function(data){
-                            var $new_list = $(data).find('.js-messages-list'),
-                                $new_list_elements = $(data).find('.js-message-wrapper'),
-                                old_message_id = $new_list_elements.eq(0).data('id'),
-                                $new_list_count = $new_list_elements.length;
-        
-                            if ($new_list_count) {
-                                //that.old_message_id = $new_list_elements.eq(0).data('id');
-                                if ($new_list_count < 10) $new_list.find(".js-lazy-load").remove();
-                                var $new_list_html = $new_list.html();
-                                $blank_list.append($new_list_html)
-                                onImagesLoaded();
-                                
-                                function onImagesLoaded() {
-        
-                                        var images = $blank_list[0].getElementsByTagName("img"),
-                                        videos = $blank_list[0].getElementsByTagName("video");
-                                        var loaded = images.length + videos.length;
-                                        function checkLoadingData() {
-                                            if (loaded == 0) {
-                                                that.$message_list.html($blank_list.html());
-                                                //that.$message_list.append(response_html);
-                                                $blank_list.html('');
-                                                //$transparent_cover.hide();
-                                                $(document).trigger('scroll_button_event', {old_message_id: old_message_id, last_message_id: last_message_id});
-                                                $(document).trigger('new_message_lazy');
-                                                return
-                                            }
-                                        }
-                            
-                                        checkLoadingData();
-                            
-                                         for (var i = 0; i < videos.length; i++) {
-                                            if (videos[i].readyState >= 3) {
-                                                loaded--;
-                                                checkLoadingData();
-                                            }
-                                            else {
-                                                
-                                                videos[i].addEventListener('loadeddata', function() {
-                                                    loaded--;
-                                                    checkLoadingData();
-                                                });
-                            
-                                                videos[i].addEventListener("error", function() {
-                                                    loaded--;
-                                                    checkLoadingData();
-                                                });
-                                            }
-                                        }
-                            
-                                        for (var i = 0; i < images.length; i++) {
-                                            if (images[i].complete) {
-                                                loaded--;
-                                                checkLoadingData();
-                                            }
-                                            else {
-                                                
-                                                images[i].addEventListener("load", function() {
-                                                    loaded--;
-                                                    checkLoadingData();
-                                                });
-                            
-                                                images[i].addEventListener("error", function() {
-                                                    loaded--;
-                                                    checkLoadingData();
-                                                });
-                                            }
-                                        }
-                                    }
-                    
-                            }
-                            else {
-                               // if ($loader) $loader.remove();
-                            }
-                               
-                           // startLazyLoading();
-                        }
-                    });
                 }
 
                 function clearErrors() {

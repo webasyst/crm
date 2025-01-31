@@ -78,7 +78,7 @@ class crmShopBackend_rightsHandler extends waEventHandler
         $rights = new crmRights();
         $right_deal_view = $rights->deal($deal) > crmRightConfig::RIGHT_DEAL_VIEW ? 1 : 0;
         if ($right_deal_view == 0) {
-            echo '<div class="block double-padded"><h2 id="Title">' . _w('The order is not available because of insufficient access rights for deal editing.') . '</h2></div>';
+            echo '<div class="block double-padded"><h2 id="Title">' . _wd('crm', 'The order is not available because of insufficient access rights for deal editing.') . '</h2></div>';
             exit;
         } else {
             if (defined('shopRightConfig::RIGHT_ORDERS_FULL')) {

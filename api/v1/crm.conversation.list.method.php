@@ -106,6 +106,10 @@ class crmConversationListMethod extends crmApiAbstractMethod
                     $el['summary'] = _w('Geolocation').mb_substr($el['summary'], mb_strlen('[geolocation]'));
                 } elseif (mb_strpos($el['summary'], '[sticker]') === 0) {
                     $el['summary'] = _w('Sticker').mb_substr($el['summary'], mb_strlen('[sticker]'));
+                } elseif ($conversation['summary'] === '[unsupported]') {
+                    $conversation['summary'] = _w('Unsupported message');
+                } elseif ($conversation['summary'] === '[error]') {
+                    $conversation['summary'] = _w('Error');
                 } elseif ($el['summary'] === '[empty]') {
                     $el['summary'] = _w('Empty message');
                 }

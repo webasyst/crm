@@ -764,4 +764,63 @@ class crmHelper
 
         return $vars;
     }
+
+    public static function renderSummary($summary, $trancate_length = null)
+    {
+        if (empty($summary) && $summary !== '0') {
+            return '';
+        }
+        $is_trancated = !empty($trancate_length) && mb_strlen($summary) > $trancate_length;
+        $summary_trancated = $is_trancated ? mb_substr($summary, 0, 47, 'UTF-8') . '...' : $summary;
+        $html_full = $is_trancated ? htmlentities($summary, ENT_QUOTES, 'UTF-8', false) : '';
+        $html = htmlentities($summary_trancated, ENT_QUOTES, 'UTF-8', false);
+        $icon = '';
+        if (mb_strpos($html, '[image]') === 0) {
+            $html_full = $is_trancated ? _w('Image').mb_substr($html_full, mb_strlen('[image]')) : '';
+            $icon = '<i class="fas fa-camera" title="'._w('Image').'"></i>';
+            $_summary_tail = mb_substr($html, mb_strlen('[image]'));
+            $html = $_summary_tail ?: _w('Image');
+        } elseif (mb_strpos($html, '[video]') === 0) {
+            $html_full = $is_trancated ? _w('Video').mb_substr($html_full, mb_strlen('[video]')) : '';
+            $icon = '<i class="fab fa-youtube" title="'._w('Video').'"></i>';
+            $_summary_tail = mb_substr($html, mb_strlen('[video]'));
+            $html = $_summary_tail ?: _w('Video');
+        } elseif (mb_strpos($html, '[audio]') === 0) {
+            $html_full = $is_trancated ? _w('Audio').mb_substr($html_full, mb_strlen('[audio]')) : '';
+            $icon = '<i class="fas fa-microphone" title="'._w('Audio').'"></i>';
+            $_summary_tail = mb_substr($html, mb_strlen('[audio]'));
+            $html = $_summary_tail ?: _w('Audio');
+        } elseif (mb_strpos($html, '[file]') === 0) {
+            $html_full = $is_trancated ? _w('File').mb_substr($html_full, mb_strlen('[file]')) : '';
+            $icon = '<i class="far fa-file-alt" title="'._w('File').'"></i>';
+            $_summary_tail = mb_substr($html, mb_strlen('[file]'));
+            $html = $_summary_tail ?: _w('File');
+        } elseif (mb_strpos($html, '[geolocation]') === 0) {
+            $html_full = $is_trancated ? _w('Geolocation').mb_substr($html_full, mb_strlen('[geolocation]')) : '';
+            $icon = '<i class="fas fa-map-marker-alt" title="'._w('Geolocation').'"></i>';
+            $_summary_tail = mb_substr($html, mb_strlen('[geolocation]'));
+            $html = $_summary_tail ?: _w('Geolocation');
+        } elseif (mb_strpos($html, '[sticker]') === 0) {
+            $html_full = $is_trancated ? _w('Sticker').mb_substr($html_full, mb_strlen('[sticker]')) : '';
+            $icon = '<i class="fas fa-sticky-note" title="'._w('Sticker').'"></i>';
+            $_summary_tail = mb_substr($html, mb_strlen('[sticker]'));
+            $html = $_summary_tail ?: _w('Sticker');
+        } elseif ($html === '[unsupported]') {
+            $html_full = $is_trancated ? _w('Unsupported message') : '';
+            $icon = '<i class="fas fa-ban" title="'._w('Unsupported message').'"></i>';
+            $html = _w('Unsupported message');
+        } elseif ($html === '[error]') {
+            $html_full = $is_trancated ? _w('Error') : '';
+            $icon = '<i class="fas fa-exclamation-triangle" title="'._w('Error').'"></i>';
+            $html = _w('Error');
+        } elseif ($html === '[empty]') {
+            $html_full = $is_trancated ? _w('Empty message') : '';
+            $icon = '<i class="fas fa-battery-empty" title="'._w('Empty message').'"></i>';
+            $html = _w('Empty message');
+        }
+        $icon = empty($icon) ? '' : '<span class="icon size-16 custom-ml-0 custom-mr-4">' . $icon . '</span> ';
+        $html = empty($html_full) ? $html : '<span title="' . $html_full . '">' . $html . '</span>';
+
+        return $icon . $html;
+    }
 }

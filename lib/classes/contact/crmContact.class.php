@@ -5,6 +5,7 @@ class crmContact extends waContact
     const EMPTY_EMAIL_SIGNATURE = ':EMPTY_EMAIL_SIGNATURE:';
 
     protected $app_id = 'crm';
+    protected $region_model = null;
 
     /**
      * For store arbitrary properties
@@ -45,9 +46,21 @@ class crmContact extends waContact
         } else {
             $set_value = true;
             if ($f instanceof waContactSelectField) {
+                $set_value = false;
                 $value = $this->findValueForSelect($f, $value);
                 if ($value !== null) {
                     $set_value = true;
+                }
+            } elseif ($f instanceof waContactCompositeField && !empty($subfield)) {
+                $sf = $f->getFields($subfield);
+                if ($sf instanceof waContactSelectField) {
+                    $set_value = false;
+                    $value = $this->findValueForSelect($sf, $value);
+                    if ($value !== null) {
+                        $set_value = true;
+                    }
+                } elseif ($sf instanceof waContactRegionField) {
+                    $value = $this->findRegion($value);
                 }
             }
             if ($set_value) {
@@ -114,6 +127,16 @@ class crmContact extends waContact
         wa()->setLocale($orig_loc);
 
         return $is_found ? $found_opt_id : null;
+    }
+
+    protected function findRegion($value)
+    {
+        if (empty($this->region_model)) {
+            $this->region_model = new waRegionModel();
+        }
+
+        $region = $this->region_model->getByField(['name' => $value]);
+        return empty($region) ? $value : $region['code'];
     }
 
     /**

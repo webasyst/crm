@@ -1121,6 +1121,17 @@ abstract class crmSource
     }
 
     /**
+     * @return crmMessageParamsModel
+     */
+    protected static function getMessageParamsModel()
+    {
+        if (empty(self::$static_cache['models']['message_params'])) {
+            self::$static_cache['models']['message_params'] = new crmMessageParamsModel();
+        }
+        return self::$static_cache['models']['message_params'];
+    }
+
+    /**
      * @return crmConversationModel
      */
     protected static function getConversationModel()

@@ -69,6 +69,18 @@
     {/foreach}
 
     {$wa->js()}
+
+    <script>
+        window.document.documentElement.addEventListener("wa-gallery-load", (e) => {
+            window.parent?.document.documentElement.dispatchEvent(new CustomEvent('wa-gallery-load', {
+                detail: {
+                    isFrame: true,
+                    forceFullPreview: true,
+                    timeout: e.detail?.timeout || 200
+                },
+            }));
+        }, false);
+    </script>
 {/strip}
 </head>
 <body class="iframe-style">

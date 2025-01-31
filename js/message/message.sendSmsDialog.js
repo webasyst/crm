@@ -18,6 +18,7 @@ var CRMSendSmsDialog = ( function($) {
         that.$wrapper = options["$wrapper"];
         that.$form = that.$wrapper.find("form");
         that.$textarea = that.$wrapper.find(".js-send-sms-textarea");
+        that.$footer = that.$wrapper.find(".dialog-footer");
 
         // VARS
         that.dialog = that.$wrapper.data("dialog");
@@ -84,10 +85,10 @@ var CRMSendSmsDialog = ( function($) {
                 is_locked = true;
 
                 var $submitButton = that.$form.find(".js-submit-button"),
-                    $loading = $('<span class="icon loading"><i class="fas fa-spinner wa-animation-spin"></i></span>');
+                    $loading = $('<div class="spinner"></div>');
 
                 $submitButton.attr("disabled", true);
-                $loading.insertAfter($submitButton);
+                that.$footer.append($loading);
 
                 var href = that.send_action_url,
                     data = that.$form.serializeArray();

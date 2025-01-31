@@ -36,7 +36,7 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
             $this->validateDealFilter($deal_list_filter),
             $this->validateDealSort($deal_list_sort),
         )) {
-            throw new waAPIException('empty_param', implode('. ', $errors), 400);
+            throw new waAPIException('empty_param', implode(' ', $errors), 400);
         }
 
         try {
@@ -76,7 +76,7 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
     {
         $errors = [];
         if (!empty($data) && !isset($data['field'])) {
-            $errors[] = _w('Empty sorting field.');
+            $errors[] = _w('Empty contacts sorting field.');
         }
 
         return $errors;
