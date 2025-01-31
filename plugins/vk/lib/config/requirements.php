@@ -1,8 +1,8 @@
 <?php
 
-return array(
-    'app.crm' => array(
-        'version' => 'latest',
-        'strict' => true,
-    )
-);
+return [
+    'app.crm' => [
+        'version' => '>=2.0.8',
+        'strict'  => true,
+    ],
+];

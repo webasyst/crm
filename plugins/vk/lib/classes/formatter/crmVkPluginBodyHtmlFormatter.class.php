@@ -34,7 +34,7 @@ class crmVkPluginBodyHtmlFormatter
                 continue;
             }
 
-            $token = htmlspecialchars($token);
+            $token = htmlspecialchars($token, ENT_QUOTES, 'UTF-8', false);
         }
         unset($token);
 

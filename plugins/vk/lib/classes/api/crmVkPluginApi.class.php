@@ -74,7 +74,7 @@ class crmVkPluginApi
 
         $res = $this->query('users.get', $params);
         if (empty($res) || empty($res['response'])) {
-            $this->logFailedResponse($res);
+            $this->logFailedResponse('users.get', $params, $res);
             return array();
         }
 
@@ -98,7 +98,7 @@ class crmVkPluginApi
         );
         $res = $this->query('database.getCitiesById', $params);
         if (empty($res) || empty($res['response'])) {
-            $this->logFailedResponse($res);
+            $this->logFailedResponse('database.getCitiesById', $params, $res);
             return array();
         }
         return $res['response'];
@@ -121,7 +121,7 @@ class crmVkPluginApi
         );
         $res = $this->query('database.getCountriesById', $params);
         if (empty($res) || empty($res['response'])) {
-            $this->logFailedResponse($res);
+            $this->logFailedResponse('database.getCountriesById', $params, $res);
             return array();
         }
         return $res['response'];
@@ -147,7 +147,7 @@ class crmVkPluginApi
         }
         $res = $this->query('groups.getById', $params);
         if (empty($res) || empty($res['response'])) {
-            $this->logFailedResponse($res);
+            $this->logFailedResponse('groups.getById', $params, $res);
             return array();
         }
         return $res['response'];
@@ -178,7 +178,7 @@ class crmVkPluginApi
         }
         $res = $this->query('messages.getById', $params);
         if (empty($res) || empty($res['response'])) {
-            $this->logFailedResponse($res);
+            $this->logFailedResponse('messages.getById', $params, $res);
             return array();
         }
         return (array)ifset($res['response']['items']);
@@ -210,7 +210,7 @@ class crmVkPluginApi
         }
         $res = $this->query('messages.markAsRead', $params);
         if (empty($res) || empty($res['response'])) {
-            $this->logFailedResponse($res);
+            $this->logFailedResponse('messages.markAsRead', $params, $res);
             return false;
         }
         return !!ifset($res['response']);
@@ -237,10 +237,11 @@ class crmVkPluginApi
 
         $params['message'] = $message;
         $params['random_id'] = 0;
+        $params['payload'] = strval(time());
 
         $res = $this->query('messages.send', $params);
         if (empty($res) || empty($res['response'])) {
-            $this->logFailedResponse($res);
+            $this->logFailedResponse('messages.send', $params, $res);
             return 0;
         }
         return $res['response'];
@@ -303,14 +304,14 @@ class crmVkPluginApi
         if ($type == self::ATTACH_TYPE_PHOTO) {
             $res = $this->query('photos.saveMessagesPhoto', $file_info);
             if (empty($res) || (empty($res['response'][0]))) {
-                $this->logFailedResponse($res);
+                $this->logFailedResponse('photos.saveMessagesPhoto', [], $res);
             } else {
                 $result = $res['response'][0];
             }
         } elseif ($type == self::ATTACH_TYPE_DOC) {
             $res = $this->query('docs.save', $file_info);
             if (empty($res) || empty($res['response']['doc'])) {
-                $this->logFailedResponse($res);
+                $this->logFailedResponse('docs.save', [], $res);
             } else {
                 $result = $res['response']['doc'];
             }
@@ -342,7 +343,7 @@ class crmVkPluginApi
         curl_close($ch);
 
         if (empty($res) || empty($res[$param_key])) {
-            $this->logFailedResponse($res);
+            $this->logFailedResponse($upload_url, [$param_key => $file_path], $res);
             return false;
         }
 
@@ -436,12 +437,11 @@ class crmVkPluginApi
             throw new crmVkPluginException("Unknown attach file");
         }
 
-        $res = $this->query($url, array(
-            'peer_id' => $peer_id
-        ));
+        $params = ['peer_id' => $peer_id];
+        $res = $this->query($url, $params);
 
         if (empty($res) || empty($res['response'])) {
-            $this->logFailedResponse($res);
+            $this->logFailedResponse($url, $params, $res);
             return false;
         }
         return $res['response']['upload_url'];
@@ -456,9 +456,10 @@ class crmVkPluginApi
         $params = array(
             'videos' => join(',', $ids)
         );
-        $res = $this->query('video.get', $params);
+        $url = 'video.get';
+        $res = $this->query($url, $params);
         if (empty($res) || empty($res['response'])) {
-            $this->logFailedResponse($res);
+            $this->logFailedResponse($url, $params, $res);
             return array();
         }
         return (array)ifset($res['response']['items']);
@@ -471,8 +472,12 @@ class crmVkPluginApi
         return $url;
     }
 
-    protected function logFailedResponse($response)
+    protected function logFailedResponse($url, $params, $response)
     {
-        waLog::dump($response, 'crm/plugins/vk/api/failed_responses.log');
+        waLog::dump([ 
+            'url' => $url,
+            'params' => $params,
+            'response' => $response,
+        ], 'crm/plugins/vk/api/failed_responses.log');
     }
 }

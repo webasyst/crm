@@ -17,6 +17,8 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
      */
     protected $chat;
 
+    protected $direction;
+
     public function __construct(array $event, crmVkPluginImSource $source, array $options = array())
     {
         parent::__construct($event, $source, $options);
@@ -25,7 +27,7 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
         }
         $object = (array)ifset($this->event['object']);
 
-        $user_id = (empty($object['user_id']) ? $object['from_id'] : $object['user_id']);
+        $user_id = (empty($object['user_id']) ? (empty($object['out']) ? $object['from_id'] : $object['peer_id']) : $object['user_id']);
         $this->vk_user = new crmVkPluginVkUser($user_id, $this->source->getApiParams());
 
         $group_id = $this->source->getGroupId();
@@ -34,6 +36,8 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
         $principal_participant = crmVkPluginChatParticipant::tieWith($this->vk_group);
         $participant = crmVkPluginChatParticipant::tieWith($this->vk_user);
         $this->chat = crmVkPluginChat::tieWith($principal_participant, $participant);
+
+        $this->direction = empty($object['out']) ? crmMessageModel::DIRECTION_IN : crmMessageModel::DIRECTION_OUT;
     }
 
     /**
@@ -41,7 +45,8 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
      */
     public function execute()
     {
-        if ($this->source->isDisabled()) {
+        if (!$this->checkMessage()) {
+            // Do nothing
             return 'ok';
         }
 
@@ -82,6 +87,21 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
         $this->createMessage($deal_id);
 
         return 'ok';
+    }
+
+    protected function checkMessage()
+    {
+        if ($this->source->isDisabled()) {
+            return false;
+        }
+
+        $message = $this->source->findMessage($this->event['object']['id']);
+        if (!empty($message)) {
+            // Message was already processed (this is doubled callback)
+            return false;
+        }
+
+        return true;
     }
 
     protected function processDeal($contact_id)
@@ -152,7 +172,7 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
         } else {
             $vk_message = new crmVkPluginVkMessage($object);
         }
-        $message = $this->chat->prepareMessageData(crmMessageModel::DIRECTION_IN, $vk_message);
+        $message = $this->chat->prepareMessageData($this->direction, $vk_message);
         $message['deal_id'] = (int)$deal_id;
         return $message;
     }
@@ -175,7 +195,7 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
     protected function createMessage($deal_id = null)
     {
         $message = $this->prepareMessage($deal_id);
-        $message_id = $this->source->createMessage($message);
+        $message_id = $this->source->createMessage($message, $this->direction);
         $this->chat->addMessage($message_id);
         return $message_id;
     }

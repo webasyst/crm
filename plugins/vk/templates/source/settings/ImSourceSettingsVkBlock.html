@@ -71,7 +71,7 @@
                             <input type="text" class="c-readonly-input c-callback-url js-url-input" readonly value="{$callback_url}">
                             {if !$callback_url}
                                 <div class="hint" style="margin-top: 2px;">
-                                    {sprintf(_wd('crm_vk', 'Set settlement for CRM app <a target="_blank" href="%s">here</a>'), $site_app_url)}
+                                    {sprintf(_wd('crm_vk', 'Set up a CRM settlement <a target="_blank" href="%s">in the Site app</a>.'), $site_app_url)}
                                 </div>
                             {/if}
                         {else}
@@ -141,7 +141,7 @@
                     <input required="required" type="text" name="source[params][service_token]" value="{$source.params.service_token|default:''|escape}" class="equal-width">
                 </div>
             </div>
-            
+
             <div class="field">
                 <div class="value">
                     <div class="crm-common-errors-block"></div>

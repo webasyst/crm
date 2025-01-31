@@ -54,10 +54,13 @@ class crmVkPluginCallback
 
         $type = $this->event['type'];
 
-        $allowed_event_types = array(
+        $allowed_event_types = [
             'confirmation',
-            'message_new'
-        );
+            'message_new',
+            'message_reply',
+            'message_edit',
+            'message_read',
+        ];
 
         if (!in_array($type, $allowed_event_types)) {
             $this->throwUnknownEventException();

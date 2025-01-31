@@ -12,7 +12,7 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
 "Language: ru_RU\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.3\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -168,3 +168,51 @@ msgstr "Плагин «%s» установлен и работает."
 
 msgid "Save configuration parameters in the <a href=\"%s\">deal source settings</a>."
 msgstr "Сохраните параметры конфигурации в <a href=\"%s\">настройках источника сделок</a>."
+
+msgid "Set up a CRM settlement <a target=\"_blank\" href=\"%s\">in the Site app</a>."
+msgstr "Настройте поселение CRM <a target=\"_blank\" href=\"%s\">в приложении «Сайт»</a>."
+
+msgid "Photo"
+msgstr "Фото"
+
+msgid "Video"
+msgstr "Видео"
+
+msgid "Audio"
+msgstr "Аудио"
+
+msgid "Wall report"
+msgstr "Отчёт со стены"
+
+msgid "GIF"
+msgstr ""
+
+msgid "Image"
+msgstr "Изображение"
+
+msgid "Audio message"
+msgstr "Аудиосообщение"
+
+msgid "Attachment"
+msgstr "Вложение"
+
+msgid "Location"
+msgstr "Место"
+
+msgid "no subject"
+msgstr "нет темы"
+
+msgid "Drop photo here"
+msgstr "Перетащите фото сюда"
+
+msgid "Unknown location"
+msgstr "Неизвестное место"
+
+msgid "Empty conversation"
+msgstr "Пустая переписка"
+
+msgid "Field is required"
+msgstr "Обязательное поле"
+
+msgid "(Video is not supported)"
+msgstr "(Видео не поддерживается)"

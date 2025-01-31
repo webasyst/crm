@@ -11,7 +11,7 @@ class crmVkPluginImSourceHelper extends crmSourceHelper
     {
         $message['icon_url'] = $this->source->getIcon();
         $message['transport_name'] = $this->source->getName();
-        $message['body_formatted'] = htmlspecialchars($message['body']);
+        $message['body_formatted'] = nl2br(htmlspecialchars($message['body']));
         $message['subject_formatted'] = crmVkPluginMessageSubjectFormatter::format($message);
         return $message;
     }
@@ -138,7 +138,7 @@ class crmVkPluginImSourceHelper extends crmSourceHelper
                 $message['participant'] = $chat->getParticipant()->getInfo();
                 $message['participant']['contact'] = ifset($contacts[$message['participant']['contact_id']]);
             }
-            
+
             $message['contact'] = ifset($contacts[$message['contact_id']]);
             $message['creator_contact'] = ifset($contacts[$message['creator_contact_id']]);
         }
@@ -149,13 +149,22 @@ class crmVkPluginImSourceHelper extends crmSourceHelper
 
     public function normalazeMessagesExtras($messages)
     {
+        $verification_key = $this->source->getParam('verification_key');
         // return $messages;
         // TODO - не закончено - см. дальше что есть в crmVkPluginMessageBodyFormatter
-        return array_map(function($m) {
+        return array_map(function($m) use ($verification_key) {
             $attachments = ifset($m, 'params', 'attachments', []);
             foreach($attachments as $att) {
                 if (ifset($att['type']) == 'doc' && isset($att['doc'])) {
-                    $m = $this->addAttachement($m, $att['doc']);
+                    if (strtolower($att['doc']['ext']) === 'gif') {
+                        $m = $this->addExtra($m, 'images', [
+                            'name' => $att['doc']['title'],
+                            'ext' => $att['doc']['ext'],
+                            'url' => $att['doc']['url'],
+                        ]);
+                    } else {
+                        $m = $this->addAttachement($m, $att['doc']);
+                    }
                     continue;
                 }
                 if (ifset($att['type']) == 'photo' && isset($att['photo'])) {
@@ -203,8 +212,9 @@ class crmVkPluginImSourceHelper extends crmSourceHelper
                     continue;
                 }
                 if (ifset($att['type']) == 'video' && isset($att['video'])) {
+                    $m['caption'] = '<span class="gray">' . _wd('crm_vk', '(Video is not supported)') . '</span>';
                     if (ifset($att['video']['title'])) {
-                        $m['caption'] = crmHtmlSanitizer::work($att['video']['title']);
+                        $m['caption'] .= ' <span class="small">' . crmHtmlSanitizer::work($att['video']['title']) . '</span>';
                     }
                     // TODO: add video normalization
                     continue;
@@ -263,11 +273,10 @@ class crmVkPluginImSourceHelper extends crmSourceHelper
 
             // convert plain-text message body to html
             $body = (new crmVkPluginBodyHtmlFormatter)->execute($m['body']);
-            $m['body_sanitized'] = crmHtmlSanitizer::work($body);
-
+            $m['body_sanitized'] = crmHtmlSanitizer::work($body, ['verification_key' => $verification_key]);
             return $m;
         }, $messages);
-        
+
     }
 
     public function getFeatures()

@@ -86,6 +86,13 @@ class crmVkPluginImSourceMessageSender extends crmImSourceMessageSender
             return $this->sendFailed("Vk user id is unknown");
         }
 
+        if (ifset($data['is_contact_updated'])) {
+            $this->message = $this->addParam($this->message, 'is_contact_updated', $data['is_contact_updated']);
+        }
+        if (ifset($data['is_auto_response'])) {
+            $this->message = $this->addParam($this->message, 'is_auto_response', $data['is_auto_response']);
+        }
+
         // for ID like 'id1234111' remove 'id' prefix
         if (substr($vk_user_id, 0, 2) == 'id') {
             $num_vk_user_id = substr($vk_user_id, 2);
@@ -106,6 +113,10 @@ class crmVkPluginImSourceMessageSender extends crmImSourceMessageSender
             return $this->sendFailed("sendMessage result value is wrong ({$vk_message_id})");
         }
 
+        if (ifset($data['do_not_save_this_message'])) {
+            return $this->ok(['vk_message_id' => $vk_message_id]);
+        }
+
         $message_id = $this->logMessage($vk_message_id);
         $this->chat->addMessage($message_id);
 
@@ -113,6 +124,15 @@ class crmVkPluginImSourceMessageSender extends crmImSourceMessageSender
             'vk_message_id' => $vk_message_id,
             'message_id' => $message_id
         ));
+    }
+
+    protected function addParam($message, $key, $value)
+    {
+        if (!ifset($message['params'])) {
+            $message['params'] = [];
+        }
+        $message['params'][$key] = $value;
+        return $message;
     }
 
     protected function sendMessage($vk_user_id, $body, $attachments = array())
@@ -152,12 +172,19 @@ class crmVkPluginImSourceMessageSender extends crmImSourceMessageSender
 
         $api = new crmVkPluginApi($this->source->getAccessToken());
 
-        foreach ($uploaded_photos as $photo) {
-            $attachment = $api->attachFile($vk_user_id, $photo, crmVkPluginApi::ATTACH_TYPE_PHOTO);
+        foreach ($uploaded_photos as $photo_path) {
+            $ext = strtolower(pathinfo($photo_path, PATHINFO_EXTENSION));
+            if ($ext === 'gif' && $this->isAnimatedGif($photo_path)) {
+                // Send animated GIFs as attachement, not image
+                $uploaded_files[] = $photo_path;
+                continue;
+            }
+            
+            $attachment = $api->attachFile($vk_user_id, $photo_path, crmVkPluginApi::ATTACH_TYPE_PHOTO);
             if ($attachment) {
                 $attachments[crmVkPluginApi::ATTACH_TYPE_PHOTO][] = $attachment;
                 try {
-                    waFiles::delete($photo);
+                    waFiles::delete($photo_path);
                 } catch (Exception $e) {
                     //nop
                 }
@@ -229,6 +256,13 @@ class crmVkPluginImSourceMessageSender extends crmImSourceMessageSender
             $message = $this->chat->prepareMessageData(crmMessageModel::DIRECTION_OUT);
             $message['params']['id'] = $vk_message_id;
         }
+
+        if (ifset($this->message['params']['is_contact_updated'])) {
+            $message = $this->addParam($message, 'is_contact_updated', $this->message['params']['is_contact_updated']);
+        }
+        if (ifset($this->message['params']['is_auto_response'])) {
+            $message['creator_contact_id'] = 0;
+        }
         $message_id = $this->source->createMessage($message, crmMessageModel::DIRECTION_OUT);
         return $message_id;
     }
@@ -253,7 +287,6 @@ class crmVkPluginImSourceMessageSender extends crmImSourceMessageSender
         }
         return true;
     }
-
     private function logError($error)
     {
         waLog::log($error, 'crm/plugins/vk/source/message_sender.log');
