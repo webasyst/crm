@@ -111,6 +111,35 @@ class crmTelegramPluginImSourceHelper extends crmSourceHelper
         return $this->workupConversationInList($conversation);
     }
 
+    public function getUI20ConversationAuxItems($conversation)
+    {
+        if (!ifset($conversation, 'contacts', $conversation['contact_id'], false)) {
+            return [];
+        }
+        $reply_form_dropdown_items = [];
+        
+        // Cheat sheet item
+        $template = wa()->getAppPath("plugins/telegram/templates/source/message/ConversationCheatSheetDropdownItem.html", 'crm');
+        $reply_form_dropdown_items[] = $this->renderTemplate($template);
+
+        // Ask phone item
+        $contact = $conversation['contacts'][$conversation['contact_id']];
+        if ($this->source->getParam('ask_phone') && empty($contact->get('phone', 'default'))) {
+            $do_confirm_phone_request = !(new waContactSettingsModel())->getOne(wa()->getUser()->getId(), 'crm.telegram', 'phone_request_no_more_confirmation');
+            $template = wa()->getAppPath("plugins/telegram/templates/source/message/ConversationAskPhoneDropdownItem.html", 'crm');
+            $reply_form_dropdown_items[] = $this->renderTemplate($template, [
+                'icon' => $this->source->getFontAwesomeBrandIcon(),
+                'message_id'    => $conversation['last_message_id'],
+                'source_id'     => $this->source->getId(),
+                'contact'       => $contact,
+                'do_confirm_phone_request' => $do_confirm_phone_request ? 1 : 0,
+            ]);
+        }
+        return [
+            'reply_form_dropdown_items' => $reply_form_dropdown_items,
+        ];
+    }
+
     public function workupMessagesInConversation($conversation, $messages)
     {
         $messages = self::workupMessagesForDisplaying($messages);
@@ -191,24 +220,6 @@ class crmTelegramPluginImSourceHelper extends crmSourceHelper
         }, $messages);
     }
 
-
-    protected function prepareSticker($width = 16)
-    {
-        $sticker_id = $this->message['params']['sticker_id'];
-        $tsm = new crmTelegramPluginStickerModel();
-        $sticker_file = $tsm->getById($sticker_id);
-        if (!$sticker_file) {
-            return array(
-                'error' => _wd('crm_telegram', 'Unkown sticker'),
-            );
-        }
-
-        return array(
-            'url'   => wa()->getAppUrl('crm').'?module=file&action=download&id='.(int)$sticker_file['id'],
-            'width' => $width,
-        );
-    }
-
     public function normalazeMessagesExtras($messages)
     {
         $attachment_ids = [];
@@ -236,6 +247,12 @@ class crmTelegramPluginImSourceHelper extends crmSourceHelper
                     && $extra_type = $this->normilizeExtraType($files_params[$file['id']]['type'])
                 ) {
                     $m = $this->addExtra($m, $extra_type, $file);
+                    unset($m['attachments'][$idx]);
+                } elseif (strtolower($file['ext']) === 'mp4') {
+                    $m = $this->addExtra($m, 'videos', $file);
+                    unset($m['attachments'][$idx]);
+                } elseif (strtolower($file['ext']) === 'gif') {
+                    $m = $this->addExtra($m, 'images', $file);
                     unset($m['attachments'][$idx]);
                 }
             }

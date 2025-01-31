@@ -4,8 +4,8 @@
             <span><i class="icon16 rotate-right" title="{_wd('crm_telegram', 'Forwarded message')}"></i></span>
         {/if}
 
-        {if strlen($subject) > 0}
-            {$_subject|escape}
+        {if !empty($subject) || $subject === '0'}
+            {$subject|escape}
         {elseif $sticker}
             {if isset($sticker.error)}
                 <span class="hint">{$sticker.error}</span>

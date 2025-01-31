@@ -30,8 +30,9 @@ class crmTelegramPluginContactExporter
         $data = array(
             'firstname'         => ifset($this->telegram_info['first_name']),
             'lastname'          => ifset($this->telegram_info['last_name']),
-            'im.telegram'       => $this->telegram_info['username'] ? 'https://t.me/'.$this->telegram_info['username'] : null,
+            'im.telegram'       => ifset($this->telegram_info['username']),
             'telegram_id'       => $this->telegram_info['id'],
+            'locale'            => ifset($this->telegram_info['language_code']) === 'ru' ? 'ru_RU' : 'en_US',
             'create_app_id'     => 'crm',
             'create_contact_id' => 0,
             'create_method'     => 'source/im/telegram',

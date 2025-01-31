@@ -95,7 +95,7 @@ class crmTelegramPluginMessageBodyFormatter extends crmTelegramPluginMessageCont
         try {
             $map_html = wa()->getMap()->getHTML($this->message['params']['location'], array('width' => '470px', 'height' => '270px', 'zoom' => 16));
         } catch (waException $e) {
-            $map_html = _wd('crm_telegram', 'Unkown location');
+            $map_html = _wd('crm_telegram', 'Unknown location');
         }
 
         return array(
@@ -108,7 +108,7 @@ class crmTelegramPluginMessageBodyFormatter extends crmTelegramPluginMessageCont
         try {
             $map_html = wa()->getMap()->getHTML($this->message['params']['venue_location'], array('width' => '470px', 'height' => '270px', 'zoom' => 16));
         } catch (waException $e) {
-            $map_html = _wd('crm_telegram', 'Unkown venue');
+            $map_html = _wd('crm_telegram', 'Unknown venue');
         }
 
         return array(

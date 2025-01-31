@@ -51,55 +51,109 @@ class crmTelegramPluginHtmlSanitizer
 
     public function compile($content, $entities)
     {
-        if (!$content) {
+        if (empty($content) && $content !== '0') {
             return '';
         }
-        if (!$entities) {
+        if (empty($entities)) {
+            $content = htmlentities($content, ENT_NOQUOTES, 'UTF-8');
             return nl2br(trim($content));
         }
 
+        do {
+            $tag_start = uniqid('-TS').'ST-';
+            $tag_end = uniqid('-TE').'ET-';
+            $nl = uniqid('NL');
+        } while (strpos($content, $nl) !== false || strpos($content, $tag_start) !== false || strpos($content, $tag_end) !== false);
+
         $entities = array_reverse($entities);
 
-        foreach ($entities as $ent)
+        $content = mb_convert_encoding($content, 'UTF-16', 'UTF-8');
+        $nl_16_subst = mb_convert_encoding($nl, 'UTF-16', 'UTF-8');
+        $nl_16 = mb_convert_encoding("\n", 'UTF-16', 'UTF-8');
+
+        foreach ($entities as $idx => &$ent)
         {
             switch ($ent['type']) {
                 case 'bold':
-                    $open_tag = '<b>';
-                    $close_tag = '</b>';
+                    $open_tag = 'b';
+                    $close_tag = '/b';
                     break;
                 case 'italic':
-                    $open_tag = '<em>';
-                    $close_tag = '</em>';
+                    $open_tag = 'em';
+                    $close_tag = '/em';
+                    break;
+                case 'underline':
+                    $open_tag = 'u';
+                    $close_tag = '/u';
+                    break;
+                case 'strikethrough':
+                    $open_tag = 'strike';
+                    $close_tag = '/strike';
                     break;
                 case 'text_link':
-                    $open_tag = '<a href="'.$ent['url'].'" target="_blank">';
-                    $close_tag = '</a>';
+                    $open_tag = 'a href="'.$ent['url'].'" target="_blank"';
+                    $close_tag = '/a';
                     break;
                 case 'mention':
-                    $username = mb_substr($content, $ent['offset'] + 1, $ent['length']);
-                    $open_tag = '<a href="https://t.me/'.trim($username).'" target="_blank">';
-                    $close_tag = '</a>';
+                    $username = substr($content, $ent['offset']*2 + 1, $ent['length']*2);
+                    $open_tag = 'a href="https://t.me/'.trim($username).'" target="_blank"';
+                    $close_tag = '/a';
                     break;
                 case 'email':
-                    $open_tag = '<a href="mailto:'.mb_substr($content, $ent['offset'], $ent['length']).'">';
-                    $close_tag = '</a>';
+                    $open_tag = 'a href="mailto:'.substr($content, $ent['offset']*2, $ent['length']*2).'"';
+                    $close_tag = '/a';
                     break;
                 case 'code':
-                    $open_tag = '<blockquote><pre>';
-                    $close_tag = '</pre></blockquote>';
+                    $open_tag = 'code';
+                    $close_tag = '/code';
                     break;
                 case 'pre':
-                    $open_tag = '<blockquote>';
-                    $close_tag = '</blockquote>';
+                    $open_tag = 'pre';
+                    $close_tag = '/pre';
+                    break;
+                case 'blockquote':
+                    $open_tag = 'blockquote';
+                    $close_tag = '/blockquote';
                     break;
                 default:
                     $open_tag = $close_tag = '';
             }
-            $format_str = $open_tag . mb_substr($content, $ent['offset'], $ent['length']). $close_tag;
-            $content = $this->mb_substr_replace($content, $format_str, $ent['offset'], $ent['length']);
-        }
+            if (empty($open_tag) || empty($close_tag)) {
+                continue;
+            }
+            $ent['open_tag'] = $tag_start . $open_tag . $tag_end;
+            $ent['close_tag'] = $tag_start . $close_tag . $tag_end;
+            $ent['orig_length'] = $ent['length'];
 
-        return nl2br(trim($content));
+            for ($i = $idx - 1; $i >= 0; $i--) {
+                if ($ent['offset'] + $ent['orig_length'] >= $entities[$i]['offset'] + $entities[$i]['orig_length']) {
+                    $ent['length'] += mb_strlen($entities[$i]['open_tag']) + mb_strlen($entities[$i]['close_tag']);
+                } else {
+                    break;
+                }
+            }
+
+            $open_tag = mb_convert_encoding($ent['open_tag'], 'UTF-16', 'UTF-8');
+            $close_tag = mb_convert_encoding($ent['close_tag'], 'UTF-16', 'UTF-8');
+
+            $format_str = $open_tag . substr($content, $ent['offset']*2, $ent['length']*2). $close_tag;
+            if ($ent['type'] === 'pre') {
+                $format_str = str_replace($nl_16, $nl_16_subst, $format_str);
+            }
+            $content = substr_replace($content, $format_str, $ent['offset']*2, $ent['length']*2);
+        }
+        $content = mb_convert_encoding($content, 'UTF-8', 'UTF-16');
+
+        $content = htmlentities($content, ENT_NOQUOTES, 'UTF-8');
+        $content = str_replace($tag_start, '<', $content);
+        $content = str_replace($tag_end, '>', $content);
+
+        // Remove \r\n after </blockquote> and </pre> ending tags
+        $content = preg_replace('~<(/(blockquote|pre))>\s*\r?\n~i', '<\1>', $content);
+        $content = nl2br(trim($content));
+        $content = str_replace($nl, "\n", $content);
+
+        return $content;
     }
 
     public static function convector($content, $options = array())
@@ -211,7 +265,7 @@ class crmTelegramPluginHtmlSanitizer
         // Convert &nbsp; to —
         $content = str_replace("&mdash;", "—", $content);
         // Leave only those tags from which Telegram will not go mad
-        $content = strip_tags($content, '<a><b><strong><i><em><pre><code>');
+        $content = strip_tags($content, '<a><b><strong><i><em><pre><code><blockquote>');
 
         return $content;
     }
@@ -246,41 +300,33 @@ class crmTelegramPluginHtmlSanitizer
         return $url;
     }
 
-    protected function mb_substr_replace($string, $replacement, $start, $length = null)
+    public function handleMarkUp($content)
     {
-        if (is_array($string)) {
-            $num = count($string);
-            // $replacement
-            $replacement = is_array($replacement) ? array_slice($replacement, 0, $num) : array_pad(array($replacement), $num, $replacement);
-            // $start
-            if (is_array($start)) {
-                $start = array_slice($start, 0, $num);
-                foreach ($start as $key => $value) {
-                    $start[$key] = is_int($value) ? $value : 0;
-                }
-            } else {
-                $start = array_pad(array($start), $num, $start);
-            }
-            // $length
-            if (!isset($length)) {
-                $length = array_fill(0, $num, 0);
-            } elseif (is_array($length)) {
-                $length = array_slice($length, 0, $num);
-                foreach ($length as $key => $value) {
-                    $length[$key] = isset($value) ? (is_int($value) ? $value : $num) : 0;
-                }
-            } else {
-                $length = array_pad(array($length), $num, $length);
-            }
-            // Recursive call
-            return array_map(__FUNCTION__, $string, $replacement, $start, $length);
-        }
-        preg_match_all('/./us', (string)$string, $smatches);
-        preg_match_all('/./us', (string)$replacement, $rmatches);
-        if ($length === null) {
-            $length = mb_strlen($string);
-        }
-        array_splice($smatches[0], $start, $length, $rmatches[0]);
-        return join($smatches[0]);
+        do {
+            $holder = uniqid('<HLDR').'>';
+        } while (strpos($content, $holder) !== false);
+        
+        $content = preg_replace_callback('/```((?:(?!```).)+)```/s', function($m) use ($holder) {
+            $s = ifset($m[1], '');
+            $s = str_replace('`', $holder, $s);
+            return '<pre>'.$s.'</pre>';
+        }, $content);
+        
+        $content = preg_replace('/`([^`]+)`/', '<code>\1</code>', $content);
+        $content = str_replace($holder, '`', $content);
+
+        $content = preg_replace('/\\*\\*((?:(?!\\*\\*).)+)\\*\\*/', '<b>\1</b>', $content);
+        $content = preg_replace('/~~((?:(?!~~).)+)~~/', '<s>\1</s>', $content);
+        $content = preg_replace('/__((?:(?!__).)+)__/', '<i>\1</i>', $content);
+
+        // Handle links
+        $content = preg_replace('/\[([^\[\]]+)\]\((https?\:\/\/[^\s\(\)]+)\)/', '<a href="\2">\1</a>', $content);
+        $content = preg_replace('/\[([^\[\]]+)\]\((www\.[^\.][^\s\(\)]+\.[^\s\(\)]+)\)/', '<a href="http://\2">\1</a>', $content);
+
+        // Handle blockquote
+        $content = preg_replace('/((?:^|\n))&gt; ?((?:(?!\r?\n).)+)/s', '\1<blockquote>\2</blockquote>', $content);
+	    $content = preg_replace('~</blockquote>\s*<blockquote>~s', "\n", $content);
+        return $content;
     }
+
 }

@@ -43,7 +43,7 @@ abstract class crmTelegramPluginMessageContentFormatter
         $sticker_file = $tsm->getById($sticker_id);
         if (!$sticker_file) {
             return array(
-                'error' => _wd('crm_telegram', 'Unkown sticker'),
+                'error' => _wd('crm_telegram', 'Unknown sticker'),
             );
         }
 

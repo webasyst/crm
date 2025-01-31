@@ -14,6 +14,9 @@ class crmTelegramPluginMessage
         if (isset($this->message['result'])) {
             return ifset($this->message['result'][$name]);
         }
+        if (isset($this->message['edited_message'])) {
+            return ifset($this->message['edited_message'][$name]);
+        }
         return ifset($this->message['message'][$name]);
     }
 
@@ -22,6 +25,9 @@ class crmTelegramPluginMessage
         if (isset($this->message['result'])) {
             return ifset($this->message['result']['from'][$name]);
         }
+        if (isset($this->message['edited_message'])) {
+            return ifset($this->message['edited_message']['from'][$name]);
+        }
         return ifset($this->message['message']['from'][$name]);
     }
 
@@ -29,6 +35,9 @@ class crmTelegramPluginMessage
     {
         if (isset($this->message['result'])) {
             return ifset($this->message['result']['chat'][$name]);
+        }
+        if (isset($this->message['edited_message'])) {
+            return ifset($this->message['edited_message']['chat'][$name]);
         }
         return ifset($this->message['message']['chat'][$name]);
     }
@@ -127,5 +136,10 @@ class crmTelegramPluginMessage
     public function getForwardData()
     {
         return $this->getMessageField('forward_from');
+    }
+
+    public function getContactData()
+    {
+        return $this->getMessageField('contact');
     }
 }

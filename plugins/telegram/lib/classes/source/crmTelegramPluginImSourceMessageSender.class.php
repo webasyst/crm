@@ -18,6 +18,11 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
     protected $telegram_file_params_model;
 
     /**
+     * @var crmFileModel
+     */
+    protected $file_model;
+
+    /**
      * @var crmTelegramPluginImSourceHelper
      */
     protected $helper;
@@ -27,7 +32,15 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
      */
     protected $downloader;
 
-    protected $is_start_response = false;
+    protected $is_auto_response = false;
+
+    protected $is_contact_updated = false;
+
+    protected $do_not_save_this_message = false;
+
+    protected $file_names = [];
+    protected $file_paths = [];
+    protected $telegram_file_ids = [];
 
     public function __construct(crmSource $source, $message, array $options = array())
     {
@@ -90,7 +103,9 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
         if ($errors) {
             return $this->fail($errors);
         }
-        $this->is_start_response = !empty($data['is_start_response']);
+        $this->is_auto_response = !empty($data['is_auto_response']);
+        $this->is_contact_updated = !empty($data['is_contact_updated']);
+        $this->do_not_save_this_message = !empty($data['do_not_save_this_message']);
 
         $chat_id = ($this->message['direction'] == crmMessageModel::DIRECTION_IN) ? $this->message['from'] : $this->message['to'];
         if (!$chat_id) {
@@ -98,14 +113,44 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
             return $this->fail(array('common' => _wp("Telegram user id is unknown")));
         }
 
-        $params = array(
-            'chat_id' => $chat_id,
-            'text'    => crmTelegramPluginHtmlSanitizer::convector($data['body']),
-        );
+        if (ifset($data, 'verify_link', 'url', false)) {
+            $data['body'] = ifset($data['verify_body'], _w('Please verify your client profile.'));
+            $data['reply_markup'] = array_merge(ifset($data['reply_markup'], []), [
+                'inline_keyboard' => [[
+                    [
+                        'text' => ifset($data['verify_link']['text'], _w('Verify client profile')),
+                        'url' => $data['verify_link']['url'],
+                    ]
+                ]]
+            ]);
+        }
 
-        $attachments = array();
+        $sanitizer = new crmTelegramPluginHtmlSanitizer();
+        $params = [
+            'chat_id' => $chat_id,
+            'text'    => ifset($data['is_plain_text']) ? $sanitizer->handleMarkUp($data['body']) : $sanitizer->sanitize($data['body']),
+            //'parse_mode' => $data['is_plain_text'] ? 'MarkdownV2' : 'HTML',
+        ];
+        if (ifset($data['reply_markup'])) {
+            $params['reply_markup'] = $data['reply_markup'];
+        }
+
+        $attachments = [];
         if (!empty($uploaded_photos)) {
             foreach ($uploaded_photos as $photo_path) {
+                $ext = strtolower(pathinfo($photo_path, PATHINFO_EXTENSION));
+                if (in_array($ext, ['svg', 'tiff'])) {
+                    // Telegram can't process these types of image
+                    // so will send it as attachement
+                    $uploaded_files[] = $photo_path;
+                    continue;
+                }
+                if ($ext === 'gif' && $this->isAnimatedGif($photo_path)) {
+                    // Send animated GIFs as attachement, not image
+                    $uploaded_files[] = $photo_path;
+                    continue;
+                }
+
                 $photo = new CURLFile(realpath($photo_path));
                 // Send chat action
                 $this->api->sendChatAction($chat_id, crmTelegramPluginApi::ACTION_UPLOAD_PHOTO);
@@ -117,16 +162,25 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
 
                 // If we have only one photo, and the message text is less than two hundred
                 // We will shove it into the caption, but the message will not be sent.
-                if (count($uploaded_photos) == 1 && mb_strlen($params['text']) <= 200 && empty($uploaded_files)) {
+                if (count($uploaded_photos) == 1 && mb_strlen(ifset($params['text'], '')) <= 200 && empty($uploaded_files)) {
                     $photo_params['caption'] = $params['text'];
                     unset($params);
                 }
 
                 $response = $this->api->sendPhoto($photo, $photo_params);
                 if ($response['ok']) {
-                    if (isset($response['result']['photo'])) {
-                        $attachments[]['photo'] = $response['result']['photo'];
+                    if (isset($response['result'][crmTelegramPluginMediaDownloader::TYPE_PHOTO])) {
+                        $max_thumb = end($response['result'][crmTelegramPluginMediaDownloader::TYPE_PHOTO]);
+                        if (isset($max_thumb['file_id'])) {
+                            $this->file_names[$max_thumb['file_id']] = basename($photo_path);
+                        }
+                        $attachments[][crmTelegramPluginMediaDownloader::TYPE_PHOTO] = $response['result'][crmTelegramPluginMediaDownloader::TYPE_PHOTO];
                     }
+                } elseif (isset($response['error_code']) && $response['error_code'] == 400) {
+                    // Telegram can't process this kind of image
+                    // so will try to send it as attachement
+                    $uploaded_files[] = $photo_path;
+                    continue;
                 }
                 try {
                     waFiles::delete($photo_path);
@@ -136,6 +190,7 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
         }
         if (!empty($uploaded_files)) {
             foreach ($uploaded_files as $file_path) {
+                $file_name = basename($file_path);
                 $document = new CURLFile(realpath($file_path));
                 // Send chat action
                 $ext = mb_strtolower(pathinfo($document->getFilename(), PATHINFO_EXTENSION));
@@ -151,31 +206,31 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
 
                 // If we only have one file, and the message text is less than two hundred
                 // We will shove it into the caption, but the message will not be sent.
-                if (count($uploaded_files) == 1 && mb_strlen(ifset($params['text'])) <= 200 && empty($uploaded_photos)) {
+                if (count($uploaded_files) == 1 && mb_strlen(ifset($params['text'], '')) <= 200 && empty($uploaded_photos)) {
                     $doc_params['caption'] = $params['text'];
                     unset($params);
                 }
 
                 $response = (array)$this->api->sendDocument($document, $doc_params);
                 if ($response['ok']) {
-                    if (isset($response['result']['document'])) {
-                        $attachments[]['document'] = $response['result']['document'];
+                    foreach([
+                        crmTelegramPluginMediaDownloader::TYPE_DOCUMENT,
+                        crmTelegramPluginMediaDownloader::TYPE_AUDIO,
+                        crmTelegramPluginMediaDownloader::TYPE_VIDEO,
+                        crmTelegramPluginMediaDownloader::TYPE_VIDEO_NOTE,
+                        crmTelegramPluginMediaDownloader::TYPE_VOICE,
+                    ] as $type) {
+                        if (isset($response['result'][$type])) {
+                            $attachments[][$type] = $response['result'][$type];
+                            $this->file_names[$response['result'][$type]['file_id']] = $file_name;
+                            $this->file_paths[$response['result'][$type]['file_id']] = $file_path;
+                        }
                     }
-                    if (isset($response['result']['audio'])) {
-                        $attachments[]['audio'] = $response['result']['audio'];
-                    }
-                    if (isset($response['result']['video'])) {
-                        $attachments[]['video'] = $response['result']['video'];
-                    }
-                }
-                try {
-                    waFiles::delete($file_path);
-                } catch (Exception $e) {
                 }
             }
         }
 
-        if (!empty($params['text'])) {
+        if (!empty($params['text']) || ifset($params['text']) === '0') {
             $new_message = $this->api->sendMessage($params);
             if (!empty($attachments)) {
                 $new_message['attachments'] = $attachments;
@@ -185,17 +240,19 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
             if (!empty($attachments)) {
                 $response['attachments'] = $attachments;
                 unset(
-                    $response['result']['photo'],
-                    $response['result']['document']
+                    $response['result'][crmTelegramPluginMediaDownloader::TYPE_PHOTO],
+                    $response['result'][crmTelegramPluginMediaDownloader::TYPE_DOCUMENT]
                 );
             }
             $new_message = ifset($response);
         }
 
         $new_message = (array)$new_message;
-
         if (!ifset($new_message['ok'])) {
-            return $this->fail(array(ifset($new_message['error_code'], 0) => ifset($new_message['description'], 'Unkown error')));
+            if (ifset($new_message['error_code']) === 403) {
+                $this->createInternalServiceMessage(ifset($new_message['description'], _wd('crm_telegram', 'Blocked by the client.')));
+            }
+            return $this->fail(array(ifset($new_message['error_code'], 0) => ifset($new_message['description'], _w('Unknown error'))));
         }
 
         $object = (array)ifset($new_message);
@@ -203,6 +260,10 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
 
         if ($new_message->getId() <= 0) {
             return $this->sendFailed("sendMessage result value is wrong ({$new_message->getId()})");
+        }
+
+        if ($this->do_not_save_this_message) {
+            return $this->ok(['telegram_message_id' => $new_message->getId()]);
         }
 
         $message_id = $this->createMessage($new_message);
@@ -223,8 +284,18 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
             $message = null;
         }
 
+        $message_params = [
+            'telegram_message_id' => $message->getId(),
+            'username'            => $message->getChatField('username'),
+            'datetime'            => $message ? $message->getDatetime() : date('Y-m-d H:i:s'),
+        ];
+        if ($this->is_contact_updated) {
+            $message_params['is_contact_updated'] = 1;
+        }
+
+        $creator_contact_id = $this->is_auto_response ? 0 : wa()->getUser()->getId();
         $data = array(
-            'creator_contact_id' => $this->is_start_response ? 0 : wa()->getUser()->getId(),
+            'creator_contact_id' => $creator_contact_id,
             'transport'          => crmMessageModel::TRANSPORT_IM,
             'contact_id'         => $this->message['contact_id'],
             'deal_id'            => ifset($this->message['deal_id']),
@@ -232,59 +303,42 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
             'body'               => crmTelegramPluginHtmlSanitizer::parser($message),
             'from'               => $message->getSenderField('username'),
             'to'                 => $message->getChatField('id'),
-            'params'             => array(
-                'telegram_message_id' => $message->getId(),
-                'username'            => $message->getChatField('username'),
-                'datetime'            => $message ? $message->getDatetime() : date('Y-m-d H:i:s'),
-            )
+            'params'             => $message_params,
         );
 
-        $fpm = $this->getTelegramFileParamsModel();
+        $this->downloader->setContext($this->message['contact_id'], ifset($this->message['deal_id']), $creator_contact_id);
 
         if ($message->getSticker()) {
             $data['params']['sticker_id'] = $this->downloader->getSticker($message->getSticker());
         }
 
-        if ($message->getAudio()) {
-            $file_id = $this->downloader->getAudio($message->getAudio());
-            $data['attachments'][] = $file_id;
-            $fpm->set($file_id, array('type' => 'audio'));
-            $data['params']['audio'] = true;
-        }
-
         if ($message->getPhoto()) {
-            $file_id = $this->downloader->getPhoto($message->getPhoto());
-            $data['attachments'][] = $file_id;
-            $fpm->set($file_id, array('type' => 'photo'));
-            $data['params']['photo'] = true;
+            $photo = $message->getPhoto();
+            array_multisort(array_column($photo, 'file_size'), $photo);
+            $p = end($photo);
+            $this->saveFile($p, crmTelegramPluginMediaDownloader::TYPE_PHOTO, $data);
         }
 
+        if ($message->getAudio()) {
+            $this->saveFile($message->getAudio(), crmTelegramPluginMediaDownloader::TYPE_AUDIO, $data);
+        }
         if ($message->getVoice()) {
-            $file_id = $this->downloader->getVoice($message->getVoice());
-            $data['attachments'][] = $file_id;
-            $fpm->set($file_id, array('type' => 'voice'));
-            $data['params']['voice'] = true;
+            $this->saveFile($message->getVoice(), crmTelegramPluginMediaDownloader::TYPE_VOICE, $data);
         }
-
         if ($message->getVideo()) {
-            $file_id = $this->downloader->getVideo($message->getVideo());
-            $data['attachments'][] = $file_id;
-            $fpm->set($file_id, array('type' => 'video'));
-            $data['params']['video'] = true;
+            $this->saveFile($message->getVideo(), crmTelegramPluginMediaDownloader::TYPE_VIDEO, $data);
         }
-
         if ($message->getVideoNote()) {
-            $file_id = $this->downloader->getVideo($message->getVideoNote());
-            $data['attachments'][] = $file_id;
-            $fpm->set($file_id, array('type' => 'video_note'));
-            $data['params']['video_note'] = true;
+            $this->saveFile($message->getVideoNote(), crmTelegramPluginMediaDownloader::TYPE_VIDEO_NOTE, $data);
+        }
+        if ($message->getDocument()) {
+            $this->saveFile($message->getDocument(), crmTelegramPluginMediaDownloader::TYPE_DOCUMENT, $data);
         }
 
         if ($message->getLocation()) {
             $location = $message->getLocation();
             $data['params']['location'] = $location['latitude'].', '.$location['longitude'];
         }
-
         if ($message->getVenue()) {
             $venue = $message->getVenue();
             $data['params']['venue_location'] = $venue['location']['latitude'].', '.$venue['location']['longitude'];
@@ -294,13 +348,6 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
             unset($data['params']['location']);
         }
 
-        if ($message->getDocument()) {
-            $data['attachments'][] = $this->downloader->getDocument($message->getDocument());
-            $data['params']['attachment'] = true;
-        }
-
-        //
-
         if ($message->getCaption()) {
             $data['params']['caption'] = crmTelegramPluginHtmlSanitizer::parserCaption($message);
         }
@@ -308,35 +355,75 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
         // Attachments -- files sent from CRM
         if ($message->getAttachments()) {
             foreach ($message->getAttachments() as $attachment) {
-                if (isset($attachment['audio'])) {
-                    $file_id = $this->downloader->getAudio($attachment['audio']);
-                    $data['attachments'][] = $file_id;
-                    $fpm->set($file_id, array('type' => 'audio'));
-                    $data['params']['audio'] = true;
+                foreach([
+                    crmTelegramPluginMediaDownloader::TYPE_DOCUMENT,
+                    crmTelegramPluginMediaDownloader::TYPE_AUDIO,
+                    crmTelegramPluginMediaDownloader::TYPE_VIDEO,
+                    crmTelegramPluginMediaDownloader::TYPE_VIDEO_NOTE,
+                    crmTelegramPluginMediaDownloader::TYPE_VOICE,
+                ] as $type) {
+                    if (isset($attachment[$type])) {
+                        $this->saveFile($attachment[$type], $type, $data);
+                    }
                 }
-
-                if (isset($attachment['video'])) {
-                    $file_id = $this->downloader->getVideo($attachment['video']);
-                    $data['attachments'][] = $file_id;
-                    $fpm->set($file_id, array('type' => 'video'));
-                    $data['params']['video'] = true;
-                }
-
-                if (isset($attachment['photo'])) {
-                    $file_id = $this->downloader->getPhoto($attachment['photo']);
-                    $data['attachments'][] = $file_id;
-                    $fpm->set($file_id, array('type' => 'photo'));
-                    $data['params']['photo'] = true;
-                }
-
-                if (isset($attachment['document'])) {
-                    $data['attachments'][] = $this->downloader->getDocument($attachment['document']);
-                    $data['params']['attachment'] = true;
+                if (isset($attachment[crmTelegramPluginMediaDownloader::TYPE_PHOTO])) {
+                    $photo = $attachment[crmTelegramPluginMediaDownloader::TYPE_PHOTO];
+                    array_multisort(array_column($photo, 'file_size'), $photo);
+                    $p = end($photo);
+                    $this->saveFile($p, crmTelegramPluginMediaDownloader::TYPE_PHOTO, $data);
                 }
             }
         }
 
+        foreach ($this->file_paths as $file_path) {
+            try {
+                waFiles::delete($file_path);
+            } catch (Exception $e) {
+            }
+        }
+
         return $data;
+    }
+
+    protected function saveFile($f, $type, &$data)
+    {
+        if (in_array($f['file_id'], $this->telegram_file_ids)) {
+            return;
+        }
+        $this->telegram_file_ids[] = $f['file_id'];
+        $result = $this->downloader->downloadFile($f['file_id'], $type, ['file_name' => ifset($this->file_names[$f['file_id']])]);
+        if (empty($result['crm_file_id'])) {
+            if (ifset($this->file_names[$f['file_id']]) && ifset($this->file_paths[$f['file_id']])) {
+                $crm_file_data = [
+                    'creator_contact_id' => wa()->getUser()->getId(),
+                    'name' => $this->file_names[$f['file_id']],
+                    'ext' => pathinfo($this->file_names[$f['file_id']], PATHINFO_EXTENSION),
+                    'source_type' => crmFileModel::SOURCE_TYPE_MESSAGE,
+                ];
+                if (!empty($this->message['deal_id'])) {
+                    $crm_file_data['contact_id'] = -1 * $this->message['deal_id'];
+                } elseif (!empty($this->message['contact_id'])) {
+                    $crm_file_data['contact_id'] = $this->message['contact_id'];
+                }
+        
+                $result['crm_file_id'] = $this->getFileModel()->add($crm_file_data, $this->file_paths[$f['file_id']]);
+            } else {
+                $data['params']['footer'] = empty($data['params']['footer']) ? '' : sprintf('%s<br>', $data['params']['footer']);
+                $data['params']['footer'] .= sprintf(_wd('crm_telegram', 'File <b>%s</b> could not be saved'), ifset($this->file_names[$f['file_id']]));
+                if (!empty($result['error']['description'])) {
+                    $data['params']['footer'] .= ': <b>' . $result['error']['description'] . '</b>';
+                }
+                return;
+            }
+        }
+        $crm_file_id = $result['crm_file_id'];
+        $data['attachments'][] = $crm_file_id;
+        if ($type === crmTelegramPluginMediaDownloader::TYPE_DOCUMENT) {
+            $data['params']['attachment'] = true;
+        } else {
+            $this->getTelegramFileParamsModel()->set($crm_file_id, ['type' => $type]);
+            $data['params'][$type] = true;
+        }
     }
 
     /**
@@ -383,6 +470,22 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
             $file_paths[] = $full_file_path;
         }
         return $file_paths;
+    }
+
+    protected function createInternalServiceMessage($text)
+    {
+        $message_id = $this->source->createMessage([
+            'creator_contact_id' => 0,
+            'transport'          => crmMessageModel::TRANSPORT_IM,
+            'contact_id'         => $this->message['contact_id'],
+            'deal_id'            => ifset($this->message['deal_id']),
+            'subject'            => '',
+            'body'               => $text,
+            'from'               => _wd('crm_telegram', 'Internal service message'),
+            'to'                 => wa()->getUser()->getId(),
+            'params'             => ['internal' => '1'],
+        ], crmMessageModel::DIRECTION_OUT);
+        return $message_id;
     }
 
     protected function fail($errors)
@@ -432,5 +535,16 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
             $this->telegram_file_params_model = new crmTelegramPluginFileParamsModel();
         }
         return $this->telegram_file_params_model;
+    }
+
+    /**
+     * @return crmFileModel
+     */
+    public function getFileModel()
+    {
+        if (!$this->file_model) {
+            $this->file_model = new crmFileModel();
+        }
+        return $this->file_model;
     }
 }

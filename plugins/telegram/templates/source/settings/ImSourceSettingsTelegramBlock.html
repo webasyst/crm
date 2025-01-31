@@ -1,73 +1,147 @@
 {$block_class = 'c-source-settings-telegram-block'}
 {$block_id = uniqid($block_class)}
-<div class="{$block_class} c-connection-settings-block" id="{$block_id}">
-    <div class="field">
-        <p class="large-hint">
-            {_wd('crm_telegram', 'Fill in the fields below:')}
-        </p>
+<div class="{$block_class} c-connection-settings-block not-styled" id="{$block_id}">
+
+    <div class="fields-group">
+        <div class="field">
+            <p class="large-hint">
+                {_wd('crm_telegram', 'Fill in the fields below:')}
+            </p>
+        </div>
+        <div class="field">
+            <div class="name">
+                {_wd('crm_telegram', 'Name')}
+            </div>
+            <div class="value">
+                <input class="js-name-input" type="text" name="source[name]" value="{$source.name|default:''|escape}">
+            </div>
+        </div>
+        <div class="field top-padded" style="margin-bottom: 16px;">
+            <div class="name">
+                Access token
+                <br>
+                <span class="hint"><a href="https://core.telegram.org/bots#3-how-do-i-create-a-bot" target="_blank">{_wd('crm_telegram', 'more info')}</a></span>
+            </div>
+            <div class="value">
+                <input class="equal-width js-access-token-input" type="text" name="source[params][access_token]" value="{$source.params.access_token|default:''|escape}" autocomplete="off">
+            </div>
+        </div>
+        <div class="field top-padded" style="margin-bottom: 16px;">
+            <div class="name">
+                <label for="c-webhook-checkbox">
+                    {_wd('crm_telegram', 'Webhook bot updates mode')}
+                </label>
+            </div>
+            <div class="value">
+                <input type="checkbox" name="source[params][webhook_mode]" value="1" id="c-webhook-checkbox"
+                    {if !empty($source.params.webhook_mode)}checked="checked"{/if}>
+                <div class="hint" style="margin-top: 10px;">
+                    {$_doc_page = 'https://core.telegram.org/bots/webhooks'}
+                    {$_hint = _wd('crm_telegram', 'Telegram supports two ways of processing bot updates — a pull mechanism and a push mechanism. By default the pull mechanism is used. Webhook is a push mechanism. <a href="%s" target="_blank">More info</a>.')}
+                    {sprintf(_wd('crm_telegram', $_hint), $_doc_page)}
+                </div>
+            </div>
+        </div>
+        <div class="field top-padded" style="margin-bottom: 16px;">
+            <div class="name">
+                {_wd('crm_telegram', 'Response to the /start command')}
+                <br>
+                <span class="hint"><a href="https://core.telegram.org/bots#global-commands" target="_blank">{_wd('crm_telegram', 'more info')}</a></span>
+            </div>
+            <div class="value">
+                <textarea class="start_response_textarea" name="source[params][start_response]">{$source.params.start_response|default:$default_start_response|escape}</textarea>
+                <span class="hint">
+                    {_wd('crm_telegram', 'Variables are supported:')} <code>$contact_name</code>, <code>$site_name</code>, <code>$site_url</code>, <code>$site_link</code>, <code>$bot_name</code>, <code>$bot_username</code>
+                    <br>
+                    {_wd('crm_telegram', 'Supported markup:')} <a href="https://core.telegram.org/bots/api#html-style" target="_blank">HTML Style</a>
+                </span>
+            </div>
+        </div>
     </div>
-    <div class="field" style="margin-top: 20px">
-        <div class="value">
-            <div class="field">
-                <div class="name">
-                    {_wd('crm_telegram', 'Name')}
-                </div>
-                <div class="value">
-                    <input class="js-name-input" type="text" name="source[name]" value="{$source.name|default:''|escape}">
-                </div>
+
+    {if $wa->whichUI() !== '1.3'}
+    <div class="fields-group">
+        <div class="custom-mb-24" >
+            <div class="name crm-section">
+                <label for="c-askphone-checkbox">
+                    {_wd('crm_telegram', 'Allow to request a client’s phone number')}
+                </label>
             </div>
+            <div class="value switch-with-text tg-value-switch">
+                <input type="hidden" name="source[params][ask_phone]" value="{if !empty($source.params.ask_phone)}1{else}0{/if}" id="c-askphone-checkbox-hidden" class="js-askphone-checkbox-hidden">
+                <span class="switch smaller" id="js-askphone-switch">
+                    <input type="checkbox" name="source[params][ask_phone]" value="{if !empty($source.params.ask_phone)}1{else}0{/if}" id="c-askphone-checkbox" class="js-askphone-checkbox" {if !empty($source.params.ask_phone)}checked="checked"{/if}>
+                </span>
+                <label for="c-askphone-checkbox" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">{if !empty($source.params.ask_phone)}[`Enabled`]{else}[`Disabled`]{/if}</label>
+            </div>
+        </div>
+        <div class="js-askphone-params params" style="{if empty($source.params.ask_phone)}display: none{/if}">
             <div class="field top-padded" style="margin-bottom: 16px;">
                 <div class="name">
-                    Access token
-                    <br>
-                    <span class="hint"><a href="https://core.telegram.org/bots#3-how-do-i-create-a-bot" target="_blank">{_wd('crm_telegram', 'more info')}</a></span>
+                    {_wd('crm_telegram', 'Phone number request text')}
                 </div>
                 <div class="value">
-                    <input class="equal-width js-access-token-input" type="text" name="source[params][access_token]" value="{$source.params.access_token|default:''|escape}" autocomplete="off">
-                </div>
-            </div>
-            <div class="field top-padded" style="margin-bottom: 16px;">
-                <div class="name">
-                    {_wd('crm_telegram', 'Response to the /start command')}
-                    <br>
-                    <span class="hint"><a href="https://core.telegram.org/bots#global-commands" target="_blank">{_wd('crm_telegram', 'more info')}</a></span>
-                </div>
-                <div class="value">
-                    <textarea class="start_response_textarea" name="source[params][start_response]">{$source.params.start_response|default:$default_start_response|escape}</textarea>
-                    <br>
+                    <textarea class="phone_request_textarea" name="source[params][phone_request]">{$source.params.phone_request|default:$default_phone_request|escape}</textarea>
                     <span class="hint">
-                        {_wd('crm_telegram', 'Variables are supported:')} <code>$contact_name</code>, <code>$site_name</code>, <code>$site_url</code>, <code>$site_link</code>, <code>$bot_name</code>, <code>$bot_username</code>
-                        <br>
                         {_wd('crm_telegram', 'Supported markup:')} <a href="https://core.telegram.org/bots/api#html-style" target="_blank">HTML Style</a>
                     </span>
                 </div>
             </div>
-
-            <div class="field">
+            <div class="field top-padded" style="margin-bottom: 16px;">
+                <div class="name">
+                    {_wd('crm_telegram', 'Button text')}
+                </div>
                 <div class="value">
-                    <div class="crm-common-errors-block"></div>
+                    <input class="equal-width" type="text" name="source[params][phone_request_button]" value="{$source.params.phone_request_button|default:$default_phone_request_button|escape}">
                 </div>
             </div>
-
-            <input class="js-bot-id-input" type="hidden" name="source[params][bot_id]" value="{$source.params.bot_id|default:''|escape}" />
-            <input class="js-username-input" type="hidden" name="source[params][username]" value="{$source.params.username|default:''|escape}" />
-            <input class="js-firstname-input" type="hidden" name="source[params][firstname]" value="{$source.params.firstname|default:''|escape}" />
-            {if $source.id <= 0}
-                <input class="js-api-offset-input" type="hidden" name="source[params][api_offset]" />
-            {/if}
+            <div class="field top-padded" style="margin-bottom: 16px;">
+                <div class="name">
+                    {_wd('crm_telegram', 'Received phone number response text')}
+                </div>
+                <div class="value">
+                    <textarea name="source[params][phone_response]">{$source.params.phone_response|default:$default_phone_response|escape}</textarea>
+                    <span class="hint">
+                        {_wd('crm_telegram', 'Supported markup:')} <a href="https://core.telegram.org/bots/api#html-style" target="_blank">HTML Style</a>
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
+    {else}
+
+    <input type="hidden" name="source[params][ask_phone]" value="{if !empty($source.params.ask_phone)}1{else}0{/if}">
+    <input type="hidden" name="source[params][phone_request]" value="{$source.params.phone_request|default:$default_phone_request|escape}">
+    <input type="hidden" name="source[params][phone_request_button]" value="{$source.params.phone_request_button|default:$default_phone_request_button|escape}">
+    <input type="hidden" name="source[params][phone_response]" value="{$source.params.phone_response|default:$default_phone_response|escape}">
+
+    {/if}
+    <div class="">
+        <div class="field">
+            <div class="value">
+                <div class="crm-common-errors-block"></div>
+            </div>
+        </div>
+    </div>
+
+    <input class="js-bot-id-input" type="hidden" name="source[params][bot_id]" value="{$source.params.bot_id|default:''|escape}" />
+    <input class="js-username-input" type="hidden" name="source[params][username]" value="{$source.params.username|default:''|escape}" />
+    <input class="js-firstname-input" type="hidden" name="source[params][firstname]" value="{$source.params.firstname|default:''|escape}" />
+    <input class="js-webhook-token-input" type="hidden" name="source[params][webhook_token]" value="{$source.params.webhook_token|default:''|escape}" />
+    {if $source.id <= 0}
+        <input class="js-api-offset-input" type="hidden" name="source[params][api_offset]" />
+    {/if}
 </div>
 <script>
-    (function ($) {
-        new CRMTelegramPluginSettings({
-            $wrapper: $("#{$block_id}"),
-            action: {if $source.id <= 0}'create'{else}'edit'{/if},
-            locales: {
-                alert_title: "{_wd('crm_telegram', 'Validation error')}",
-                alert_body: '{sprintf('[`You cannot change the bot for a source.<br><br>To use a different bot, <a href=\"%ssettings/sources/telegram\">set up a new source</a> for it.`]', {$wa_app_url})}',
-                alert_close: "[`Close`]"
-            }
-        });
-    })(jQuery);
+(function ($) {
+    new CRMTelegramPluginSettings({
+        $wrapper: $("#{$block_id}"),
+        action: {if $source.id <= 0}'create'{else}'edit'{/if},
+        locales: {
+            alert_title: "{_wd('crm_telegram', 'Validation error')}",
+            alert_body: '{sprintf('[`You cannot change the bot for a source.<br><br>To use a different bot, <a href=\"%ssettings/sources/telegram\">set up a new source</a> for it.`]', {$wa_app_url})}',
+            alert_close: "[`Close`]"
+        }
+    });
+})(jQuery);
 </script>

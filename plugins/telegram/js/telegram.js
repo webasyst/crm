@@ -30,6 +30,8 @@ var CRMTelegramPluginSettings = ( function($) {
         that.$name_input = that.$wrapper.find('.js-name-input');
         that.$token_input = that.$wrapper.find('.js-access-token-input');
         that.$start_response_textarea = that.$wrapper.find('.start_response_textarea');
+        that.$verify_request_textarea = that.$wrapper.find('.verify_request_textarea');
+        that.$phone_request_textarea = that.$wrapper.find('.phone_request_textarea');
         that.$bot_id_input = that.$wrapper.find('.js-bot-id-input');
         that.$username_input = that.$wrapper.find('.js-username-input');
         that.$firstname_input = that.$wrapper.find('.js-firstname-input');
@@ -50,8 +52,57 @@ var CRMTelegramPluginSettings = ( function($) {
 
         that.checkToken();
         //
-        that.initStartResponse();
+        that.initAceEditor(that.$start_response_textarea);
+        if (that.$phone_request_textarea.length > 0) {
+            that.initAceEditor(that.$phone_request_textarea);
+        }
+        that.initShowParams();
     };
+
+    CRMTelegramPluginSettings.prototype.initShowParams = function() {
+        var that = this,
+        $switches = that.$wrapper.find('.tg-value-switch .switch');
+
+        $switches.each(function(index, el){
+            $(el).waSwitch({
+                ready: function (wa_switch) {
+                    let $label = wa_switch.$wrapper.siblings('label');
+                    let $input_hidden = wa_switch.$wrapper.siblings('input');
+                    let $input = wa_switch.$wrapper.find('input');
+                    wa_switch.$label = $label;
+                    wa_switch.$input = $input;
+                    wa_switch.$input_hidden = $input_hidden;
+                    wa_switch.active_text = $label.data('active-text');
+                    wa_switch.inactive_text = $label.data('inactive-text');
+                },
+                change: function(active, wa_switch) {
+                    var $field = wa_switch.$wrapper.closest('.fields-group'),
+                        $block = $field.find('.params');
+
+                    if (active) {
+                        $block.slideDown();
+                        wa_switch.$input_hidden.val(1);
+                        wa_switch.$input.val(1);
+                        wa_switch.$label.text(wa_switch.active_text);
+                    }
+                    else {
+                        $block.slideUp();
+                        wa_switch.$input_hidden.val(0);
+                        wa_switch.$input.val(0);
+                        wa_switch.$label.text(wa_switch.inactive_text); 
+                    }
+                }
+            });
+        })
+  
+        /*$askverify_checkbox.on('change', function() {
+            $askverify_params.slideToggle();
+        })
+        $askphone_checkbox.on('change', function() {
+            $askphone_params.slideToggle();
+        })*/
+    }
+
 
     CRMTelegramPluginSettings.prototype.checkToken = function() {
         var that = this;
@@ -101,13 +152,13 @@ var CRMTelegramPluginSettings = ( function($) {
         });
     };
 
-    CRMTelegramPluginSettings.prototype.initStartResponse = function() {
+    CRMTelegramPluginSettings.prototype.initAceEditor = function($textarea) {
         var that = this,
             div = $('<div></div>');
 
         // Init Ace
-        that.$start_response_textarea.parent().prepend($('<div class="ace"></div>').append(div));
-        that.$start_response_textarea.hide();
+        $textarea.parent().prepend($('<div class="ace"></div>').append(div));
+        $textarea.hide();
         var editor = ace.edit(div.get(0));
         // Set options
         editor.commands.removeCommand('find');
@@ -123,15 +174,15 @@ var CRMTelegramPluginSettings = ( function($) {
         } else {
             editor.setFontSize(14);
         }
-        if (that.$start_response_textarea.val().length) {
-            session.setValue(that.$start_response_textarea.val());
+        if ($textarea.val().length) {
+            session.setValue($textarea.val());
         } else {
             session.setValue(' ');
         }
         editor.setOption("minLines", 1);
         editor.setOption("maxLines", 100);
         session.on('change', function () {
-            that.$start_response_textarea.val(editor.getValue());
+            $textarea.val(editor.getValue());
         });
     };
 

@@ -12,54 +12,6 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: en_US\n"
-"X-Generator: Poedit 1.8.7.1\n"
+"X-Generator: Poedit 2.3\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
-
-msgid "open in Telegram"
-msgstr ""
-
-msgid "Response to the /start command"
-msgstr ""
-
-msgid "Variables are supported:"
-msgstr ""
-
-msgid "Supported markup:"
-msgstr ""
-
-msgid "Unkown sticker"
-msgstr ""
-
-msgid "Location"
-msgstr ""
-
-msgid "Unkown location"
-msgstr ""
-
-msgid "Download in full size"
-msgstr ""
-
-msgid "Voice message"
-msgstr ""
-
-msgid "Unkown voice message"
-msgstr ""
-
-msgid "Video note"
-msgstr ""
-
-msgid "Unkown video note"
-msgstr ""
-
-msgid "Video"
-msgstr ""
-
-msgid "Unkown video"
-msgstr ""
-
-msgid "Audio"
-msgstr ""
-
-msgid "Unkown audio"
-msgstr ""

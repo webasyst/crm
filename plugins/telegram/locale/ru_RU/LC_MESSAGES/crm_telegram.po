@@ -12,7 +12,7 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
 "Language: ru_RU\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.4.3\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -31,13 +31,13 @@ msgstr "Поддерживается разметка:"
 msgid "Sticker"
 msgstr "Стикер"
 
-msgid "Unkown sticker"
+msgid "Unknown sticker"
 msgstr "Неизвестный стикер"
 
 msgid "Location"
 msgstr "Геопозиция"
 
-msgid "Unkown location"
+msgid "Unknown location"
 msgstr "Неизвестная геопозиция"
 
 msgid "See on Foursquare"
@@ -46,7 +46,7 @@ msgstr "Смотрите на Foursquare"
 msgid "Venue"
 msgstr "Место встречи"
 
-msgid "Unkown venue"
+msgid "Unknown venue"
 msgstr "Неизвестное место встречи"
 
 msgid "Download in full size"
@@ -55,19 +55,19 @@ msgstr "Загрузить в полном размере"
 msgid "Voice message"
 msgstr "Голосовое сообщение"
 
-msgid "Unkown voice message"
+msgid "Unknown voice message"
 msgstr "Неизвестное голосовое сообщение"
 
 msgid "Video note"
 msgstr "Видеосообщение"
 
-msgid "Unkown video note"
+msgid "Unknown video note"
 msgstr "Неизвестное видеосообщение"
 
 msgid "Video"
 msgstr "Видео"
 
-msgid "Unkown video"
+msgid "Unknown video"
 msgstr "Неизвестное видео"
 
 msgid "The video tag is not supported by your browser."
@@ -76,13 +76,13 @@ msgstr "Тег video не поддерживается вашим браузер
 msgid "Audio"
 msgstr "Аудио"
 
-msgid "Unkown audio"
+msgid "Unknown audio"
 msgstr "Неизвестное аудио"
 
 msgid "Photo"
 msgstr "Фотография"
 
-msgid "Unkown photo"
+msgid "Unknown photo"
 msgstr "Неизвестная фотография"
 
 msgid "Attachment"
@@ -243,3 +243,123 @@ msgstr "Это обязательное поле."
 
 msgid "Reply cannot be sent."
 msgstr "Не удалось отправить ответ."
+
+msgid "Enabled"
+msgstr "Включено"
+
+msgid "Disabled"
+msgstr "Выключено"
+
+msgid "Webhook bot updates mode"
+msgstr "Обновление с помощью веб-хука"
+
+msgid "Button text"
+msgstr "Надпись на кнопке"
+
+msgid "Allow to request a client’s phone number"
+msgstr "Разрешить запрашивать номер телефона клиента"
+
+msgid "Phone number request text"
+msgstr "Текст для запроса номера телефона"
+
+msgid "Received phone number response text"
+msgstr "Текст ответа об полученном номере телефона"
+
+msgid "Forwarded message"
+msgstr "Перенаправленное сообщение"
+
+msgid "Unknown error"
+msgstr "Неизвестная ошибка"
+
+msgid "Request authorization"
+msgstr "Запросить авторизацию"
+
+msgid "Request phone number"
+msgstr "Запросить номер телефона"
+
+msgid "A CRM settlement is required."
+msgstr "Требуется настроенное поселение CRM."
+
+msgid "Send phone number"
+msgstr "Отправить номер телефона"
+
+msgid "Please send us your phone number."
+msgstr "Пожалуйста, отправьте нам свой номер телефона."
+
+msgid "Error creating webhook: %s"
+msgstr "Ошибка создания веб-хука: %s"
+
+msgid "Thank you!"
+msgstr "Спасибо!"
+
+msgid "Another client was found with this phone number: <a href=\"%s\">%s</a>."
+msgstr "Найден другой контакт с этим номером телефона: <a href=\"%s\">%s</a>."
+
+msgid "Internal service message"
+msgstr "Служебное сообщение"
+
+msgid "Telegram supports two ways of processing bot updates — a pull mechanism and a push mechanism. By default the pull mechanism is used. Webhook is a push mechanism. <a href=\"%s\" target=\"_blank\">More info</a>."
+msgstr "Telegram поддерживает два способа обработки обновлений бота: <em>pull</em> и <em>push</em>. По умолчанию используется механизм <em>pull</em>. Веб-хук — это механизм <em>push</em>. <a href=\"%s\" target=\"_blank\">Подробнее об этом</a>."
+
+msgid "A request for a phone number will be sent to the client."
+msgstr "Клиенту будет отправлена просьба указать номер телефона."
+
+msgid "Unknown command"
+msgstr "Неизвестная команда"
+
+msgid "Don’t show again"
+msgstr "Больше не показывать"
+
+msgid "Blocked by the client."
+msgstr "Заблокировано клиентом."
+
+msgid "To make bold text, add double asterisks around it."
+msgstr "Чтобы выделить текст жирным, поставьте вокруг него двойные звёздочки."
+
+msgid "Important text"
+msgstr "Важный текст"
+
+msgid "To make italic text, add double underscores around it."
+msgstr "Чтобы выделить текст курсивом, поставьте вокруг него двойное подчёркивание."
+
+msgid "Italic text"
+msgstr "Курсивный текст"
+
+msgid "To strike through text, add double tildes around it."
+msgstr "Чтобы зачеркнуть текст, поставьте вокруг него двойные тильды."
+
+msgid "Strike-through text"
+msgstr "Зачёркнутый текст"
+
+msgid "To add a link, type its name inside brackets followed, without a white space, by the link URL inside parenthesis. A URL must begin with <em>http://</em>, <em>https://</em> or <em>www.</em>"
+msgstr "Чтобы добавить ссылку, напишите её текст внутри квадратных скобок, затем без пробела адрес ссылки в круглых скобках. Адрес должен начинаться с <em>http://</em>, <em>https://</em> или <em>www.</em>"
+
+msgid "Link name"
+msgstr "Текст ссылки"
+
+msgid "To add a quote, put <code>&gt;</code> at the beginning of each quoted line of text."
+msgstr "Чтобы вставить цитату, добавьте <code>&gt;</code> в начало каждой строки цитируемого текста."
+
+msgid "Quoted line #1"
+msgstr "Строка цитаты №1"
+
+msgid "Quoted line #2"
+msgstr "Строка цитаты №2"
+
+msgid "To format text with a monospace font, add backticks around it."
+msgstr "Чтобы выделить текст моноширинным шрифтом, поставьте вокруг него обратные апострофы."
+
+msgid "Monospace text"
+msgstr "Моноширинный текст"
+
+msgid "To sent a block of programming code, add triple backticks before and after it."
+msgstr "Чтобы отправить блок программного кода, поставьте тройные обратные апострофы перед ним и после него."
+
+msgid "Formatting options"
+msgstr "Форматирование"
+
+msgid "File <b>%s</b> could not be saved"
+msgstr "Файл <b>%s</b> не удалось сохранить"
+
+msgid "File <b>%s</b> could not be received"
+msgstr "Файл <b>%s</b> не удалось получить"

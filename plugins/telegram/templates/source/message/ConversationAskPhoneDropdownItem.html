@@ -1,0 +1,47 @@
+<a href="javascript:void(0);" class="inline-link js-request-phone">
+    <span class="icon"><i class="fab fa-{$icon.icon_fab}" style="color: {$icon.icon_color};"></i></span>
+    <span class="nowrap">{_wd('crm_telegram', 'Request phone number')}</span>
+</a>
+<script>
+(function($){
+    $(".js-request-phone").click(function () {
+        {if $do_confirm_phone_request}
+            $.waDialog.confirm({
+                title: "{_wd('crm_telegram', 'Request phone number')}",
+                text: "{_wd('crm_telegram', 'A request for a phone number will be sent to the client.')}" 
+                    + '<div class="custom-mt-24"><label><span class="wa-checkbox"><input type="checkbox" value="1" class="js-verification-not-show-confirm-checkbox"><span><span class="icon"><i class="fas fa-check"></i></span></span></span> '
+                    + "[`Don’t show again`]"
+                    + '</label></div>',
+                success_button_title: "{_wd('crm_telegram', 'Request phone number')}",
+                cancel_button_title: $.crm.locales['cancel'],
+                cancel_button_class: 'light-gray',
+                onSuccess: function() {
+                    const no_more_confirmation = $(".js-verification-not-show-confirm-checkbox").is(':checked');
+                    requestPhone(no_more_confirmation);
+                }
+            });
+        {else}
+            requestPhone();
+        {/if}
+        function requestPhone(no_more_confirmation = false) {
+            var href = '?plugin=telegram&module=backend&action=phone',
+                params = { 
+                    message_id: {$message_id},
+                    no_more_confirmation: no_more_confirmation ? 1 : 0
+                };
+            $.post(href, params, function(data) {
+                console.log(data);
+                if (data.status == "ok") {
+                    $(document).trigger('msg_conversation_update');
+                } else {
+                    $.waDialog.alert({
+                        text: data.errors.message || "[`Unknown error`]",
+                        button_title: "[`Close`]",
+                        button_class: 'gray',
+                    });
+                }
+            });
+        }
+    });
+})(jQuery);
+</script>

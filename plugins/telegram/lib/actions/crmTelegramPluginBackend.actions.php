@@ -71,6 +71,49 @@ class crmTelegramPluginBackendActions  extends waActions
         $api->sendChatAction($chat_id, $action);
     }
 
+    public function phoneAction()
+    {
+        $message_id = waRequest::request('message_id', null, waRequest::TYPE_INT);
+        if (!$message_id) {
+            $this->displayJson(null, ['message' => 'Message id not passed']);
+            return;
+        }
+        $message = (new crmMessageModel)->getMessage($message_id);
+        if (empty($message)) {
+            $this->displayJson(null, ['message' => 'Message not found']);
+            return;
+        }
+        $source = $this->getSource($message);
+        if (empty($source)) {
+            $this->displayJson(null, ['message' => 'Source not found']);
+            return;
+        }
+
+        $no_more_confirmation = waRequest::request('no_more_confirmation', 0, waRequest::TYPE_INT);
+        if ($no_more_confirmation) {
+            (new waContactSettingsModel)->set(wa()->getUser()->getId(), 'crm.telegram', 'phone_request_no_more_confirmation', 1);
+        }
+
+        $button_text = $source->getParam('phone_request_button') or $text = _wd('crm_telegram', 'Send phone number');
+        $reply_keyboard = [
+            'keyboard' => [[
+                [
+                    'text' => $button_text,
+                    'request_contact' => true
+                ]
+            ]],
+            'one_time_keyboard' => true,
+            'resize_keyboard' => true,
+        ];
+
+        $text = $source->getParam('phone_request') or $text = _wd('crm_telegram', 'Please send us your phone number.');
+
+        $source_sender = new crmTelegramPluginImSourceMessageSender($source, $message);
+        $result = $source_sender->reply(['body' => $text, 'reply_markup' => $reply_keyboard]);
+        $error_message = join('<br>', ifset($result['errors'], []));
+        $this->displayJson(ifset($result['data']), empty($error_message) ? null : ['message' => $error_message]);
+    }
+
     public function settingsAction()
     {
         $this->getView()->assign(array(
@@ -80,5 +123,18 @@ class crmTelegramPluginBackendActions  extends waActions
 
         $template = wa()->getAppPath('plugins/telegram/templates/TelegramPluginSettings.html');
         $this->getView()->display($template);
+    }
+
+    protected function getSource($message)
+    {
+        $id = (int)$message['source_id'];
+        if ($id <= 0) {
+            return null;
+        }
+        $source = crmSource::factory($id);
+        if (!($source instanceof crmTelegramPluginImSource)) {
+            return null;
+        }
+        return $source;
     }
 }

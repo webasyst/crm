@@ -1,0 +1,56 @@
+<a href="javascript:void(0);" class="inline-link js-show-cheat-sheet">
+    <span class="icon"><i class="fas fa-info-circle"></i></span>
+    <span class="nowrap">{_wd('crm_telegram', 'Formatting options')}</span>
+</a>
+
+{capture assign="header_html"}
+<div class="flexbox full-width">
+    <h3 class="wide">{_wd('crm_telegram', 'Formatting options')}</h3>
+    <a href="#" class="drawer-close js-close-drawer"><i class="fas fa-times"></i></a>
+</div>
+{/capture}
+
+{capture assign="content_html"}
+
+<p>{_wd('crm_telegram', 'To make bold text, add double asterisks around it.')}</p>
+
+<p><code>**{_wd('crm_telegram', 'Important text')}**</code></p>
+
+<p>{_wd('crm_telegram', 'To make italic text, add double underscores around it.')}</p>
+
+<p><code>__{_wd('crm_telegram', 'Italic text')}__</code></p>
+
+<p>{_wd('crm_telegram', 'To strike through text, add double tildes around it.')}</p>
+
+<p><code>~~{_wd('crm_telegram', 'Strike-through text')}~~</code></p>
+
+<p>{_wd('crm_telegram', 'To add a link, type its name inside brackets followed, without a white space, by the link URL inside parenthesis. A URL must begin with <em>http://</em>, <em>https://</em> or <em>www.</em>')}</p>
+
+<p><code>[{_wd('crm_telegram', 'Link name')}](https://domain.com)</code></p>
+
+<p>{_wd('crm_telegram', 'To add a quote, put <code>&gt;</code> at the beginning of each quoted line of text.')}</p>
+<pre style="background: var(--background-color-blockquote); border-radius: 0.375rem; padding: 0.125rem 0.25rem;">&gt; {_wd('crm_telegram', 'Quoted line #1')}
+&gt; {_wd('crm_telegram', 'Quoted line #2')}</pre>
+
+<p>{_wd('crm_telegram', 'To format text with a monospace font, add backticks around it.')}</p>
+<p><code>`{_wd('crm_telegram', 'Monospace text')}`</code></p>
+
+<p>{_wd('crm_telegram', 'To sent a block of programming code, add triple backticks before and after it.')}</p>
+<pre style="background: var(--background-color-blockquote); border-radius: 0.375rem; padding: 0.125rem 0.25rem;">```
+print('Hello world')
+```</pre>
+
+{/capture}
+
+<script>
+( function($) {
+    $(".js-show-cheat-sheet").on("click", function() {
+        var drawer = $.waDrawer({
+            header: {$header_html|json_encode},
+            content: {$content_html|json_encode},
+            direction: "right",
+            onBgClick: function() { drawer.close(); }
+        });
+    });
+})(jQuery);
+</script>

@@ -9,9 +9,10 @@ class crmTelegramPlugin extends crmSourcePlugin
 
     public function backendAssets()
     {
+        $version = $this->info['version'];
         $sources = array();
-        $sources[] = '<link rel="stylesheet" href="'.wa()->getAppStaticUrl('crm', true).'plugins/telegram/css/telegram.css">';
-        $sources[] = '<script src="'.wa()->getAppStaticUrl('crm', true).'plugins/telegram/js/telegram.js"></script>';
+        $sources[] = '<link rel="stylesheet" href="'.wa()->getAppStaticUrl('crm', true).'plugins/telegram/css/telegram.css?v'.$version.'">';
+        $sources[] = '<script src="'.wa()->getAppStaticUrl('crm', true).'plugins/telegram/js/telegram.js?v'.$version.'"></script>';
 
         return join("", $sources);
     }

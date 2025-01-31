@@ -32,6 +32,8 @@ class crmTelegramPluginApi
     const ALLOWED_UPDATES_MESSAGE = "message";
     const ALLOWED_UPDATES_EDITED  = "edited_message";
 
+    const WEBHOOK_MAX_CONNECTIONS = 40;
+
     public function __construct($access_token, $options = array())
     {
         $this->access_token = $access_token;
@@ -179,30 +181,59 @@ class crmTelegramPluginApi
         return $this->request('getFile', $params);
     }
 
+    public function setWebhook($source_id, $secret_token)
+    {
+        $url = wa()->getRouteUrl('crm', [
+            'plugin' => 'telegram',
+            'module' => 'frontend',
+            'action' => 'callback',
+            'source_id' => $source_id,
+        ], true);
+        if (empty($url)) {
+            return [
+                'ok' => false,
+                'description' => _wd('crm_telegram', 'A CRM settlement is required.'),
+            ];
+        }
+        $params = [
+            'url' => $url,
+            'max_connections' => self::WEBHOOK_MAX_CONNECTIONS,
+            'allowed_updates' => self::ALLOWED_UPDATES_MESSAGE,
+            'secret_token' => $secret_token,
+        ];
+        return $this->request('setWebhook', $params);
+    }
+
+    public function deleteWebhook()
+    {
+        return $this->request('deleteWebhook');
+    }
+
     /**
      * @param $method
      * @param array $params
      * @return array
      */
     protected function request($method, $params = array()) {
-        $token = $this->access_token;
+        $url = self::API_URL . $this->access_token . '/' . $method;
 
-        $url = self::API_URL.$token.'/'.$method;
-        if (!empty($params)) {
-            $url .= '?'.http_build_query($params);
-        }
+        $net_options = [
+            'timeout' => 20,
+            'format' => waNet::FORMAT_JSON,
+            'request_format' => waNet::FORMAT_JSON,
+            'expected_http_code' => null
+        ];
+        $net = new waNet($net_options);
 
-        $curl_handle = curl_init();
-        if (isset($params['content_type'])) {
-            curl_setopt($curl_handle, CURLOPT_HTTPHEADER, array(
-                "Content-Type:".$params['content_type'],
-            ));
+        try {
+            return $net->query($url, $params, waNet::METHOD_POST);
+        } catch (Exception $e) {
+            return [
+                'ok' => false,
+                'error_code' => $e->getCode(),
+                'description' => $e->getMessage()
+            ];
         }
-        curl_setopt($curl_handle, CURLOPT_URL, $url);
-        curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
-        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
-        return (array)json_decode(curl_exec($curl_handle), true);
-        curl_close($curl_handle);
     }
 
     protected function multipartRequest($method, $params, $file, $type) {
