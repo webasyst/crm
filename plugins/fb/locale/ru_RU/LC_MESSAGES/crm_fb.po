@@ -12,7 +12,7 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
 "Language: ru_RU\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.3\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -84,3 +84,69 @@ msgstr "Использовать тег Human Agent"
 
 msgid "Enable only if you have received the permission from Facebook to use the Human Agent tag. This tag allows you to respond to user inquiries outside 24&nbsp;hours window. With this option enabled, your responses can be sent within 7&nbsp;days from last user message or action. To start using this option, log into Facebook, complete and submit the <a href=\"%s\">application form</a>, and wait until Facebook permits you to use the Human Agent Tag."
 msgstr "Включите, только если вы получили разрешение от Facebook использовать тег Human Agent. Этот тег позволяет отвечать на обращения пользователей позднее стандартного ограничения в 24&nbsp;часа. При включении этой настройки можно отправлять ответы в течение 7&nbsp;дней после последнего сообщения или действия пользователя. Чтобы начать использовать эту настройку, войдите в Facebook, заполните и отправьте <a href=\"%s\">форму заявления</a> и дождитесь разрешения от Facebook использовать тег Human Agent."
+
+msgid "(no subject)"
+msgstr "(нет темы)"
+
+msgid "incoming"
+msgstr "входящее"
+
+msgid "outgoing"
+msgstr "исходящее"
+
+msgid "open conversation"
+msgstr "открыть переписку"
+
+msgid "From"
+msgstr "От"
+
+msgid "To"
+msgstr "Кому"
+
+msgid "Stage deleted"
+msgstr "Этап удалён"
+
+msgid "Funnel deleted"
+msgstr "Воронка удалена"
+
+msgid "Deal"
+msgstr "Сделка"
+
+msgid "Reply"
+msgstr "Ответить"
+
+msgid "or"
+msgstr "или"
+
+msgid "cancel"
+msgstr "отмена"
+
+msgid "Delete message"
+msgstr "Удалить сообщение"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "to"
+msgstr "для"
+
+msgid "to "
+msgstr "для "
+
+msgid "Write a message"
+msgstr "Написать сообщение"
+
+msgid "Send"
+msgstr "Отправить"
+
+msgid "Message sent successfully"
+msgstr "Сообщение успешно отправлено"
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "Plugin %s is installed and working."
+msgstr "Плагин «%s» установлен и работает."
+
+msgid "Specify configuration parameters in <a href=\"%s\">deal source settings</a>."
+msgstr "Укажите конфигурационные параметры в <a href=\"%s\">настройках источников сделок</a>."

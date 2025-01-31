@@ -115,7 +115,7 @@ class crmFbPluginCallbackEventMessage extends crmFbPluginCallbackEvent
         if ($message->getAttachments()) {
             $message_attachments = $message->getAttachments();
             $attachments = $fb_attachments = array();
-            $downloader = new crmFbPluginDownloader();
+            $downloader = new crmFbPluginDownloader($contact->getId(), $deal_id, $contact->getId());
             foreach ($message_attachments as $type => $files) {
                 foreach ($files as $file_url) {
                     $crm_file_id = $downloader->downloadFile($file_url);

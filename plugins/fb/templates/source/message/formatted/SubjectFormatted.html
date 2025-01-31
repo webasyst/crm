@@ -1,7 +1,7 @@
 {strip}
     <div class='c-fb-message-subject'>
-        {if strlen($subject) > 0}
-            {$_subject|escape}
+        {if !empty($subject) || $subject === '0'}
+            {$subject|escape}
         {elseif $image}
             <span style="color: #999;"><i class="icon16 image"></i> {_wd('crm_fb', 'Image')}</span>
         {elseif $audio}

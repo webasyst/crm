@@ -63,7 +63,7 @@ class crmFbPluginImSourceMessageSender extends crmImSourceMessageSender
             }
 
             // Save attachment in server
-            $downloader = new crmFbPluginDownloader();
+            $downloader = new crmFbPluginDownloader($this->message['contact_id'], $this->message['deal_id'], wa()->getUser()->getId());
             $crm_file_id = $downloader->downloadFile(realpath($uploaded_file));
             $file_model = new crmFileModel();
             $crm_file = $file_model->getById($crm_file_id);
