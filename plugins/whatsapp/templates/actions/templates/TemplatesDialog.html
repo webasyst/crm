@@ -1,0 +1,20 @@
+<ul class="menu">
+{foreach $templates as $template}
+    <li class="item" data-id="{$template.id|escape}" data-name="{$template.name|escape}" data-lang="{$template.language|escape}" data-body="{$template.body}" data-body-vars="{$template.body_vars|json_encode|escape}" data-header-vars="{$template.header_vars|default:[]|json_encode|escape}">
+        <a href="javascript:void(0);" class="details js-template">
+            {if $template.category == 'MARKETING'}
+                <i class="fas fa-comments-dollar custom-mt-4 gray" title="[`Marketing`]"></i>
+            {elseif $template.category == 'AUTHENTICATION'}
+                <i class="fas fa-user-check custom-mt-4 gray" title="[`Authentication`]"></i>
+            {elseif $template.category == 'UTILITY'}
+                <i class="fas fa-tools custom-mt-4 gray" title="[`Utility`]"></i>
+            {else}
+                <i class="far fa-comment-alt large custom-mt-4 gray"></i>
+            {/if}
+            <span><strong>{$template.name|escape} ({$template.language|escape})</strong>
+            <br>
+            <span class="hint">{$template.body_hint|escape}</span></span>
+        </a>
+    </li>
+{/foreach}
+</ul>

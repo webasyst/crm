@@ -1,0 +1,11 @@
+<div class="c-vk-plugin-settings-page">
+    <p><b>{sprintf(_wd('crm_whatsapp', 'Plugin %s is installed and working.'), 'WhatsApp')}</b></p>
+    <p>{sprintf(_wd('crm_whatsapp', 'Save configuration parameters in the <a href="%s">deal source settings</a>.'), {$source_settings_url})}</p>
+
+    {if $need_show_review_widget}
+        <div>
+            {$wa->installer->reviewWidget("plugin/crm/whatsapp", ['is_inline' => true])}
+        </div>
+    {/if}
+</div>
+

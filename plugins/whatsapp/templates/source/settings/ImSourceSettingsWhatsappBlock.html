@@ -1,0 +1,164 @@
+{$block_class = 'c-source-settings-whatsapp-block'}
+{$block_id = uniqid($block_class)}
+
+<div class="{$block_class} fields-group c-connection-settings-block" id="{$block_id}">
+    <div class="field">
+        <p class="large-hint custom-mb-24">
+            {$_text = '<a href="%s" target="_blank">Step-by-step manual on connecting with WhatsApp Business Platform</a>'}
+            {if $locale == 'ru_RU'}
+                {$_link = 'https://support.webasyst.ru/46525/whatsapp/'}
+            {else}
+                {$_link = 'https://support.webasyst.com/46526/whatsapp/'}
+            {/if}
+            {sprintf(_wd('crm_whatsapp', $_text), $_link)}
+        </p>
+    </div>
+    <div class="fields">
+        <div class="field">
+            <div class="name for-input">
+                [`Name`]
+            </div>
+            <div class="value">
+                <input class="js-name-input long" type="text" name="source[name]" value="{$source.name|default:''|escape}">
+            </div>
+        </div>
+        <div class="field">
+            <div class="name">
+                {_wd('crm_whatsapp', 'WhatsApp API proxy')}
+                <span class="hint">[`optional`]</span>
+            </div>
+            <div class="value">
+                <input class="js-api-endpoint-input js-credentials-input long" type="text" name="source[params][api_endpoint]" value="{$source.params.api_endpoint|default:''|escape}" placeholder="https://graph.facebook.com/v19.0/">
+                <i class="fas fa-check custom-mx-8 large js-credentials-ok-marker" style="display: none; color: var(--green);"></i>
+                <i class="fas fa-exclamation-triangle custom-mx-8 large js-credentials-fail-marker" style="display: none; color: var(--orange);"></i>
+                <div class="spinner js-credentials-spinner" style="display: none;"></div>
+            </div>
+        </div>
+        <div class="field">
+            <div class="name">
+                {_wd('crm_whatsapp', 'WhatsApp media proxy')}
+                <span class="hint">[`optional`]</span>
+            </div>
+            <div class="value">
+                <input class="js-media-proxy-input long" type="text" name="source[params][media_proxy]" value="{$source.params.media_proxy|default:''|escape}" placeholder="{crmWhatsappPluginDownloader::MEDIA_URL}">
+            </div>
+        </div>
+        <div class="field">
+            <div class="name">
+                {_wd('crm_whatsapp', 'WhatsApp Business Account ID')}
+            </div>
+            <div class="value">
+                <input class="js-access-account-id-input long" type="text" name="source[params][account_id]" value="{$source.params.account_id|default:''|escape}" required>
+            </div>
+        </div>
+        <div class="field">
+            <div class="name for-input">
+                {_wd('crm_whatsapp', 'Phone number ID')}
+            </div>
+            <div class="value">
+                <input class="js-access-phone-id-input js-credentials-input long" type="text" name="source[params][phone_id]" value="{$source.params.phone_id|default:''|escape}" required>
+                <i class="fas fa-check custom-mx-8 large js-credentials-ok-marker" style="display: none; color: var(--green);"></i>
+                <i class="fas fa-exclamation-triangle custom-mx-8 large js-credentials-fail-marker" style="display: none; color: var(--orange);"></i>
+                <div class="spinner js-credentials-spinner" style="display: none;"></div>
+            </div>
+        </div>
+        <div class="field">
+            <div class="name for-input">
+                {_wd('crm_whatsapp', 'Access Token')}
+            </div>
+            <div class="value">
+                <input class="js-access-token-input js-credentials-input long" type="text" name="source[params][access_token]" value="{$source.params.access_token|default:''|escape}" required>
+                <i class="fas fa-check custom-mx-8 large js-credentials-ok-marker" style="display: none; color: var(--green);"></i>
+                <i class="fas fa-exclamation-triangle custom-mx-8 large js-credentials-fail-marker" style="display: none; color: var(--orange);"></i>
+                <div class="spinner js-credentials-spinner" style="display: none;"></div>
+                <input class="js-valid-credentials-marker-input" type="hidden" name="source[params][valid_credentials_marker]" value="{$source.params.valid_credentials_marker|default:''|escape}" required>
+            </div>
+        </div>
+        <div class="field">
+            <div class="name for-input">
+                {_wd('crm_whatsapp', 'App secret')}
+            </div>
+            <div class="value">
+                <input class="js-app-secret-input long" type="text" name="source[params][app_secret]" value="{$source.params.app_secret|default:''|escape}" required>
+            </div>
+        </div>
+        <div class="field">
+            <div class="name for-checkbox">
+                {_wd('crm_whatsapp', 'App mode')}
+            </div>
+            <div class="value">
+                <label class="custom-mr-8">
+                    <span class="wa-radio">
+                        <input class="js-app-mode-dev" type="radio" name="source[params][app_mode]" value="dev" {if $app_mode == 'dev'}checked{/if}>
+                        <span></span>
+                    </span>
+                    {_wd('crm_whatsapp', 'Dev Mode')}
+                </label>
+                <label>
+                    <span class="wa-radio">
+                        <input class="js-app-mode-work" type="radio" name="source[params][app_mode]" value="dev" {if $app_mode == 'live'}checked{/if}>
+                        <span></span>
+                    </span>
+                    {_wd('crm_whatsapp', 'Live Mode')}
+                </label>
+            </div>
+        </div>
+        <div class="field">
+            <div class="name">
+                {_wd('crm_whatsapp', 'Webhook URL')}
+            </div>
+            <div class="value">
+                {if $source.id > 0}
+                    {if empty($webhook_url)}
+                        [`A CRM settlement is required.`]<br>
+                        {sprintf(_wd('crm_whatsapp', 'Set up a CRM settlement <a target="_blank" href="%s">in the Site app</a>.'), $site_app_url)}
+                    {else}
+                        <span class="js-copy-value badge squared gray">{$webhook_url}</span>
+                        <a title="[`Copy to clipboard`]" class="custom-my-4 custom-mx-8 large gray js-copy" href="javascript:void(0);">
+                            <i class="fas fa-copy js-copy-button"></i>
+                            <i class="fas fa-check js-copy-marker" style="display: none; color: var(--green);"></i>
+                        </a>
+                        <span id="js-copy-textarea-place"></span>
+                    {/if}
+                {else}
+                    <p class="hint bold" style="margin-top: -2px;">{_wd('crm_whatsapp', 'Will be shown after source creation')}</p>
+                {/if}
+            </div>
+        </div>
+        {if $source.id > 0 && !empty($webhook_url)}
+        <div class="field">
+            <div class="name">
+                {_wd('crm_whatsapp', 'Webhook verify token')}
+            </div>
+            <div class="value">
+                <span class="js-copy-value badge squared gray">{$webhook_token|escape}</span>
+                <a title="[`Copy to clipboard`]" class="custom-my-4 custom-mx-8 large gray js-copy" href="javascript:void(0);">
+                    <i class="fas fa-copy js-copy-button"></i>
+                    <i class="fas fa-check js-copy-marker" style="display: none; color: var(--green);"></i>
+                </a>
+            </div>
+        </div>
+        {/if}
+        <input type="hidden" name="source[params][webhook_token]" value="{$webhook_token|escape}"/>
+
+        <div class="field">
+            <div class="value">
+                <div class="crm-common-errors-block"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function ($) {
+        new CRMWhatsappPluginSettings({
+            $wrapper: $("#{$block_id}"),
+            action: {if $source.id <= 0}'create'{else}'edit'{/if},
+            locales: {
+                alert_title: "{_wd('crm_whatsapp', 'Validation error')}",
+                alert_body: "{_wd('crm_whatsapp', 'Access token or phone number ID is invalid. Here is the WhatsApp API message:')}",
+                alert_fail_body: "{_wd('crm_whatsapp', 'Access token verification has been failed for the next reason:')}",
+                alert_close: "[`Close`]"
+            }
+        });
+    })(jQuery);
+</script>

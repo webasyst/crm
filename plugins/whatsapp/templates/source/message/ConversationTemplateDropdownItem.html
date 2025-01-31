@@ -1,0 +1,49 @@
+{$class = 'js-whatsapp-template-init'}
+{$item_id = uniqid($class)}
+<a href="javascript:void(0);" id="{$item_id}" class="js-whatsapp-template-init" data-conversation-id="{$conversation_id|escape}" data-contact-id="{$contact_id|escape}" data-source-id="{$source_id|escape}">
+    <span class="icon"><i class="fab fa-{$icon.icon_fab}" style="color: {$icon.icon_color};" title="WhatsApp"></i></span>
+    <span class="nowrap">{$source_name}<br>
+        <i class="hint">{_wd('crm_whatsapp', 'Send templated message')}</i>
+    </span>
+</a>
+
+{capture assign="header_html"}
+<h3><i class="fab fa-{$icon.icon_fab}" style="color: {$icon.icon_color};" title="WhatsApp"></i> {_wd('crm_whatsapp', 'Message Templates')}</h3>
+{/capture}
+
+{capture assign="footer_html"}
+<form class="js-template-form">
+    <div class="error js-template-error custom-my-8"></div>
+    <input type="hidden" name="template_name" class="js-template-name" value="">
+    <input type="hidden" name="template_lang" class="js-template-lang" value="">
+    <input type="hidden" name="conversation_id" value="{$conversation_id|escape}">
+    <input type="hidden" name="contact_id" value="{$contact_id|escape}">
+    <input type="hidden" name="source_id" value="{$source_id|escape}">
+    <div class="custom-mb-16 js-example-vars-wrapper fields" style="width: 100%; display: none;">
+        <div class="fields-group" style="max-height: 150px; overflow-y: scroll;">
+            <div class="hint custom-mb-8">{_wd('crm_whatsapp', 'Template variables:')}</div>
+            <div class="js-example-vars"></div>
+        </div>
+    </div>
+    <figure class="card js-example" style="width: 100%; display: none;">
+        <div class="details"><p class="small js-example-body"></p></div>
+    </figure>
+
+    <div class="custom-mt-24">
+        <button class="js-send-template disabled button" disabled="disabled">
+            <i class="fas fa-spinner wa-animation-spin speed-1000 js-load-icon" style="display: none;"></i>
+            <i class="fab fa-whatsapp js-icon"></i> [`Send`]</button>
+        <button class="js-close-drawer button light-gray">[`Close`]</button>
+    </div>
+</form>
+{/capture}
+
+<script>
+(function ($) {
+    new CRMWhatsappPluginTemplatesDropdownItem({
+        $wrapper: $('#{$item_id}'),
+        header_html: {$header_html|json_encode},
+        footer_html: {$footer_html|json_encode}
+    });
+})(jQuery);
+</script>

@@ -1,0 +1,95 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm/plugin/fb\n"
+"POT-Creation-Date: 2016-11-14 16:26+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: crm/plugin/fb\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"Language: ru_RU\n"
+"X-Generator: Poedit 2.4.3\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "Access Token"
+msgstr "Маркер доступа"
+
+msgid "Send templated message"
+msgstr "Шаблоны сообщений"
+
+msgid "Template variables:"
+msgstr "Переменные шаблона:"
+
+msgid "Message Templates"
+msgstr "Шаблоны сообщений"
+
+msgid "Validation error"
+msgstr "Ошибка валидации данных"
+
+msgid "Access token or phone number ID is invalid. Here is the WhatsApp API message:"
+msgstr "Маркер доступа или ID номера телефона неверны. Ответ WhatsApp API:"
+
+msgid "Access token verification has been failed for the next reason:"
+msgstr "Проверка маркера доступа не удалась по следующей причине:"
+
+msgid "Will be shown after source creation"
+msgstr "Будет доступен после сохранения источника"
+
+msgid "Set up a CRM settlement <a target=\"_blank\" href=\"%s\">in the Site app</a>."
+msgstr "Настройте поселение CRM <a target=\"_blank\" href=\"%s\">в приложении «Сайт»</a>."
+
+msgid "Phone number ID"
+msgstr "ID номера телефона"
+
+msgid "WhatsApp Business Account ID"
+msgstr "ID аккаунта WhatsApp Business"
+
+msgid "App secret"
+msgstr "Секрет приложения"
+
+msgid "App mode"
+msgstr "Режим приложения"
+
+msgid "Dev Mode"
+msgstr "Режим разработки"
+
+msgid "Live Mode"
+msgstr "Рабочий режим"
+
+msgid "Webhook URL"
+msgstr "URL обратного вызова Webhook"
+
+msgid "Webhook verify token"
+msgstr "Подтверждение маркера Webhook"
+
+msgid "<a href=\"%s\" target=\"_blank\">Step-by-step manual on connecting with WhatsApp Business Platform</a>"
+msgstr "<a href=\"%s\" target=\"_blank\">Инструкция по подключению к сервису «WhatsApp Business Platform»</a>"
+
+msgid "WhatsApp API proxy"
+msgstr "URL прокси для доступа к API WhatsApp"
+
+msgid "WhatsApp media proxy"
+msgstr "URL прокси для получения файлов из сообщений WhatsApp"
+
+msgid "Unsupported file: "
+msgid_plural "Unsupported files: "
+msgstr[0] "Не поддерживается отправка файла "
+msgstr[1] "Не поддерживается отправка файлов: "
+msgstr[2] "Не поддерживается отправка файлов: "
+
+msgid "Only following file types supported: "
+msgstr "Допускается отправка файлов только следующих типов: "
+
+msgid "Unsupported message type"
+msgstr "Неподдерживаемый тип сообщения"
+
+msgid "This message type is not currently supported by WhatsApp Business."
+msgstr "Этот тип сообщения в настоящее время не поддерживается WhatsApp Business."
+
+msgid "Message failed to send because more than 24 hours have passed since the customer last replied to this number."
+msgstr "Сообщение не удалось отправить, так как прошло более 24 часов с момента последнего ответа клиента."
