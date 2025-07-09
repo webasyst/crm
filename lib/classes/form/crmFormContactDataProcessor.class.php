@@ -80,10 +80,33 @@ class crmFormContactDataProcessor
             unset($data['password_confirm']);    
         }
         
-        if ($this->isStrategyForAuthorizedUser()) {
-            return $this->processAuthorizedUser($data);
-        } else {
-            return $this->processNotAuthorizedUser($data);
+        $result = $this->isStrategyForAuthorizedUser() ? 
+            $this->processAuthorizedUser($data) : 
+            $this->processNotAuthorizedUser($data);
+
+        if (empty($this->errors) && isset($result['contact'])) {
+            $this->logAgreementAcceptance($result['contact'], $data);
+        }
+
+        return $result;
+    }
+
+    protected function logAgreementAcceptance($contact, $data) {
+        $agreement_fields = $this->form->getAgreementCheckboxes();
+        $agreement_fields = array_filter($agreement_fields, function ($field) use ($data) {
+            return !empty($data[$field['uid']]);
+        });
+        if (empty($agreement_fields)) {
+            return;
+        }
+        
+        $contact_id = !empty($contact) && $contact->exists() ? $contact->getId() : null;
+        $form_page_url = isset($data['!form_page_url']) ? $data['!form_page_url'] : null;
+        
+        wa('webasyst');
+
+        foreach ($agreement_fields as $agreement_field) {
+            webasystHelper::logAgreementAcceptance($agreement_field['uid'], $agreement_field['html_label'], 'checkbox', $contact_id, 'form:'.$this->form->getId(), 'crm', $form_page_url);        
         }
     }
 

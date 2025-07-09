@@ -46,7 +46,7 @@ class crmMailMessage
         $text = ifset($this->mail['text/html']);
         if(empty($text)) {
             $text = (string)ifset($this->mail['text/plain']);
-            $text = nl2br(htmlspecialchars($text));
+            $text = nl2br(htmlspecialchars($text, ENT_IGNORE));
         }
 
         return $this->mail['__body'] = $text;

@@ -5478,3 +5478,6 @@ msgstr "Ширина"
 
 msgid "Subfield label placement"
 msgstr "Расположение надписи дочернего поля"
+
+msgid "Please select an option"
+msgstr "Выберите хотя бы один вариант"

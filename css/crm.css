@@ -4848,6 +4848,9 @@ ul.pager li {
     max-width: 100%;
   }
 }
+.c-message-conversation-page .c-im-conversation-section .c-message-item .c-message-body:has(.c-message-body-locations) {
+  max-width: 100%;
+}
 .c-message-conversation-page .c-im-conversation-section .c-message-item .c-message-body tgs-player {
   width: 100px;
   height: auto;

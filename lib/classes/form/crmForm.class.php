@@ -236,6 +236,13 @@ class crmForm
         return $info['params']['fields'];
     }
 
+    public function getAgreementCheckboxes()
+    {
+        return array_filter($this->getFields(), function ($field) {
+            return strpos($field['id'], '!agreement_checkbox') === 0;
+        });
+    }
+
     /**
      * @param $uid
      * @return mixed

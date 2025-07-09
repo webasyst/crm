@@ -26,12 +26,12 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
 
     var renderErrors = function ($error, errors) {
         $error.show().html($.map(errors, function (error) {
-            return '<div class="crm-error-msg">' + error + '</div>'
+            return '<div class="crm-error-msg" style="margin-top: 5px;">' + error + '</div>'
         }));
     };
 
     var validate = function($inputs) {
-        
+
         var is_valid = true;
 
         $('.crm-error-msg').hide();
@@ -69,6 +69,12 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
             }
             if (fld_id === '!agreement_checkbox' && !$el.is(':checked')) {
                 $el.closest('.c-agreement-checkbox-wrapper').addClass('crm-error');
+                renderErrors($fld.find('.crm-error-msg-block'), [options.validate_messages.required || '']);
+                is_valid = false;
+                return;
+            }
+            if ($el.hasClass('crm-required-radio') && !$fld.find(`[name="${$el.attr('name')}"]`).is(':checked')) {
+                renderErrors($fld.find('.crm-error-msg-block'), [options.validate_messages.select_one_option || '']);
                 is_valid = false;
                 return;
             }
@@ -84,7 +90,7 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
     $inputsUser
         .on('click.' + namespace, clearValidateErrors)
         .on('change.' + namespace, clearValidateErrors);
-    
+
     var normalizeErrorResult = function (errors) {
         var res = [];
         $.each(typeof errors === 'string' ? [errors] : errors, function (k, v) {
@@ -125,6 +131,16 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
         });
     };
 
+    var scrollIntoViewIfNeeded = ($el, offset_top = 0) => {
+        const rect = $el[0].getBoundingClientRect();
+        if (rect.top < 0) {
+            window.scrollTo({
+                top: window.scrollY + rect.top - offset_top,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     var intiSubmitForm = function () {
 
         var onDone = function (r) {
@@ -153,6 +169,9 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
                 $form.hide();
                 $after_block.height($wrapper.outerHeight());
                 $after_block.html(r.data.html).show();
+                setTimeout(() => {
+                    scrollIntoViewIfNeeded($after_block, 100);
+                }, 100);
             }
         };
 

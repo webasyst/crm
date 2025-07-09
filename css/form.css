@@ -4,6 +4,22 @@
   width: 100%;
   box-sizing: border-box;
 }
+.crm-form-block label.flexbox {
+  display: flex;
+  cursor: pointer;
+  margin-top: 0.05em;
+  margin-bottom: 0.75em;
+}
+.crm-form-block label.flexbox > span + span {
+  align-self: center;
+}
+.crm-form-block label.space-8 input[type="checkbox"],
+.crm-form-block label.space-8 input[type="radio"] {
+  margin-right: 0.5rem;
+}
+.crm-form-block label:last-child {
+  margin-bottom: 0;
+}
 .crm-form-block .redactor-box .redactor-layer,
 .crm-form-block .redactor-box .redactor-editor {
   background: transparent;
@@ -51,19 +67,6 @@
 }
 .crm-form-block .crm-form-fields-block .fields:not(.vertical) .field.vertical > .value:not(:first-child) {
   margin-top: 0.25rem;
-}
-.crm-form-block .crm-form-fields-block .crm-form-fields .flexbox {
-  display: flex;
-  align-items: baseline;
-}
-.crm-form-block .crm-form-fields-block .crm-form-fields .flexbox.full-width {
-  justify-content: space-between;
-}
-.crm-form-block .crm-form-fields-block .crm-form-fields .flexbox.space-8 {
-  gap: 0.5rem;
-}
-.crm-form-block .crm-form-fields-block .crm-form-fields .flexbox .wide {
-  flex: 1 1 auto;
 }
 .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field:not(:last-child) {
   margin-bottom: var(--crm-form-fields-space);
@@ -197,8 +200,10 @@
   display: block;
   color: #f00;
 }
-.crm-form-block .crm-error {
-  border: 2px solid #f00;
+.crm-form-block input.crm-error:not(:focus),
+.crm-form-block textarea.crm-error:not(:focus),
+.crm-form-block select.crm-error:not(:focus) {
+  border: 2px solid #f00 !important;
 }
 .crm-form-block .c-agreement-checkbox-wrapper.crm-error {
   border: none;
@@ -284,4 +289,7 @@
   .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .fields.crm-composite-field:not(.vertical) .field > * {
     display: block;
   }
+}
+.js-seq-wrapper .crm-form-block label.flexbox > span + span {
+  align-self: auto;
 }

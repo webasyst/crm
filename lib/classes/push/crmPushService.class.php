@@ -30,7 +30,7 @@ class crmPushService
 
     public function notifyAboutMessage($contact, $message, $conversation, $deal = null)
     {
-        if ($message['direction'] !== crmMessageModel::DIRECTION_IN) {
+        if (!isset($message['direction']) || $message['direction'] !== crmMessageModel::DIRECTION_IN) {
             return;
         }
         

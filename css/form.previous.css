@@ -3,6 +3,19 @@
   min-width: 100px;
   width: 100%;
 }
+.crm-form-block label.flexbox {
+  display: block;
+  cursor: pointer;
+  margin-top: 0.05em;
+  margin-bottom: 0.5em;
+}
+.crm-form-block label.space-8 input[type="checkbox"],
+.crm-form-block label.space-8 input[type="radio"] {
+  margin-right: 0.5rem;
+}
+.crm-form-block label:last-child {
+  margin-bottom: 0;
+}
 .crm-form-block .redactor-box .redactor-layer,
 .crm-form-block .redactor-box .redactor-editor {
   background: transparent;
@@ -113,7 +126,11 @@
 .crm-form-block .crm-form-fields-block .crm-form-fields .wa-captcha p img {
   float: none !important;
 }
+.crm-form-block .crm-form-fields-block .crm-form-fields .c-agreement-checkbox-wrapper {
+  display: flex;
+}
 .crm-form-block .crm-form-fields-block .crm-form-fields .c-agreement-checkbox-wrapper .c-agreement-checkbox-html-label {
+  align-self: center;
   display: inline-block !important;
 }
 .crm-form-block .crm-form-fields-block .crm-form-fields .c-agreement-checkbox-wrapper .c-agreement-checkbox-html-label.c-disabled {
