@@ -251,8 +251,16 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
         if (!ifset($new_message['ok'])) {
             if (ifset($new_message['error_code']) === 403) {
                 $this->createInternalServiceMessage(ifset($new_message['description'], _wd('crm_telegram', 'Blocked by the client.')));
+            } elseif (ifset($new_message['error_code']) === 400 && $this->is_auto_response) {
+                $this->createInternalServiceMessage(
+                    _w('crm_telegram', 'Failed to send message:<blockquote>') . htmlspecialchars($params['text']) . '</blockquote>' .
+                    _w('crm_telegram', 'Message refused by Telegram:') . '<br><i>' . 
+                    htmlspecialchars(ifset($new_message['description'], _wd('crm_telegram', 'Bad request.'))) . '</i>'
+                );
             }
-            return $this->fail(array(ifset($new_message['error_code'], 0) => ifset($new_message['description'], _w('Unknown error'))));
+            return $this->fail([
+                ifset($new_message['error_code'], 0) => htmlspecialchars(ifset($new_message['description'], _w('Unknown error')))
+            ]);
         }
 
         $object = (array)ifset($new_message);

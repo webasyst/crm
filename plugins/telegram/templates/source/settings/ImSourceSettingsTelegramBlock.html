@@ -37,16 +37,20 @@
                     {if !empty($source.params.webhook_mode)}checked="checked"{/if}>
                 <div class="hint" style="margin-top: 10px;">
                     {$_doc_page = 'https://core.telegram.org/bots/webhooks'}
-                    {$_hint = _wd('crm_telegram', 'Telegram supports two ways of processing bot updates — a pull mechanism and a push mechanism. By default the pull mechanism is used. Webhook is a push mechanism. <a href="%s" target="_blank">More info</a>.')}
+                    {$_hint = _wd('crm_telegram', 'Telegram supports two ways of processing bot updates — a pull mechanism and a push mechanism. By default the pull mechanism is used. Webhook is a push mechanism, it works faster. <a href="%s" target="_blank">More info</a>.')}
                     {sprintf(_wd('crm_telegram', $_hint), $_doc_page)}
                 </div>
             </div>
         </div>
+        <div class="field crm-section">
+            {_wd('crm_telegram', 'Auto-response to bot commands')}
+            {* ** ссылка уже не верна
+                <span class="hint"><a href="https://core.telegram.org/bots#global-commands" target="_blank">{_wd('crm_telegram', 'more info')}</a></span>
+            *}
+        </div>
         <div class="field top-padded" style="margin-bottom: 16px;">
             <div class="name">
-                {_wd('crm_telegram', 'Response to the /start command')}
-                <br>
-                <span class="hint"><a href="https://core.telegram.org/bots#global-commands" target="_blank">{_wd('crm_telegram', 'more info')}</a></span>
+                <code>/start</code>
             </div>
             <div class="value">
                 <textarea class="start_response_textarea" name="source[params][start_response]">{$source.params.start_response|default:$default_start_response|escape}</textarea>
@@ -57,6 +61,70 @@
                 </span>
             </div>
         </div>
+        <div class="js-commands">
+        {if !empty($source.params.commands)}
+            {foreach $source.params.commands.command as $_idx => $_command}
+                <div class="field top-padded js-command" style="margin-bottom: 16px;">
+                    <div class="name">
+                        <input class="js-command-input short" type="text" name="source[params][commands][command][{$_idx}]" value="{$_command|escape}" placeholder="/command">
+                    </div>
+                    <div class="value">
+                        <div class="flexbox space-16 full-width">
+                            <div class="wide">
+                                <textarea class="js-command-response-textarea wide" placeholder="{_wd('crm_telegram', 'Response text')}" name="source[params][commands][response][{$_idx}]">{ifset($source.params.commands.response[$_idx], '')|escape}</textarea>
+                                <div class="hint">
+                                    {_wd('crm_telegram', 'Supported markup:')} <a href="https://core.telegram.org/bots/api#html-style" target="_blank">HTML Style</a>
+                                </div>
+                                <label>
+                                    <input type="checkbox" class="js-command-checkbox" value="1"{if !empty($source.params.commands.save[$_idx])} checked="checked"{/if}>
+                                    {_wd('crm_telegram', 'Show response in conversation')}
+                                </label>
+                                <input type="hidden" class="js-command-hidden" name="source[params][commands][save][{$_idx}]" value="{ifset($source.params.commands.save[$_idx], 0)|escape}">
+                            </div>
+                            <a class="button nobutton circle js-command-remove" title="{_wd('crm_telegram', 'delete')}">
+                                <i class="far fa-trash-alt text-gray"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {/foreach}
+        {/if}
+        </div>
+        <div class="field top-padded" style="margin-bottom: 16px;">
+            <div class="name"></div>
+            <div class="value">
+                <a href="javascript:void(0);" class="button rounded small nobutton js-add-command">
+                    <i class="fas fa-plus-circle text-green"></i>
+                    {_wd('crm_telegram', 'Add auto-response')}
+                </a>
+            </div>
+        </div>
+
+        <template class="js-command-template">
+            <div class="field top-padded js-command" style="margin-bottom: 16px;">
+                <div class="name">
+                    <input class="js-command-input short" type="text" name="source[params][commands][command][]" value="" placeholder="/command">
+                </div>
+                <div class="value">
+                    <div class="flexbox space-16 full-width">
+                        <div class="wide">
+                            <textarea class="js-command-response-textarea wide" placeholder="{_wd('crm_telegram', 'Response text')}" name="source[params][commands][response][]"></textarea>
+                            <div class="hint">
+                                {_wd('crm_telegram', 'Supported markup:')} <a href="https://core.telegram.org/bots/api#html-style" target="_blank">HTML Style</a>
+                            </div>
+                            <label>
+                                <input type="checkbox" class="js-command-checkbox" value="1">
+                                {_wd('crm_telegram', 'Show response in conversation')}
+                            </label>
+                            <input type="hidden" class="js-command-hidden" name="source[params][commands][save][]" value="0">
+                        </div>
+                        <a class="button nobutton circle js-command-remove" title="{_wd('crm_telegram', 'delete')}">
+                            <i class="far fa-trash-alt text-gray"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 
     {if $wa->whichUI() !== '1.3'}

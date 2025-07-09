@@ -36,6 +36,9 @@ var CRMTelegramPluginSettings = ( function($) {
         that.$username_input = that.$wrapper.find('.js-username-input');
         that.$firstname_input = that.$wrapper.find('.js-firstname-input');
         that.$api_offset_input = that.$wrapper.find('.js-api-offset-input');
+        that.$commands = that.$wrapper.find('.js-commands');
+        that.$addCommandButton = that.$wrapper.find('.js-add-command');
+        that.$commandTemplate = that.$wrapper.find('.js-command-template');
 
         // VARS
         that.action = options["action"];
@@ -57,6 +60,7 @@ var CRMTelegramPluginSettings = ( function($) {
             that.initAceEditor(that.$phone_request_textarea);
         }
         that.initShowParams();
+        that.initCommands();
     };
 
     CRMTelegramPluginSettings.prototype.initShowParams = function() {
@@ -183,6 +187,30 @@ var CRMTelegramPluginSettings = ( function($) {
         editor.setOption("maxLines", 100);
         session.on('change', function () {
             $textarea.val(editor.getValue());
+        });
+    };
+
+    CRMTelegramPluginSettings.prototype.initCommands = function() {
+        var that = this;
+        that.initCommandInputs();
+        that.$addCommandButton.on("click", function() {
+            that.$commands.append($(that.$commandTemplate.html()));
+            that.initCommandInputs();
+        });
+    };
+
+    CRMTelegramPluginSettings.prototype.initCommandInputs = function() {
+        var that = this;
+        that.$commands.find(".js-command-input").off("change").on("change", function(event) {
+            if (event.target.value && event.target.value.substring(0, 1) != "/") {
+                event.target.value = "/" + event.target.value;
+            }
+        });
+        that.$commands.find(".js-command-remove").off("click").on("click", function(event) {
+            $(event.target).parents('.js-command').remove();
+        });
+        that.$commands.find(".js-command-checkbox").off("click").on("click", function(event) {
+            $(event.target).parents('.js-command').find('.js-command-hidden').val(event.target.checked ? 1 : 0);
         });
     };
 

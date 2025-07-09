@@ -66,13 +66,30 @@ class crmTelegramPluginCommands
             return $item;
         }, $result);
         
-        if (empty($result) && $this->telegram_message['text'] === '/start') {
-            $start_text = $this->source->getParam('start_response');
-            if (!empty($start_text)) {
-                $result = [[
-                    'body' => $this->replaceVars($start_text),
-                    'is_auto_response' => true,
-                ]];
+        if (empty($result)) {
+            if ($this->telegram_message['text'] === '/start') {
+                $start_text = $this->source->getParam('start_response');
+                if (!empty($start_text)) {
+                    $result = [[
+                        'body' => $this->replaceVars($start_text),
+                        'is_auto_response' => true,
+                    ]];
+                }
+            } else {
+                $commands_arr = $this->source->getParam('commands');
+                if (!empty($commands_arr['command']) && 
+                    count($commands_arr['command']) === count(ifempty($commands_arr['response'], []))
+                ) {
+                    $commands = array_combine($commands_arr['command'], $commands_arr['response']);
+                    if (isset($commands[$this->telegram_message['text']])) {
+                        $command_index = array_search($this->telegram_message['text'], $commands_arr['command']);
+                        $result = [[
+                            'body' => $commands[$this->telegram_message['text']],
+                            'is_auto_response' => true,
+                            'do_not_save_this_message' => empty($commands_arr['save'][$command_index]),
+                        ]];
+                    }
+                }
             }
         }
 

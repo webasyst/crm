@@ -206,7 +206,7 @@ class crmTelegramPluginHtmlSanitizer
         $content = preg_replace(
             '~
                 &lt;
-                    (/?(?:a|b|strong|i|em|pre|code))
+                    (/?(?:a|b|strong|i|em|pre|code|s|u|strike|del))
                     ((?!&gt;)[^a-z\-\_]((?!&gt;)(\s|.))+)?
                 &gt;
             ~iux',
@@ -265,7 +265,7 @@ class crmTelegramPluginHtmlSanitizer
         // Convert &nbsp; to —
         $content = str_replace("&mdash;", "—", $content);
         // Leave only those tags from which Telegram will not go mad
-        $content = strip_tags($content, '<a><b><strong><i><em><pre><code><blockquote>');
+        $content = strip_tags($content, '<a><b><strong><i><em><pre><code><blockquote><s><u><strike><del>');
 
         return $content;
     }

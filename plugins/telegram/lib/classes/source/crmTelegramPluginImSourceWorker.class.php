@@ -86,7 +86,12 @@ class crmTelegramPluginImSourceWorker extends crmImSourceWorker
             return $new_api_offset;
         }
 
-        $from = ifset(ifset($this->telegram_message['message'], $this->telegram_message['edited_message']), 'from', []);
+        $from = isset($this->telegram_message['message']) ? 
+            ifset($this->telegram_message['message']['from'], []) :
+            (
+                isset($this->telegram_message['edited_message']) ? 
+                    ifset($this->telegram_message['edited_message']['from'], []) : []
+            );
         $this->contact = $this->findContact($from);
         // Ignore blocked users
         if ($this->contact['is_user'] == -1) {
@@ -134,6 +139,7 @@ class crmTelegramPluginImSourceWorker extends crmImSourceWorker
 
         $commands = new crmTelegramPluginCommands($this->source, $this->contact, $this->telegram_message['message']);
         $bot_responses = $commands->botCommand();
+        waLog::dump($bot_responses, 'telegram-debug.log');
         if (isset($this->telegram_message['message']['contact'])) {
             $bot_responses[] = $commands->savePhone();
         }

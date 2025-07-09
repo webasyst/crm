@@ -5,14 +5,14 @@ msgstr ""
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: crm/plugin/telegram\n"
+"Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
-"Language: ru_RU\n"
-"X-Generator: Poedit 2.4.3\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -298,8 +298,8 @@ msgstr "Найден другой контакт с этим номером те
 msgid "Internal service message"
 msgstr "Служебное сообщение"
 
-msgid "Telegram supports two ways of processing bot updates — a pull mechanism and a push mechanism. By default the pull mechanism is used. Webhook is a push mechanism. <a href=\"%s\" target=\"_blank\">More info</a>."
-msgstr "Telegram поддерживает два способа обработки обновлений бота: <em>pull</em> и <em>push</em>. По умолчанию используется механизм <em>pull</em>. Веб-хук — это механизм <em>push</em>. <a href=\"%s\" target=\"_blank\">Подробнее об этом</a>."
+msgid "Telegram supports two ways of processing bot updates — a pull mechanism and a push mechanism. By default the pull mechanism is used. Webhook is a push mechanism, it works faster. <a href=\"%s\" target=\"_blank\">More info</a>."
+msgstr "Telegram поддерживает два способа обработки обновлений бота: <em>pull</em> и <em>push</em>. По умолчанию используется механизм <em>pull</em>. Веб-хук — это механизм <em>push</em>, он работает быстрее. <a href=\"%s\" target=\"_blank\">Подробнее об этом</a>."
 
 msgid "A request for a phone number will be sent to the client."
 msgstr "Клиенту будет отправлена просьба указать номер телефона."
@@ -363,3 +363,24 @@ msgstr "Файл <b>%s</b> не удалось сохранить"
 
 msgid "File <b>%s</b> could not be received"
 msgstr "Файл <b>%s</b> не удалось получить"
+
+msgid "Response text"
+msgstr "Содержимое ответа"
+
+msgid "Show response in conversation"
+msgstr "Показывать ответ в переписке"
+
+msgid "Add auto-response"
+msgstr "Добавить автоответ"
+
+msgid "You cannot change the bot for a source.<br><br>To use a different bot, <a href=\"%ssettings/sources/telegram\">set up a new source</a> for it."
+msgstr "В источнике нельзя изменить выбор бота.<br><br>Чтобы использовать другого бота, <a href=\"%ssettings/sources/telegram\">настройте новый источник</a> для него."
+
+msgid "Auto-response to bot commands"
+msgstr "Автоответы на команды бота"
+
+msgid "Failed to send message:"
+msgstr "Не удалось отправить сообщение:"
+
+msgid "Message refused by Telegram:"
+msgstr "Telegram отклонил сообщение:"
