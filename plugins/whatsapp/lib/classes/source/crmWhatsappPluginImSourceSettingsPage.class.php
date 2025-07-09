@@ -13,8 +13,8 @@ class crmWhatsappPluginImSourceSettingsPage extends crmImSourceSettingsPage
         $this->checkRequiredParams($data, $errors);
 
         if (empty($data['params']['valid_credentials_marker'])) {
-            $errors['params']['access_token'] = _wd('crm_whatsapp', 'Access token or phone number ID is invalid');
-            $errors['params']['phone_id'] = _wd('crm_whatsapp', 'Access token or phone number ID is invalid');
+            $errors['params']['access_token'] = _wd('crm_whatsapp', 'Access token or phone number ID is invalid.');
+            $errors['params']['phone_id'] = _wd('crm_whatsapp', 'Access token or phone number ID is invalid.');
         }
 
         return $errors;
@@ -22,7 +22,7 @@ class crmWhatsappPluginImSourceSettingsPage extends crmImSourceSettingsPage
 
     protected function checkRequiredParams($data, &$errors)
     {
-        $error_msg = _wd('crm_whatsapp', 'Field is required');
+        $error_msg = _wd('crm_whatsapp', 'The field is required.');
         $fields = ['access_token', 'phone_id', 'app_secret'];
         foreach ($fields as $field) {
             if (empty($data['params'][$field])) {

@@ -7,7 +7,7 @@ class crmWhatsappPluginImSourceHelper extends crmSourceHelper
     {
         $message['icon_url'] = $this->source->getIcon();
         $message['transport_name'] = $this->source->getName();
-        $message['body_formatted'] = nl2br(htmlspecialchars($message['body']));
+        $message['body_formatted'] = $this->formatBody($message['body']);
         return $message;
     }
 
@@ -23,7 +23,7 @@ class crmWhatsappPluginImSourceHelper extends crmSourceHelper
     public function workupMessagesInConversation($conversation, $messages)
     {
         return array_map(function ($m) {
-            $m['body_formatted'] = nl2br(htmlspecialchars($m['body']));
+            $m['body_formatted'] = $this->formatBody($m['body']);
             return $m;
         }, $messages);
     }
@@ -65,19 +65,19 @@ class crmWhatsappPluginImSourceHelper extends crmSourceHelper
             if ($error_code) {
                 $m['error_code'] = $error_code;
                 switch ($error_code) {
-                    case 'unsupported': 
+                    case 'unsupported':
                         $m['error_body'] = _wd('crm_whatsapp', 'This message type is not currently supported by WhatsApp Business.');
                         break;
                     case 'not_delivered':
                         // do nothing here (all nedded is already done)
                         break;
                     default:
-                        $m['error_body'] = _wd('crm_whatsapp', 'Failed to render message.');
+                        $m['error_body'] = _wd('crm_whatsapp', 'Failed to render the message.');
                 }
                 // $m['error_details'] = nl2br(htmlspecialchars(ifset($m, 'params', 'error_details', '')));
             }
             // convert plain-text message body to html
-            $body = nl2br(htmlspecialchars($m['body']));
+            $body = $this->formatBody($m['body']);
             $m['body_sanitized'] = crmHtmlSanitizer::work($body, ['verification_key' => $verification_key]);
             return $m;
         }, $messages);
@@ -87,9 +87,16 @@ class crmWhatsappPluginImSourceHelper extends crmSourceHelper
     {
         return [
             'reply_form_dropdown_items' => [
-                $this->templatesDropdownItem($conversation['id'], $conversation['contact_id'])
+                $this->templatesDropdownItem($conversation['id'], $conversation['contact_id']),
+                $this->cheatSheetDropdownItem(),
             ],
         ];
+    }
+
+    private function cheatSheetDropdownItem()
+    {
+        $template = wa()->getAppPath("plugins/whatsapp/templates/source/message/ConversationCheatSheetDropdownItem.html", 'crm');
+        return $this->renderTemplate($template);
     }
 
     public function templatesDropdownItem($conversation_id, $contact_id)
@@ -102,6 +109,16 @@ class crmWhatsappPluginImSourceHelper extends crmSourceHelper
             'contact_id'      => $contact_id,
             'source_name'     => $this->source->getName(),
         ]);
+    }
+
+    protected function formatBody($content)
+    {
+        $content = nl2br(htmlspecialchars($content));
+        $content = preg_replace('/```((?:(?!```).)+)```/s', '<pre>\1</pre>', $content);
+        $content = preg_replace('/\\*((?:(?!\\*).)+)\\*/s', '<b>\1</b>', $content);
+        $content = preg_replace('/~((?:(?!~).)+)~/s', '<s>\1</s>', $content);
+        $content = preg_replace('/_((?:(?!_).)+)_/s', '<i>\1</i>', $content);
+        return $content;
     }
 
     protected function ext2extra($ext)

@@ -5,14 +5,14 @@ msgstr ""
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: crm/plugin/fb\n"
+"Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
-"Language: ru_RU\n"
-"X-Generator: Poedit 2.4.3\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -93,3 +93,75 @@ msgstr "Этот тип сообщения в настоящее время не
 
 msgid "Message failed to send because more than 24 hours have passed since the customer last replied to this number."
 msgstr "Сообщение не удалось отправить, так как прошло более 24 часов с момента последнего ответа клиента."
+
+msgid "To make bold text, add asterisks around it."
+msgstr "Чтобы выделить текст жирным, поставьте вокруг него звёздочки."
+
+msgid "Important text"
+msgstr "Важный текст"
+
+msgid "To make italic text, add underscores around it."
+msgstr "Чтобы выделить текст курсивом, поставьте вокруг него символы подчёркивания."
+
+msgid "Italic text"
+msgstr "Курсивный текст"
+
+msgid "To strike through text, add tildes around it."
+msgstr "Чтобы зачеркнуть текст, поставьте вокруг него тильды."
+
+msgid "Strike-through text"
+msgstr "Зачёркнутый текст"
+
+msgid "To sent a block of programming code, add triple backticks before and after it."
+msgstr "Чтобы отправить блок программного кода, поставьте тройные обратные апострофы перед ним и после него."
+
+msgid "WhatsApp formatting options"
+msgstr "Форматирование сообщений WhatsApp"
+
+msgid "Name"
+msgstr "Название"
+
+msgid "optional"
+msgstr "необязательно"
+
+msgid "A CRM rule in the site settings is required."
+msgstr "Требуется правило CRM в настройках сайта."
+
+msgid "Copy to clipboard"
+msgstr "Копировать в буфер обмена"
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "Send"
+msgstr "Отправить"
+
+msgid "Marketing"
+msgstr "Маркетинг"
+
+msgid "Authentication"
+msgstr "Аутентификация"
+
+msgid "Utility"
+msgstr "Служебное"
+
+msgid "Plugin %s is installed and working."
+msgstr "Плагин «%s» установлен и работает."
+
+msgid "Save configuration parameters in the <a %s>deal source settings</a>."
+msgstr "Сохранить параметры конфигурации в <a %s>настройках источника сделок</a>."
+
+msgid "Access token is required."
+msgstr "Требуется токен доступа."
+
+msgid "Phone number ID is required."
+msgstr "Требуется ID номера телефона."
+
+msgid "Failed to render the message."
+msgstr "Не удалось отобразить сообщение."
+
+msgid "Access token or phone number ID is invalid."
+msgstr "Неверный токен доступа или ID номера телефона."
+
+msgid "The field is required."
+msgstr "Это поле обязательное."

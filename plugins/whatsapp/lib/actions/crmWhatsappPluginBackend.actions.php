@@ -19,11 +19,11 @@ class crmWhatsappPluginBackendActions  extends waActions
         $phone_id = waRequest::request('phone_id', null, waRequest::TYPE_STRING_TRIM);
         $api_endpoint = waRequest::request('api_endpoint', null, waRequest::TYPE_STRING_TRIM);
         if (empty($token)) {
-            $this->displayJson(['message' => _wd('crm_whatsapp', 'Access token is required')], true);
+            $this->displayJson(['message' => _wd('crm_whatsapp', 'Access token is required.')], true);
             return;
         }
         if (empty($phone_id)) {
-            $this->displayJson(['message' => _wd('crm_whatsapp', 'Phone number ID is required')], true);
+            $this->displayJson(['message' => _wd('crm_whatsapp', 'Phone number ID is required.')], true);
             return;
         }
         $options = empty($api_endpoint) ? [] : ['api_endpoint' => $api_endpoint];

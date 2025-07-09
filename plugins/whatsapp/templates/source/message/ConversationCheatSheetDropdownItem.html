@@ -1,0 +1,45 @@
+<a href="javascript:void(0);" class="inline-link js-show-cheat-sheet">
+    <span class="icon"><i class="fas fa-info-circle"></i></span>
+    <span class="nowrap">{_wd('crm_whatsapp', 'WhatsApp formatting options')}</span>
+</a>
+
+{capture assign="_header_html"}
+<div class="flexbox full-width">
+    <h3 class="wide">{_wd('crm_whatsapp', 'WhatsApp formatting options')}</h3>
+    <a href="#" class="drawer-close js-close-drawer"><i class="fas fa-times"></i></a>
+</div>
+{/capture}
+
+{capture assign="_content_html"}
+
+<p>{_wd('crm_whatsapp', 'To make bold text, add asterisks around it.')}</p>
+
+<p><code>*{_wd('crm_whatsapp', 'Important text')}*</code></p>
+
+<p>{_wd('crm_whatsapp', 'To make italic text, add underscores around it.')}</p>
+
+<p><code>_{_wd('crm_whatsapp', 'Italic text')}_</code></p>
+
+<p>{_wd('crm_whatsapp', 'To strike through text, add tildes around it.')}</p>
+
+<p><code>~{_wd('crm_whatsapp', 'Strike-through text')}~</code></p>
+
+<p>{_wd('crm_whatsapp', 'To sent a block of programming code, add triple backticks before and after it.')}</p>
+<pre style="background: var(--background-color-blockquote); border-radius: 0.375rem; padding: 0.125rem 0.25rem;">```
+print('Hello world')
+```</pre>
+
+{/capture}
+
+<script>
+( function($) {
+    $(".js-show-cheat-sheet").on("click", function() {
+        var drawer = $.waDrawer({
+            header: {$_header_html|json_encode},
+            content: {$_content_html|json_encode},
+            direction: "right",
+            onBgClick: function() { drawer.close(); }
+        });
+    });
+})(jQuery);
+</script>

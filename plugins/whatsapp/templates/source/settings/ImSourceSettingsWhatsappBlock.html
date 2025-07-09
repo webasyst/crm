@@ -16,7 +16,7 @@
     <div class="fields">
         <div class="field">
             <div class="name for-input">
-                [`Name`]
+                {_wd('crm_whatsapp', 'Name')}
             </div>
             <div class="value">
                 <input class="js-name-input long" type="text" name="source[name]" value="{$source.name|default:''|escape}">
@@ -25,7 +25,7 @@
         <div class="field">
             <div class="name">
                 {_wd('crm_whatsapp', 'WhatsApp API proxy')}
-                <span class="hint">[`optional`]</span>
+                <span class="hint">{_wd('crm_whatsapp', 'optional')}</span>
             </div>
             <div class="value">
                 <input class="js-api-endpoint-input js-credentials-input long" type="text" name="source[params][api_endpoint]" value="{$source.params.api_endpoint|default:''|escape}" placeholder="https://graph.facebook.com/v19.0/">
@@ -37,7 +37,7 @@
         <div class="field">
             <div class="name">
                 {_wd('crm_whatsapp', 'WhatsApp media proxy')}
-                <span class="hint">[`optional`]</span>
+                <span class="hint">{_wd('crm_whatsapp', 'optional')}</span>
             </div>
             <div class="value">
                 <input class="js-media-proxy-input long" type="text" name="source[params][media_proxy]" value="{$source.params.media_proxy|default:''|escape}" placeholder="{crmWhatsappPluginDownloader::MEDIA_URL}">
@@ -110,11 +110,11 @@
             <div class="value">
                 {if $source.id > 0}
                     {if empty($webhook_url)}
-                        [`A CRM settlement is required.`]<br>
+                    {_wd('crm_whatsapp', 'A CRM rule in the site settings is required.')}<br>
                         {sprintf(_wd('crm_whatsapp', 'Set up a CRM settlement <a target="_blank" href="%s">in the Site app</a>.'), $site_app_url)}
                     {else}
                         <span class="js-copy-value badge squared gray">{$webhook_url}</span>
-                        <a title="[`Copy to clipboard`]" class="custom-my-4 custom-mx-8 large gray js-copy" href="javascript:void(0);">
+                        <a title="{_wd('crm_whatsapp', 'Copy to clipboard')}" class="custom-my-4 custom-mx-8 large gray js-copy" href="javascript:void(0);">
                             <i class="fas fa-copy js-copy-button"></i>
                             <i class="fas fa-check js-copy-marker" style="display: none; color: var(--green);"></i>
                         </a>
@@ -132,7 +132,7 @@
             </div>
             <div class="value">
                 <span class="js-copy-value badge squared gray">{$webhook_token|escape}</span>
-                <a title="[`Copy to clipboard`]" class="custom-my-4 custom-mx-8 large gray js-copy" href="javascript:void(0);">
+                <a title="{_wd('crm_whatsapp', 'Copy to clipboard')}" class="custom-my-4 custom-mx-8 large gray js-copy" href="javascript:void(0);">
                     <i class="fas fa-copy js-copy-button"></i>
                     <i class="fas fa-check js-copy-marker" style="display: none; color: var(--green);"></i>
                 </a>
@@ -157,7 +157,7 @@
                 alert_title: "{_wd('crm_whatsapp', 'Validation error')}",
                 alert_body: "{_wd('crm_whatsapp', 'Access token or phone number ID is invalid. Here is the WhatsApp API message:')}",
                 alert_fail_body: "{_wd('crm_whatsapp', 'Access token verification has been failed for the next reason:')}",
-                alert_close: "[`Close`]"
+                alert_close: "{_wd('crm_whatsapp', 'Close')}"
             }
         });
     })(jQuery);
