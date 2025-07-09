@@ -498,8 +498,8 @@ abstract class crmSendEmailController extends crmJsonController
             $this->getMessageModel()->updateById($message['id'], array('conversation_id' => $conversation_id));
             $this->getMessageReadModel()->setRead($message['id'], $message['creator_contact_id']);
 
-            $message['conversation_id'] = $conversation_id;
-            (new crmPushService)->notifyAboutMessage(null, $message, ifset($conversation));
+            //$message['conversation_id'] = $conversation_id;
+            //(new crmPushService)->notifyAboutMessage(null, $message, ifset($conversation));
             return;
         }
 

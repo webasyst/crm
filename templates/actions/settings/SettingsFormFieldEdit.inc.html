@@ -1,4 +1,5 @@
-<div class="dialog crm-settings-form-edit-field-wrapper" data-template="1" style="display: none;">
+<template class="crm-settings-form-edit-field-wrapper">
+<div class="dialog">
     <div class="dialog-background"></div>
     <div class="dialog-body">
         <header class="dialog-header">
@@ -21,12 +22,61 @@
                     <div class="field crm-field-captionplace">
                         <div class="name">[`Label placement`]</div>
                         <div class="value">
-                            <label><span class="wa-radio"><input type="radio" name="params[captionplace]" value="left" checked="checked"><span></span></span> [`left from field`]</label><br>
-                            <label><span class="wa-radio"><input type="radio" name="params[captionplace]" value="above"><span></span></span> [`above of the field`]</label><br>
-                            <label><span class="wa-radio"><input type="radio" name="params[captionplace]" value="none"><span></span></span> [`hide`]</label><br>
+                            <div class="custom-mb-8">
+                                <label>
+                                    <span class="wa-radio">
+                                        <input type="radio" name="params[captionplace]" value="left" checked="checked">
+                                        <span></span>
+                                    </span> [`left from field`]
+                                </label>
+                            </div>
+                            <div class="custom-mb-8">
+                                <label>
+                                    <span class="wa-radio">
+                                        <input type="radio" name="params[captionplace]" value="above">
+                                        <span></span>
+                                    </span> [`above of the field`]
+                                </label>
+                            </div>
+                            <div class="custom-mb-8">
+                                <label>
+                                    <span class="wa-radio">
+                                        <input type="radio" name="params[captionplace]" value="none">
+                                        <span></span>
+                                    </span> [`hide`]
+                                </label>
+                            </div>
                         </div>
                     </div>
-
+                    <div class="field crm-field-subfield_captionplace" style="display: none;">
+                        <div class="name">[`Subfield label placement`]</div>
+                        <div class="value">
+                            <div class="custom-mb-8">
+                                <label>
+                                    <span class="wa-radio">
+                                        <input type="radio" name="params[subfield_captionplace]" value="left">
+                                        <span></span>
+                                    </span> [`left from field`]
+                                </label>
+                            </div>
+                            <div class="custom-mb-8">
+                                <label>
+                                    <span class="wa-radio">
+                                        <input type="radio" name="params[subfield_captionplace]" value="above" checked="checked">
+                                        <span></span>
+                                    </span> [`above of the field`]
+                                </label>
+                            </div>
+                            <div class="custom-mb-8">
+                                <label>
+                                    <span class="wa-radio">
+                                        <input type="radio" name="params[subfield_captionplace]" value="none">
+                                        <span></span>
+                                    </span> [`hide`]
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                     <div class="field crm-field-redactor" style="display: none;">
                         <div class="name">[`Mode`]</div>
                         <div class="value">
@@ -89,3 +139,4 @@
         </form>
     </div>
 </div>
+</template>

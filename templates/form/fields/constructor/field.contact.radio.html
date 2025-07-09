@@ -1,0 +1,15 @@
+{**
+  * Template for render radio selector
+  *}
+
+{foreach $params.field->getOptions() as $k => $v}
+    <label class="flexbox full-width space-8">
+        <span class="custom-pt-4 wa-radio">
+            <input type="radio" value="{$k|escape}">
+            <span></span>
+        </span>
+        <span class="wide">
+            {$v|escape}
+        </span>
+    </label>
+{/foreach}

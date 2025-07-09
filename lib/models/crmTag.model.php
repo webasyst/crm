@@ -9,13 +9,20 @@ class crmTagModel extends crmModel
     const CLOUD_MAX_OPACITY = 100;
     const CLOUD_MIN_OPACITY = 30;
 
-    public function getCloud($key = null, $limit = 0, $tag_names = [])
+    public function getCloud($key = null, $limit = 0, $tag_names = [], $tag_ids = [])
     {
-        if (empty($tag_names)) {
-            $query = $this->where('count > 0');
-        } else {
-            $query = $this->where("count > 0 AND name IN (?)", $tag_names);
+        $where = ['count > 0'];
+        $conditions = [];
+        if (!empty($tag_names)) {
+            $where[] = 'name IN (:names)';
+            $conditions = ['names' => $tag_names];
         }
+        if (!empty($tag_ids)) {
+            $where[] = 'id IN (:ids)';
+            $conditions = ['ids' => $tag_ids];
+        }
+        $query = $this->where(join(' AND ', $where), $conditions);
+
         if ($limit) {
             $query->order('count DESC');
             $query->limit((int)$limit);

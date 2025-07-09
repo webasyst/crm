@@ -201,7 +201,8 @@ var CRMSettingsSourceIm = ( function($) {
         $link.click(function (e) {
             e.preventDefault();
             CRMSettingsSources.deleteSource(that.source.id, {
-                messages: that.messages
+                messages: that.messages,
+                type: 'im'
             });
         });
     };

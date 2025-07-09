@@ -1,0 +1,12 @@
+{**
+  * Template for render radio selector
+  *}
+
+{foreach $params.field->getOptions() as $k => $v}
+    <label>
+        <span>
+            <input type="radio" value="{$k|escape}" name="{$input_name}" {if !empty($params.default_checked)}checked="checked"{/if}>
+        </span>
+        <span>{$v|escape}</span>
+    </label>
+{/foreach}

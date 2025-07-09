@@ -144,6 +144,9 @@ class crmForm
 
         $counters = array();
         foreach ($this->info['params']['fields'] as &$field) {
+            if (!isset($field['id'])) {
+                continue;
+            }
             if (!isset($counters[$field['id']])) {
                 $counters[$field['id']] = 0;
             } else {
@@ -159,7 +162,9 @@ class crmForm
 
         $this->info['params']['__fields'] = array();
         foreach ($this->info['params']['fields'] as $field) {
-            $this->info['params']['__fields'][$field['uid']] = $field;
+            if (isset($field['uid'])) {
+                $this->info['params']['__fields'][$field['uid']] = $field;
+            }
         }
 
 
@@ -605,7 +610,7 @@ class crmForm
     {
         $indexes = array();
         foreach ($fields as $index => $field) {
-            if ($field['id'] === $field_id) {
+            if (isset($field['id']) && $field['id'] === $field_id) {
                 $indexes[] = $index;
             }
         }

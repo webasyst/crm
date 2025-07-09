@@ -217,11 +217,11 @@ var crmContactImportUpload = (function ($) {
                                 for (var i = 0; i < data.segment_ids.length; i += 1) {
                                     var id = data.segment_ids[i],
                                         $item = $items.filter('[data-id="' + id + '"]');
-                                    names.push($item.find('.c-name').text());
+                                    names.push($item.find('.c-name-wrapper').html());
                                     inputs.push('<input type="hidden" name="segment_id[]" value="' + id + '">');
                                 }
 
-                                names = '<span>' + names.join(',') + '</span>';
+                                names = '<div class="grey">' + names.join('<br>') + '</div>';
                                 inputs = inputs.join(' ');
 
                                 $('.c-add-to-segments-names', $form).html(names + inputs);

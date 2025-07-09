@@ -265,16 +265,6 @@
             }
 
             , {
-                "regex": ["(at (\\d+))(?:\\W|\\z)"],
-                "example": "gym tomorrow at 13",
-                "script": "local res=getNow2();res=replaceHour(res,getMatch(2));res=replaceMinutes(res,0); res = checkFastF(res); return {ts=res,timed=1};",
-                "rules": {
-                    "1": "hours"
-                },
-                "checkpasttime": "day"
-            }
-
-            , {
                 "regex": ["((\\month) (\\d+))"],
                 "example": "friends wedding may 20",
                 "script": "local res=getNow2();res=replaceMonth(res,getMatch(2));local dater=getMatch(3);if tonumber(dater)>2011 then res=replaceYear(res,dater); else res=replaceDate(res,dater); end; setFastF(365*24*60*60); res = checkFastF(res); return {ts=res,timed=0};",

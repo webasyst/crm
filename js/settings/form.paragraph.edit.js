@@ -7,7 +7,7 @@ var crmSettingsFormParagraphEditDialog = (function ($) {
             // DOM
             that.$wrapper = $wrapper;
             that.$textarea = that.$wrapper.find('.crm-paragraph-textarea');
-            that.$button = that.$wrapper.find('[type=button]');
+            that.$button = that.$wrapper.find('[type=submit]');
 
             // VARS
             that.id = options.id;   // field id
@@ -30,7 +30,7 @@ var crmSettingsFormParagraphEditDialog = (function ($) {
             construct($wrapper, dialog);
         };
 
-        new CRMDialog(options);
+        $.waDialog(options);
     };
 
     crmSettingsFormParagraphEditDialog.prototype.initClass = function () {

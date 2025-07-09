@@ -22,14 +22,17 @@
                         <span class="switch smaller" id="js-ibutton">
                             <input type="checkbox" name="source[params][antispam]" class="js-crm-block-toggle js-ibutton" id="antispam-checkbox" value="1" {if !empty($source.params.antispam)}checked="checked"{/if}>
                         </span>
-                        <label for="antispam-checkbox" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">[`Disabled`]</label>
+                        <label for="antispam-checkbox" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">{if !empty($source.params.antispam)}[`Enabled`]{else}[`Disabled`]{/if}</label>
                     </p>
 
                     <p class="large-hint">
                         [`Every time you receive a message from an unknown email address which is not yet stored in your Contacts database, an automatic notification will be sent to the sender's address.`]
                         [`This notification contains a special link which must be clicked to confirm the sending of the first request. You may also add extra instructions for your clients to the notification text.`]
                     </p>
+                    <div class="link show-js-crm-block">[`Set up an email`]</div>
+                    <div class="link hide-js-crm-block" style="display: none;">[`Wrap`]</div>
                 </div>
+
                 <div class="collapsed-hidden value js-crm-block" style="display: none;">
                     <div class="fields narrow-vars crm-email-template-editor-wrapper c-spam-control-editor-wrapper">
                         {include

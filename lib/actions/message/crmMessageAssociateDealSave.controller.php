@@ -39,6 +39,8 @@ class crmMessageAssociateDealSaveController extends crmJsonController
             return;
         }
 
+        $bind_type = waRequest::post('bind_type', 'conversation', waRequest::TYPE_STRING_TRIM);
+
         $deal_data['id'] = (int)ifset($deal_data['id']);
 
         if ($deal_data['id'] > 0) {
@@ -65,7 +67,21 @@ class crmMessageAssociateDealSaveController extends crmJsonController
                 )
             );
 
-            $this->addDealToConversation($message, $deal['id']);
+            if ($bind_type == 'conversation') {
+                $this->addDealToConversation($message, $deal['id']);
+            } else {
+                $deal_conversation = $this->getConversationModel()->getByField([
+                    'source_id' => $message['source_id'],
+                    'contact_id' => $message['contact_id'],
+                    'deal_id' => $deal['id'],
+                    'is_closed' => 0,
+                ]);
+                if (empty($deal_conversation)) {
+                    $this->extractNewConversation($message, $deal['id']);
+                } else {
+                    $this->bindToConversation($message, $deal_conversation['id']);
+                }
+            }
 
             $this->response = array(
                 'deal_url' => wa()->getAppUrl('crm')."deal/{$deal['id']}",
@@ -103,7 +119,11 @@ class crmMessageAssociateDealSaveController extends crmJsonController
                 )
             );
 
-            $this->addDealToConversation($message, $id);
+            if ($bind_type == 'conversation') {
+                $this->addDealToConversation($message, $id);
+            } else {
+                $this->extractNewConversation($message, $id);
+            }
 
             $this->response = array(
                 'deal_url' => wa()->getAppUrl('crm')."deal/{$id}",
@@ -135,5 +155,43 @@ class crmMessageAssociateDealSaveController extends crmJsonController
         }
 
         return false;
+    }
+
+    protected function extractNewConversation($message, $deal_id)
+    {
+        $messages_in_conversation = $this->getMessageModel()->countByField(['conversation_id' => $message['conversation_id']]);
+        if ($messages_in_conversation <= 1) {
+            return $this->addDealToConversation($message, $deal_id);
+        }
+        
+        $summary = ifset($message, 'subject', '');
+
+        $data = [
+            'source_id' => $message['source_id'],
+            'contact_id' => $message['contact_id'],
+            'user_contact_id' => wa()->getUser()->getId(),
+            'summary' => $summary,
+            'deal_id' => $deal_id,
+        ];
+
+        $conversation_id = $this->getConversationModel()->add($data, $message['transport']);
+        $this->getMessageModel()->updateById($message['id'], ['conversation_id' => $conversation_id]);
+
+        return $conversation_id;
+    }
+
+    protected function bindToConversation($message, $conversation)
+    {
+        $this->getMessageModel()->updateById($message['id'], ['conversation_id' => $conversation['id']]);
+
+        $conversation_update = [ 'count' => '+1' ];
+        if ($conversation['last_message_id'] < $message['id']) {
+            $conversation_update['last_message_id'] = $message['id'];
+            $conversation_update['update_datetime'] = $message['create_datetime'];
+            if ($message['direction'] === crmMessageModel::DIRECTION_IN) {
+                $conversation_update['summary'] = ifset($message, 'subject', '');
+            }
+        }
+        $this->getConversationModel()->updateById($conversation['id'], $conversation_update);
     }
 }

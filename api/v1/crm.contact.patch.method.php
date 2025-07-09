@@ -32,6 +32,9 @@ class crmContactPatchMethod extends crmApiAbstractMethod
             ];
             return;
         }
+        
+        $this->getLogModel()->log('contact_edit', $this->contact_id, $this->contact_id);
+
         $this->setResponse($contact);
     }
 
@@ -61,6 +64,19 @@ class crmContactPatchMethod extends crmApiAbstractMethod
      */
     private function firstValidate(&$fields_data)
     {
+        if (!is_array($fields_data)) {
+            $this->errors = [
+                'error' => 'invalid_param',
+                'error_description' => _w('Please fill in the required fields'),
+                'error_fields' => []
+            ];
+            return false;
+        }
+
+        $fields_data = array_filter($fields_data, function ($field_data) {
+            return is_array($field_data) && array_key_exists('field', $field_data);
+        });
+
         if (empty($fields_data)) {
             $this->errors = [
                 'error' => 'invalid_param',

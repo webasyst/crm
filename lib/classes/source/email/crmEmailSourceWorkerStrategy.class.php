@@ -154,7 +154,9 @@ abstract class crmEmailSourceWorkerStrategy
             $crm_user_id = $contact->get('crm_user_id');
         }
         if ($crm_user_id <= 0) {
-            $crm_user_id = ($deal && $deal['user_contact_id'] > 0 ? $deal['user_contact_id'] : $this->source->getNormalizedResponsibleContactId());
+            $crm_user_id = (!empty($deal) && !empty($deal['user_contact_id']) && $deal['user_contact_id'] > 0) ? 
+                $deal['user_contact_id'] : 
+                $this->source->getNormalizedResponsibleContactId();
         }
 
         $data = array(

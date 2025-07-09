@@ -361,6 +361,7 @@ class crmFormProcessor
         foreach ($data as $uid => $value) {
             if (!$this->getForm()->isFieldPresented($uid) &&
                     $uid !== 'locale' &&
+                    $uid !== '!form_page_url' &&
                     $uid !== 'password_confirm' &&
                     $uid !== 'captcha_hash') {
                 unset($data[$uid]);

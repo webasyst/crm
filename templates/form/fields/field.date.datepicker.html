@@ -1,7 +1,7 @@
 {$wrapper_id = uniqid('c-deal-date-field-wrapper')}
 <div class="c-deal-date-field-wrapper" id="{$wrapper_id}">
     <span class="c-datepicker-wrapper js-datepicker-wrapper">
-        <input class="c-datepicker js-datepicker" type="text" value="{$params.value|default:''|wa_date}" name="{$input_name}" {if !empty($params.funnel_parameters)}required{/if}>
+        <input class="c-datepicker js-datepicker" type="text" placeholder="{$params.placeholder|default:''|escape}" value="{$params.value|default:''|wa_date}" name="{$input_name}" {if !empty($params.funnel_parameters)}required{/if}>
         <input type="hidden" name="{$input_name}" value="{$params.value|default:''}">
         <i class="icon16 calendar js-icon"></i>
     </span>

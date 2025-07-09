@@ -128,6 +128,7 @@ class crmDefaultLayout extends waLayout
         return [
             'call'     => !($user->getRights('crm', 'calls') === crmRightConfig::RIGHT_CALL_NONE),
             'invoice'  => !!$user->getRights('crm', 'manage_invoices'),
+            'export'   => !!$user->getRights('crm', 'export'),
             'is_admin' => $user->isAdmin('crm'),
         ];
     }

@@ -369,6 +369,9 @@ class crmDealModel extends crmModel
                 $params_to_set[$field_id] = $field->typecast($value);
             }
         }
+        if (!empty($params['!form_page_url'])) {
+            $params_to_set['!form_page_url'] = $params['!form_page_url'];
+        }
 
         // guard case
         if (!$params_to_set) {
@@ -808,7 +811,7 @@ class crmDealModel extends crmModel
         $table_fields = $this->getMetadata();
         if (!empty($params['sort'])) {
             if ($params['sort'] == 'user_name') {
-                $sort_join = 'JOIN wa_contact uc ON uc.id=d.user_contact_id';
+                $sort_join = 'LEFT JOIN wa_contact uc ON uc.id=d.user_contact_id';
                 $sort = 'uc.name';
                 $user_name_display = preg_split('/\s*,\s*/', trim(wa()->getSetting('user_name_display', 'name', 'webasyst')));
                 if (!empty($user_name_display[0])) {

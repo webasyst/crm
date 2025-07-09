@@ -75,6 +75,9 @@ class crmFormDealDataProcessor
                 $params[$field['id']] = $data[$field['id']];
             }
         }
+        if (!empty($data['!form_page_url'])) {
+            $params['!form_page_url'] = $data['!form_page_url'];
+        }
         $deal['params'] = $params;
 
         $source->setAsEnabled();

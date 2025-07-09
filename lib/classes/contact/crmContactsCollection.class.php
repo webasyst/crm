@@ -7,6 +7,11 @@ class crmContactsCollection extends waContactsCollection
      */
     protected $models;
 
+    /**
+     * @var crmRights
+     */
+    protected $crm_rights;
+
     public function segmentPrepare($id, $auto_title = true)
     {
         $id = (int) $id;
@@ -121,7 +126,7 @@ class crmContactsCollection extends waContactsCollection
         $were_prepared = $this->prepared;
         parent::prepare($new, $auto_title);
         if (!$were_prepared && !empty($this->options['check_rights']) && !wa()->getUser()->isAdmin('crm')) {
-            $rights = new crmRights();
+            $rights = $this->getCrmRights();
             $this->where[] = "c.crm_vault_id IN (".join(',', $rights->getAvailableVaultIds()).")";
         }
     }
@@ -184,6 +189,8 @@ class crmContactsCollection extends waContactsCollection
             if ($field) {
                 if ($field === 'birthday') {
                     $fields .= ',birth_day,birth_month,birth_year';
+                } elseif ($field === 'is_editable') {
+                    $fields .= ',crm_vault_id';
                 }
                 $fields_ar[] = $field;
             }
@@ -233,6 +240,14 @@ class crmContactsCollection extends waContactsCollection
                         'day'   => ifset($contact, 'birth_day', null)
                     ]
                 ];
+            }
+            unset($contact);
+        }
+        if (isset($fields['is_editable'])) {
+            $rights = $this->getCrmRights();
+            $editable_contact_ids = array_column($rights->dropUnallowedContacts($contacts, 'edit'), 'id');
+            foreach ($contacts as &$contact) {
+                $contact['is_editable'] = in_array($contact['id'], $editable_contact_ids);
             }
             unset($contact);
         }
@@ -346,5 +361,10 @@ class crmContactsCollection extends waContactsCollection
                 }
             }
         }
+    }
+
+    public function getCrmRights()
+    {
+        return $this->crm_rights ? $this->crm_rights : ($this->crm_rights = new crmRights());
     }
 }

@@ -55,9 +55,415 @@
 
                     </ul>
                 </div>
+
                 <div class="c-personal-settings-reminder-settings-content">
                     {$personal_settings.reminder_settings_html}
                 </div>
+
+                <div class="fields-group">
+                    <h3>[`Web push notifications`]</h3>
+                    <p>[`These notifications are useful to quickly learn about important events, occurring within CRM; e.g., incoming phone calls that you are responsible of. Web push notifications appear on your screen even when no browser is currently opened.`]</p>
+                    {if $is_push_enabled}
+                        <div class="js-push-loading spinner hidden"></div>
+                        <div class="js-push-false hidden">
+                            <p>[`Enable web push notifications to receive them on this device. You will be able to disable them later at any time.`]</p>
+                            <a class="button small outlined js-push-request">[`Enable`]</a>
+                        </div>
+                        <div class="js-push-ok hidden">
+                            <p><i class="fas fa-check-circle text-black"></i> [`Web push notifications are enabled.`]</p>
+                            <a class="button small outlined js-push-test">[`Send test notification`]</a>
+                        </div>
+                        <p class="js-push-error state-error hidden"></p>
+
+                        <script>
+                            (function ($) {
+                                if ($.wa_push) {
+                                    $('.js-push-loading').removeClass('hidden');
+                                    $.wa_push.init({
+                                        force_no_mute: true,
+                                        func: initControls
+                                    });
+
+                                    $(window).on('wa_push_status_changed', function(e, is_ok) {
+                                        togglePushStatus(is_ok);
+                                    });
+
+                                    $(window).on('wa_push_error', function(e, error) {
+                                        $('.js-push-error').html(error).removeClass('hidden');
+                                        $('.js-push-loading').addClass('hidden');
+                                    });
+
+                                    function initControls() {
+                                        if (typeof $.wa_push.check === 'function') {
+                                            $.wa_push.check(togglePushStatus);
+
+                                            $('.js-push-request').on('click', () => {
+                                                $('.js-push-error').text('').addClass('hidden');
+                                                $.wa_push.check(togglePushStatus);
+                                                $.wa_push.requestAllow();
+                                                WaBellAnnouncement.adhocHide($.wa_push.bell_ids.request_permissions);
+                                                $.wa_push.timeout_id = setTimeout(() => {
+                                                    WaBellAnnouncement.adhocHide($.wa_push.bell_ids.timeout); // prevent multiple notifications
+                                                    WaBellAnnouncement.adhocShow($("<p />").html($.wa_push.loc.requestTimeoutMessage), $.wa_push.bell_ids.timeout);
+                                                    $.wa_push.timeout_id = undefined;
+                                                }, 1000);
+                                            });
+
+                                            $('.js-push-test').on('click', () => {
+                                                $('.js-push-test').addClass('disabled');
+                                                $('.js-push-error').text('').addClass('hidden');
+                                                $.wa_push.sendTest(() => {
+                                                    $('.js-push-test').removeClass('disabled');
+                                                });
+                                            });
+                                        } else {
+                                            $('.js-push-loading').addClass('hidden');
+                                        }
+                                    }
+
+                                    function togglePushStatus(is_ok) {
+                                        $('.js-push-loading').addClass('hidden');
+                                        $('.js-push-error').text('').addClass('hidden');
+                                        if (is_ok) {
+                                            $('.js-push-ok').removeClass('hidden');
+                                            $('.js-push-false').addClass('hidden');
+                                        } else {
+                                            $('.js-push-false').removeClass('hidden');
+                                            $('.js-push-ok').addClass('hidden');
+                                        }
+                                    }
+                                }
+                            })(jQuery);
+                        </script>
+
+                    {else}
+                        [`Web push notifications are not configured yet.`]
+                        <a href="{$wa_backend_url}webasyst/settings/push/">[`Set up web push notifications`]&nbsp;›</a>
+                    {/if}
+
+                </div>
+
+                {if $is_push_enabled || $is_onesignal_enabled}
+                    <div class="fields-group">
+                        <h3>[`Which web push notifications must be sent`]</h3>
+
+                        {if !$is_push_enabled}
+                            <p class="hint">
+                                [`Push notifications are always automatically sent via the <em>mobile CRM app</em>.`]
+                                {sprintf_wp(
+                                    '<%s>Additional setup<%s> is required to receive them on your <em>computer</em>, too.',
+                                    sprintf(
+                                        'a href="%s"',
+                                        sprintf('%swebasyst/settings/push/', $wa_backend_url)
+                                    ),
+                                    '/a'
+                                )}
+                            </p>
+
+                        {/if}
+
+                        <ul class="c-options-list menu">
+                            <li>
+                                <label class="flexbox space-8 all-width">
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" disabled="disabled" checked>
+                                            <span>
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </span>
+                                    </span> {sprintf_wp(
+                                        'On reminders according to the settings in section “%s”',
+                                        _w('Notify me')
+                                    )}
+                                </label>
+                            </li>
+                            {if $calls_has_access}
+                                {if !$is_push_enabled}
+                                <li>
+                                    <label class="flexbox space-8 all-width">
+                                        <span class="wa-checkbox">
+                                            <input type="checkbox" disabled="disabled">
+                                                <span>
+                                                    <span class="icon">
+                                                        <i class="fas fa-check"></i>
+                                                    </span>
+                                                </span>
+                                        </span>
+                                        <div class="wide">
+                                            <span class="grey">[`On incoming calls to internal PBX numbers assigned to me`]</span>
+                                            <div class="hint">
+                                                [`Push notifications on incoming calls can be sent only to your <em>computer</em>.`]
+                                                {sprintf_wp(
+                                                    '<%s>Additional setup<%s> is required for this.',
+                                                    sprintf(
+                                                        'a href="%s"',
+                                                        sprintf('%swebasyst/settings/push/', $wa_backend_url)
+                                                    ),
+                                                    '/a'
+                                                )}
+                                            </div>
+                                        </div>
+                                    </label>
+                                </li>
+                                {elseif empty($pbx_numbers)}
+                                <li>
+                                    <label class="flexbox space-8 all-width">
+                                        <span class="wa-checkbox">
+                                            <input type="checkbox" disabled="disabled">
+                                                <span>
+                                                    <span class="icon">
+                                                        <i class="fas fa-check"></i>
+                                                    </span>
+                                                </span>
+                                        </span>
+                                        <div class="wide">
+                                            <span class="grey">[`On incoming calls to internal PBX numbers assigned to me`]</span>
+                                            <div class="hint">
+                                                [`PBX plugins are not configured.`]
+                                                <a href="{$wa_backend_url}webasyst/settings/pbx/">[`Set up PBX numbers`]</a>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </li>
+                                {else}
+                                <li>
+                                    <label class="flexbox space-8 all-width">
+                                        <span class="wa-checkbox">
+                                            <input type="checkbox" disabled="disabled" checked>
+                                                <span>
+                                                    <span class="icon">
+                                                        <i class="fas fa-check"></i>
+                                                    </span>
+                                                </span>
+                                        </span>
+                                        <div class="wide">[`On incoming calls to internal PBX numbers assigned to me`]</div>
+                                    </label>
+                                </li>
+                                {*
+                                <li>
+                                    <label class="flexbox space-8 all-width">
+                                        <input type="hidden" name="settings[personal][push][all_calls]" value="0">
+                                        <span class="wa-checkbox">
+                                            <input type="checkbox" class="js-all-calls" name="settings[personal][push][all_calls]" value="1"
+                                                {if !empty($personal_settings.push.all_calls)}checked=""{/if}>
+                                                <span>
+                                                    <span class="icon">
+                                                        <i class="fas fa-check"></i>
+                                                    </span>
+                                                </span>
+                                        </span>
+                                        <div class="wide">[`On all incoming calls`]</div>
+                                    </label>
+                                </li>
+                                {foreach $pbx_numbers as $_id => $_number}
+                                <li class="js-calls">
+                                    <label class="flexbox space-8 all-width">
+                                        <input type="hidden" name="settings[personal][push][pbx_{$_id}_calls]" value="0">
+                                        <span class="wa-checkbox">
+                                            <input type="checkbox" name="settings[personal][push][pbx_{$_id}_calls]" value="1"
+                                                {if !empty($personal_settings.push["pbx_{$_id}_calls"])}checked=""{/if}>
+                                                <span>
+                                                    <span class="icon">
+                                                        <i class="fas fa-check"></i>
+                                                    </span>
+                                                </span>
+                                        </span>
+                                        <div class="wide">
+                                            {sprintf_wp(
+                                                'On all incoming calls to number %s',
+                                                $_number
+                                            )}
+                                        </div>
+                                    </label>
+                                </li>
+                                {/foreach}
+                                *}
+                                {/if}
+                            {/if}
+                            {if empty($sources)}
+                            <li>
+                                <label class="flexbox space-8 all-width">
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" disabled="disabled">
+                                            <span>
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </span>
+                                    </span>
+                                    <div class="wide">
+                                        <span class="grey">[`On incoming messages in conversations where I am selected as responsible`]</span>
+                                        <div class="hint">
+                                            [`No messengers or email sources are configured.`]
+                                            <a href="{$wa_backend_url}webasyst/settings/message-sources/im/">[`Set up messengers`]</a>
+                                            <a href="{$wa_backend_url}webasyst/settings/message-sources/email/">[`Set up email`]</a>
+                                        </div>
+                                    </div>
+                                </label>
+                            </li>
+                            {else}
+                            <li>
+                                <label class="flexbox space-8 all-width">
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" disabled="disabled" checked>
+                                            <span>
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </span>
+                                    </span>
+                                    <div class="wide">[`On incoming messages in conversations where I am selected as responsible`]</div>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="flexbox space-8 all-width">
+                                    <input type="hidden" name="settings[personal][push][all_messages]" value="0">
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" class="js-all-messages" name="settings[personal][push][all_messages]" value="1"
+                                            {if !empty($personal_settings.push.all_messages)}checked=""{/if}>
+                                            <span>
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </span>
+                                    </span>
+                                    <div class="wide">[`On all incoming messages I have access to`]</div>
+                                </label>
+                            </li>
+                            <li class="js-messages">
+                                <label class="flexbox space-8 all-width">
+                                    <input type="hidden" name="settings[personal][push][im_messages]" value="0">
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" class="js-all-im-messages" name="settings[personal][push][im_messages]" value="1"
+                                            {if !empty($personal_settings.push.im_messages)}checked=""{/if}>
+                                            <span>
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </span>
+                                    </span>
+                                    <div class="wide">[`On incoming messages, received via messengers, I have access to`]</div>
+                                </label>
+                            </li>
+                            <li class="js-messages">
+                                <label class="flexbox space-8 all-width">
+                                    <input type="hidden" name="settings[personal][push][email_messages]" value="0">
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" class="js-all-email-messages" name="settings[personal][push][email_messages]" value="1"
+                                            {if !empty($personal_settings.push.email_messages)}checked=""{/if}>
+                                            <span>
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </span>
+                                    </span>
+                                    <div class="wide">[`On incoming email messages I have access to`]</div>
+                                </label>
+                            </li>
+                            {foreach $sources as $_id => $_source}
+                            <li class="js-messages js-{$_source.type|lower}-messages">
+                                <label class="flexbox space-8 all-width">
+                                    <input type="hidden" name="settings[personal][push][source_{$_id}_messages]" value="0">
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" name="settings[personal][push][source_{$_id}_messages]" value="1"
+                                            {if !empty($personal_settings.push["source_{$_id}_messages"])}checked=""{/if}>
+                                            <span>
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </span>
+                                    </span>
+                                    <div class="wide">
+                                        {capture name="source_name"}
+                                            {if !empty($_source.icon_fab)}
+                                                <i class="fab fa-{$_source.icon_fab}" title="{$_source.name|escape}" style="color:{$_source.icon_color}"></i>
+                                            {elseif !empty($_source.icon_fa)}
+                                                <i class="fas fa-{$_source.icon_fa}" title="{$_source.name|escape}" style="color:{$_source.icon_color}"></i>
+                                            {elseif !empty($_source.icon_url)}
+                                                <img src="{$_source.icon_url}" title="{$_source.name|escape}" data-fa-i2svg>
+                                            {/if}
+                                            <em>{$_source.name|escape}</em>
+                                        {/capture}
+
+                                        {sprintf_wp(
+                                            'On incoming messages, I have access to, received via source %s',
+                                            $smarty.capture.source_name
+                                        )}
+                                    </div>
+                                </label>
+                            </li>
+                            {/foreach}
+                            {/if}
+                        </ul>
+
+                        <script>
+                            ( function($) {
+                                const $all_calls_checkbox = $('.js-all-calls');
+                                const $calls_checkboxes = $('.js-calls').find('input');
+                                const $all_messages_checkbox = $('.js-all-messages');
+                                const $messages_checkboxes = $('.js-messages').find('input');
+                                const $all_im_messages_checkbox = $('.js-all-im-messages');
+                                const $im_messages_checkboxes = $('.js-im-messages').find('input');
+                                const $all_email_messages_checkbox = $('.js-all-email-messages');
+                                const $email_messages_checkboxes = $('.js-email-messages').find('input');
+
+                                const checked_n_disabled = ($checkboxes) => {
+                                    $checkboxes.prop('checked', true).prop('disabled', true);
+                                };
+
+                                const unchecked_n_enabled = ($checkboxes) => {
+                                    $checkboxes.prop('checked', false).prop('disabled', false);
+                                };
+
+                                $all_calls_checkbox.on('change', function() {
+                                    if ($(this).is(':checked')) {
+                                        checked_n_disabled($calls_checkboxes);
+                                    } else {
+                                        unchecked_n_enabled($calls_checkboxes);
+                                    }
+                                });
+                                if ($all_calls_checkbox.is(':checked')) {
+                                    checked_n_disabled($calls_checkboxes);
+                                }
+
+                                $all_messages_checkbox.on('change', function() {
+                                    if ($(this).is(':checked')) {
+                                        checked_n_disabled($messages_checkboxes);
+                                    } else {
+                                        unchecked_n_enabled($messages_checkboxes);
+                                    }
+                                });
+                                if ($all_messages_checkbox.is(':checked')) {
+                                    checked_n_disabled($messages_checkboxes);
+                                }
+
+                                $all_im_messages_checkbox.on('change', function() {
+                                    if ($(this).is(':checked')) {
+                                        checked_n_disabled($im_messages_checkboxes);
+                                    } else {
+                                        unchecked_n_enabled($im_messages_checkboxes);
+                                    }
+                                });
+                                if ($all_im_messages_checkbox.is(':checked')) {
+                                    checked_n_disabled($im_messages_checkboxes);
+                                }
+
+                                $all_email_messages_checkbox.on('change', function() {
+                                    if ($(this).is(':checked')) {
+                                        checked_n_disabled($email_messages_checkboxes);
+                                    } else {
+                                        unchecked_n_enabled($email_messages_checkboxes);
+                                    }
+                                });
+                                if ($all_email_messages_checkbox.is(':checked')) {
+                                    checked_n_disabled($email_messages_checkboxes);
+                                }
+                            })(jQuery);
+                        </script>
+                    </div>
+                {/if}
+
             </div>
         </div>
 
@@ -65,8 +471,8 @@
             <div class="crm-submit c-footer-actions js-footer-actions">
               <button type="submit" class="button js-submit-button">[`Save`]</button>
                 <span class="c-hidden">
-                        <a class="button light-gray" href="{$wa_app_url}settings/">[`Cancel`]</a>
-                    </span>
+                    <a class="button light-gray" href="{$wa_app_url}settings/">[`Cancel`]</a>
+                </span>
             </div>
         </div>
 

@@ -11,7 +11,7 @@ class crmContactSegmentEditAction extends crmBackendViewAction
     {
         $this->view->assign(array(
             'segment' => $this->getSegment(),
-            'icons' => crmSegmentModel::getIcons()
+            'icons' => crmSegmentModel::getIcons(wa()->whichUI()),
         ));
     }
 

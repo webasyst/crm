@@ -4,6 +4,10 @@ class crmContactOperationExportAction extends crmContactOperationAction
 {
     public function execute()
     {
+        if (!$this->getUser()->getRights('crm', 'export')) {
+            throw new waRightsException();
+        }
+
         $this->view->assign(array(
             'count' => $this->getCheckedCount(),
             'encoding' => crmHelper::getImportExportEncodings()

@@ -76,6 +76,10 @@ class crmFormContactDataProcessor
      */
     public function process($data)
     {
+        if (isset($data['password_confirm'])) {
+            unset($data['password_confirm']);    
+        }
+        
         if ($this->isStrategyForAuthorizedUser()) {
             return $this->processAuthorizedUser($data);
         } else {
@@ -378,6 +382,9 @@ class crmFormContactDataProcessor
 
         // try save contact
         $contact = new crmContact();
+        if ($this->isSignUpStrategy() && !empty($data['password'])) {
+            $contact->set('password', $data['password']);
+        }
         $errors = $contact->save($contact_data, true);
         if ($errors) {
             $this->errors = $errors;
@@ -430,6 +437,11 @@ class crmFormContactDataProcessor
             if (!$is_conform) {
                 unset($data[$field['uid']]);
             }
+        }
+
+        if (array_keys($data) === ['!form_page_url']) {
+            // if the only !form_page_url field remains in the data array, clear it
+            unset($data['!form_page_url']);
         }
 
         if (!$data) {

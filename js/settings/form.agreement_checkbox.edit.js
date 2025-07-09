@@ -9,7 +9,8 @@ var crmSettingsFormAgreementCheckboxEditDialog = (function ($) {
             that.$html_label = that.$wrapper.find('.c-html-label-textarea-wrapper textarea');
             that.$field_id = that.$wrapper.find('.c-field-id .value');
             that.$checked_by_default = that.$wrapper.find('.c-field-checked-by-default :checkbox');
-            that.$button = that.$wrapper.find('[type=button]');
+            that.$captionplace = that.$wrapper.find('.c-field-captionplace :radio');
+            that.$button = that.$wrapper.find('[type=submit]');
 
             // VARS
             that.id = options.id;   // field id
@@ -27,7 +28,7 @@ var crmSettingsFormAgreementCheckboxEditDialog = (function ($) {
             construct($wrapper, dialog);
         };
 
-        new CRMDialog(options);
+        $.waDialog(options);
     };
 
     crmSettingsFormAgreementCheckboxEditDialog.prototype.initClass = function () {
@@ -40,6 +41,10 @@ var crmSettingsFormAgreementCheckboxEditDialog = (function ($) {
         that.initHtmlLabel();
         that.initDefaultChecked();
         that.initSaveButton();
+
+        that.$captionplace.on('click', function () {
+            that.setFormChanged();
+        }).filter('[value="' + field.captionplace + '"]').prop('checked', true);
     };
 
     crmSettingsFormAgreementCheckboxEditDialog.prototype.initHtmlLabel = function () {
@@ -87,13 +92,15 @@ var crmSettingsFormAgreementCheckboxEditDialog = (function ($) {
         var that = this,
             $button = that.$button,
             $html_label = that.$html_label,
-            $default_by_checked = that.$checked_by_default;
+            $default_by_checked = that.$checked_by_default,
+            $captionplace = that.$captionplace;
 
         $button.click(function (e) {
             e.preventDefault();
             var data = {
                 html_label: $html_label.val(),
-                default_checked: $default_by_checked.is(':checked') ? 1 : 0
+                default_checked: $default_by_checked.is(':checked') ? 1 : 0,
+                captionplace: $captionplace.filter(':checked').val()
             };
             that.settingsForm.updateField(that.id, that.checked, data);
             that.renderField();
@@ -127,13 +134,16 @@ var crmSettingsFormAgreementCheckboxEditDialog = (function ($) {
 
         $field.find('.c-agreement-checkbox-html-label').html(html_label);
         $field.find(':checkbox').attr('checked', !!field.default_checked);
+        $field.find('.name').html('');
+        $field.removeClass('crm-caption-style-none crm-caption-style-above')
+            .addClass('crm-caption-style-' + field.captionplace);
     };
 
     crmSettingsFormAgreementCheckboxEditDialog.prototype.setFormChanged = function () {
         var that = this;
         that.$button.removeClass('green').addClass('yellow');
     };
-    
+
     return crmSettingsFormAgreementCheckboxEditDialog;
 
 })(jQuery);

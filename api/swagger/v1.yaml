@@ -491,6 +491,7 @@ paths:
             + **last_action**: информация о последнем действии контакта
             + **acl**: уровень доступа к контакту
             + **is_pinned**: присутствие контакта в числе избранных
+            + **is_editable**: доступность редактирования контакта для текущего пользователя
           schema:
             type: array
             items:
@@ -2101,7 +2102,7 @@ paths:
             + **reminder_datetime**: дата и время актуального напоминания
             + **name**: название
             + **amount**: предварительная стоимость
-            + **user_name**: логин ответственного сотрудника
+            + **user_name**: имя ответственного сотрудника
             + **last_action**: последнее выполненное действие
           schema:
             type: string
@@ -5531,7 +5532,24 @@ paths:
       externalDocs:
         description: crm.tag.list
         url: https://developers.webasyst.ru/api/explorer/crm/crm.tag.list/
-      summary: Возвращает список всех тегов.
+      summary: Возвращает список тегов.
+      parameters:
+        - in: query
+          name: contact_id[]
+          description: Массив ID контактов, список тегов которых нужно получить
+          schema:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+        - in: query
+          name: deal_id[]
+          description: Массив ID сделок, список тегов которых нужно получить
+          schema:
+            type: array
+            items:
+              type: integer
+              minimum: 1
       responses:
         200:
           description: Список тегов.
@@ -6254,6 +6272,9 @@ components:
         company:
           type: string
           description: Название компании
+        is_company:
+          type: boolean
+          description: Признак того, что контакт является компанией
         jobtitle:
           type: string
           description: Должность
@@ -6289,6 +6310,9 @@ components:
         is_banned:
           type: boolean
           description: Признак того, что контакт заблокирован
+        is_editable:
+          type: boolean
+          description: Признак доступности редактирования контакта для текущего пользователя
         vault_id:
           type: integer
           description: ID класса
@@ -7991,6 +8015,10 @@ components:
         icon_color:
           type: string
           description: HTML-обозначение цвета иконки
+        form_page_url:
+          type: string
+          format: uri
+          description: Адрес страницы, на которой размещена форма (только для источников типа "веб-форма")
     vault:
       type: object
       properties:

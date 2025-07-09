@@ -38,6 +38,10 @@ class crmDealInfoMethod extends crmApiAbstractMethod
             if (!empty($this->deal['fields']['source']['icon'])) {
                 $source['icon_url'] = $this->deal['fields']['source']['icon'];
             }
+            if ($source['type'] === crmSourceModel::TYPE_FORM && !empty($this->deal['params']['!form_page_url'])) {
+                $source['form_page_url'] = $this->deal['params']['!form_page_url'];
+                unset($this->deal['params']['!form_page_url']);
+            }
             $this->deal['source'] = $source;
         }
         unset($this->deal['source_id']);

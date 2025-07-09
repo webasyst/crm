@@ -137,7 +137,10 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
         }
 
         // Get Sources
-        $active_sources = $cs->select("*")->where("type IN ('".crmSourceModel::TYPE_EMAIL."','".crmSourceModel::TYPE_IM."') AND disabled=0")->fetchAll();
+        $active_sources = $this->view->getVars('active_sources') ?: $cs->getByField([
+            'type' => [crmSourceModel::TYPE_EMAIL, crmSourceModel::TYPE_IM],
+            'disabled' => 0
+        ], true);
 
         $this->getMessageReadModel()->setReadConversation($conversation['id']);
 

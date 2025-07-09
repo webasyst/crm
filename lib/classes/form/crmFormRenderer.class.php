@@ -46,21 +46,29 @@ class crmFormRenderer
      */
     public function render()
     {
+        $form = $this->getForm();
+        if (!$form->exists()) {
+            return '';
+        }
+
+        $info = $form->getInfo();
+        $info['params']['button'] = json_decode(ifset($info, 'params', 'button', '{}'), true) ?: [
+            'captionplace' => empty($info['params']['button_caption']) ? 'left' : 'none',
+            'width' => 'auto',
+            'caption' => ifset($info, 'params', 'button_caption', _w('Submit')),
+        ];
+        $info = $this->workupFormInfoBeforeRender($info);
+
         $view = wa()->getView();
         $vars = $view->getVars();
         $view->clearAllAssign();
-
-        $form = $this->getForm();
-        $info = $form->getInfo();
-
-        $info = $this->workupFormInfoBeforeRender($info);
-
         $view->assign(array(
             'form' => $info,
             'locale' => wa()->getLocale(),
             'action_url' => wa()->getRouteUrl('crm/frontend/formSubmit', array()),
             'need_datepicker' => $this->need_datepicker,
-            'options' => $this->options
+            'options' => $this->options,
+            'page_url' => wa()->getConfig()->getRootUrl(true) . wa()->getConfig()->getRequestUrl(),
         ));
 
         $path = wa()->getAppPath('templates/form/form.html', 'crm');
@@ -114,8 +122,42 @@ class crmFormRenderer
     {
         $field_type = $info['form_field_type'];
         $field_id = ltrim($info['id'], '!');
-        $env = wa()->getEnv();
-        $template_path = "templates/form/fields/{$env}/field.{$field_type}.{$field_id}.html";
+        $env = 'frontend';
+
+        if (isset($info['field']) && $info['field'] instanceof waContactField) {
+            $contact_field_type = strtolower($info['field']->getType());
+            if ($info['field'] instanceof waContactRadioSelectField || $info['field'] instanceof waContactBranchField) {
+                $template_path = "templates/form/fields/{$env}/field.contact.radio.html";
+            } elseif ($info['field'] instanceof waContactSelectField) {
+                $template_path = "templates/form/fields/{$env}/field.contact.select.html";
+            } elseif ($info['field'] instanceof waContactTextField) {
+                $template_path = "templates/form/fields/{$env}/field.contact.textarea.html";
+            } elseif ($info['field'] instanceof waContactCompositeField || $info['field'] instanceof waContactAddressField) {
+                $subfields = $info['field']->getFields();
+                $info['subfields'] = [];
+                foreach ($subfields as $subfield_id => $subfield) {
+                    $subfield_info = [
+                        'id' => $subfield_id,
+                        'type' => $subfield->getType(),
+                        'name' => $subfield->getName(),
+                        'placeholder' => $subfield->getName(),
+                        'is_multi' => false,
+                        'form_field_type' => crmFormConstructor::FIELD_TYPE_CONTACT,
+                        'field' => $subfield,
+                        'parent' => $field_id,
+                    ];
+                    $subfield_info['html'] = $this->renderField($subfield_info);
+                    $info['subfields'][$subfield_id] = $subfield_info;
+                }
+                $template_path = "templates/form/fields/{$env}/field.contact.composite.html";
+            } else {
+                $template_path = "templates/form/fields/{$env}/field.{$field_type}.{$contact_field_type}.html";
+            }
+        } else {
+            $field_id = ltrim($info['id'], '!');
+            $template_path = "templates/form/fields/{$env}/field.{$field_type}.{$field_id}.html";
+        }
+
         $template_path = wa()->getAppPath($template_path, 'crm');
         if (file_exists($template_path)) {
             $html = $this->renderFieldByTemplate($template_path, $info);
@@ -317,7 +359,9 @@ class crmFormRenderer
     {
         $params = $assign;
         $params['template_path'] = $template;
-        $field_renderer = new crmFormFieldRenderer($assign, $params);
+        $params['namespace'] = 'crm_form';
+
+        $field_renderer = new crmFormFieldRenderer($assign['field'], $params);
         return $field_renderer->render();
     }
 

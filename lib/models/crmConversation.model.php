@@ -157,6 +157,10 @@ class crmConversationModel extends crmModel
             $condition[] = "c.type='".strtoupper($this->escape($params['transport']))."'";
         }
 
+        if (!empty($params['source_id']) && wa_is_int($params['source_id']) && $params['source_id'] > 0) {
+            $condition[] = "c.source_id=".$params['source_id'];
+        }
+
         // responsible filter
         if (isset($params['responsible'])) {    // response might be 0, so not check by !empty
             $responsible_contact_id = (int)$params['responsible'];

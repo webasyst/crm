@@ -137,6 +137,7 @@ var CRMSettingsSources = ( function($) {
 
     CRMSettingsSources.deleteSource = function (id, options) {
         var messages = options.messages || {};
+        var type = options.type || 'email';
 
         $.crm.confirm.show({
 
@@ -152,7 +153,7 @@ var CRMSettingsSources = ( function($) {
 
                 $.post(url, { id: id })
                     .always(function () {
-                        $.crm.content.load($.crm.app_url + 'settings/sources/');
+                        $.crm.content.load($.crm.app_url + 'settings/message-sources/' + type + '/');
                         $loading.hide();
                         $button.attr('disabled', false);
                     });

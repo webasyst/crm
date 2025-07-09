@@ -9,6 +9,10 @@ class crmContactOperationExportProcessController extends waLongActionController
 
     /** Called only once when a new export is requested */
     protected function init() {
+        if (!$this->getUser()->getRights('crm', 'export')) {
+            throw new waRightsException();
+        }
+        
         $this->data = array(
             // Separator between fields
             'separator' => $this->getSeparator(),

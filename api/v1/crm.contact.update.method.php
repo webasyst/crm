@@ -47,6 +47,8 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
             return;
         }
 
+        $this->getLogModel()->log('contact_edit', $this->contact_id, $this->contact_id);
+
         $this->http_status_code = 204;
         $this->response = null;
     }
@@ -328,15 +330,20 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
                 } else {
                     $this->data[$_data['field']][] = $composite_value;
                 }
-            } else if ($field_is_multi) {
-                $value = ['value' => $_data['value']] + ($field_object->hasExt() ? ['ext' => $_data['ext']] : []);
-                if (isset($this->data[$_data['field']])) {
-                    $this->data[$_data['field']][] = $value;
-                } else {
-                    $this->data[$_data['field']] = [$value];
-                }
             } else {
-                $this->data[$_data['field']] = $_data['value'];
+                if ($field_object instanceof waContactStringField && !($field_object instanceof waContactTextField)) {
+                    $_data['value'] = preg_replace('/\s+/', ' ', $_data['value']);
+                }
+                if ($field_is_multi) {
+                    $value = ['value' => $_data['value']] + ($field_object->hasExt() ? ['ext' => $_data['ext']] : []);
+                    if (isset($this->data[$_data['field']])) {
+                        $this->data[$_data['field']][] = $value;
+                    } else {
+                        $this->data[$_data['field']] = [$value];
+                    }
+                } else {
+                    $this->data[$_data['field']] = $_data['value'];
+                }
             }
         }
 
@@ -353,11 +360,15 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
 
             $one_name_field = wa()->getSetting('one_name_field', '', 'crm');
             if ($one_name_field) {
+                $this->data['name'] = preg_replace('/\s+/', ' ', $this->data['name']);
                 $name = explode(' ', $this->data['name']);
                 $name_order = waContactNameField::getNameOrder();
                 foreach ($name_order as $_part) {
                     $_name = (string) array_shift($name);
                     $this->data[$_part] = $_name;
+                }
+                if (!empty($name)) {
+                    $this->data[$_part] .= ' ' . implode(' ', $name);
                 }
             } else {
                 $this->data['name'] = waContactNameField::formatName($this->data, true);

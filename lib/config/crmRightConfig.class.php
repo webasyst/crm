@@ -46,6 +46,7 @@ class crmRightConfig extends waRightConfig
         // Contacts
         //
         $this->addItem('edit', _w('Can edit or delete contacts added by other users'), 'checkbox');
+        $this->addItem('export', _w('Can export contacts and deals'), 'checkbox');
 
         //
         // Funnels

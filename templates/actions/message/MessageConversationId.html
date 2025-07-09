@@ -122,14 +122,17 @@
                 <div class="flexbox full-width c-name-wrapper">
                     <div class="flexbox middle space-8 c-name-wrapper--name">
                         <div class="c-name">{$_contact.name|escape}</div>
-                        <div class="icon size-16 custom-pt-4" style="align-self: center;">
-                            {if !empty($conversation.icon_fab)}
-                                <i class="fab fa-{$conversation.icon_fab}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
-                            {elseif !empty($conversation.icon_fa)}
-                                <i class="fas fa-{$conversation.icon_fa}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
-                            {else}
-                                <img src="{$conversation.icon_url}" data-fa-i2svg>
-                            {/if}
+                        <div class="flexbox middle space-4 custom-pt-4">
+                            <div class="icon size-16" style="align-self: center;">
+                                {if !empty($conversation.icon_fab)}
+                                    <i class="fab fa-{$conversation.icon_fab}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
+                                {elseif !empty($conversation.icon_fa)}
+                                    <i class="fas fa-{$conversation.icon_fa}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
+                                {else}
+                                    <img src="{$conversation.icon_url}" data-fa-i2svg>
+                                {/if}
+                            </div>
+                            <div class="hint desktop-only">{$conversation.transport_name|escape}</div>
                         </div>
                     </div>
                     <div class="dropdown" id="dropdown-c-name">
@@ -368,7 +371,7 @@
                                             <path fill-rule="evenodd" clip-rule="evenodd" d="M4.4379 17.0078C4.4379 17.0078 4.70548 9.45488 4.13562 5.87589C3.79545 3.73945 2.30345 2.05672 1.15597 1.04732C0.778405 0.715178 1.00664 0.0465164 1.5065 0.101429C3.67696 0.339867 7.49978 1.09173 10.7859 3.45844C15.6976 6.99592 4.4379 17.0078 4.4379 17.0078Z" fill="white"/>
                                         </svg>
                                     </div>
-                                    <div class="flexbox middle nowrap space-8 c-message-header">
+                                    <div class="flexbox middle nowrap space-16 c-message-header custom-mr-8">
                                         {if $_m.direction == crmMessageModel::DIRECTION_OUT}
                                             <span class="flexbox middle space-4 c-contact">
                                             {if !empty($contacts[$_m.creator_contact_id])}
@@ -380,11 +383,11 @@
                                         {/if}
 
                                         {if !empty($_m.create_datetime)}
-                                            <span class="nowrap c-date hint custom-ml-auto{if $_m.direction == crmMessageModel::DIRECTION_OUT} text-strong{/if}">
+                                            <span class="nowrap c-date gray custom-ml-auto{if $_m.direction == crmMessageModel::DIRECTION_OUT} text-strong{/if}">
                                                 {$_m.create_datetime|wa_datetime:'time'}
                                             </span>
                                         {/if}
-                                        <span class="icon cursor-pointer hint js-open-detail-message" data-dialog-url="{$wa_app_url}?module=message&action=bodyDialog&message_id={$_m.id}"><i class="fas fa-envelope-open-text"></i></span>
+                                        <a href="javascript:void(0);" class="button nobutton circle light-gray js-open-detail-message" data-dialog-url="{$wa_app_url}?module=message&action=bodyDialog&message_id={$_m.id}"><i class="fas fa-expand-alt"></i></a>
                                     </div>
 
                                     <div class="c-message-body{if $_m.direction == crmMessageModel::DIRECTION_OUT} text-strong{/if}">
@@ -583,7 +586,7 @@
                                                 <div class="flexbox js-default-drop-area">
                                                     <div class="c-files-wrapper js-files-wrapper">
                                                         <div class="c-drop-wrapper js-drop-area">
-                                                            <span class="{if empty($conversation.aux_items.reply_form_dropdown_items)}custom-pr-12 {/if}icon size-16 js-message-attachment {if !$is_images_enabled && !$is_images_enabled}is-disabled{/if}">
+                                                            <span class="{if empty($conversation.aux_items.reply_form_dropdown_items)}custom-pr-12 {/if}icon size-16 js-message-attachment {if !$is_images_enabled}is-disabled{else}cursor-pointer{/if}">
                                                                 <i class="fas fa-paperclip"></i>
                                                             </span>
                                                             {*<div class="js-drop-text" data-default="[`Attach file`]" data-hover="[`Drop file here`]">[`Attach file`]</div>*}
@@ -698,7 +701,7 @@
         <script>
             (function ($) {
 
-                $.crm.title.set("[`Conversation with`] {$_contact.name|escape}");
+                $.crm.title.set("[`Conversation with`] " + {$_contact.name|json_encode});
                 if (typeof prettyPrint != 'undefined' && $.isFunction(prettyPrint)) {
                     prettyPrint();
                 }
@@ -803,14 +806,13 @@
 </div>
 </div>
 
-{else}
+{elseif empty($is_empty_case)}
     <div class="flexbox middle width-100 no-messages">[`No messages`]</div>
 {/if}
 
-{if !$iframe}
+{if !$iframe && !empty($conversation)}
 <div class="sidebar right width-20rem not-blank bordered-left desktop-only" id="c-messages-sidebar-right" style="top: 0;">
     {if $_contact.id|default:null}
-        {* Попробуем вместо SSR подтянуть SPA с профилем в iframe *}
 
         <div class="custom-px-16 c-info-additional js-info-additional hidden" id="c-messages-info-additional">
             <div class="small gray cursor-pointer c-info-toggle js-info-toggle custom-mb-24">

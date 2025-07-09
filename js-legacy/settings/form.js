@@ -675,7 +675,7 @@ var crmSettingsForm = (function ($) {
                 $.crm.app_url + '?module=settings&action=formDelete',
                 { id: that.form.id },
                 function () {
-                    $.crm.content.load($.crm.app_url + 'settings/form');
+                    $.crm.content.load($.crm.app_url + 'settings/form/');
                 }
             );
         });

@@ -4,6 +4,7 @@ class crmMessageListByConversationAction extends crmBackendViewAction
 {
     const USERPIC = 32;
     protected $mm;
+    protected $active_sources;
 
     public function execute()
     {
@@ -71,21 +72,12 @@ class crmMessageListByConversationAction extends crmBackendViewAction
             return $el;
         }, $conversations);
 
-        // Get Sources
-        $active_sources = (new crmSourceModel)->getByField([
-            'type' => [crmSourceModel::TYPE_EMAIL, crmSourceModel::TYPE_IM],
-            'disabled' => 0
-        ], true);
         $pages_count = ceil($total_count / $list_params['limit']);
         $current_page = ceil($list_params['offset'] / $list_params['limit']) + 1;
         $contacts = $this->getContacts($contact_ids);
 
         $contact = [];
         if ($contact_id && isset($contacts[$contact_id])) {
-            $active_sources = array_map(function ($el) {
-                $el['source'] = crmSource::factory($el);
-                return $el;
-            }, $active_sources);
 
             $email = $contacts[$contact_id]->getFirst('email');
             $socialnetwork = $contacts[$contact_id]->getFirst('socialnetwork');
@@ -114,10 +106,11 @@ class crmMessageListByConversationAction extends crmBackendViewAction
             'page_of_item'              => $page_of_item,        
             'available_funnel'          => $fm->getAvailableFunnel(),
             'message_ts'                => $asm->get('crm', 'message_ts'),
-            'active_sources'            => $active_sources,
+            'active_sources'            => $this->getActiveSources(),
             'crm_app_url'               => wa()->getAppUrl('crm'),
             'site_url'                  => wa()->getRootUrl(true),
             'last_message_id'           => $last_message_id,
+            'is_empty_case'             => !$this->getConversationModel()->countAll(),
         ));
 
         wa('crm')->getConfig()->setLastVisitedUrl('message/');
@@ -245,6 +238,43 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         );
     }
 
+    protected function getActiveSources()
+    {
+        if ($this->active_sources !== null) {
+            return $this->active_sources;
+        }
+
+        $this->active_sources = (new crmSourceModel)->getByField([
+            'type' => [crmSourceModel::TYPE_EMAIL, crmSourceModel::TYPE_IM],
+            'disabled' => 0
+        ], 'id');
+
+        $this->active_sources = array_map(function ($el) {
+            $el['source'] = crmSource::factory($el);
+
+            $el['icon_color'] = '#BB64FF';
+            if ($el['type'] === crmSourceModel::TYPE_IM) {
+                $el['icon_url'] = $el['source']->getIcon();
+                $fa_icon = $el['source']->getFontAwesomeBrandIcon();
+                if (ifset($fa_icon['icon_fab'])) {
+                    $el['icon_fab'] = $fa_icon['icon_fab'];
+                    $el['icon_color'] = $fa_icon['icon_color'];
+                }
+            } elseif ($el['type'] === crmSourceModel::TYPE_EMAIL) {
+                $el['icon_fa'] = 'envelope';
+            }
+
+            return $el;
+        }, $this->active_sources);
+
+        return $this->active_sources;
+    }
+
+    protected function getFilterItemsBySource()
+    {
+        
+    }
+
     /**
      * Prepare filter by responsible:
      *  - Get requested filter or get last from DB
@@ -324,6 +354,7 @@ class crmMessageListByConversationAction extends crmBackendViewAction
     {
         // filter by transport preparation
         $filter_transports = $this->getFilterItemsByTransport();
+        $active_sources = $this->getActiveSources();
 
         // requested transport
         $selected_transport = waRequest::request('transport', null, waRequest::TYPE_STRING_TRIM);
@@ -338,11 +369,17 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         // ok, found in filter item variants, so be it selected (active)
         if (isset($filter_transports[$selected_transport])) {
             $active_filter_transport = $filter_transports[$selected_transport];
+        } elseif (isset($active_sources[$selected_transport])) {
+            $active_filter_transport = $active_sources[$selected_transport];
         }
 
         // list params filter (for sql query)
         if ($active_filter_transport['id'] !== "all") {
-            $list_params['transport'] = $active_filter_transport['id'];
+            if (wa_is_int($active_filter_transport['id'])) {
+                $list_params['source_id'] = $active_filter_transport['id'];
+            } else {
+                $list_params['transport'] = $active_filter_transport['id'];
+            }
         }
 
         // remember filter by transport (user)

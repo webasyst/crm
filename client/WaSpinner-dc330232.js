@@ -1,1 +1,0 @@
-import{_ as e,o as t,c as s,a as c}from"./main-82f77a11.js";const n={},o={class:"tw-w-full tw-h-full tw-flex tw-justify-center tw-items-center"},r=c("div",{class:"spinner tw-w-12 tw-h-12"},null,-1),_=[r];function a(i,l){return t(),s("div",o,_)}const w=e(n,[["render",a]]);export{w as W};

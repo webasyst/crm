@@ -65,7 +65,7 @@
                     <div class="block custom-mt-8">
                         <div class="flexbox vertical crm-bottom-panel">
                             <div class="crm-total-count-column">
-                                [`Total lines`]: <span class="highlighted crm-count">{$csv.count}</span>
+                                [`Total lines`]: <span class="highlighted crm-count">{if !empty($csv.count)}{$csv.count}{/if}</span>
                             </div>
                             <div class="crm-submit-column">
                                 <label>
@@ -79,17 +79,21 @@
                                 </label>
                                 <div class="crm-deals-settings-wrapper" style="display: none;">
 
+                                    <div class="wa-select">
                                     <select name="deal_funnel_id">
                                         {foreach $funnels as $_id => $_f}
                                             <option value="{$_id}" {if $form.params.deal_funnel_id|default:0 == $_id} selected="selected"{/if}>{$_f.name|escape}</option>
                                         {/foreach}
                                     </select>
+                                    </div>
 
+                                    <div class="wa-select">
                                     <select name="deal_stage_id">
                                         {foreach $stages as $_id => $_s}
                                             <option value="{$_id}" {if $form.params.deal_stage_id|default:0 == $_id} selected="selected"{/if}>{$_s.name|escape}</option>
                                         {/foreach}
                                     </select>
+                                    </div>
 
                                 </div>
 

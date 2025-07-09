@@ -103,6 +103,9 @@ class crmMessageBodyDialogAction extends crmViewAction
         }
 
         $to_list = $this->buildToList($recipients, $collection[$message['contact_id']]);
+        $copy_recipients = array_filter($recipients, function($el) {
+            return $el['type'] !== crmMessageRecipientsModel::TYPE_TO;
+        });
 
         $this->view->assign(array(
             'message'             => $message,
@@ -113,8 +116,10 @@ class crmMessageBodyDialogAction extends crmViewAction
             'funnel'              => $this->getFunnel($deal),
             'contacts'            => $collection,
             'recipients'          => $recipients,
+            'copy_recipients'     => $copy_recipients,
             'delete_message_text' => $delete_message_text,
             'is_admin'            => $this->getCrmRights()->isAdmin(),
+            'messages_in_conversation' => $this->getMessageModel()->countByField(['conversation_id' => $message['conversation_id']]),
         ));
     }
 

@@ -8,12 +8,14 @@ class crmContactListMethod extends crmApiAbstractMethod
         'online_status',
         'last_action',
         'acl',
-        'is_pinned'
+        'is_pinned',
+        'is_editable',
     ];
     const EXCLUSION_FIELDS = [
         'acl',
         'online_status',
-        'is_pinned'
+        'is_pinned',
+        'is_editable',
     ];
 
     /** @var crmContactsCollection */
@@ -181,6 +183,7 @@ class crmContactListMethod extends crmApiAbstractMethod
                 'last_datetime',
                 'name',
                 'company',
+                'is_company',
                 'jobtitle',
                 'company_contact_id',
                 'userpic',
@@ -192,6 +195,7 @@ class crmContactListMethod extends crmApiAbstractMethod
                 'fields',
                 'is_pinned',
                 'is_banned',
+                'is_editable',
             ],
             $userpic_size,
             $this->sort['key'] === 'name',
@@ -356,7 +360,8 @@ class crmContactListMethod extends crmApiAbstractMethod
                 'create_app_id',
                 'create_method',
                 'is_user',
-                'company'
+                'company',
+                'is_company',
             ],
             $fields
         );

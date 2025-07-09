@@ -287,19 +287,20 @@ var CRMNotificationEdit = (function ($) {
     };
 
     CRMNotificationEdit.prototype.initChangeEvent = function () {
-        var that = this,
+        const that = this,
             $eventToggle = that.$wrapper.find(".js-event-toggle"),
-            $companySelector = that.$wrapper.find(".js-event-company"),
             $fieldsGroup = that.$wrapper.find(".js-fields-group");
+        const $companyField = $fieldsGroup.find('.js-company-field');
+        const $companySelector = $companyField.find(".js-event-company");
 
         $eventToggle.on("change", onChange);
 
         function onChange() {
-            var event_id = $.trim($(this).val());
+            const event_id = $.trim($(this).val());
 
             that.notification_event = event_id;
 
-            var notification = that.notifications[event_id];
+            const notification = that.notifications[event_id];
             if (notification) {
                 // names
                 that.$name.val(notification.name);
@@ -317,9 +318,11 @@ var CRMNotificationEdit = (function ($) {
             }
 
             if (event_id.substr(0, 8) === 'invoice.') {
+                $companyField.show();
                 $companySelector.removeAttr('disabled').show();
             } else {
                 $companySelector.attr('disabled', true).hide();
+                $companyField.hide();
             }
 
             $fieldsGroup.show();

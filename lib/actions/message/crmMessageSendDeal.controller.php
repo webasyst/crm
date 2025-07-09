@@ -64,13 +64,19 @@ class crmMessageSendDealController extends crmSendEmailController
             $data['sender_email'] = key(waMail::getDefaultFrom());
         }
 
-        $from = array($data['sender_email'] => $sender_name);
+        $from = [$data['sender_email'] => $sender_name];
 
-        $reply_to = array();
-        if ($deal['source_email']) {
+        $reply_to = [];
+        if (!empty($deal['source_email'])) {
             $reply_to[$deal['source_email']] = $deal['source_email'];
+        } else {
+            $source_email = $this->emailSource();
+            if ($source_email) {
+                $notification['reply_to'][$source_email] = $source_email;
+            } else {
+                waLog::log('Source email not found on message send deal controller');
+            }
         }
-        $reply_to[$data['sender_email']] = $sender_name;
 
         $notification = array(
             'contact'  => $this->getRecipientContact(),
@@ -84,10 +90,6 @@ class crmMessageSendDealController extends crmSendEmailController
             'sender'   => waMail::getDefaultFrom(),
             'cc'       => $data['cc']
         );
-
-        if ($deal['source_email']) {
-            $notification['reply_to'][$deal['source_email']] = $deal['source_email'];
-        }
 
         if ($data['sender_email']) {
             $this->getUserContact()->setSenderEmail($data['sender_email']);

@@ -1,0 +1,11 @@
+{**
+  * Template for render select
+  *}
+<div class="wa-select">
+    <select disabled="disabled">
+        <option value=""></option>
+        {foreach $params.field->getOptions() as $k => $v}
+            <option>{$v|escape}</option>
+        {/foreach}
+    </select>
+</div>

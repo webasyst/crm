@@ -144,7 +144,7 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
         }
         if (!empty($contact_list_sort)) {
             $_list_sort = $csm->getOne($this->getUser()->getId(), $this->getAppId(), 'contacts_action_params');
-            $_list_sort = waUtils::jsonDecode($_list_sort, true);
+            $_list_sort = empty($_list_sort) ? [] : waUtils::jsonDecode($_list_sort, true);
             $_list_sort['raw_sort'] = [
                 $contact_list_sort['field'],
                 ($contact_list_sort['asc'] ? 'ASC' : 'DESC')

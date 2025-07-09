@@ -101,18 +101,18 @@
                         {/if}
                     {/if}
 
-                    <div class="field crm-icons-block">
+                    <div class="field crm-icons-block custom-mt-24">
                         <div class="name">[`Icon`]</div>
                         <div class="value">
-                            <ul class="chips">
+                            <ul class="chips custom-mt-0">
                                 {foreach $icons as $icon}
                                     <li data-icon="{$icon}" {if $icon == $segment.icon}class="selected"{/if}>
                                         <a href="javascript:void(0)">
                                             {if array_key_exists($icon, $icons_array)}
-                                                    {$icons_array[$icon]}
-                                                {else}
-                                                    {$icons_array['noname']}
-                                                {/if}
+                                                {$icons_array[$icon]}
+                                            {else}
+                                                <i class="fas fa-{$icon}"></i>
+                                            {/if}
                                         </a>
                                     </li>
                                 {/foreach}

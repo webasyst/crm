@@ -6,15 +6,22 @@
 
     {* dialog section *}
     {include file="./SettingsFormFieldEdit.inc.html" inline}
+    {include file="./SettingsFormCheckboxEdit.inc.html" inline}
     {include file="./SettingsFormParagraphEdit.inc.html" inline}
     {include file="./SettingsFormAgreementCheckboxEdit.inc.html" inline}
+    {include file="./SettingsFormButtonEdit.inc.html" inline}
 
     <script>
         (function($) {
             $.crm.title.set('[`Web forms`]');
 
+            $("#add-field-dropdown").waDropdown({
+                hide: false
+            });
+
             new crmSettingsForm({
                 $wrapper: $("#crm-form-page"),
+                $add_field_dropdown: $("#add-field-dropdown"),
                 form: {$form|json_encode},
                 available_fields: {$available_fields|json_encode},
                 default_checked_fields: {$default_checked_fields|json_encode},

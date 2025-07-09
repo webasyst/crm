@@ -3,7 +3,7 @@
 class crmAutocompleteController extends waController
 {
     protected $term;
-    protected $limit = 10;
+    protected $limit = 30;
     protected $type;
     protected $add_new = false;
     protected $emailcomplete = false;
@@ -176,20 +176,21 @@ class crmAutocompleteController extends waController
                         }
                         $company = '<span class="small">'.$company.'</span>';
                     }
-                    $phone && $phone = '<i class="icon16 phone"></i>'.$phone;
-                    $email && $email = '<i class="icon16 email"></i>'.$email;
-                    $tag && $tag = '<i class="icon16 tags"></i>'.$tag;
-                    $contact_add = new waContact($c['id']);
-                    $result[$c['id']] = array(
+                    $result[$c['id']] = [
                         'id'        => $c['id'],
                         'name'      => $c['name'],
                         'login'     => $c['login'],
-                        'photo_url' => $contact_add->getPhoto(96), //waContact::getPhotoUrl($c['id'], $c['photo'], 96),
-                        'label'     => implode(' ', array_filter(array($name, $company, $email, $phone, $tag))),
-                        'criteria'  => array(
-                            'email' => ifset($c['email'])
-                        )
-                    );
+                        'name_term' => $name,
+                        'email_term' => $email,
+                        'phone_term' => $phone,
+                        'tag_term'   => $tag,
+                        'company'   => $company,
+                        'photo'     => $c['photo'],
+                        'photo_url' => waContact::getPhotoUrl($c['id'], $c['photo'], 96),
+                        'criteria'  => [
+                            'email' => ifset($c['email']),
+                        ],
+                    ];
 
                     if ($deal) {
                         $result[$c['id']]['rights'] = $this->getDealRights($deal, $c);
@@ -211,18 +212,6 @@ class crmAutocompleteController extends waController
             }
         }
 
-        foreach ($result as &$c) {
-            $contact = new waContact($c['id']);
-            if (wa()->whichUI() === '2.0') {
-                $c['label'] = "<div class = \"c-layout-contact\"><span class=\"icon userpic custom-mr-4\"><i class=\"rounded\" style='background-image: url(\"".$contact->getPhoto(20)."\");'></i></span><span class = \"c-layout-contact-name\">".$c['label']."</span></div>";
-            }
-            else {
-                $c['label'] = "<i class='icon16 userpic20' style='background-image: url(\"".$contact->getPhoto(20)."\");'></i>".$c['label'];
-            }
-            $c['link'] = 'contact/'.$c['id'].'/';
-        }
-        unset($c);
-
         if ($this->add_new) {
             $data = $this->extractData($term_safe);
             $result[] = array(
@@ -230,7 +219,7 @@ class crmAutocompleteController extends waController
                 'name'      => $term_safe,
                 'login'     => null,
                 'photo_url' => null,
-                'label'     => '<i class="icon16 add"></i>'._w('Add new contact').': '.$term_safe,
+                'label'     => (wa()->whichUI('crm') === '1.3' ? '<i class="icon16 add"></i>' : '<i class="fas fa-plus opacity-50"></i>&nbsp;')._w('Add new contact').': '.$term_safe,
                 'data'      => $data,
                 'criteria'  => array(
                     'email' => null
@@ -238,51 +227,53 @@ class crmAutocompleteController extends waController
             );
         }
 
-        if ($this->emailcomplete && $result) {
-            $ids = array();
-            foreach ($result as $contacts)
-            {
-                $ids[] = $contacts['id'];
-            }
-            unset($contacts);
-
+        if (!empty($result)) {
+            $ids = array_column($result, 'id');
             $collection = new crmContactsCollection('id/'.implode(',', $ids));
-            $collection = $collection->getContacts("name,email");
-            foreach ($collection as $contact => $field) {
-                if (!is_array($field['email']) || empty($field['email'])) {
-                    unset($result[$contact]);
-                } else {
-                    $result[$contact]['name'] = htmlspecialchars($field['name']);
-                    $result[$contact]['email'] = htmlspecialchars($field['email']['0']);
+            $collection = $collection->getContacts("email,phone");
+            $formatter = new waContactPhoneFormatter();
+            foreach ($collection as $contact_id => $fields) {
+                if (!empty($fields['email']) && is_array($fields['email'])) {
+                    $result[$contact_id]['email'] = htmlspecialchars($fields['email']['0']);
+                }
+                if (!empty($fields['phone']) && is_array($fields['phone'])) {
+                    $result[$contact_id]['phone'] = htmlspecialchars($formatter->format(($fields['phone']['0']['value'])));
                 }
             }
-            unset($collection);
+        }
 
-            return $result;
+        if ($this->emailcomplete && $result) {
+            $result = array_filter($result, function($contact) {
+                return !empty($contact['email']);
+            });
         }
 
         if ($this->phonecomplete && $result) {
-            $ids = array();
-            foreach ($result as $contacts)
-            {
-                $ids[] = $contacts['id'];
-            }
-            unset($contacts);
-
-            $collection = new crmContactsCollection('id/'.implode(',', $ids));
-            $collection = $collection->getContacts("name,phone");
-            foreach ($collection as $contact => $field) {
-                if (!is_array($field['phone'])) {
-                    unset($result[$contact]);
-                } else {
-                    $result[$contact]['name'] = htmlspecialchars($field['name']);
-                    $result[$contact]['phone'] = $field['phone']['0']['value'];
-                }
-            }
-            unset($collection);
-
-            return $result;
+            $result = array_filter($result, function($contact) {
+                return !empty($contact['phone']);
+            });
         }
+
+        $result = array_map(function($contact) {
+            if ($contact['id'] > 0) {
+                $phone = ifempty($contact['phone_term'], ifset($contact['phone'], ''));
+                $email = ifempty($contact['email_term'], ifset($contact['email'], ''));
+                $tag = ifempty($contact['tag_term'], '');
+                $phone && $phone = '<span class="nowrap">'.(wa()->whichUI('crm') === '1.3' ? '<i class="icon16 phone"></i>' : '<i class="fas fa-phone-alt opacity-50"></i>&nbsp;').$phone.'</span>';
+                $email && $email = '<span class="nowrap">'.(wa()->whichUI('crm') === '1.3' ? '<i class="icon16 email"></i>' : '<i class="fas fa-envelope opacity-50"></i>&nbsp;').$email.'</span>';
+                $tag && $tag = '<span class="nowrap">'.(wa()->whichUI('crm') === '1.3' ? '<i class="icon16 tags"></i>' : '<i class="fas fa-hashtag opacity-50"></i>').$tag.'</span>';
+                $contact['label'] = implode('&nbsp; ', array_filter([$contact['name_term'], $contact['company'], $email, $phone, $tag]));
+
+                if (wa()->whichUI() === '1.3') {
+                    $contact['label'] = "<i class='icon16 userpic20' style='background-image: url(\"".waContact::getPhotoUrl($contact['id'], $contact['photo'], 20)."\");'></i>".$contact['label'];
+                } else {
+                    $contact['label'] = "<div class = \"c-layout-contact flexbox full-width\"><span class=\"icon userpic custom-mr-4\"><i class=\"rounded\" style='background-image: url(\"".waContact::getPhotoUrl($contact['id'], $contact['photo'], 20)."\");'></i></span><span class = \"c-layout-contact-name wide\">".$contact['label']."</span></div>";
+                }
+                $contact['link'] = 'contact/'.$contact['id'].'/';
+                unset($contact['name_term'], $contact['email_term'], $contact['phone_term'], $contact['tag_term'], $contact['photo']);
+            }
+            return $contact;
+        }, $result);
 
         return array_values($result);
     }

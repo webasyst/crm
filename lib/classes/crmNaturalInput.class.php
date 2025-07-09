@@ -89,6 +89,10 @@ class crmNaturalInput
 
     public static function matchDueDate(&$item_name)
     {
+        if (true) {
+            return false;
+        }
+        
         $instance = self::getInstance();
 
         foreach (self::$json_rules as $locale => $json_rule) { // all langs

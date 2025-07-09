@@ -92,6 +92,11 @@ class crmFormConstructor
     {
         $info = $this->getForm()->getInfo();
         $info['params']['fields'] = $this->getCheckedFields();
+        $info['params']['button'] = json_decode(ifset($info, 'params', 'button', '{}'), true) ?: [
+            'captionplace' => empty($info['params']['button_caption']) ? 'left' : 'none',
+            'width' => 'auto',
+            'caption' => ifset($info, 'params', 'button_caption', _w('Submit')),
+        ];
         return $info;
     }
 
@@ -109,32 +114,26 @@ class crmFormConstructor
         }
 
         // throw off not-allowed fields
-        foreach ($available_fields as $field_id => $field) {
-            if (!self::isFieldAllowed($field_id)) {
-                unset($available_fields[$field_id]);
-            }
-        }
-
+        $available_fields = array_filter($available_fields, function ($field) {
+            return isset($field['id']) && self::isFieldAllowed($field['id']);
+        });
+        
         $form = $this->getForm();
 
-        // field must be multi-check-able, so use loop
-        // don't touch it
-        $field_ids = array();
-        foreach ($form->getFields() as $field) {
-            $field_ids[] = $field['id'];
-        }
+        $field_ids = array_column($form->getFields(), 'id');
 
-        foreach ($available_fields as $field_id => &$field_info) {
-            $field_info['checked'] = 0;
-        }
-        unset($field_info);
+        $available_fields = array_map(function ($field) use ($field_ids) {
+            $field['checked'] = in_array($field['id'], $field_ids) ? 1 : 0;
+            return $field;
+        }, $available_fields);
 
-        foreach ($field_ids as $field_id) {
-            if (!isset($available_fields[$field_id])) {
-                continue;
-            }
-            $available_fields[$field_id]['checked'] += 1;
-        }
+        $available_fields = array_reduce(
+            $available_fields,
+            function ($result, $field) {
+                $result[strval($field['id'])] = $field;
+                return $result;
+            }, 
+        []);
 
         return $available_fields;
     }
@@ -151,7 +150,7 @@ class crmFormConstructor
         $checked_fields = array();
         $available_fields = $this->obtainAvailableFields();
         foreach ($fields as $field) {
-            if (!isset($available_fields[$field['id']])) {
+            if (!isset($field['id']) || !isset($available_fields[$field['id']])) {
                 continue;
             }
             $a_field = $available_fields[$field['id']];
@@ -211,7 +210,32 @@ class crmFormConstructor
         $field_type = $info['form_field_type'];
         if (isset($info['field']) && $info['field'] instanceof waContactField) {
             $contact_field_type = strtolower($info['field']->getType());
-            $template_path = "templates/form/fields/constructor/field.{$field_type}.{$contact_field_type}.html";
+            if ($info['field'] instanceof waContactRadioSelectField || $info['field'] instanceof waContactBranchField) {
+                $template_path = "templates/form/fields/constructor/field.contact.radio.html";
+            } elseif ($info['field'] instanceof waContactSelectField) {
+                $template_path = "templates/form/fields/constructor/field.contact.select.html";
+            } elseif ($info['field'] instanceof waContactTextField) {
+                $template_path = "templates/form/fields/constructor/field.contact.textarea.html";
+            } elseif ($info['field'] instanceof waContactCompositeField || $info['field'] instanceof waContactAddressField) {
+                $subfields = $info['field']->getFields();
+                $info['subfields'] = [];
+                foreach ($subfields as $subfield_id => $subfield) {
+                    $subfield_info = [
+                        'id' => $subfield_id,
+                        'type' => $subfield->getType(),
+                        'name' => $subfield->getName(),
+                        'placeholder' => $subfield->getName(),
+                        'is_multi' => false,
+                        'form_field_type' => self::FIELD_TYPE_CONTACT,
+                        'field' => $subfield,
+                    ];
+                    $subfield_info['html'] = $this->renderField($subfield_info);
+                    $info['subfields'][$subfield_id] = $subfield_info;
+                }
+                $template_path = "templates/form/fields/constructor/field.contact.composite.html";
+            } else {
+                $template_path = "templates/form/fields/constructor/field.{$field_type}.{$contact_field_type}.html";
+            }
         } else {
             $field_id = ltrim($info['id'], '!');
             $template_path = "templates/form/fields/constructor/field.{$field_type}.{$field_id}.html";
@@ -511,7 +535,10 @@ class crmFormConstructor
                     'is_multi' => false,
                     'placeholder_need' =>
                         ($field instanceof waContactSelectField
-                            || $field instanceof waContactBirthdayField || $field instanceof waContactAddressField
+                            || $field instanceof waContactBirthdayField 
+                            || $field instanceof waContactCompositeField
+                            || $field instanceof waContactAddressField
+                            || $field instanceof waContactCheckboxField
                         ) ? false : true,
                     'form_field_type' => self::FIELD_TYPE_CONTACT,
                     'person_enabled' => boolval($pf),
@@ -599,7 +626,7 @@ class crmFormConstructor
                 'name' => $name,
                 'type' => $field->getType(),
                 'is_multi' => false,
-                'placeholder_need' => !($field instanceof waContactSelectField),
+                'placeholder_need' => !($field instanceof waContactSelectField) && !($field instanceof waContactCompositeField) && !($field instanceof waContactAddressField),
                 'form_field_type' => self::FIELD_TYPE_DEAL
             );
         }

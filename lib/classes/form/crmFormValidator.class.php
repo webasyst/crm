@@ -101,7 +101,7 @@ class crmFormValidator
         $failed = true;
         $at_least_one_required = array('firstname', 'lastname', 'middlename', 'email', 'company');
         foreach ($at_least_one_required as $field_id) {
-            $value = trim(ifset($data[$field_id]));
+            $value = trim(ifset($data[$field_id], ''));
             if (strlen($value) > 0) {
                 $failed = false;
                 continue;

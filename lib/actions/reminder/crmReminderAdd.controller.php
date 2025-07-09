@@ -73,8 +73,9 @@ class crmReminderAddController extends crmJsonController
         if ($data['due_time']) {
             $reminder['due_datetime'] = waDateTime::parse('Y-m-d H:i:s', $reminder['due_date'].' '.$data['due_time'].':00');
         } else {
-            $reminder['due_datetime'] = !empty($dt['due_datetime']) ? $dt['due_datetime'] : null;
+            $reminder['due_datetime'] = !empty($dt['due_datetime']) ? waDateTime::parse('Y-m-d H:i:s', $dt['due_datetime']) : null;
         }
+
         $action = 'reminder_update';
         if (!$data['id']) {
             $action = 'reminder_add';

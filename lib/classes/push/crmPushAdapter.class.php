@@ -44,6 +44,10 @@ class crmPushAdapter extends onesignalPush
     {
         if ($api_method === 'notifications') {
             $this->is_no_auth = ifset($request_data['app_id']) === self::ONESIGNAL_APP_ID;
+            if ($this->mobile_push_only && !$this->is_no_auth) {
+                // on mobile_push_only do not try to send web push
+                return null;
+            }
         }
         return parent::request($api_method, $request_data, $request_method);
     }

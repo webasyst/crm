@@ -2904,22 +2904,33 @@ var CRMContactUpdateDialog = ( function($) {
             $selectHtmlField = that.$wrapper.find(".js-field-autocomplete");
 
         function setContactData(contact) {
+            const name = escapeHtml(contact.name);
             return contactHtml = `        
             <div class="c-column c-column-image">
                 <a class="flexbox middle" href="${$.crm.app_url}${contact.link}" target="_top" data-link="top" >
-                    <img src="${contact.photo_url}" alt="${contact.name}">
+                    <img src="${contact.photo_url}" alt="${name}">
                 </a>
             </div>
             <div class="c-column middle nowrap">
-                <a href="${$.crm.app_url}${contact.link}" target="_top" data-link="top" title="${contact.name}">${contact.name}</a>
+                <a href="${$.crm.app_url}${contact.link}" target="_top" data-link="top" title="${name}">${name}</a>
             </div>`
         }
+
+        const escapeHtml = unsafe => {
+            return unsafe
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        };
 
         $autocomplete
             .autocomplete({
                 appendTo: $wrapper,
                 source: $.crm.app_url + "?module=autocomplete",
                 minLength: 2,
+                delay: 300,
                 html: true,
                 focus: function () {
                     return false;
@@ -2931,9 +2942,12 @@ var CRMContactUpdateDialog = ( function($) {
                     $selectHtmlField.html(setContactData(ui.item));
                     return false;
                 }
-            }).data("ui-autocomplete")._renderItem = function (ul, item) {
-            return $("<li />").addClass("ui-menu-item-html").append("<div>" + item.value + "</div>").appendTo(ul);
-        };
+            })
+            .data("ui-autocomplete")._renderItem = function (ul, item) {
+                ul.css("max-height", "50vh");
+                ul.css("overflow-y", "scroll");
+                return $("<li />").addClass("ui-menu-item-html").append("<div>" + item.label + "</div>").appendTo(ul);
+            };
 
         $idField.on("change", function() {
             that.$submitButton.attr("disabled", false);

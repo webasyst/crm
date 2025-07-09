@@ -20,7 +20,8 @@ abstract class crmApiAbstractMethod extends waAPIMethod
     public function getResponse($internal = false)
     {
         set_error_handler(function ($errno, $err_str, $err_file, $err_line) {
-            if (error_reporting() !== 0) {
+            // https://www.php.net/manual/en/language.operators.errorcontrol.php
+            if (error_reporting() !== 0 && error_reporting() !== E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR | E_PARSE) {
                 waLog::dump([
                     'warning' => $err_str,
                     'code'    => $errno,
@@ -54,7 +55,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
         }
         return $this->request_body;
     }
-    
+
     protected function getContactsMicrolist(array $ids, array $fields = ['id', 'name', 'userpic'], $userpic_size = '32')
     {
         $list = (new waContactModel)->getByField(['id' => $ids], true);
@@ -83,7 +84,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
                 }
             }
             $el['userpic'] = $this->getDataResourceUrl(waContact::getPhotoUrl($el['id'], $el['photo'], $userpic_size, $userpic_size, ifset($el['is_company'], false) ? 'company' : 'person', true));
-            
+
             if (in_array('tags', $fields) && isset($el['tags']) && is_array($el['tags'])) {
                 $el['tags'] = $this->filterData(
                     $el['tags'],
@@ -91,7 +92,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
                     ['id' => 'integer', 'count' => 'integer']
                 );
             }
-            return $this->filterFields($el, $fields, ['id' => 'integer', 'company_contact_id' => 'integer', 'create_datetime' => 'datetime', 'last_datetime' => 'datetime', 'is_pinned' => 'boolean', 'is_banned' => 'boolean']);
+            return $this->filterFields($el, $fields, ['id' => 'integer', 'company_contact_id' => 'integer', 'create_datetime' => 'datetime', 'last_datetime' => 'datetime', 'is_company' => 'boolean', 'is_pinned' => 'boolean', 'is_banned' => 'boolean', 'is_editable' => 'boolean']);
         }, array_values($raw_list));
     }
 
@@ -152,7 +153,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
     protected function prepareFile(array $data)
     {
         return $this->filterFields(
-            $data, 
+            $data,
             ['id', 'name', 'size', 'ext', 'create_datetime', 'comment', 'url'],
             ['id' => 'integer', 'size' => 'integer', 'create_datetime' => 'datetime']
         );
@@ -161,7 +162,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
     protected function prepareSource(array $data)
     {
         return $this->filterFields(
-            $data, 
+            $data,
             ['id', 'type', 'name', 'provider', 'icon_url', 'icon_fab', 'icon_color'],
             ['id' => 'integer']
         );
@@ -177,7 +178,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
         }
 
         return $this->filterFields(
-            $data, 
+            $data,
             [
                 'id',
                 'status_id',
@@ -203,7 +204,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
             $data['deal_id'] = null;
         }
         return $this->filterFields(
-            $data, 
+            $data,
             ['id', 'create_datetime', 'creator_contact_id', 'contact_id', 'deal_id', 'user_contact_id', 'due_date', 'due_datetime', 'complete_datetime', 'content', 'type'],
             ['id' => 'integer', 'creator_contact_id' => 'integer', 'contact_id' => 'integer', 'deal_id' => 'integer', 'user_contact_id' => 'integer', 'create_datetime' => 'datetime', 'due_datetime' => 'datetime', 'complete_datetime' => 'datetime']
         );
@@ -214,7 +215,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
         $state = crmInvoice::getState($data['state_id']);
         $data['state_name'] = ifset($state, 'name', false) ? $state['name'] : $data['state_id'];
         return $this->filterFields(
-            $data, 
+            $data,
             ['id', 'create_datetime', 'update_datetime', 'number', 'invoice_date', 'creator_contact_id', 'company_id', 'contact_id', 'due_days', 'due_date', 'amount', 'currency_id', 'currency_rate', 'tax_name', 'tax_percent', 'tax_type', 'tax_amount', 'discount_percent', 'discount_amount', 'summary', 'comment', 'state_id', 'state_name', 'payment_datetime', 'deal_id'],
             ['id' => 'integer', 'creator_contact_id' => 'integer', 'contact_id' => 'integer', 'company_id' => 'integer', 'due_days' => 'integer', 'amount' => 'float', 'currency_rate' => 'float', 'tax_percent' => 'float', 'tax_amount' => 'float', 'discount_percent' => 'float', 'discount_amount' => 'float', 'deal_id' => 'integer', 'create_datetime' => 'datetime', 'update_datetime' => 'datetime', 'payment_datetime' => 'datetime']
         );
@@ -223,7 +224,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
     protected function prepareMessage(array $data)
     {
         return $this->filterFields(
-            $data, 
+            $data,
             [
                 'id',
                 'create_datetime',
@@ -269,7 +270,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
             $data['plugin_icon'] = $this->getDataResourceUrl($data['plugin_icon']);
         }
         return $this->filterFields(
-            $data, 
+            $data,
             ['id', 'direction', 'status_id', 'create_datetime', 'finish_datetime', 'plugin_id', 'plugin_call_id', 'plugin_gateway', 'plugin_user_number', 'plugin_client_number', 'plugin_record_id', 'notification_sent', 'deal_id', 'client_contact_id', 'user_contact_id', 'duration', 'comment', 'has_access', 'plugin_icon', 'plugin_name', 'redirect_allowed', 'client_phone_formatted', 'contact', 'user'],
             ['id' => 'integer', 'client_contact_id' => 'integer', 'user_contact_id' => 'integer', 'deal_id' => 'integer', 'create_datetime' => 'datetime', 'finish_datetime' => 'datetime', 'duration' => 'integer', 'has_access' => 'boolean', 'notification_sent' => 'boolean', 'redirect_allowed' => 'boolean']
         );
@@ -282,13 +283,13 @@ abstract class crmApiAbstractMethod extends waAPIMethod
             $el['is_editable'] = $rights->canEditSegment($el);
             return $el;
         }, $result_set);
-        
+
         $result = $this->filterData(
-            $result, 
+            $result,
             ['id', 'name', 'icon', 'icon_path', 'type', 'count', 'archived', 'is_editable'],
             ['id' => 'integer', 'count' => 'integer', 'archived' => 'boolean']
         );
-        
+
         return $this->prepareSegmentIcons($result);
     }
 
@@ -382,10 +383,10 @@ abstract class crmApiAbstractMethod extends waAPIMethod
     {
         $contact['id'] = intval($contact['id']);
         $contact['userpic'] = $this->getDataResourceUrl(waContact::getPhotoUrl(
-            $contact['id'], 
+            $contact['id'],
             ifset($contact, 'photo', null),
-            $userpic_size, 
-            $userpic_size, 
+            $userpic_size,
+            $userpic_size,
             ifset($contact, 'is_company', false) ? 'company' : 'person',
             true
         ));
@@ -418,8 +419,8 @@ abstract class crmApiAbstractMethod extends waAPIMethod
             $result[$el['id']] = $el;
             return $result;
         }, []);
-        
-        
+
+
         $source_helpers = array_reduce($sources, function ($result, $el) {
             $result[$el['id']] = crmSourceHelper::factory(crmSource::factory($el['id']));
             return $result;

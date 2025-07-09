@@ -1,16 +1,16 @@
 {**
   * Template for render address control
   *}
-<div class="c-field-wrapper">
-    <p>
-        {$subfields = $field.field->getFields()}
-        {foreach $subfields as $subfield_id => $subfield}
-            {if !($subfield instanceof waContactHiddenField)}
-                <span class="field field-address-{$subfield_id}">
-                    <span>{$subfield->getName()|escape}</span>
-                    {$subfield->getHtml([], 'disabled="disabled"')}
-                </span>
-            {/if}
-        {/foreach}
-    </p>
+<div class="c-field-wrapper crm-composite-field fields{if $field.subfield_captionplace|default:'above' !== 'above'} horizontal{elseif $field.subfield_captionplace|default:'above' === 'none'} no-name{/if}" data-composite="1">
+    {$subfields = $field.field->getFields()}
+    {foreach $subfields as $subfield_id => $subfield}
+        {if !($subfield instanceof waContactHiddenField)}
+            <div class="field field-composite-{$subfield_id}{if $field.subfield_captionplace|default:'above' === 'above'} vertical{/if}">
+                <div class="name for-input">{$subfield->getName()|escape}</div>
+                <div class="value">
+                    {$subfield->getHtml([], "disabled='disabled' placeholder='{$subfield->getName()|escape}'")}
+                </div>
+            </div>
+        {/if}
+    {/foreach}
 </div>

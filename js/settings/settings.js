@@ -95,10 +95,10 @@ var CRMSettings = ( function($) {
 
             if ($link && $link.length) {
                 setItem( $link.closest("li") );
-
             } else {
                 var $links = $sidebar.find("a[href^='" + $.crm.app_url + "']"),
                     location_string = location.pathname,
+                    location_string_slash = location.pathname + '/',
                     max_length = 0,
                     link_index = 0;
 
@@ -110,7 +110,7 @@ var CRMSettings = ( function($) {
 
                     if (alias && href == alias) {
                         link_index = index;
-                    } else if (location_string.indexOf(href) >= 0) {
+                    } else if (location_string.indexOf(href) >= 0 || location_string_slash.indexOf(href) >= 0) {
                         if ( href_length > max_length ) {
                             max_length = href_length;
                             link_index = index;

@@ -28,14 +28,56 @@ class crmPushService
         $this->waid_client_id = ifset($waidCredentials['client_id']) ? $waidCredentials['client_id'] : null;
     }
 
-    public function notifyAboutMessage($contact, $message, $conversation)
+    public function notifyAboutMessage($contact, $message, $conversation, $deal = null)
     {
+        if ($message['direction'] !== crmMessageModel::DIRECTION_IN) {
+            return;
+        }
+        
         if ((empty($this->push_adapter) && empty($this->onesignal_adapter)) || empty($message)) {
             return;
         }
 
-        //$rights_model = new waContactRightsModel();
-        //$crm_user_ids = $rights_model->getUsers('crm');
+        if (empty($conversation)) {
+            if (!ifset($message['conversation_id'])) {
+                return;
+            }
+            $conversation = (new crmConversationModel)->getById($message['conversation_id']);
+            if (empty($conversation)) {
+                return;
+            }
+        }
+
+        if (!empty($conversation['deal_id']) && empty($deal)) {
+            $deal = (new crmDealModel)->getById($conversation['deal_id']);
+        }
+        $crm_user_ids = $this->getMessageUsers($message, $contact, $deal);
+
+        $contacts_push_settings = (new waContactSettingsModel)->getByField(['app_id' => 'crm', 'name' => 'push'], 'contact_id');
+        $contacts_push_settings = array_filter($contacts_push_settings, function($settings) use ($message, $crm_user_ids) {
+            if (!in_array($settings['contact_id'], $crm_user_ids)) {
+                return false;
+            }
+            $value = json_decode($settings['value'], true);
+            if (empty($value)) {
+                return false;
+            }
+            
+            return ifset($value['all_messages']) || 
+                ifset($value['email_messages']) && $message['transport'] === 'EMAIL' ||
+                ifset($value['im_messages']) && $message['transport'] === 'IM' ||
+                ifset($value['source_'.$message['source_id'].'_messages']);
+        });
+
+        $push_users_ids = array_keys($contacts_push_settings);
+
+        if (!empty($conversation['user_contact_id']) && !in_array($conversation['user_contact_id'], $push_users_ids)) {
+            $push_users_ids[] = $conversation['user_contact_id'];
+        }
+        
+        if (empty($push_users_ids)) {
+            return;
+        }
 
         $data = [
             'waid_wa_client_id' => $this->waid_client_id,
@@ -44,79 +86,52 @@ class crmPushService
             'conversation_id' => (int) $message['conversation_id']
         ];
 
-        if ($message['direction'] === crmMessageModel::DIRECTION_IN) {
-            if (empty($conversation)) {
-                if (!ifset($message['conversation_id'])) {
-                    return;
-                }
-                $conversation = (new crmConversationModel)->getById($message['conversation_id']);
-                if (empty($conversation)) {
-                    return;
-                }
+        if (empty($contact) && ifset($message['contact_id'])) {
+            $contact = new crmContact($message['contact_id']);
+        }
+
+        $push_body = ($conversation['type'] === crmConversationModel::TYPE_EMAIL) ? 
+        ifset($message['subject'], '') :
+        strip_tags($message['body']);
+    
+        $crm_app_url = wa()->getRootUrl(true) . wa()->getConfig()->getBackendUrl() .'/crm/';
+        $client_userpic_url = waContact::getPhotoUrl($contact['id'], $contact['photo'], null, null, $contact['is_company'] ? 'company' : 'person');
+        $image_url = $this->getDataResourceUrl($client_userpic_url);
+
+        $sql = "SELECT id, locale FROM `wa_contact` WHERE id IN (:ids) AND is_user = 1";
+        $push_users_locales = (new waContactModel)->query($sql, ['ids' => $push_users_ids])->fetchAll();
+        $push_users_locales = array_reduce($push_users_locales, function($res, $el) {
+            if (!isset($res[$el['locale']])) {
+                $res[$el['locale']] = [];
             }
-            
-            if (!empty($conversation['user_contact_id'])) {
-                // Видимый пуш ответственному
-                if (empty($contact) && ifset($message['contact_id'])) {
-                    $contact = new crmContact($message['contact_id']);
-                }
-        
-                $push_body = ($conversation['type'] === crmConversationModel::TYPE_EMAIL) ? 
-                    ifset($message['subject'], '') :
-                    strip_tags($message['body']);
-                
-                $crm_app_url = wa()->getRootUrl(true) . wa()->getConfig()->getBackendUrl() .'/crm/';
-                $client_userpic_url = waContact::getPhotoUrl($contact['id'], $contact['photo'], null, null, $contact['is_company'] ? 'company' : 'person');
-                
-                $user = new waContact($conversation['user_contact_id']);
-                if (!$user->exists()) {
-                    return;
-                }
+            $res[$el['locale']][] = $el['id'];
+            return $res;
+        }, []);
 
-                $old_locale = wa()->getLocale();
-                if ($user->getLocale() !== $old_locale) {
-                    wa()->setLocale($user->getLocale());
-                }
+        $old_locale = wa()->getLocale();
+        foreach($push_users_locales as $locale => $user_ids) {
+            wa()->setLocale($locale);
 
-                $image_url = $this->getDataResourceUrl($client_userpic_url);
-
-                if (!empty($this->onesignal_adapter)) {
-                    $this->onesignal_adapter->sendByContact($conversation['user_contact_id'], [
-                        'title'   => sprintf_wp('New message from %s', $contact->getName()),
-                        'message' => $push_body,
-                        'url'     => $crm_app_url.'message/conversation/'.$conversation['id'].'/',
-                        'image_url' => $image_url,
-                        'data' => $data,
-                    ]);
-                }
-                if (!empty($this->push_adapter)) {
-                    $this->push_adapter->sendByContact($conversation['user_contact_id'], [
-                        'title'   => sprintf_wp('New message from %s', $contact->getName()),
-                        'message' => $push_body,
-                        'url'     => $crm_app_url.'message/conversation/'.$conversation['id'].'/',
-                        'image_url' => $image_url,
-                        'data' => $data,
-                    ]);
-                }
-
-                if ($user->getLocale() !== $old_locale) {
-                    wa()->setLocale($old_locale);
-                }
-                /*
-                $crm_user_ids = array_filter($crm_user_ids, function ($el) use ($conversation) {
-                    return $el != $conversation['user_contact_id'];
-                });
-                */
+            if (!empty($this->onesignal_adapter)) {
+                $this->onesignal_adapter->sendByContact($user_ids, [
+                    'title'   => sprintf_wp('New message from %s', $contact->getName()),
+                    'message' => $push_body,
+                    'url'     => $crm_app_url.'message/conversation/'.$conversation['id'].'/',
+                    'image_url' => $image_url,
+                    'data' => $data,
+                ]);
+            }
+            if (!empty($this->push_adapter)) {
+                $this->push_adapter->sendByContact($user_ids, [
+                    'title'   => sprintf_wp('New message from %s', $contact->getName()),
+                    'message' => $push_body,
+                    'url'     => $crm_app_url.'message/conversation/'.$conversation['id'].'/',
+                    'image_url' => $image_url,
+                    'data' => $data,
+                ]);
             }
         }
-        /*
-        if (!empty($crm_user_ids)) {
-            // технический скрытый пуш всем осталным
-            $this->push_adapter->sendByContact($crm_user_ids, [
-                'data' => $data,
-            ]);
-        }
-        */
+        wa()->setLocale($old_locale);
     }
 
     public function notifyAboutreminder($reminder, $user = null, $contact = null)
@@ -197,5 +212,82 @@ class crmPushService
         }
         $host_url = wa()->getConfig()->getHostUrl();
         return rtrim($host_url, '/') . '/' . ltrim($relative_url, '/');
+    }
+
+    public function getMessageUsers($message, $contact, $deal)
+    {
+        $admin_conditions = "(r.app_id = 'webasyst' AND r.name = 'backend' AND r.value > 0) OR (r.app_id = 'crm' AND r.name = 'backend' AND r.value > 1)";
+        $non_admin_conditions = "(r.app_id = 'crm' AND r.name = 'conversations' AND r.value > " . (empty($message['user_contact_id']) ? 1 : 2) . ")";
+
+        $sql = "SELECT IF(r.group_id < 0, -r.group_id, g.contact_id) AS cid,
+                    MAX(IF({$admin_conditions}, 1, 0)) AS is_admin
+                FROM wa_contact_rights r
+                    LEFT JOIN wa_user_groups g ON r.group_id = g.group_id
+                WHERE (r.group_id < 0 OR g.contact_id IS NOT NULL) 
+                    AND ({$admin_conditions} OR $non_admin_conditions) 
+                GROUP BY cid";
+
+        $model = new waContactRightsModel();
+        $user_ids = $model->query($sql)->fetchAll('cid', true);
+        if (empty($user_ids)) {
+            return [];
+        }
+
+        $admin_ids = array_keys(array_filter($user_ids, function($el) {
+            return $el == 1;
+        }));
+        $non_admin_ids = array_keys(array_filter($user_ids, function($el) {
+            return $el == 0;
+        }));
+
+        if (empty($non_admin_ids)) {
+            return $admin_ids;
+        }
+
+        if (!empty($contact['crm_vault_id'])) {
+            if ($contact['crm_vault_id'] > 0) {
+                $conditions = "r.app_id = 'crm' AND r.name = 'vault.{$contact['crm_vault_id']}' AND r.value >= 1";
+
+                $sql = "SELECT DISTINCT IF(r.group_id < 0, -r.group_id, g.contact_id) AS cid
+                        FROM wa_contact_rights r
+                            LEFT JOIN wa_user_groups g ON r.group_id = g.group_id
+                        WHERE (r.group_id < 0 OR g.contact_id IS NOT NULL) AND {$conditions}";
+
+                $vault_user_ids = $model->query($sql)->fetchAll(null, true);
+                $non_admin_ids = array_intersect($non_admin_ids, $vault_user_ids);
+            } elseif ($contact['crm_vault_id'] < 0) {
+                $adhoc_user_ids = array_keys((new crmAdhocGroupModel)->getByField([
+                    'adhoc_id'   => -1 * $contact['crm_vault_id'],
+                ], 'contact_id'));
+                $non_admin_ids = array_intersect($non_admin_ids, $adhoc_user_ids);
+            }
+        }
+
+        if (empty($non_admin_ids)) {
+            return $admin_ids;
+        }
+
+        if (!empty($deal)) {
+            $participant_ids = array_keys((new crmDealParticipantsModel)->getByField([
+                'deal_id' => $deal['id'],
+                'role_id' => 'USER',
+            ], 'contact_id'));
+
+            $conditions = "r.app_id = 'crm' AND r.name = 'funnel.{$deal['funnel_id']}' AND r.value >= " . (empty($deal['user_id']) ? 2 : 3);
+
+            $sql = "SELECT DISTINCT IF(r.group_id < 0, -r.group_id, g.contact_id) AS cid
+                    FROM wa_contact_rights r
+                        LEFT JOIN wa_user_groups g ON r.group_id = g.group_id
+                    WHERE (r.group_id < 0 OR g.contact_id IS NOT NULL) AND {$conditions}";
+
+            $deal_user_ids = $model->query($sql)->fetchAll(null, true);
+            $deal_user_ids = array_unique(array_merge($deal_user_ids, $participant_ids));
+            $non_admin_ids = array_intersect($non_admin_ids, $deal_user_ids);
+        }
+
+        return array_merge($admin_ids, $non_admin_ids);
+
+        //$sql = "SELECT id FROM `wa_contact` WHERE id IN(:ids) AND is_user = 1";
+        //return $model->query($sql, ['ids' => array_merge($admin_ids, $non_admin_ids)])->fetchAll(null, true);
     }
 }

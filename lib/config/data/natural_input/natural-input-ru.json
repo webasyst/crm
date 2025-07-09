@@ -193,6 +193,17 @@
             }
 
             , {
+                "regex": ["(в (\\week) в (\\d+) (\\reltime))"],
+                "example": "занятия в понедельник в 5 утра",
+                "script": "local res=getNow2();res=replaceWeekDay(res,getMatch(2)); setFastF(7*24*60*60); res = checkFastF(res);replaceHour(res,getMatch(3));res=replaceMinutes(res,0));return {ts=res,timed=1};",
+                "rules": {
+                    "1": "week",
+                    "2": "hours",
+                    "3": "reltime"
+                }
+            }
+
+            , {
                 "regex": ["((\\d+) (\\month) (\\d\\d\\d\\d))"],
                 "script": "local res=getNow2();res=replaceYear(res,getMatch(4));res=replaceMonth(res,getMatch(3));res=replaceDate(res,getMatch(2));if res<getNow() then res=addMonth(res,12);res=replaceMonth(res,getMatch(3));res=replaceDate(res,getMatch(2)); end;return {ts=res,timed=0};",
                 "rules": {
@@ -308,15 +319,6 @@
                 "rules": {
                     "1": "hours",
                     "2": "minutes"
-                },
-                "checkpasttime": "day"
-            }
-
-            , {
-                "regex": ["(в (\\d\\d))(?:\\W|\\z)", "(в (\\d))(?:\\W|\\z)"],
-                "script": "local res=getNow2();res=replaceHour(res,getMatch(2));res=replaceMinutes(res,0); res = checkFastF(res); return {ts=res,timed=1};",
-                "rules": {
-                    "1": "hours"
                 },
                 "checkpasttime": "day"
             }

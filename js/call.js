@@ -356,9 +356,12 @@ var CRMCallPage = ( function($) {
                         applyFilter(true);
                         return false;
                     }
-                }).data("ui-autocomplete")._renderItem = function (ul, item) {
-                return $("<li />").addClass("ui-menu-item-html").append("<div><span class='icon userpic custom-mr-4'><i style='background-image: url("+ item.userpic +");'></i></span>" + item.name + "</div>").appendTo(ul);
-            };
+                })
+                .data("ui-autocomplete")._renderItem = function ($ul, item) {
+                    $ul.css("max-height", "70vh");
+                    $ul.css("overflow-y", "scroll");
+                    return $("<li />").addClass("ui-menu-item-html").append("<div>" + item.label + "</div>").appendTo($ul);
+                };
 
             $search_contact_cancel.on('click', function (event) {
                 event.preventDefault();
@@ -388,9 +391,13 @@ var CRMCallPage = ( function($) {
                         renderContact(ui.item, ui.item.id, $contact_wrapper, $autocomplete_client);
                         return false;
                     }
-                }).data("ui-autocomplete")._renderItem = function (ul, item) {
-                return $("<li />").addClass("ui-menu-item-html").append("<div class='flexbox'><span class='icon userpic custom-mr-4'><i style='background-image: url("+ item.userpic +");'></i></span>" + item.name + "</div>").appendTo(ul);
-            };
+                })
+                .data("ui-autocomplete")._renderItem = function ($ul, item) {
+                    $ul.css("max-height", "50vh");
+                    $ul.css("overflow-y", "scroll");
+                    $ul.css('max-width', '350px');
+                    return $("<li />").addClass("ui-menu-item-html").append("<div>" + item.label + "</div>").appendTo($ul);
+                };
 
         $autocomplete_deal
             .autocomplete({

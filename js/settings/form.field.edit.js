@@ -60,11 +60,11 @@ var crmSettingsFormFieldEditDialog = (function ($) {
             $('.crm-field-' + field_id, $dialog).show().find(':input').attr('disabled', false);
         };
 
-        // caption place
-        if (field.type !== 'Checkbox') {
-            enableField('captionplace');
+        // composite subfield caption place
+        if (field.type === 'Composite' || field.type === 'Address') {
+            enableField('subfield_captionplace');
         } else {
-            disableField('captionplace');
+            disableField('subfield_captionplace');
         }
 
         // placeholder: enable/disable?

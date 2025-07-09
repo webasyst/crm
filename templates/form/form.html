@@ -1,5 +1,22 @@
+{if ifset($form.params._version) == '2'}
 {$block_id = uniqid('crm-form-block-')}
 {$form_id = $block_id|cat:'-form'}
+
+{$form_max_width = $form.params.max_width|default:$form.params.formwidth|default:600}
+{$fields_space = $form.params.fields_space|default:16}
+{$caption_space = $form.params.caption_space|default:8}
+{$caption_width = $form.params.caption_width|default:20}
+<style>
+    #{$block_id} {
+        --crm-form-max-width: {$form_max_width}px;
+        --crm-form-fields-space: {$fields_space}px;
+        --crm-form-caption-width: {$caption_width}%;
+        --crm-form-caption-space: {$caption_space}px;
+        max-width: var(--crm-form-max-width);
+        width: 100%;
+    }
+    .{$block_id} {}
+</style>
 
 <link rel="stylesheet" href="{$wa_app_static_url}css/form.css?{$wa->version()}">
 <script src="{$wa_app_static_url}js/crm.frontend.form.js?{$wa->version()}"></script>
@@ -50,57 +67,83 @@
 
 {function form_field_html field=[]}
     {$captionplace = $field.captionplace|default:'left'}
-    <div class="crm-form-field {if $captionplace !== 'left'}crm-caption-style-{$captionplace}{/if}" data-id="{$field.id}" data-uid="{$field.uid}">
-        <div class="crm-form-field-line crm-form-field-1st-line">
-            <div class="crm-form-field-col crm-caption-col">
-                <span class="crm-caption">
+    {if $field.id === '!horizontal_rule' || $field.id === '!paragraph'}
+        {$captionplace = 'none'}
+    {/if}
+    {$type = ifset($field.type, 'Text')}
+
+    <div class="crm-form-field field crm-caption-style-{$captionplace}" data-id="{$field.id}" data-uid="{$field.uid}">
+        {if $captionplace !== 'none'}
+            <div class="name for-input">
+                {if $field.id !== '!agreement_checkbox' && $type !== 'Checkbox'}
                     {if isset($field.caption)}
                         {$field.caption|escape}
                     {else}
                         {$field.name|escape}
                     {/if}
-                    {if !empty($field.required) && $field.id !== '!captcha'} *{/if}
-                </span>
-            </div>
-            <div class="crm-form-field-col crm-input-col">
-                {if $captionplace === 'left'}
-                    {$field.html}
-                    <div class="crm-error-msg-block" data-id="{$field.id}" data-uid="{$field.uid}"></div>
                 {/if}
-            </div>
-        </div>
-        {if $captionplace !== 'left'}
-            <div class="crm-form-field-line crm-form-field-2st-line">
-                <div class="crm-form-field-col crm-input-col">
-                    {$field.html}
-                    <div class="crm-error-msg-block" data-id="{$field.id}" data-uid="{$field.uid}"></div>
-                </div>
+                {if !empty($field.required) && $field.id !== '!captcha'} *{/if}
             </div>
         {/if}
+        <div class="value">
+            {if $type === 'Checkbox'}
+                <label>
+                    <span>
+                        {$field.html}
+                    </span>
+                    <span>{strip}
+                        {if isset($field.caption)}
+                            {$field.caption|escape}
+                        {else}
+                            {$field.name|escape}
+                        {/if}
+                    {/strip}</span>
+                </label>
+            {else}
+                {$field.html}
+            {/if}
+        </div>
     </div>
 {/function}
 
-<div class="crm-form-block"  style="width: {$form.params.formwidth|default:400}px" id="{$block_id}">
+<div class="crm-form-block" id="{$block_id}">
 
     <div class="crm-form-fields-block">
-        <div class="crm-form-fields">
+        <div class="crm-form-fields fields">
             <form id="{$form_id}" method="post" action="{$action_url}" enctype="multipart/form-data" target="{$form_id}-target" autocomplete="off">
-                {foreach $form.params.fields as $field_id => $field}
-                    {form_field_html field=$field}
-                {/foreach}
-                <div class="crm-error-msg crm-error-common"></div>
-                <div class="crm-submit-button-wrapper">
+                    {foreach $form.params.fields as $field_id => $field}
+                        {form_field_html field=$field}
+                    {/foreach}
+
+                    {$captionplace = $form.params.button.captionplace|default:'none'}
+                    {$button_width = $form.params.button.width|default:'auto'}
+                    <div class="crm-form-field field" data-id="!button" data-uid="!button">
+                        <div class="name for-input" style="{if ifset($form.params.button.captionplace) === 'left'}display: none;{/if}"></div>
+                        <div class="value">
+                            <div class="crm-error-msg crm-error-common"></div>
+                            <div class="crm-submit-button-wrapper">
+                                <button class="crm-form-submit-button {$button_width}">
+                                    {$form.params.button.caption|escape|default:'[`Submit`]'}
+                                    {if $button_width !== 'auto'}<i class="icon16 loading crm-loading" style="display: none;"></i>{/if}
+                                </button>
+                                {if $button_width === 'auto'}<i class="icon16 loading crm-loading" style="display: none;"></i>{/if}
+                            </div>
+                        </div>
+
+
                     <input type="hidden" name="crm_form[id]" value="{$form.id}">
-                    <input class="crm-form-submit-button button green" type="submit" value="{$form.params.button_caption|escape|default:'[`Sign up`]'}">
-                    <i class="icon16 loading crm-loading" style="display: none;"></i>
+                    <input type="hidden" name="crm_form[!form_page_url]" value="{$page_url}">
+
                 </div>
             </form>
 
             <iframe src="javascript:true" name="{$form_id}-target" id="{$form_id}-target" style="width:0 !important;height:0 !important;border:0 !important;"></iframe>
 
-            <div class="crm-after-submit-block">
-            </div>
+            <div class="crm-after-submit-block"></div>
         </div>
+    </div>
+    <div style="visibility:hidden;max-height:0;word-break:break-all;color:transparent;user-select:none;">
+        {for $i=0 to 30}{$block_id}{/for}
     </div>
 </div>
 <script>
@@ -123,3 +166,6 @@
         }
     })(jQuery);
 </script>
+{else}
+{include file="./form.previous.html"}
+{/if}

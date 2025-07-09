@@ -51,7 +51,8 @@ class crmFormFieldRenderer
         }
 
         if ($this->field instanceof waContactField || $this->field instanceof crmDealField) {
-            return $this->field->getHTML($params, $attrs);
+            $html = $this->field->getHTML($params, $attrs);
+            return $this->field instanceof waContactBirthdayField ? '<span class="nowrap">' . $html . '</span>' : $html;
         }
 
         return '';

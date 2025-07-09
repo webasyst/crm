@@ -132,6 +132,7 @@ var CRMSettingsSourceEmail = ( function($) {
             e.preventDefault();
 
             var post_data = $form.serializeArray();
+            console.log("serializeArray", post_data)
             post_data.push({
                 name: 'id',
                 value: that.source.id > 0 ? that.source.id : that.source.provider
@@ -190,7 +191,8 @@ var CRMSettingsSourceEmail = ( function($) {
         $link.click(function (e) {
             e.preventDefault();
             CRMSettingsSources.deleteSource(that.source.id, {
-                messages: that.messages
+                messages: that.messages,
+                type: 'email'
             });
         });
     };
@@ -209,7 +211,10 @@ var CRMSettingsSourceEmail = ( function($) {
         that.$wrapper.find("#js-ibutton").each( function() {
             var $checkbox_wrapper = $(this),
                 $field = $checkbox_wrapper.closest('.fields-group'),
-                $block = $field.find('.js-crm-block');
+                $block = $field.find('.js-crm-block'),
+                $show_block = $checkbox_wrapper.closest('.value').find('.show-js-crm-block'),
+                $hide_block = $checkbox_wrapper.closest('.value').find('.hide-js-crm-block');
+
             if ($checkbox_wrapper.data('iButtonInit')) {
                 return $checkbox_wrapper;
             }
@@ -221,19 +226,24 @@ var CRMSettingsSourceEmail = ( function($) {
                     wa_switch.inactive_text = $label.data('inactive-text');
                 },
                 change: function(active, wa_switch) {
-                    
                     if (active) {
                     wa_switch.$label.text(wa_switch.active_text);
                     $checkbox_wrapper.find(".js-ibutton").attr('checked', true);
                     $block.slideDown(350);
+                    if ($show_block.length) { $show_block.hide(); $hide_block.show() }
                     }
                     else {
                      wa_switch.$label.text(wa_switch.inactive_text); 
                      $checkbox_wrapper.find(".js-ibutton").attr('checked', false);
                      $block.slideUp(350);
+                     if ($show_block.length) { $show_block.show(); $hide_block.hide() }
                     }
                 }
             });
+            if ($show_block.length) {
+                $show_block.on('click', () => { $show_block.hide(); $hide_block.show(); $block.slideDown(350); })
+                $hide_block.on('click', () => { $show_block.show(); $hide_block.hide(); $block.slideUp(350); })
+             }
           //  that.initIButton($(this));
         });
     };

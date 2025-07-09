@@ -99,11 +99,11 @@ class crmSettingsFormIdAction extends crmSettingsViewAction
 
     protected function getDefaultCheckedFields()
     {
-        return array(
+        return [
             'firstname',
             'lastname',
             'email',
-            'password'
-        );
+            'phone',
+        ];
     }
 }

@@ -45,7 +45,7 @@
             {* COMPANY *}
             {$_is_invoice_event = substr($notification.event|default:'', 0, 8) === 'invoice.'}
             {if empty($notification.id) || $_is_invoice_event}
-                <div class="field">
+                <div class="field js-company-field">
                     <div class="name">[`Company`]</div>
                     <div class="value">
                         <div class="wa-select">

@@ -1,0 +1,42 @@
+<template class="crm-settings-form-button-edit-wrapper">
+<div class="dialog">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <header class="dialog-header">
+            <h1>[`Button settings`]</h1>
+        </header>
+
+        <form>
+            <div class="dialog-content">
+                <div class="block fields">
+                    <div class="field crm-field-caption">
+                        <div class="name">[`Button label`]</div>
+                        <div class="value">
+                            <input type="text" name="params[caption]" value="">
+                        </div>
+                    </div>
+                    <div class="field crm-field-width">
+                        <div class="name for-switch">[`Width`]</div>
+                        <div class="value">
+                            <div class="switch-with-text small">
+                                <span class="crm-submit-width-switch switch smaller">
+                                    <input type="hidden" name="params[width]" value="auto">
+                                    <input type="checkbox" id="crm-submit-width-switch-input" name="params[width]" value="wide">
+                                </span>
+                                <label for="crm-submit-width-switch-input">[`Stretch to available width, if possible`]</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="dialog-footer">
+                <div class="crm-actions">
+                    <input class="button crm-button js-some-action" type="submit" value="[`Apply`]">
+                    <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
+                </div>
+            </footer>
+        </form>
+    </div>
+</div>
+</template>

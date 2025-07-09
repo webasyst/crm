@@ -395,29 +395,9 @@ class crmCallModel extends crmModel
 
             foreach ($pbx_users[$call['plugin_id']][$call['plugin_user_number']] as $user_id) {
                 $users[] = $user_id;
-                $call['users_to_notify'][$user_id] = array(
-                    'id'         => $user_id,
-                    'is_online'  => false,
-                );
+                $call['users_to_notify'][$user_id] = ['id' => $user_id];
             }
 
-        }
-        unset($call);
-
-        // Get user data, most importantly whether they are online
-        $collection = new waContactsCollection(array_values(array_unique($users)));
-        $users = $collection->getContacts('id,_online_status');
-        if (empty($users)) {
-            return;
-        }
-
-        foreach ($calls as &$call) {
-            foreach ($call['users_to_notify'] as $user_id => &$user_data) {
-                if (!empty($users[$user_id])) {
-                    $user_data['is_online'] = $users[$user_id]['_online_status'] === 'online';
-                }
-            }
-            unset($user_data);
         }
         unset($call);
     }
@@ -453,9 +433,7 @@ class crmCallModel extends crmModel
 
                 $contact_ids = array();
                 foreach ($call['users_to_notify'] as $user_to_push) {
-                    if (!empty($user_to_push['is_online'])) {
-                        $contact_ids[] = $user_to_push['id'];
-                    }
+                    $contact_ids[] = $user_to_push['id'];
                 }
 
                 if (empty($contact_ids)) {

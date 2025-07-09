@@ -230,6 +230,8 @@ var CRMMessageBodyDialog = ( function($) {
             $deal_name = $deal_form.find('.js-deal-name'),
             $deal_name_input = $deal_form.find('.js-deal-name-input'),
             $deal_save = $deal_form.find('.js-save-deal'),
+            $deal_save_details = $deal_form.find('.js-deal-save-details'),
+            $deals_dropdown_wrapper = $deal_form.find('.js-select-deal'),
             $deals_dropdown = $deal_form.find('.js-deals-dropdown'),
             $deal_remove = $deal_form.find('.js-remove-deal'),
             $deal_empty = $deals_dropdown.find('.js-empty-deal'),
@@ -259,11 +261,13 @@ var CRMMessageBodyDialog = ( function($) {
         // New deal
         $deal_form.on('click', '.js-create-new-deal', function () {
             $deal_id.val('0');
+            $deals_dropdown_wrapper.addClass('hidden');
             $deals_dropdown.addClass('hidden');
-            $deal_name.removeClass('c-deal-name-hidden');
-            $deal_save.attr('title', that.locales['deal_create']).removeClass('hidden');
+            $deal_name.removeClass('hidden');
+            $deal_save.attr('title', that.locales['deal_create']).text(that.locales['deal_create']).removeClass('hidden');
+            $deal_save_details.removeClass('hidden');
             $select_funnel.removeClass('hidden');
-            $deal_empty.removeClass('c-empty-deal-hidden');
+            $deal_empty.removeClass('hidden');
             $deal_name_input.focus();
         });
 
@@ -272,9 +276,10 @@ var CRMMessageBodyDialog = ( function($) {
             var new_deal = $(this).find('.js-text').html();
             $visible_link.html(new_deal);
             $deal_id.val($(this).data('deal-id'));
-            $deal_save.attr('title', that.locales['deal_add']).removeClass('hidden');
+            $deal_save.attr('title', that.locales['deal_add']).text(that.locales['deal_add']).removeClass('hidden');
+            $deal_save_details.removeClass('hidden');
             $select_funnel.addClass('hidden');
-            $deal_empty.removeClass('c-empty-deal-hidden');
+            $deal_empty.removeClass('hidden');
             $deals_list.find('li').removeClass('selected');
             $(this).parent().addClass('selected');
         });
@@ -307,6 +312,7 @@ var CRMMessageBodyDialog = ( function($) {
 
         // Load new funnel stages
         $deal_form.on('change', '.js-select-deal-funnel', function() {
+            console.log($(this).val());
             $deal_form.find('.js-select-stage-wrapper').load('?module=deal&action=stagesByFunnel&id=' + $(this).val());
         });
 
@@ -318,11 +324,13 @@ var CRMMessageBodyDialog = ( function($) {
             $visible_link.html(''+ that.locales['deal_empty'] +'');
             $deal_id.val('none');
             $deal_name_input.val('');
-            $deal_name.addClass('c-deal-name-hidden');
+            $deal_name.addClass('hidden');
             $deal_save.addClass('hidden').removeAttr('title');
-            $deal_empty.addClass('c-empty-deal-hidden');
+            $deal_save_details.addClass('hidden');
+            $deal_empty.addClass('hidden');
             $select_funnel.addClass('hidden');
             $deals_list.find('li').removeClass('selected');
+            $deals_dropdown_wrapper.removeClass('hidden');
             $deals_dropdown.removeClass('hidden');
         }
 
@@ -352,7 +360,7 @@ var CRMMessageBodyDialog = ( function($) {
                 return false;
             }
 
-            $deal_form.addClass('deal-form-hidden');
+            $deal_form.addClass('hidden');
             $created_deal.removeClass('hidden');
 
             // Set deal
@@ -584,7 +592,8 @@ var CRMMessagesSidebar = ( function($) {
                 .autocomplete({
                     appendTo:  $search_wrapper,
                     source: $.crm.app_url + "?module=autocompleteContact",
-                    minLength: 0,
+                    minLength: 2,
+                    delay: 300,
                     html: true,
                     focus: function () {
                         return false;
@@ -595,9 +604,13 @@ var CRMMessagesSidebar = ( function($) {
                         $autocomplete.val("");
                         return false;
                     }
-                }).data("ui-autocomplete")._renderItem = function (ul, item) {
-                return $("<li />").addClass("ui-menu-item-html").append("<div><span class='icon userpic custom-mr-4'><i style='background-image: url("+ item.userpic +");'></i></span>" + item.name + "</div>").appendTo(ul);
-            };
+                })
+                .data("ui-autocomplete")._renderItem = function ($ul, item) {
+                    $ul.css("max-height", "70vh");
+                    $ul.css("overflow-y", "scroll");
+                    $ul.css('max-width', '200px');
+                    return $("<li />").addClass("ui-menu-item-html").append("<div>" + item.label + "</div>").appendTo($ul);
+                };
         }
 
             $search_wrapper.on('click', '.js-search-contact-cancel', function() {

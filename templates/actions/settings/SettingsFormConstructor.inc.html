@@ -1,44 +1,73 @@
+{$form_max_width = $form.params.max_width|default:$form.params.formwidth|default:600}
+{$fields_space = $form.params.fields_space|default:16}
+{$caption_space = $form.params.caption_space|default:8}
+{$caption_width = $form.params.caption_width|default:20}
+<style>
+    .crm-form-page .crm-form-content .crm-form-constructor .crm-form-preview-block {
+        --crm-form-max-width: {$form_max_width}px;
+        --crm-form-fields-space: {$fields_space}px;
+        --crm-form-caption-width: {$caption_width}%;
+        --crm-form-caption-space: {$caption_space}px;
+        max-width: var(--crm-form-max-width);
+        width: 100%;
+    }
+    .crm-form-page {}
+</style>
 {function form_field_html field=[] is_template=0}
     {$captionplace = $field.captionplace|default:'left'}
     {if $field.id === '!horizontal_rule' || $field.id === '!paragraph'}
         {$captionplace = 'none'}
     {/if}
+    {$type = ifset($field.type, 'Text')}
 
     <div class="crm-form-field {if $captionplace !== 'left'}crm-caption-style-{$captionplace}{/if} {if $is_template}crm-form-field-template{/if}"
         data-id="{$field.id}"
-        data-checked="{$field.checked|default:0}">
-            <div class="crm-form-field-line crm-form-field-1st-line">
-                <div class="crm-form-field-col crm-sorting-col">
-                    <i class="fas fa-grip-vertical text-light-gray sort"></i>
-                </div>
-                <div class="crm-form-field-col crm-caption-col">
-                    <span class="crm-caption">
-                        {if isset($field.caption)}
-                            {$field.caption|escape}
-                        {else}
-                            {$field.name|escape}
+        data-checked="{$field.checked|default:0}"
+        data-type="{$type}"
+    >
+        <div class="flexbox full-width fields">
+            <div class="crm-sorting-col">
+                <i class="fas fa-grip-vertical text-light-gray sort"></i>
+            </div>
+            <div class="flexbox full-width wide crm-field-edit">
+                <div class="field wide{if $field.id === '!agreement_checkbox' || $field.type === 'Checkbox'} custom-mt-4{/if}">
+                    <div class="name for-input js-field-label">{strip}
+                        {if $field.id !== '!agreement_checkbox' && $type !== 'Checkbox'}
+                            {if isset($field.caption)}
+                                {$field.caption|escape}
+                            {else}
+                                {$field.name|escape}
+                            {/if}
                         {/if}
                         {if !empty($field.required) && $field.id !== '!captcha'} *{/if}
-                    </span>
+                    {/strip}</div>
+                    <div class="value js-field-input">
+                        {if $type === 'Checkbox'}
+                            <label class="flexbox full-width space-8">
+                                <span>
+                                    {$field.html}
+                                </span>
+                                <span class="js-field-label wide">
+                                    {if isset($field.caption)}
+                                        {$field.caption|escape}
+                                    {else}
+                                        {$field.name|escape}
+                                    {/if}
+                                </span>
+                            </label>
+                        {else}
+                            {$field.html}
+                        {/if}
+                    </div>
                 </div>
-                <div class="crm-form-field-col crm-input-col">
-                    <div class="c-field-wrapper">{if $field.id !== '!agreement_checkbox'}{$field.html}{/if}</div>
-                </div>
-                <div class="crm-form-field-col crm-delete-col">
-                    <a href="javascript:void(0);" class="crm-delete-field-link text-red"><i class="fas fa-trash-alt delete"></i></a>
+                <div class="crm-actions-col js-field-edit small">
+                    <a href="javascript:void(0);" class="text-light-gray crm-edit-field-link"><i class="fas fa-pen"></i></a>
                 </div>
             </div>
-            <div class="crm-form-field-line crm-form-field-2st-line">
-                <div class="crm-form-field-col crm-sorting-col">
-                    <i class="fas fa-grip-vertical text-light-gray sort"></i>
-                </div>
-                <div class="crm-form-field-col crm-input-col">
-                    <div class="c-field-wrapper">{$field.html}</div>
-                </div>
-                <div class="crm-form-field-col crm-delete-col">
-                    <a href="javascript:void(0);" class="crm-delete-field-link text-red"><i class="fas fa-trash-alt delete"></i></a>
-                </div>
+            <div class="crm-actions-col small">
+                <a href="javascript:void(0);" class="crm-delete-field-link text-light-gray"><i class="fas fa-trash-alt delete"></i></a>
             </div>
+        </div>
     </div>
 {/function}
 
@@ -63,21 +92,152 @@
 {$_back_uri = "{$wa_app_url}settings/form/"}
 
 <form method="post" action="{$wa_app_url}?module=settings&action=formSave{if $form.id > 0}&id={$form.id}{/if}" class="crm-form-settings-form">
-    
+
     <div class="crm-form-header">
         <div class="flexbox middle">
             <a href="{$_back_uri}" class="icon size-32 back js-back-button cursor-pointer custom-mr-8"><i class="icon fas fa-arrow-left"></i></a>
             <input type="text" name="form[name]" value="{if $form.id > 0}{$form.name|escape}{else}[`New form`]{/if}" placeholder="[`Form name`]" class="crm-name-input">
         </div>
-        
+        {if $form.id}
+            <div class="crm-form-section fields-group">
+                <div class="flexbox full-width space-8 custom-my-8">
+                    <div class="hint">[`To publish the form on external site use this code:`]
+                        {if $form.id > 0}
+                            <code class="crm-smarty-helper bold nowrap">{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}</code>
+                            <a class="icon crm-copy js-copy" data-content="{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}" title="[`Copy to clipboard`]"><i class="fas fa-copy"></i></a>
+                        {else}
+                            <strong>[`Will be available after saving`]</strong>
+                        {/if}
+                    </div>
+                    {if $form.id > 0}
+                        <a class="js-show-external-code small semibold nowrap" href="javascript:void(0)">[`Publishing on external site`] <i class="fas fa-caret-down"></i></a>
+                    {/if}
+                </div>
+                <div class="js-external-code" style="display: none;">
+                    <textarea class="small width-100" readonly><iframe frameborder="0" src="{$frontend_form_iframe_url}" id="wa-crm-iframe" name="wa-crm-iframe" marginheight="0" marginwidth="0" scrolling="no" style="width:100%; height:50px;"></iframe><script type="text/javascript" src="{$app_static_url}js/iframeResizer.min.js"></script><script type="text/javascript">iFrameResize({ heightCalculationMethod:'max' });</script></textarea>
+                </div>
+            </div>
+        {/if}
     </div>
 
     <div class="crm-common-errors-block"></div>
 
     <div class="crm-form-body fields">
         <div class="crm-form-constructor fields-group">
-            <div class="crm-form-preview-block" style="width: {$form.params.formwidth|default:400}px">
-                <div class="crm-form-fields-block shadowed blank">
+            <div class="flexbox middle full-width space-8 custom-mb-32">
+                <div>
+                    <div class="small text-gray">[`Approximate preview`]</div>
+                    <p class="hint custom-mt-0">[`The actual web form design will depend on the CSS styles of the site where it is published.`]</p>
+                </div>
+                <div class="js-view-mode-toggler toggle">
+                    <span class="selected" data-id="customization"><i class="fas fa-tools"></i></span>
+                    <span data-id="desktop"><i class="fas fa-laptop"></i></span>
+                    <span data-id="mobile"><i class="fas fa-mobile-alt"></i></span>
+                </div>
+            </div>
+            <div class="crm-form-preview-block">
+                <div class="flexbox middle full-width">
+                    <div class="dropdown" id="add-field-dropdown">
+                        <button class="dropdown-toggle button small rounded light-gray" type="button">
+                            <i class="fas fa-plus-circle text-green add"></i> [`Add field`]
+                        </button>
+
+                        <div class="dropdown-body" style="width: 350px;">
+                            <ul class="menu crm-available-fields">
+
+                                {$_available_field_rendered_map = []}
+
+                                {* CONTACT FIELDS ENABLED FOR PERSON *}
+                                {foreach $available_fields as $field_id => $field}
+                                    {$_is_contact_field = $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT}
+                                    {if $_is_contact_field && $field['id'] !== 'password' && $field.person_enabled}
+                                        {form_available_field field=$field}
+                                        {$_available_field_rendered_map[$field.id] = true}
+                                    {/if}
+                                {/foreach}
+
+                                {* RENDER PASSWORD FIELD *}
+                                {$_password = $available_fields.password|default:null}
+                                {if $_password}
+                                    {form_available_field
+                                        field=$_password
+                                        disabled=$available_fields.email.checked <= 0}
+                                    {$_available_field_rendered_map[$_password.id] = true}
+                                {/if}
+
+                                {* CONTACT FIELDS EXCLUSIVELY ENABLED FOR COMPANY *}
+                                {$_exclusive_company_fields_exist = false}
+                                {capture assign="_exclusive_company_fields_html"}
+                                    {foreach $available_fields as $field_id => $field}
+                                        {$_is_contact_field = $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT}
+                                        {if $_is_contact_field && $field['id'] !== 'password' && !$field.person_enabled && $field.company_enabled}
+                                            {form_available_field
+                                                field=$field
+                                                disabled=$available_fields.company.checked <= 0}
+                                            {$_available_field_rendered_map[$field.id] = true}
+                                            {$_exclusive_company_fields_exist = true}
+                                        {/if}
+                                    {/foreach}
+                                {/capture}
+
+                                {if $_exclusive_company_fields_exist}
+                                    <li class="crm-form-field crm-top-bordered crm-disabled crm-hint js-hint-about-deal-fields">
+                                        <span class="hint">
+                                            [`To make company-only fields available, first add the “Company” field to the form.`]
+                                        </span>
+                                    </li>
+                                    {$_exclusive_company_fields_html}
+                                {/if}
+
+                                <li class="crm-form-field crm-top-bordered crm-disabled crm-hint js-hint-about-deal-fields">
+                                    <span class="hint">
+                                        {sprintf('[`Select “%s” in “%s” section below to make these fields available for adding to the form.`]', '[`Enabled`]', '[`Create deal`]')}
+                                    </span>
+                                </li>
+
+                                {* RENDER !DEAL_DESCRIPTION FIELD *}
+                                {$_deal_description = $available_fields['!deal_description']|default:null}
+                                {if $_deal_description}
+                                    {form_available_field
+                                        field=$_deal_description
+                                        disabled=empty($form.params.create_deal)}
+                                    {$_available_field_rendered_map[$_deal_description.id] = true}
+                                {/if}
+
+                                {* RENDER DEALS-FIELDS *}
+                                {foreach $available_fields as $field_id => $field}
+                                    {if $field.form_field_type === crmFormConstructor::FIELD_TYPE_DEAL}
+                                        {form_available_field
+                                            field=$field
+                                            disabled=empty($form.params.create_deal)}
+                                        {$_available_field_rendered_map[$field.id] = true}
+                                    {/if}
+                                {/foreach}
+
+                                {* RENDER !DEAL_ATTACHMENTS FIELD *}
+                                {$_deal_attachments = $available_fields['!deal_attachments']|default:null}
+                                {if $_deal_attachments}
+                                    {form_available_field
+                                        field=$_deal_attachments
+                                        classes=['crm-top-bordered']
+                                        disabled=empty($form.params.create_deal)}
+                                    {$_available_field_rendered_map[$_deal_attachments.id] = true}
+                                {/if}
+
+                                {* RENDER REST FIELDS *}
+                                {$_classes = ['crm-top-bordered']}
+                                {foreach $available_fields as $field_id => $field}
+                                    {if empty($_available_field_rendered_map[$field.id])}
+                                        {form_available_field field=$field classes=$_classes}
+                                        {$_available_field_rendered_map[$field.id] = true}
+                                        {$_classes = []}
+                                    {/if}
+                                {/foreach}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="crm-form-fields-block blank">
                     <div class="crm-form-fields">
 
                         {$_checked_fields = $form.params.fields}
@@ -90,118 +250,50 @@
                         {/foreach}
                     </div>
 
-                    <div class="crm-add-new-field-wrapper">
-                        <a href="javascript:void(0)" class="button small rounded light-gray crm-add-new-field-link small">
-                            <i class="fas fa-plus-circle text-green add"></i> [`Add fields`]
-                        </a>
-
-                        <ul class="menu crm-available-fields" style="display: none;">
-
-                            {$_available_field_rendered_map = []}
-
-                            {* CONTACT FIELDS ENABLED FOR PERSON *}
-                            {foreach $available_fields as $field_id => $field}
-                                {$_is_contact_field = $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT}
-                                {if $_is_contact_field && $field['id'] !== 'password' && $field.person_enabled}
-                                    {form_available_field field=$field}
-                                    {$_available_field_rendered_map[$field.id] = true}
-                                {/if}
-                            {/foreach}
-
-                            {* RENDER PASSWORD FIELD *}
-                            {$_password = $available_fields.password|default:null}
-                            {if $_password}
-                                {form_available_field
-                                    field=$_password
-                                    disabled=$available_fields.email.checked <= 0}
-                                {$_available_field_rendered_map[$_password.id] = true}
-                            {/if}
-
-                            {* CONTACT FIELDS EXCLUSIVELY ENABLED FOR COMPANY *}
-                            {$_exclusive_company_fields_exist = false}
-                            {capture assign="_exclusive_company_fields_html"}
-                                {foreach $available_fields as $field_id => $field}
-                                    {$_is_contact_field = $field.form_field_type === crmFormConstructor::FIELD_TYPE_CONTACT}
-                                    {if $_is_contact_field && $field['id'] !== 'password' && !$field.person_enabled && $field.company_enabled}
-                                        {form_available_field
-                                            field=$field
-                                            disabled=$available_fields.company.checked <= 0}
-                                        {$_available_field_rendered_map[$field.id] = true}
-                                        {$_exclusive_company_fields_exist = true}
-                                    {/if}
-                                {/foreach}
-                            {/capture}
-
-                            {if $_exclusive_company_fields_exist}
-                                <li class="crm-form-field crm-top-bordered crm-disabled crm-hint js-hint-about-deal-fields">
-                                    <span class="hint">
-                                        [`To make company-only fields available, first add the “Company” field to the form.`]
-                                    </span>
-                                </li>
-                                {$_exclusive_company_fields_html}
-                            {/if}
-
-                            <li class="crm-form-field crm-top-bordered crm-disabled crm-hint js-hint-about-deal-fields">
-                                <span class="hint">
-                                    {sprintf('[`Select “%s” in “%s” section below to make these fields available for adding to the form.`]', '[`Enabled`]', '[`Create deal`]')}
-                                </span>
-                            </li>
-
-                            {* RENDER !DEAL_DESCRIPTION FIELD *}
-                            {$_deal_description = $available_fields['!deal_description']|default:null}
-                            {if $_deal_description}
-                                {form_available_field
-                                    field=$_deal_description
-                                    disabled=empty($form.params.create_deal)}
-                                {$_available_field_rendered_map[$_deal_description.id] = true}
-                            {/if}
-
-                            {* RENDER DEALS-FIELDS *}
-                            {foreach $available_fields as $field_id => $field}
-                                {if $field.form_field_type === crmFormConstructor::FIELD_TYPE_DEAL}
-                                    {form_available_field
-                                        field=$field
-                                        disabled=empty($form.params.create_deal)}
-                                    {$_available_field_rendered_map[$field.id] = true}
-                                {/if}
-                            {/foreach}
-
-                            {* RENDER !DEAL_ATTACHMENTS FIELD *}
-                            {$_deal_attachments = $available_fields['!deal_attachments']|default:null}
-                            {if $_deal_attachments}
-                                {form_available_field
-                                    field=$_deal_attachments
-                                    classes=['crm-top-bordered']
-                                    disabled=empty($form.params.create_deal)}
-                                {$_available_field_rendered_map[$_deal_attachments.id] = true}
-                            {/if}
-
-                            {* RENDER REST FIELDS *}
-                            {$_classes = ['crm-top-bordered']}
-                            {foreach $available_fields as $field_id => $field}
-                                {if empty($_available_field_rendered_map[$field.id])}
-                                    {form_available_field field=$field classes=$_classes}
-                                    {$_available_field_rendered_map[$field.id] = true}
-                                    {$_classes = []}
-                                {/if}
-                            {/foreach}
-
-                        </ul>
-
-                    </div>
-
-                    <div class="crm-submit-button-wrapper">
-                        <div class="crm-submit-button-wrapper-on-hover">
-                            <input class="crm-form-preview-submit-button" type="button" value="{$form.params.button_caption|escape|default:'[`Sign up`]'}">
-                            <input class="crm-form-preview-submit-button-caption-input" name="form[params][button_caption]" type="text" value="{$form.params.button_caption|escape|default:'[`Sign up`]'}" style="display: none">
+                    <div class="crm-form-fields crm-form-field-submit">
+                    <div class="crm-form-field" data-id="!button">
+                        <div class="flexbox full-width fields">
+                            <div class="crm-sorting-col">
+                                <div style="visibility: hidden;"><i class="fas fa-grip-vertical"></i></div>
+                            </div>
+                            <div class="flexbox full-width wide crm-field-edit">
+                                <div class="field wide">
+                                    <div class="name for-input js-field-label" style="{if ifset($form.params.button.captionplace) === 'left'}display: none;{/if}"></div>
+                                    <div class="value js-field-input">
+                                        <button class="crm-form-preview-submit-button dark-gray {$form.params.button.width|default:'auto'}">
+                                            {$form.params.button.caption|escape|default:'[`Submit`]'}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="crm-actions-col crm-button-actions-col js-field-edit small">
+                                    <a href="javascript:void(0);" class="text-light-gray crm-edit-field-link"><i class="fas fa-pen"></i></a>
+                                </div>
+                            </div>
+                            <div class="" style="min-width: 36px; max-width: 36px;"></div>
                         </div>
+                    </div>
                     </div>
 
                 </div>
 
                 <div class="crm-form-width-wrapper">
-                    <input class="crm-form-width-input" type="text" value="{$form.params.formwidth|default:400}" name="form[params][formwidth]"/>
-                    <div class="crm-form-width-label">[`Form width (200-600px)`]</div>
+                    <input class="crm-form-width-input" type="number" value="{$form_max_width}" name="form[params][max_width]" data-css-var="--crm-form-max-width"  data-css-unit="px">
+                    <div class="crm-form-width-label hint">[`Recommended 280–600 pixels. A web form can shrink and adapt if its width exceeds that of a column or the phone screen.`]</div>
+                </div>
+
+                <div class="crm-form-margins-wrapper custom-pt-32 custom-pb-16 custom-px-32">
+                    <div>
+                        <input type="number" name="form[params][fields_space]" value="{$fields_space}" data-css-var="--crm-form-fields-space" data-css-unit="px" class="shortest">px
+                        <p class="hint">[`Vertical space between the fields and above the caption`]</p>
+                    </div>
+                    <div>
+                        <input type="number" name="form[params][caption_space]" value="{$caption_space}" data-css-var="--crm-form-caption-space" data-css-unit="px" class="shortest">px
+                        <p class="hint">[`Vertical space between label and field displayed below`]</p>
+                    </div>
+                    <div>
+                        <input type="number" name="form[params][caption_width]" value="{$caption_width}" data-css-var="--crm-form-caption-width" data-css-unit="%" class="shortest">%
+                        <p class="hint">[`Width of label displayed on the left`]</p>
+                    </div>
                 </div>
 
             </div>
@@ -326,7 +418,7 @@
 
             </div>
         </div>
-
+        <input type="hidden" name="form[params][_version]" value="2">
         {$blocks.form_with_contact|default:''}
         {$blocks.form_create_deal|default:''}
         {$blocks.form_responsible|default:''}
@@ -339,30 +431,6 @@
                 {$messages_block}
             </div>
         </div>
-
-        {if $form.id}
-            <div class="crm-form-section fields-group">
-                <div class="crm-form-section-header">
-                    [`Publication`]
-                </div>
-                <div class="crm-form-section-content">
-                    <p class="large-hint">[`To publish this form on your website use this code:`]
-                        {if $form.id > 0}
-                            <tt class="crm-smarty-helper"><strong>{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}</strong></tt>
-                            <span class="icon crm-copy js-copy" data-content="{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}" title="[`Copy to clipboard`]"><i class="fas fa-copy"></i></span>
-                        {else}
-                            <strong>[`Will be available after saving`]</strong>
-                        {/if}
-                    </p>
-                </div>
-                <div class="crm-form-section-content">
-                    <p class="large-hint">[`To publish the form on external site use this code:`]
-                        <a class="inline-link crm-iframe-code-block-toggle" href="javascript:void(0);">iframe</a>
-                    </p>
-                    <textarea class="crm-iframe-code small" style="display: none;" readonly><iframe frameborder="0" src="{$frontend_form_iframe_url}" id="wa-crm-iframe" name="wa-crm-iframe" marginheight="0" marginwidth="0" scrolling="no" style="width:100%; height:50px;"></iframe><script type="text/javascript" src="{$app_static_url}js/iframeResizer.min.js"></script><script type="text/javascript">iFrameResize({ heightCalculationMethod:'max' });</script></textarea>
-                </div>
-            </div>
-        {/if}
 
         <div class="bottombar sticky custom-mt-20 crm-form-buttons">
             <div class="custom-px-20 custom-py-16 blank c-layout">

@@ -1,0 +1,18 @@
+{**
+  * Template for render composite control
+  *}
+
+<div class="c-field-wrapper crm-composite-field fields{if $params.subfield_captionplace|default:'above' !== 'above'} horizontal{/if}" data-composite="1">
+    {foreach $params.subfields as $subfield_id => $subfield}
+        {if !($subfield.field instanceof waContactHiddenField)}
+            <div class="field {if $params.subfield_captionplace|default:'above' === 'above'} vertical{/if}">
+                {if $params.subfield_captionplace|default:'above' !== 'none'}
+                    <div class="name for-input">{$subfield.name|escape}</div>
+                {/if}
+                <div class="value">
+                    {$subfield.html}
+                </div>
+            </div>
+        {/if}
+    {/foreach}
+</div>

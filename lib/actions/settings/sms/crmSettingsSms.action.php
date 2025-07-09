@@ -27,6 +27,17 @@ class crmSettingsSmsAction extends crmSettingsViewAction
         if (!$dh) {
             return array();
         }
+
+        // Load config for SMS adapters
+        $config = wa()->getConfig()->getConfigFile('sms');
+        $config_by_plugin = [];
+        foreach ($config as $c) {
+            if (!empty($c['adapter'])) {
+                $config_by_plugin[$c['adapter']] = $c;
+            }
+        }
+
+        // Get adapters
         $adapters = array();
         while (($f = readdir($dh)) !== false) {
             if ($f === '.' || $f === '..' || !is_dir($path.$f)) {
@@ -34,7 +45,7 @@ class crmSettingsSmsAction extends crmSettingsViewAction
             } elseif (file_exists($path.$f.'/lib/'.$f.'SMS.class.php')) {
                 require_once($path.$f.'/lib/'.$f.'SMS.class.php');
                 $class_name = $f.'SMS';
-                $adapters[$f] = new $class_name(array());
+                $adapters[$f] = new $class_name(ifset($config_by_plugin, $f, []));
             }
         }
         closedir($dh);
@@ -45,8 +56,7 @@ class crmSettingsSmsAction extends crmSettingsViewAction
 
         $result = array();
 
-        $config = wa()->getConfig()->getConfigFile('sms');
-
+        // Get config
         $this->used = [];
         foreach ($config as $c_from => $c) {
             if (isset($adapters[$c['adapter']])) {
@@ -63,17 +73,22 @@ class crmSettingsSmsAction extends crmSettingsViewAction
         }
         $result = array_values($result);
 
-        foreach ($adapters as $a) {
+        foreach ($adapters as $id => $a) {
             /**
              * @var waSMSAdapter $a
              */
             if (!empty($this->used[$a->getId()])) {
                 continue;
             }
-            $result[] = $this->getSMSAdapaterInfo($a);
+            $info = $this->getSMSAdapaterInfo($a);
+            if ($id == 'webasystsms') {
+                array_unshift($result, $info);
+            } else {
+                $result[] = $info;
+            }
         }
-        return $result;
 
+        return $result;
     }
 
     protected function getSMSAdapaterInfo(waSMSAdapter $a)
@@ -81,16 +96,24 @@ class crmSettingsSmsAction extends crmSettingsViewAction
         $temp = $a->getInfo();
         $temp['id'] = $a->getId();
         $temp['controls'] = $a->getControls();
+
         if (ifset($temp['no_settings'], false) && !empty($this->used) && empty($this->used[$a->getId()])) {
-            $temp['controls_html'] = '<p class="hint">'.
-                sprintf(
-                    _ws('%s is not currently used. There are other configured SMS adapters. To use %s, remove settings from all SMS adapters.'),
-                    $temp['name'], $temp['name']
-                ) . '</p>';
+            $mode = ifset($temp, 'no_settings_controls_mode', 'warning');
+            $temp['controls_html'] = '';
+            if ($mode == 'warning' || $mode == 'both') {
+                $temp['controls_html'] .= '<p class="hint">'.
+                    sprintf(
+                        _ws('%s is not currently used. There are other configured SMS adapters. To use %s, remove settings from all SMS adapters.'),
+                        $temp['name'], $temp['name']
+                    ) . "</p>\n\n";
+            }
+            if ($mode == 'controls' || $mode == 'both') {
+                $temp['controls_html'] .= $a->getControlsHtml();
+            }
         } else {
             $temp['controls_html'] = $a->getControlsHtml();
         }
-        
+
         return $temp;
     }
 

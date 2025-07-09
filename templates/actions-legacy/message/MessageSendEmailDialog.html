@@ -54,7 +54,7 @@
                             <div class="value">
                                 <div class="email-copy-area">
                                     <div class="email-copy-text">
-                                        {if ifset($recipients)}
+                                        {if !empty($recipients)}
                                             {foreach $recipients as $_recipient}
                                                 <div class="email-copy-user" title="{$_recipient.email|escape}" data-contact-id="{if !empty($_recipient.contact_id)}{$_recipient.contact_id|escape}{else}0{/if}" data-email="{$_recipient.email|escape}">
                                                     {if !empty($_recipient.photo)}<i class="icon16 userpic20" style="background-image: url({$_recipient.photo});"></i>{/if}
@@ -80,7 +80,7 @@
                                     </div>
                                 </div>
                                 <div class="deal-participants-area">
-                                    {if ifset($participants)}
+                                    {if !empty($participants)}
                                         [`Participants in the deal`]:
                                         {foreach $participants as $_participant}
                                         <span class="email-copy-user" title="{$_participant.email[0]|default:''|escape}" data-cc-contact-id="{$_participant.id|escape}" data-cc-email="{$_participant.email[0]|default:''|escape}">
@@ -93,12 +93,12 @@
                             </div>
                         </div>
 
-                        <div class="field email-copy-wrapper-collapsed{if ifset($recipients)} email-copy-wrapper-collapsed-block{/if}">
+                        <div class="field email-copy-wrapper-collapsed{if !empty($recipients)} email-copy-wrapper-collapsed-block{/if}">
                             <div class="name">[`Copy`]</div>
                             <div class="value">
                                 <div class="email-copy-area">
                                     <div class="email-copy-text-collapsed">
-                                        {if ifset($recipients)}
+                                        {if !empty($recipients)}
                                             {foreach $recipients as $_recipient}
                                                 <div class="email-copy-user" title="{$_recipient.email|escape}" data-contact-id="{if !empty($_recipient.contact_id)}{$_recipient.contact_id|escape}{else}0{/if}" data-email="{$_recipient.email|escape}">
                                                     {if !empty($_recipient.photo)}<i class="icon16 userpic20" style="background-image: url({$_recipient.photo|escape});"></i>{/if}

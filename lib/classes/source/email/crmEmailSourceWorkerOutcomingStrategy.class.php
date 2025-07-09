@@ -34,11 +34,12 @@ class crmEmailSourceWorkerOutcomingStrategy extends crmEmailSourceWorkerStrategy
         $mm = new crmMessageModel();
         $mm->addToConversation($message, $conversation_id);
 
+        /*
         if ($conversation) {
             // Если переписка не только что создана, отправляем пуши
             $message['conversation_id'] = $conversation_id;
-            (new crmPushService)->notifyAboutMessage($customer, $message, $conversation);
-        }
+            (new crmPushService)->notifyAboutMessage($customer, $message, $conversation, $deal);
+        } */
     }
 
     /**

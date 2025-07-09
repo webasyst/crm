@@ -93,10 +93,6 @@ class crmMessageSendForwardController extends crmSendEmailController
 
         $from = array($data['sender_email'] => $sender_name);
 
-        $reply_to = array(
-            $data['sender_email'] => $sender_name,
-        );
-
         $notification = array(
             'contact'  => $this->getRecipientContact(),
             'email'    => $data['email'],
@@ -104,7 +100,7 @@ class crmMessageSendForwardController extends crmSendEmailController
             'body'     => $data['body'],
             'wa_log'   => true,
             'from'     => $from,
-            'reply_to' => $reply_to,
+            'reply_to' => [],
             'sender'   => waMail::getDefaultFrom(),
             'cc'       => $data['cc']
         );
@@ -116,28 +112,32 @@ class crmMessageSendForwardController extends crmSendEmailController
         $notification['attachments'] = $this->formAttachments($data);
 
         $deal_id = 0;
-        if ($this->getDeal()) {
-            $deal = $this->getDeal();
+        $deal = $this->getDeal();
+        if (!empty($deal)) {
             $deal_id = $deal['id'];
             $notification['deal_id'] = $deal['id'];
 
-            if ($deal['source_email']) {
+            if (!empty($deal['source_email'])) {
                 $notification['reply_to'][$deal['source_email']] = $deal['source_email'];
             }
+        }
 
-            $original_message = $this->getOriginalMessage();
-            if ($original_message) {
-                $notification['in_reply_to'] = $original_message->getMessageId();
-                $notification['in_reply_to'] = trim(trim(trim($notification['in_reply_to']), '><'));
-                $notification['references'] = $original_message->getReferences();
-                $notification['references'][] = $notification['in_reply_to'];
-                $notification['references'] = array_unique($notification['references']);
-            }
-        } else {
+        if (empty($deal) || empty($notification['reply_to'])) {
             $source_email = $this->emailSource();
-            if ($source_email) {
+            if (!empty($source_email)) {
                 $notification['reply_to'][$source_email] = $source_email;
+            } else {
+                waLog::log('Source email not found on message send forward controller');
             }
+        }
+
+        $original_message = $this->getOriginalMessage();
+        if ($original_message) {
+            $notification['in_reply_to'] = $original_message->getMessageId();
+            $notification['in_reply_to'] = trim(trim(trim($notification['in_reply_to']), '><'));
+            $notification['references'] = $original_message->getReferences();
+            $notification['references'][] = $notification['in_reply_to'];
+            $notification['references'] = array_unique($notification['references']);
         }
 
         $notification['message_id'] = crmEmailSourceWorker::generateMessageId($deal_id);

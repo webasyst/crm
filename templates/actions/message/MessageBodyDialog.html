@@ -1,30 +1,30 @@
 {strip}
     {function name="_renderFromContact" _contact=[]}
         {if isset($_contact.id)}
-        <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top" class="c-contact-link">
-            <i class="icon userpic custom-mr-4" style="background-image: url({$_contact.photo_url_16});" title="{$_contact.name|escape}"></i>{$_contact.name|escape}
-        </a>
+            <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top" class="c-contact-link">
+                <i class="icon userpic custom-mr-4" style="background-image: url({$_contact.photo_url_16});" title="{$_contact.name|escape}"></i>{$_contact.name|escape}
+            </a>
             {if !empty($message.from)}
-                <span style="color: #999">&lt;{$message.from|escape}&gt;</span>
+                <span class="gray">&lt;{$message.from|escape}&gt;</span>
             {/if}
         {else}
             {$_contact.name|escape}&nbsp;
             {if !empty($message.from)}
-                <span style="color: #999">&lt;{$message.from|escape}&gt;</span>
+                <span class="gray">&lt;{$message.from|escape}&gt;</span>
             {/if}
         {/if}
     {/function}
 
     {function name="_renderToRecipient" recipient=[]}
         {if $recipient.contact_id > 0}
-        <a href="{$wa_app_url}contact/{$recipient.contact_id}/" target="_top" data-link="top" class="c-contact-link">
-            <i class="icon userpic custom-mr-4" style="background-image: url({$recipient.photo_url_16});" title="{$recipient.name|escape}"></i>
-            {$recipient.name|escape}
-        </a>
-            <span style="color: #999">&lt;{$recipient.destination|escape}&gt;</span>
+            <a href="{$wa_app_url}contact/{$recipient.contact_id}/" target="_top" data-link="top" class="c-contact-link">
+                <i class="icon userpic custom-mr-4" style="background-image: url({$recipient.photo_url_16});" title="{$recipient.name|escape}"></i>
+                {$recipient.name|escape}
+            </a>
+            <span class="gray">&lt;{$recipient.destination|escape}&gt;</span>
         {else}
             {$recipient.name|escape}&nbsp;
-            <span style="color: #999">&lt;{$recipient.destination|escape}&gt;</span>
+            <span class="gray">&lt;{$recipient.destination|escape}&gt;</span>
         {/if}
     {/function}
 
@@ -35,15 +35,15 @@
                 {$_contact.name|escape}
             </a>
             {if isset($_contact.destination)}
-                <span style="color: #999">&lt;{$_contact.destination|escape}&gt;</span>
+                <span class="gray">&lt;{$_contact.destination|escape}&gt;</span>
             {/if}
         {elseif !$_contact.contact_id && $_contact.name}
             {$_contact.name|escape}&nbsp;
             {if isset($_contact.destination)}
-                <span style="color: #999">&lt;{$_contact.destination|escape}&gt;</span>
+                <span class="gray">&lt;{$_contact.destination|escape}&gt;</span>
             {/if}
         {elseif isset($_contact.email)}
-            <span style="color: black">{$_contact.destination|escape}</span>
+            <span>{$_contact.destination|escape}</span>
         {/if}
     {/function}
 
@@ -51,85 +51,78 @@
         <div class="dialog-background"></div>
         <div class="dialog-body">
             <header class="dialog-header">
-                <div class="flexbox middle wrap full-width space-16">
-                <h2 class="custom-mb-0">{strip_tags($message.subject)|escape}</h2>
-
-                <div class="flexbox middle space-4 c-message-actions">
+                <div class="flexbox middle full-width space-16">
                     {if !empty($message.create_datetime)}
-                        <span class="nowrap c-text-item">
-                            {if $message.direction === "IN"}
-                            <span class="icon size-20 custom-mr-4"><i class="fas fa-arrow-circle-left text-green import" title="[`incoming`]"></i></span>
-                            {else}
-                                <span class="icon size-20 custom-mr-4"><i class="fas fa-arrow-circle-right text-blue message-out" title="[`outgoing`]"></i></span>
-                            {/if}
-                            {$message.create_datetime|wa_datetime}
+                        <span class="nowrap small c-text-item">
+                            {$message.create_datetime|wa_datetime:humandatetime}
                         </span>
                     {/if}
-                    <span class="c-button-items nowrap">
-                    {if $message.direction === crmMessageModel::DIRECTION_IN}
-                        <button class="button circle light-gray js-message-reply" title="[`Reply`]"
-                            data-message-id="{$message.id|escape}"><i class="icon fas fa-undo"></i></button>
+                    <div class="wide flexbox middle space-4 c-message-actions">
+                        <span class="c-button-items nowrap">
+                        {if $message.direction === crmMessageModel::DIRECTION_IN}
+                            <button class="button nobutton large circle light-gray js-message-reply" title="[`Reply`]"
+                                data-message-id="{$message.id|escape}"><i class="fas fa-reply"></i></button>
 
-
-                        {if $message.transport == crmMessageModel::TRANSPORT_EMAIL}
-                            <button class="button circle light-gray js-message-forward" title="[`Forward message`]"
-                               data-message-id="{$message.id|escape}"><i class="icon fas fa-redo"></i></button>
+                            {if $message.transport == crmMessageModel::TRANSPORT_EMAIL}
+                                <button class="button nobutton large circle light-gray js-message-forward" title="[`Forward message`]" data-message-id="{$message.id|escape}"><i class="fas fa-share"></i></button>
+                            {/if}
                         {/if}
 
-                    {/if}
+                        {if $message.original}
+                            <a class="button nobutton large circle light-gray js-disable-router" href="?module=file&action=downloadEml&id={$message.id}"
+                                title="[`Download original`]"><i class="fas fa-arrow-down"></i></a>
+                        {/if}
 
-                    {if $message.original}
-                        <a class="button circle light-gray js-disable-router" href="?module=file&action=downloadEml&id={$message.id}"
-                            title="[`Download original`]"><i class="icon fas fa-download"></i></a>
-                    {/if}
-                    
-                    {if $message.transport === crmMessageModel::TRANSPORT_IM || $message.transport === crmMessageModel::TRANSPORT_EMAIL && $message.conversation_id}
-                        {*<a href="{$wa_app_url}message/conversation/{$message.conversation_id}" class="small" style="padding: 13px 10px 12px;">[`open conversation`]</a>*}
-                    {/if}
-                    </span>
+                        {if $is_admin}
+                            <button title="[`Delete message`]" class="button nobutton circle light-gray js-delete-message"><i class="fas fa-trash-alt"></i></button>
+                        {/if}
+                        </span>
+                    </div>
+                    <button class="button nobutton large circle light-gray js-close-dialog" title="[`Close`]"><i class="fas fa-times"></i></button>
                 </div>
-                                    
-            </div>
+                <div class="flexbox middle full-width space-16">
+                    <h2 class="custom-mb-0 wide">{strip_tags($message.subject)|escape}</h2>
+                </div>
             </header>
             <div class="dialog-content">
                 <div class="fields c-message-info">
                     <div class="js-message-data">
                         <div class="field">
                             <div class="name">[`From`]</div>
-                            <div class="value small">{_renderFromContact _contact=$from}</div>
+                            <div class="value small">
+                                {_renderFromContact _contact=$from}
+                            </div>
                         </div>
 
                         {if !empty($message.to)}
-                            <div class="field custom-mt-4">
+                            <div class="field">
                                 <div class="name">[`To`]</div>
-                                <div class="value">
-                                    <ul class="menu c-to-list">
+                                <div class="value small">
+                                    <div class="flexbox vertical" style="row-gap: 8px;">
                                         {foreach $to_list as $_recipient}
-                                            <li>{_renderToRecipient recipient=$_recipient|default:0}</li>
+                                            <div>{_renderToRecipient recipient=$_recipient|default:0}</div>
                                         {/foreach}
-                                    </ul>
+                                    </div>
                                 </div>
                             </div>
                         {/if}
 
-                        {if !empty($recipients)}
+                        {if !empty($copy_recipients)}
                             <div class="field">
                                 <div class="name">[`Copy`]</div>
-                                <div class="value">
-                                    <ul class="menu c-copy-list">
-                                        {foreach $recipients as $_recipient}
-                                            {if $_recipient.type !== crmMessageRecipientsModel::TYPE_TO}
-                                                <li>{_renderRecipient _contact=$_recipient}</li>
-                                            {/if}
+                                <div class="value small">
+                                    <div class="flexbox vertical" style="row-gap: 8px;">
+                                        {foreach $copy_recipients as $_recipient}
+                                            <div>{_renderRecipient _contact=$_recipient}</div>
                                         {/foreach}
-                                    </ul>
+                                    </div>
                                 </div>
                             </div>
                         {/if}
 
                         {if !empty($deal)}
                             <div class="field">
-                                <div class="name">[`Deal`]</div>
+                                <div class="name for-input">[`Deal`]</div>
                                 <div class="value">
                                     {if !empty($deal.id)}
                                         {$_funnel = $funnel[$deal.funnel_id]|default:null}
@@ -137,7 +130,7 @@
                                             {$_stage = $_funnel.stages[$deal.stage_id]|default:null}
                                             {if $_stage}
                                                 <i class="icon fas fa-circle funnel-state" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
-                                                <a href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
+                                                <a class="custom-ml-8" href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
                                             {else}
                                                 [`Stage deleted`]
                                             {/if}
@@ -158,45 +151,44 @@
                                         {$deal = $clean_data.deal}
                                         {$funnels = $clean_data.funnels}
                                         {$stages = $clean_data.stages}
-                                        <div class="c-deal-value js-deal-value">
-                                            <span class="c-deal-name c-deal-name-hidden js-deal-name">
+                                        <div class="js-deal-value flexbox middle wrap space-4">
+                                            <div class="c-deal-name hidden js-deal-name state-with-inner-icon right custom-mb-4">
                                                 <input class="c-deal-name-input js-deal-name-input" type="text" name="deal[name]" autocomplete="off" placeholder="[`Type a deal name`]" />
-                                                <span title="[`Cancel creation`]" class="c-remove-deal js-remove-deal"><i class="fas fa-times-circle text-red"></i></span>
-                                            </span>
-                                            <div class="c-select-deal js-select-deal">
+                                                <button title="[`Cancel creation`]" class="icon c-remove-deal js-remove-deal"><i class="fas fa-times-circle text-red"></i></button>
+                                            </div>
+                                            <div class="c-select-deal js-select-deal custom-mb-4">
                                                 <div class="dropdown small js-deals-dropdown" id="dropdown-deals-body">
                                                     <button class="dropdown-toggle button light-gray js-visible-link" type="button" style="word-break: break-word;">
                                                         <span class="js-text">[`Empty`]</span>
                                                     </button>
                                                     <div class="dropdown-body">
-                                                
                                                         <ul class="menu with-icons js-deals-list">
                                                             <li class="js-create-new-deal">
                                                                 <a href="javascript:void(0);">
                                                                     <span class="js-text">[`Create new`]</span>
                                                                 </a>
                                                             </li>
-                                                            <li class="c-empty-deal c-empty-deal-hidden js-empty-deal">
+                                                            <li class="c-empty-deal hidden js-empty-deal">
                                                                 <a href="javascript:void(0);">
                                                                     <span class="js-text">[`Empty`]</span>
                                                                 </a>
                                                             </li>
                                                         </ul>
-                                                        <input class="js-field js-deal-id" name="deal[id]" type="hidden" value="none">
                                                     </div>
                                                 </div>
+                                                <input class="js-field js-deal-id" name="deal[id]" type="hidden" value="none">
                                             </div>
 
-                                            <div class="c-select-funnel hidden js-select-funnel-wrapper">
+                                            <div class="hidden flexbox space-4 js-select-funnel-wrapper">
                                                 {$_active_funnel = reset($funnels)}
                                                 {if !empty($deal.funnel_id) && !empty($funnels[$deal.funnel_id])}
                                                     {$_active_funnel = $funnels[$deal.funnel_id]}
                                                 {/if}
 
-                                                <div class="c-funnels-list" id="c-funnels-list">
-                                                    <div class="dropdown small js-deals-dropdown" id="dropdown-funnels-list-body">
+                                                <div id="c-funnels-list js-funnels-list custom-mb-4">
+                                                    <div class="dropdown js-funnels-dropdown" id="dropdown-funnels-list-body">
                                                         <button class="dropdown-toggle button light-gray js-visible-link" type="button" style="word-break: break-word;">
-                                                            <span class="js-text">
+                                                            <span class="js-text flexbox space-4 align-left">
                                                                 {if !empty($_active_funnel.color)}
                                                                     <i class="icon fas fa-circle funnel-state" style="color: {$_active_funnel.color}"></i>
                                                                 {/if}
@@ -204,40 +196,68 @@
                                                             </span>
                                                         </button>
                                                         <div class="dropdown-body">
-                                                    
                                                             <ul class="menu with-icons ">
                                                                 {strip}
                                                                     {foreach $funnels as $_funnel}
-                                                                        <li class="{if $deal.funnel_id == $_funnel.id}selected{/if}">
+                                                                        <li>
                                                                             <a href="javascript:void(0);" data-id="{$_funnel.id|escape}">
-                                                                                {if !empty($_funnel.color)}
-                                                                                    <i class="icon fas fa-circle funnel-state" style="color: {$_funnel.color|escape}"></i>
-                                                                                {/if}
-                                                                                <span>{$_funnel.name|escape}</span>
+                                                                                <span class="js-text flexbox space-4 align-left">
+                                                                                    {if !empty($_funnel.color)}
+                                                                                        <i class="icon fas fa-circle funnel-state" style="margin-right: 0; color: {$_funnel.color|escape}"></i>
+                                                                                    {/if}
+                                                                                    <span>{$_funnel.name|escape}</span>
+                                                                                </span>
                                                                             </a>
                                                                         </li>
                                                                     {/foreach}
                                                                 {/strip}
                                                             </ul>
-                                                            <input class="js-field js-select-deal-funnel" name="deal[funnel_id]" type="hidden" value="{$_active_funnel.id|escape}">
                                                         </div>
                                                     </div>
-
+                                                    <input class="js-field js-select-deal-funnel" name="deal[funnel_id]" type="hidden" value="{$_active_funnel.id|escape}">
+                                                </div>
                                                     <script>
                                                         ( function($) {
-                                                            $("#dropdown-funnels-list-body").waDropdown();
+                                                            $("#dropdown-funnels-list-body").waDropdown({
+                                                                items: ".menu > li > a",
+                                                                change: function(event, target, dropdown) {
+                                                                    $(".js-select-deal-funnel").val( $(target).data("id") ).trigger('change');
+                                                                }
+                                                            });
                                                             $("#dropdown-deals-body").waDropdown();
-
                                                         })(jQuery);
                                                     </script>
-                                                </div>
 
-                                                <div class="js-select-stage-wrapper" style="display: inline-block; vertical-align: top; padding-top: 3px;">
+                                                <div class="js-select-stage-wrapper custom-mb-4" style="vertical-align: top;">
                                                     {include file="templates/actions/deal/DealStagesByFunnel.html" selected_stage=$deal.stage_id inline}
                                                 </div>
                                             </div>
                                         </div>
-                                        <i class="icon fas fa-save js-save-deal hidden"></i>
+                                        {if $messages_in_conversation > 1}
+                                        <div class="js-deal-save-details hidden small">
+                                            <label class="flexbox full-width space-8 custom-mt-4">
+                                                <span class="wa-radio">
+                                                    <input type="radio" name="bind_type" value="conversation" checked="checked">
+                                                    <span></span>
+                                                </span>
+                                                <span class="wide">
+                                                    [`Link entire conversation to deal`]
+                                                </span>
+                                            </label>
+                                            <label class="flexbox full-width space-8 custom-mt-4">
+                                                <span class="wa-radio">
+                                                    <input type="radio" name="bind_type" value="message">
+                                                    <span></span>
+                                                </span>
+                                                <span class="wide">
+                                                    [`Move this message to a separate conversation and link it to deal`]
+                                                </span>
+                                            </label>
+                                        </div>
+                                        {/if}
+                                        <button class="hidden smaller js-save-deal custom-mt-8">
+                                            [`Save`]
+                                        </button>
                                     </form>
                                 </div>
                             </div>
@@ -245,7 +265,7 @@
                     </div>
                 </div>
 
-                <div class="c-message-body js-message-body">
+                <div class="c-message-body js-message-body" style="min-height: 50vh;">
                     <div class="">{$message.body_sanitized}</div>
                     {if $message.attachments}
                         <div class="c-attachments-block">
@@ -264,19 +284,7 @@
                 <div class="js-errors-place"></div>
             </div>
 
-            <footer class="dialog-footer">
-                <div class="c-layout">
-                    <div class="c-column">
-                        <div class="c-footer-actions js-dialog-footer">
-                            <button class="button light-gray js-close-dialog" >[`Close`]</button>
-                        </div>
-                    </div>
-                    {if $is_admin}
-                    <div class="c-column middle right">
-                        <a href="javascript:void(0);" class="button red js-delete-message">[`Delete message`]</a>
-                    </div>
-                    {/if}
-            </footer>
+
         </div>
 
         <script>

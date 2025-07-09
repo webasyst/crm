@@ -1,11 +1,12 @@
-<div class="crm-dialog-wrapper c-settings-form-agreement-checkbox-edit-wrapper" data-template="1" style="display: none;">
-    <div class="crm-dialog-background"></div>
-    <div class="crm-dialog-block">
-        <header class="crm-dialog-header">
+<template class="c-settings-form-agreement-checkbox-edit-wrapper">
+<div class="dialog crm-dialog-wrapper">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <header class="dialog-header">
             <h1>[`Consent to terms`]</h1>
         </header>
 
-        <div class="crm-dialog-content">
+        <div class="dialog-content">
             <div class="fields">
                 <div class="field c-field-id">
                     <div class="name">[`Field`]</div>
@@ -32,14 +33,36 @@
                         </label>
                     </div>
                 </div>
+                <div class="field c-field-captionplace">
+                    <div class="name">[`Checkbox placement`]</div>
+                    <div class="value">
+                        <div class="custom-mb-8">
+                            <label>
+                                <span class="wa-radio">
+                                    <input type="radio" name="params[captionplace]" value="none">
+                                    <span></span>
+                                </span> [`on the form’s left`]
+                            </label>
+                        </div>
+                        <div class="custom-mb-8">
+                            <label>
+                                <span class="wa-radio">
+                                    <input type="radio" name="params[captionplace]" value="left" checked="checked">
+                                    <span></span>
+                                </span> [`on the fields column’s left`]
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <footer class="crm-dialog-footer">
+        <footer class="dialog-footer">
             <div class="crm-actions">
-                <input class="button green crm-button js-some-action" type="button" value="[`Apply`]">
+                <input class="button crm-button js-some-action" type="submit" value="[`Apply`]">
                 <a class="button light-gray js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
             </div>
         </footer>
     </div>
 </div>
+</template>
