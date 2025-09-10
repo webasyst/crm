@@ -2,8 +2,8 @@
     <form>
         <h1 class="c-page-header">[`Deal loss reasons`]</h1>
 
-        <div class="">
-            <div>
+        <div class="custom-my-20 custom-ml-2">
+            <div class="custom-mb-4">
                 <label>
                     <span class="wa-checkbox"><input type="checkbox" name="lost_reason_require" {if !empty($lost_reason_require)}checked{/if}>
                         <span>
@@ -30,50 +30,53 @@
             </div>
         </div>
 
-        <section class="c-reasons-section">
-            {function _renderReason}
-                <li class="flexbox middle wrap space-8 c-reason" {if !empty($_reason)}data-id="{$_reason.id}"{/if}>
-                    <i class="fas fa-grip-vertical text-light-gray c-sort-toggle js-sort-toggle"></i>
-                    <div class="flexbox middle wrap space-8">
-                        <input class="js-name-field" type="text" placeholder="[`Reason name`]" value="{if !empty($_reason)}{$_reason.name|escape}{else}[`New reason`]{/if}" required>
-                        <div class="wa-select">
-                            <select class="js-funnel-id-field not-styled">
-                                <option value="0">[`All funnels`]</option>
-                                {foreach $_funnels as $_funnel}
-                                    <option value="{$_funnel.id}" {if isset($_reason.funnel_id) && $_reason.funnel_id == $_funnel.id}selected{/if}>{$_funnel.name|escape:"html"}</option>
-                                {/foreach}
-                            </select>
+        <div class="fields">
+            <section class="c-reasons-section fields-group">
+                {function _renderReason}
+                    <li class="flexbox middle wrap space-12 c-reason" {if !empty($_reason)}data-id="{$_reason.id}"{/if}>
+                        <i class="fas fa-grip-vertical text-light-gray c-sort-toggle js-sort-toggle"></i>
+                        <div class="flexbox middle wrap space-8">
+                            <input class="js-name-field" type="text" placeholder="[`Reason name`]" value="{if !empty($_reason)}{$_reason.name|escape}{else}[`New reason`]{/if}" required>
+                            <div class="wa-select">
+                                <select class="js-funnel-id-field not-styled">
+                                    <option value="0">[`All funnels`]</option>
+                                    {foreach $_funnels as $_funnel}
+                                        <option value="{$_funnel.id}" {if isset($_reason.funnel_id) && $_reason.funnel_id == $_funnel.id}selected{/if}>{$_funnel.name|escape:"html"}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                            <a class="button nobutton light-gray small c-delete-link js-delete-reason" href="javascript:void(0);" title="[`Delete`]">
+                                <i class="fas fa-trash-alt text-red"></i>
+                            </a>
                         </div>
-                        <a class="button light-gray small c-delete-link js-delete-reason" href="javascript:void(0);">
-                            <i class="fas fa-trash-alt text-red"></i>
-                            [`Delete`]
-                        </a>
-                    </div>
-                    
-                </li>
-            {/function}
 
-            {capture assign="_reason_template_html"}{_renderReason _reason=[] _funnels=$funnels}{/capture}
+                    </li>
+                {/function}
 
-            <ul class="compact c-reasons-list js-reasons-list">
-                {foreach $reasons as $_reason}
-                    {_renderReason _reason=$_reason _funnels=$funnels}
-                {/foreach}
-            </ul>
+                {capture assign="_reason_template_html"}{_renderReason _reason=[] _funnels=$funnels}{/capture}
 
-            <div class="c-actions custom-mt-16">
-                <a class="button small rounded light-gray js-add-reason" href="javascript:void(0);">
-                    <i class="fas fa-plus-circle text-green"></i>
-                    [`Add reason`]
-                </a>
+                <ul class="compact c-reasons-list js-reasons-list">
+                    {foreach $reasons as $_reason}
+                        {_renderReason _reason=$_reason _funnels=$funnels}
+                    {/foreach}
+                </ul>
+
+                <div class="c-actions custom-mt-20">
+                    <a class="button small rounded light-gray js-add-reason" href="javascript:void(0);">
+                        <i class="fas fa-plus-circle text-green"></i>
+                        [`Add reason`]
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <div class="c-settings-footer bottombar sticky">
+            <div class="c-footer-actions js-footer-actions">
+                <button class="button js-submit-button" type="submit">[`Save`]</button>
+                <span class="js-hidden-actions" style="display: none;">
+                    <a href="{$wa_app_url}settings/lostReasons/" class="button light-gray">[`Cancel`]</a>
+                </span>
             </div>
-        </section>
-
-        <div class="c-footer-actions js-footer-actions">
-            <button class="button js-submit-button" type="submit">[`Save`]</button>
-            <span class="js-hidden-actions" style="display: none;">
-                <a href="{$wa_app_url}settings/lostReasons/" class="button light-gray">[`Cancel`]</a>
-            </span>
         </div>
     </form>
 

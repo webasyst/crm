@@ -15,8 +15,8 @@
         <form method="post" action="{$wa_app_url}?module=settings&action=fieldDelete">
             <div class="dialog-content">
                 {if !$count}
-                    <p>[`No data in the field`]</p>
-                    <p>[`Deleting this field will not cause a loss of any contact information.`]</p>
+                    <p class="small">[`No data in the field`]</p>
+                    <p class="small">[`Deleting this field will not cause a loss of any contact information.`]</p>
                 {else}
                     <p class="error-text">{_w(
                             '%d contact have data in the field',

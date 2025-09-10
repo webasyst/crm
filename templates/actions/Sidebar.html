@@ -12,132 +12,175 @@
 
     <div class="sidebar-body c-sidebar-block" id="c-sidebar-block">
         {/if}
-        <ul class="menu">
-            <li>
-                <a href="{$wa_app_url}contact/" data-wa-tooltip-content="[`Contacts`]">
-                    {if isset($contacts_count)}
-                        <span class="count js-count">{$contacts_count}</span>
-                    {/if}
-                    <i class="fas fa-users"></i>
-                    <span class="name">[`Contacts`]</span>
-                    {if !empty($contacts_new_count)}
-                        <strong class="c-badge badge small js-indicator">{if $contacts_new_count < 100}{$contacts_new_count}{else}99+{/if}</strong>
-                    {/if}
-                </a>
-            </li>
 
-            {if !empty($deals_has_access)}
-                <li>
-                    <a href="{$wa_app_url}deal/" data-wa-tooltip-content="[`Deals`]">
-                        {if isset($deals_count)}
-                            <span class="count js-count">{$deals_count}</span>
-                        {/if}
-                        <i class="fas fa-funnel-dollar"></i>
-                        <span class="name">[`Deals`]</span>
-                        {if !empty($deals_new_count)}
-                            <strong class="c-badge badge small js-indicator">{if $deals_new_count < 100}{$deals_new_count}{else}99+{/if}</strong>
-                        {/if}
-                    </a>
-                </li>
-            {/if}
+        {if !empty($deals_has_access)}
 
-            <li{if waRequest::param('module') == 'reminder'} class="selected"{/if}>
-                <a href="{$wa_app_url}reminder/" data-wa-tooltip-content="[`Reminders`]">
-                    <i class="fas fa-bell"></i>
-                    <span class="name">[`Reminders`]</span>
-                    {if !empty($reminders_due_count)}
-                        <strong class="c-badge badge small js-indicator{if $reminders_state != 'overdue'} indicator {$reminders_state}{/if}">{if $reminders_due_count < 100}{$reminders_due_count}{else}99+{/if}</strong>
-                    {/if}
-                </a>
-            </li>
+        <div id="c-sidebar-bricks" class="bricks">
+            {foreach $funnels as $_funnel}
+            <a class="brick full-width text-ellipsis" href="{$wa_app_url}deal/?funnel={$_funnel.id}" data-id="{$_funnel.id}" data-wa-tooltip-content="{$_funnel.name|escape}">
+                <span class="icon" style="color: {$_funnel.color};">
+                    <i class="{$_funnel.icon|default:'fas fa-briefcase'}"></i>
+                </span>
+                {if isset($_funnel.deals_count)}
+                    <span class="count js-count">{$_funnel.deals_count}</span>
+                {/if}
+                <span>
+                    {$_funnel.name|escape}
+                </span>
+            </a>
+            {/foreach}
+        </div>
 
-            {if $can_manage_invoices}
-                <li{if waRequest::param('module') == 'invoice'} class="selected"{/if}>
-                    <a href="{$wa_app_url}invoice/" data-wa-tooltip-content="[`Invoices`]">
-                        {if isset($invoices_count)}
-                            <span class="count js-count">{$invoices_count|default:""}</span>
+        {/if}
+
+        <div class="box custom-pt-0">
+            <ul class="menu large rounded">
+                <li data-id="contacts">
+                    <a href="{$wa_app_url}contact/" data-wa-tooltip-content="[`Contacts`]">
+                        {if isset($contacts_count)}
+                            <span class="count js-count">{$contacts_count}</span>
                         {/if}
-                        <i class="fas fa-file-invoice-dollar"></i>
-                        <span class="name">[`Invoices`]</span>
-                        {if !empty($invoices_new_count)}
-                        <strong class="c-badge badge small js-indicator">{if $invoices_new_count < 100}{$invoices_new_count}{else}99+{/if}</strong>
+                        <i class="fas fa-users"></i>
+                        <span class="name">[`Contacts`]</span>
+                        {if !empty($contacts_new_count)}
+                            <strong class="c-badge badge small js-indicator">{if $contacts_new_count < 100}{$contacts_new_count}{else}99+{/if}</strong>
                         {/if}
                     </a>
                 </li>
-            {/if}
 
-            <li{if waRequest::param('module') == 'log'} class="selected"{/if}>
-                <a href="{$wa_app_url}live/" data-wa-tooltip-content="[`Live`]">
-                    <i class="fas fa-bolt"></i>
-                    <span class="name">[`Live`]</span>
-                </a>
-            </li>
+                {if !empty($deals_has_access)}
+                    <li data-id="all_funnels">
+                        <a href="{$wa_app_url}deal/?all_funnels=1" data-wa-tooltip-content="[`Funnels`]">
+                            {if isset($deals_count)}
+                                <span class="count js-count">{$deals_count}</span>
+                            {/if}
+                            <i class="fas fa-briefcase"></i>
+                            <span class="name">[`Funnels`]</span>
+                            {if !empty($deals_new_count)}
+                                <strong class="c-badge badge small js-indicator">{if $deals_new_count < 100}{$deals_new_count}{else}99+{/if}</strong>
+                            {/if}
+                        </a>
+                    </li>
+                {/if}
 
-            {if !empty($calls_has_access)}
-                <li{if waRequest::param('module') == 'call'} class="selected"{/if}>
-                    <a href="{$wa_app_url}call/" data-wa-tooltip-content="[`Calls`]">
-                        <span class="count">{if isset($calls_count)}{$calls_count}{/if}</span>
-                        <i class="fas fa-phone-alt"></i>
-                        <span class="name">[`Calls`]</span>
-                        {if !empty($calls_new_count)}
-                        <strong class="c-badge badge small js-indicator">{if $calls_new_count < 100}{$calls_new_count}{else}99+{/if}</strong>
+                <li{if waRequest::param('module') == 'reminder'} class="selected"{/if}>
+                    <a href="{$wa_app_url}reminder/" data-wa-tooltip-content="[`Reminders`]">
+                        <i class="fas fa-bell"></i>
+                        <span class="name">[`Reminders`]</span>
+                        {if !empty($reminders_due_count)}
+                            <strong class="c-badge badge small js-indicator{if $reminders_state != 'overdue'} indicator {$reminders_state}{/if}">{if $reminders_due_count < 100}{$reminders_due_count}{else}99+{/if}</strong>
                         {/if}
                     </a>
                 </li>
-            {/if}
 
-            <li{if waRequest::param('module') == 'message'} class="selected"{/if}>
-                <a href="{$wa_app_url}message/" data-wa-tooltip-content="[`Messages`]">
-                    <span class="count hidden">{if isset($messages_count)}{$messages_count}{/if}</span>
-                    <i class="fas fa-comments"></i>
-                    <span class="name">[`Messages`]</span>
-                    {if !empty($messages_new_count)}
-                    <strong class="c-badge badge small js-indicator">{if $messages_new_count < 100}{$messages_new_count}{else}99+{/if}</strong>
-                    {/if}
-                </a>
-            </li>
+                {if $can_manage_invoices}
+                    <li{if waRequest::param('module') == 'invoice'} class="selected"{/if}>
+                        <a href="{$wa_app_url}invoice/" data-wa-tooltip-content="[`Invoices`]">
+                            {if isset($invoices_count)}
+                                <span class="count js-count">{$invoices_count|default:""}</span>
+                            {/if}
+                            <i class="fas fa-receipt"></i>
+                            <span class="name">[`Invoices`]</span>
+                            {if !empty($invoices_new_count)}
+                            <strong class="c-badge badge small js-indicator">{if $invoices_new_count < 100}{$invoices_new_count}{else}99+{/if}</strong>
+                            {/if}
+                        </a>
+                    </li>
+                {/if}
 
-            <li{if waRequest::param('module') == 'report'} class="selected"{/if}>
-                <a href="{$wa_app_url}report/" data-wa-tooltip-content="[`Reports`]">
-                    <i class="fas fa-chart-bar"></i>
-                    <span class="name">[`Reports`]</span>
-                </a>
-            </li>
-            {* @event backend_sidebar.%plugin_id%.top_li *}
-            {foreach $backend_sidebar as $_}{ifset($_.top_li)}{/foreach}
-        </ul>
+                {if !empty($calls_has_access)}
+                    <li{if waRequest::param('module') == 'call'} class="selected"{/if}>
+                        <a href="{$wa_app_url}call/" data-wa-tooltip-content="[`Calls`]">
+                            <span class="count">{if isset($calls_count)}{$calls_count}{/if}</span>
+                            <i class="fas fa-phone-alt"></i>
+                            <span class="name">[`Calls`]</span>
+                            {if !empty($calls_new_count)}
+                            <strong class="c-badge badge small js-indicator">{if $calls_new_count < 100}{$calls_new_count}{else}99+{/if}</strong>
+                            {/if}
+                        </a>
+                    </li>
+                {/if}
+
+                <li{if waRequest::param('module') == 'message'} class="selected"{/if}>
+                    <a href="{$wa_app_url}message/" data-wa-tooltip-content="[`Messages`]">
+                        <span class="count hidden">{if isset($messages_count)}{$messages_count}{/if}</span>
+                        <i class="fas fa-comments"></i>
+                        <span class="name">[`Messages`]</span>
+                        {if !empty($messages_new_count)}
+                        <strong class="c-badge badge small js-indicator">{if $messages_new_count < 100}{$messages_new_count}{else}99+{/if}</strong>
+                        {/if}
+                    </a>
+                </li>
+
+                <li{if waRequest::param('module') == 'report'} class="selected"{/if}>
+                    <a href="{$wa_app_url}report/" data-wa-tooltip-content="[`Reports`]">
+                        <i class="fas fa-chart-bar"></i>
+                        <span class="name">[`Reports`]</span>
+                    </a>
+                </li>
+
+                <li{if waRequest::param('module') == 'log'} class="selected"{/if}>
+                    <a href="{$wa_app_url}live/" data-wa-tooltip-content="[`Live`]">
+                        <i class="fas fa-bolt"></i>
+                        <span class="name">[`Live`]</span>
+                    </a>
+                </li>
+                
+                {* @event backend_sidebar.%plugin_id%.top_li *}
+                {foreach $backend_sidebar as $_}{ifset($_.top_li)}{/foreach}
+            </ul>
+        </div>
 {if !$is_reload}
     </div>
 
-  
     <div class="sidebar-footer shadowed">
-        <ul class="menu">
-            {* @event backend_sidebar.%plugin_id%.bottom_li *}
-            {foreach $backend_sidebar as $_}{ifset($_.bottom_li)}{/foreach}
-            {if $_is_admin}
-                <li{if waRequest::param('module') == 'plugins'} class="selected"{/if}>
-                    <a href="{$wa_app_url}plugins/#/" data-wa-tooltip-content="[`Plugins`]">
-                        <i class="fas fa-plug"></i>
-                        <span class="name">[`Plugins`]</span>
+        <div class="box custom-py-0">
+            <ul class="menu rounded">
+                {* @event backend_sidebar.%plugin_id%.bottom_li *}
+                {foreach $backend_sidebar as $_}{ifset($_.bottom_li)}{/foreach}
+                {if $_is_admin}
+                    <li{if waRequest::param('module') == 'plugins'} class="selected"{/if}>
+                        <a href="{$wa_app_url}plugins/#/" data-wa-tooltip-content="[`Plugins`]">
+                            <i class="fas fa-plug"></i>
+                            <span class="name">[`Plugins`]</span>
+                        </a>
+                    </li>
+                {/if}
+
+                <li{if waRequest::param('module') == 'settings'} class="selected"{/if}>
+                    <a href="{$wa_app_url}settings/" data-wa-tooltip-content="[`Settings`]">
+                        <i class="fas fa-cog"></i>
+                        <span class="name">[`Settings`]</span>
                     </a>
                 </li>
-            {/if}
 
-            <li{if waRequest::param('module') == 'settings'} class="selected"{/if}>
-                <a href="{$wa_app_url}settings/" data-wa-tooltip-content="[`Settings`]">
-                    <i class="fas fa-cog"></i>
-                    <span class="name">[`Settings`]</span>
-                </a>
-            </li>
-        </ul>
+                {if $_is_admin}
+                    <li class="top-padded">
+                        <a href="{$wa_app_url}upgrade/" data-wa-tooltip-content="[`Premium`]">
+                            <i class="fas fa-star{if !$is_premium} text-yellow{/if}"></i>
+                            <span class="name">[`Premium`]</span>
+                        </a>
+                    </li>
+                {/if}
+
+                <li class="top-padded opacity-40">
+                    <a href="javascript:void(0);" class="js-toggle-sidebar" data-wa-tooltip-content="[`Expand menu`]">
+                        <i class="fas fa-caret-left action"></i>
+                        <i class="fas fa-caret-right hidden action"></i>
+                        <span class="name">[`Collapse menu`]</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
     {/if}
-
+    {if !$is_reload}
 <script>
     ( function($) {
         $.crm.sidebar = new CRMSidebar({
             $wrapper: $("#c-sidebar-wrapper"),
             $ui: '{$wa->whichUI()}',
+            menu_state: '{$menu_state}'
         });
     })(jQuery);
     {if isset($contacts_count)}
@@ -146,3 +189,4 @@
         }
     {/if}
 </script>
+{/if}

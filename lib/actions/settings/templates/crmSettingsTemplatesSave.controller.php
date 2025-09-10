@@ -26,7 +26,7 @@ class crmSettingsTemplatesSaveController extends crmJsonController
             throw new waRightsException();
         }
 
-        $arrFields = array('id' => '', 'name' => '', 'content' => '', 'param_name' => '', 'param_type' => '', 'param_placeholder' => '', 'param_code' => '');
+        $arrFields = ['id' => '', 'name' => '', 'content' => '', 'origin_id' => '', 'style_version' => '', 'param_name' => '', 'param_type' => '', 'param_placeholder' => '', 'param_code' => ''];
 
         $data = array_intersect_key($get_data, $arrFields);
 
@@ -50,10 +50,12 @@ class crmSettingsTemplatesSaveController extends crmJsonController
         $tpm = new crmTemplatesParamsModel();
 
         if (empty($data['id'])) {
-            $ins = array(
+            $ins = [
                 'name'    => $data['name'],
                 'content' => $data['content'],
-            );
+                'origin_id' => $data['origin_id'],
+                'style_version' => $data['style_version'],
+            ];
 
             $data['id'] = $tm->insert($ins);
 
@@ -75,10 +77,10 @@ class crmSettingsTemplatesSaveController extends crmJsonController
             $this->setParams($data['id'], $data['param_name'], $data['param_code'], $data['param_type'], $data['param_placeholder']);
 
             if ($data['name'] !== $old_template['name'] || $data['content'] !== $old_template['content']) {
-                $tm->updateById($data['id'], array(
+                $tm->updateById($data['id'], [
                     'name'    => $data['name'],
                     'content' => $data['content']
-                ));
+                ]);
             }
         }
         return $data['id'];

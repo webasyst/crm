@@ -107,15 +107,17 @@ var CRMSettingsTemplate = (function ($) {
         });
 
         //Reset text in js-redactor
-        $reset.on('click', getBasicTemplate);
+        $reset.on('click', getOriginTemplate);
 
-        function getBasicTemplate() {
+        function getOriginTemplate() {
             var data = 'template_id=' + that.template_id,
                 href = "?module=settings&action=templatesReset";
                // ace = that.ace.getSession();
             $.post(href, data, function (response) {
                 if (response.status === "ok") {
                     $('.js-content-body').text(response.data.template);
+                    $('.js-style-version').val('2');
+                    $(that.preview_dialog_template).find('.js-style-version').val('2');
                     that.initAce();
                     that.toggleButton(true);
                 }
@@ -510,10 +512,11 @@ var CRMSettingsTemplate = (function ($) {
 
         that.$wrapper.on("click", ".js-show-preview", function (event) {
             event.preventDefault();
-            showDialog();
+            const style_version = that.$wrapper.find('.js-style-version').val();
+            showDialog(style_version);
         });
 
-        function showDialog() {
+        function showDialog(style_version) {
             $(document).trigger("updateEditorTextarea");
 
             //Disable cancel button
@@ -523,6 +526,7 @@ var CRMSettingsTemplate = (function ($) {
                 html: that.preview_dialog_template,
                 onOpen: function ($wrapper) {
                     $wrapper.find("#js-preview-content").val(that.$textarea.val());
+                    $wrapper.find('.js-style-version').val(style_version);
                     $wrapper.find(".js-preview-form").trigger("submit");
                 }
             });

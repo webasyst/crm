@@ -125,12 +125,17 @@
                                 <div class="name for-input">[`Deal`]</div>
                                 <div class="value">
                                     {if !empty($deal.id)}
-                                        {$_funnel = $funnel[$deal.funnel_id]|default:null}
+                                        {$_funnel = $funnel[$deal.funnel_id]|default:[]}
                                         {if $_funnel}
                                             {$_stage = $_funnel.stages[$deal.stage_id]|default:null}
                                             {if $_stage}
-                                                <i class="icon fas fa-circle funnel-state" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
-                                                <a class="custom-ml-8" href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
+                                                <i class="{$_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                                <a class="custom-ml-8" href="{$wa_app_url}deal/{$deal.id}/">
+                                                    {strip_tags($deal.name)|escape}
+                                                    {if !empty($_funnel.is_archived)}
+                                                    <span class="hint custom-ml-4 nowrap"> [`(archived)`]</span>
+                                                    {/if}
+                                                </a>
                                             {else}
                                                 [`Stage deleted`]
                                             {/if}
@@ -190,7 +195,7 @@
                                                         <button class="dropdown-toggle button light-gray js-visible-link" type="button" style="word-break: break-word;">
                                                             <span class="js-text flexbox space-4 align-left">
                                                                 {if !empty($_active_funnel.color)}
-                                                                    <i class="icon fas fa-circle funnel-state" style="color: {$_active_funnel.color}"></i>
+                                                                    <i class="{$_active_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_active_funnel.color}"></i>
                                                                 {/if}
                                                                 <span class="js-name">{$_active_funnel.name|escape}</span>
                                                             </span>
@@ -199,11 +204,14 @@
                                                             <ul class="menu with-icons ">
                                                                 {strip}
                                                                     {foreach $funnels as $_funnel}
+                                                                        {if !empty($_funnel.is_archived)}
+                                                                            {continue}
+                                                                        {/if}
                                                                         <li>
                                                                             <a href="javascript:void(0);" data-id="{$_funnel.id|escape}">
                                                                                 <span class="js-text flexbox space-4 align-left">
                                                                                     {if !empty($_funnel.color)}
-                                                                                        <i class="icon fas fa-circle funnel-state" style="margin-right: 0; color: {$_funnel.color|escape}"></i>
+                                                                                        <i class="{$_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="margin-right: 0; color: {$_funnel.color|escape}"></i>
                                                                                     {/if}
                                                                                     <span>{$_funnel.name|escape}</span>
                                                                                 </span>
@@ -304,7 +312,8 @@
                             delete_message_text: "{$delete_message_text}",
                             deal_empty: "[`Empty`]",
                             deal_create: "[`Create deal`]",
-                            deal_add: "[`Add deal`]"
+                            deal_add: "[`Add deal`]",
+                            archived: "[`(archived)`]"
                         }
                     });
             })(jQuery);

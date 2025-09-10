@@ -22,6 +22,8 @@ var crmSettingsForm = (function ($) {
         that.$delete_link = that.$wrapper.find('.crm-delete-form-link');
         that.$copy = that.$wrapper.find('.js-copy');
         that.$external_code = that.$wrapper.find('.js-external-code');
+        that.$widget_params = that.$wrapper.find('.js-widget-params');
+        that.$widget_manual_code = that.$wrapper.find('.js-widget-manual-code');
 
         that.$available_deal_related_field = getDealRelatedFields();
 
@@ -44,8 +46,10 @@ var crmSettingsForm = (function ($) {
         that.available_fields = options.available_fields || {};
         that.lang = options.lang;
         that.messages = options.messages || {};
+        that.captcha_is_invisible = options.captcha_is_invisible || false;
         that.default_checked_fields = getDefaultCheckedFields();
         that.sortable_is_active = false;
+		that.csrf = options.csrf || '';
 
         // DYNAMIC VARS
         that.changed = false;
@@ -105,6 +109,7 @@ var crmSettingsForm = (function ($) {
         that.initMarginsSettings();
         that.initViewModeToggler();
         that.initSubmitPlacement();
+        that.initColorSection();
         //that.initBackButton();
     };
 
@@ -172,6 +177,17 @@ var crmSettingsForm = (function ($) {
         that.$form.find('.js-show-external-code').click(function () {
             that.$external_code.slideToggle();
             $(this).find('svg').toggleClass('fa-caret-down fa-caret-up');
+        });
+
+        that.$form.find('.js-widget-container').click(function () {
+            console.log($(this).val(), that.$widget_manual_code);
+            if ($(this).val()) {
+                that.$widget_manual_code.slideUp();
+                that.$widget_params.slideDown();
+            } else {
+                that.$widget_params.slideUp();
+                that.$widget_manual_code.slideDown();
+            }
         });
     };
 
@@ -344,22 +360,49 @@ var crmSettingsForm = (function ($) {
     };
 
     crmSettingsForm.prototype.initTextEditor = function () {
-        var that = this,
-            $text = that.$form.find('[name="form[params][confirm_mail_body]"]');
-        $text.waEditor({
-            focus: false,
-            buttons: ['formatting', 'bold', 'italic', 'link'],
-            plugins: ['fontcolor', 'fontsize', 'fontfamily'],
-            minHeight: 200,
-            callbacks: {
-                keydown: function(event) { }, // without this waEditor intercents Ctrl+S event in Redactor
-                change: function () {
-                    $text.waEditor('sync');
-                    that.setFormChanged();
-                }
-            },
-            lang: that.lang
-        });
+        const that = this,
+            wrapEditor = function ($textarea, buttons, plugins) {
+                $textarea.waEditor({
+                    focus: false,
+                    buttons: buttons, // ['formatting', 'bold', 'italic', 'link'],
+                    plugins: plugins, // ['fontcolor', 'fontsize', 'fontfamily', 'alignment', 'inlinestyle'],
+                    minHeight: 200,
+					imageUpload: '?module=file&action=uploadImage',
+                    imageUploadFields: {
+                        '_csrf': that.csrf
+                    },
+                    callbacks: {
+                        keydown: function(event) { }, // without this waEditor intercents Ctrl+S event in Redactor
+                        change: function () {
+                            $textarea.waEditor('sync');
+                            that.setFormChanged();
+                        }
+                    },
+                    lang: that.lang
+                });
+            };
+        
+        wrapEditor(
+            that.$form.find('[name="form[params][confirm_mail_body]"]'), 
+            ['formatting', 'bold', 'italic', 'link'],
+            ['fontcolor', 'fontsize', 'fontfamily']
+        );
+        wrapEditor(
+            that.$form.find('[name="form[params][html_after_submit]"]'),  
+            [  'format',
+                'inline', 'bold', 'italic', 'underline', 'deleted', 'link', 'image',
+                'alignment', 'lists', 'outdent', 'indent',
+                'horizontalrule',  'fontcolor', 'fontsize'],
+            ['alignment', 'fontcolor', 'fontsize']
+        );
+        wrapEditor(
+            that.$form.find('[name="form[params][after_antispam_confirm_text]"]'),
+            [  'format',
+                'inline', 'bold', 'italic', 'underline', 'deleted', 'link', 'image',
+                'alignment', 'lists', 'outdent', 'indent',
+                'horizontalrule',  'fontcolor', 'fontsize'],
+            ['alignment', 'fontcolor', 'fontsize']
+        );
     };
 
     crmSettingsForm.prototype.initMessagesBlock = function () {
@@ -479,7 +522,7 @@ var crmSettingsForm = (function ($) {
     crmSettingsForm.prototype.getAvailableField = function (id) {
         if (this.available_fields[id]) {
             var field = $.extend({}, this.available_fields[id]);
-            if (field.id === '!horizontal_rule' || field.id === '!paragraph') {
+            if (field.id === '!horizontal_rule') {
                 field.captionplace = 'none';
             }
             return field;
@@ -585,6 +628,9 @@ var crmSettingsForm = (function ($) {
             $field.show();
         }
 
+        $field.removeClass('crm-caption-style-none crm-caption-style-above')
+            .addClass('crm-caption-style-' + field.captionplace);
+
         if (field.id === '!paragraph') {
             $field.find('.crm-paragraph').html(field.text || '');
             return;
@@ -598,8 +644,6 @@ var crmSettingsForm = (function ($) {
             encodeHtml(field.caption) +
             (field.required && field.id !== '!captcha' ? ' *' : '')
         );
-        $field.removeClass('crm-caption-style-none crm-caption-style-above')
-            .addClass('crm-caption-style-' + field.captionplace);
 
         if (field.type === 'Composite' || field.type === 'Address') {
             if (field.subfield_captionplace === 'none') {
@@ -621,6 +665,11 @@ var crmSettingsForm = (function ($) {
         $field.find(':input:eq(0)').prop('placeholder', field.placeholder || '');
         if (field.id === 'password') {
             $field.find(':input:eq(1)').prop('placeholder', field.placeholder_confirm || '');
+            if (field.without_confirm) {
+                $field.find('.js-password-confirn').addClass('hidden');
+            } else {
+                $field.find('.js-password-confirn').removeClass('hidden');
+            }
         }
 
         if (field.id === '!deal_description') {
@@ -735,6 +784,25 @@ var crmSettingsForm = (function ($) {
             data.push({
                 name: 'form[params][button]',
                 value: JSON.stringify(that.form.params.button)
+            });
+
+            that.form.params.widget_domains = [];
+            $form.find('.js-widget-domain:checked').each(function () {
+                $this = $(this);
+                    that.form.params.widget_domains.push($this.val());
+            });
+            data.push({
+                name: 'form[params][widget_domains]',
+                value: JSON.stringify(that.form.params.widget_domains)
+            });
+
+            that.form.params.widget_path = {};
+            $form.find('.js-widget-path').each(function () {
+                that.form.params.widget_path[$(this).data('domain')] = $(this).val();
+            });
+            data.push({
+                name: 'form[params][widget_path]',
+                value: JSON.stringify(that.form.params.widget_path)
             });
 
             that.clearValidateErrors();
@@ -1173,6 +1241,179 @@ var crmSettingsForm = (function ($) {
                 $.crm.content.load($.crm.app_url + 'settings/form/');
             }
         });
+    };
+
+    crmSettingsForm.prototype.initColorSection = function() {
+        var that = this,
+            //$colorWrapper = that.$wrapper.find(".js-color-selector-wrapper"),
+            $colorList = that.$wrapper.find(".c-color-section .c-colors"),
+            $colorField = that.$wrapper.find(".c-color-section .js-color-field"),
+            $colorPickerWrapper = that.$wrapper.find(".js-toggle-wrapper");
+
+        // VARS
+        var active_class = "is-active",
+            hidden_class = "is-hidden";
+
+        // CLASSES
+        var ColorPicker = ( function($) {
+
+            ColorPicker = function(options) {
+                var that = this;
+
+                // DOM
+                that.$wrapper = options["$wrapper"];
+                that.$field = that.$wrapper.find(".js-color-field");
+                that.$icon = that.$wrapper.find(".js-toggle");
+                that.$colorPicker = that.$wrapper.find(".js-color-picker");
+                that.$colors = that.$wrapper.closest(".js-color-selector-wrapper").find(".c-colors");
+
+                // VARS
+
+                // DYNAMIC VARS
+                that.is_opened = false;
+                that.farbtastic = false;
+
+                // INIT
+                that.initClass();
+            };
+
+            ColorPicker.prototype.initClass = function() {
+                var that = this;
+
+                document.addEventListener('click', (event) => {
+                    // Close on click outside the colorpicker
+                    const wrapper = that.$wrapper[0];
+                    if (wrapper && !wrapper.contains(event.target)) {
+                        that.displayToggle( false );
+                    }
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    // Close on the Escape key is pressed
+                    if (event.key === 'Escape') {
+                        that.displayToggle( false );
+                    }
+                });
+
+                that.farbtastic = $.farbtastic(that.$colorPicker, function(color) {
+                    if (that.$field.val() !== color) {
+                        hideColorIcon();
+                        that.$field.val( color ).addClass("js-changed").change();
+                    }
+                });
+
+                that.$wrapper.data("colorPicker", that);
+
+                that.$field.on("change keyup", function() {
+                    var color = $(this).val();
+                    //
+                    that.$icon.css("background-color", color);
+                    that.farbtastic.setColor(color);
+                });
+
+                that.$icon.on("click", function(event) {
+                    event.preventDefault();
+                    that.displayToggle( !that.is_opened );
+                });
+
+                that.$field.on("click", function() {
+                    that.displayToggle(!that.is_opened);
+                });
+
+                that.$field.on("keyup", hideColorIcon);
+
+                function hideColorIcon() {
+                    var $active = that.$colors.find("." + active_class);
+                    if ($active.length) {
+                        $active.removeClass(active_class);
+                        $active = false;
+                    }
+                }
+            };
+
+            ColorPicker.prototype.displayToggle = function( show ) {
+                var that = this;
+
+                if (show) {
+                    $colorPickerWrapper.addClass(hidden_class);
+                    that.$wrapper.removeClass(hidden_class);
+                    that.is_opened = true;
+                } else {
+                    that.$wrapper.addClass(hidden_class);
+                    that.is_opened = false;
+                }
+            };
+
+            return ColorPicker;
+
+        })(jQuery);
+
+        // EVENTS
+        $colorList.on("click", ".js-set-color", setColor);
+
+        $colorField.on("change", function() {
+            var color = $(this).val();
+
+            var rgb = getRGB(color);
+            if (!rgb) {
+                return;
+            }
+            //var crmColor = new $.crm.color(color),
+            //    range = crmColor.getRange();
+
+            function getRGB(color) {
+                var rgb = false;
+                if (typeof color === "string") {
+                    color = color.replace("#","");
+                    if (color.length === 3) {
+                        rgb = hex2rgb(color[0] + "" + color[0], color[1] + "" + color[1], color[2] + "" + color[2]);
+                    } else if (color.length === 6) {
+                        rgb = hex2rgb(color[0] + "" + color[1], color[2] + "" + color[3], color[4] + "" + color[5]);
+                    }
+                } else if (typeof color === "object" && color.length === 3) {
+                    rgb = color;
+                }
+                return rgb;
+            }
+
+            // HEX
+            function hex2rgb(r,g,b) {
+                r = parseInt(r, 16);
+                g = parseInt(g, 16);
+                b = parseInt(b, 16);
+
+                return (r >= 0 && g >= 0 && b >= 0) ? [r,g,b] : null;
+            }
+        });
+
+        $colorPickerWrapper.each(function() {
+            $wrapper = $(this);
+            new ColorPicker({
+                $wrapper: $wrapper
+            });
+        })
+
+
+        //$colorField.change();
+
+        // HANDLERS
+        function setColor(event) {
+            event.preventDefault();
+            var $color = $(this),
+                $section = $color.closest(".js-color-selector-wrapper"),
+                $active = $section.find(".c-colors").find("." + active_class);
+
+            if ($active.length) {
+                $active.removeClass(active_class)
+            }
+            $color.addClass(active_class);
+
+            $colorPickerWrapper.addClass(hidden_class);
+
+            var color = $color.data("color");
+            $section.find(".js-color-field").val(color).addClass("js-changed").change();
+        }
+
     };
 
     crmSettingsForm.prototype.initBlocks = function () {

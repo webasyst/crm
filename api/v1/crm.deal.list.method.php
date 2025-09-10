@@ -15,6 +15,13 @@ class crmDealListMethod extends crmApiAbstractMethod
         'user_name',
         'last_action'
     ];
+    const STANDARD_FIELDS = [
+        'amount',
+        'tags',
+        'user',
+    ];
+
+    private $deal_all_fields;
 
     public function execute()
     {
@@ -61,7 +68,7 @@ class crmDealListMethod extends crmApiAbstractMethod
             throw new waAPIException('not_found', _w('Stage not found.'), 404);
         } elseif ($tag_id < 0) {
             throw new waAPIException('not_found', _w('Tag not found.'), 404);
-        } elseif (!empty($fields) && $_f = array_diff($fields, $this->getConfigureFields())) {
+        } elseif (!empty($fields) && $_f = array_diff($fields, $this->getConfigureFields(), self::STANDARD_FIELDS)) {
             throw new waAPIException('invalid_field', sprintf_wp('Unknown configured deal fields: %s.', implode(', ', $_f)), 400);
         } elseif (!empty($reminder_ids) && !!array_diff($reminder_ids, ['no', 'burn', 'overdue', 'actual'])) {
             throw new waAPIException('invalid_field', _w('Unknown reminder state.'), 400);
@@ -70,8 +77,7 @@ class crmDealListMethod extends crmApiAbstractMethod
         }
 
         if ($search) {
-            $search_deals = $this->getDealModel()->searchDeal($search, $user_id);
-            $this->list_params['deal_ids'] = array_keys($search_deals);
+            $this->list_params['deal_ids'] = $this->dealSearch($search);
         }
 
         $logs = [];
@@ -86,7 +92,10 @@ class crmDealListMethod extends crmApiAbstractMethod
             }
         }
 
-        $data = $this->prepareData(true);
+        $data = $this->prepareData(true, $fields);
+
+        //wa_dump($data);
+
         $deal_tags = $data['deal_tags'];
         $funnels = ifempty($data, 'funnels', []);
         $deal_params = $this->getDealParams($data['deals'], $fields);
@@ -132,11 +141,7 @@ class crmDealListMethod extends crmApiAbstractMethod
                 $el['is_pinned'] = !!ifset($pinned_recent, $el['id'], 'is_pinned', false);
             }
             if (isset($deal_tags[$el['id']])) {
-                $el['tags'] = $this->filterData(
-                    $deal_tags[$el['id']],
-                    ['id', 'name', 'count', 'size', 'opacity'],
-                    ['id' => 'integer', 'count' => 'integer', 'size' => 'integer', 'opacity' => 'float']
-                );
+                $el['tags'] = $this->prepareTags($deal_tags[$el['id']]);
             }
             if (isset($el['user']) && $el['user'] instanceof waContact) {
                 $el['user'] = $this->prepareContactData($el['user'], $userpic_size);
@@ -156,7 +161,8 @@ class crmDealListMethod extends crmApiAbstractMethod
                 $el['funnel'] = [
                     'id'    => (int) $el['funnel_id'],
                     'name'  => ifempty($funnels, $el['funnel_id'], 'name', ''),
-                    'color' => ifempty($funnels, $el['funnel_id'], 'color', '')
+                    'color' => ifempty($funnels, $el['funnel_id'], 'color', ''),
+                    'icon'  => ifempty($funnels, $el['funnel_id'], 'icon', 'fas fa-briefcase'),
                 ];
                 $el['stage'] = [
                     'id'    => (int) $el['stage_id'],
@@ -251,6 +257,37 @@ class crmDealListMethod extends crmApiAbstractMethod
         ];
     }
 
+    protected function searchContacts($search_term)
+    {
+        if (preg_match('#^\S*@\S*$#', $search_term)) {
+            /** передан email */
+            return array_column((new waContactEmailsModel)->query("SELECT contact_id FROM wa_contact_emails WHERE email LIKE ?", ["%{$search_term}%"])->fetchAll(), 'contact_id');
+        } elseif (preg_match('#^\+?[-\s\d]*\(?[-\s\d]+\)?[-\s\d]+$#', $search_term)) {
+            /** передан phone */
+            $search_term = preg_replace('/[^\d]+/', '', $search_term);
+            return array_column((new waContactDataModel)->query("SELECT contact_id FROM wa_contact_data WHERE field='phone' AND value LIKE ?", ["%{$search_term}%"])->fetchAll(), 'contact_id');
+        } else {
+            /** передан name */
+            return array_column((new waContactModel)->query("SELECT id FROM wa_contact WHERE name LIKE ? OR company LIKE ?", ["%{$search_term}%", "%{$search_term}%"])->fetchAll(), 'id');
+        }
+    }
+
+    protected function dealSearch($search_term)
+    {
+        $deal_ids = array_column($this->getDealModel()->query("SELECT id FROM crm_deal WHERE name LIKE ?", ["%{$search_term}%"])->fetchAll(), 'id');
+        $contact_ids = $this->searchContacts($search_term);
+        if (!empty($contact_ids)) {
+            $deal_ids = array_unique(array_merge(
+                $deal_ids, 
+                array_keys($this->getDealParticipantsModel()->getByField([
+                    'role_id' => crmDealParticipantsModel::ROLE_CLIENT,
+                    'contact_id' => $contact_ids
+                ], 'deal_id'))
+            ));
+        }
+        return $deal_ids;
+    }
+
     protected function prepareContactData(waContact $contact, $userpic_size)
     {
         $data = array_merge(['id' => $contact->getId()], $contact->getCache());
@@ -260,9 +297,17 @@ class crmDealListMethod extends crmApiAbstractMethod
         return $this->filterFields($this->prepareUserpic($data, $userpic_size), ['id', 'name', 'userpic']);
     }
 
+    private function getDealAllFields()
+    {
+        if (empty($this->deal_all_fields)) {
+            $this->deal_all_fields = crmDealFields::getAll();
+        }
+        return $this->deal_all_fields;
+    }
+
     private function getConfigureFields()
     {
-        $configure_fields = crmDealFields::getAll() + ['last_action' => '', 'is_pinned' => ''];
+        $configure_fields = $this->getDealAllFields() + ['last_action' => '', 'is_pinned' => ''];
 
         return array_keys($configure_fields);
     }
@@ -272,19 +317,37 @@ class crmDealListMethod extends crmApiAbstractMethod
         if (empty($fields)) {
             return [];
         }
+
+        $deal_ids = array_keys($deals);
+        $deal_params = $this->getDealParamsModel()->get($deal_ids);
+        if (empty($deal_params)) {
+            return [];
+        }
+
         $result = [];
         $fields = array_flip($fields);
-        $deal_ids = array_keys($deals);
+        $all_requested_fields = array_intersect_key($this->getDealAllFields(), $fields);
+        $all_requested_checkbox_fields = array_keys(array_filter($all_requested_fields, function ($field) {
+            return $field instanceof crmDealCheckboxField;
+        }));
+
         foreach ($this->getDealParamsModel()->get($deal_ids) as $_deal_id => $_params) {
+            $result[$_deal_id] = [];
+            foreach ($all_requested_checkbox_fields as $_field_id) {
+                $result[$_deal_id][] = [
+                    'id'    => strval($_field_id),
+                    'value' => empty($_params[$_field_id]) ? _ws('No') : _ws('Yes'),
+                ];
+                unset($_params[$_field_id]);
+            }
             $_params = array_intersect_key($_params, $fields);
             if (empty($_params)) {
                 continue;
             }
-            $result[$_deal_id] = [];
             foreach ($_params as $_n => $_v) {
                 $result[$_deal_id][] = [
-                    'id'    => $_n,
-                    'value' => $_v
+                    'id'    => strval($_n),
+                    'value' => isset($all_requested_fields[$_n]) ? $all_requested_fields[$_n]->format($_v) : strval($_v)
                 ];
             }
         }

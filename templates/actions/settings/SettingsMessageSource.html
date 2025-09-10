@@ -7,7 +7,7 @@
 
 {function render_sources}
     {if !empty($sources)}
-    <ul class="menu c-sources-list">
+    <ul class="list c-sources-list">
         {foreach $sources as $_source}
             {$_is_email = ($_source.type === crmSourceModel::TYPE_EMAIL)}
             {$_is_im = ($_source.type === crmSourceModel::TYPE_IM)}
@@ -30,7 +30,8 @@
                             {if !empty($_source.funnel)}
                                 {$funnel_name = $_source.funnel.name|escape}
                                 {$funnel_color = $_source.funnel.color}
-                                <span class="icon size-16 desktop-only"><i class="fas fa-circle funnel-state" style="color: {$funnel_color}" title="{$funnel_name}"></i></span>
+                                {$funnel_icon = $_source.funnel.icon|default:'fas fa-briefcase'|escape}
+                                <span class="icon size-16 desktop-only"><i class="{$funnel_icon} funnel-state" style="color: {$funnel_color}" title="{$funnel_name}"></i></span>
 
                                 {if !empty($_source.stage)}
                                     {$stage_id = $_source.stage.id}
@@ -51,7 +52,7 @@
                                 <span class="icon size-16 loading c-loading" style="display: none"><i class="fas fa-spinner fa-spin"></i></span>
                                 <div class="switch-with-text js-c-disable-link">
                                     <label for="switch-im-input" class="desktop-only" data-active-text="[`enable`]" data-inactive-text="[`disable`]">{if $_source.disabled}[`enable`]{else}[`disable`]{/if}</label>
-                                    <span class="switch" id="switch-{$_source.id}">
+                                    <span class="switch smaller" id="switch-{$_source.id}">
                                         <input type="checkbox" name="" id="switch-im-input" {if !$_source.disabled}checked{/if}>
                                     </span>
                                 </div>
@@ -66,12 +67,12 @@
     {else}
         {if $source_type === 'email'}
             <div class="block">
-                <p style="line-height: 32px;">[`Set up an email address to receive messages and deal requests.`]</p>
+                <p class="small custom-mb-8">[`Set up an email address to receive messages and deal requests.`]</p>
             </div>
         {/if}
         {if $source_type === 'im'}
             <div class="block">
-                <p>[`Set up connection to instant messengers to receive deal requests and messages.`]</p>
+                <p class="small custom-mb-8">[`Set up connection to instant messengers to receive deal requests and messages.`]</p>
             </div>
         {/if}
     {/if}
@@ -99,15 +100,15 @@
 <div class="c-settings-sources-page" id="c-settings-sources-page">
     <h1 class="c-page-header">{$_title}</h1>
 
-    <div class="">
+    <div class="fields">
 
-        <div class="block c-source-lists">
+        <div class="fields-group c-source-lists">
 
             {render_sources}
 
             {if $source_type === 'email'}
                 {capture assign=links_email}
-                    <div class="dropdown custom-pt-16" id="dropdown-email-source">
+                    <div class="dropdown" id="dropdown-email-source">
                         <button class="dropdown-toggle button small rounded light-gray"><i class="fas fa-plus-circle text-green add"></i> [`Add email source`]</button>
                         <div class="dropdown-body">
                             <ul class="menu">

@@ -809,6 +809,12 @@ class crmDealModel extends crmModel
         $sort = 'd.id';
         $sort_join = '';
         $table_fields = $this->getMetadata();
+
+        $order = ifset($params['order'], 'ASC');
+        if (strtolower($order) !== 'asc') {
+            $order = 'DESC';
+        }
+
         if (!empty($params['sort'])) {
             if ($params['sort'] == 'user_name') {
                 $sort_join = 'LEFT JOIN wa_contact uc ON uc.id=d.user_contact_id';
@@ -825,15 +831,12 @@ class crmDealModel extends crmModel
                 $sort = array('d.funnel_id', 'd.status_id', 'fs.number');
             } elseif ($params['sort'] === 'last_action') {
                 $sort = 'IFNULL(last_log_datetime, update_datetime)';
+            } elseif ($params['sort'] === 'reminder_datetime') {
+                $sort = 'reminder_datetime IS ' . (strtolower($order) === 'asc' ? 'NOT' : '') . ' NULL, reminder_datetime';
             } elseif (!empty($table_fields[$params['sort']])) {
                 $sort = $this->escapeField($params['sort']);
                 $sort = 'd.'.$sort;
             }
-        }
-
-        $order = ifset($params['order'], 'ASC');
-        if (strtolower($order) !== 'asc') {
-            $order = 'DESC';
         }
 
         // WHERE: filter conditions
@@ -1046,6 +1049,8 @@ class crmDealModel extends crmModel
             $sort = join(' '.$order.', ', $sort);
         }
 
+        $order_by = isset($params['count_results']) && $params['count_results'] === 'only' ? '' : 'ORDER BY '.$sort.' '.$order;
+
         // Fetch data from DB
         $sql = "{$select}
                 FROM {$this->table} AS d
@@ -1060,8 +1065,8 @@ class crmDealModel extends crmModel
                     AND {$participants_condition}
                     AND {$markers_condition}
                 {$group_by}
-                ORDER BY {$sort} {$order}";
-        if ($limit) {
+                {$order_by}";
+        if ($limit && (empty($params['count_results']) || $params['count_results'] !== 'only')) {
             $sql .= " LIMIT {$offset}, {$limit}";
         }
 
@@ -1466,21 +1471,23 @@ class crmDealModel extends crmModel
     // Count number of open deals: by funnel and by stage.
     // This method takes into account access rights of current user logged in.
     // Caches the DB query result in memory and is safe to call multiple times with different arguments.
-    public function countOpen($conditions = array())
+    public function countOpen($conditions = [], $whith_amount = false)
     {
         static $data = null;
         if ($data === null) {
             // Count all open deals by funnel and stage, checking access rights
-            $data = $this->getList(array(
+            $data = $this->getList([
                 'status_id'       => 'OPEN',
-                'custom_select'   => 'd.funnel_id, d.stage_id, d.status_id, d.user_contact_id, count(*) AS count',
+                'custom_select'   => 'd.funnel_id, d.stage_id, d.status_id, d.user_contact_id, COUNT(*) AS count' . 
+                                    ($whith_amount ? ', SUM(d.amount * d.currency_rate) AS amnt' : ''),
                 'custom_group_by' => 'd.funnel_id, d.stage_id, d.status_id, d.user_contact_id',
                 'check_rights'    => true,
                 'sort'            => 'funnel_id',
-            ));
+            ]);
         }
 
         $result = 0;
+        $total = 0;
         foreach ($data as $row) {
             foreach ($conditions as $col => $value) {
                 if ($value != $row[$col]) {
@@ -1488,8 +1495,11 @@ class crmDealModel extends crmModel
                 }
             }
             $result += $row['count'];
+            if ($whith_amount) {
+                $total += $row['amnt'];
+            }
         }
-        return $result;
+        return $whith_amount ? [$result, $total] : $result;
     }
 
     /**

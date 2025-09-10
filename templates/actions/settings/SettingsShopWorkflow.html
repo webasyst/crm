@@ -7,14 +7,14 @@
     </div>
 
     {if !$supported}
-        <p>{sprintf_wp('You need Shop-Script version %s or newer for CRM integration.', $min_version)}</p>
+        <p class="small">{sprintf_wp('You need Shop-Script version %s or newer for CRM integration.', $min_version)}</p>
 
     {else}
         {* HEADER *}
         <header class="c-funnels-section">
             {* FUNNELS *}
             <div class="c-funnels-tabs js-funnels-tabs">
-                <div class="c-funnels-wrapper">
+                <div class="c-funnels-wrapper tabs-with-arrows-side-wrapper">
                     <ul class="tabs c-funnels-list">
                         {if empty($funnel.id)}
                             {$_new_funnel = [
@@ -31,7 +31,7 @@
                             {$_is_selected = ($funnel.id == $_funnel.id)}
                             <li class="c-funnel {if $_is_selected}selected{/if}" data-id="{$_funnel.id|default:""}">
                                 <a class="c-link flexbox middle space-4" href="{if !$_is_selected}{$wa_app_url}settings/shop/workflow/?funnel_id={$_funnel.id}{else}javascript:void(0);{/if}">
-                                    <span class="c-funnel-color-item" style="background: {$_funnel.color}"></span>
+                                    <i class="{$_funnel.icon|default:'fas fa-briefcase'|escape}" style="color: {$_funnel.color}"></i>
                                     <span class="c-name">{$_funnel.name|escape}</span>
                                 </a>
                             </li>
@@ -93,7 +93,7 @@
                 <div class="fields-group">
                     {*<h4 class="heading">[`Shop-Script &rarr; CRM`]</h4>*}
                     {if !empty($shop_actions)}
-                        <ul class="menu custom-ml-16 custom-mr-16">
+                        <ul class="menu custom-m-4">
                             <li class="custom-mb-16">
                                 <div class="c-stage-line">
                                     <span class="c-name gray"><b>[`Shop-Script order actions`]</b></span>
@@ -123,14 +123,16 @@
 
                 <div class="js-errors-place"></div>
 
-                <div class="c-footer-actions js-footer-actions">
-                    <input class="button js-submit-button" type="submit" value="[`Save`]">
-                    <span class="c-loading" style="display: none;">
-                        <i class="fas fa-spinner fa-spin loading"></i>
+                <div class="c-settings-footer bottombar sticky">
+                    <div class="c-footer-actions js-footer-actions">
+                        <input class="button js-submit-button" type="submit" value="[`Save`]">
+                        <span class="c-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin loading"></i>
+                            </span>
+                        <span class="c-hidden">
+                            <a href="{$wa_app_url}settings/shop/workflow/?funnel_id={$funnel.id}" class="button light-gray">[`Cancel`]</a>
                         </span>
-                    <span class="c-hidden">
-                        <a href="{$wa_app_url}settings/shop/workflow/?funnel_id={$funnel.id}" class="button light-gray">[`Cancel`]</a>
-                    </span>
+                    </div>
                 </div>
 
                 <input type="hidden" name="funnel_id" value="{$funnel.id}">

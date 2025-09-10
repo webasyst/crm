@@ -17,7 +17,6 @@
         <a href="javascript:void(0);" data-id="{$_stage.id}">
             {if !empty($_stage.color)}
             <i class="fas fa-circle custom-pr-4 funnel-state" style="color: {$_stage.color}"></i>
-            <!--<i class="icon16 funnel-state svg-icon" data-color="{$_stage.color}"></i>-->
             {/if}
             <span>{$_stage.name|escape}</span>
         </a>
@@ -30,7 +29,7 @@
     <div class="dialog-background"></div>
     <div class="dialog-body">
         <form method="post" action="{$wa_backend_url}crm/?module=deal&action=create">
-            
+
             <div class="dialog-content">
 
                     {if !empty($open_deals)}
@@ -53,7 +52,7 @@
                                                             <button class="dropdown-toggle light-gray js-visible-link flexbox space-4 align-left" type="button" style="word-break: break-all;">
                                                                 <span class="js-text">
                                                                     {if !empty($_active_funnel.color)}
-                                                                    <i class="fas fa-circle custom-pr-4 funnel-state" style="color: {$_active_funnel.color}"></i>
+                                                                    <i class="{$_active_funnel.icon|default:'fas fa-briefcase'} custom-pr-4 funnel-state" style="color: {$_active_funnel.color}"></i>
                                                                     {/if}
                                                                     <span class="js-name">{$_active_funnel.name|escape}</span>
                                                                 </span>
@@ -62,10 +61,13 @@
                                                                 <ul class="menu with-icons">
                                                                     {strip}
                                                                         {foreach $funnels as $_funnel}
+                                                                            {if !empty($_funnel.is_archived)}
+                                                                                {continue}
+                                                                            {/if}
                                                                             <li class="{if $_active_funnel.id == $_funnel.id}selected{/if}">
                                                                                 <a href="javascript:void(0);" data-id="{$_funnel.id}">
                                                                                     {if !empty($_funnel.color)}
-                                                                                    <i class="fas fa-circle custom-pr-4 funnel-state" style="color: {$_funnel.color}"></i>
+                                                                                    <i class="{$_funnel.icon|default:'fas fa-briefcase'} custom-pr-4 funnel-state" style="color: {$_funnel.color}"></i>
                                                                                     {/if}
                                                                                     <span>{$_funnel.name|escape}</span>
                                                                                 </a>
@@ -73,8 +75,8 @@
                                                                         {/foreach}
                                                                     {/strip}
                                                                 </ul>
-                                                                <input class="js-field" name="data[funnel_id]" type="hidden" value="{$_active_funnel.id}">
                                                             </div>
+                                                            <input class="js-field" name="data[funnel_id]" type="hidden" value="{$_active_funnel.id}">
                                                         </div>
                                                     </div>
 
@@ -107,7 +109,7 @@
                                                                 <i class="icon userpic rounded" style="background-image: url({$_userpic});"></i>
                                                             {/if}
                                                             <span class="c-name">{$_me.name|escape}</span>
-                                                            <a class="js-show-combobox" href="javascript:void(0);">[`Assign another user`]</a>
+                                                            <a class="js-show-combobox nowrap" href="javascript:void(0);">[`Assign another user`]</a>
                                                         </div>
                                                         <div class="c-combobox">
                                                             <span class="gray">[`Owner:`]</span>
@@ -135,11 +137,14 @@
                                                             {if !empty($_funnel.stages[$_deal.stage_id])}
                                                                 {$_stage = $_funnel.stages[$_deal.stage_id]}
                                                             {/if}
-                                                            <i class="fas fa-circle custom-pr-4 funnel-state" style="color: {$_funnel.color|default:"inherit"|escape}" title="{if $_deal.status_id == "WON"}[`Won`] / {elseif $_deal.status_id == "LOST"}[`Lost`] / {/if}{$_funnel.name|escape} / {$_stage.name|default:""|escape}"></i>
+                                                            <i class="{$_funnel.icon|default:'fas fa-briefcase'} custom-pr-4 funnel-state" style="color: {$_funnel.color|default:"inherit"|escape}" title="{if $_deal.status_id == "WON"}[`Won`] / {elseif $_deal.status_id == "LOST"}[`Lost`] / {/if}{$_funnel.name|escape} / {$_stage.name|default:""|escape}"></i>
 
                                                         {/if}
 
-                                                        {$_deal.name|escape}
+                                                        <span>
+                                                            {$_deal.name|escape}
+                                                            {if !empty($_funnel.is_archived)}<span class="gray small custom-ml-4 nowrap"> [`(archived)`]</span>{/if}
+                                                        </span>
 
                                                         {if !empty($_deal.amount)}
                                                             <span class="c-amount">&mdash; {$_deal.amount|wa_format_amount_currency:$_deal.currency_id}</span>
@@ -165,7 +170,7 @@
                                             <button class="dropdown-toggle light-gray js-visible-link flexbox space-4 align-left" type="button" style="word-break: break-all;">
                                                 <span class="js-text">
                                                     {if !empty($_active_funnel.color)}
-                                                    <i class="fas fa-circle custom-pr-4 funnel-state" style="color: {$_active_funnel.color}"></i>
+                                                    <i class="{$_active_funnel.icon|default:'fas fa-briefcase'} custom-pr-4 funnel-state" style="color: {$_active_funnel.color}"></i>
                                                     {/if}
                                                     <span class="js-name">{$_active_funnel.name|escape}</span>
                                                 </span>
@@ -174,10 +179,13 @@
                                                 <ul class="menu with-icons">
                                                     {strip}
                                                         {foreach $funnels as $_funnel}
+                                                            {if !empty($_funnel.is_archived)}
+                                                                {continue}
+                                                            {/if}
                                                             <li class="{if $_active_funnel.id == $_funnel.id}selected{/if}">
                                                                 <a href="javascript:void(0);" data-id="{$_funnel.id}">
                                                                     {if !empty($_funnel.color)}
-                                                                    <i class="fas fa-circle custom-pr-4 funnel-state" style="color: {$_funnel.color}"></i>
+                                                                    <i class="{$_funnel.icon|default:'fas fa-briefcase'} custom-pr-4 funnel-state" style="color: {$_funnel.color}"></i>
                                                                     {/if}
                                                                     <span>{$_funnel.name|escape}</span>
                                                                 </a>
@@ -185,8 +193,8 @@
                                                         {/foreach}
                                                     {/strip}
                                                 </ul>
-                                                <input class="js-field" name="data[funnel_id]" type="hidden" value="{$_active_funnel.id}">
                                             </div>
+                                            <input class="js-field" name="data[funnel_id]" type="hidden" value="{$_active_funnel.id}">
                                         </div>
                                     </div>
                                     <div class="c-funnel-stages-list js-funnel-stages-list">
@@ -203,8 +211,8 @@
                                                 <ul class="menu with-icons">
                                                     {strip}{foreach $_active_funnel.stages as $_id => $_stage}{_renderStage _stage=$_stage}{/foreach}{/strip}
                                                 </ul>
-                                                <input class="js-field" name="data[stage_id]" type="hidden" value="{$_active_stage.id}">
                                             </div>
+                                            <input class="js-field" name="data[stage_id]" type="hidden" value="{$_active_stage.id}">
                                         </div>
                                     </div>
                                 </div>
@@ -220,7 +228,7 @@
                                                 <i class="icon userpic rounded" style="background-image: url({$_userpic});"></i>
                                             {/if}
                                             <span class="c-name">{$_me.name|escape}</span>
-                                            <a class="inline-link js-show-combobox" href="javascript:void(0);">[`Assign another user`]</a>
+                                            <a class="inline-link js-show-combobox nowrap" href="javascript:void(0);">[`Assign another user`]</a>
                                         </div>
                                         <div class="c-combobox">
                                             <input class="js-autocomplete" type="text" value="" placeholder="[`Choose a user`]">
@@ -240,7 +248,7 @@
                     <a class="button light-gray cancel js-close-dialog" href="javascript:void(0);">[`Cancel`]</a>
                 </div>
             </footer>
-            
+
             <input type="hidden" name="order_id" value="{$order_id}">
         </form>
     </div>
@@ -362,7 +370,7 @@
                         $field = $wrapper.find(".js-field"),
                         $menu = $wrapper.find(".menu");
 
-                    $dropdown.waDropdown();    
+                    $dropdown.waDropdown();
                     $menu.on("click", "a", function () {
                         var $link = $(this);
                         $visibleLink.find(".js-text").html($link.html());
@@ -489,7 +497,7 @@
                     }
 
                     var is_active = $input.prop("checked");
-                  
+
                     if (is_active) {
                         $wrapper.find(".c-list." + active_class).removeClass(active_class);
                         $li.addClass(active_class);

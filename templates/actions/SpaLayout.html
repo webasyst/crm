@@ -1,20 +1,48 @@
 <script type="module" crossorigin src="{$wa_app_static_url}client/index.js?v={$wa->version()}"></script>
 <link rel="stylesheet" href="{$wa_app_static_url}client/index.css?v={$wa->version()}">
-
 <script type="module">
-    if ('emitter' in window) {
-        window.emitter.on('spa:navigateType', (name) => {
-            if (name) {
-                const menuItems = document.querySelectorAll('#c-sidebar-block .menu li');
-                const targetItemIndex = name === 'contacts' ? 0 : 1;
-                if (menuItems[targetItemIndex]) {
-                    menuItems.forEach(e => e.classList.remove('selected'));
-                    menuItems[targetItemIndex].classList.add('selected');
+    const documentElement = window.document.documentElement;
+    const deselectMenuItems = () => {
+        const menuItems = document.querySelectorAll('#c-sidebar-block .menu li, #c-sidebar-bricks .brick');
+        menuItems.forEach(e => e.classList.remove('selected'));
+    };
+    // Events from SPA
+    documentElement.addEventListener('spa:navigateType', (e) => {
+        if (e.detail.name === 'contacts') {
+            deselectMenuItems();
+            document.querySelector('#c-sidebar-block .menu li[data-id="contacts"]').classList.add('selected');
+        } else if (e.detail.name === 'deals') {
+            if (e.detail.query.all_funnels) {
+                deselectMenuItems();
+                document.querySelector('#c-sidebar-block ul li[data-id="all_funnels"]').classList.add('selected');
+            } else if (e.detail.query.funnel) {
+                deselectMenuItems();
+                const brick = document.querySelector('#c-sidebar-bricks [data-id="'+e.detail.query.funnel+'"]');
+                if (brick) {
+                    brick.classList.add('selected');
+                } else {
+                    document.querySelector('#c-sidebar-block ul li[data-id="all_funnels"]').classList.add('selected');
                 }
-
             }
-        });
-    }
+        }
+    });
+    documentElement.addEventListener('spa:reloadSidebar', () => {
+        $.crm.sidebar.reload();
+    });
+    documentElement.addEventListener('spa:showReviewWidget', () => {
+        $.crm.showReviewWidget();
+    });
+    // Events from SSR
+    $(document).on('wa_funnel_save', () => {
+        if ('emitter' in window) {
+            emitter.emit('environment:reloadFunnels');
+        }
+    });
+    $(document).on('wa_tags_save', () => {
+        if ('emitter' in window) {
+            emitter.emit('environment:reloadTags');
+        }
+    });
 </script>
 
 <div id="app"></div>

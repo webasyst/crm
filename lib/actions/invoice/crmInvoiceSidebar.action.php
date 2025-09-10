@@ -93,7 +93,10 @@ class crmInvoiceSidebarAction extends waViewAction
                 $contacts[$c['id']] = new waContact($c);
             }
             foreach ($invoices as &$i) {
-                if (!empty($contacts[$i['contact_id']])) {
+                if (empty($i['contact_id'])) {
+                    $i['contact'] = new waContact();
+                    $i['contact']['name'] = _w('Client not specified.');
+                } elseif (!empty($contacts[$i['contact_id']])) {
                     $i['contact'] = $contacts[$i['contact_id']];
                 } else {
                     $i['contact'] = new waContact();

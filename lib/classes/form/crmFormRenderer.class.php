@@ -12,7 +12,9 @@ class crmFormRenderer
      */
     protected $options;
 
-    protected $need_datepicker = false;
+    protected $captcha_is_invisible = false;
+
+    protected $captcha;
 
     /**
      * crmForm constructor.
@@ -42,9 +44,10 @@ class crmFormRenderer
     }
 
     /**
+     * @param bool $lastest_version
      * @return string
      */
-    public function render()
+    public function render($lastest_version = false)
     {
         $form = $this->getForm();
         if (!$form->exists()) {
@@ -58,6 +61,9 @@ class crmFormRenderer
             'caption' => ifset($info, 'params', 'button_caption', _w('Submit')),
         ];
         $info = $this->workupFormInfoBeforeRender($info);
+        if ($lastest_version) {
+            $info['params']['_version'] = '2';
+        }
 
         $view = wa()->getView();
         $vars = $view->getVars();
@@ -66,9 +72,9 @@ class crmFormRenderer
             'form' => $info,
             'locale' => wa()->getLocale(),
             'action_url' => wa()->getRouteUrl('crm/frontend/formSubmit', array()),
-            'need_datepicker' => $this->need_datepicker,
             'options' => $this->options,
             'page_url' => wa()->getConfig()->getRootUrl(true) . wa()->getConfig()->getRequestUrl(),
+            'captcha_is_invisible' => $this->captcha_is_invisible,
         ));
 
         $path = wa()->getAppPath('templates/form/form.html', 'crm');
@@ -86,8 +92,6 @@ class crmFormRenderer
      */
     protected function workupFormInfoBeforeRender($form)
     {
-        $this->need_datepicker = false;
-
         $fields = array_values((array)ifset($form['params']['fields']));
 
         foreach ($fields as $index => &$field) {
@@ -186,7 +190,6 @@ class crmFormRenderer
         $params = $info;
         unset($params['field']);
         if ($info['field']->getType() === 'Date') {
-            $this->need_datepicker = true;
             $params['template'] = 'date.datepicker';
         }
 
@@ -310,7 +313,6 @@ class crmFormRenderer
         $params = $info;
         unset($params['field']);
         if ($info['field']->getType() === 'Date') {
-            $this->need_datepicker = true;
             $params['template'] = 'date.datepicker';
         }
 
@@ -348,11 +350,20 @@ class crmFormRenderer
 
     protected function renderCaptcha($template, $info)
     {
-        $object = wa('crm')->getCaptcha();
+        $object = $this->getCaptcha();
         $isReCaptcha = $object instanceof waReCaptcha;
         $info['object'] = $object;
         $info['isReCaptcha'] = $isReCaptcha;
         return $this->renderFieldTemplate($template, $info);
+    }
+
+    protected function getCaptcha()
+    {
+        if (empty($this->captcha)) {
+            $this->captcha = wa('crm')->getCaptcha();
+            $this->captcha_is_invisible = $this->captcha->isInvisible();
+        }
+        return $this->captcha;
     }
 
     protected function renderFieldTemplate($template, $assign = array())

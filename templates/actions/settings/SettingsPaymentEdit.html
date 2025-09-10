@@ -11,7 +11,7 @@
             {* HEADER *}
             <header class="custom-mb-16">
                 <div class="flexbox middle full-width">
-                    <a href="{$_back_uri}" class="back">&larr;&nbsp;{$company.name|escape}</a>
+                    <a href="{$_back_uri}"><i class="fas fa-arrow-left"></i> {$company.name|escape}</a>
                     {if isset($instance.status) && !empty($instance.id)}
                         <div class="flexbox middle">
                             <button href="javascript:void(0);" class="red outlined small js-delete-payment"><i class="fas fa-times-circle delete"></i> [`Delete this payment option`]</button>
@@ -99,9 +99,11 @@
             </section>
 
             {* FOOTER *}
-            <footer class="c-footer-actions js-footer">
-                <input type="submit" class="button yellow" value="[`Save`]">
-                <a href="{$_back_uri}" class="button light-gray"> [`Cancel`]</a>
+            <footer class="c-settings-footer bottombar sticky">
+                <div class="c-footer-actions js-footer">
+                    <input type="submit" class="button yellow" value="[`Save`]">
+                    <a href="{$_back_uri}" class="button light-gray"> [`Cancel`]</a>
+                </div>
             </footer>
 
             <input name="payment[company_id]" type="hidden" value="{$company.id}">

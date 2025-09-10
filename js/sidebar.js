@@ -15,6 +15,7 @@ var CRMSidebar = (function ($) {
 
         // VARS
         that.selected_class = "selected";
+        that.menu_state = options["menu_state"];
         // that.storage_count_name = "crm/sidebar_counts";
 
         // DYNAMIC VARS
@@ -37,6 +38,8 @@ var CRMSidebar = (function ($) {
         //
         that.initUpdater();
         that.initMobileToggle();
+        that.initTooltips();
+        that.initRailToggle();
 
         if (!that.$activeMenuItem.length) {
             that.selectLink();
@@ -76,36 +79,47 @@ var CRMSidebar = (function ($) {
             handleUrl(stateUrl);
         })
 
+        $(document).on('wa_funnel_save', () => {
+            $.crm.sidebar.reload();
+        })
+
         function handleUrl(stateUrl) {
             const startIndex = stateUrl.indexOf('crm/');
             if (startIndex && startIndex > 0) {
                 const strUrlTemp = stateUrl.slice(startIndex + 4);
                 const endIndex = strUrlTemp.indexOf('/');
                 const strUrl = strUrlTemp.slice(0, endIndex);
-                $item = ( that.$wrapper.find(`a[href*="crm/${strUrl}/"]`) || false );
-                that.setItem($item.closest("li"));
-                $.crm.title.set($item.data('wa-tooltip-content'));
+
+                let query = '';
+                const funnel = strUrlTemp.match(/[?|&]funnel=(\d+)/)?.[1];
+                if (funnel) {
+                    query = '?funnel=' + funnel;
+                }
+                if (strUrlTemp.includes('all_funnels=1')) {
+                    query = '?all_funnels=1';
+                }
+
+                $item = that.$wrapper.find(`a[href*="crm/${strUrl}/${query}"]`);
+                if ($item.length === 1) {
+                    that.setItem(that.getLiOrBrick($item));
+                    $.crm.title.set($item.data('wa-tooltip-content'));
+                }
             }
         }
+    };
 
-        const isMdWithCursor = window.matchMedia("(min-width: 761px) and (pointer: fine)").matches;
-        if (isMdWithCursor) {
-            that.$body.find('li > a').each(function() {
-                $(this).waTooltip({placement:"right"});
-            })
-            that.$footer.find('li > a').each(function() {
-                $(this).waTooltip({placement: "right"});
-            })
-            
-            that.$body.on("scroll", function () {
-                $('.wa-tooltip-box').parent().remove()
-            })
-    
-            that.$footer.on("scroll", function () {
-                $('.wa-tooltip-box').parent().remove()
-            })
+    CRMSidebar.prototype.updateBody = function (html) {
+        const that = this;
+        const $active_item = that.$body.find('.selected');
+        const index = $active_item.index();
+        const is_brick = $active_item.hasClass('brick');
+
+        that.$body.html(html);
+        if (index !== -1) {
+            const $item = that.$body.find(is_brick ? '.brick' : 'li').eq(index).addClass(that.selected_class);
+            that.setItem(that.getLiOrBrick($item));
         }
-        };
+    };
 
     CRMSidebar.prototype.setItem = function ($item) {
         var that = this;
@@ -116,6 +130,10 @@ var CRMSidebar = (function ($) {
 
         if (that.$activeMenuItem.length) {
             that.$activeMenuItem.removeClass(that.selected_class);
+        }
+        if ($item.length) {
+            that.$wrapper.find('#c-sidebar-bricks a').removeClass(that.selected_class);
+            that.$body.find('li').removeClass(that.selected_class);
         }
 
         $item.addClass(that.selected_class);
@@ -164,7 +182,7 @@ var CRMSidebar = (function ($) {
         }
 
         if ($link && $link.length) {
-            that.setItem($link.closest("li"));
+            that.setItem(that.getLiOrBrick($link));
 
         } else {
             var $links = that.$wrapper.find("a[href^='" + $.crm.app_url + "']"),
@@ -192,6 +210,10 @@ var CRMSidebar = (function ($) {
         }
     };
 
+    CRMSidebar.prototype.getLiOrBrick = function ($link) {
+        return $link.hasClass('brick') ? $link : $link.closest('li');
+    };
+
     CRMSidebar.prototype.reload = function (background) {
         const that = this;
         const app_url = $.crm.app_url;
@@ -209,9 +231,25 @@ var CRMSidebar = (function ($) {
             that.$toggler.off('.sidebar');
             //$(document).off('wa_before_render', toggleMenu);
             that.xhr = false;
-            that.$body.html(html);
-
+            that.updateBody(html);
+            that.initUpdater();
+            that.initTooltips();
         });
+    };
+
+    CRMSidebar.prototype.initTooltips = function () {
+        var that = this;
+
+        that.$wrapper.find('[data-wa-tooltip-content]').each(function() {
+
+            $(this).waTooltip({placement:"right"});
+
+            if(that.menu_state === 'expanded') {
+                $(this).data('tooltip')._promise
+                    .then(tippy => tippy.disable())
+                    .catch(error => console.error('Tooltip error:', error));
+            }
+        })
     };
 
 /*    CRMSidebar.prototype.initElasticBlock = function () {
@@ -234,7 +272,7 @@ var CRMSidebar = (function ($) {
 */
     CRMSidebar.prototype.initUpdater = function () {
         var that = this,
-            time = 1000 * 60 * 5; //1000 * 60 * 5
+            time = 1000 * 60 * 2;
 
         that.timer = setTimeout(function () {
             if ($.contains(document, that.$wrapper[0])) {
@@ -242,6 +280,92 @@ var CRMSidebar = (function ($) {
             }
         }, time);
     };
+
+    CRMSidebar.prototype.initRailToggle = function () {
+        const that = this;
+        const $toggle = that.$wrapper.find('.js-toggle-sidebar');
+        
+        // сохраняем начальное состояние
+        that._user_menu_state = that.menu_state;
+
+        const applyState = (state, save_setting = false) => {
+            const isCollapsedLocal = state === 'collapsed';
+            that.$wrapper.toggleClass('rail', isCollapsedLocal);
+            $toggle.find('.fa-caret-left').toggleClass('hidden', isCollapsedLocal);
+            $toggle.find('.fa-caret-right').toggleClass('hidden', !isCollapsedLocal);
+
+            // tooltips
+            that.$wrapper.find('[data-wa-tooltip-content]').each(function () {
+                if (state === 'collapsed') {
+                    $(this).data('tooltip')?._promise.then((tippy) => tippy.enable());
+                } else {
+                    $(this).data('tooltip')?._promise.then((tippy) => tippy.disable());
+                }
+            });
+
+            const $menuNames = that.$wrapper.find('span:not(.icon)');
+            that.$wrapper
+                .off('transitionstart transitionend')
+                .on('transitionstart', (event) => {
+                    if(event.target == event.currentTarget) {
+                        $menuNames.toggleClass('hidden', !that.$wrapper.hasClass('rail'));
+                    }})
+                .on('transitionend', (event) => {
+                    if(event.target == event.currentTarget) {
+                        $menuNames.toggleClass('hidden', that.$wrapper.hasClass('rail'));
+                    }
+                });
+
+            if (save_setting) {
+                that.menu_state = state;
+                that._user_menu_state = state;
+                saveUserSettings(state);
+            }
+        };
+
+        const setResponsiveState = () => {
+            const width = window.innerWidth;
+            const isTablet = width >= 760 && width <= 1024;
+            const isMobile = width < 760;
+
+            if (isTablet) {
+                $toggle.addClass('hidden');
+                applyState('collapsed'); // принудительно, без сохранения
+            } else if (isMobile) {
+                $toggle.addClass('hidden');
+                applyState('expanded'); // принудительно, без сохранения
+            } else {
+                $toggle.removeClass('hidden');
+                applyState(that._user_menu_state); // возвращаем исходное состояние
+            }
+        };
+
+        // Первичная инициализация
+        setResponsiveState();
+
+        // Пересчитываем при изменении размеров окна
+        $(window).off('resize.sidebar').on('resize.sidebar', setResponsiveState);
+
+        // Клик-обработчик (работает только когда кнопка видна)
+        $toggle.off('click').on('click', function () {
+            if ($toggle.hasClass('hidden')) return;
+            const newState = that.$wrapper.hasClass('rail') ? 'expanded' : 'collapsed';
+            applyState(newState, true); // с сохранением
+        });
+
+        function saveUserSettings(menu_state) {
+            const deferred = $.Deferred();
+            const data = { sidebar_menu_state: menu_state };
+            const app_url = $.crm.app_url;
+            let save_uri = app_url + "?module=sidebar&action=saveMenuState";
+
+            $.post(save_uri, data, "json").always(function () {
+                deferred.resolve();
+            });
+
+            return deferred.promise();
+        }
+    }
 
     return CRMSidebar;
 

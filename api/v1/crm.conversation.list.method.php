@@ -47,7 +47,7 @@ class crmConversationListMethod extends crmApiAbstractMethod
         if ($deal_contact_ids) {
             $contacts += $this->getContacts($deal_contact_ids, $userpic_size);
         }
-        $funnels = $this->getFunnelModel()->getAllFunnels();
+        $funnels = $this->getFunnelModel()->getAllFunnels(true);
         $funnels = $this->getFunnelStageModel()->withStages($funnels);
 
         $conversations = array_values(array_map(function ($el) use ($allowed, $active_sources, $contacts, $deals, $funnels) {
@@ -106,10 +106,10 @@ class crmConversationListMethod extends crmApiAbstractMethod
                     $el['summary'] = _w('Geolocation').mb_substr($el['summary'], mb_strlen('[geolocation]'));
                 } elseif (mb_strpos($el['summary'], '[sticker]') === 0) {
                     $el['summary'] = _w('Sticker').mb_substr($el['summary'], mb_strlen('[sticker]'));
-                } elseif ($conversation['summary'] === '[unsupported]') {
-                    $conversation['summary'] = _w('Unsupported message');
-                } elseif ($conversation['summary'] === '[error]') {
-                    $conversation['summary'] = _w('Error');
+                } elseif ($el['summary'] === '[unsupported]') {
+                    $el['summary'] = _w('Unsupported message');
+                } elseif ($el['summary'] === '[error]') {
+                    $el['summary'] = _w('Error');
                 } elseif ($el['summary'] === '[empty]') {
                     $el['summary'] = _w('Empty message');
                 }

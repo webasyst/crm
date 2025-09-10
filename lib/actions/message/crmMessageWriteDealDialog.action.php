@@ -7,7 +7,7 @@ class crmMessageWriteDealDialogAction extends crmSendEmailDialogAction
         $deal = $this->getDeal();
         $participants_ids = $this->getParticipantsIds($deal['participants']);
 
-        $funnels = $this->getFunnelModel()->getAllFunnels();
+        $funnels = $this->getFunnelModel()->getAllFunnels(true);
         if (empty($funnels[$deal['funnel_id']])) {
             $funnel = reset($funnels);
             $stages = $this->getFunnelStageModel()->getStagesByFunnel($funnel);

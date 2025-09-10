@@ -1,0 +1,1 @@
+import{d as s,r as p,u as r,S as t}from"./main-2290994d.js";const m=s({__name:"WaDialogOpener",props:{component:{},componentProps:{}},setup(e){const o=e;return(n,a)=>p(n.$slots,"default",{open:()=>r(t)(o.component,o.componentProps).show()})}});export{m as _};

@@ -20,7 +20,7 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
         if (!$id) {
             throw new waException(_w('Invoice not found'), 404);
         }
-        $this->invoice = $im->getById($id);
+        $this->invoice = $im->getInvoiceWithCompany($id);
         if (!$this->invoice || $hash != crmHelper::getInvoiceHash($this->invoice)) {
             throw new waException(_w('Invoice not found'), 404);
         }
@@ -35,12 +35,16 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
             throw new waRightsException();
         }
         $this->invoice['items'] = $iim->getByField('invoice_id', $id, true);
-        $this->invoice['company'] = $this->invoice['contact'] = null;
+        $this->invoice['contact'] = null;
         $this->invoice['params'] = $ipm->getParams($id);
-        if ($this->invoice['company_id']) {
-            $cpm = new crmCompanyParamsModel();
-            $this->invoice['company'] = $cm->getById($this->invoice['company_id']);
-            $this->invoice['company']['invoice_options'] = $cpm->getParams($this->invoice['company_id'], $this->invoice['company']['template_id']);
+        $template = null;
+        $style_version = 2;
+        if (!empty($this->invoice['company']['template_id'])) {
+            $template_record = (new crmTemplatesModel)->getById($this->invoice['company']['template_id']);
+            if (!empty($template_record)) {
+                $template = $template_record['content'];
+                $style_version = $template_record['style_version'];
+            }
         }
 
         try {
@@ -76,8 +80,12 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
         unset($i);
 
         $template_render = new crmTemplatesRender(array(
-            'invoice_id' => $id
-        ));
+            'invoice_id' => $id,
+            'template' => $template,
+            'hash'     => $hash,
+            'invoice'  => $this->invoice,
+            'style_version' => $style_version < 2 ? '' : '_v'.$style_version,
+        ) + $this->view->getVars());
 
         $this->view->assign(array(
             'hash'     => $hash,
@@ -85,6 +93,7 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
             'customer' => $this->invoice['contact'],
             'company'  => $this->invoice['company'],
             'html'     => $template_render->getRenderedTemplate(),
+            'style_version' => $style_version < 2 ? '' : '_v'.$style_version,
         ));
     }
 

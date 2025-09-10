@@ -49,7 +49,9 @@ class crmSidebarAction extends crmViewAction
             'reminders_due_count' => ifset($reminders_counts, 'due_count', 0) + ifset($reminders_counts, 'burn_count', 0),
             'recent'              => $this->getRecent(),
             'can_manage_invoices' => $can_manage_invoices,
-            'recent_block_hidden' => $user->getSettings("crm", "sidebar_recent_block_hidden", "0"),
+            'recent_block_hidden' => $user->getSettings('crm', 'sidebar_recent_block_hidden', '0'),
+            'menu_state'          => $user->getSettings('crm', 'sidebar_menu_state', 'expanded'),
+            'is_premium'          => crmHelper::isPremium(),
             'is_reload'           => boolval(waRequest::get('reload', 0, waRequest::TYPE_INT))
         ));
 
@@ -82,6 +84,10 @@ class crmSidebarAction extends crmViewAction
 
     private function getRecent()
     {
+        if (wa('crm')->whichUI('crm') !== '1.3') {
+            // TODO: implement recent block for 2.0
+            return null;
+        }
         $limit = 10;
 
         $rm = new crmRecentModel();
@@ -251,12 +257,26 @@ class crmSidebarAction extends crmViewAction
             return;
         }
 
+        
+        $unpinned_funnels = wa()->getUser()->getSettings('crm', 'unpinned_funnels');
+        $unpinned_funnels = empty($unpinned_funnels) ? [] : explode(',', $unpinned_funnels);
+        $funnels = array_filter($funnels, function($funnel) use ($unpinned_funnels) {
+            return !in_array($funnel['id'], $unpinned_funnels);
+        });
+
         $dm = new crmDealModel();
         $deal_max_id = waRequest::cookie('deal_max_id', 0, waRequest::TYPE_INT);
+
+        $funnels = array_map(function($funnel) use ($dm) {
+            $funnel['deals_count'] = $dm->countOpen(['funnel_id' => $funnel['id']]);
+            return $funnel;
+        }, $funnels);
+
         $this->view->assign(array(
             'deals_has_access' => true,
             'deals_count'      => $dm->countOpen(),
             'deals_new_count'  => $deal_max_id ? crmDeal::getNewCount($deal_max_id) : 0,
+            'funnels'          => $funnels,
         ));
     }
 }

@@ -9,12 +9,15 @@ class crmDealNumberField extends crmDealField
 
     public function validate($value)
     {
-        if (!is_scalar($value) || (is_string($value) && strlen($value) <= 0)) {
-            return array(_ws('Incorrect numerical value'));
+        if (empty($value)) {
+            return [];
+        }
+        if (!is_scalar($value)) {
+            return [_ws('Incorrect numerical value')];
         }
         $validator = new waNumberValidator();
         if ($validator->isValid($value)) {
-            return array();
+            return [];
         }
         return $validator->getErrors();
     }

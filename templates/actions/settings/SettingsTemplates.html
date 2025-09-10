@@ -10,7 +10,7 @@
 
         {* TEMPLATES *}
         <div class="c-tabs-wrapper flexbox wrap middle full-width" >
-            <div class="c-companies-wrapper">
+            <div class="c-companies-wrapper tabs-with-arrows-side-wrapper">
                 <ul class="tabs c-companies-list">
                     {if empty($template.id)}
                         {$_new_template = [
@@ -39,7 +39,24 @@
                 <span class="c-action left" title="[`Before`]"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
             </div>
             <div class="c-add-wrapper">
-                <a class="button small rounded light-gray" href="{$wa_app_url}settings/templates/new/"><i class="fas fa-plus-circle text-green add"></i> [`Add new template`]</a>
+                <div class="dropdown" id="dropdown-origin-variant">
+                    <button class="dropdown-toggle button small rounded light-gray"><i class="fas fa-plus-circle text-green add"></i> [`Add new template`]</button>
+                    <div class="dropdown-body">
+                        <ul class="menu">
+                        {foreach $origin_variants as $_origin}
+                            <li><a href="{$wa_app_url}settings/templates/new/?origin_id={$_origin.origin_id}">
+                                {$_origin.name}
+                            </a></li>
+                        {/foreach}
+                        </ul>
+                    </div>
+                </div>
+                <script>
+                    ( function($) {
+                        $("#dropdown-origin-variant").waDropdown({
+                        });
+                    })(jQuery);
+                </script>
             </div>
         </div>
     </header>
@@ -48,10 +65,10 @@
     <section class="c-template-section" id="c-template-section">
         <form action="" class="width-100 fields vertical js-template-form ">
 
-            <input class="wide large js-template-name" name="data[name]" type="text" value="{$template.name|default: ''|escape}" placeholder="[`Template name`]" required>
+            <input class="wide large js-template-name custom-mt-20" name="data[name]" type="text" value="{$template.name|default: ''|escape}" placeholder="[`Template name`]" required>
 
-            <section class="c-params-section">
-                <h3 class="heading">[`Custom variables`]</h3>
+            <section class="c-params-section fields-group custom-mt-20">
+                <h3 class="heading custom-mt-0">[`Custom variables`]</h3>
                 <p class="hint">[`Set up custom variables to show extra company-related data on an invoice; e.g., payment details, contact information, business license number, etc. Save appropriate values for your variables in each company’s settings and add the variables to an invoice template.`]</p>
 
                 {function _renderParams}
@@ -78,9 +95,8 @@
                                    value="{if !empty($_param)}{$_param.code|escape}{/if}">
                         </td>
                         <td>
-                            <a class="nowrap c-delete-link js-delete-param" href="javascript:void(0);">
-                                <i class="fas fa-times"></i>
-                                [`delete`]
+                            <a class="nowrap c-delete-link js-delete-param icon size-16 text-red" href="javascript:void(0);" title="[`Delete`]">
+                                <i class="fas fa-trash-alt"></i>
                             </a>
                         </td>
                     </tr>
@@ -103,8 +119,10 @@
                             {foreach $template.params as $_param}
                                 {_renderParams _param=$_param}
                             {/foreach}
-                        {elseif !$template.id}
-                            {_renderParams _param=[]}
+                        {elseif empty($template.id)}
+                            {foreach $basic_params as $_param}
+                                {_renderParams _param=$_param}
+                            {/foreach}
                         {/if}
                     </tbody>
                 </table>
@@ -117,6 +135,19 @@
                 </div>
             </section>
 
+            {if $template.style_version|default:'2' == '2' && !$wa->crm->isPremium()}
+                <section class="c-powered-by-section fields-group">
+                    <h3 class="heading custom-mt-0">[`Powered by Webasyst CRM`]</h3>
+                    <p>{sprintf_wp(
+                        'To hide the link to Webasyst CRM, <a %s>buy premium ›</a>',
+                        sprintf(
+                            'href="https://www.%s/store/app/crm/premium/" target="_blank"',
+                            _w('webasyst.com')
+                        )
+                    )}</p>
+                </section>
+            {/if}
+
             <div class="c-template-content" data-id="content">
                 <div class="field">
                     <div class="name"><p class="hint">HTML + Smarty</p></div>
@@ -126,34 +157,35 @@
                 </div>
             </div>
 
-            <footer class="c-footer-actions js-footer-actions">
-                <div class="c-footer-block js-footer-block">
-                    <div class="c-footer-layout flexbox nowrap full-width middle">
-                        <div class="c-column middle">
-                            <input class="button js-template-save-button" type="submit" value="{if !empty($template.id)}[`Save`]{else}[`Create`]{/if}">
-                            <span class="js-hidden-actions" style="{if !empty($template.id)}display: none;{/if}">
-                                <a href="{$wa_app_url}settings/templates/{if !empty($template.id)}{$template.id}/{/if}" class="button light-gray">[`Cancel`]</a>
-                            </span>
-                        </div>
-                        <div class="c-column c-footer-link-wrapper middle center">
-                                <a class="nowrap js-reset-template {if !$reset_template}hidden{/if}" href="javascript:void(0);"><i class="fas fa-undo broom"></i>
-                                    [`Reset changes`]</a>
-                            {include file='./SettingsNotificationsHelp.inc.html' inline}
+            <footer class="c-settings-footer bottombar sticky">
+                <div class="c-footer-actions js-footer-actions flexbox nowrap full-width middle">
+                    <div class="c-column middle">
+                        <input class="button js-template-save-button" type="submit" value="{if !empty($template.id)}[`Save`]{else}[`Create`]{/if}">
+                        <span class="js-hidden-actions" style="{if !empty($template.id)}display: none;{/if}">
+                            <a href="{$wa_app_url}settings/templates/{if !empty($template.id)}{$template.id}/{/if}" class="button light-gray">[`Cancel`]</a>
+                        </span>
+                        <a class="button light-gray nowrap js-reset-template {if !$reset_template}hidden{/if}" href="javascript:void(0);">
+                            [`Reset changes`]
+                        </a>
+                    </div>
+                    <div class="c-column c-footer-link-wrapper middle center">
+                        {include file='./SettingsNotificationsHelp.inc.html' inline}
 
-                            <a class="nowrap js-show-preview" href="javascript:void(0);"><i class="fas fa-external-link-alt new-window"></i> [`Preview`]</a>
-                        </div>
-                        <div class="c-column middle right">
-                            {if !empty($template.id) && count($templates) > 1}
-                                <a class="button small red outlined js-delete-template" href="javascript:void(0);">
-                                    <i class="fas fa-times-circle delete"></i> [`Delete`]
-                                </a>
-                            {/if}
-                        </div>
+                        <a class="nowrap js-show-preview" href="javascript:void(0);"><i class="fas fa-external-link-alt new-window"></i> [`Preview`]</a>
+                    </div>
+                    <div class="c-column middle right">
+                        {if !empty($template.id) && count($templates) > 1}
+                            <a class="button light-gray js-delete-template" href="javascript:void(0);" title="[`Delete`]">
+                                <i class="fas fa-trash-alt delete text-red"></i>
+                            </a>
+                        {/if}
                     </div>
                 </div>
             </footer>
 
             <input name="data[id]" value="{$template.id}" type="hidden">
+            <input name="data[origin_id]" value="{$template.origin_id}" type="hidden">
+            <input name="data[style_version]" class="js-style-version" value="{$template.style_version|default:'2'}" type="hidden">
         </form>
     </section>
 
@@ -165,9 +197,11 @@
                     <form class="js-preview-form" action="?module=invoice&action=templatesRender" method="post" target="c-preview-iframe">
                         <input type="hidden" id="js-preview-content" name="content" value="">
                         <input type="hidden" id="template_id" name="template_id" value="{$template.id}">
+                        <input type="hidden" id="origin_id" name="origin_id" value="{$template.origin_id}">
+                        <input type="hidden" id="style_version" class="js-style-version" name="style_version" value="{$template.style_version|default:'2'}">
                         {$wa->csrf()}
                     </form>
-                    <iframe name="c-preview-iframe" class="c-preview-iframe"></iframe>
+                    <iframe name="c-preview-iframe" class="c-preview-iframe{if $template.style_version|default:'2' == '2'} blank{/if}"></iframe>
                 </div>
 
                 <footer class="dialog-footer js-footer-actions">

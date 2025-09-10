@@ -18,9 +18,10 @@ if (window.parent.appState) {
         apiEndpoint: '{$wa_url}api.php',
         token: '{$spa_api_token}',
         lang: '{$spa_locale}',
-        can_init_call: false,
-        is_sms_configured: false,
-        is_email_configured: false,
+        can_init_call: {$can_init_call},
+        is_sms_configured: {$is_sms_configured},
+        is_email_configured: {$is_email_configured},
+        rights: {$access_rights},
         user: {
             id: {$wa->user()->getID()},
             name: '{$wa->user()->getName()|escape:"javascript"}',

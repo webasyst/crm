@@ -1666,7 +1666,7 @@ paths:
                   description: Свойства валюты
                   properties:
                     id:
-                      description: ISO-код валюты
+                      description: 3-буквенный код валюты
                       type: string
                     name:
                       description: Локализованное название валюты
@@ -1725,7 +1725,7 @@ paths:
                   nullable: true
                 currency_id:
                   type: string
-                  description: ISO-код валюты
+                  description: 3-буквенный код валюты
                   nullable: true
                 contact_id:
                   type: integer
@@ -3184,15 +3184,30 @@ paths:
                     color:
                       type: string
                       description: HTML-обозначение цвета
+                    icon:
+                      type: string
+                      description: CSS-класс иконки из набора Font Awesome
                     open_color:
                       type: string
                       description: HTML-обозначение цвета первого этапа воронки
                     close_color:
                       type: string
                       description: HTML-обозначение цвета последнего этапа воронки
+                    is_archived:
+                      type: boolean
+                      description: Флаг, указывающий, что воронка помещена в архив
+                    is_pinned:
+                      type: boolean
+                      description: Флаг, указывающий, что воронка отображается отдельным пунктом в сайдбаре
                     deal_count:
                       type: integer
-                      description: Количество сделок в воронке
+                      description: Количество открытых сделок в воронке
+                    deal_total_amount:
+                      type: integer
+                      description: Общая сумма в открытых сделках в воронке
+                    currency_id:
+                      type: string
+                      description: 3-буквенный код валюты
                     stages:
                       type: array
                       description: Список этапов воронки
@@ -3220,7 +3235,13 @@ paths:
                             nullable: true
                           deal_count:
                             type: integer
-                            description: Количество сделок на этапе
+                            description: Количество открытых сделок на этапе
+                          deal_total_amount:
+                            type: integer
+                            description: Общая сумма в открытых сделках на этапе
+                          currency_id:
+                            type: string
+                            description: 3-буквенный код валюты
         403:
           description: Запрещён доступ к приложению CRM или данному методу API.
           content:
@@ -5828,6 +5849,30 @@ paths:
                     asc:
                       type: boolean
                       description: Флаг, требующий сортировку по возрастанию
+                deal_funnel_columns:
+                  description: Массив столбцов, которые нужно показывать в списках сделок, — в том порядке, в котором должны быть показаны столбцы
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - funnel_id
+                      - columns
+                    properties:
+                      funnel_id:
+                        type: integer
+                        description: ID воронки
+                        nullable: false
+                      columns:
+                        type: array
+                        description: Массив столбцов в списке сделок воронки
+                        items:
+                          type: object
+                          required:
+                            - field
+                          properties:
+                            field:
+                              type: string
+                              description: ID столбца
                 deal_list_filter:
                   description: Список параметров фильтрации сделок
                   type: object
@@ -6492,7 +6537,7 @@ components:
               description: Сумма заказа
             currency:
               type: string
-              description: ISO-код валюты
+              description: 3-буквенный код валюты
             rate:
               type: number
               description: Курс валюты заказа по отношению к основной валюте
@@ -6593,7 +6638,7 @@ components:
           description: Итоговая сумма
         currency_id:
           type: string
-          description: ISO-код валюты
+          description: 3-буквенный код валюты
         currency_rate:
           type: number
           description: Курс валюты счёта по отношению к основной валюте
@@ -6905,19 +6950,15 @@ components:
           description: Предварительная стоимость
         currency_id:
           type: string
-          description: ISO-код валюты
+          description: 3-буквенный код валюты
         contact:
           description: Клиент
           allOf:
             - $ref: '#/components/schemas/contactMinimal'
         funnel:
-          description: Воронка
-          allOf:
-            - $ref: '#/components/schemas/dealFunnel'
+          $ref: '#/components/schemas/dealFunnel'
         stage:
-          description: Этап воронки
-          allOf:
-            - $ref: '#/components/schemas/dealStage'
+          $ref: '#/components/schemas/dealStage'
     message:
       type: object
       properties:
@@ -7152,7 +7193,7 @@ components:
           description: Предварительная стоимость
         currency_id:
           type: string
-          description: ISO-код валюты
+          description: 3-буквенный код валюты
         currency_rate:
           type: number
           description: Курс валюты счёта по отношению к основной валюте
@@ -7386,7 +7427,7 @@ components:
         currency_id:
           type: string
           nullable: true
-          description: ISO-код основной валюты
+          description: 3-буквенный код основной валюты
         currency_rate:
           type: number
           nullable: true
@@ -7396,7 +7437,7 @@ components:
           description: Предварительная стоимость в валюте сделки
         original_currency_id:
           type: string
-          description: ISO-код валюты сделки
+          description: 3-буквенный код валюты сделки
         lost_id:
           type: integer
           description: ID одной из настроенных причин проигрыша сделки
@@ -7487,6 +7528,9 @@ components:
         color:
           type: string
           description: HTML-значение цвета
+        icon:
+          type: string
+          description: Класс иконки Font Awesome
     dealPin:
       type: object
       properties:
@@ -7512,7 +7556,7 @@ components:
           description: Предварительная стоимость
         currency_id:
           type: string
-          description: ISO-код валюты
+          description: 3-буквенный код валюты
         contact:
           description: Клиент
           allOf:
@@ -7929,6 +7973,12 @@ components:
         name:
           type: string
           description: Название
+        color:
+          type: string
+          description: Цвет
+        bg_color:
+          type: string
+          description: Цвет фона
         count:
           type: integer
           description: Количество связанных контактов и сделок

@@ -10,7 +10,7 @@ class crmSettingsFunnelsSortSaveController extends crmJsonController
         $ids = preg_split('/\s*,\s*/', $this->getRequest()->post('ids', null, waRequest::TYPE_STRING_TRIM));
 
         $fm = new crmFunnelModel();
-        $funnels = $fm->getAllFunnels();
+        $funnels = $fm->getAllFunnels(true);
 
         if (count($ids) != count($funnels)) {
             throw new waException('Invalid data');

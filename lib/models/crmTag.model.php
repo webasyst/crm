@@ -54,6 +54,8 @@ class crmTagModel extends crmModel
                     $tag['size'] = ceil((self::CLOUD_MAX_SIZE + self::CLOUD_MIN_SIZE) / 2);
                     $tag['opacity'] = number_format(self::CLOUD_MAX_OPACITY, 2, '.', '');
                 }
+
+                $tag['bg_color'] = $this->getBgTagColor($tag['color']);
                 /* Кажется это нигде не используется
                 if (strpos($tag['name'], '/') !== false) {
                     $tag['uri_name'] = explode('/', $tag['name']);
@@ -126,6 +128,10 @@ class crmTagModel extends crmModel
         $map = $this->getContactTagsModel()->getByField(array('contact_id' => $contact_ids), true);
         $tag_ids = waUtils::getFieldValues($map, 'tag_id');
         $tags = $this->getById($tag_ids);
+        $tags = array_map(function ($tag) {
+            $tag['bg_color'] = $this->getBgTagColor($tag['color']);
+            return $tag;
+        }, $tags);
         foreach ($map as $item) {
             $tag = ifset($tags[$item['tag_id']]);
             if ($tag) {
@@ -289,4 +295,19 @@ class crmTagModel extends crmModel
         }
     }
 
+    protected function getBgTagColor($color)
+    {
+        if (empty($color)) {
+            return null;
+        }
+        
+        $color = is_scalar($color) ? trim(strval($color)) : '';
+        if (strlen($color) <= 0 || $color[0] != '#' || strlen($color) != 7) {
+            return null;
+        }
+
+        $c = substr($color, 1);
+        list($r, $g, $b) = array(hexdec($c[0].$c[1]), hexdec($c[2].$c[3]), hexdec($c[4].$c[5]));
+        return 'rgba(' . $r . ',' . $g .  ',' . $b . ', 0.3)';
+    }
 }

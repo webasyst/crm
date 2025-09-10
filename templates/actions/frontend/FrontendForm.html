@@ -1,0 +1,34 @@
+{strip}
+{$_title = $wa->appName()}
+{if !empty($invoice)}
+    {$_title = "{ifempty($invoice.company.name, $invoice.company_id)|escape}: Invoice #`$invoice.number|escape`"}
+{/if}
+{$wa->title($_title)}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="robots" content="noindex">
+    <title>{$wa->title()}</title>
+
+    {* JQUERY *}
+    <script src="{$wa_url}wa-content/js/jquery/jquery-1.11.1.min.js?{$wa->version()}"></script>
+    {*<script src="{$wa_url}wa-content/js/jquery/jquery-migrate-1.2.1.min.js?{$wa->version()}"></script>*}
+
+    {* CSS *}
+    {$wa->css()}
+    <link href="{$wa_static_url}wa-content/css/wa/wa-2.0.css?v={$wa->version()}" rel="stylesheet">
+    <link href="{$wa_app_static_url}css/frontend.css?v={$wa->version()}" rel="stylesheet">
+</head>
+<body>
+
+
+<div style="margin: 0 auto; padding: 50px 0; width: 100%; max-width: {$form.params.max_width|default:600}px;">
+    {$html}
+</div>
+
+</body>
+</html>
+
+{/strip}

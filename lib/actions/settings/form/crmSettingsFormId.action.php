@@ -13,16 +13,28 @@ class crmSettingsFormIdAction extends crmSettingsViewAction
             $this->notFound();
         }
 
-        $this->view->assign(array(
+        $domains = wa()->getRouting()->getByApp($this->getAppId());
+        $storefront_list = array();
+        foreach ($domains as $domain => $storefronts) {
+            $storefront_list[$domain] = $domain . '/' . current($storefronts)['url'];
+        }
+        $has_storefronts = !empty($storefront_list);
+
+        $this->view->assign([
             'form' => $form_constructor->getFormInfo(),
             'available_fields' => $form_constructor->getAvailableFields(),
             'messages_block' => $this->getMessagesBlock($form_constructor->getForm()),
             'app_static_url' => wa()->getAppStaticUrl('crm', true),
             'frontend_form_iframe_url' => $this->getIFrameUrl($form_constructor->getFormId()),
+            'frontend_form_url' => $this->getFormUrl($form_constructor->getFormId()),
             'segments' => $this->getSegmentModel()->getMergedSegments($form_constructor->getForm()),
             'default_checked_fields' => $this->getDefaultCheckedFields(),
-            'blocks' => $this->getBlocks($form_constructor->getForm())
-        ));
+            'blocks' => $this->getBlocks($form_constructor->getForm()),
+            'captcha_is_invisible' => crmFormConstructor::getCaptchaIsInvisible(),
+            'captcha_settings_url' => wa()->getAppUrl('webasyst') . 'webasyst/settings/captcha/',
+            'domains' => wa()->getRouting()->getDomains(),
+            'has_storefronts' => $has_storefronts,
+        ]);
     }
 
     protected function getBlocks(crmForm $form)
@@ -92,6 +104,15 @@ class crmSettingsFormIdAction extends crmSettingsViewAction
     {
         return wa()->getRouting()->getUrl(
             'crm/frontend/formIframe',
+            array('id' => $form_id),
+            true
+        );
+    }
+
+    protected function getFormUrl($form_id)
+    {
+        return wa()->getRouting()->getUrl(
+            'crm/frontend/form',
             array('id' => $form_id),
             true
         );

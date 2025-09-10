@@ -59,6 +59,14 @@ class crmFormProcessor
     public function process($id, $data)
     {
         $this->initForm($id);
+        
+        if ($this->isBotDetected($data)) {
+            waLog::log('Bot detected. Form data:' . PHP_EOL . wa_dump_helper($data), self::$LOG_FILE);
+
+            //return ['errors' => [_ws('Who the fuck are you?')]];
+            return $this->getResponseAfterSuccessProcess();
+        }
+
         $data = $this->sanitize($data);
 
         // validation
@@ -85,6 +93,31 @@ class crmFormProcessor
         }
 
         return $this->getResponseAfterSuccessProcess();
+    }
+
+    protected function isBotDetected($data)
+    {
+        $antibot_honey_pot = $this->getForm()->getParam('antibot_honey_pot');
+        if (empty($antibot_honey_pot)) {
+            return false;
+        }
+
+        if (!empty($antibot_honey_pot['empty_field_name']) && !empty($data[$antibot_honey_pot['empty_field_name']])) {
+            // empty field filled by bot (must be empty)
+            return true;
+        }
+        
+        if (!empty($antibot_honey_pot['filled_field_name']) && 
+            !empty($antibot_honey_pot['filled_field_value']) && (
+                empty($data[$antibot_honey_pot['filled_field_name']]) || 
+                $data[$antibot_honey_pot['filled_field_name']] != $antibot_honey_pot['filled_field_value']
+            )
+        ) {
+            // filled field value not valid (so js does not work)
+            return true;
+        }
+        
+        return false;
     }
 
     protected function getResponseAfterSuccessProcess($default = array())

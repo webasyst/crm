@@ -18,7 +18,7 @@ class crmDefaultLayout extends waLayout
         // Locale for SPA
         $locale = str_replace('_', '-', wa()->getLocale());
 
-        list($contact_list_columns, $contact_list_sort, $deal_list_filter, $deal_list_sort) = $this->getContactListSettings();
+        list($contact_list_columns, $contact_list_sort, $deal_funnel_columns, $deal_list_filter, $deal_list_sort, $funnel_bricks) = $this->getContactListSettings();
 
         $this->view->assign([
             'spa_api_token'        => $token,
@@ -28,8 +28,10 @@ class crmDefaultLayout extends waLayout
             'is_email_configured'  => waUtils::jsonEncode($this->isEmailConfigured()),
             'contact_list_columns' => waUtils::jsonEncode($contact_list_columns),
             'contact_list_sort'    => waUtils::jsonEncode($contact_list_sort),
+            'deal_funnel_columns'  => waUtils::jsonEncode($deal_funnel_columns),
             'deal_list_filter'     => waUtils::jsonEncode($deal_list_filter),
             'deal_list_sort'       => waUtils::jsonEncode($deal_list_sort),
+            'funnel_bricks'        => waUtils::jsonEncode($funnel_bricks),
             'access_rights'        => waUtils::jsonEncode($this->getAccessRights()),
         ]);
     }
@@ -47,16 +49,48 @@ class crmDefaultLayout extends waLayout
             'field' => 'create_datetime',
             'asc'   => false
         ];
+
+        $csm = new waContactSettingsModel();
+        $contact_settings = $csm->get(wa()->getUser()->getId(), 'crm');
+
+        $funnel_model = new crmFunnelModel();
+        $deal_funnel_columns = [];
+        $funnels = $funnel_model->getAllFunnels(true);        
+        foreach ($funnels as $funnel) {
+            $_deal_columns = ifset($contact_settings, 'deal_funnel_columns:'.$funnel['id'], '');
+            $_deal_list_columns = [];
+            if (empty($_deal_columns)) {
+                $_deal_list_columns = [
+                    ['field' => 'amount'],
+                    ['field' => 'user'],
+                    ['field' => 'tags'],
+                    ['field' => 'last_action'],
+                ];
+            } else {
+                $_deal_columns = waUtils::jsonDecode($_deal_columns, true);
+                foreach ($_deal_columns as $_column_name => $_list_column) {
+                    if (empty($_list_column['off'])) {
+                        $_deal_list_columns[] = [
+                            'field' => (string) $_column_name,
+                        ];
+                    }
+                }
+            }
+
+            $deal_funnel_columns[] = [
+                'funnel_id' => $funnel['id'],
+                'columns' => $_deal_list_columns,
+            ];
+        }
+
         $deal_list_sort = [
             'field' => 'create_datetime',
             'asc'   => false
         ];
 
-        $csm = new waContactSettingsModel();
-        $contact_settings = $csm->get(wa()->getUser()->getId(), 'crm');
-
         $list_columns = ifset($contact_settings, 'contact_list_columns', '');
         $list_sort = ifset($contact_settings, 'contacts_action_params', '');
+        //$deal_columns = ifset($contact_settings, 'deal_list_columns', '');
         $deal_sort = ifset($contact_settings, 'deal_list_sort', '');
         if (!empty($list_columns)) {
             $contact_list_columns = [];
@@ -78,6 +112,18 @@ class crmDefaultLayout extends waLayout
                 'asc'   => ifset($list_sort, 1, $contact_list_sort['asc']) == 'ASC'
             ];
         }
+        /*
+        if (!empty($deal_columns)) {
+            $deal_list_columns = [];
+            $deal_columns = waUtils::jsonDecode($deal_columns, true);
+            foreach ($deal_columns as $_column_name => $_list_column) {
+                if (empty($_list_column['off'])) {
+                    $deal_list_columns[] = [
+                        'field' => (string) $_column_name,
+                    ];
+                }
+            }
+        } */
         if (!empty($deal_sort)) {
             $deal_sort = explode(' ', $deal_sort);
             if (!empty($deal_sort[0]) && isset($deal_sort[1])) {
@@ -94,7 +140,17 @@ class crmDefaultLayout extends waLayout
             'user_id'   => $this->intOrNull($contact_settings, 'deal_user_id')
         ];
 
-        return [$contact_list_columns, $contact_list_sort, $deal_list_filter, $deal_list_sort];
+        $funnel_bricks = $funnel_model->getAllFunnels();
+        if (!empty($funnel_bricks)) {
+            $unpinned_funnels = wa()->getUser()->getSettings('crm', 'unpinned_funnels');
+            $unpinned_funnels = empty($unpinned_funnels) ? [] : explode(',', $unpinned_funnels);
+            $funnel_bricks = array_filter($funnel_bricks, function($funnel) use ($unpinned_funnels) {
+                return !in_array($funnel['id'], $unpinned_funnels);
+            });
+            $funnel_bricks = array_keys($funnel_bricks);
+        }
+
+        return [$contact_list_columns, $contact_list_sort, $deal_funnel_columns, $deal_list_filter, $deal_list_sort, $funnel_bricks];
     }
 
     protected function intOrNull($arr, $key, $allowed_str_values = [])

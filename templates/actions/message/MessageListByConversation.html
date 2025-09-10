@@ -72,7 +72,7 @@
                     <input class="js-search-field" placeholder="[`Search`]" type="text" id="input-autocomplete-contact" value="">
                     <button class="icon"><i class="fas fa-search"></i></button>
                 </div>
-                <span class="icon js-search-contact-hide"><i class="fas fa-times-circle"></i></span>
+                <span class="icon js-search-contact-hide custom-ml-8"><i class="fas fa-times-circle"></i></span>
                 <div class="flexbox middle nowrap space-16 c-search-contact js-search-contact">
                     {if !empty($list_params.contact_id)}
                         {if isset($contacts[$list_params.contact_id])}
@@ -124,7 +124,7 @@
                                 <ul class="menu nowrap">
                                     {foreach $filter_responsibles as $_responsible}
                                     <li class="{if $_responsible.id === $active_filter_responsible.id}selected{/if}">
-                                        <a href="{crmHelper::getUrl(["responsible" => $_responsible.id, "page" => null, "contact" => $contact_var_link])}">
+                                        <a href="{$wa_app_url}message/{crmHelper::getUrl(["responsible" => $_responsible.id, "page" => null, "contact" => $contact_var_link], null, true)}">
                                             {if (isset($_responsible.photo_url_32))}
                                                 <span class="icon size-16 rounded">
                                                     <img src="{$_responsible.photo_url_32}" alt="{$_responsible.name|escape}" class="responsible-userpic rounded">
@@ -165,7 +165,7 @@
                                 <ul class="menu nowrap">
                                 {foreach $filter_transports as $_filter_transport}
                                 <li class="{if $_filter_transport.id === $active_filter_transport.id}selected{/if}">
-                                    <a href="{crmHelper::getUrl(["transport" => $_filter_transport.id, "page" => null, "contact" => $contact_var_link])}">
+                                    <a href="{$wa_app_url}message/{crmHelper::getUrl(["transport" => $_filter_transport.id, "page" => null, "contact" => $contact_var_link], null, true)}">
                                         <span class="dropdown-body--name">{sprintf_wp($_filter_transport.name)|escape}</span>
                                     </a>
                                 </li>
@@ -174,7 +174,7 @@
                                     <li class="disabled"><hr></li>
                                     {foreach $active_sources as $_source}
                                     <li class="{if $_source.id === $active_filter_transport.id}selected{/if}">
-                                        <a href="{crmHelper::getUrl(["transport" => $_source.id, "page" => null, "contact" => $contact_var_link])}">
+                                        <a href="{$wa_app_url}message/{crmHelper::getUrl(["transport" => $_source.id, "page" => null, "contact" => $contact_var_link], null, true)}">
                                             {if !empty($_source.icon_fab)}
                                                 <i class="fab fa-{$_source.icon_fab}" title="{$_source.name|escape}" style="color:{$_source.icon_color}"></i>
                                             {elseif !empty($_source.icon_fa)}
@@ -256,7 +256,7 @@
                         </ul>
                     </div>
                     <input id="js-operation-dropdown-input" name="dropdown_input" type="hidden" value="">
-                
+
                     <script>
                         ( function($) {
                             $("#js-operation-dropdown").waDropdown({
@@ -267,7 +267,7 @@
                                     console.log('kek')
                                     return*/
                                 }
-                                
+
                             });
                         })(jQuery);
                     </script>
@@ -348,7 +348,7 @@
                             {$_iframe_prop = '&iframe=1'}
                         {/if}
                     {/if}
-            
+
                     {$_conversation_url = "{$wa_app_url}message/conversation/{$_c.id}/{$_page_tail}{$_iframe_prop}{$_view_prop}"}
                     {if !$_can_view}
                         {$_conversation_url = "javascript:void(0);"}
@@ -534,7 +534,7 @@
                         {/if}
                     {/foreach}
                 {/if}
-        
+
                 <div class="flexbox vertical middle no-messages">
                     <span class="icon size-80 text-light-gray"><i class="fas fa-comments"></i></span>
                     <span class="custom-my-16 gray">[`No messages`]</span>

@@ -94,21 +94,25 @@
 
     <form action="/">
         <h1 class="c-header flexbox middle space-12 wrap">
-            <a href="javascript:void(0);"class="mobile-only back middle js-invoice-hide-mobile"><i class="fas fa-arrow-circle-left"></i></a>
-            <span class="h3-mobile">
+            {if $iframe}
+                <a href="javascript:void(0);"class="back middle js-cancel-button{if !empty($invoice.id)} js-disable-router{/if} larger"><i class="fas fa-arrow-circle-left"></i></a>
+            {else}
+                <a href="javascript:void(0);"class="mobile-only back middle js-invoice-hide-mobile"><i class="fas fa-arrow-circle-left"></i></a>
+            {/if}
+            <span>
                 [`Invoice`] [`#`]
-                <input class="c-number js-invoice-number shorter" type="text" name="invoice[number]" placeholder="123" value="{$invoice.number|escape}">
+                <input class="c-number js-invoice-number short" type="text" name="invoice[number]" placeholder="123" value="{$invoice.number|escape}">
             </span>
-            <span class="h3-mobile">
+            <span>
                 [`issued on`]
                 <span>
-                    <input class="c-date js-invoice-datepicker shorter" type="text" value="{$invoice.invoice_date|wa_date}">
+                    <input class="c-date js-invoice-datepicker short" type="text" value="{$invoice.invoice_date|wa_date}">
                     <input name="invoice[invoice_date]" type="hidden" value="{$invoice.invoice_date}">
                 </span>
             </span>
         </h1>
 
-        <div class="c-contacts-wrapper fields">
+        <div class="c-contacts-wrapper fields custom-mt-24">
             <div class="fields-group blank">
             <div class="field">
                 <div class="name">
@@ -130,7 +134,7 @@
                     <script>
                     ( function($) {
                         $("#switch-due-date-show").waSwitch({
-                            change: function(active, wa_switch) { 
+                            change: function(active, wa_switch) {
                                 if (active) {
                                     $(".c-due-date").removeClass('hidden');
                                 }
@@ -166,7 +170,7 @@
                             <span class="js-company-name">{if !empty($contact) && $_company_name}{$_company_name|escape}{/if}</span>
                         </div>
                         {/strip}
-                        <a class="inline-link js-change-contact" href="javascript:void(0);"><span class="js-label" data-change-text="[`Change`]">{if !empty($contact)}<i class="fas fa-pen custom-pr-8"></i><span class="">[`Change`]</span>{else}<i class="fas fa-users custom-pr-8"></i><span class="">[`Set contact`]</span>{/if}</span></a>
+                        <a class="inline-link js-change-contact" href="javascript:void(0);"><span class="js-label" data-change-text="[`Change`]">{if !empty($contact.id)}<i class="fas fa-pen custom-pr-8"></i><span class="">[`Change`]</span>{else}<i class="fas fa-users custom-pr-8"></i><span class="">[`Set contact`]</span>{/if}</span></a>
                         <input class="js-contact-id" type="text" name="invoice[contact_id]" value="{if !empty($contact)}{$_contact_id}{/if}" style="{$hidden_input_style}">
                     </div>
                 </div>
@@ -177,8 +181,21 @@
                 <div class="name">[`Deal`]</div>
                 <div class="value">
                     <div class="c-deal-toggle js-deal-toggle">
-                    {if $deal}
-                        <b class="break-words js-deal-name"><i class="fas fa-flag text-green custom-pr-4"></i> {$deal.name|escape}</b>
+                        <b class="break-words js-deal-name">
+                            {$_funnel_color = 'lightgray'}
+                            {if !empty($funnel) && !empty($funnel.color)}{$_funnel_color = $funnel.color}{/if}
+                            <span class="icon custom-mr-4" style="color: {$_funnel_color};">
+                            {if $deal.status_id == crmDealModel::STATUS_WON}
+                                <i class="fas fa-flag-checkered"></i>
+                            {elseif $deal.status_id == crmDealModel::STATUS_LOST}
+                                <i class="fas fa-ban"></i>
+                            {elseif empty($funnel.icon)}
+                                <i class="fas fa-briefcase"></i>
+                            {else}
+                                <i class="{$funnel.icon} funnel-state"></i>
+                            {/if}
+                            </span> {$deal.name|escape}
+                        </b>
 {* 83.6957 *}
 {*                        <a href="javascript:void(0);" class="c-deal-wrapper c-dotted js-attach-other-deal">*}
 {*                            <i class="icon fas fa-pen"></i> [`link to another deal`]*}
@@ -191,7 +208,6 @@
 {*                            <i class="custom-mr-8 fas fa-plus add"></i>*}
 {*                            [`Associate with a deal`]*}
 {*                        </a>*}
-                    {/if}
                     </div>
                 </div>
             </div>
@@ -221,7 +237,7 @@
                     {/if}
                 </div>
             </div>
-            
+
             <div class="field {if $currencies|@count <= 1}hidden{/if}" >
                 <div class="name">[`Currency`]</div>
                 <div class="value">
@@ -234,7 +250,7 @@
                     </div>
                 </div>
             </div>
-            
+
         </div>
         </div>
 
@@ -301,9 +317,9 @@
             {/function}
 
             {capture assign="_row_template_html"}{tableRow}{/capture}
-            <div class="fields-group blank">
+            <div class="fields-group blank custom-p-8-mobile">
             <table class="c-products-table">
-               
+
                 <thead>
                     <tr>
                         <th class="c-number">[`#`]</th>
@@ -460,7 +476,8 @@
                     deal_detach_title: "[`Detach from deal`]",
                     deal_detach_text: "[`Do you really want to detach this invoice from deal “<strong>%s</strong>”?`]",
                     deal_detach_confirm_button: "[`Detach`]",
-                    deal_empty: "[`Empty`]"
+                    deal_empty: "[`Empty`]",
+                    archived: "[`(archived)`]"
                 }
             });
         })(jQuery);
@@ -469,19 +486,7 @@
 
 {if $iframe}
 <script>
-    $('.js-cancel-button').one('click', function (e) {
-        e.preventDefault();
-        if ($(this).hasClass('js-disable-router')) {
-            window.history.back()
-        } else {
-            const iframeInvoice = window.parent.document.getElementById('iframe-invoice');
-            if (iframeInvoice) {
-                iframeInvoice.dispatchEvent(new Event('close'))
-            } else {
-                throw 'not found #iframe-invoice'
-            }
-        }
-    })
+    new CrmInvoiceIframe();
 </script>
 </body>
 </html>

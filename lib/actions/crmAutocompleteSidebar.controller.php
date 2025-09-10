@@ -18,7 +18,7 @@ class crmAutocompleteSidebarController extends crmAutocompleteController
     public function getDeals($q)
     {
         if (strlen($q) <= 0) {
-            return array();
+            return [];
         }
         $dm = new crmDealModel();
         $res = $dm->select('id, name')->where("name LIKE '%".$dm->escape($q)."%'")->limit($this->limit)->fetchAll('id');
@@ -39,14 +39,18 @@ class crmAutocompleteSidebarController extends crmAutocompleteController
             $tag = $this->prepare($t['name'], $term_safe);
             $res[$deal_id]['tags'] = isset($res[$deal_id]['tags']) ? $res[$deal_id]['tags'].' '.$tag : $tag;
         }
-        if ($res) {
-            $deals = $dm->getList([
-                'id'           => array_keys($res),
-                'limit'        => $this->limit,
-                'check_rights' => true
-            ]);
+        if (empty($res)) {
+            return [];
         }
-        $out = array();
+
+        $deals = $dm->getList([
+            'id'           => array_keys($res),
+            'limit'        => $this->limit,
+            'check_rights' => true
+        ]);
+        $funnels = (new crmFunnelModel)->getAllFunnels(true);
+
+        $out = [];
         foreach ($res as $deal_id => $r) {
             if (empty($deals[$deal_id])) {
                 continue;
@@ -56,14 +60,23 @@ class crmAutocompleteSidebarController extends crmAutocompleteController
             if (!empty($r['tags'])) {
                 $label .= ' <i class="icon16 tags"></i>'.$r['tags'];
             }
-            $label_string = (wa()->whichUI() === '2.0') ? '<div class = "c-layout-deal"><span class="icon flag"><i class="fas fa-flag"></i></span><span class = "c-layout-deal-name">'.$label.'</span></div>' : '<div class = "c-layout inline"><div class = "c-column" style = "width: 16px;padding: 0 4px 0 0;"><i class = "icon16 funnel" style = "margin: 0; top: 0;"></i></div><div class = "c-column middle">'.$label.'</div></div>';
+            $funnel = ifset($funnels[$deals[$deal_id]['funnel_id']], null);
+            $icon = ifset($funnel, 'icon', 'fas fa-briefcase');
+            if ($deals[$deal_id]['status_id'] == crmDealModel::STATUS_WON) {
+                $icon = 'fas fa-flag-checkered';
+            } elseif ($deals[$deal_id]['status_id'] == crmDealModel::STATUS_LOST) {
+                $icon = 'fas fa-ban';
+            }
+            $label_string = (wa()->whichUI() === '2.0') ? '<div class = "c-layout-deal"><span class="larger custom-mr-6" style="color: '.ifset($funnel, 'color', 'lightgray').';"><i class="'.$icon.'"></i></span><span class = "c-layout-deal-name">'.$label.'</span></div>' : '<div class = "c-layout inline"><div class = "c-column" style = "width: 16px;padding: 0 4px 0 0;"><i class = "icon16 funnel" style = "margin: 0; top: 0;"></i></div><div class = "c-column middle">'.$label.'</div></div>';
 
-            $out[] = array(
+            $out[] = [
                 'label' => $label_string,
                 'link'  => 'deal/'.$deal_id.'/',
                 'name' => $deal_name,
-                'id' => $deal_id
-            );
+                'id' => $deal_id,
+                'icon' => $icon,
+                'color' => ifset($funnel, 'color', 'lightgray'),
+            ];
         }
 
         return $out;

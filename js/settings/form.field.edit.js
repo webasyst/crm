@@ -40,6 +40,13 @@ var crmSettingsFormFieldEditDialog = (function ($) {
         $.each(field, function (key, val) {
             if (key === 'id') {
                 $('.crm-field-id', $dialog).find('.value').text(field.name + ' (ID=' + val + ')');
+                if (val === '!captcha') {
+                    $('.js-captcha-settings', $dialog).removeClass('hidden');
+                    if (that.settingsForm.captcha_is_invisible) {
+                        $('.crm-field-caption', $dialog).addClass('hidden');
+                        $('.crm-field-captionplace', $dialog).addClass('hidden');
+                    }
+                }
             } else if (key !== 'name') {
                 var name = '.crm-field-' + key;
                 var $input = $(name, $dialog).find('.value').find(':input');
@@ -76,8 +83,10 @@ var crmSettingsFormFieldEditDialog = (function ($) {
 
         // confirm placeholder: enable/disabled?
         if (field.placeholder_need && field.id === 'password') {
+            enableField('without_confirm');
             enableField('placeholder_confirm');
         } else {
+            disableField('without_confirm');
             disableField('placeholder_confirm');
         }
 

@@ -78,9 +78,9 @@
 
             {$blocks.responsible|default:''}
 
-            <div class="bottombar sticky custom-mt-20 crm-form-buttons">
-                <div class="custom-px-20 custom-py-16 blank c-layout">
-                    <div class="c-column">
+            <div class="c-settings-footer bottombar sticky">
+                <div class="c-footer-actions flexbox middle full-width">
+                    <div>
                         <input type="submit" class="button" value="[`Save`]">
                         <a class="button light-gray" href="{$wa_app_url}settings/message-sources/im/">[`Cancel`]</a>
                         <span class="crm-loading" style="display: none;">
@@ -92,7 +92,7 @@
                     </span>
                     </div>
                     {if $source.id > 0}
-                        <div class="c-column middle right">
+                        <div>
                             <div class="crm-delete-link-wrapper">
                                 <a href="javascript:void(0);" class="button light-gray smaller crm-delete-source-link desktop-only">
                                     <i class="fas fa-trash-alt delete custom-mr-4"></i> [`Delete this source`]

@@ -259,14 +259,14 @@
                             {/if}
                         </span>
                     </span>
-                   
+
                 </a>
                 {/strip}
             {/if}
         {else}
             {if $is_ui13}
                 {strip}
-                
+
                     <a href="javascript:void(0);" class="crm-create-deal js-crm-link js-crm-create-deal" data-order="{$order_id}" data-contact="{$contact_id}">
                         <i class="icon16 userpic20" style="background-image: url('{$wa_url}wa-apps/crm/img/crm96.png'); border-radius: 0; background-position: 1px 1px; background-size: 15px 15px;"></i>
                         [`Create deal in CRM`]
@@ -276,17 +276,17 @@
                 <script>
                     ( function($) {
                         var is_locked = false;
-                        
+
                         $("#js-crm-backend-order").on("click", ".js-crm-create-deal", function() {
                             if (!is_locked) {
                                 is_locked = true;
-    
+
                                 var href = "{$wa_backend_url}crm/?module=deal&action=createDialog",
                                     data = {
                                         order_id: {$order_id|json_encode},
                                         contact_id: {$contact_id|json_encode}
                                     };
-    
+
                                 $.post(href, data, function(html) {
                                     $(document.body).append(html);
                                 }).always( function() {
@@ -298,27 +298,27 @@
                 </script>
             {else}
                 {strip}
-                
+
                 <a href="javascript:void(0);" class="crm-create-deal js-crm-link js-crm-create-deal" data-order="{$order_id}" data-contact="{$contact_id}">
                     <i class="icon userpic crm-icon" style="background-image: url('{$wa_url}wa-apps/crm/img/crm96.png'); border-radius: 0;"></i>
                     <span>[`Create deal in CRM`]</span>
                 </a>
-                
+
                 {/strip}
                 <script>
                     ( function($) {
                         var is_locked = false;
-                        
+
                         $(".js-crm-create-deal").on("click", function() {
                             if (!is_locked) {
                                 is_locked = true;
-    
+
                                 var href = "{$wa_backend_url}crm/?module=deal&action=createDialog",
                                     data = {
                                         order_id: {$order_id|json_encode},
                                         contact_id: {$contact_id|json_encode}
                                     };
-    
+
                                 $.post(href, data, function(html) {
                                     $.waDialog({
                                         html: html,
@@ -348,6 +348,19 @@
                 var $li = $link.closest("li");
                 $li.prependTo($li.closest("ul"));
             }
+
+            {if $order_id && !empty($contact_id)}
+                $.wa.loadSources([
+                    { type: 'js', uri: '{$wa_url}wa-apps/crm/js/widget.contact.js?v={$wa->version()}', id: 'crm-widget-contact-js' }
+                ]).then(() => {
+                    new CRMContactEmbedded({
+                        contact_id: {$contact_id|json_encode},
+                        userpic: {$photo|json_encode},
+                        wrapper: document.getElementById('s-order-block')
+                    });
+                });
+            {/if}
+
         })(jQuery);
     </script>
 

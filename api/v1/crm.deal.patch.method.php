@@ -213,7 +213,7 @@ class crmDealPatchMethod extends crmApiAbstractMethod
                 'name'  => $field_obj->getName(),
                 'type'  => $this->normalizeFieldType($field_obj->getType()),
                 'value' => $this->valueFormat($field_obj, $_value),
-                'data'  => (!empty($_value) && $field_obj->getType() == 'Date' ? waDateTime::format('Y-m-d', $_value) : $_value)
+                'data'  => (!empty($_value) && $field_obj->getType() == 'Date' ? waDateTime::format('Y-m-d', $_value, 'server') : $_value)
             ];
         }
 
@@ -222,20 +222,14 @@ class crmDealPatchMethod extends crmApiAbstractMethod
 
     private function valueFormat($field_object, $value)
     {
-        if (empty($value) && $field_object->getType() != 'Checkbox') {
-            return null;
-        }
-        switch (get_class($field_object)) {
-            case 'crmDealCheckboxField':
-                $result = ($value ? _ws('Yes') : _ws('No'));
-                break;
-            case 'crmDealDateField':
-                $result = waDateTime::format('humandate', $value);
-                break;
-            default:
-                $result = $value;
+        if ($field_object instanceof crmDealCheckboxField) {
+            return empty($value) ? _ws('No') : _ws('Yes');
         }
 
-        return $result;
+        if (empty($value)) {
+            return null;
+        }
+
+        return $field_object->format($value);
     }
 }

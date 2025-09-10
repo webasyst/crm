@@ -9,7 +9,7 @@
     </script>
 
     {capture assign="settings_content"}
-        <div class="content bordered-left blank content-mobile-friendly">
+        <div class="content not-blank content-mobile-friendly">
             <div class="article">
                 <div class="article-body">
                 {if isset($settings_html) && is_string($settings_html)}
@@ -25,7 +25,7 @@
 
     {if $is_admin}
         <div class="flexbox">
-            <div class="sidebar blank width-15rem" id="c-sidebar-wrapper">
+            <div class="sidebar blank width-20rem" id="c-sidebar-wrapper">
                 {* SIDEBAR MENU ONLY FOR ADMIN *}
 
                 {$_menu = [
@@ -40,43 +40,43 @@
                     "uri" => "`$wa_app_url`settings/general/"
                     ],
                     [
-                        "icon" => "fa-briefcase",
+                        "icon" => "fa-university",
                         "name" => "[`Companies`]",
                         "uri" => "`$wa_app_url`settings/companies/"
                     ],
                     [
-                        "icon" => "fa-file-alt",
+                        "icon" => "fa-receipt",
                         "name" => "[`Invoice templates`]",
                         "uri" => "`$wa_app_url`settings/templates/"
                     ],
                     [
-                        "icon" => "fa-pound-sign",
+                        "icon" => "fa-ruble-sign",
                         "name" => "[`Currencies`]",
                         "uri" => "`$wa_app_url`settings/currencies/"
                     ],
                     [
-                        "icon" => "fa-wallet",
+                        "icon" => "fa-credit-card",
                         "name" => "[`Payment`]",
                         "uri" => "`$wa_app_url`settings/payment/"
                     ],
                     [
-                        "icon" => "fa-user",
+                        "icon" => "fa-users",
                         "name" => "[`Vaults`]",
                         "uri" => "`$wa_app_url`settings/vaults/"
                     ],
                     [
-                        "icon" => "fa-layer-group",
-                        "name" => "[`Field constructor`]",
+                        "icon" => "fa-user-check",
+                        "name" => "[`Fields`]",
                         "uri" => "`$wa_app_url`settings/field/"
                     ],
                     [
-                        "icon" => "fa-filter",
-                        "name" => "[`Funnels`]",
+                        "icon" => "fa-briefcase",
+                        "name" => "[`Sales funnels`]",
                         "uri" => "`$wa_app_url`settings/funnels/"
                     ],
                     [
-                        "icon" => "fa-list-ol",
-                        "name" => "[`Deal loss reasons`]",
+                        "icon" => "fa-recycle",
+                        "name" => "[`Deal resulting`]",
                         "uri" => "`$wa_app_url`settings/lostReasons/"
                     ],
                     [
@@ -85,8 +85,8 @@
                         "uri" => "`$wa_app_url`settings/notifications/"
                     ],
                     [
-                        "icon" => "fa-th",
-                        "name" => "[`Web forms`]",
+                        "icon" => "fa-inbox",
+                        "name" => "[`Lead forms`]",
                         "uri" => "`$wa_app_url`settings/form/"
                     ],
                     [
@@ -95,7 +95,7 @@
                         "uri" => "`$wa_app_url`settings/message-sources/email/"
                     ],
                     [
-                        "icon" => "fa-comment-alt",
+                        "icon" => "fa-comments",
                         "name" => "[`Messengers`]",
                         "uri" => "`$wa_app_url`settings/message-sources/im/"
                     ],
@@ -108,12 +108,16 @@
                         "icon" => "fa-phone-alt",
                         "name" => "[`PBX`]",
                         "uri" => "`$wa_app_url`settings/pbx/"
+                    ],
+                    [
+                        "icon" => "fa-hashtag",
+                        "name" => "[`Tags`]",
+                        "uri" => "`$wa_app_url`settings/tags/"
                     ]
                 ]}
-
                 {if $shop_app_exists}
                     {$_menu[] = [
-                        "icon" => "fa-dollar-sign",
+                        "icon" => "fa-shopping-cart",
                         "name" => "[`Shop-Script integration`]",
                         "uri" => "`$wa_app_url`settings/shop/"
                     ]}
@@ -134,7 +138,7 @@
                     <button class="button small circle light-gray js-expand-sidebar"><i class="fas fa-arrow-right"></i></button>
                 </div>
                 <aside class="c-settings-sidebar" id="c-settings-sidebar">
-                    <ul class="menu stack with-icons" style="margin: 0;">
+                    <ul class="menu large">
                         {foreach $_menu as $_item}
                             <li class="{$_item.li_class|default:''}">
                                 <a href="{$_item.uri}"{if !empty($alias) && $_item.uri == $alias} data-alias="{$alias}"{/if}>

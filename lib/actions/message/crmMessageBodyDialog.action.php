@@ -254,7 +254,7 @@ class crmMessageBodyDialogAction extends crmViewAction
             'stage_id'           => $stage_id,
         ));
 
-        $funnels = $this->getFunnelModel()->getAllFunnels();
+        $funnels = $this->getFunnelModel()->getAllFunnels(true);
         if (empty($funnels[$deal['funnel_id']])) {
             return null;
         }

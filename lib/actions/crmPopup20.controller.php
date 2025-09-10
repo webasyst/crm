@@ -11,7 +11,7 @@ class crmPopup20Controller extends crmJsonController
     {
         $fm = new crmFunnelModel();
         $fsm = new crmFunnelStageModel();
-        $this->funnels = $fsm->withStages($fm->getAllFunnels());
+        $this->funnels = $fsm->withStages($fm->getAllFunnels(true));
 
         $this->response = array_merge($this->getMessages(), $this->getReminders());
     }

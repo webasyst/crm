@@ -3,11 +3,28 @@
   *}
 <div class="c-field-wrapper crm-composite-field fields{if $field.subfield_captionplace|default:'above' === 'none'} no-name{elseif $field.subfield_captionplace|default:'above' !== 'above'}  horizontal{/if}" data-composite="1">
     {foreach $field.subfields as $subfield_id => $subfield}
+        {$is_checkbox = $subfield.field instanceof waContactCheckboxField}
         {if !($subfield.field instanceof waContactHiddenField)}
             <div class="field field-composite-{$subfield_id}{if $field.subfield_captionplace|default:'above' === 'above'} vertical{/if}">
-                <div class="name for-input">{$subfield.name|escape}</div>
+                <div class="name for-input">
+                    {if !$is_checkbox}
+                        {$subfield.name|escape}
+                    {/if}
+                </div>
                 <div class="value">
-                    {$subfield.html}
+                    {if $is_checkbox}
+                        <label class="crm-input-checkbox flexbox space-8">
+                            <span>
+                                {$subfield.html}
+                                <span></span>
+                            </span>
+                            <span>{strip}
+                                {$subfield.name|escape}
+                            {/strip}</span>
+                        </label>
+                    {else}
+                        {$subfield.html}
+                    {/if}
                 </div>
             </div>
         {/if}

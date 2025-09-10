@@ -68,10 +68,8 @@
                         {if $funnel}
                             <div class="c-filter-wrapper nowrap">
                                 <div class="dropdown" id="dropdown-funnel-filter">
-                                    <button class="dropdown-toggle light-gray" type="button">
-                                        {if !empty($funnel.color)}
-                                            <i class="fas fa-circle custom-mr-8" style="color: {$funnel.color}"></i>
-                                        {/if}
+                                    <button class="dropdown-toggle light-gray small" type="button">
+                                        <i class="{$funnel.icon|default:'fas fa-briefcase'|escape} custom-mr-8" style="color: {$funnel.color}"></i>
                                         <span class="filter-name">{$funnel.name|escape}</span>
                                     </button>
                                     <div class="dropdown-body">
@@ -82,9 +80,7 @@
                                                         <span class="count">{$_funnel.deal_count}</span>
                                                     {/if}
                                                     <a href="{crmHelper::getUrl(["funnel" => $_funnel.id, "/field-.+/" => null])}">
-                                                        {if !empty($_funnel.color)}
-                                                            <i class="fas fa-circle funnel-state custom-mr-8" style="color: {$_funnel.color}"></i>
-                                                        {/if}
+                                                        <i class="{$_funnel.icon|default:'fas fa-briefcase'|escape} custom-mr-8" style="color: {$_funnel.color}"></i>
                                                         <span class="filter-funnel-name">{$_funnel.name|escape}</span>
                                                     </a>
                                                 </li>
@@ -103,7 +99,7 @@
                         {* USERS *}
                         <div class="c-filter-wrapper nowrap">
                             <div class="dropdown" id="dropdown-contact-filter">
-                                <button class="dropdown-toggle light-gray" type="button">
+                                <button class="dropdown-toggle light-gray small" type="button">
                                     {if !empty($user.photo_url_16)}
                                         <span class="icon size-16 rounded userpic custom-mr-8" style="background-image: url({$user.photo_url_16})"></span>
                                     {/if}
@@ -134,11 +130,11 @@
                         {* TAGS *}
                         <div class="c-filter-wrapper c-tags-filter js-tags-filter {if empty($popular_cloud)}is-locked{/if}">
                             <div class="dropdown" id="dropdown-tags-filter">
-                                <button class="dropdown-toggle light-gray" type="button">
+                                <button class="dropdown-toggle light-gray small" type="button">
                                     <span class="icon size-14 custom-mr-8"><i class="fas fa-tags"></i></span>
                                     <span class="filter-name">{if !empty($active_deal_tag)}{$active_deal_tag.name|escape}{else}[`Tag`]{/if}</span>
                                 </button>
-                            
+
                                 {if !empty($popular_cloud)}
                                 <div class="dropdown-body">
                                     <ul class="menu with-icons">
@@ -147,7 +143,7 @@
                                             <a href="{crmHelper::getUrl("tag", null)}">[`Show all`]</a>
                                         </li>
                                         {/if}
-                                        
+
                                         <li class="c-tags-wrapper">
                                             <ul class="chips tags small mobile-friendly custom-my-0 js-popular-tags-part">
                                                 {foreach $popular_cloud as $_tag}
@@ -178,7 +174,7 @@
                                                     {/foreach}
                                                 </ul>
                                             </div>
-                                           
+
                                             {*foreach $tag_cloud as $_tag}
                                                 <a class="{if !empty($active_deal_tag) && $active_deal_tag.id === $_tag.id}selected{/if}" href="{crmHelper::getUrl("tag", {$_tag.id})}" style="font-size: {$_tag.size}%; opacity: {$_tag.opacity};">
                                                 {$_tag.name|escape}
@@ -201,7 +197,7 @@
                         {foreach $fields as $_field}
                             <div class="c-filter-wrapper c-fields-filter {if empty($fields)}is-locked{/if}">
                                 <div class="dropdown" id="dropdown-field-filter-{$_field.id}">
-                                    <button class="dropdown-toggle light-gray" type="button">
+                                    <button class="dropdown-toggle light-gray small" type="button">
                                         {if !empty($active_fields[$_field.id])}
                                             {$active_fields[$_field.id]|escape}
                                         {else}
@@ -222,7 +218,7 @@
                                                 </li>
                                             {/foreach}
                                         </ul>
-                                    </div> 
+                                    </div>
                                     {/if}
                                 </div>
                             </div>
@@ -250,7 +246,7 @@
                         <div class="flexbox wrap middle space-8 c-nav-wrapper">
                             <div class="c-filter-wrapper">
                                 <div class="dropdown" id="dropdown-date-filter">
-                                    <button class="dropdown-toggle nowrap light-gray" type="button">
+                                    <button class="dropdown-toggle nowrap light-gray small" type="button">
                                         <span class="js-link-text">{$selected_filter_date.name|escape}</span>
                                     </button>
                                     <div class="dropdown-body right">

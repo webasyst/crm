@@ -3,7 +3,7 @@
 {function render_sources type=''}
     {$_sources = $sources[$type]|default:[]}
     {if !empty($_sources)}
-    <ul class="menu c-sources-list">
+    <ul class="list c-sources-list">
         {foreach $_sources as $_source}
             {$_is_email = ($_source.type === crmSourceModel::TYPE_EMAIL)}
             {$_is_im = ($_source.type === crmSourceModel::TYPE_IM)}
@@ -20,7 +20,8 @@
                             {if !empty($_source.funnel)}
                                 {$funnel_name = $_source.funnel.name|escape}
                                 {$funnel_color = $_source.funnel.color}
-                                <span class="icon size-16"><i class="fas fa-circle funnel-state" style="color: {$funnel_color}" title="{$funnel_name}"></i></span>
+                                {$_funnel_icon = $_source.funnel.icon|default:'fas fa-briefcase'|escape}
+                                <span class="icon size-16"><i class="{$_funnel_icon} funnel-state" style="color: {$funnel_color}" title="{$funnel_name}"></i></span>
 
                                 {if !empty($_source.stage)}
                                     {$stage_id = $_source.stage.id}
@@ -41,7 +42,7 @@
                                 <span class="icon size-16 loading c-loading" style="display: none"><i class="fas fa-spinner fa-spin"></i></span>
                                 <div class="switch-with-text js-c-disable-link">
                                     <label for="switch-im-input" data-active-text="[`enable`]" data-inactive-text="[`disable`]">{if $_source.disabled}[`enable`]{else}[`disable`]{/if}</label>
-                                    <span class="switch" id="switch-{$_source.id}">
+                                    <span class="switch smaller" id="switch-{$_source.id}">
                                         <input type="checkbox" name="" id="switch-im-input" {if !$_source.disabled}checked{/if}>
                                     </span>
                                 </div>
@@ -56,17 +57,17 @@
     {else}
         {if $type === crmSourceModel::TYPE_EMAIL}
             <div class="block">
-                <p style="line-height: 32px;">[`Set up an email address to receive messages and deal requests.`]</p>
+                <p class="small custom-mb-8">[`Set up an email address to receive messages and deal requests.`]</p>
             </div>
         {/if}
         {if $type === crmSourceModel::TYPE_FORM}
             <div class="block">
-                <p>[`Create a form and publish it on your website for visitors to easily initiate new deals.`]</p>
+                <p class="small">[`Create a form and publish it on your website for visitors to easily initiate new deals.`]</p>
             </div>
         {/if}
         {if $type === crmSourceModel::TYPE_IM}
             <div class="block">
-                <p>[`Set up connection to instant messengers to receive deal requests and messages.`]</p>
+                <p class="small">[`Set up connection to instant messengers to receive deal requests and messages.`]</p>
             </div>
         {/if}
     {/if}
@@ -74,7 +75,7 @@
 
 {function render_forms}
     {if !empty($forms)}
-        <ul class="menu c-sources-list">
+        <ul class="list c-sources-list">
             {foreach $forms as $_form}
                 <li class="c-source">
                     <div class="flexbox middle full-width">
@@ -87,7 +88,8 @@
                                 {if !empty($_form.funnel)}
                                     {$_funnel_name = $_form.funnel.name|escape}
                                     {$_funnel_color = $_form.funnel.color}
-                                    <span class="icon size-16"><i class="fas fa-circle funnel-state" style="color: {$_funnel_color}" title="{$_funnel_name}"></i></span>
+                                    {$_funnel_icon = $_form.funnel.icon|default:'fas fa-briefcase'|escape}
+                                    <span class="icon size-16"><i class="{$_funnel_icon} funnel-state" style="color: {$_funnel_color}" title="{$_funnel_name}"></i></span>
                                     {if !empty($_form.stage)}
                                         {$stage_id = $_form.stage.id}
                                         {$_stage_name = $_form.stage.name|escape}
@@ -137,7 +139,7 @@
                     <a href="javascript:void(0);" class="c-tab-link">[`Email`]</a>
                 </li>
                 <li class="c-tab" data-type="form">
-                    <a href="javascript:void(0);" class="c-tab-link">[`Web forms`]</a>
+                    <a href="javascript:void(0);" class="c-tab-link">[`Lead forms`]</a>
                 </li>
                 <li class="c-tab" data-type="im">
                     <a href="javascript:void(0);" class="c-tab-link">[`Messengers`]</a>
@@ -182,7 +184,7 @@
                 <div class="block c-tab-content" data-type="form" style="display: none;">
                     {render_forms}
                     <a class="button small rounded light-gray js-c-web-form-link" href="{$wa_app_url}settings/form/new/"><i class="fas fa-plus-circle text-green add"></i> [`Add a web form`]</a>
- 
+
                 </div>
                 <div class="block c-tab-content" data-type="im" style="display: none;">
                     {render_sources type=crmSourceModel::TYPE_IM}
@@ -211,7 +213,7 @@
                     {/capture}
                     {capture assign=help}
                         <div class="block">
-                            <a href="{$wa_app_url}plugins/">[`Install messenger integration plugins.`]</a>
+                            <a href="{$wa_app_url}plugins/" class="small">[`Install messenger integration plugins.`]</a>
                         </div>
                     {/capture}
 

@@ -1,1 +1,0 @@
-import{d as o}from"./dayjs-a1477631.js";import{bp as t}from"./main-46836c41.js";function y(a,r="L"){return o(a).isYesterday()?t.global.t("yesterday"):o(a).isToday()?t.global.t("today"):o(a).format(r)}export{y as d};

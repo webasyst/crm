@@ -86,11 +86,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
             $el['userpic'] = $this->getDataResourceUrl(waContact::getPhotoUrl($el['id'], $el['photo'], $userpic_size, $userpic_size, ifset($el['is_company'], false) ? 'company' : 'person', true));
 
             if (in_array('tags', $fields) && isset($el['tags']) && is_array($el['tags'])) {
-                $el['tags'] = $this->filterData(
-                    $el['tags'],
-                    ['id', 'name', 'count'],
-                    ['id' => 'integer', 'count' => 'integer']
-                );
+                $el['tags'] = $this->prepareTags($el['tags']);
             }
             return $this->filterFields($el, $fields, ['id' => 'integer', 'company_contact_id' => 'integer', 'create_datetime' => 'datetime', 'last_datetime' => 'datetime', 'is_company' => 'boolean', 'is_pinned' => 'boolean', 'is_banned' => 'boolean', 'is_editable' => 'boolean']);
         }, array_values($raw_list));
@@ -171,7 +167,10 @@ abstract class crmApiAbstractMethod extends waAPIMethod
     protected function prepareDealShort(array $data)
     {
         if (isset($data['funnel'])) {
-            $data['funnel'] = $this->filterFields($data['funnel'], ['id', 'name', 'color'], ['id' => 'integer']);
+            if (empty($data['funnel']['icon'])) {
+                $data['funnel']['icon'] = 'fas fa-briefcase';
+            }
+            $data['funnel'] = $this->filterFields($data['funnel'], ['id', 'name', 'color', 'icon'], ['id' => 'integer']);
         }
         if (isset($data['stage'])) {
             $data['stage'] = $this->filterFields($data['stage'], ['id', 'name', 'color'], ['id' => 'integer']);
@@ -311,8 +310,8 @@ abstract class crmApiAbstractMethod extends waAPIMethod
     {
         return $this->filterData(
             $result_set,
-            ['id', 'name', 'count'],
-            ['id' => 'integer', 'count' => 'integer']
+            ['id', 'name', 'color', 'bg_color', 'count', 'size', 'opacity'],
+            ['id' => 'integer', 'count' => 'integer', 'size' => 'integer', 'opacity' => 'float']
         );
     }
 
@@ -455,7 +454,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
         return $messages;
     }
 
-    protected function prepareLog($log, $conversations, $userpic_size)
+    protected function prepareLog($log, $conversations, $userpic_size, $deal = null)
     {
         $log = array_filter($log, function ($l) {
             $result = true;
@@ -465,7 +464,9 @@ abstract class crmApiAbstractMethod extends waAPIMethod
             return $result;
         });
 
-        return array_map(function ($l) use ($userpic_size, $conversations) {
+        $funnels = $this->getFunnelModel()->getAllFunnels(true);
+
+        return array_map(function ($l) use ($userpic_size, $conversations, $funnels, $deal) {
             switch ($l['object_type']) {
                 case crmLogModel::OBJECT_TYPE_CONTACT:
                     $l['icon'] = [
@@ -474,9 +475,19 @@ abstract class crmApiAbstractMethod extends waAPIMethod
                     ];
                     break;
                 case crmLogModel::OBJECT_TYPE_DEAL:
+                    $fa = 'briefcase';
+                    $color = '#275A00';
+                    $_deal = isset($l['deal']) ? $l['deal'] : $deal;
+                    if (!empty($_deal['funnel_id']) && isset($funnels[$_deal['funnel_id']])) {
+                        if (!empty($funnels[$_deal['funnel_id']]['icon'])) {
+                            $fa = $funnels[$_deal['funnel_id']]['icon'];
+                            $fa = str_replace('fas fa-', '', $fa);
+                        }
+                        $color = $funnels[$_deal['funnel_id']]['color'] ?: $color;
+                    }
                     $l['icon'] = [
-                        'fa' => 'flag',
-                        'color' => '#275A00',
+                        'fa' => $fa,
+                        'color' => $color,
                     ];
                     if (empty($l['object_id']) && isset($l['deal']) && isset($l['deal']['id'])) {
                         $l['object_id'] = $l['deal']['id'];
@@ -490,7 +501,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
                     break;
                 case crmLogModel::OBJECT_TYPE_INVOICE:
                     $l['icon'] = [
-                        'fa' => 'file-invoice-dollar',
+                        'fa' => 'receipt',
                         'color' => '#F98836',
                     ];
                     break;

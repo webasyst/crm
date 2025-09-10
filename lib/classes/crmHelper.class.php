@@ -38,10 +38,14 @@ class crmHelper
      * @return mixed|string
      *
      */
-    public static function getUrl($replace = null, $value = null)
+    public static function getUrl($replace = null, $value = null, $query_string_only = false)
     {
-        $url = parse_url(waRequest::server('REQUEST_URI'));
-        $url = $url['path'];
+        $url = '';
+        if (!$query_string_only) {
+            $url = parse_url(waRequest::server('REQUEST_URI'));
+            $url = $url['path'];
+        }
+        
         $get = waRequest::get();
         if (is_string($replace)) {
             $replace = array($replace => $value);
@@ -826,5 +830,10 @@ class crmHelper
         $html = empty($html_full) ? $html : '<span title="' . $html_full . '">' . $html . '</span>';
 
         return $icon . $html;
+    }
+
+    public static function isPremium()
+    {
+        return waLicensing::check('crm')->isPremium();
     }
 }

@@ -1,0 +1,1 @@
+import{d as a,o as n,c as t,r as c,n as l,_}from"./main-2290994d.js";const p=a({__name:"CustomColumn",props:{space:{},align:{}},setup(e){const s=e;return(o,r)=>(n(),t("div",{class:l(["col",`space-${s.space}`,s.align?`align-${s.align}`:""])},[c(o.$slots,"default",{},void 0,!0)],2))}});const u=_(p,[["__scopeId","data-v-350c899b"]]);export{u as C};

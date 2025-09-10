@@ -7,12 +7,12 @@
     </div>
 
     {if !$supported}
-        <p>
+        <p class="small">
             {sprintf_wp('You need Shop-Script version %s or newer for CRM integration.', crmConfig::SHOP_MINIMAL_VERSION)}
         </p>
     {else}
 
-        <p>
+        <p class="small">
             [`Create deals from orders in your online store!`]
             [`Set up <i>automatic</i> creation of deals upon execution of various order actions, individually for each of your storefronts.`]
             [`Or <i>manually</i> create deals in the online store backend, regardless of the settings on this page.`]
@@ -29,9 +29,9 @@
                         {$_namespace = "storefront[NULL]"}
                     {/if}
 
-                    <div class="field-group c-storefront">
+                    <div class="fields-group c-storefront">
 
-                        <h3>{$storefront.name|default:''|escape}</h3>
+                        <h4>{$storefront.name|default:''|escape}</h4>
 
                         <div class="js-ibutton-wrapper">
                             <span class="switch smaller" id="c-storefront-switch">
@@ -67,14 +67,16 @@
                 {/foreach}
             </div>
 
-            <div class="c-footer-actions js-footer-actions">
-                <input class="button js-submit-button" type="submit" value="[`Save`]">
-                <span class="c-loading" style="display: none;">
-                    <i class="fas fa-spinner fa-spin loading"></i>
+            <div class="c-settings-footer bottombar sticky">
+                <div class="c-footer-actions js-footer-actions">
+                    <input class="button js-submit-button" type="submit" value="[`Save`]">
+                    <span class="c-loading" style="display: none;">
+                        <i class="fas fa-spinner fa-spin loading"></i>
+                        </span>
+                    <span class="c-hidden">
+                        <a href="{$wa_app_url}settings/shop/" class="button light-gray">[`Cancel`]</a>
                     </span>
-                <span class="c-hidden">
-                    <a href="{$wa_app_url}settings/shop/" class="button light-gray">[`Cancel`]</a>
-                </span>
+                </div>
             </div>
         </form>
 

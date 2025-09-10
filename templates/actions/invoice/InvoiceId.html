@@ -12,10 +12,6 @@
     <style>
         .iframe-style {
             background: var(--background-color-blank);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow: hidden;
         }
         .iframe-style .fields-group.blank {
             background: var(--background-color) !important;
@@ -48,7 +44,7 @@
 <div class="c-invoice-page custom-mb-32" id="c-invoice-page" data-id="{$invoice.id}">
 
     <h1 class="c-page-header flexbox space-8">
-        <a href="javascript:void(0);" class="back mobile-only js-invoice-hide-mobile"><i class="fas fa-arrow-circle-left"></i></a>
+        <a href="javascript:void(0);" class="back {if $iframe}js-cancel-button{else}js-invoice-hide-mobile mobile-only{/if}"><i class="fas fa-arrow-circle-left"></i></a>
         <div>
             [`Invoice`] [`#`]{$invoice.number|escape} [`issued on`] {$invoice.invoice_date|wa_date}
 
@@ -85,26 +81,26 @@
             {$_disabled = false}
             {$_contact = $invoice.contact}
             {$_exists = $_contact->exists()}
-            {$_disabled = !$_exists}
+            {* $_disabled = !$_exists *}
 
             {if $invoice.state_id == 'PROCESSING'}
-                <button class="button green js-change-state" type="button" data-action="accept" {if $_disabled}disabled="disabled"{/if}>[`Accept payment`]</button>
-                <button class="button gray js-change-state" type="button" data-action="refuse" {if $_disabled}disabled="disabled"{/if}>[`Refuse payment`]</button>
+                <button class="button large green js-change-state" type="button" data-action="accept" {if $_disabled}disabled="disabled"{/if}>[`Accept payment`]</button>
+                <button class="button large gray js-change-state" type="button" data-action="refuse" {if $_disabled}disabled="disabled"{/if}>[`Refuse payment`]</button>
             {elseif $invoice.state_id == 'PAID'}
-                <button class="button red flexbox middle space-4 js-change-refund" type="button" data-action="refund" {if $_disabled}disabled="disabled"{/if}>
+                <button class="button large red flexbox middle space-4 js-change-refund" type="button" data-action="refund" {if $_disabled}disabled="disabled"{/if}>
                     <span class="icon size-12">
                         <i class="fas fa-times-circle"></i>
                     </span>
                     [`Make a refund`]
                 </button>
                 {if $is_cancel_available}
-                    <button class="button gray js-change-state" type="button" data-action="cancel" {if $_disabled}disabled="disabled"{/if}>[`Cancel payment`]</button>
+                    <button class="button large gray js-change-state" type="button" data-action="cancel" {if $_disabled}disabled="disabled"{/if}>[`Cancel payment`]</button>
                 {/if}
             {elseif $invoice.state_id == 'PENDING'}
-                <button class="button green js-change-state" type="button" data-action="paid" {if $_disabled}disabled="disabled"{/if}>[`Mark as paid`]</button>
-                <button class="button gray js-change-state" type="button" data-action="draft" {if $_disabled}disabled="disabled"{/if}>[`Return to draft`]</button>
+                <button class="button large green js-change-state" type="button" data-action="paid" {if $_disabled}disabled="disabled"{/if}>[`Mark as paid`]</button>
+                <button class="button large gray js-change-state" type="button" data-action="draft" {if $_disabled}disabled="disabled"{/if}>[`Return to draft`]</button>
             {elseif $invoice.state_id == 'DRAFT' && floatval($invoice.amount)}
-                <button class="button green js-change-state" type="button" data-action="activate" {if $_disabled}disabled="disabled"{/if}>[`Activate`]</button>
+                <button class="button large green js-change-state" type="button" data-action="activate" {if $_disabled}disabled="disabled"{/if}>[`Activate`]</button>
             {/if}
 
             <!-- plugin hook: 'backend_invoice.action_button' -->
@@ -113,16 +109,16 @@
 
             {if $show_url && !empty($public_url)}
                 <div class="dropdown" id="dropdown-public-link">
-                    <button class="dropdown-toggle button outlined" type="button">
+                    <button class="dropdown-toggle button light-gray large" type="button">
                         <i class="fas fa-link fa-sm"></i>
                         [`Link`]
                     </button>
                     <div class="dropdown-body right">
-                        <div class="box">
-                            <a href="{$public_url}" class="small c-public-link" target="_blank">
-                                {$public_url} <i class="fas fa-external-link-alt"></i>
+                        <div class="box custom-pb-12">
+                            <a href="{$public_url}" class="bold c-public-link" target="_blank">
+                                {$public_url} <i class="fas fa-external-link-alt fa-xs custom-ml-4 opacity-70"></i>
                             </a>
-                            <button class="button outlined align-center width-100 custom-mt-16 js-copy-public-link"
+                            <button class="button small outlined align-center width-100 custom-mt-16 js-copy-public-link"
                                 type="button"
                                 data-class-success="green"
                                 data-icon-default="fa-copy"
@@ -197,7 +193,7 @@
                             </div>
                         </div>
                     </div>
-                    {if !crmInvoice::isCliOk()}
+                    {if $invoice.days_left < 0 && !crmInvoice::isCliOk()}
                         <div class="crm-invoices-recap-error custom-my-16">
                             {include file="templates/actions/settings/SettingsCronInvoicesArchive.inc.html" inline}
                         </div>
@@ -230,7 +226,7 @@
                                         <a href="{$wa_app_url}contact/{$company_contact.id}/" class="custom-ml-4" {if $iframe}target="_parent"{/if}>{$company_contact.name|escape}</a>
                                     {/if}
                                 {else}
-                                    <span>{$_contact_name}</span>
+                                    <span class="gray">{$_contact_name}</span>
                                 {/if}
                             </div>
                         </div>
@@ -258,10 +254,23 @@
                     <div class="field">
                         <div class="name">[`Deal`]</div>
                         <div class="value">
-                            <span class="icon text-green custom-mr-4">
-                                <i class="fas fa-flag"></i>
+                            {$_funnel_color = 'lightgray'}
+                            {if !empty($funnel) && !empty($funnel.color)}{$_funnel_color = $funnel.color}{/if}
+                            <span class="icon custom-mr-4" style="color: {$_funnel_color};">
+                            {if $deal.status_id == crmDealModel::STATUS_WON}
+                                <i class="fas fa-flag-checkered"></i>
+                            {elseif $deal.status_id == crmDealModel::STATUS_LOST}
+                                <i class="fas fa-ban"></i>
+                            {elseif empty($funnel.icon)}
+                                <i class="fas fa-briefcase"></i>
+                            {else}
+                                <i class="{$funnel.icon} funnel-state"></i>
+                            {/if}
                             </span>
                             <a class="semibold" href="{$wa_app_url}deal/{$deal.id}/" {if $iframe}target="_parent"{/if}>{$deal.name|escape}</a>
+                            {if !empty($funnel.is_archived)}
+                                <span class="gray">([`archive`])</span>
+                            {/if}
                         </div>
                     </div>
                 {elseif $deal_access_denied}
@@ -345,6 +354,12 @@
             <!-- plugin hook: 'backend_invoice.info_section' -->
             {* @event backend_invoice.%plugin_id%.info_section *}
             {if !empty($backend_invoice)}{foreach $backend_invoice as $_}{ifset($_.info_section)}{/foreach}{/if}
+
+            <div class="fields-group custom-p-0"{if $invoice.company.invoice_options.style_version|default:'2' == '2'} style="background-color: white;"{/if}>
+                <div class="fields-group" style="{if !empty($invoice.company.invoice_options.bg_color)}background-color: {$invoice.company.invoice_options.bg_color} !important;{/if}{if !empty($invoice.company.invoice_options.bg_image)}background-image: url({$invoice.company.invoice_options.bg_image}) !important; background-size: cover !important;{/if}">
+                    {include file="../frontend/FrontendInvoice.html" is_include=true use_skeleton=true inline}
+                </div>
+            </div>
         </div>
     </div>
 
@@ -397,18 +412,9 @@
     </script>
 </div>
 
-{include file="../frontend/FrontendInvoice.html" is_include=true use_skeleton=true inline}
-
 {if $iframe}
 <script>
-    $('.js-invoice-hide-mobile').removeClass('mobile-only')
-    $('.js-invoice-hide-mobile').one('click', function () {
-            const iframeInvoice = window.parent.document.getElementById('iframe-invoice');
-            if (iframeInvoice) {
-                iframeInvoice.dispatchEvent(new CustomEvent('close', { detail: window.parent.iframe_invoice_is_saved ? 'refresh' : null }));
-                delete window.parent.iframe_invoice_is_saved
-            }
-        })
+    new CrmInvoiceIframe();
 </script>
 </body>
 </html>

@@ -24,31 +24,37 @@ class crmInvoiceModel extends crmModel
      * @return array|null
      * @throws waException
      */
-    public function getInvoiceWithCompany($invoice_id)
+    public function getInvoiceWithCompany($invoice_id, $company_id = null)
     {
         $invoice = $this->getInvoice($invoice_id);
 
-        if (!$invoice) {
+        if (empty($invoice)) {
             throw new waException(_w('Invoice not found'), 404);
         }
 
-        $cm = new crmCompanyModel();
-        $companies = $cm->getAll('id');
-
-        if ($invoice['company_id']) {
-            $invoice['company'] = isset($companies[$invoice['company_id']]) ? $companies[$invoice['company_id']] : null;
-            if (!empty($invoice['company'])) {
-                $cpm = new crmCompanyParamsModel();
-                $invoice['company']['invoice_options'] = $cpm->getParams($invoice['company_id'], $companies[$invoice['company_id']]['template_id']);
-            }
-            if (!empty($invoice['company']['logo'])) {
-                $invoice['company']['logo_url'] = wa()->getDataUrl(
-                    'logos/'.$invoice['company']['id'].'.'.$invoice['company']['logo'],
-                    true,
-                    'crm'
-                );
-            }
+        if (!empty($company_id)) {
+            $invoice['company_id'] = $company_id;
         }
+
+        if (empty($invoice['company_id'])) {
+            return $invoice;
+        }
+
+        $invoice['company'] = $company = (new crmCompanyModel)->getById($invoice['company_id']);
+
+        if (empty($company)) {
+            return $invoice;
+        }
+
+        if (!empty($invoice['company']['logo'])) {
+            $invoice['company']['logo_url'] = wa()->getDataUrl(
+                'logos/'.$invoice['company']['id'].'.'.$invoice['company']['logo'],
+                true,
+                'crm'
+            );
+        }
+
+        $invoice['company']['invoice_options'] = crmTemplatesRender::getCompanyTemplateParams($company);
 
         return $invoice;
     }

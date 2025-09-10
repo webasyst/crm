@@ -1,1 +1,0 @@
-import{d as n,o,c as a,j as r}from"./main-46836c41.js";const s=["innerHTML"],p=n({__name:"TabContentHtml",props:{tab:{}},setup(t){const e=t;return(c,m)=>e.tab.html?(o(),a("div",{key:0,innerHTML:e.tab.html},null,8,s)):r("",!0)}});export{p as default};

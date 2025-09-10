@@ -64,7 +64,7 @@
                         {if $funnel}
                         <div class="c-filter-wrapper">
                             <div class="dropdown" id="dropdown-funnelSt-filter">
-                                <button class="dropdown-toggle light-gray" type="button">
+                                <button class="dropdown-toggle light-gray small" type="button">
                                     {if !empty($funnel.color)}
                                         <i class="fas fa-circle funnel-state custom-mr-8" style="color: {$funnel.color}"></i>
                                     {/if}
@@ -99,7 +99,7 @@
                         {* USERS *}
                         <div class="c-filter-wrapper">
                             <div class="dropdown" id="dropdown-contactSt-filter">
-                                <button class="dropdown-toggle light-gray" type="button">
+                                <button class="dropdown-toggle light-gray small" type="button">
                                     {if !empty($users[$user_id].photo_url_16)}
                                         <span class="icon size-16 rounded userpic custom-mr-8" style="background-image: url({$users[$user_id].photo_url_16})"></span>
                                     {/if}
@@ -137,7 +137,7 @@
                         <div class="flexbox wrap middle space-8 c-nav-wrapper">
                             <div class="c-filter-wrapper">
                                 <div class="dropdown" id="dropdown-dateSt-filter">
-                                    <button class="dropdown-toggle nowrap light-gray" type="button">
+                                    <button class="dropdown-toggle nowrap light-gray small" type="button">
                                         <span class="js-link-text">{$selected_filter_date.name|escape}</span>
                                     </button>
                                     <div class="dropdown-body right">

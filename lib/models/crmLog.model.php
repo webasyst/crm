@@ -26,7 +26,7 @@ class crmLogModel extends crmModel
         if (!empty($this->stages)) {
             return;
         }
-        $this->funnels = (new crmFunnelModel)->getAllFunnels();
+        $this->funnels = (new crmFunnelModel)->getAllFunnels(true);
         $this->stages = (new crmFunnelStageModel)->select('*')->order('funnel_id, number')->fetchAll('id');
         crmHelper::getFunnelStageColors($this->funnels, $this->stages);
     }

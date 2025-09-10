@@ -40,7 +40,7 @@
                                                     <li>
                                                         <a href="javascript:void(0);" class="js-deal-item" data-deal-id="{$_deal.id}">
 
-                                                            {$_funnel = $funnels[$_deal.funnel_id]|default:null}
+                                                            {$_funnel = $funnels[$_deal.funnel_id]|default:[]}
 
                                                             {$_stage = null}
                                                             {if $_funnel}
@@ -53,8 +53,8 @@
                                                             {/if}
 
                                                             <span class="js-text flexbox space-4">
-                                                                <i class="fas fa-circle" style="color: {$_color}; max-width: 16px"></i>
-                                                                {$_deal.name|escape}
+                                                                <i class="{$_funnel.icon|default:'fas fa-briefcase'} funnel-state custom-mr-4" style="color: {$_color}; max-width: 16px"></i>
+                                                                <span class="js-text--name">{$_deal.name|escape}<span class="custom-ml-4 small gray">{if !empty($_funnel.is_archived)}[`(archived)`]{/if}</span></span>
                                                                 {if !$_funnel}<span class="hint">[`Funnel deleted`]</span>{/if}
                                                             </span>
                                                         </a>
@@ -63,7 +63,7 @@
                                                 <li class="js-create-new-deal">
                                                     <a href="javascript:void(0);">
                                                         <span class="flexbox space-4">
-                                                            <i class="fas fa-plus" style="max-width: 16px; margin-right: 0;"></i> 
+                                                            <i class="fas fa-plus" style="max-width: 16px; margin-right: 0;"></i>
                                                             <span class="js-text">
                                                                 [`Create new`]
                                                             </span>
@@ -100,9 +100,8 @@
                                         <button class="dropdown-toggle light-gray js-visible-link" type="button">
                                             <span class="js-text">
                                                 {if !empty($_active_funnel.color)}
-                                                    {*<i class="icon funnel-state svg-icon" data-color="{$_active_funnel.color}"></i>*}
-                                                    <i class="fas fa-circle custom-pr-4" style="color: {$_active_funnel.color}"></i>
-                                                    {/if}
+                                                    <i class="{$_active_funnel.icon|default:'fas fa-briefcase'} custom-pr-4 funnel-state" style="color: {$_active_funnel.color}"></i>
+                                                {/if}
                                                 <span class="js-name">{$_active_funnel.name|escape}</span>
                                             </span>
                                         </button>
@@ -110,11 +109,13 @@
                                             <ul class="menu with-icons">
                                                 {strip}
                                                     {foreach $funnels as $_funnel}
+                                                        {if !empty($_funnel.is_archived)}
+                                                            {continue}
+                                                        {/if}
                                                         <li class="{if $new_deal.funnel_id == $_funnel.id}selected{/if}">
                                                             <a href="javascript:void(0);" data-id="{$_funnel.id|escape}">
                                                                 {if !empty($_funnel.color)}
-                                                                    {*<i class="icon16 funnel-state svg-icon" data-color="{$_funnel.color|escape}"></i>*}
-                                                                    <i class="fas fa-circle funnel-state custom-mr-4" style="color: {$_funnel.color|escape}"></i>
+                                                                    <i class="{$_funnel.icon|default:'fas fa-briefcase'} custom-pr-4 funnel-state" style="color: {$_funnel.color|escape}"></i>
                                                                 {/if}
                                                                 {$_funnel.name|escape}
                                                             </a>

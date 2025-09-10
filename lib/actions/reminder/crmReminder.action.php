@@ -215,6 +215,7 @@ class crmReminderAction extends crmBackendViewAction
             'user_id'                   => $user_id,
             'reminders'                 => $reminders,
             'deals'                     => $deals,
+            'funnels'                   => (new crmFunnelModel)->getAllFunnels(true),
             'contacts'                  => $persons,
             'completed_reminders_count' => $completed_reminders_count,
             'reminders_count'           => $reminders_count,

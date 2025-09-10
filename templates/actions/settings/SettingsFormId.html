@@ -13,7 +13,7 @@
 
     <script>
         (function($) {
-            $.crm.title.set('[`Web forms`]');
+            $.crm.title.set('[`Lead forms`]');
 
             $("#add-field-dropdown").waDropdown({
                 hide: false
@@ -31,7 +31,9 @@
                     'delete_confirm_title': '[`Delete source`]',
                     'delete_confirm_text': '[`Are you sure?`]',
                     'delete_confirm_button': '[`Delete`]'
-                }
+                },
+                captcha_is_invisible: {$captcha_is_invisible|json_encode},
+				csrf: "{waRequest::cookie('_csrf', '')}"
             });
         })(jQuery);
     </script>

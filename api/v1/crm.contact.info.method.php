@@ -294,7 +294,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                     }
                 } elseif ($field_object instanceof waContactDateField) {
                     try {
-                        $date_formatted = waDateTime::format('humandate', $value);
+                        $date_formatted = waDateTime::format('humandate', $value, 'server');
                         $field['values'][] = $date_formatted;
                         $row = [
                             'data' => $value,

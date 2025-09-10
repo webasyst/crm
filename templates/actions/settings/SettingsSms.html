@@ -6,9 +6,9 @@
         <form action="?module=settings&action=smsSave" method="post">
 
             <div class="fields">
-                
+
                 {if count($sms_adapters)}
-                    <p>
+                    <p class="small">
                         {sprintf('[`Once connection to a gateway is set up, add SMS notifications in “<a href="%s">Notifications</a>” settings.`]', "{$wa_app_url}settings/notifications/")}
                         <br>
                         {sprintf('[`<a href="%s" target="_blank">See documentation</a> for details.`]', '[`https://support.webasyst.com/22505/crm-sms-notifications/`]')}
@@ -52,7 +52,7 @@
                     {foreach $sms_adapters as $i => $a}
                         <div class="fields-group">
                             <input name="sms[{$i}][adapter]" type="hidden" value="{$a.id}">
-                            <h3>{if $a.icon}<span class="icon middle size-16"><img src="{$a.icon}" alt=""></span> {/if}{$a.name}</h3>
+                            <h3 class="custom-mt-0">{if $a.icon}<span class="icon middle size-16"><img src="{$a.icon}" alt=""></span> {/if}{$a.name}</h3>
 
                             {if !empty($a.controls_html)}
                                 {$a.controls_html}
@@ -102,8 +102,8 @@
                 {/if}
             </div>
 
-                <div class="crm-form-buttons custom-mt-20">
-                    <div class="crm-submit">
+                <div class="c-settings-footer bottombar sticky">
+                    <div class="c-footer-actions crm-submit">
                         <input class="button" type="submit" name="" value="[`Save`]">
                         <i class="fas fa-spinner fa-spin crm-loading" style="display: none;"></i>
                         <span class="crm-success-status" style="display: none;">

@@ -100,7 +100,7 @@ var CRMSettingsSourceIm = ( function($) {
                         $block.slideUp();
                         wa_switch.$input_hidden.val(0);
                         wa_switch.$input.val(0);
-                        wa_switch.$label.text(wa_switch.inactive_text); 
+                        wa_switch.$label.text(wa_switch.inactive_text);
                     }
                 }
             });
@@ -145,7 +145,7 @@ var CRMSettingsSourceIm = ( function($) {
 
         var that = this,
             $form = that.$form,
-            $buttons = that.$wrapper.find('.crm-form-buttons'),
+            $buttons = that.$wrapper.find('.c-footer-actions'),
             $loading = $buttons.find('.crm-loading'),
             $button = that.$button,
             $status = $form.find('.crm-success-status'),
@@ -227,7 +227,7 @@ var CRMSettingsSourceIm = ( function($) {
 
             //$switch_wrapper.addClass('switch');
             that.$switch =  $switch_wrapper.waSwitch({
-               
+
                 ready: function (wa_switch) {
                     let $label = wa_switch.$wrapper.siblings('label');
                     wa_switch.$label = $label;
@@ -237,12 +237,12 @@ var CRMSettingsSourceIm = ( function($) {
                     $label.eq(1).hide();
                 },
                 change: function(active, wa_switch) {
-                    
+
                     if (active) {
                     wa_switch.$label.text(wa_switch.active_text);
                     }
                     else {
-                     wa_switch.$label.text(wa_switch.inactive_text); 
+                     wa_switch.$label.text(wa_switch.inactive_text);
                     }
                 }
             });

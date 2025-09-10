@@ -10,7 +10,7 @@ class crmDealByContactController extends crmJsonController
     public function execute()
     {
         $status_id = waRequest::get('select', crmDealModel::STATUS_OPEN, waRequest::TYPE_STRING_TRIM);
-
+        $only_existing_stage = (bool)waRequest::get('only_existing_stage', null, waRequest::TYPE_INT);
         $contact_id = waRequest::get('id', null, waRequest::TYPE_INT);
         if (!$contact_id) {
             $this->response = array(
@@ -38,7 +38,11 @@ class crmDealByContactController extends crmJsonController
 
         $default_currency = wa()->getSetting('currency');
 
-        foreach ($deals as &$d) {
+        $fm = new crmFunnelModel();
+        $fsm = new crmFunnelStageModel();
+        $funnels = $fsm->withStages($fm->getAllFunnels(true));
+
+        foreach ($deals as $i => &$d) {
             if ($d['user_contact_id']) {
                 $d['user_contact'] = new waContact($d['user_contact_id']);
             }
@@ -52,13 +56,14 @@ class crmDealByContactController extends crmJsonController
             $d['name'] = htmlspecialchars($d['name']);
             $d['reminder_state'] = crmHelper::getDealReminderState($d['reminder_datetime']);
             $d['reminder_title'] = crmHelper::getReminderTitle($d['reminder_state'], $d['reminder_datetime']);
+
+            if (
+                $only_existing_stage &&
+                ( !$d['funnel_id'] || !$d['stage_id'] || !isset($funnels[$d['funnel_id']]) || !isset($funnels[$d['funnel_id']]['stages'][$d['stage_id']]) )
+            ) {
+                unset($deals[$i]);
+            }
         }
-        unset($d);
-
-        $fm = new crmFunnelModel();
-        $fsm = new crmFunnelStageModel();
-        $funnels = $fsm->withStages($fm->getAllFunnels());
-
         $this->response = array(
             'contact_id'       => $contact_id,
             'deals'            => $deals,

@@ -15,8 +15,15 @@
 </style>
 {function form_field_html field=[] is_template=0}
     {$captionplace = $field.captionplace|default:'left'}
-    {if $field.id === '!horizontal_rule' || $field.id === '!paragraph'}
+    {if $field.id === '!horizontal_rule' || $field.id === '!captcha' && !empty($captcha_is_invisible)}
         {$captionplace = 'none'}
+    {/if}
+    {if $field.id === '!paragraph'}
+        {$caption = ''}
+    {elseif isset($field.caption)}
+        {$caption = $field.caption}
+    {else}
+        {$caption = $field.name}
     {/if}
     {$type = ifset($field.type, 'Text')}
 
@@ -33,11 +40,7 @@
                 <div class="field wide{if $field.id === '!agreement_checkbox' || $field.type === 'Checkbox'} custom-mt-4{/if}">
                     <div class="name for-input js-field-label">{strip}
                         {if $field.id !== '!agreement_checkbox' && $type !== 'Checkbox'}
-                            {if isset($field.caption)}
-                                {$field.caption|escape}
-                            {else}
-                                {$field.name|escape}
-                            {/if}
+                            {$caption|escape}
                         {/if}
                         {if !empty($field.required) && $field.id !== '!captcha'} *{/if}
                     {/strip}</div>
@@ -48,11 +51,7 @@
                                     {$field.html}
                                 </span>
                                 <span class="js-field-label wide">
-                                    {if isset($field.caption)}
-                                        {$field.caption|escape}
-                                    {else}
-                                        {$field.name|escape}
-                                    {/if}
+                                    {$caption|escape}
                                 </span>
                             </label>
                         {else}
@@ -98,35 +97,233 @@
             <a href="{$_back_uri}" class="icon size-32 back js-back-button cursor-pointer custom-mr-8"><i class="icon fas fa-arrow-left"></i></a>
             <input type="text" name="form[name]" value="{if $form.id > 0}{$form.name|escape}{else}[`New form`]{/if}" placeholder="[`Form name`]" class="crm-name-input">
         </div>
-        {if $form.id}
-            <div class="crm-form-section fields-group">
-                <div class="flexbox full-width space-8 custom-my-8">
-                    <div class="hint">[`To publish the form on external site use this code:`]
-                        {if $form.id > 0}
-                            <code class="crm-smarty-helper bold nowrap">{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}</code>
-                            <a class="icon crm-copy js-copy" data-content="{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}" title="[`Copy to clipboard`]"><i class="fas fa-copy"></i></a>
-                        {else}
-                            <strong>[`Will be available after saving`]</strong>
-                        {/if}
+
+
+        <div class="crm-form-section fields">
+            <div class="fields-group">
+                <div class="flexbox full-width space-16 custom-mb-24">
+                    <div class="flexbox wide wrap large space-16 custom-mt-4">
+                        <label class="nowrap">
+                            <span class="wa-radio custom-mt-4">
+                                <input type="radio" class="js-widget-container" name="form[params][widget_container]"{if !empty($form.params.widget_container) && $form.params.widget_container == 'dialog'} checked{/if} value="dialog"><span></span>
+                            </span>
+                            [`Dialog`]
+                        </label>
+                        <label class="nowrap">
+                            <span class="wa-radio custom-mt-4">
+                                <input type="radio" class="js-widget-container" name="form[params][widget_container]"{if !empty($form.params.widget_container) && $form.params.widget_container == 'drawer'} checked{/if} value="drawer"><span></span>
+                            </span>
+                            [`Drawer`]
+                        </label>
+                        <label class="nowrap">
+                            <span class="wa-radio custom-mt-4">
+                                <input type="radio" class="js-widget-container" name="form[params][widget_container]"{if empty($form.params.widget_container)} checked{/if} value=""><span></span>
+                            </span>
+                            [`Embed manually`]
+                        </label>
                     </div>
                     {if $form.id > 0}
-                        <a class="js-show-external-code small semibold nowrap" href="javascript:void(0)">[`Publishing on external site`] <i class="fas fa-caret-down"></i></a>
+                    <div class="align-right">
+                        <span class="hint">[`Form standalone URL:`]</span><br>
+                        <a target="_blank" class="nowrap small semibold" href="{$frontend_form_url}">{$frontend_form_url}</a>
+                    </div>
                     {/if}
                 </div>
-                <div class="js-external-code" style="display: none;">
-                    <textarea class="small width-100" readonly><iframe frameborder="0" src="{$frontend_form_iframe_url}" id="wa-crm-iframe" name="wa-crm-iframe" marginheight="0" marginwidth="0" scrolling="no" style="width:100%; height:50px;"></iframe><script type="text/javascript" src="{$app_static_url}js/iframeResizer.min.js"></script><script type="text/javascript">iFrameResize({ heightCalculationMethod:'max' });</script></textarea>
+                <div class="crm-form-section-content">
+                    <div class="js-widget-manual-code"{if !empty($form.params.widget_container)} style="display: none;"{/if}>
+                        <div class="flexbox full-width space-8 wrap custom-my-8">
+                            <div class="hint">[`To publish this form on your website use this code:`]
+                                {if $form.id > 0}
+                                    <code class="crm-smarty-helper bold nowrap">{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}</code>
+                                    <a class="icon crm-copy js-copy" data-content="{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}" title="[`Copy to clipboard`]"><i class="fas fa-copy"></i></a>
+                                {else}
+                                    <strong>[`Will be available after saving`]</strong>
+                                {/if}
+                            </div>
+                            {if $form.id > 0}
+                                <a class="js-show-external-code small semibold nowrap" href="javascript:void(0)">[`Publishing on external site`] <i class="fas fa-caret-down"></i></a>
+                            {/if}
+                        </div>
+                        <div class="js-external-code" style="display: none;">
+                            <textarea class="small width-100" readonly><iframe frameborder="0" src="{$frontend_form_iframe_url}" id="wa-crm-iframe" name="wa-crm-iframe" marginheight="0" marginwidth="0" scrolling="no" style="width:100%; height:50px;"></iframe><script type="text/javascript" src="{$app_static_url}js/iframeResizer.min.js"></script><script type="text/javascript">iFrameResize({ heightCalculationMethod:'max' });</script></textarea>
+                        </div>
+                    </div>
+                    <div class="js-widget-params"{if empty($form.params.widget_container)} style="display: none;"{/if}>
+                    {if $has_storefronts}
+                        <div class="field">
+                            <div class="name for-input">
+                                [`Form title`]
+                            </div>
+                            <div class="value">
+                                <input type="text" class="long bold large" name="form[params][widget_header]" value="{$form.params.widget_header|default:''|escape}">
+                            </div>
+                        </div>
+                        <div class="field custom-mt-4">
+                            <div class="name for-input"></div>
+                            <div class="value small">
+                                <label>
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" name="form[params][widget_theme]"{if !empty($form.params.widget_theme) && $form.params.widget_theme == 'dark'} checked{/if} value="dark">
+                                        <span><span class="icon"><i class="fas fa-check"></i></span></span>
+                                    </span>
+                                    [`Always use dark mode`]
+                                </label>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <h5 class="heading custom-mt-24">[`Show & hide`]</h5>
+                        </div>
+                        <div class="field">
+                            <div class="name for-checkbox">
+                                <label>
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" class="js-widget-fab" name="form[params][widget_display_fab]"{if !empty($form.params.widget_display_fab)} checked{/if} value="1">
+                                        <span><span class="icon"><i class="fas fa-check"></i></span></span>
+                                    </span>
+                                    [`Floating button`]
+                                </label>
+                            </div>
+                            <div class="value">
+                                <div class="hint">[`Button color`]</div>
+                                {$_colors = ["#cc5252","#cc8f52","#cccc52","#52cc52","#52cc8f","#52cccc","#528fcc","#5252cc","#8f52cc","#cc52cc","#cc528f"]}
+                                {$_toggle_color = ifset($form.params['widget_display_fab_color'])|escape}
+                                <div class="c-color-section js-color-selector-wrapper flexbox middle space-8">
+                                    <ul class="c-colors">
+                                    {strip}
+                                        {foreach $_colors as $_color}
+                                        <li class="c-color-wrapper">
+                                            <span class="c-color-item color js-set-color {if $_toggle_color == $_color}is-active{/if}" data-color="{$_color}" style="background: {$_color};"></span>
+                                        </li>
+                                        {/foreach}
+                                    {/strip}
+                                    </ul>
+                                    <div class="c-toggle-wrapper js-toggle-wrapper is-hidden">
+                                        <input class="c-field js-color-field" type="text" name="form[params][widget_display_fab_color]" value="{$_toggle_color}" placeholder="#cc528f">
+                                        <div class="c-toggle-block">
+                                            <span class="c-color-item color c-toggle js-toggle" style="background: {$_toggle_color};"></span>
+                                            <div class="c-color-picker js-color-picker"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="hint">[`Button text (HTML is allowed)`]</div>
+                                <input type="text" name="form[params][widget_display_fab_text]" value="{$form.params.widget_display_fab_text|default:''|escape}" placeholder="[`Subscribe`]">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="name for-input">
+                                <label>
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" class="js-widget-auto-timeout" name="form[params][widget_display_on_timeout]"{if !empty($form.params.widget_display_on_timeout)} checked{/if} value="1">
+                                        <span><span class="icon"><i class="fas fa-check"></i></span></span>
+                                    </span>
+                                    [`On timeout`]
+                                </label>
+                            </div>
+                            <div class="value">
+                                <input type="number" class="shorter" name="form[params][widget_display_timeout]" value="{$form.params.widget_display_timeout|default:''}" placeholder="0"> [`sec`]
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="name for-input">
+                                <label>
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" class="js-widget-auto-scroll" name="form[params][widget_display_on_scroll]"{if !empty($form.params.widget_display_on_scroll)} checked{/if} value="1">
+                                        <span><span class="icon"><i class="fas fa-check"></i></span></span>
+                                    </span>
+                                    [`On scroll`]
+                                </label>
+                            </div>
+                            <div class="value">
+                                <input type="number" class="shorter" name="form[params][widget_display_scroll]" value="{$form.params.widget_display_scroll|default:''}" placeholder="0"> [`px`]
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="name for-checkbox">
+                                <label>
+                                    <span class="wa-checkbox">
+                                        <input type="checkbox" class="js-widget-inline" name="form[params][widget_display_custom]"{if !empty($form.params.widget_display_custom)} checked{/if} value="1">
+                                        <span><span class="icon"><i class="fas fa-check"></i></span></span>
+                                    </span>
+                                    [`Custom element`]
+                                </label>
+                            </div>
+                            <div class="value">
+                                <div class="hint">[`Element selector`]</div>
+                                <input type="text" name="form[params][widget_display_custom_selector]" value="{$form.params.widget_display_custom_selector|default:''|escape}" placeholder=".class [`or`] #id" class="long">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="name for-input">
+                                [`Hide upon close for`]
+                            </div>
+                            <div class="value">
+                                <input type="number" class="shorter" name="form[params][widget_show_after_timeout]" value="{$form.params.widget_show_after_timeout|default:''}" placeholder="24"> [`hrs`]
+                                <div class="hint">[`If the user closes the form intentionally, it won’t be displayed for the specified period of time.`]</div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <h5 class="heading custom-mt-24">[`Display on`]</h5>
+                        </div>
+                        {if !empty($domains)}
+                            <table class="borderless">
+                            {foreach $domains as $domain}
+                                <tr>
+                                    <td>
+                                        <label class="flexbox space-8">
+                                            <span class="wa-checkbox custom-mt-4">
+                                                <input type="checkbox" class="js-widget-domain" value="{$domain}"{if !empty($form.params.widget_domains) && in_array($domain, $form.params.widget_domains)} checked{/if}>
+                                                <span><span class="icon"><i class="fas fa-check"></i></span></span>
+                                            </span>
+                                            <span>{waIdna::dec($domain)}</span>
+                                        </label>
+                                    </td>
+                                    <td class="min-width">
+                                        <input type="text" class="js-widget-path" data-domain="{$domain}" value="{$form.params.widget_path[$domain]|default:''}" placeholder="/">
+                                    </td>
+                                </tr>
+                            {/foreach}
+                            </table>
+                        {/if}
+
+                        {if !$wa->crm->isPremium()}
+                            <div class="field custom-mt-32">
+                                <h5 class="heading">[`Powered by Webasyst CRM`]</h5>
+                            </div>
+                            <div class="field">
+                                <p>{sprintf_wp(
+                                    'To hide the link to Webasyst CRM, <a %s>buy premium ›</a>',
+                                    sprintf(
+                                        'href="https://www.%s/store/app/crm/premium/" target="_blank"',
+                                        _w('webasyst.com')
+                                    )
+                                )}</p>
+                            </div>
+                        {/if}
+                    {else}
+                        <div class="alert small custom-mt-0 custom-mb-4">
+                            <div class="flexbox space-8">
+                                <span class=""><i class="fas fa-exclamation-triangle text-orange"></i></span>
+                                <div class="wide">
+                                    [`A CRM rule must be added to the site settings to use this mode.`]
+                                    <a href="{$wa_backend_url}site/#/routing/">[`Go to <em>Site</em> app`] ›</a>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
+                    </div>
                 </div>
             </div>
-        {/if}
+        </div>
     </div>
 
     <div class="crm-common-errors-block"></div>
 
-    <div class="crm-form-body fields">
+    <div class="crm-form-body crm-form-section fields">
         <div class="crm-form-constructor fields-group">
             <div class="flexbox middle full-width space-8 custom-mb-32">
                 <div>
-                    <div class="small text-gray">[`Approximate preview`]</div>
+                    <div class="crm-form-section-header custom-mb-0">[`Form fields`]</div>
                     <p class="hint custom-mt-0">[`The actual web form design will depend on the CSS styles of the site where it is published.`]</p>
                 </div>
                 <div class="js-view-mode-toggler toggle">
@@ -303,15 +500,17 @@
             <div class="crm-form-section-header">
                 [`After form submission`]
             </div>
-            <div class="crm-form-section-content">
-                <p>[`This setting will redirect clients to any specified URL or display any text message after the form is submitted.`]</p>
-                <p>[`After successful submission:`]</p>
+            <div class="crm-form-section-content crm-after-submit-block">
+                <p class="small">[`This setting will redirect clients to any specified URL or display any text message after the form is submitted.`]</p>
+                <p class="small">[`After successful submission:`]</p>
 
                 <div class="field">
-                    <div class="name">
-                        <label>
-                            <span class="wa-radio"><input type="radio" name="form[params][after_submit]"{if !empty($form.params.after_submit) && $form.params.after_submit == 'redirect'} checked{/if} value="redirect"><span></span></span>
-                            [`Redirect to URL`]
+                    <div class="name for-input">
+                        <label class="flexbox space-8 full-width">
+                            <span class="wa-radio custom-mt-4"><input type="radio" name="form[params][after_submit]"{if !empty($form.params.after_submit) && $form.params.after_submit == 'redirect'} checked{/if} value="redirect"><span></span></span>
+                            <span class="wide">
+                                [`Redirect to URL`]
+                            </span>
                         </label>
                     </div>
                     <div class="value">
@@ -321,13 +520,28 @@
 
                 <div class="field">
                     <div class="name">
-                        <label>
-                            <span class="wa-radio"><input type="radio" name="form[params][after_submit]" {if empty($form.params.after_submit) || $form.params.after_submit == 'html'} checked{/if} value="html"><span></span></span>
-                            [`Display text instead of the form`]
+                        <label class="flexbox space-8 full-width">
+                            <span class="wa-radio custom-mt-4"><input type="radio" name="form[params][after_submit]" {if empty($form.params.after_submit) || $form.params.after_submit == 'html'} checked{/if} value="html"><span></span></span>
+                            <span class="wide">
+                                [`Display text instead of the form`]
+                            </span>
                         </label>
                     </div>
                     <div class="value">
-                        <textarea name="form[params][html_after_submit]" class="equal-width" style="width: 100%;">{$form.params.html_after_submit|escape|default:'[`Thanks for subscribing!`]'}</textarea>
+
+                        <div class="wa-editor-core-wrapper not-blank">
+                            <ul class="tabs overflow-dropdown wa-editor-wysiwyg-html-toggle bordered-bottom custom-ml-8 small">
+                                <li class="selected">
+                                    <a href="javascript:void(0);" class="wysiwyg">[`WYSIWYG`]</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);" class="html">HTML</a>
+                                </li>
+                            </ul>
+                            <div class="c-editor-wrapper">
+                                <textarea name="form[params][html_after_submit]">{$form.params.html_after_submit|escape|default:'[`Thanks for subscribing!`]'}</textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -341,8 +555,8 @@
             <div class="crm-form-section-content">
                 {$email_checked = $available_fields.email.checked > 0}
 
-                <p>
-                    <span class="switch smaller" id="js-ibutton">
+                <p class="small">
+                    <span class="switch smaller js-ibutton" id="js-ibutton">
                         <input type="checkbox" class="crm-confirmation-checkbox" id="js-ibutton-2" name="form[params][confirm_mail]" value="1" {if isset($form.params.confirm_mail) && $email_checked} checked{/if} {if !$email_checked}disabled="disabled"{/if}>
                     </span>
                     <label for="js-ibutton-2" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">[`Enabled`]</label>
@@ -351,7 +565,7 @@
                 <span class="crm-confirmation-enable-text" {if $email_checked}style="display: none;"{/if}>
                     [`To enable this option, your form must contain Email field.`]
                 </span>
-                <p>[`An automatic notification will be sent to a subscriber‘s email address, with a special link to be clicked for a client to confirm registration. You may add extra instructions for your clients to the notification text.`]</p>
+                <p class="small">[`An automatic notification will be sent to a subscriber‘s email address, with a special link to be clicked for a client to confirm registration. You may add extra instructions for your clients to the notification text.`]</p>
 
                 <div class="crm-form-email-confirm-block" {if !isset($form.params.confirm_mail) || !$email_checked}style="display: none;" {/if}>
                     <div class="crm-fields">
@@ -388,13 +602,15 @@
                     </div>
 
                     <div class="crm-after-auth-block">
-                        <p>[`After successful confirmation`]</p>
+                        <p class="small">[`After successful confirmation`]</p>
 
                         <div class="crm-line field">
                             <div class="name">
-                                <label>
-                                    <span class="wa-radio"><input type="radio" name="form[params][after_antispam_confirm]" value="redirect" {if isset($form.params.after_antispam_confirm) && $form.params.after_antispam_confirm === 'redirect'}checked="checked"{/if}><span></span></span>
-                                    [`Redirect to URL`]
+                                <label class="flexbox space-8 full-width">
+                                    <span class="wa-radio custom-mt-4"><input type="radio" name="form[params][after_antispam_confirm]" value="redirect" {if isset($form.params.after_antispam_confirm) && $form.params.after_antispam_confirm === 'redirect'}checked="checked"{/if}><span></span></span>
+                                    <span class="wide">
+                                        [`Redirect to URL`]
+                                    </span>
                                 </label>
                             </div>
                             <div class="value">
@@ -404,12 +620,27 @@
 
                         <div class="crm-line field">
                             <div class="name">
-                                <label>
-                                    <span class="wa-radio"><input type="radio" name="form[params][after_antispam_confirm]" value="text" {if empty($form.params.after_antispam_confirm) || $form.params.after_antispam_confirm !== 'redirect'}checked="checked"{/if}><span></span></span> [`Display text`]
+                                <label class="flexbox space-8 full-width">
+                                    <span class="wa-radio custom-mt-4"><input type="radio" name="form[params][after_antispam_confirm]" value="text" {if empty($form.params.after_antispam_confirm) || $form.params.after_antispam_confirm !== 'redirect'}checked="checked"{/if}><span></span></span>
+                                    <span class="wide">
+                                        [`Display text`]
+                                    </span>
                                 </label>
                             </div>
                             <div class="value">
-                                <textarea name="form[params][after_antispam_confirm_text]" style="width: 100%; min-width: auto;">{$form.params.after_antispam_confirm_text|default:'[`Confirmed`]'}</textarea>
+                                <div class="wa-editor-core-wrapper not-blank">
+                                    <ul class="tabs overflow-dropdown wa-editor-wysiwyg-html-toggle bordered-bottom custom-ml-8 small">
+                                        <li class="selected">
+                                            <a href="#" class="wysiwyg">[`WYSIWYG`]</a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="html">HTML</a>
+                                        </li>
+                                    </ul>
+                                    <div class="c-editor-wrapper">
+                                        <textarea name="form[params][after_antispam_confirm_text]" style="width: 100%; min-width: auto;">{$form.params.after_antispam_confirm_text|default:'[`Confirmed`]'}</textarea>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -432,9 +663,9 @@
             </div>
         </div>
 
-        <div class="bottombar sticky custom-mt-20 crm-form-buttons">
-            <div class="custom-px-20 custom-py-16 blank c-layout">
-                <div class="c-column">
+        <div class="c-settings-footer bottombar sticky">
+            <div class="c-footer-actions flexbox middle full-width">
+                <div>
                     {$wa->csrf()}
                     <input type="submit" class="button" value="[`Save`]">
                     <a class="button light-gray js-c-cancel-link" href="javascript:void(0);">[`Cancel`]</a>
@@ -446,7 +677,7 @@
                     </span>
                 </div>
                 {if $form.id > 0}
-                    <div class="c-column middle right">
+                    <div>
                         <div class="crm-delete-link-wrapper">
                             <a href="javascript:void(0);" class="button light-gray smaller crm-delete-form-link desktop-only">
                                 <i class="fas fa-trash-alt delete custom-mr-4"></i> [`Delete this form`]

@@ -30,6 +30,7 @@ class crmShopBackend_orderHandler extends waEventHandler
             'contact_id'      => $params['contact_id'],
             'deal'            => $deal,
             'can_create_deal' => $can_create_deal,
+            'photo'           => empty($params['contact']['photo_50x50']) ? (new waContact($params['contact_id']))->getPhoto() : $params['contact']['photo_50x50'],
         ));
 
         $rights_model = new waContactRightsModel();

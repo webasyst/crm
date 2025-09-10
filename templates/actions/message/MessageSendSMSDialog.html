@@ -83,9 +83,8 @@
                                     {if $_funnel}
                                         {$_stage = $stages[$deal.stage_id]|default:null}
                                         {if $_stage}
-                                            <i class="fas fa-circle funnel-state svg-icon" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                            <i class="{$_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
                                             <a href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
-            
                                         {else}
                                             [`Stage deleted`]
                                         {/if}

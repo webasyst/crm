@@ -8,18 +8,22 @@ class crmMessageConversationAssociateDealDialogAction extends crmBackendViewActi
 
         $conversation = $this->getConversationModel()->getById($conversation_id);
 
-        if (!$conversation) {
-            throw new waException('Conversation not found', 404);
+        if (empty($conversation)) {
+            $this->notFound(_w('Conversation not found'));
         }
 
         if (empty($conversation['contact_id'])) {
-            throw new waException('A conversation without a client can not be linked to a deal', 404);
+            $this->notFound(_w('Conversation contact not found.'));
         }
 
         $contact = new crmContact($conversation['contact_id']);
 
         if (empty($contact) || !$contact->exists()) {
-            throw new waException(_w('Contact not found'), 404);
+            $this->notFound(_w('Conversation contact not found.'));
+        }
+
+        if (!$this->getCrmRights()->canEditConversation($conversation)) {
+            $this->accessDenied();
         }
 
         $dm = new crmDealModel();
@@ -27,8 +31,8 @@ class crmMessageConversationAssociateDealDialogAction extends crmBackendViewActi
         $fsm = new crmFunnelStageModel();
 
         $funnel = $fm->getAvailableFunnel();
-        if (!$funnel) {
-            throw new waRightsException();
+        if (empty($funnel)) {
+            $this->accessDenied();
         }
         $stage_id = $fsm->select('id')->where(
             'funnel_id = '.(int)$funnel['id']
@@ -45,7 +49,7 @@ class crmMessageConversationAssociateDealDialogAction extends crmBackendViewActi
             'stage_id'           => $stage_id,
         ));
 
-        $funnels = $fsm->withStages($fm->getAllFunnels());
+        $funnels = $fsm->withStages($fm->getAllFunnels(true));
         if (empty($funnels[$new_deal['funnel_id']])) {
             throw new waException('Funnel not found');
         }

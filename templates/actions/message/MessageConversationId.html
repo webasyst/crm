@@ -174,15 +174,20 @@
                                         <i class="custom-mr-8 fas fa-ban" style="color: {$_stage.color|escape}" title=" [`LOST`]"></i>
                                     {else}
                                         {if $_stage}
-                                            <i class="custom-mr-8 fas fa-circle funnel-state svg-icon" style="color: {$_stage.color|escape}" title="{$funnel.name|escape} / {$_stage.name|escape}"></i>
+                                            <i class="custom-mr-8 {$funnel.icon|default:'fas fa-briefcase'|escape} funnel-state" style="color: {$_stage.color|escape}" title="{$funnel.name|escape} / {$_stage.name|escape}"></i>
                                         {else}
-                                        <i class="custom-mr-8 fas fa-exclamation-circle gray" title=" [`Stage deleted`]"></i>
+                                            <i class="custom-mr-8 fas fa-exclamation-circle gray" title=" [`Stage deleted`]"></i>
                                         {/if}
                                     {/if}
                                         {if $deal.funnel_id && $deal.stage_id}
                                         <span class="flexbox vertical js-deal-link">
                                             <span class="smaller text-gray">[`Deal`]</span>
-                                            <span class="js-deal-link--name">{strip_tags($deal.name)|escape}</span>
+                                            <span class="js-deal-link--name flexbox">
+                                                <span title="{strip_tags($deal.name)|escape}">{strip_tags($deal.name)|escape}</span>
+                                                {if !empty($funnel.is_archived)}
+                                                <span class="hint custom-ml-4 nowrap"> [`(archived)`]</span>
+                                                {/if}
+                                            </span>
                                         </span>
                                         {/if}
                                         <span class="custom-ml-auto custom-mr-0 icon"> <i class="fas fa-caret-right"></i></span>
@@ -224,7 +229,7 @@
                                         <li>{$_item}</li>
                                     {/foreach}
                                 {/if}
-                                
+
                                 {if $wa->user()->isAdmin('crm') || !$conversation['user_contact_id'] || $conversation['user_contact_id'] == $wa->user()->getId()}
                                 <li>
                                     <a class="flexbox middle js-delete-conversation" href="javascript:void(0);">
@@ -387,7 +392,125 @@
                                                 {$_m.create_datetime|wa_datetime:'time'}
                                             </span>
                                         {/if}
-                                        <a href="javascript:void(0);" class="button nobutton circle light-gray js-open-detail-message" data-dialog-url="{$wa_app_url}?module=message&action=bodyDialog&message_id={$_m.id}"><i class="fas fa-expand-alt"></i></a>
+
+                                        <div class="dropdown c-message-dropdown js-message-dropdown" id="js-message-dropdown-{$_m.id}">
+                                            <a href="javascript:void(0);" class="dropdown-toggle without-arrow">
+                                                <span class="icon size-14"><i class="fas fa-ellipsis-v"></i></span>
+                                            </a>
+                                            <div class="dropdown-body right">
+                                                <ul class="menu">
+                                                    <li>
+                                                        <a href="javascript:void(0);" class="js-open-detail-message" data-dialog-url="{$wa_app_url}?module=message&action=bodyDialog&message_id={$_m.id}">
+                                                            <i class="fas fa-expand-alt"></i>
+                                                            <span>[`Open full message`]</span>
+                                                        </a>
+                                                    </li>
+                                                    {if $_m.direction === crmMessageModel::DIRECTION_IN}
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="js-message-reply" data-message-id="{$_m.id}">
+                                                                <i class="fas fa-reply"></i>
+                                                                <span>[`Reply`]</span>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="js-message-ai-reply" data-message-id="{$_m.id}">
+                                                                <span class="icon webasyst-magic-wand-ai"></span>
+                                                                <span>[`Reply with AI`]</span>
+                                                            </a>
+                                                        </li>
+                                                        {if $_m.transport == crmMessageModel::TRANSPORT_EMAIL}
+                                                            <li>
+                                                                <a href="javascript:void(0);" class="js-message-forward" data-message-id="{$_m.id}">
+                                                                    <i class="fas fa-share"></i>
+                                                                    <span>[`Forward message`]</span>
+                                                                </a>
+                                                            </li>
+                                                        {/if}
+                                                    {/if}
+                                                    {if $_m.original}
+                                                        <li>
+                                                            <a class="js-disable-router" href="?module=file&action=downloadEml&id={$_m.id}">
+                                                                <i class="fas fa-arrow-down"></i>
+                                                                <span>[`Download original`]</span>
+                                                            </a>
+                                                        </li>
+                                                    {/if}
+                                                    {if !empty($_m.deal)}
+                                                        <li>
+                                                            <a class="" href="{$wa_app_url}deal/{$_m.deal.id}/" target="_top" data-link="top">
+                                                            {if !empty($_m.deal.stage)}
+                                                                {$_stage = $_m.deal.stage}
+                                                            {else}
+                                                                {$_stage = null}
+                                                            {/if}
+                                                            {if $_m.deal.status_id == "WON"}
+                                                                <i class="custom-mr-8 fas fa-flag-checkered" style="color: {$_stage.color|escape}" title=" [`WON`]"></i>
+                                                            {elseif $_m.deal.status_id == "LOST"}
+                                                                <i class="custom-mr-8 fas fa-ban" style="color: {$_stage.color|escape}" title=" [`LOST`]"></i>
+                                                            {else}
+                                                                {if $_stage}
+                                                                    <i class="custom-mr-8 {$_m.deal.funnel.icon|default:'fas fa-briefcase'|escape} funnel-state" style="color: {$_stage.color|escape}" title="{$_m.deal.funnel.name|escape} / {$_stage.name|escape}"></i>
+                                                                {else}
+                                                                    <i class="custom-mr-8 fas fa-exclamation-circle gray" title=" [`Stage deleted`]"></i>
+                                                                {/if}
+                                                            {/if}
+                                                            {if $_m.deal.funnel && $_m.deal.stage}
+                                                            <span class="flexbox vertical js-deal-link">
+                                                                <span class="flexbox full-width smaller text-gray">
+                                                                    <span class="wide">[`Deal`]
+                                                                    {if !empty($_m.deal.funnel.is_archived)}
+                                                                        <span class="custom-ml-4 nowrap"> [`(archived)`]</span>
+                                                                    {/if}
+                                                                    </span>
+                                                                    <span class="small">
+                                                                        <i class="fas fa-external-link-alt"></i>
+                                                                    </span>
+                                                                </span>
+                                                                <div class="text-ellipsis" style="max-width: 130px;" title="{strip_tags($_m.deal.name)|escape}">
+                                                                    {strip_tags($_m.deal.name)|escape}
+                                                                </div>
+                                                            </span>
+                                                            {/if}
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="flexbox middle c-deal-wrapper {if $can_edit_conversation}js-associate-message-deal{/if}" data-dialog-url="{$wa_app_url}?module=message&action=associateDealDialog&message_id={$_m.id}">
+                                                                <i class="icon fas fa-pen"></i> [`Attach to another deal`]
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="flexbox middle inline-link js-detach-message-deal" href="javascript:void(0);" data-dialog-url="{$wa_app_url}?module=message&action=dealDetachDialog&message_id={$_m.id}">
+                                                                <i class="icon fas fa-times-circle"></i> [`Detach from deal`]
+                                                            </a>
+                                                        </li>
+                                                    {elseif !empty($contacts[$_m.contact_id]) && !empty($clean_data.deal) && empty($_m.deal_id)}
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="js-associate-message-deal nowrap" data-dialog-url="{$wa_app_url}?module=message&action=associateDealDialog&message_id={$_m.id}">
+                                                                <i class="custom-mr-8 fas fa-plus add"></i>
+                                                                <span>[`Associate with a deal`]</span>
+                                                            </a>
+                                                        </li>
+                                                    {/if}
+                                                    {if $is_admin}
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="js-delete-message" data-message-id="{$_m.id}">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                                <span>[`Delete message`]</span>
+                                                            </a>
+                                                        </li>
+                                                    {/if}
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <script>
+                                            ( function($) {
+                                                $("#js-message-dropdown-{$_m.id}").waDropdown({
+                                                    hover: false,
+                                                });
+                                            })(jQuery);
+                                        </script>
+
                                     </div>
 
                                     <div class="c-message-body{if $_m.direction == crmMessageModel::DIRECTION_OUT} text-strong{/if}">
@@ -454,6 +577,9 @@
                         <div class="flexbox middle custom-p-16 source-not-found">[`Oops, sorry, this message source is disabled :(`]</div>
                     </section>
                 {elseif $conversation.contact_id && !empty($contacts[$conversation.contact_id])}
+                    {if !empty($conversation.aux_items.reply_form_ai_answer)}
+                        {$conversation.aux_items.reply_form_ai_answer.content}
+                    {/if}
                     <section class="c-reply-section">
                         <button class="button light-gray rounded js-messages-list--to-bottom-button">
                             <i class="fas fa-angle-down"></i>
@@ -523,10 +649,107 @@
                                                 {$_m.create_datetime|wa_datetime:'time'}
                                             </span>
                                         {/if}
+
+                                        <div class="dropdown c-message-dropdown js-message-dropdown" id="js-message-dropdown-{$_m.id}">
+                                            <a href="javascript:void(0);" class="dropdown-toggle without-arrow">
+                                                <span class="icon size-14"><i class="fas fa-ellipsis-v"></i></span>
+                                            </a>
+                                            <div class="dropdown-body{if $_m.direction === crmMessageModel::DIRECTION_OUT} right{/if}">
+                                                <ul class="menu">
+                                                    {if $_m.direction === crmMessageModel::DIRECTION_IN}
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="js-message-im-reply" data-message-id="{$_m.id}">
+                                                                <i class="fas fa-reply"></i>
+                                                                <span>[`Reply`]</span>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="js-message-ai-reply" data-message-id="{$_m.id}">
+                                                                <span class="icon webasyst-magic-wand-ai"></span>
+                                                                <span>[`Reply with AI`]</span>
+                                                            </a>
+                                                        </li>
+                                                    {/if}
+                                                    {* if !empty($_m.deal)}
+                                                        <li>
+                                                            <a class="" href="{$wa_app_url}deal/{$_m.deal.id}/" target="_top" data-link="top">
+                                                            {if !empty($_m.deal.stage)}
+                                                                {$_stage = $_m.deal.stage}
+                                                            {else}
+                                                                {$_stage = null}
+                                                            {/if}
+                                                            {if $_m.deal.status_id == "WON"}
+                                                                <i class="custom-mr-8 fas fa-flag-checkered" style="color: {$_stage.color|escape}" title=" [`WON`]"></i>
+                                                            {elseif $_m.deal.status_id == "LOST"}
+                                                                <i class="custom-mr-8 fas fa-ban" style="color: {$_stage.color|escape}" title=" [`LOST`]"></i>
+                                                            {else}
+                                                                {if $_stage}
+                                                                    <i class="custom-mr-8 {$_m.deal.funnel.icon|default:'fas fa-briefcase'|escape} funnel-state" style="color: {$_stage.color|escape}" title="{$_m.deal.funnel.name|escape} / {$_stage.name|escape}"></i>
+                                                                {else}
+                                                                    <i class="custom-mr-8 fas fa-exclamation-circle gray" title=" [`Stage deleted`]"></i>
+                                                                {/if}
+                                                            {/if}
+                                                            {if $_m.deal.funnel && $_m.deal.stage}
+                                                            <span class="flexbox vertical js-deal-link">
+                                                                <span class="flexbox full-width smaller text-gray">
+                                                                    <span class="wide">[`Deal`]
+                                                                    {if !empty($_m.deal.funnel.is_archived)}
+                                                                        <span class="custom-ml-4 nowrap"> [`(archived)`]</span>
+                                                                    {/if}
+                                                                    </span>
+                                                                    <span class="small">
+                                                                        <i class="fas fa-external-link-alt"></i>
+                                                                    </span>
+                                                                </span>
+                                                                <div class="text-ellipsis" style="max-width: 130px;" title="{strip_tags($_m.deal.name)|escape}">
+                                                                    {strip_tags($_m.deal.name)|escape}
+                                                                </div>
+                                                            </span>
+                                                            {/if}
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="flexbox middle c-deal-wrapper {if $can_edit_conversation}js-associate-message-deal{/if}" data-dialog-url="{$wa_app_url}?module=message&action=associateDealDialog&message_id={$_m.id}">
+                                                                <i class="icon fas fa-pen"></i> [`Attach to another deal`]
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="flexbox middle inline-link js-detach-message-deal" href="javascript:void(0);" data-dialog-url="{$wa_app_url}?module=message&action=dealDetachDialog&message_id={$_m.id}">
+                                                                <i class="icon fas fa-times-circle"></i> [`Detach from deal`]
+                                                            </a>
+                                                        </li>
+                                                    {elseif !empty($contacts[$_m.contact_id]) && !empty($clean_data.deal) && empty($_m.deal_id)}
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="js-associate-message-deal nowrap" data-dialog-url="{$wa_app_url}?module=message&action=associateDealDialog&message_id={$_m.id}">
+                                                                <i class="custom-mr-8 fas fa-plus add"></i>
+                                                                <span>[`Associate with a deal`]</span>
+                                                            </a>
+                                                        </li>
+                                                    {/if *}
+                                                    {if $is_admin}
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="js-delete-message" data-message-id="{$_m.id}">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                                <span>[`Delete message`]</span>
+                                                            </a>
+                                                        </li>
+                                                    {/if}
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <script>
+                                            ( function($) {
+                                                $("#js-message-dropdown-{$_m.id}").waDropdown({
+                                                    hover: false,
+                                                });
+                                            })(jQuery);
+                                        </script>
+
                                     </div>
 
                                     {_renderMessageBody message=$_m}
-                                    
+
                                     {if !empty($_m.params.status)}
                                         <div class="small custom-pr-8 custom-pb-4 c-message-status">
                                             {if $_m.params.status === crmImSource::STATUS_DELIVERED}
@@ -555,6 +778,9 @@
                     <div class="flexbox middle custom-p-16 source-not-found">[`Oops, sorry, this messenger is disabled :(`]</div>
                 </section>
                 {elseif $conversation.contact_id && !empty($contacts[$conversation.contact_id])}
+                    {if !empty($conversation.aux_items.reply_form_ai_answer)}
+                        {$conversation.aux_items.reply_form_ai_answer.content}
+                    {/if}
                     <section class="c-reply-section">
                         <button class="button light-gray rounded js-messages-list--to-bottom-button">
                             <i class="fas fa-angle-down"></i>
@@ -613,6 +839,9 @@
                                                             </script>
                                                         </div>
                                                     </div>
+                                                    {/if}
+                                                    {if !empty($conversation.aux_items.reply_form_ai_answer)}
+                                                        {$conversation.aux_items.reply_form_ai_answer.button}
                                                     {/if}
                                                     <div class="width-100 flexbox middle">
                                                         <textarea class="c-textarea js-textarea" name="body" placeholder="[`Message`]"></textarea>
@@ -708,6 +937,9 @@
                 {$_locales = [
                     "delete_conversation_title"     => {_w("Delete conversation")},
                     "delete_conversation_button"    => {_w("Delete")},
+                    "delete"                        => {_w("Delete")},
+                    "delete_message"                => {_w("Delete message")},
+                    "delete_message_text"           => {_w("Are you sure you want to delete this message?")},
                     "remove_owner_title"            => {_w("Remove owner")},
                     "remove_owner_text"             => {_w("Remove owner <strong>%s</strong> from the conversation?")},
                     "remove_owner_button"           => {_w("Remove")},
@@ -724,7 +956,8 @@
                     "verify_confirm_title"          => {_w("Client verification request")},
                     "verify_confirm_text"           => {_w("A verification link will be sent to the client.")},
                     "verify_confirm_button"         => {_w("Send verification request")},
-                    "verify_no_more_confirmation_label" => {_w("Don’t show again")}
+                    "verify_no_more_confirmation_label" => {_w("Don’t show again")},
+                    "archived"                      => {_w("(archived)")}
                 ]}
 
                 new CRMMessageConversationPage({
@@ -747,7 +980,7 @@
                     $.crm.messagesWS.close();
                     $.crm.messagesWS = null;
                 }
-                
+
                 {if $conversation.type == 'IM'}
                 $.crm.messagesWS = new CRMWebSocket({
                     channel: 'conversation-{$conversation.id}',

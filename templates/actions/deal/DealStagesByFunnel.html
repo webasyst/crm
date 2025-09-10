@@ -12,7 +12,6 @@
             <button class="dropdown-toggle light-gray js-visible-link" type="button">
                 <span class="js-text flexbox space-4 align-left">
                     {if !empty($_active_stage.color)}
-                        {*<i class="icon16 funnel-state svg-icon" data-color="{$_active_stage.color}"></i>*}
                         <i class="fas fa-circle custom-pr-4" style="color: {$_active_stage.color}"></i>
                     {/if}
                     <span class="js-name">{$_active_stage.name|escape}</span>
@@ -25,8 +24,7 @@
                         <li class="{if isset($selected_stage) && $selected_stage == $_id}selected{/if}">
                             <a class="flexbox space-4" href="javascript:void(0);" data-id="{$_id}">
                                 {if !empty($_stage.color)}
-                                    <i class="fas fa-circle" style="color: {$_stage.color}"></i>
-                                    {*<i class="icon16 funnel-state svg-icon" data-color="{$_stage.color}"></i>*}
+                                    <i class="fas fa-circle custom-mr-2" style="color: {$_stage.color}"></i>
                                 {/if}
                                 {$_stage.name|escape}
                             </a>

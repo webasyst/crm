@@ -230,7 +230,7 @@
                                     <span class="c-call-filter-name--name">[`Direction`]</span>
                                 </div>
                                 <div class="dropdown custom-pl-8" id="dropdown-directions-filter">
-                                    <button class="dropdown-toggle light-gray" type="button">
+                                    <button class="dropdown-toggle light-gray small" type="button">
                                         {if $active_filter_direction.id === "in"}
                                         <span class="icon size-18"><i class="fas fa-long-arrow-alt-right call-in"></i></span>
                                         {elseif $active_filter_direction.id === "out"}
@@ -275,7 +275,7 @@
                             <div class="c-call-filter-name flexbox vertical space-8">
                                 <span class="c-call-filter-name--name">[`State`]</span>
                                 <div class="dropdown custom-pl-8" id="dropdown-states-filter">
-                                    <button class="dropdown-toggle light-gray" type="button">
+                                    <button class="dropdown-toggle light-gray small" type="button">
 
                                         <span class="filter-name">
                                             <i class="fas fa-circle custom-pr-4" style="color: {$active_filter_state.color|escape|default:"inherit"};"></i>
@@ -333,7 +333,7 @@
 
                                 {/if}
                                 <div class="dropdown custom-pl-8" id="dropdown-responsible-filter">
-                                    <button class="dropdown-toggle light-gray" type="button">
+                                    <button class="dropdown-toggle light-gray small" type="button">
                                         <span class="flexbox space-4 filter-name">
                                             {if $active_user}
                                                 <i class="icon"><img src="{$active_user.photo_url_32}" class="rounded" alt="{$active_user.name|escape}"></i>
@@ -394,7 +394,11 @@
                                     {if $deal}
                                         <div class="c-deal-wrapper nowrap">
                                             <div class="flexbox space-8 ">
-                                                <i class="fas fa-circle" style="color: {$deal.funnel.color|escape}"></i>
+                                                {if !empty($deal.funnel)}
+                                                <i class="fas fa-circle" style="color: {$deal.funnel.icon|escape}"></i>
+                                                {else}
+                                                <i class="fas fa-circle"></i>
+                                                {/if}
                                             </div>
                                             <div>
                                                 <div class="c-deal-wrapper--name">{$deal.name|escape}</div>
@@ -449,7 +453,7 @@
                                 <span class="c-call-filter-name--name">[`Period`]</span>
                                 <div class="c-call-filter-name--input custom-pl-8">
                                     <div class="dropdown" id="dropdown-date-filter">
-                                        <button class="dropdown-toggle nowrap light-gray" type="button">
+                                        <button class="dropdown-toggle nowrap light-gray small" type="button">
                                             <span class="js-link-text">{$selected_filter_date.name|escape}</span>
                                         </button>
                                         <div class="dropdown-body right">
@@ -581,7 +585,7 @@
                                             {if !empty($_client)}
                                                 {_renderContact _contact=$_client _number=$_call.client_number _with_company=true}
                                             {else}
-                                                
+
                                                 <img class="icon size-24" src="{$site_url}wa-content/img/userpic.svg" />
 
                                                 <span class="call-number custom-pl-8 custom-pr-20">
@@ -634,7 +638,7 @@
                                             {/if}
                                             </div>
 
-                                           
+
                                         </div>
 
                                     </div>
@@ -665,15 +669,15 @@
                                             {if !empty($_deal) && $_deal.is_visible}
 
                                                 <div class="c-deal-wrapper nowrap">
-                                                    {$_funnel = $funnels[$_deal.funnel_id]|default:null}
+                                                    {$_funnel = $funnels[$_deal.funnel_id]|default:[]}
                                                     {if $_funnel}
                                                         {$_stage = $_funnel.stages[$_deal.stage_id]|default:null}
+                                                        {$_is_archived_label = (!empty($_funnel.is_archived)) ? "<span class='gray small nowrap custom-ml-4'>[`(archived)`]</span>" : ''}
                                                         {if $_stage}
-                                                            {*<i class="icon funnel-state svg-icon" data-color="{$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>*}
-                                                            <i class="fas fa-circle custom-pt-4" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
-                                                            <a href="{$wa_app_url}deal/{$_deal.id}/" target="_top" data-link="top" title="{$_deal.name|escape}">{$_deal.name|escape}</a>
+                                                            <i class="{$_funnel.icon|default:'fas fa-briefcase'} custom-pt-4" style="color: {$_stage.color|escape}; font-size: 1rem;" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                                            <a href="{$wa_app_url}deal/{$_deal.id}/" target="_top" data-link="top" title="{$_deal.name|escape}"><span>{$_deal.name|escape}{$_is_archived_label}</span></a>
                                                         {else}
-                                                            <a href="{$wa_app_url}deal/{$_deal.id}/" target="_top" data-link="top" title="{$_deal.name|escape}">{$_deal.name|escape}</a> <span class="hint">[`Stage deleted`]</span>
+                                                            <a href="{$wa_app_url}deal/{$_deal.id}/" target="_top" data-link="top" title="{$_deal.name|escape}"><span>{$_deal.name|escape}{$_is_archived_label}</span></a> <span class="hint">[`Stage deleted`]</span>
                                                         {/if}
                                                     {else}
                                                         <a href="{$wa_app_url}deal/{$_deal.id}/" target="_top" data-link="top" title="{$_deal.name|escape}">{$_deal.name|escape}</a> <span class="hint">[`Funnel deleted`]</span>
@@ -817,4 +821,3 @@
 </body>
 </html>
 {/if}
-

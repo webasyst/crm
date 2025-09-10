@@ -9,7 +9,7 @@
             <div class="c-main-fields-label field custom-mt-24">
                 <p>[`Main contact fields cannot be modified or disabled.`]</p>
             </div>
-            <div class="fields-group custom-mt-20">
+            <div class="fields-group custom-mt-16">
                 {foreach $fields.main as $field}
                     <div class="field">
                         <div class="name">{$field.name|escape}</div>
@@ -30,7 +30,7 @@
                     <a href="javascript:void(0);" class="button rounded light-gray crm-edit-field-link"> <i class="fas fa-plus-circle text-green"></i> [`New field`]</a>
                 </div>
             </div>
-            <div class="fields-group js-other-fields custom-mt-20">
+            <div class="fields-group js-other-fields custom-mt-16">
                 {foreach $fields.other as $field}
                     {include file="./SettingsFieldRow.inc.html" field=$field inline}
                 {/foreach}

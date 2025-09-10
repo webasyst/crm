@@ -7,6 +7,7 @@ var crmSettingsFormParagraphEditDialog = (function ($) {
             // DOM
             that.$wrapper = $wrapper;
             that.$textarea = that.$wrapper.find('.crm-paragraph-textarea');
+            that.$captionplace = that.$wrapper.find('.c-field-captionplace :radio');
             that.$button = that.$wrapper.find('[type=submit]');
 
             // VARS
@@ -38,11 +39,17 @@ var crmSettingsFormParagraphEditDialog = (function ($) {
             $textarea = that.$textarea,
             field = that.settingsForm.getField(that.id, that.checked);
 
+        console.log(field);
+
         $textarea.val(field && field.text || '');
         //
         that.initWYSIWYG();
         //
         that.initSaveButton();
+
+        that.$captionplace.on('click', function () {
+            that.setFormChanged();
+        }).filter('[value="' + field.captionplace + '"]').prop('checked', true);
     };
 
 
@@ -65,11 +72,15 @@ var crmSettingsFormParagraphEditDialog = (function ($) {
     crmSettingsFormParagraphEditDialog.prototype.initSaveButton = function () {
         var that = this,
             $button = that.$button,
-            $textarea = that.$textarea;
+            $textarea = that.$textarea,
+            $captionplace = that.$captionplace;
 
         $button.click(function (e) {
             e.preventDefault();
-            that.settingsForm.updateField(that.id, that.checked, { text: $textarea.val() });
+            that.settingsForm.updateField(that.id, that.checked, { 
+                text: $textarea.val(), 
+                captionplace: $captionplace.filter(':checked').val()
+            });
             that.settingsForm.renderField(that.id, that.checked);
             that.dialog.close();
         });

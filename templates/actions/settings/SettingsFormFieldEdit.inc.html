@@ -11,7 +11,9 @@
                 <div class="block fields">
                     <div class="field crm-field-id">
                         <div class="name">[`Field`]</div>
-                        <div class="value">[`Description`] (ID=?)</div>
+                        <div class="value">
+                            [`Description`] (ID=?)
+                        </div>
                     </div>
                     <div class="field crm-field-caption">
                         <div class="name">[`Label in this form`]</div>
@@ -110,6 +112,18 @@
                         <div class="name">[`Placeholder for confirm password input`]</div>
                         <div class="value">
                             <input type="text" name="params[placeholder_confirm]" value="">
+                            <div class="custom-mt-8 crm-field-without_confirm">
+                            <label class="value">
+                                <span class="wa-checkbox"><input type="checkbox" name="params[without_confirm]">
+                                    <span>
+                                        <span class="icon">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    </span>
+                                </span> 
+                                [`Do not show confirm password input`]
+                            </label>
+                            </div>
                         </div>
                     </div>
 
@@ -125,6 +139,17 @@
                                     </span>
                                 </span>
                             </span> </label>
+                        </div>
+                    </div>
+
+                    <div class="fields-group js-captcha-settings hidden">
+                        <div class="field">
+                            <div class="name"></div>
+                            <div class="value">
+                                <a href="{$captcha_settings_url}" target="_blank">
+                                    <i class="fas fa-cog"></i> [`Captcha settings`]
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

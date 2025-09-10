@@ -40,7 +40,7 @@ class crmMessageWriteNewDialogAction extends crmSendEmailDialogAction
             ));   
         }
 
-        $funnels = $fm->getAllFunnels();
+        $funnels = $fm->getAllFunnels(true);
         if (empty($funnels[$deal['funnel_id']])) {
             throw new waException('Funnel not found');
         }

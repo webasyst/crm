@@ -115,7 +115,10 @@ class crmForm
         $this->info = self::getFormModel()->getForm($this->id);
         if (!$this->info) {
             $this->info = self::getFormModel()->getEmptyRow();
-            $this->info['params'] = array();
+            $this->info['params'] = [
+                'html_after_submit' => $this->getDefaultHtmlAfterSubmit(),
+                'after_antispam_confirm_text' => $this->getDefaultAfterAntispamConfirmText(),
+            ];
         } else {
             $this->info['params'] = self::unserializeParams(self::getFormParamsModel()->get($this->id));
         }
@@ -169,6 +172,26 @@ class crmForm
 
 
         return $this->info;
+    }
+
+    protected function getDefaultHtmlAfterSubmit()
+    {
+        $root_uri = wa()->getRootUrl();
+        $text = _w('Thanks for subscribing!');
+        return <<<HTML
+<p style="text-align: center"><img src="{$root_uri}wa-apps/crm/img/success.svg"></p>
+<p style="text-align: center">{$text}</p>
+HTML;
+    }
+
+        protected function getDefaultAfterAntispamConfirmText()
+    {
+        $root_uri = wa()->getRootUrl();
+        $text = _w('Confirmed');
+        return <<<HTML
+<p style="text-align: center"><img src="{$root_uri}wa-apps/crm/img/success.svg"></p>
+<p style="text-align: center">{$text}</p>
+HTML;
     }
 
     public function getId()

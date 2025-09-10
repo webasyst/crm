@@ -63,6 +63,7 @@ class crmSettingsFunnelSaveController extends crmJsonController
             $ins = array(
                 'name'        => $funnel['name'],
                 'sort'        => 0,
+                'icon'        => ifset($funnel['icon']),
                 'color'       => ifset($funnel['color']),
                 'open_color'  => ifset($funnel['open_color']),
                 'close_color' => ifset($funnel['close_color']),
@@ -108,6 +109,7 @@ class crmSettingsFunnelSaveController extends crmJsonController
             }
             $upd = array(
                 'name'        => $funnel['name'],
+                'icon'        => ifset($funnel['icon']),
                 'color'       => ifset($funnel['color']),
                 'open_color'  => ifset($funnel['open_color']),
                 'close_color' => ifset($funnel['close_color']),

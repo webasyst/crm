@@ -20,6 +20,14 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
         $deal_description = $('.crm-deal-description', $form),
         $iframe = $wrapper.find('iframe');
 
+    if (options.bot_hpot.empty_field_name) {
+        const $bot_hpot_wrapper = $wrapper.find('[data-id="' + options.bot_hpot.empty_field_name + '"]');
+        $bot_hpot_wrapper.hide();
+        if (options.bot_hpot.filled_field_value && options.bot_hpot.filled_field_name) {
+            $bot_hpot_wrapper.append('<input type="hidden" name="crm_form[' + options.bot_hpot.filled_field_name + ']" value="' + options.bot_hpot.filled_field_value + '">');
+        }
+    }
+
     $wrapper.css({
         'min-height': $wrapper.height()
     });
@@ -191,7 +199,8 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
             $captcha_refresh.trigger('click');
         };
 
-        $form.on('submit', function () {
+        $form.on('submit', function (e) {
+            e.preventDefault();
 
             clearValidateErrors();
 
@@ -204,8 +213,34 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
             $loading.show();
             $submit.prop('disabled', true);
 
+            const href = $form.attr('action');
+            const data = new FormData($form[0]);
+
+            $.ajax({
+                url: href,
+                type: 'POST',
+                data: data,
+                processData: false,
+                contentType: false,
+                success: function(r) {
+                    try {
+                        onDone(r);
+                    } catch (e) {
+                        onFail(e);
+                    } finally {
+                        onAlways();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    onFail(error);
+                    onAlways();
+                }
+            });
+
+/*
             $iframe.one('load', function() {
                 var r = $.trim($iframe.contents().find("body").html());
+                console.log(r);
                 if (r.length <= 0) {
                     onFail();
                     onAlways();
@@ -217,15 +252,26 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
                     onDone(r);
                     onAlways();
                 } catch (e) {
+                    console.log(r);
                     onFail(e);
                     onAlways();
                 }
             });
             // allow form to submit via its target iframe
-            return true;
+            return true; */
 
         });
     };
 
+    var initTogglePassword = function () {
+        const $wrapper = $('.crm-password-input-wrapper');
+        $wrapper.find('.crm-password-input-icon').on('click', () => {
+            $wrapper.toggleClass('crm-password-input-show');
+            const is_show_password = $wrapper.hasClass('crm-password-input-show');
+            $wrapper.find('.crm-password-input').attr('type', is_show_password ? 'text' : 'password');
+        });
+    };
+
     intiSubmitForm();
+    initTogglePassword();
 };

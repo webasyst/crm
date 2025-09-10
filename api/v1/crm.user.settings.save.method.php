@@ -18,6 +18,7 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
                         '%s, %s, %s or %s',
                         sprintf_wp('“%s”', 'contact_list_columns'),
                         sprintf_wp('“%s”', 'contact_list_sort'),
+                        sprintf_wp('“%s”', 'deal_funnel_columns'),
                         sprintf_wp('“%s”', 'deal_list_filter'),
                         sprintf_wp('“%s”', 'deal_list_sort')
                     )
@@ -28,11 +29,13 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
 
         $contact_list_columns = ifset($fields_data, 'contact_list_columns', []);
         $contact_list_sort = ifset($fields_data, 'contact_list_sort', []);
+        $deal_funnel_columns = ifset($fields_data, 'deal_funnel_columns', null);
         $deal_list_filter = ifset($fields_data, 'deal_list_filter', []);
         $deal_list_sort = ifset($fields_data, 'deal_list_sort', []);
         if ($errors = array_merge(
             $this->validateColumns($contact_list_columns),
             $this->validateSort($contact_list_sort),
+            $this->validateDealColumns($deal_funnel_columns),
             $this->validateDealFilter($deal_list_filter),
             $this->validateDealSort($deal_list_sort),
         )) {
@@ -43,6 +46,7 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
             $this->saveSettings(
                 $contact_list_columns,
                 $contact_list_sort,
+                $deal_funnel_columns,
                 $deal_list_filter,
                 $deal_list_sort
             );
@@ -54,7 +58,28 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
         $this->response = null;
     }
 
-    private function validateColumns($data)
+    private function validateDealColumns($data)
+    {
+        $errors = [];
+        if (!empty($data)) {
+            foreach ($data as $_data) {
+                if (!isset($_data['funnel_id'])) {
+                    $errors[_w('Empty funnel_id')] = 1;
+                }
+                if (!empty($_data['columns'])) {
+                    foreach ($_data['columns'] as $_column) {
+                        if (!isset($_column['field'])) {
+                            $errors[_w('Empty field.')] = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        return array_keys($errors);
+    }
+
+        private function validateColumns($data)
     {
         $errors = [];
         if (!empty($data)) {
@@ -95,7 +120,7 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
             $diff = array_diff($required_fields, array_keys($data));
             if (!empty($diff)) {
                 $errors[] = sprintf_wp('Empty required fields: %s.', implode(', ', $diff));
-            } elseif (!is_numeric($data['stage_id']) && !in_array(strtolower($data['stage_id']), ['', 'null', 'won', 'lost'])) {
+            } elseif (!is_numeric($data['stage_id']) && !in_array(strtolower(ifempty($data['stage_id'], '')), ['', 'null', 'won', 'lost'])) {
                 $errors[] = sprintf_wp('Unknown “%s” value.', 'stage_id');
             }
         }
@@ -126,7 +151,7 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
         return $errors;
     }
 
-    private function saveSettings($contact_list_columns, $contact_list_sort, $deal_list_filter, $deal_list_sort)
+    private function saveSettings($contact_list_columns, $contact_list_sort, $deal_funnel_columns, $deal_list_filter, $deal_list_sort)
     {
         $settings = [];
         $csm = new waContactSettingsModel();
@@ -151,9 +176,21 @@ class crmUserSettingsSaveMethod extends crmApiAbstractMethod
             ];
             $settings['contacts_action_params'] = json_encode($_list_sort);
         }
+        if (!empty($deal_funnel_columns) || is_array($deal_funnel_columns)) {
+            foreach ($deal_funnel_columns as $_funnel_columns) {
+                $_list_columns = [];
+                foreach ($_funnel_columns['columns'] as $sort => $_column) {
+                    $_list_columns[$_column['field']] = [
+                        'sort'  => $sort,
+                        'off'   => 0
+                    ];
+                }
+                $settings['deal_funnel_columns:'.$_funnel_columns['funnel_id']] = json_encode($_list_columns);    
+            }
+        }
         if (!empty($deal_list_filter)) {
             foreach ($deal_list_filter as $_name => &$_value) {
-                if ($_name === 'stage_id' && in_array(strtolower($_value), ['won', 'lost'])) {
+                if ($_name === 'stage_id' && !empty($_value) && in_array(strtolower($_value), ['won', 'lost'])) {
                     continue;
                 }
                 $_value = (int) $_value;

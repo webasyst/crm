@@ -36,6 +36,10 @@ class crmFormConstructor
      */
     protected static $allowed_field_ids;
 
+    protected static $captcha_is_invisible;
+
+    protected static $captcha_type;
+
     /**
      * crmFormConstructor constructor.
      * @param int $id
@@ -71,10 +75,16 @@ class crmFormConstructor
      */
     public function saveForm($data, $delete_old_params = true)
     {
+        $data['params']['antibot_honey_pot'] = [
+            'empty_field_name'   => '!f' . waUtils::getRandomHexString(6),
+            'filled_field_name'  => '!f' . waUtils::getRandomHexString(6),
+            'filled_field_value' => waUtils::getRandomHexString(32),
+        ];
         $this->getForm()->save($data, $delete_old_params);
         $success = $this->getForm()->getId() > 0;
         $this->available_fields = null;
         $this->checked_fields = null;
+
         return $success;
     }
 
@@ -97,6 +107,8 @@ class crmFormConstructor
             'width' => 'auto',
             'caption' => ifset($info, 'params', 'button_caption', _w('Submit')),
         ];
+        $info['params']['widget_domains'] = json_decode(ifset($info, 'params', 'widget_domains', '[]'), true);
+        $info['params']['widget_path'] = json_decode(ifset($info, 'params', 'widget_path', '{}'), true);
         return $info;
     }
 
@@ -293,16 +305,27 @@ class crmFormConstructor
 
     protected function renderCaptcha($template, $info)
     {
+        $info['captcha_type'] = self::getCaptchaType();
+        $info['caption'] = $info['captcha_type'] === 'waPHPCaptcha' ? 
+                _w('Enter the code from the image') :
+                _w('Antibot protection');
+
+        $info['placeholder_need'] = $info['captcha_type'] === 'waPHPCaptcha';
+
+        $info['is_invisible'] = self::getCaptchaIsInvisible();
+        $info['captionplace'] = $info['is_invisible'] ? 'none' : 'left';                
+
         $img_url = 'img/waCaptchaImg.png';
-        $isReCaptcha = waCaptcha::getCaptchaType('crm') == 'waReCaptcha';
-        if ($isReCaptcha) {
+        if ($info['captcha_type'] === 'waReCaptcha') {
             $img_url = 'img/reCaptchaEN.png';
             if (wa()->getLocale() === 'ru_RU') {
                 $img_url = 'img/reCaptchaRU.png';
             }
+        } elseif ($info['captcha_type'] === 'waSmartCaptcha') {
+            $img_url = 'img/smartCaptcha.png';
         }
         $info['img_url'] = $img_url;
-        $info['isReCaptcha'] = $isReCaptcha;
+
         return $this->renderFieldTemplate($template, $info);
     }
 
@@ -461,6 +484,21 @@ class crmFormConstructor
         return self::$allowed_field_ids;
     }
 
+    public static function getCaptchaIsInvisible()
+    {
+        if (self::$captcha_is_invisible === null) {
+            self::$captcha_is_invisible = wa('crm')->getCaptcha()->isInvisible();
+        }
+        return self::$captcha_is_invisible;
+    }
+
+    public static function getCaptchaType()
+    {
+        if (self::$captcha_type === null) {
+            self::$captcha_type = waCaptcha::getCaptchaType('crm');
+        }
+        return self::$captcha_type;
+    }
 
     /**
      * @return array
@@ -556,6 +594,8 @@ class crmFormConstructor
      */
     protected function getSpecialFields()
     {
+        $captcha_type = self::getCaptchaType();
+        $captcha_is_invisible = self::getCaptchaIsInvisible();
         $fields = array(
             '!deal_description' => array(
                 'id' => '!deal_description',
@@ -582,6 +622,7 @@ class crmFormConstructor
                 'id' => '!paragraph',
                 'name' => _w('Text paragraph'),
                 'is_multi' => true,
+                //'captionplace' => 'left',
                 'form_field_type' => self::FIELD_TYPE_SPECIAL
             ),
             '!agreement_checkbox' => array(
@@ -599,11 +640,17 @@ class crmFormConstructor
             ),
             '!captcha' => array(
                 'id' => '!captcha',
-                'name' => _w('Captcha'),
-                'placeholder_need' => true,
+                'name' => _w('Antispam (captcha)'),
+                'caption' => $captcha_type === 'waPHPCaptcha' ? 
+                    _w('Enter the code from the image') :
+                    _w('Antibot protection'),
                 'required' => true,
                 'required_always' => true,
                 'is_multi' => false,
+                'is_invisible' => $captcha_is_invisible,
+                'captcha_type' => $captcha_type,
+                'placeholder_need' => $captcha_type === 'waPHPCaptcha',
+                'captionplace' => $captcha_is_invisible ? 'none' : 'left',
                 'form_field_type' => self::FIELD_TYPE_SPECIAL
             )
         );

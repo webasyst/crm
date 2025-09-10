@@ -1,71 +1,693 @@
-{if !$_hide_payments && (!empty($payment_methods) || !empty($payment))}
+{if empty($_hide_payments) && (!empty($payment_methods) || !empty($payment))}
     <section class="c-payment-section">
         {if !empty($payment_methods)}
-            <input class="c-button button js-show-payments" type="button" value="[`Payment`]">
-            <div class="c-payments-wrapper js-payments-wrapper" style="display: none;">
-                <form method="post">
-                    <ul class="c-payment-options">
-                        {foreach $payment_methods as $m}
-                            <li class="c-payment-item {if $m.id == $payment_id}is-active{/if} {if !empty($m.error)}has-error{/if}" >
-                                <h3 class="c-payment-header">
-                                    <label>
-                                        {if !empty($m.logo)}<img class="c-payment-image" src="{$m.logo}">{/if}
-                                        <input class="c-payment-input" type="radio" name="payment_id" value="{$m.id}" {if $m.id == $payment_id}checked{/if} {if !empty($m.error)}disabled="disabled"{/if}>
-                                        <span class="c-payment-name">{$m.name|escape}</span>
-                                    </label>
-                                </h3>
-                                {if $m.description}
-                                    <p class="c-payment-description">{$m.description}</p>
-                                {/if}
-                                {if !empty($m.error)}
-                                    <p class="error"><em>{$m.error}</em></p>
-                                {/if}
-                                {if !empty($m.custom_html)}
-                                    <div class="c-payment-content {if $m.id != $payment_id}is-hidden{/if} wa-form">{$m.custom_html}</div>
-                                {/if}
-                            </li>
-                            {foreachelse}
-                            <li class="c-payment-item">
-                                <em class="error">[`Oops! We are sorry, but <strong>we can not offer any payment option for your order</strong>. Checkout can not be completed.`]</em>
-                            </li>
-                        {/foreach}
-                    </ul>
-                    <input type="hidden" name="hash" value="{$hash|escape}">
-                    <input class="button" type="submit" value="[`Pay`]">
-                </form>
+
+            {if empty($style_version)}
+                <input class="c-button button js-show-payments" type="button" value="[`Pay`]">
+            {else}
+                <a href="javascript:void(0);" class="c-button js-show-payments"{if !empty($company.invoice_options.button_color)} style="background-color: {$company.invoice_options.button_color};"{/if}>[`Pay`]</a>
+            {/if}
+
+            <div class="dialog c-payments-wrapper js-payments-wrapper">
+                <div class="dialog-background"></div>
+                <div class="dialog-body">
+                    <a href="#" class="dialog-close js-close-dialog">&#x2715;</a>
+                    <div class="dialog-content">
+                        <form method="post">
+
+                            <ul class="c-payment-options">
+                                {foreach $payment_methods as $m}
+                                    <li class="c-payment-item {if $m.id == $payment_id}is-active{/if} {if !empty($m.error)}has-error{/if}" >
+                                        <label>
+                                            <input class="c-payment-input" type="radio" name="payment_id" value="{$m.id}" {if $m.id == $payment_id}checked{/if} {if !empty($m.error)}disabled="disabled"{/if}>
+                                            <div class="c-payment-header">
+                                                {if !empty($m.logo)}<img class="c-payment-image" src="{$m.logo}">{/if}
+                                            </div>
+                                            <div class="c-payment-body">
+                                                <p class="c-payment-name">{$m.name|escape}</p>
+                                                {if $m.description}
+                                                    <p class="c-payment-description">{$m.description}</p>
+                                                {/if}
+                                                {if !empty($m.error)}
+                                                    <p class="error"><em>{$m.error}</em></p>
+                                                {/if}
+                                                {if !empty($m.custom_html)}
+                                                    <div class="c-payment-content {if $m.id != $payment_id}is-hidden{/if} wa-form">{$m.custom_html}</div>
+                                                {/if}
+                                            </div>
+                                        </label>
+                                    </li>
+                                    {foreachelse}
+                                    <li class="c-payment-item">
+                                        <em class="error">[`Oops! We are sorry, but <strong>we can not offer any payment option for your order</strong>. Checkout can not be completed.`]</em>
+                                    </li>
+                                {/foreach}
+                            </ul>
+
+                            <input type="hidden" name="hash" value="{$hash|escape}">
+                            <input class="{if empty($style_version)}button{else}c-button{/if}" type="submit" value="[`Pay`]">
+                        </form>
+                    </div>
+                </div>
             </div>
             <script>
                 ( function($) {
-                    var $wrapper = $("#c-invoice-front-section"),
-                        $paymentW = $wrapper.find(".js-payments-wrapper") ;
+                    var $wrapper = $("#c-invoice-front-section");
+                    const dialogContent = $wrapper.find(".js-payments-wrapper");
 
-                    $wrapper.on("click", ".js-show-payments", function () {
-                        $(this).hide();
-                        $paymentW.show();
+                    $wrapper.on("click", ".js-show-payments", () => {
+                        $.waDialog({
+                            $wrapper: dialogContent,
+                            onOpen: ($dialog, dialog) => {
+                                const $form = $dialog.find('form');
+                                const $submitButton = $form.find("[type='submit']");
+                                let paymentSection = null;
+
+                                $form.on('submit', (e) => {
+                                    e.preventDefault();
+
+                                    $submitButton.hide();
+
+                                    $.post(location.href, $dialog.find('form').serialize(), (response) => {
+                                        if(typeof response === 'string') {
+                                            paymentSection = $(response).find(".c-payment-section");
+                                            if(paymentSection.length) {
+                                                $form.after(paymentSection);
+                                            }
+                                        }else{
+                                            $submitButton.show();
+                                        }
+
+                                        dialog.resize();
+                                    });
+                                });
+
+                                $form.find('li').on('click', () => {
+                                    if(paymentSection) {
+                                        paymentSection.remove();
+                                        paymentSection = null;
+                                        $submitButton.show();
+                                        dialog.resize();
+                                    }
+                                });
+                            }
+                        })
                     });
+                })(jQuery);
 
-                    initActivePayment();
+                /**
+                 * @description dialog component
+                 * @example /webasyst/ui/component/dialog/
+                 * */
+                {literal}
+                ( function($) {
 
-                    function initActivePayment() {
-                        var active_class = "is-active",
-                            $activeItem = $paymentW.find(".c-payment-item." + active_class);
+                    const class_names = {
+                        "wrapper": "dialog",
+                        "wrapper-opened": "dialog-opened",
+                            "background": "dialog-background",
+                            "body": "dialog-body",
+                                "header": "dialog-header",
+                                "content": "dialog-content",
+                                "footer": "dialog-footer"
+                    };
 
-                        $paymentW.on("change", ".c-payment-item input:radio", setActive);
+                    const locked_class = "is-locked";
+                    const dialogs = [];
 
-                        function setActive() {
-                            var $input = $(this),
-                                $item = $input.closest(".c-payment-item");
+                    var Dialog = ( function($) {
 
-                            if ($activeItem.length) {
-                                $activeItem.removeClass(active_class);
+                        Dialog = function(options) {
+                            const that = this;
+
+                            that.$body = $('body');
+                            that.$window = $(window.top);
+                            that.$document = $(top.document);
+
+                            that.$wrapper = options["$wrapper"];
+
+                            if (that.$wrapper && that.$wrapper.length) {
+                                // GENERATE ID
+                                that.component_id = Object.generateId(this);
+
+                                // DOM
+                                that.$background = that.$wrapper.find( getSelector("background") )
+                                that.$block = that.$wrapper.find( getSelector("body") );
+                                that.$content = that.$block.find( getSelector("content") );
+
+                                // CONST
+                                that.esc = (typeof options["esc"] === "boolean" ? options["esc"] : true);
+                                that.animate = (typeof options["animate"] === "boolean" ? options["animate"] : true);
+
+                                // VARS
+                                that.options = (options["options"] || {});
+                                that.position = (typeof options["position"] === "function" ? options["position"] : null);
+                                that.lock_body_scroll = (typeof options["lock_body_scroll"] === "boolean" ? options["lock_body_scroll"] : true);
+                                that.bodyDefaultPadding = document.body.style.getPropertyValue('padding-right');
+                                that.bodyDefaultBoxSizing = document.body.style.getPropertyValue('box-sizing');
+                                const append_to = that.$body.find(options["append_to"]);
+                                that.append_to = append_to.length ? append_to : that.$body;
+
+                                // DYNAMIC VARS
+                                that.is_visible = false;
+                                that.is_removed = false;
+                                that.is_ontop = true;
+
+                                // HELPERS
+                                that.onOpen = (typeof options["onOpen"] === "function" ? options["onOpen"] : null);
+                                that.onClose = (typeof options["onClose"] === "function" ? options["onClose"] : null);
+                                that.onResize = (typeof options["onResize"] === "function" ? options["onResize"] : null);
+                                that.onBgClick = (typeof options["onBgClick"] === "function" ? options["onBgClick"] : null);
+
+                                // INIT
+                                that.init();
+
+                            } else {
+                                log("Error: bad data for dialog");
                             }
 
-                            $activeItem = $item.addClass(active_class);
+                            dialogs.push(that);
+                        };
+
+                        Dialog.prototype.init = function() {
+                            const that = this;
+
+                            // save link on dialog
+                            that.$wrapper.data("dialog", that);
+
+                            that.bindEvents();
+                        };
+
+                        Dialog.prototype.bindEvents = function() {
+                            const that = this;
+
+                            that.$wrapper.on("click.Dialog", ".js-close-dialog, .js-dialog-close", $.proxy(this.close, that));
+
+                            that.$wrapper.on("dialog-close", $.proxy(this.close, that));
+
+                            // Click on background, default nothing
+                            if (that.onBgClick) {
+                                that.$wrapper.on("click.Dialog", getSelector("background"), $.proxy(that.backgroundClick, that));
+                            }
+
+                            if (that.esc) {
+                                that.$document.on(`keyup.Dialog.${that.component_id}`, $.proxy(that.escapeWatcher, that))
+                            }
+
+                            that.$window.on(`resize.Dialog.${that.component_id}`, $.proxy(that.resizeDialog, that));
+                            that.$document.on(`refresh.Dialog.${that.component_id}`, $.proxy(that.resizeDialog, that));
+
+                            that.render();
+                        };
+
+                        Dialog.prototype.render = function() {
+                            const that = this;
+
+                            try {
+                                that.show();
+                            } catch(e) {
+                                log("Error: " + e.message);
+                            }
+
+                            // trigger event on open
+                            if (that.onOpen) {
+                                that.onOpen(that.$wrapper, that);
+                            }
+                        };
+
+                        Dialog.prototype.show = function() {
+                            const that = this;
+
+                            const is_exist = $.contains(top.document, that.$wrapper);
+
+                            if (!is_exist) {
+                                that.append_to.append(that.$wrapper);
+                            }
+
+                            that.$wrapper.addClass(class_names["wrapper-opened"]);
+                            that.is_visible = true;
+
+                            // set is_ontop flag only on last element
+                            dialogs.map((item) => {
+                                if (item.component_id !== that.component_id) {
+                                    item.is_ontop = false;
+                                }
+                            })
+
+                            that.setPosition();
+
+                            if (that.animate) {
+                                that.animateDialog(true);
+                            }
+
+                            if (that.lock_body_scroll) {
+                                that.lockBodyScroll(true);
+                            }
+                        };
+
+                        Dialog.prototype.setPosition = function() {
+                            const that = this;
+
+                            that.$content.css("height", "auto");
+
+                            const window_w = that.$window.width();
+                            const window_h = that.$window.height();
+                            const wrapper_w = that.$block.outerWidth();
+                            const wrapper_h = that.$block.outerHeight();
+
+                            let pad = 20;
+
+                            let css;
+
+                            let getPosition = getDefaultPosition;
+
+                            if (that.position) {
+                                css = that.position(that);
+                                pad = 0;
+                            } else {
+                                css = getPosition({
+                                    width: wrapper_w,
+                                    height: wrapper_h
+                                });
+                            }
+
+                            if (css.left > 0 && css.left + wrapper_w > window_w) {
+                                css.left = window_w - wrapper_w - pad;
+                            }
+
+                            if (css.top > 0) {
+                                if (css.top + wrapper_h > window_h) {
+                                    const customPad = pad ? pad : 20;
+                                    css.top = pad ? pad : css.top;
+                                    that.$background.css('height', that.$block.outerHeight() + customPad + css.top);
+                                    that.$wrapper.css({
+                                        'overflow-y': 'scroll',
+                                        'padding-bottom': pad,
+                                    });
+                                    that.$block.css('position', 'relative');
+                                    that.$block.css('margin-bottom', customPad);
+                                } else {
+                                    that.$background.height('');
+                                    that.$wrapper.css({
+                                        'overflow-y': 'scroll',
+                                        'padding-bottom': 0,
+                                    });
+                                }
+                            } else {
+                                css.top = pad;
+
+                                that.$content.hide();
+
+                                const block_h = that.$block.outerHeight();
+                                const content_h = window_h - block_h - pad * 2;
+
+                                that.$content
+                                .css("height", content_h > 0 ? `${content_h}px` : 'auto')
+                                .addClass("is-long-content")
+                                .show();
+
+                            }
+
+                            that.$block.css({'top': css.top, 'left': css.left});
+
+                            function getDefaultPosition(area) {
+                                return {
+                                    top: Math.abs( (window_h - area.height)/2 ),
+                                    left: Math.abs( (window_w - area.width)/2 )
+                                };
+                            }
+                        };
+
+                        Dialog.prototype.lockBodyScroll = function(state) {
+                            const that = this;
+
+                            if (state) {
+                                const scroll_width = Math.abs(window.innerWidth - document.documentElement.clientWidth);
+                                that.$body.addClass(locked_class);
+                                document.body.style.paddingRight = scroll_width + 'px';
+                                document.body.style.boxSizing = 'border-box';
+                            } else {
+                                that.$body.removeClass(locked_class);
+
+                                if (that.bodyDefaultPadding) {
+                                    document.body.style.paddingRight = that.bodyDefaultPadding;
+                                } else {
+                                    document.body.style.removeProperty('padding-right');
+                                }
+
+                                if (that.bodyDefaultBoxSizing) {
+                                    document.body.style.boxSizing = that.bodyDefaultBoxSizing;
+                                } else {
+                                    document.body.style.removeProperty('box-sizing');
+                                }
+                            }
+                        }
+
+                        Dialog.prototype.resizeDialog = function() {
+                            const that = this;
+
+                            const is_exist = $.contains(top.document, that.$wrapper[0]);
+
+                            if (is_exist) {
+                                that.resize();
+                            }
+                        }
+
+                        Dialog.prototype.resize = function() {
+                            const that = this;
+
+                            that.setPosition();
+
+                            if (that.onResize) {
+                                that.onResize(that.$wrapper, that);
+                            }
+                        };
+
+                        Dialog.prototype.backgroundClick = function(event) {
+                            const that = this;
+
+                            that.onBgClick(event, that.$wrapper, that);
+                        }
+
+                        Dialog.prototype.escapeWatcher = function(event) {
+                            const that = this;
+
+                            // prevent all system keyboard events
+                            event.preventDefault();
+
+                            const is_exist = $.contains(top.document, that.$wrapper[0]);
+
+                            if (!is_exist) {
+                                return;
+                            }
+
+                            const ESCAPE_CODE = 27;
+
+                            if (event.keyCode === ESCAPE_CODE && dialogs.length && that.is_ontop) {
+                                const currentDialog = dialogs[dialogs.length - 1];
+                                currentDialog.close();
+                            }
+                        }
+
+                        Dialog.prototype.close = function(event) {
+                            if (event) {
+                                event.preventDefault();
+                            }
+
+                            const that = this;
+
+                            let result = null;
+
+                            if (!that.is_visible || result) {
+                                return;
+                            }
+
+                            if(!dialogs.length) {
+                                return;
+                            }
+
+                            if (that.onClose) {
+                                result = that.onClose(that);
+
+                                if (result === false) {
+                                    return;
+                                }
+                            }
+
+                            dialogs.pop()
+
+                            // set is_ontop flag on a last dialog in array
+                            dialogs.map((item, index) => {
+                                if (dialogs.length === index + 1) {
+                                    item.is_ontop = true;
+                                }
+                            })
+
+                            if (that.animate) {
+                                that.animateDialog(false).then( function() {
+                                    that.$wrapper.remove()
+                                });
+                            } else {
+                                that.$wrapper.remove();
+                            }
+
+                            const dialogLength = that.$body.find(`div.${class_names["wrapper-opened"]}:visible`).length;
+                            if (that.lock_body_scroll && !(dialogLength > 1)) {
+                                that.lockBodyScroll(false);
+                            }
+
+                            that.is_removed = true;
+                            that.is_visible = false;
+
+                            that.destroy();
+
+                            return result;
+                        };
+
+                        Dialog.prototype.hide = function() {
+                            const that = this;
+
+                            if (that.animate) {
+                                that.animateDialog(false).then( function() {
+                                    that.$wrapper.detach();
+                                });
+                            } else {
+                                that.$wrapper.detach();
+                            }
+
+                            that.is_visible = false;
+
+                            if (that.lock_body_scroll) {
+                                that.lockBodyScroll(false);
+                            }
+                        };
+
+                        Dialog.prototype.unbindEvents = function() {
+                            const that = this;
+
+                            that.$wrapper.off(".Dialog");
+                            that.$window.off(`resize.Dialog.${that.component_id}`);
+                            that.$document.off(`keyup.Dialog.${that.component_id}`);
+                            that.$document.off(`refresh.Dialog.${that.component_id}`);
+                        }
+
+                        Dialog.prototype.destroy = function() {
+                            const that = this;
+
+                            that.unbindEvents()
+                            that.$wrapper.removeData("dialog");
+                        }
+
+                        if ( typeof Object.generateId == "undefined" ) {
+                            let id = 0;
+
+                            Object.generateId = function(o) {
+                                if ( typeof o.__uniqueid == "undefined" ) {
+                                    Object.defineProperty(o, "__uniqueid", {
+                                        value: ++id,
+                                        enumerable: false,
+                                        writable: false
+                                    });
+                                }
+
+                                return o.__uniqueid;
+                            };
+                        }
+
+                        /**
+                         * @param {Boolean} animate
+                        * */
+                        Dialog.prototype.animateDialog = function(animate) {
+                            var that = this,
+                                deferred = $.Deferred(),
+                                time = 200;
+
+                            var shifted_class = "is-shifted",
+                                animate_class = "is-animated";
+
+                            if (animate) {
+                                that.$wrapper.addClass(shifted_class);
+                                that.$wrapper[0].offsetHeight;
+                                that.$wrapper
+                                    .addClass(animate_class)
+                                    .removeClass(shifted_class);
+
+                                setTimeout( function() {
+                                    deferred.resolve();
+                                }, time);
+
+                            } else {
+                                that.$wrapper.addClass(shifted_class);
+                                setTimeout( function() {
+                                    deferred.resolve();
+                                    that.$wrapper.removeClass(animate_class);
+                                }, time);
+                            }
+
+                            return deferred.promise();
+                        };
+
+                        return Dialog;
+
+                    })($);
+
+                    $.waDialog = function(plugin_options) {
+                        plugin_options = ( typeof plugin_options === "object" ? plugin_options : {});
+
+                        var options = $.extend(true, {}, plugin_options),
+                            result = false;
+
+                        options["$wrapper"] = getWrapper(options);
+
+                        if (options["$wrapper"]) {
+                            result = new Dialog(options);
+                        }
+
+                        return result;
+                    };
+
+                    function getWrapper(options) {
+                        let result;
+
+                        if (options["html"]) {
+                            result = $(options["html"]);
+
+                        } else if (options["$wrapper"]) {
+                            result = options["$wrapper"];
+
+                        } else {
+                            result = generateDialog(options["header"], options["content"], options["footer"]);
+                        }
+
+                        return result;
+
+                        function generateDialog($header, $content, $footer) {
+                            let result = false;
+
+                            const $wrapper = $("<div />").addClass( class_names["wrapper"] );
+                            const $bg = $("<div />").addClass( class_names["background"] );
+                            const $body = $("<div />").addClass( class_names["body"] );
+                            const $header_w = ( $header ? $("<div />").addClass( class_names["header"] ).append($header) : false );
+                            const $content_w = ( $content ? $("<div />").addClass( class_names["content"] ).append($content) : false );
+                            const $footer_w = ( $footer ? $("<div />").addClass( class_names["footer"] ).append($footer) : false );
+
+                            if ($header_w || $content_w || $footer_w) {
+                                if ($header_w) {
+                                    $body.append($header_w)
+                                }
+                                if ($content_w) {
+                                    $body.append($content_w)
+                                }
+                                if ($footer_w) {
+                                    $body.append($footer_w)
+                                }
+                                result = $wrapper.append($bg).append($body);
+                            }
+
+                            return result;
                         }
                     }
 
+                    function getSelector(name) {
+                        return (class_names[name] ? "." + class_names[name] : null);
+                    }
+
+                    function log(data) {
+                        if (console && console.log) {
+                            console.trace(data);
+                        }
+                    }
+
+                    $.waDialog = $.extend($.waDialog || {}, {
+                        alert(options) {
+                            return $.wa.notice(options);
+                        },
+                        confirm(options) {
+                            return $.wa.confirm(options);
+                        },
+                    })
+
                 })(jQuery);
+                {/literal}
             </script>
+            <style>
+                html {
+                    --background-color-blank:#fff;
+                    --dialog-background-color:rgba(255, 255, 255, 0.8);
+                    --dialog-shadow-color:#bbb;
+                    --background-color:rgba(0, 20, 80, 0.05);
+                }
+
+                .dialog { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-sizing: border-box; z-index: 1050; background-color: transparent; }
+                .dialog.dialog-opened { display: block; }
+                .dialog .dialog-background { position: absolute; top: 0; left: 0; z-index: 5; width: 100%; height: 100%; box-sizing: border-box; background-color: var(--dialog-background-color); }
+                .dialog .dialog-body { position: absolute; top: 10vh !important; left: 0; z-index: 10; box-sizing: border-box; background: var(--background-color-blank); width: 600px; max-width: 80%; border-radius: 0.75rem; box-shadow: 0 0 70px  var(--dialog-shadow-color); }
+                .dialog .dialog-body.min-width { width: min-content; }
+                .dialog .dialog-body form { overflow: visible; }
+                .dialog .dialog-body .dialog-header { padding: 1.5rem; margin: 0; }
+                .dialog .dialog-body .dialog-header > *:first-child { margin-top: 0; }
+                .dialog .dialog-body .dialog-header > *:last-child { margin-bottom: 0; }
+                .dialog .dialog-body .dialog-header + .dialog-content { padding-top: 0; }
+                .dialog .dialog-body .dialog-content { padding: 1.5rem; min-height: 4rem; overflow-y: auto; box-sizing: border-box;}
+                .dialog .dialog-body .dialog-content:empty { display: none; }
+                .dialog .dialog-body .dialog-content.overflow-hidden { overflow: hidden; }
+                .dialog .dialog-body .dialog-footer { margin: 1rem 0 0; padding: 0 1.5rem 1.5rem 1.5rem; }
+                .dialog .dialog-close { position: absolute; top: 0.75rem; right: 1rem; color: inherit; font-size: 1.5rem; opacity: 0.5; padding: 1rem; }
+                .dialog .dialog-close:hover { opacity: 1; }
+
+                /* animation */
+                .dialog .dialog-body { transform: translate(0, 0); }
+                .dialog.is-shifted { opacity: 0; }
+                .dialog.is-shifted .dialog-body { transform: translate(0, 2rem); }
+                .dialog.is-animated { transition: opacity 200ms ease-in-out;}
+                .dialog.is-animated .dialog-body { transition: transform 200ms ease-in-out, left 200ms linear, top 200ms linear;}
+
+                .dialog .c-payment-options { margin: 3rem 0 2rem 0; padding: 0; list-style: none; border-radius: .5rem; border: 1px solid #e6e6e6; overflow: hidden; max-height: 80vh; overflow-y: auto; }
+                .dialog .c-payment-options li { padding: 1rem; }
+                .dialog .c-payment-options li:not(:last-child) { border-bottom: 1px solid #e6e6e6; }
+                .dialog .c-payment-options li label { display: flex; gap: 1rem; cursor: pointer; }
+                .dialog .c-payment-options li label .c-payment-input { display: none; }
+                .dialog .c-payment-options li:has(.c-payment-input:checked) { background-color: var(--background-color); }
+                .dialog .c-payment-options li label .c-payment-header { flex-basis: 20%; }
+                .dialog .c-payment-options li label .c-payment-header img { max-width: 100%; }
+                .dialog .c-payment-options li label .c-payment-body { flex-basis: 80%; text-align: left; }
+                .dialog .c-payment-options li label .c-payment-body p:last-of-type { margin-bottom: 0; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-name { margin-bottom: 0.5rem; font-weight: bold; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-description { margin-bottom: 0.5rem; font-size: 80%; }
+                .dialog .c-payment-options li .error { color: red; font-style: italic; font-size: 80%; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-content { margin-bottom: 0.5rem; font-size: 80%; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-content.is-hidden { display: none; margin-top: 1rem; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-content .wa-field:not(:last-child) { margin-bottom: .5rem; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-content .wa-field input { border: 1px solid #e6e6e6; border-radius: .25rem; padding: .5rem; }
+                .dialog .c-button,
+                .dialog .c-payment-section [type="submit"] {
+                    display: flex;
+                    background-color: #256336;
+                    box-sizing: border-box;
+                    color: #fff;
+                    border-radius: 50px;
+                    padding: 8px 21px;
+                    text-decoration: none;
+                    font-size: 18px;
+                    font-weight: 500;
+                    margin-inline: auto;
+                }
+                .dialog .c-payment-section {
+                    text-align: center;
+                }
+                .dialog .c-payment-section:not(:has([type="submit"])) {
+                    color: red;
+                }
+
+                @media screen and (max-width: 760px) { /* mobile */
+
+                    .dialog { padding: 0 !important; overflow: hidden !important; }
+                    .dialog .dialog-body { position: absolute !important; top: 0!important; left: 0!important; bottom: 0!important; right: 0!important; max-width: 100%; width: 100%; display: flex; flex-direction: column; border-radius: 0; margin: 0 !important; }
+                    .dialog .dialog-body .dialog-footer { margin-top: auto; padding-top: 1rem; }
+
+                }
+                .dialog ~ .ui-autocomplete { z-index: 1051 !important; }
+            </style>
         {elseif (!empty($payment))}
             {$payment}
         {/if}

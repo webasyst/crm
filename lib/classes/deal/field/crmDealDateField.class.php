@@ -29,9 +29,9 @@ class crmDealDateField extends crmDealField
             return null;
         }
         if ($format === null) {
-            $format = 'humandate';
+            $format = 'date';
         }
-        return waDateTime::format($format, $value);
+        return waDateTime::format($format, $value, 'server');
     }
 
     public function typecast($value)

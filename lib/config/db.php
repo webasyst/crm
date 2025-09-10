@@ -216,9 +216,11 @@ return array(
         'id' => array('int', 11, 'null' => 0, 'autoincrement' => 1),
         'name' => array('varchar', 255, 'null' => 0),
         'sort' => array('int', 11, 'null' => 0, 'default' => '0'),
+        'icon' => array('varchar', 255),
         'color' => array('varchar', 13, 'null' => 0),
         'open_color' => array('varchar', 13, 'null' => 0),
         'close_color' => array('varchar', 13, 'null' => 0),
+        'is_archived' => array('int', 1, 'null' => 0, 'default' => '0'),
         ':keys' => array(
             'PRIMARY' => 'id',
         ),
@@ -528,6 +530,7 @@ return array(
     'crm_tag' => array(
         'id' => array('int', 11, 'null' => 0, 'autoincrement' => 1),
         'name' => array('varchar', 255, 'null' => 0),
+        'color' => array('varchar', 13),
         'count' => array('int', 11, 'null' => 0, 'default' => '0'),
         ':keys' => array(
             'PRIMARY' => 'id',
@@ -547,6 +550,8 @@ return array(
         'id' => array('int', 11, 'null' => 0, 'autoincrement' => 1),
         'name' => array('varchar', 255, 'null' => 0),
         'content' => array('text', 'null' => 0),
+        'origin_id' => array('int', 11),
+        'style_version' => array('int', 11, 'null' => 0, 'default' => '1'),
         ':keys' => array(
             'PRIMARY' => 'id',
         ),

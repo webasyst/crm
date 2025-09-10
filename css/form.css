@@ -157,6 +157,32 @@
 .crm-form-block .crm-form-fields-block .crm-form-fields .c-agreement-checkbox-wrapper .c-agreement-checkbox-html-label.c-disabled a:hover {
   color: #aaa !important;
 }
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-password-input-wrapper.crm-password-input-with-toggler {
+  position: relative;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-password-input-wrapper.crm-password-input-with-toggler .crm-password-input-icon {
+  --icon-url: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20576%20512%22%3E%3C!--!Font%20Awesome%20Free%20v5.15.4%20by%20%40fontawesome%20-%20https%3A%2F%2Ffontawesome.com%20License%20-%20https%3A%2F%2Ffontawesome.com%2Flicense%2Ffree%20Copyright%202025%20Fonticons%2C%20Inc.--%3E%3Cpath%20d%3D%22M572.52%20241.4C518.29%20135.59%20410.93%2064%20288%2064S57.68%20135.64%203.48%20241.41a32.35%2032.35%200%200%200%200%2029.19C57.71%20376.41%20165.07%20448%20288%20448s230.32-71.64%20284.52-177.41a32.35%2032.35%200%200%200%200-29.19zM288%20400a144%20144%200%201%201%20144-144%20143.93%20143.93%200%200%201-144%20144zm0-240a95.31%2095.31%200%200%200-25.31%203.79%2047.85%2047.85%200%200%201-66.9%2066.9A95.78%2095.78%200%201%200%20288%20160z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E");
+  content: '';
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask: var(--icon-url);
+  mask: var(--icon-url);
+  opacity: 0.6;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-password-input-wrapper.crm-password-input-with-toggler .crm-password-input-icon:hover {
+  opacity: 1;
+}
+.crm-form-block .crm-form-fields-block .crm-form-fields .crm-password-input-wrapper.crm-password-input-with-toggler.crm-password-input-show .crm-password-input-icon {
+  --icon-url: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20640%20512%22%3E%3C!--!Font%20Awesome%20Free%20v5.15.4%20by%20%40fontawesome%20-%20https%3A%2F%2Ffontawesome.com%20License%20-%20https%3A%2F%2Ffontawesome.com%2Flicense%2Ffree%20Copyright%202025%20Fonticons%2C%20Inc.--%3E%3Cpath%20d%3D%22M320%20400c-75.85%200-137.25-58.71-142.9-133.11L72.2%20185.82c-13.79%2017.3-26.48%2035.59-36.72%2055.59a32.35%2032.35%200%200%200%200%2029.19C89.71%20376.41%20197.07%20448%20320%20448c26.91%200%2052.87-4%2077.89-10.46L346%20397.39a144.13%20144.13%200%200%201-26%202.61zm313.82%2058.1l-110.55-85.44a331.25%20331.25%200%200%200%2081.25-102.07%2032.35%2032.35%200%200%200%200-29.19C550.29%20135.59%20442.93%2064%20320%2064a308.15%20308.15%200%200%200-147.32%2037.7L45.46%203.37A16%2016%200%200%200%2023%206.18L3.37%2031.45A16%2016%200%200%200%206.18%2053.9l588.36%20454.73a16%2016%200%200%200%2022.46-2.81l19.64-25.27a16%2016%200%200%200-2.82-22.45zm-183.72-142l-39.3-30.38A94.75%2094.75%200%200%200%20416%20256a94.76%2094.76%200%200%200-121.31-92.21A47.65%2047.65%200%200%201%20304%20192a46.64%2046.64%200%200%201-1.54%2010l-73.61-56.89A142.31%20142.31%200%200%201%20320%20112a143.92%20143.92%200%200%201%20144%20144c0%2021.63-5.29%2041.79-13.9%2060.11z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E");
+  width: 20px;
+  height: 16px;
+}
 .crm-form-block .crm-form-fields-block .crm-form-fields button.crm-form-submit-button.wide {
   width: 100%;
 }
@@ -205,13 +231,6 @@
 .crm-form-block select.crm-error:not(:focus) {
   border: 2px solid #f00 !important;
 }
-.crm-form-block .c-agreement-checkbox-wrapper.crm-error {
-  border: none;
-  color: #f00;
-}
-.crm-form-block .c-agreement-checkbox-wrapper.crm-error a {
-  color: #f00;
-}
 .crm-form-block .crm-loading {
   margin-top: 6px;
 }
@@ -248,6 +267,7 @@
   .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field:not(.crm-caption-style-none) > .name {
     width: 100%;
     margin-bottom: var(--crm-form-caption-space);
+    padding-right: 0;
   }
   .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .fields.crm-composite-field .field > .name {
     width: 100%;
@@ -262,6 +282,11 @@
   }
   .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .fields.crm-composite-field:not(.vertical) .field > * {
     display: block;
+  }
+  .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field input[type="text"],
+  .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field input[type="email"],
+  .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field input[type="password"] {
+    margin-right: 0;
   }
 }
 @container crm-form-block-container (max-width: 441px) {
@@ -274,6 +299,7 @@
   .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field:not(.crm-caption-style-none) > .name {
     width: 100%;
     margin-bottom: var(--crm-form-caption-space);
+    padding-right: 0;
   }
   .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .fields.crm-composite-field .field > .name {
     width: 100%;
@@ -289,7 +315,9 @@
   .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field .fields.crm-composite-field:not(.vertical) .field > * {
     display: block;
   }
-}
-.js-seq-wrapper .crm-form-block label.flexbox > span + span {
-  align-self: auto;
+  .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field input[type="text"],
+  .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field input[type="email"],
+  .crm-form-block .crm-form-fields-block .crm-form-fields .crm-form-field input[type="password"] {
+    margin-right: 0;
+  }
 }

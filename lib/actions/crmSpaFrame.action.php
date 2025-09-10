@@ -16,11 +16,26 @@ class crmSpaFrameAction extends crmBackendViewAction
             'spa_api_token'        => $token,
             'spa_locale'           => $locale,
             'is_contact_profile'   => strpos(waRequest::server('REQUEST_URI'), '/frame/contact/') !== false,
+            'can_init_call'        => waUtils::jsonEncode((new crmRights())->isInitCall()),
+            'is_sms_configured'    => waUtils::jsonEncode($this->isSMSConfigured()),
+            'is_email_configured'  => waUtils::jsonEncode($this->isEmailConfigured()),
+            'access_rights'        => waUtils::jsonEncode($this->getAccessRights()),
         ]);
     }
 
     public static function checkSkipUpdateLastPage()
     {
         waRequest::setParam('skip_update_last_page', '1');
+    }
+
+    protected function getAccessRights()
+    {
+        $user = wa()->getUser();
+        return [
+            'call'     => !($user->getRights('crm', 'calls') === crmRightConfig::RIGHT_CALL_NONE),
+            'invoice'  => !!$user->getRights('crm', 'manage_invoices'),
+            'export'   => !!$user->getRights('crm', 'export'),
+            'is_admin' => $user->isAdmin('crm'),
+        ];
     }
 }

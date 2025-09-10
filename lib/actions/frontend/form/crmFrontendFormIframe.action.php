@@ -13,7 +13,7 @@ class crmFrontendFormIframeAction extends waViewAction
         if (!$form->getForm()->exists()) {
             $this->notFound(_w('Form not found'));
         }
-        $html = $form->render();
+        $html = $form->render(true);
         $this->view->assign('html', $html);
 
         header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');

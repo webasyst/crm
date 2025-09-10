@@ -8,23 +8,26 @@ trait crmDealListTrait
     protected $list_params = [];
     protected $view_mode = 'list';
 
-    protected function prepareData($api = false)
+    protected function prepareData($api = false, $felds = [])
     {
         // Funnels data
-        $funnels = $this->getFunnels();
+        $funnels = $this->getFunnels($api);
         $funnel = $this->getFunnel($funnels, $api);
         $this->funnel_id = $funnel['id'];
 
-        // All backend users assigned to deals of this funnel
-        if ($funnel['id'] != 'all') {
-            $user_ids = array_keys($this->getDealModel()->select('DISTINCT(user_contact_id)')->where('funnel_id=?', $funnel['id'])->fetchAll('user_contact_id', true));
-        } else {
-            $user_ids = array_keys($this->getDealModel()->select('DISTINCT(user_contact_id)')->fetchAll('user_contact_id', true));
-        }
-        $users = $this->getContactsByIds($user_ids);
+        $users = [];
+        if (!$api || in_array('user', $felds)) {
+            // All backend users assigned to deals of this funnel
+            if ($funnel['id'] != 'all') {
+                $user_ids = array_keys($this->getDealModel()->select('DISTINCT(user_contact_id)')->where('funnel_id=?', $funnel['id'])->fetchAll('user_contact_id', true));
+            } else {
+                $user_ids = array_keys($this->getDealModel()->select('DISTINCT(user_contact_id)')->fetchAll('user_contact_id', true));
+            }
+            $users = $this->getContactsByIds($user_ids);
 
-        if ($this->user_id && empty($users[$this->user_id])) {
-            $this->user_id = ($api && is_numeric($this->user_id) ? null : 'all');
+            if ($this->user_id && empty($users[$this->user_id])) {
+                $this->user_id = ($api && is_numeric($this->user_id) ? null : 'all');
+            }
         }
 
         // List of deals
@@ -37,7 +40,7 @@ trait crmDealListTrait
         $count_params['count_results'] = 'only';
         $total_count = $this->getDealModel()->getList($count_params);
         $max_kanban_deals = wa('crm')->getConfig()->getMaxKanbanDeals();
-        if ($this->view_mode == 'thumbs' && $total_count > $max_kanban_deals) {
+        if (!$api && $this->view_mode == 'thumbs' && $total_count > $max_kanban_deals) {
             $deals = [];
             $is_deals_limit = true;
         } else {
@@ -110,6 +113,16 @@ trait crmDealListTrait
         }
         unset($d);
 
+        if ($api) {
+            return [
+                'deals' => $deals,
+                'funnels' => $funnels,
+                'total_count' => $total_count,
+                'deal_tags' => in_array('tags', $felds) ? $this->getDealTags($negative_ids) : [],
+                'list_params' => $list_params
+            ];
+        }
+
         // Last deal id used to count and highlight new items
         $deal_max_id = $this->getDealModel()->select('MAX(id) mid')->fetchField('mid');
         wa()->getResponse()->setCookie('deal_max_id', $deal_max_id, time() + 86400);
@@ -132,7 +145,6 @@ trait crmDealListTrait
         $filter_reminders = $this->getFilterReminders();
         $selected_filter_reminders = $this->getSelectedFilterReminders($list_params, $filter_reminders);
 
-        $deal_tags = $this->getDealTags($negative_ids);
         $tag_cloud = $this->getTagModel()->getCloud();
         $active_deal_tag = $this->getActiveDealTag($tag_cloud, $list_params);
 
@@ -157,7 +169,7 @@ trait crmDealListTrait
             "offset"                    => ifset( $list_params['offset'] ) + ifset( $list_params['limit'] ),
             "lazyloading_disable"       => $total_count === null || $total_count <= $list_params['offset'] + $list_params['limit'],
             "deal_max_id"               => $deal_max_id,
-            "deal_tags"                 => $deal_tags,
+            "deal_tags"                 => $this->getDealTags($negative_ids),
             "active_deal_tag"           => $active_deal_tag,
             "tag_cloud"                 => $tag_cloud,
             "limit"                     => $list_params['limit'],
@@ -322,21 +334,23 @@ trait crmDealListTrait
         }
         $list_params['tag_id'] = $tag;
 
-        $deal_fields = $this->getFunnelFields($this->funnel_id);
-        $old_fields  = $fields = $list_params['fields'] = array();
-        foreach ($deal_fields as $key => $value) {
-            $old_fields[$key] = ($api ? null : wa()->getUser()->getSettings('crm', 'deal_field_' . $key));
-            $fields[$key] = waRequest::request('field-' . $key, null, waRequest::TYPE_STRING_TRIM);
-            if (!$api && $fields[$key] !== $old_fields[$key] && !empty($fields[$key])) {
-                wa()->getUser()->setSettings('crm', 'deal_field_' . $key, $fields[$key]);
+        if (!$api) {
+            $deal_fields = $this->getFunnelFields($this->funnel_id);
+            $old_fields  = $fields = $list_params['fields'] = array();
+            foreach ($deal_fields as $key => $value) {
+                $old_fields[$key] = ($api ? null : wa()->getUser()->getSettings('crm', 'deal_field_' . $key));
+                $fields[$key] = waRequest::request('field-' . $key, null, waRequest::TYPE_STRING_TRIM);
+                if (!$api && $fields[$key] !== $old_fields[$key] && !empty($fields[$key])) {
+                    wa()->getUser()->setSettings('crm', 'deal_field_' . $key, $fields[$key]);
+                }
+                if (empty($fields[$key])) {
+                    $fields[$key] = waRequest::request($key, $old_fields[$key], waRequest::TYPE_STRING_TRIM);
+                }
+                if ($fields[$key] == "all") {
+                    $fields[$key] = "";
+                }
+                $list_params['fields'][$key] = $fields[$key];
             }
-            if (empty($fields[$key])) {
-                $fields[$key] = waRequest::request($key, $old_fields[$key], waRequest::TYPE_STRING_TRIM);
-            }
-            if ($fields[$key] == "all") {
-                $fields[$key] = "";
-            }
-            $list_params['fields'][$key] = $fields[$key];
         }
 
         $reminder_states = waRequest::request('reminder', array(), waRequest::TYPE_ARRAY_TRIM);
@@ -362,7 +376,7 @@ trait crmDealListTrait
         return $list_params + $this->list_params;
     }
 
-    protected function getFunnels()
+    protected function getFunnels($api = false)
     {
         $result = array();
 
@@ -373,10 +387,10 @@ trait crmDealListTrait
             );
         }
 
-        $dm = new crmDealModel();
+        $dm = $api ? null : new crmDealModel();
         $fm = new crmFunnelModel();
         $fsm = new crmFunnelStageModel();
-        $funnels = $fm->getAllFunnels();
+        $funnels = $fm->getAllFunnels(true);
 
         foreach ($funnels as $f) {
             $conditions = array(
@@ -386,7 +400,9 @@ trait crmDealListTrait
                 $conditions['user_contact_id'] = $this->user_id;
             }
 
-            $f['deal_count'] = $dm->countOpen($conditions);
+            if (!$api) {
+                $f['deal_count'] = $dm->countOpen($conditions);
+            }
             $f['stages'] = $fsm->select('*')->where('funnel_id='.intval($f['id']))->order('number')->fetchAll('id');
             $i = 0;
             foreach ($f['stages'] as &$s) {

@@ -61,7 +61,7 @@
 {/if}
 
 <li class="c-invoice {$_invoice_classes|join:' '}" data-id="{$invoice.id}">
-    <a class="flexbox full-width middle box js-disable-router" href="{$wa_app_url}invoice/{$invoice.id}/">
+    <a class="flexbox full-width space-4 box js-disable-router" href="{$wa_app_url}invoice/{$invoice.id}/">
         {if !empty($_userpic)}
             <div class="image custom-mr-8">
                 <img src="{$_userpic}" class="userpic userpic-48">
@@ -71,19 +71,29 @@
             {if !empty($invoice.number)}
                 <div class="flexbox middle">
                     {*<i class="{$wa->crm->convertIcon($_state.icon)} fa-xs"></i>*}
-                    <span class="c-number semibold">№{$invoice.number|escape}</span>
+                    <span class="c-state badge uppercase nowrap opacity-90 c-bg custom-mr-8 small">
+                        {if $_state}<span class="text-ellipsis">{$_state.name}</span>{/if}
+                    </span>
                     {if !empty($invoice.amount)}
-                    <div class="wide align-right"><span class="count c-price">{$invoice.amount|wa_currency_html:$invoice.currency_id}</span></div>
+                    <div class="custom-ml-auto nowrap semibold">
+                        {if ifset($invoice.state_id) === 'PAID'}
+                        <i class="fas fa-check-circle text-green custom-mr-4 small"></i>
+                        {/if}
+                        <span class="count c-price">{$invoice.amount|wa_currency_html:$invoice.currency_id}</span>
+                    </div>
                     {/if}
                 </div>
             {/if}
-            <div class="small black custom-my-4 break-words">{$wa->crm->contactName($invoice.contact.name)}</div>
-            <div class="line">
-                <div>
-                    <strong class="badge uppercase nowrap opacity-90 c-bg custom-mr-8">{if $_state}{$_state.name}{/if}</strong>
-                </div>
-                <span class="text-gray smaller">{$invoice.invoice_date|wa_date:'humandate'}</span>
+
+            <div class="c-invoice-number-with-contact">
+                <span class="c-number semibold break-words">[`#`]{$invoice.number|escape}</span>
+                <div class="small black break-words {if $invoice.contact.id}opacity-80{else}text-gray{/if}">{$wa->crm->contactName($invoice.contact.name)}</div>
             </div>
+
+            <div class="text-gray smaller">[`Created`] {$invoice.create_datetime|wa_date:'humandatetime'|lower}</div>
+            {if $invoice.payment_datetime}
+            <div class="text-gray smaller">[`Paid`] {$invoice.payment_datetime|wa_date:'humandatetime'|lower}</div>
+            {/if}
         </div>
     </a>
 </li>

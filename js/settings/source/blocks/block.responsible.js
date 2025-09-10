@@ -128,6 +128,9 @@ var CRMSettingsSourceResponsibleBlock = ( function($) {
             $loading = $('<span class="icon loading"><i class="fas fa-spinner fa-spin"></i></span>'),
             url = that.url;
 
+        if (!$user_info) {
+            return;
+        }
         if ($user_info.is(':visible')) {
             that.$user_delete_link.hide();
             $loading.css({
@@ -136,7 +139,6 @@ var CRMSettingsSourceResponsibleBlock = ( function($) {
                 float: 'right'
             });
         }
-
         $user_info.after($loading);
 
         data = data || {};

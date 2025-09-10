@@ -33,6 +33,11 @@ class crmTemplatesRender extends waController
     public $template;
 
     /**
+     * @int crm_invoice.id
+     */
+    public $origin_id;
+
+    /**
      * @int crm_company.company_id
      */
     public $company_id;
@@ -42,6 +47,8 @@ class crmTemplatesRender extends waController
      */
     public $customer;
 
+    private $options;
+
     /**
      * If options have an invoice_id, then the data of a particular invoice will be received, otherwise the base invoice data will be received
      * crmTemplatesRender constructor.
@@ -50,16 +57,22 @@ class crmTemplatesRender extends waController
      */
     public function __construct($options = array())
     {
-        $options += array(
+        $options += [
             'invoice_template_id' => null,
             'company_id'          => null,
             'template'            => null,
-            'invoice_id'          => null
-        );
+            'invoice_id'          => null,
+            'invoice'             => null,
+            'origin_id'           => null,
+        ];
 
         $this->invoice_template_id = $options['invoice_template_id'];
-        $this->template = ifempty($options['template']);
+        $this->invoice_id = $options['invoice_id'];
+        $this->invoice = $options['invoice'];
+        $this->template = $options['template'];
+        $this->origin_id = $options['origin_id'];
         $this->company_id = $options['company_id'];
+        $this->options = $options;
 
         $path = wa('crm')->getConfig()->getAppPath('lib/config/data/template_info.php');
         if (!file_exists($path)) {
@@ -67,18 +80,21 @@ class crmTemplatesRender extends waController
         }
         $this->_content = include($path);
 
-        if ($options['invoice_id']) {
-            $this->invoice_id = $options['invoice_id'];
+        if (!empty($this->invoice_id) || !empty($this->invoice)) {
             $this->setInvoiceOptions();
         } else {
             $this->invoice = $this->_content['invoice'];
 
-            if (isset($options['company_id'])) {
+            if (isset($options['company'])) {
+                $this->company = $options['company'];
+            } elseif (isset($options['company_id'])) {
                 $cm = new crmCompanyModel();
                 $this->company = $cm->getById($options['company_id']);
             } else {
                 $this->company = $this->_content['company'];
             }
+            $this->company['invoice_options'] = self::getCompanyTemplateParams($this->company, $this->invoice_template_id, $this->origin_id);
+            $this->invoice['company'] = $this->company;
             $this->customer = wa()->getUser();
         }
     }
@@ -101,73 +117,48 @@ class crmTemplatesRender extends waController
     {
         $view = wa()->getView();
 
-        $view->assign(array(
+        $view->assign([
             'invoice'  => $this->invoice,
+            'pay_button'   => $this->getRenderedPayButton(),
             'customer' => $this->customer,
-            'company'  => $this->getStaticInfoCompany(),
+            'company'  => $this->company,
             'link'     => $this->_content['link'],
-        ));
+        ]);
 
         return $view->fetch('string:'.$this->getTemplate());
     }
 
-    /**
-     * If company_id is known, then a particular company will be received, otherwise general parameters will be received
-     * @return array company data + template params
-     */
-    public function getStaticInfoCompany()
+    protected function getRenderedPayButton()
     {
-        $tpm = new crmTemplatesParamsModel();
-        $params = $tpm->getParamsByTemplates($this->invoice_template_id);
-        $company = $this->company;
-        $company['invoice_options'] = null;
-        $arrCompany_template_params = null;
-
-        if (isset($this->company['id'])){
-            $arrCompany_template_params = $this->getTemplateParamsForCompany();
-        }
-
-        if (isset($this->company['logo'])) {
-            $company['logo_url'] = wa()->getDataUrl('logos/'.$this->company_id.'.original.'.$this->company['logo'], true, 'crm').'?'.rand(1, 1000);
-        }
-
-        if ($arrCompany_template_params) {
-            foreach ($arrCompany_template_params as $key => $param) {
-
-                if (isset($params, $params[$key], $this->company_id, $this->invoice_template_id) && $params[$key]['type'] == 'IMAGE') {
-                    $company['invoice_options'][$key] = wa()->getDataUrl('company_images/'.$this->company_id.'.original.'.$key.'.'.$this->invoice_template_id.'.'.$param, true,
-                        'crm');
-                } else {
-                    $company['invoice_options'][$key] = $param;
-
-                }
+        if (!empty($this->options['style_version']) && !empty($this->options['invoice']['state_id']) && in_array($this->options['invoice']['state_id'], ['PROCESSING', 'PAID'])) {
+            if ($this->options['invoice']['state_id'] == 'PROCESSING') {
+                return '<p style="text-align:center; font-size: 1.5rem;"><span style="color:#7256ee"><b>'._w('Payment is in process').'</b></span></p>';
+            } elseif ($this->options['invoice']['state_id'] == 'PAID') {
+                return '<p style="text-align:center; font-size: 1.5rem;"><span style="color:#22d13d"><b>'._w('Invoice is paid').'</b></span></p>';
             }
         }
-        return $company;
-    }
-
-    /**
-     * @return array crm_company.invoice_options
-     */
-    public function getTemplateParamsForCompany()
-    {
-        $cpm = new crmCompanyParamsModel();
-        $tpm = new crmTemplatesParamsModel();
-
-        $company_params = $cpm->getParams($this->company_id, $this->invoice_template_id);
-        $params_description = $tpm->getByField('template_id', $this->company['template_id'], 'code');
-
-        $params = array();
-
-        foreach ($params_description as $code => $p) {
-            if (ifset($company_params[$code])) {
-                $params[$code] = $company_params[$code];
-            } else {
-                $params[$code] = null;
+        if (wa()->getEnv() == 'frontend') {
+            if ($this->options['invoice']['state_id'] == 'PENDING' && waRequest::get('result') == 'success') {
+                return '';
             }
+            
+            $file = wa('crm')->getConfig()->getAppPath('templates/actions/frontend/invoice/payment.section.inc.html');
+            if (!file_exists($file)) {
+                throw new Exception(_w('Basic template info not found.'));
+            }
+            $button_template = file_get_contents($file);
+            $view = wa()->getView();
+            $view->assign([
+                'invoice'  => $this->invoice,
+                'customer' => $this->customer,
+                'company'  => $this->company,
+            ] + $this->options);
+            return $view->fetch('string:'.$button_template);
         }
-
-        return $params;
+        return '<a href="javascript:void(0);" class="c-button js-show-payments"'.(
+                    !empty($this->company['invoice_options']['button_color']) ? 
+                        ' style="background-color: '.$this->company['invoice_options']['button_color'].';"' : ''
+                ).'>'._w('Pay').'</a>';
     }
 
     /**
@@ -179,9 +170,10 @@ class crmTemplatesRender extends waController
             $tm = new crmTemplatesModel();
             $template = $tm->getById($this->invoice_template_id);
             $this->template = ifset($template, 'content', null);
+            $this->origin_id = ifset($template, 'origin_id', null);
 
             if (!$this->template) {
-                $file = wa('crm')->getConfig()->getAppPath('lib/config/data/templates/invoice.template_a.html');
+                $file = wa('crm')->getConfig()->getAppPath('lib/config/data/templates/invoices/invoice.template_a.html');
                 if (!file_exists($file)) {
                     throw new Exception(_w('Basic template info not found.'));
                 }
@@ -197,9 +189,12 @@ class crmTemplatesRender extends waController
      */
     public function setInvoiceOptions()
     {
-        // Get invoice data
-        $im = new crmInvoiceModel();
-        $this->invoice = $im->getInvoiceWithCompany($this->invoice_id);
+        if (empty($this->invoice)) {
+            // Get invoice data
+            $this->invoice = (new crmInvoiceModel)->getInvoiceWithCompany($this->invoice_id);
+        } else {
+            $this->invoice_id = $this->invoice['id'];
+        }
         $this->company_id = $this->invoice['company_id'];
         $company = ifset($this->invoice, 'company', null);
         unset($this->invoice['company']);
@@ -215,5 +210,69 @@ class crmTemplatesRender extends waController
         }
 
         return $this->company = $company;
+    }
+
+    public static function getCompanyTemplateParams($company, $template_id = null, $origin_id = null)
+    {
+        $company_params = [];
+        if (!empty($template_id) && !empty($company)) {
+            $company['template_id'] = $template_id;
+        }
+        if (!empty($company['template_id']) && !empty($company['id'])) {
+            $template_params = (new crmTemplatesParamsModel)->getParamsByTemplates($company['template_id']);
+            $company_params = (new crmCompanyParamsModel)->getParams($company['id'], $company['template_id']);
+            foreach ($company_params as $key => $value) {
+                if (empty($value)) {
+                    continue;
+                }
+                if (ifset($template_params[$key]['type']) === crmTemplatesModel::PARAM_TYPE_IMAGE) {
+                    $company_params[$key] = wa()->getDataUrl('company_images/'.$company['id'].'.original.'.$key.'.'.$company['template_id'].'.'.$value, true, 'crm');
+                } elseif ($key === 'bg_color') {
+                    $company_params[$key] = self::getBgColor($value);
+                }
+            }
+        }
+        if (empty($origin_id) && !empty($company['template_id'])) {
+            $template_record = (new crmTemplatesModel())->getById($company['template_id']);
+            if (!empty($template_record['origin_id'])) {
+                $origin_id = $template_record['origin_id'];
+            }
+        }
+        if (!empty($origin_id)) {
+            $origin_params = (new crmTemplates())->getOriginTemplateParams($origin_id);
+            $origin_params = array_filter($origin_params, function ($value) {
+                return !empty($value['default']);
+            });
+            foreach ($origin_params as $value) {
+                $_key = $value['code'];
+                if (empty($company_params[$_key])) {
+                    if ($value['type'] === crmTemplatesModel::PARAM_TYPE_IMAGE) {
+                        $company_params[$_key] = wa()->getRootUrl() . 'wa-apps/crm' . $value['default'];
+                    } elseif ($_key === 'bg_color') {
+                        $company_params[$_key] = self::getBgColor($value['default']);
+                    } else {
+                        $company_params[$_key] = $value['default'];
+                    }
+                }
+            }
+        }
+        
+        return $company_params;
+    }
+
+    protected static function getBgColor($color)
+    {
+        if (empty($color)) {
+            return null;
+        }
+        
+        $color = is_scalar($color) ? trim(strval($color)) : '';
+        if (strlen($color) <= 0 || $color[0] != '#' || strlen($color) != 7) {
+            return null;
+        }
+
+        $c = substr($color, 1);
+        list($r, $g, $b) = array(hexdec($c[0].$c[1]), hexdec($c[2].$c[3]), hexdec($c[4].$c[5]));
+        return 'rgba(' . $r . ',' . $g .  ',' . $b . ', 0.3)';
     }
 }

@@ -242,7 +242,7 @@ class crmCallAction extends crmBackendViewAction
             'contact'                 => $contact,
             'deals'                   => $deals,
             'deal'                    => $deal,
-            'funnels'                 => $this->getFunnels( $deals ),
+            'funnels'                 => $this->getFunnels(),
             'availble_funnels'        => $fm->getAvailableFunnel(),
             'states'                  => $states,
             'filter_states'           => $filter_states,
@@ -304,11 +304,11 @@ class crmCallAction extends crmBackendViewAction
         return $deals;
     }
 
-    protected function getFunnels($deals)
+    protected function getFunnels()
     {
         $fm = new crmFunnelModel();
         $fsm = new crmFunnelStageModel();
-        return $fsm->withStages($fm->getAllFunnels());
+        return $fsm->withStages($fm->getAllFunnels(true));
     }
 
     protected function getCallIds()

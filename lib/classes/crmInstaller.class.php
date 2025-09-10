@@ -618,7 +618,7 @@ class crmInstaller
 
         if ($tm->countAll() <= 0) {
             $fields = $tm->getMetadata();
-            $templates = crmTemplates::getTemplatesVariants();
+            $templates = crmTemplates::getTemplatesVariants(true);
 
             foreach ($templates as $t) {
                 $data = array_intersect_key($t, $fields);

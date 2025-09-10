@@ -33,13 +33,6 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
         $mm = new crmMessageModel();
         $cs = new crmSourceModel();
 
-        // Get Deal
-        if ($conversation['deal_id']) {
-            $deal = $this->getDealModel()->getById($conversation['deal_id']);
-        } else {
-            $deal = null;
-        }
-
         if ($is_ui13) {
             $messages = $mm->select('*')
                 ->where('conversation_id = ?', (int) $conversation_id)
@@ -69,6 +62,21 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
         }
         $source_emails = $this->getSourceEmailAddresses($source_ids);
 
+        // Get Deals
+        $deal_ids = array_column($messages, 'deal_id');
+        $deal_ids[] = $conversation['deal_id'];
+        $deal_ids = array_filter(array_unique($deal_ids));
+        $deals = empty($deal_ids) ? [] : $this->getDealModel()->getByField(['id' => $deal_ids], 'id');
+        $funnels = empty($deals) ? [] : $this->getFunnelModel()->getByField(['id' => array_column($deals, 'funnel_id')], 'id');
+        $funnels = empty($funnels) ? [] : $this->getFunnelStageModel()->withStages($funnels);
+        $deals = array_map(function ($d) use ($funnels) {
+            $d['funnel'] = isset($funnels[$d['funnel_id']]) ? $funnels[$d['funnel_id']] : null;
+            $d['stage'] = isset($d['funnel']['stages'][$d['stage_id']]) ? $d['funnel']['stages'][$d['stage_id']] : null;
+            return $d;
+        }, $deals);
+
+        $deal = isset($deals[$conversation['deal_id']]) ? $deals[$conversation['deal_id']] : null;
+
         $messages = $mm->getExtMessages($messages, $this->source);
         foreach ($messages as &$m) {
             $message_ids[$m['id']] = $m['id'];
@@ -89,8 +97,11 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
                 ]);
             }
 
-            $last_id = $m['id'] > $last_id ? $m['id'] : $last_id;
+            if (!empty($m['deal_id']) && isset($deals[$m['deal_id']])) {
+                $m['deal'] = $deals[$m['deal_id']];
+            }
 
+            $last_id = $m['id'] > $last_id ? $m['id'] : $last_id;
         }
         unset($m);
 
@@ -159,7 +170,7 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
             'conversation'    => $conversation,
             'deal'            => $deal,
             'clean_data'      => ifempty($clean_data),
-            'funnel'          => $this->getFunnel($deal),
+            'funnel'          => ifempty($deal['funnel']),
             'contacts'        => $contacts,
             'active_sources'  => $active_sources,
             'is_admin'        => wa()->getUser()->isAdmin(),
@@ -251,6 +262,12 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
             $conversation['icon_fa'] = 'mobile';
             $conversation['transport_name'] = 'SMS';
         }
+
+        // In the last message, we store only the last incoming message.
+        // Let's get the last letter, it will be incoming or outgoing.
+        $last_message = $this->getMessageModel()->select('*')->where('conversation_id = '.(int)$conversation['id'])->order('id DESC')->limit(1)->fetchAssoc();
+        $conversation['conversation_last_message'] = $last_message;
+
         if ($conversation['source_id']) {
             $source_helper = crmSourceHelper::factory($this->source);
             $res = $source_helper->workupConversation($conversation);
@@ -266,6 +283,20 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
                         ]
                     ];
                 }
+
+                $template_button = wa()->getAppPath("templates/actions/message/MessageAiAnswerButton.html", 'crm');
+                $template_content = wa()->getAppPath("templates/actions/message/MessageAiAnswerContent.html", 'crm');
+                $aux_items['reply_form_ai_answer']['button'] =
+                    $this->renderTemplate($template_button);
+                $aux_items['reply_form_ai_answer']['content'] =
+                    $this->renderTemplate($template_content, [
+                        'conversation_type' => $conversation['type'],
+                        'conversation_id'   => $conversation['id'],
+                        'message_id'        => $conversation['last_message_id'],
+                        'source_id'         => $this->source->getId(),
+                        'message_text'      => empty($last_message) ? '' : crmHtmlSanitizer::work($last_message['body']),
+                    ]);
+
                 $source_aux = ['source' => $source_helper->getUI20ConversationAuxItems($conversation)];
                 $plugins_aux = wa('crm')->event('conversation_view', $conversation, [ 'reply_form_dropdown_items' ]);
                 $plugins_aux = array_merge($source_aux, $plugins_aux);
@@ -286,11 +317,19 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
             $conversation['icon_fa'] = 'exclamation-circle';
         }
 
-        // In the last message, we store only the last incoming message.
-        // Let's get the last letter, it will be incoming or outgoing.
-        $last_message = $this->getMessageModel()->select('*')->where('conversation_id = '.(int)$conversation['id'])->order('id DESC')->limit(1)->fetchAssoc();
-        $conversation['conversation_last_message'] = $last_message;
         return $conversation;
+    }
+
+    protected function renderTemplate($template, $assign = array())
+    {
+        $view = wa()->getView();
+        $old_vars = $view->getVars();
+        $view->clearAllAssign();
+        $view->assign($assign);
+        $html = $view->fetch($template);
+        $view->clearAllAssign();
+        $view->assign($old_vars);
+        return $html;
     }
 
     protected function workupMessages($conversation, $messages)
@@ -321,18 +360,6 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
         }
         unset($recipient);
         return $recipients;
-    }
-
-    protected function getFunnel($deal)
-    {
-        if (!$deal) {
-            return false;
-        }
-
-        $funnel = $this->getFunnelModel()->getById($deal['funnel_id']);
-        $funnel['stages'] = $this->getFunnelStageModel()->getStagesByFunnel($funnel);
-
-        return $funnel;
     }
 
     /**
@@ -375,7 +402,7 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
             'stage_id'           => $stage_id,
         ));
 
-        $funnels = $this->getFunnelModel()->getAllFunnels();
+        $funnels = $this->getFunnelModel()->getAllFunnels(true);
 
         if (empty($funnels[$deal['funnel_id']])) {
             return array();
@@ -401,7 +428,7 @@ class crmMessageConversationIdAction extends crmBackendViewAction //crmContactId
 
         return $subject;
     }
-    
+
     protected function getBody()
     {
         $message = $this->conversation['conversation_last_message'];

@@ -395,7 +395,7 @@ var CRMInvoiceEdit = ( function($) {
                 if (item.name !== "invoice[contact]") {
                     result.data.push(item);
                 }
-
+/*
                 if (item.name === "invoice[contact_id]") {
                     if (!(item.value > 0)) {
                         result.errors.push({
@@ -403,7 +403,7 @@ var CRMInvoiceEdit = ( function($) {
                             "value": that.locales["empty_contact"]
                         });
                     }
-                }
+                } */
             });
 
             setItemsData(result.data);
@@ -523,6 +523,9 @@ var CRMInvoiceEdit = ( function($) {
                                 iframe.dispatchEvent(new CustomEvent('close', { detail: { id: response.data.id } }));
                             } else {
                                 $.crm.content.load(content_uri);
+                            }
+                            if (data.find(f => f.name === 'invoice[id]').value === '') {
+                                window.parent.$.crm.showReviewWidget();
                             }
                         }
                     } else {
@@ -836,10 +839,10 @@ var CRMInvoiceEdit = ( function($) {
             }
 
             return '<li><a href="javascript:void(0);" class="js-deal-item" data-deal-id="' + deal_id + '">' +
-                '<span class="flexbox middle js-text"><i class="fas fa-circle funnel-state" style="color: ' + color +'"></i>' +
-                '<span class="deal-item--name" style="word-break: break-word;">' + deal_name + '</span>' +
-                '</span>' + funnel_deleted_html + '</a>' +
-                '</li>';
+                    '<span class="flexbox middle js-text"><i class="' + (funnel?.icon || 'fas fa-briefcase') + ' funnel-state" style="color: ' + color +'"></i>' +
+                        '<span class="deal-item--name" style="word-break: break-word;">' + deal_name + (funnel?.is_archived == 1 ? `<span class="gray small custom-ml-4 nowrap">${that.locales['archived']}</span>` : '') + '</span>' +
+                    '</span>' + funnel_deleted_html +
+                '</a></li>';
         }
 
         function emptyDeal() {
@@ -1002,7 +1005,7 @@ var CRMInvoiceEdit = ( function($) {
 
     CRMInvoiceEdit.prototype.loadDealListByContact = function (callback) {
         let contact_id = this.$wrapper.find(".js-contact-toggle .js-contact-id").val();
-        let href = '?module=deal&action=byContact&id='+ contact_id;
+        let href = '?module=deal&action=byContact&only_existing_stage=1&id='+ contact_id;
 
         callback = callback || function () {};
         if (contact_id <= 0 || this.iframe) {
@@ -1856,7 +1859,7 @@ var CRMInvoicePage = ( function($) {
                         var content_uri = $.crm.app_url + "invoice/";
                         const iframe = getIframeIfExists();
                         if (iframe) {
-                            iframe.dispatchEvent(new CustomEvent('close', { detail: 'refresh' }));
+                            iframe.dispatchEvent(new CustomEvent('close', { detail: { action: 'refresh' } }));
                         } else {
                             $.crm.content.load(content_uri);
                         }
@@ -2115,3 +2118,26 @@ function spinnerView ($button, timeout = 350) {
         }
     }
 }
+
+var CrmInvoiceIframe = ( function($) {
+    var CrmInvoiceIframe = function() {
+
+        $('.js-cancel-button').one('click', function (e) {
+            e.preventDefault();
+
+            if ($(this).hasClass('js-disable-router')) {
+                window.history.back();
+            } else {
+                const iframe = getIframeIfExists();
+                if (iframe) {
+                    iframe.dispatchEvent(new CustomEvent('close', {
+                        detail: { action: window.parent.iframe_invoice_is_saved ? 'refresh' : null }
+                    }));
+                    delete window.parent.iframe_invoice_is_saved;
+                }
+            }
+        })
+    };
+
+    return CrmInvoiceIframe;
+})($);

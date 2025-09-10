@@ -153,10 +153,10 @@ var CRMReminderFormEdit = ( function($) {
                 }
             }
             else {
-               var is_delete = !!( $target.closest(".js-reset-deal").length );         
-               if (is_delete){
-                that.clearDeal()
-            }
+                var is_delete = !!( $target.closest(".js-reset-deal").length );         
+                if (is_delete) {
+                    that.clearDeal()
+                }
             }
         })
 
@@ -177,13 +177,13 @@ var CRMReminderFormEdit = ( function($) {
         });
          
         that.setDeal = function(deal, unload = false) {
-            const deal_id_icon = deal["photo_url"] ? `<span class="icon size-18 rounded js-open-search" style="background-image: url(${deal["photo_url"]});"></span>`
-            : '';
+            const deal_id_icon = deal["photo_url"] ? `<span class="icon size-18 rounded js-open-search custom-mr-4" style="background-image: url(${deal["photo_url"]});"></span>`
+            : (deal["icon"] ? `<span class="custom-mr-4" style="color: ${deal["color"]};"><i class="${deal["icon"]}"></i></span>` : '');
             const deal_link = that.app_url + (deal["photo_url"]? 'contact/' : 'deal/') + deal.id;
             const deal_id_string = 
             `<a class="flexbox middle c-user" href="${!unload ? 'javascript:void(0);' : deal_link}">
             ${deal_id_icon}
-            <span class="c-user-name">&nbsp;${deal.name}</span>
+            <span class="c-user-name">${deal.name}</span>
             </a>
             ${!unload ? `<div class="hint custom-pl-12 js-open-search cursor-pointer">
                 <span class="icon size-14"><i class="fas fa-pen" title="[\`edit\`]"></i></span>

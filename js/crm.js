@@ -68,7 +68,7 @@
                     });
                 }
             });
-           
+
             // it is not crm dialog, just write responseText into document
             if (html.indexOf('dialog-background') === -1) {
                 document.open("text/html");
@@ -377,6 +377,18 @@
                         }
                     });
 
+                    that.$wrapper.on("wheel", function(event) {
+                        if (event.shiftKey) {
+                            event.preventDefault();
+                            // deltaY > 0 - прокрутка вниз/вправо, deltaY < 0 - вверх/влево
+                            if (event.originalEvent.deltaY > 0) {
+                                that.moveSlider(true); // прокрутка вправо
+                            } else {
+                                that.moveSlider(false); // прокрутка влево
+                            }
+                        }
+                    });
+
                     // FUNCTIONS
 
                     function onResize() {
@@ -387,7 +399,7 @@
                                 that.reset();
                             }
                         } else {
-                       
+
                             $window.off("resize", onResize);
                         }
                     }
@@ -811,6 +823,11 @@
             };
 
             process();
+        },
+        showReviewWidget () {
+            $.get($.crm.app_url + '?module=reviewWidget', (html) => {
+                $('body').append(html);
+            });
         }
     });
 
@@ -823,7 +840,7 @@
             onClose = ( options.onClose || function() {});
 
         var template = $.crm.confirm.template;
-      
+
         template = template
             .replace("%title%", title)
             .replace("%text%", text)
@@ -1011,15 +1028,15 @@ var ContentRouter = ( function($) {
                 href_top = $link.data("link"),
                 content_uri = this.href;
                 var uri_has_spa_url = ( content_uri.indexOf( $.crm.app_url + 'contact/' ) >= 0 ) || ( content_uri.indexOf( $.crm.app_url + 'deal/' ) >= 0 );
-                
+
 
             // preventing the processing of links in the iframe
             //var link_in_spa = that.$spaContainer.length? $.contains(that.$spaContainer[0], $link[0]) : false;
             /*if ($.crm.iframe && (uri_has_spa_url || !href)) {
                     return false
             }*/
-            
-           
+
+
             // hack for jqeury ui links without href attr
 
             if (!href) {
@@ -1046,14 +1063,14 @@ var ContentRouter = ( function($) {
                         }
                     })
                 } else {
-                  
+
                     if ($.crm.iframe && href_top === 'top') {
                         window.parent.$.crm.content.load(content_uri, false, $link);
-                        
+
                     } else {
                         that.load(content_uri, false, $link);
                     }
-                    
+
                 }
 
             }
@@ -1079,7 +1096,6 @@ var ContentRouter = ( function($) {
 
     ContentRouter.prototype.load = function(content_uri, unset_state, $link) {
         var that = this;
-
         var uri_has_app_url = ( content_uri.indexOf( $.crm.app_url ) >= 0 );
 
         if (!uri_has_app_url) {
@@ -1087,8 +1103,6 @@ var ContentRouter = ( function($) {
             alert("Determine the path error");
             return false;
         }
-
-        that.animate( true );
 
         if (that.xhr) {
             that.xhr.abort();
@@ -1098,8 +1112,12 @@ var ContentRouter = ( function($) {
             // for which these data ?
             content_uri: content_uri
         });
-        if ($link) {
+
+        const show_spinner = !!$link && !!$link.length && !$link.closest('.sidebar').length;
+        if (show_spinner) {
             $link.find('[data-fa-i2svg]').hide().after('<i class="fas fa-spinner fa-spin"></i>');
+        } else {
+            that.animate().show();
         }
 
         that.xhr = $.ajax({
@@ -1116,16 +1134,22 @@ var ContentRouter = ( function($) {
                 }, "", content_uri);
             }
 
-            if ($link) {
+            if (show_spinner) {
                 $link.find('[data-fa-i2svg]:first').show();
                 $link.find('[data-fa-i2svg]').slice(1).remove();
+            } else {
+                that.animate().done();
             }
-
             that.setContent( html );
-            that.animate( false );
+
             that.xhr = false;
 
             $(document).trigger("wa_loaded");
+
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }).fail(function(data) {
             if (data.responseText) {
                     $.crm.alert.show({
@@ -1134,9 +1158,11 @@ var ContentRouter = ( function($) {
                         button: "Close",
                     })
             }
-            if ($link) {
+            if (show_spinner) {
                 $link.find('[data-fa-i2svg]:first').show();
                 $link.find('[data-fa-i2svg]').slice(1).remove();
+            } else {
+                that.animate().abort();
             }
         });
 
@@ -1158,7 +1184,7 @@ var ContentRouter = ( function($) {
         var that = this;
 
         $(document).trigger("wa_before_render");
-        
+
         var isSpa = $(html).filter("#app").length;
 
         if (isSpa) {
@@ -1180,7 +1206,7 @@ var ContentRouter = ( function($) {
             //$(document).trigger("wa_on_popstate");
             var uri_has_spa_url = state.current ? ( state.current.indexOf( '/contact/' ) >= 0 || state.current.indexOf( '/deal/' ) >= 0) : true;
             if (!state.content_uri && !uri_has_spa_url) {
-                // TODO:    
+                // TODO:
                 alert("Determine the path error");
                 return false;
             }
@@ -1210,20 +1236,25 @@ var ContentRouter = ( function($) {
         }
     };
 
-    ContentRouter.prototype.animate = function( show ) {
-        var that = this,
-            $content = that.$content;
-
-        //$(".router-loading-indicator").remove();
-        //
-        //if (show) {
-        //    var $header = $content.find(".t-content-header h1"),
-        //        loading = '<i class="icon16 loading router-loading-indicator"></i>';
-        //
-        //    if ($header.length) {
-        //        $header.append(loading);
-        //    }
-        //}
+    ContentRouter.prototype.animate = function() {
+        if (!this.waLoading) {
+            this.waLoading = $.waLoading({top: ($('#wa-nav').height() || 0) + 'px'});
+        }
+        return {
+            show: () => {
+                if (this.waLoading.is_animated) {
+                    return;
+                }
+                this.waLoading.show();
+                this.waLoading.animate(10000, 95, false);
+            },
+            done: () => {
+                this.waLoading.done();
+            },
+            abort: () => {
+                this.waLoading.abort();
+            }
+        }
     };
 
     return ContentRouter;

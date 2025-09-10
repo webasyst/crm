@@ -12,7 +12,7 @@
                         {* DROPDOWN ACTIONS *}
                         <div class="c-filter-wrapper">
                             <div class="dropdown" id="js-actions-filter-dropdown">
-                                <button class="dropdown-toggle button light-gray nowrap" type="button" style="width: 200px;">
+                                <button class="dropdown-toggle button light-gray small nowrap" type="button" style="width: 200px;">
                                     <div class="js-link-text align-left">
                                         {if !empty($selected_filter_action.color)}
                                             <i class="icon size-14 rounded" style="background-color: {$selected_filter_action.color};"></i>
@@ -55,7 +55,7 @@
                         {/if}
                         <div class="c-filter-wrapper">
                             <div class="dropdown" id="js-users-filter-dropdown">
-                                <button class="dropdown-toggle button light-gray nowrap" type="button" style="width: 230px;">
+                                <button class="dropdown-toggle button light-gray small nowrap" type="button" style="width: 230px;">
                                     <div class="flexbox middle space-4">
                                         {if !empty($selected_filter_user.photo_url_16)}
                                             <i class="userpic icon size-16" style="background-image: url({$selected_filter_user.photo_url_16})"></i>
@@ -146,7 +146,7 @@
                                 </div>
                             </div>
                             <div class="dropdown" id="js-dates-filter-dropdown">
-                                <button class="dropdown-toggle button light-gray nowrap" type="button" style="width: 200px;">
+                                <button class="dropdown-toggle button light-gray small nowrap" type="button" style="width: 200px;">
                                     <div class="js-link-text align-left">{$selected_filter_date.name|escape}</div>
                                 </button>
                                 <div class="dropdown-body right">

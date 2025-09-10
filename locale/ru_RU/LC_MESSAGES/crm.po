@@ -12,7 +12,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.7\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -84,9 +84,6 @@ msgstr "Последнее действие"
 
 msgid "Name "
 msgstr "Имя"
-
-msgid "Signed up"
-msgstr "Зарегистрирован"
 
 msgid "Created"
 msgstr "Создан"
@@ -1085,6 +1082,9 @@ msgid "Field constructor"
 msgstr "Конструктор полей"
 
 msgid "Funnels"
+msgstr "Воронки"
+
+msgid "Sales funnels"
 msgstr "Воронки продаж"
 
 msgid "Deal loss reasons"
@@ -1411,8 +1411,8 @@ msgstr[2] "%d сделок в воронке"
 msgid "New funnel"
 msgstr "Новая воронка"
 
-msgid "Captcha"
-msgstr "Капча"
+msgid "Antispam (captcha)"
+msgstr "Антиспам (капча)"
 
 msgid "Request a reason for lost deals"
 msgstr "Требовать указание причины при проигрыше сделки"
@@ -1479,12 +1479,6 @@ msgstr "Добавить способ оплаты"
 
 msgid "Browse payment plugins..."
 msgstr "Поиск плагинов оплаты...."
-
-msgid "Search by contacts and deals"
-msgstr "Поиск по контактам и сделкам"
-
-msgid "Search by names, deals and dates"
-msgstr "Поиск по именам, сделкам и датам"
 
 msgid "Search by customer names"
 msgstr "Поиск по именам клиентов"
@@ -1741,9 +1735,6 @@ msgstr "неправильный номер"
 msgid "Notes"
 msgstr "Заметки"
 
-msgid "Notes and files"
-msgstr "Заметки и файлы"
-
 msgid "All types"
 msgstr "Все типы"
 
@@ -1803,15 +1794,6 @@ msgstr "след"
 
 msgid "%s deal"
 msgstr "Сделка «%s»"
-
-msgid "B"
-msgstr "Б"
-
-msgid "KB"
-msgstr "КБ"
-
-msgid "MB"
-msgstr "МБ"
 
 msgid "Payment plugins not installed yet"
 msgstr "Плагины оплаты еще не установлены."
@@ -2022,9 +2004,6 @@ msgstr "Период"
 
 msgid "Applied an action to"
 msgstr "К кому применено действие"
-
-msgid "Event participants"
-msgstr "Участники мероприятия"
 
 msgid "Forbidden"
 msgstr "Запрещено"
@@ -2604,9 +2583,6 @@ msgstr "Email-источник сделок"
 
 msgid "Source not found"
 msgstr "Источник сделок не найден"
-
-msgid "Deal source disabled"
-msgstr "Источник сделок отключен"
 
 msgid "Oops, sorry, this messenger is disabled :("
 msgstr "Ой, извините, этот мессенджер отключен :("
@@ -3496,8 +3472,26 @@ msgstr "Вариант А"
 msgid "Variant B"
 msgstr "Вариант Б"
 
+msgid "Variant C"
+msgstr "Вариант В"
+
+msgid "Template"
+msgstr "Шаблон"
+
 msgid "Color"
 msgstr "Цвет"
+
+msgid "Button color"
+msgstr "Цвет кнопки оплаты"
+
+msgid "Headers color"
+msgstr "Цвет заголовоков"
+
+msgid "Background color"
+msgstr "Цвет фона"
+
+msgid "Background image"
+msgstr "Фоновое изображение"
 
 msgid "Template settings"
 msgstr "Настройка шаблонов"
@@ -3982,9 +3976,6 @@ msgstr "Не найдено сделок по заданным условиям"
 msgid "Change company"
 msgstr "Изменить компанию"
 
-msgid "To receive and handle messages from clients %sset up a message source%s"
-msgstr "Чтобы получать и обрабатывать сообщения от клиентов необходимо %sнастроить источники сообщений%s"
-
 msgid "To receive and handle messages from clients set up a message source."
 msgstr "Чтобы получать и обрабатывать сообщения от клиентов, настройте источники сообщений."
 
@@ -4060,9 +4051,6 @@ msgstr "Специальный источник"
 msgid "Instant messenger source"
 msgstr "Источник, подключенный к мессенджеру"
 
-msgid "Specify configuration parameters on <a href=\"%s\">deal source settings</a>."
-msgstr "Укажите параметры конфигурации в <a href=\"%s\">настройках источников сделок</a>."
-
 msgid "%d attachment"
 msgid_plural "%d attachments"
 msgstr[0] "%d вложение"
@@ -4083,9 +4071,6 @@ msgstr "Выигрыш сделки"
 
 msgid "Deal lost"
 msgstr "Потеря сделки"
-
-msgid "Deal restored"
-msgstr "Восстановление сделки"
 
 msgid "Deal reopened"
 msgstr "Переоткрытие сделки"
@@ -4152,15 +4137,6 @@ msgstr "Все ответственные"
 
 msgid "Deal stage overdue"
 msgstr "Превышение лимита времени на этапе"
-
-msgid "Deal create"
-msgstr "Создание сделки"
-
-msgid "Deal move"
-msgstr "Изменение этапа сделки"
-
-msgid "Deal restore"
-msgstr "Восстановление сделки"
 
 msgid "We have found %d column in imported data."
 msgid_plural "We have found %d columns in imported data."
@@ -4681,9 +4657,6 @@ msgstr "Размер файла превышает заданные ограни
 msgid "call"
 msgstr "звонок"
 
-msgid "To handle phone calls in CRM, install and set up <a href=\"%s\" target=\"_top\" >IP telephony integration plugins</a>."
-msgstr "Чтобы работать с телефонными звонками в CRM, установите и настройте <a href=\"%s\" target=\"_top\" >плагины для интеграции с IP-телефонией</a>."
-
 msgid "To work with phone calls in CRM, you need to install and configure a plugin for the integration with an IP telephony provider."
 msgstr "Чтобы работать с телефонными звонками в CRM, нужно установить и настроить плагин интеграции с провайдером IP-телефонии."
 
@@ -4728,9 +4701,6 @@ msgstr "пропущен звонок"
 
 msgid "no reply"
 msgstr "не дозвонился"
-
-msgid "<section data-role=\"c-email-signature\"><p><br></p><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: wrote:</p><blockquote>:BODY:</blockquote>"
-msgstr "<section data-role=\"c-email-signature\"><p><br></p><p>:SIGNATURE:</p></section><p><br></p><p>:MESSAGE_TIME:, :CLIENT: написал:</p><blockquote>:BODY:</blockquote>"
 
 msgid "Video"
 msgstr "Видео"
@@ -4864,9 +4834,6 @@ msgstr "Неизвестная ошибка"
 msgid "Contact saving error."
 msgstr "Ошибка сохранения контакта."
 
-msgid "Invalid request."
-msgstr "Недопустимый запрос."
-
 msgid "Invalid fields found."
 msgstr "Обнаружены недопустимые поля."
 
@@ -4875,9 +4842,6 @@ msgstr "Ошибка обновления контакта."
 
 msgid "Access to deal denied."
 msgstr "Доступ к сделке запрещён."
-
-msgid "Access denied. Reply is not allowed."
-msgstr "Доступ запрещён. Ответ не допускается."
 
 msgid "Message source not found."
 msgstr "Источник сообщений не найден."
@@ -4987,12 +4951,6 @@ msgstr "Недопустимый ID сделки."
 msgid "Stage not found."
 msgstr "Этап не найден."
 
-msgid "Deals not found."
-msgstr "Сделки не найдены."
-
-msgid "Conversations not found."
-msgstr "Переписки не найдены."
-
 msgid "Unknown transport."
 msgstr "Неизвестный транспорт."
 
@@ -5023,12 +4981,6 @@ msgstr "Плагин не существует."
 msgid "Invalid parameter type."
 msgstr "Недопустимый тип параметра."
 
-msgid "“lost_id” value not found."
-msgstr "Значение “lost_id” не найдено."
-
-msgid "File’s MIME type not supported."
-msgstr "MIME-тип файла не поддерживается."
-
 msgid "Unable to crop image: %s"
 msgstr "Не удалось обрезать изображение: %s"
 
@@ -5049,9 +5001,6 @@ msgstr "Приложение Shop-Script недоступно."
 
 msgid "Order not found."
 msgstr "Заказ не найден."
-
-msgid "Contact does not exist: %s."
-msgstr "Контакт не существует: %s."
 
 msgid "Deal pinning error."
 msgstr "Ошибка добавления сделки в избранные."
@@ -5296,9 +5245,6 @@ msgstr "Больше не показывать"
 msgid "Invalid funnel ID."
 msgstr "Недопустимый ID воронки."
 
-msgid "optional"
-msgstr "необязательно"
-
 msgid "Empty message"
 msgstr "Пустое сообщение"
 
@@ -5338,9 +5284,6 @@ msgstr "не доставлено"
 msgid "The message was not sent."
 msgstr "Сообщение не было отправлено."
 
-msgid "edited"
-msgstr "изменено"
-
 msgid "Edited"
 msgstr "Изменено"
 
@@ -5364,9 +5307,6 @@ msgstr "Push-уведомления ещё не настроены."
 
 msgid "Set up web push notifications"
 msgstr "Настроить push-уведомления"
-
-msgid "These notifications are useful to quickly learn about important events, occurring within CRM; e.g., incoming phone calls that you are responsible of. Web push notifications appear on your screen event when no browser is currently opened."
-msgstr "Эти уведомления позволяют быстро узнавать о важных событиях внутри CRM, например, о входящих телефонных звонках, на которые вам нужно ответить. Push-уведомления появляются на экране, даже когда не открыт браузер."
 
 msgid "Enable web push notifications to receive them on this device. You will be able to disable them later at any time."
 msgstr "Включите push-уведомления, чтобы получать их на этом устройстве. Вы сможете позже отключить их в любое время."
@@ -5437,9 +5377,6 @@ msgstr "Публикация на внешнем сайте"
 msgid "The actual web form design will depend on the CSS styles of the site where it is published."
 msgstr "Итоговый вид формы будет зависеть от CSS-стилей сайта, на котором она размещается."
 
-msgid "Approximate preview"
-msgstr "Приблизительное оформление"
-
 msgid "Recommended 280–600 pixels. A web form can shrink and adapt if its width exceeds that of a column or the phone screen."
 msgstr "Рекомендуется 280–600 пикселей. Форма умеет сжиматься и адаптироваться, если ее ширина больше ширины колонки или экрана телефона."
 
@@ -5481,3 +5418,315 @@ msgstr "Расположение надписи дочернего поля"
 
 msgid "Please select an option"
 msgstr "Выберите хотя бы один вариант"
+
+msgid "Lead forms"
+msgstr "Лид-формы"
+
+msgid "Deal resulting"
+msgstr "Результаты сделок"
+
+msgid "Do not show confirm password input"
+msgstr "Не показывать поле подтверждения пароля"
+
+msgid "(archived)"
+msgstr "(архив)"
+
+msgid "Powered by Webasyst CRM"
+msgstr "Работает на Webasyst CRM"
+
+msgid "CRM widget in Shop-Script orders"
+msgstr "Виджет CRM на экране заказа Shop-Script"
+
+msgid "Mini popup widget with all info about a customer directly on the order-viewing screen in Shop-Script. Conversations, calls, deals, invoices, notes, reminders — all the main CRM features are within one click when working on an order. You can chat with a customer via this interactive widget right within the Shop-Script interface."
+msgstr "Всплывающий минивиджет со всей информацией о клиенте — прямо на экране заказа Shop-Script. Переписки, звонки, сделки, счета, заметки, напоминания — все главные фишки CRM доступны на экране заказа одним нажатием. Виджет интерактивный — можно вести диалог с клиентом, не покидая интерфейса Shop-Script."
+
+msgid "Popup forms"
+msgstr "Всплывающие формы"
+
+msgid "Embedding lead forms on your site, either as a dialog or as a drawer over the general layout, displayed according to your custom rules, without making changes to design templates. Simply select the conditions for the widget to be displayed. The data submitted by website visitors are saved to your contacts and deals database according to each form’s setup."
+msgstr "Встраивание лид-форм на сайт в диалоге или выезжающей шторке «вне дизайна» по настраиваемым правилам и без изменений в шаблонах дизайна. Просто настройте условия, когда должен появляться виджет. Результат заполнения формы сохраняется в вашу базу контактов или сделок — как вы настроите в свойствах каждой формы."
+
+msgid "AI assistant in conversations with clients"
+msgstr "ИИ-помощник в переписках с клиентами"
+
+msgid "Based on the Webasyst AI service, it uses the content published on your website and creates detailed prompts from your clients’ messages or your additional comments. The AI assistant finds answers based on the information indexed by Webasyst partner’s search engine (Yandex). It provides quick ready-to-use replies to achieve higher sales."
+msgstr "Работает на основе службы Webasyst AI и публичной проиндексированной поисковиками информации на вашем сайте. Формирует промпт на основе вопроса клиента или уточненного менеджером запроса. Ищет ответы на базе публичной проиндексированной «Яндексом» информации. Быстро пишет ответ и дает менеджеру готовый продающий текст для ответа."
+
+msgid "AI replies from internal knowledge base"
+msgstr "ИИ-ответы по закрытой базе знаний"
+
+msgid "The same except for the use of an internal (non-public) knowledge base in the Hub app as well as custom text documents."
+msgstr "То же, но по закрытой (непубличной) базе знаний компании из приложения «Хаб» и дополнительным текстовым документам."
+
+msgid "Auto pilot with AI chatbot"
+msgstr "Автопилот с ИИ-чатботом"
+
+msgid "Bot-generated replies 24/7 without human intervention. Also based on Webasyst AI. Once set up, it may only require the participation of your staff upon a special command from a client, or according to your working schedule when your teammates are online and no use of the auto pilot is required."
+msgstr "Ответы бота 24/7 без вмешательства человека. Также на базе Webasyst AI. Один раз настроил — и подключение человека будет нужно только при получении от клиента специальной команды в переписке. Или же по рабочему расписанию — когда есть доступные менеджеры и автопилот нужно отключить."
+
+msgid "More automation!"
+msgstr "Больше автоматизации!"
+
+msgid "Setting up custom action rules for various system events in the “event → action” format. An event can be either an HTTP request (webhook), or the execution of a basic CRM action such as auto-issuing of an invoice upon deal creation or moving a deal to a certain stage, or setting a reminder to a selected employee."
+msgstr "Настройка собственных правил реакции на различные действия в системе в формате «событие → действие». Действием может быть либо HTTP-запрос (вебхук), либо выполнение некоторого базового действия внутри CRM. Например, автоматическое выставление счета по факту создания сделки или перемещения ее на определенный этап, либо установка напоминания нужному сотруднику."
+
+msgid "Recurrent invoices"
+msgstr "Рекуррентные счета"
+
+msgid "Auto-issuing (repeating) invoices by schedule."
+msgstr "Автоматическое выставление/повторение счетов по расписанию."
+
+msgid "More reports on user’ work efficiency"
+msgstr "Больше отчетов о результативности менеджеров"
+
+msgid "Work load and efficiency of your employees within CRM in handling deals, invoices, calls, and conversations."
+msgstr "Загруженность и эффективность работы сотрудников при работе внутри CRM со сделками, счетами, звонками, в переписках."
+
+msgid "Client balance in custom units"
+msgstr "Баланс клиента в у.е."
+
+msgid "“<em>You have 4 pre-paid visits to coach</em>”, “<em>3.5 standard hours remaining</em>”, etc. Keep the client balance in any conventional units of your choice."
+msgstr "«<em>У вас 4 предоплаченных занятия с тренером</em>», «<em>Осталось 3,5 нормочаса</em>» и т.&nbsp;д. — ведите баланс по клиенту в любых условных единицах."
+
+msgid "Client LTV"
+msgstr "LTV клиента"
+
+msgid "Main, important, and comprehensible client metric with the sorting and filtering options. Calculated from the data of paid invoices and Shop-Script orders."
+msgstr "Главная, важная, понятная метрика клиента с возможностью сортировки и фильтрации. Подсчет на основе данных оплаченных счетов в CRM и заказов Shop-Script."
+
+msgid "Online chat widget on website"
+msgstr "Виджет онлайн-чата на сайте"
+
+msgid "With all advantages of AI features, and not requiring the use of third-party services."
+msgstr "Со всеми преимуществами использования ИИ и без подключения внешних сервисов."
+
+msgid "More widgets"
+msgstr "Еще виджеты"
+
+msgid "Even more kinds of widgets to capture clients on your site: videos, phone callbacks, quizzes."
+msgstr "Больше вариантов виджетов для захвата клиентов на сайте: видеовиджеты, обратный звонок, квизы."
+
+msgid "Invisible captcha"
+msgstr "Невидимая капча"
+
+msgid "Dialog"
+msgstr "Диалог"
+
+msgid "Drawer"
+msgstr "Шторка"
+
+msgid "Embed manually"
+msgstr "Встроить вручную"
+
+msgid "Form title"
+msgstr "Заголовок формы"
+
+msgid "Always use dark mode"
+msgstr "Всегда использовать тёмный режим"
+
+msgid "Show & hide"
+msgstr "Показ и скрытие"
+
+msgid "Floating button"
+msgstr "Плавающая кнопка"
+
+msgid "Button text (HTML is allowed)"
+msgstr "Надпись на кнопке (разрешён HTML)"
+
+msgid "Subscribe"
+msgstr "Подписаться"
+
+msgid "On timeout"
+msgstr "По таймауту"
+
+msgid "sec"
+msgstr "сек"
+
+msgid "On scroll"
+msgstr "При прокручивании"
+
+msgid "px"
+msgstr "px"
+
+msgid "Custom element"
+msgstr "Другой элемент"
+
+msgid "Element selector"
+msgstr "Селектор элемента"
+
+msgid "Hide upon close for"
+msgstr "Скрывать после закрытия в течение"
+
+msgid "hrs"
+msgstr "ч"
+
+msgid "If the user closes the form intentionally, it won’t be displayed for the specified period of time."
+msgstr "Если пользователь намеренно закроет форму, то она не будет отображаться в течение указанного времени."
+
+msgid "Display on"
+msgstr "Где показывать"
+
+msgid "To hide the link to Webasyst CRM, <a %s>buy premium ›</a>"
+msgstr "Чтобы скрыть ссылку на Webasyst CRM, <a %s>купите премиум ›</a>"
+
+msgid "webasyst.com"
+msgstr "webasyst.ru"
+
+msgid "A CRM rule must be added to the site settings to use this mode."
+msgstr "В настройки сайта нужно добавить правило для CRM, чтобы использовать этот режим."
+
+msgid "Go to <em>Site</em> app"
+msgstr "Перейдите в приложение «Сайт»"
+
+msgid "Form fields"
+msgstr "Поля формы"
+
+msgid "No contacts"
+msgstr "Нет контактов"
+
+msgid "In archive"
+msgstr "В архиве"
+
+msgid "Color & icon"
+msgstr "Цвет и иконка"
+
+msgid "No deals in funnel"
+msgstr "В воронке нет сделок"
+
+msgid "The funnel and all its settings will be permanently deleted."
+msgstr "Воронка и все её настройки будут безвозвратно удалены."
+
+msgid "The funnel and all its deals will be moved to the archive and will be hidden from funnel lists."
+msgstr "Воронка вместе со всеми сделками попадёт в архив и перестанет отображаться в списках воронок."
+
+msgid "Delete funnel %s"
+msgstr "Удалить воронку %s"
+
+msgid "Archive funnel %s"
+msgstr "Архивировать воронку %s"
+
+msgid "Placement"
+msgstr "Размещение"
+
+msgid "stretch to form width"
+msgstr "на всю ширину формы"
+
+msgid "show under form fields"
+msgstr "под колонкой с полями"
+
+msgid "Fields"
+msgstr "Поля"
+
+msgid "Premium"
+msgstr "Премиум"
+
+msgid "Expand menu"
+msgstr "Раскрыть меню"
+
+msgid "Collapse menu"
+msgstr "Свернуть меню"
+
+msgid "Source of AI’s knowledge base which will be used to prepare replies."
+msgstr "Источник базы знаний, которую ИИ будет использовать при генерации ответа."
+
+msgid "Coefficient"
+msgstr "Коэффициент"
+
+msgid "Try again"
+msgstr "Переделать"
+
+msgid "Add to message"
+msgstr "Добавить в сообщение"
+
+msgid "Headers"
+msgstr "Заголовки"
+
+msgid "Open full message"
+msgstr "Открыть полное сообщение"
+
+msgid "Reply with AI"
+msgstr "Ответить с ИИ"
+
+msgid "Are you sure you want to delete this message?"
+msgstr "Вы действительно хотите удалить это сообщение?"
+
+msgid "Associate message with a deal"
+msgstr "Связать сообщение со сделкой"
+
+msgid "Detach message from the deal"
+msgstr "Открепить сообщение от сделки"
+
+msgid "Detach entire conversation from the deal"
+msgstr "Открепить всю переписку от сделки"
+
+msgid "Move this message to a separate conversation and detach it from the deal"
+msgstr "Перенести это сообщение в отдельную переписку и открепить его от сделки"
+
+msgid "archive"
+msgstr "архив"
+
+msgid "Upgrade to premium"
+msgstr "Обновить до премиум"
+
+msgid "Available now"
+msgstr "Доступно сейчас"
+
+msgid "You are all set!"
+msgstr "Вам доступно всё!"
+
+msgid "Thank you for being a premium user and for supporting the project."
+msgstr "Спасибо вам за получение премиум-статуса и за поддержку проекта."
+
+msgid "With premium, you are among the first to have access to all features."
+msgstr "С премиум-лицензией вы становитесь одним тех, кто первыми получат доступ ко всем возможностям."
+
+msgid "Give your team the best tools for working with customers the better way and making more money"
+msgstr "Предоставьте своей команде лучшие инструменты для работы с клиентами, чтобы зарабатывать больше"
+
+msgid "Later"
+msgstr "Позже"
+
+msgid "Fall 2025"
+msgstr "Осень 2025"
+
+msgid "Suggest a feature"
+msgstr "Предложить идею"
+
+msgid "Share your feedback and suggestions, <a %s>post your ideas on the forum ›</a>"
+msgstr "Делитесь своими замечаниями и предложениями, <a %s>публикуйте пожелания на форуме ›</a>"
+
+msgid "All scheduled features will be delivered as free updates via Installer."
+msgstr "Все запланированные функции будут доступны в виде бесплатных обновлений в «Инсталлере»."
+
+msgid "Files with extensions %s are allowed only."
+msgstr "Разрешены только файлы с расширениями %s."
+
+msgid "Conversation contact not found."
+msgstr "Контакт переписки не найден."
+
+msgid "Message contact not found."
+msgstr "Контакт сообщения не найден."
+
+msgid "Client not specified."
+msgstr "Клиент не указан."
+
+msgid "Enter the code from the image"
+msgstr "Введите код с изображения"
+
+msgid "Antibot protection"
+msgstr "Защита против ботов"
+
+msgid "Empty funnel_id"
+msgstr "Пустой funnel_id"
+
+msgid "AI based on the public site content"
+msgstr "ИИ по проиндексированной на сайте информации"
+
+msgid "Webasyst AI prompt complexity is ×2."
+msgstr "Расход баланса Webasyst AI имеет коэффициент ×2, так как каждый запрос проходит два этапа: сначала поиск в Яндексе ответа на поставленный вопрос на страницах сайта, затем формулирование ответа на базе полученного объема информации."
+
+msgid "Which question is to be answered?"
+msgstr "На какой вопрос дать ответ?"
+
+msgid "Write a response"
+msgstr "Написать ответ"

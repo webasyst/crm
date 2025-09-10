@@ -121,6 +121,7 @@ class crmFormValidator
 
         $password_present = false;
         $password_value = '';
+        $password_without_confirm = false;
 
         foreach ($this->getFormFields() as $field) {
 
@@ -158,6 +159,7 @@ class crmFormValidator
             if ($field['id'] === 'password') {
                 $password_present = true;
                 $password_value = $value;
+                $password_without_confirm = ifset($field['without_confirm'], false);
             }
 
             if (crmFormConstructor::isFieldOfContact($field)) {
@@ -169,10 +171,19 @@ class crmFormValidator
                         continue;
                     }
                 }
+            } elseif (crmFormConstructor::isFieldOfDeal($field)) {
+                $fld = crmDealFields::get($field['id']);
+                if ($fld) {
+                    $error = $fld->validate($value);
+                    if ($error) {
+                        $errors[$field['id']] = $error;
+                        continue;
+                    }
+                }
             }
         }
 
-        if ($password_present) {
+        if ($password_present && !$password_without_confirm) {
             $password_confirm_value = (string)ifset($data['password_confirm']);
             if ($password_value !== $password_confirm_value) {
                 $errors['password,password_confirm'] = array(_ws('Passwords do not match'));

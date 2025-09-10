@@ -1,33 +1,34 @@
 <div class="c-vaults-page" id="c-vaults-page">
     <h1 class="c-page-header">[`Vaults`]</h1>
-    <p>[`Use vaults to limit access to certain contacts for selected backend users. Add contacts to a vault and select the vault in users’ access rights settings.`]<br>
+    <p class="small">[`Use vaults to limit access to certain contacts for selected backend users. Add contacts to a vault and select the vault in users’ access rights settings.`]<br>
     [`If a contact is included in a vault, only users who have access to that vault can view the contact.`]</p>
 
-    <div class="c-vaults-wrapper">
-        {function _renderVault}
-            {strip}
-            <div class="c-vault-item" {if !empty($_vault)}data-id="{$_vault.id}"{/if}>
-              <i class="fas fa-grip-vertical text-light-gray sort js-sort-toggle"></i>
-               
-                <span class="c-toggle js-color" style="background: {$_vault.color|default:""|escape}"></span>
-                <a href="javascript:void(0);" class="c-name js-vault-edit"><span class="c-name js-name">{$_vault.name|default:"[`Vault name`]"|escape}</span> <i class="fas fa-pen edit"></i></a>
+    <div class="fields">
+        <div class="c-vaults-wrapper fields-group">
+            {function _renderVault}
+                {strip}
+                <div class="c-vault-item" {if !empty($_vault)}data-id="{$_vault.id}"{/if}>
+                <i class="fas fa-grip-vertical text-light-gray sort js-sort-toggle"></i>
+
+                    <span class="c-toggle js-color" style="background: {$_vault.color|default:""|escape}"></span>
+                    <a href="javascript:void(0);" class="c-name js-vault-edit"><span class="c-name js-name">{$_vault.name|default:"[`Vault name`]"|escape}</span> <i class="fas fa-pen edit"></i></a>
+                </div>
+                {/strip}
+            {/function}
+
+            {capture assign="_vault_template_html"}{_renderVault _vault=[]}{/capture}
+
+            <div class="c-vaults-list js-vaults-list">
+                {foreach $vaults as $_vault}{_renderVault _vault=$_vault}{/foreach}
             </div>
-            {/strip}
-        {/function}
 
-        {capture assign="_vault_template_html"}{_renderVault _vault=[]}{/capture}
-
-        <div class="c-vaults-list js-vaults-list">
-            {foreach $vaults as $_vault}{_renderVault _vault=$_vault}{/foreach}
-        </div>
-
-        <div class="c-add-wrapper">
-            <button class="button small rounded light-gray js-vault-add">
-              <i class="fas fa-plus-circle text-green add"></i> [`Add vault`]
-            </button>
+            <div class="c-add-wrapper custom-mt-12">
+                <button class="button small rounded light-gray js-vault-add">
+                <i class="fas fa-plus-circle text-green add"></i> [`Add vault`]
+                </button>
+            </div>
         </div>
     </div>
-
     <script>
         ( function($) {
             new CRMSettingsVaults({

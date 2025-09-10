@@ -25,7 +25,11 @@ var CRMSettingsFunnel = ( function($) {
         //
         that.initDelete();
         //
+        that.initArchive();
+        //
         that.initColorSection();
+        //
+        that.initIconSection();
         //
         that.initStagesSection();
         //
@@ -77,6 +81,14 @@ var CRMSettingsFunnel = ( function($) {
             ColorPicker.prototype.initClass = function() {
                 var that = this;
 
+                // Helper function to hide active color icon
+                var hideColorIcon = function() {
+                    if ($activeColor.length) {
+                        $activeColor.removeClass(active_class);
+                        $activeColor = false;
+                    }
+                };
+
                 that.farbtastic = $.farbtastic(that.$colorPicker, function(color) {
                     if (that.$field.val() !== color) {
                         hideColorIcon();
@@ -86,42 +98,91 @@ var CRMSettingsFunnel = ( function($) {
 
                 that.$wrapper.data("colorPicker", that);
 
-                that.$field.on("change keyup", function() {
-                    var color = $(this).val();
-                    //
+                // Optimized field change handler
+                var updateColor = function() {
+                    var color = that.$field.val();
                     that.$icon.css("background-color", color);
                     that.farbtastic.setColor(color);
-                });
+                };
+
+                that.$field.on("change keyup", updateColor);
 
                 that.$icon.on("click", function(event) {
                     event.preventDefault();
                     that.displayToggle( !that.is_opened );
                 });
 
-                that.$field.on("click", function() {
-                    that.displayToggle(!that.is_opened);
+                that.$field.on("focus", function() {
+                    if (!that.is_opened) {
+                        that.displayToggle( true );
+                    }
                 });
 
                 that.$field.on("keyup", hideColorIcon);
 
-                function hideColorIcon() {
-                    if ($activeColor.length) {
-                        $activeColor.removeClass(active_class);
-                        $activeColor = false;
+                // Optimized document event handler for ESC and click outside
+                that.documentHandler = function(event) {
+                    if (!that.is_opened) return;
+
+                    // Check if wrapper still exists in DOM
+                    var wrapperEl = that.$wrapper[0];
+                    if (!$.contains(document, wrapperEl)) {
+                        that.cleanup();
+                        return;
                     }
-                }
+
+                    // ESC key handler
+                    if (event.type === 'keyup' && event.keyCode === 27) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        that.displayToggle(false);
+                        return;
+                    }
+
+                    // Click outside handler
+                    if (event.type === 'click') {
+                        var target = event.target;
+                        // Check if click is inside ColorPicker (more efficient than jQuery closest)
+                        var isClickInside = wrapperEl.contains(target) ||
+                                           target === wrapperEl ||
+                                           $(target).closest(that.$wrapper).length > 0;
+
+                        if (!isClickInside) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            that.displayToggle(false);
+                        }
+                    }
+                };
+
+                // Single event listener for both ESC and click outside
+                document.addEventListener('keyup', that.documentHandler, true);
+                document.addEventListener('click', that.documentHandler, true);
+
+                // Cleanup method
+                that.cleanup = function() {
+                    document.removeEventListener('keyup', that.documentHandler, true);
+                    document.removeEventListener('click', that.documentHandler, true);
+                };
             };
 
             ColorPicker.prototype.displayToggle = function( show ) {
-                var that = this,
-                    hidden_class = "is-hidden";
+                // If closing ColorPicker, save current color first
+                if (!show && this.is_opened && this.farbtastic) {
+                    this.saveCurrentColor();
+                }
 
-                if (show) {
-                    that.$wrapper.removeClass(hidden_class);
-                    that.is_opened = true;
-                } else {
-                    that.$wrapper.addClass(hidden_class);
-                    that.is_opened = false;
+                this.$wrapper.toggleClass("is-hidden", !show);
+                this.is_opened = show;
+            };
+
+            // Save current color from Farbtastic to field
+            ColorPicker.prototype.saveCurrentColor = function() {
+                if (this.farbtastic && this.is_opened) {
+                    var currentColor = this.farbtastic.color;
+                    if (currentColor && this.$field.val() !== currentColor) {
+                        this.$field.val(currentColor).change();
+                    }
                 }
             };
 
@@ -190,6 +251,19 @@ var CRMSettingsFunnel = ( function($) {
             }
         }
     };
+
+    CRMSettingsFunnel.prototype.initIconSection = function() {
+        var that = this,
+            $iconField = that.$wrapper.find(".c-icon-section .js-icon-field"),
+            $iconItem = that.$wrapper.find(".c-icon-section .c-icon-list .js-icon-item");
+
+        $iconItem.on("click", function() {
+            var icon = $(this).data("icon");
+            $iconItem.removeClass("selected");
+            $(this).addClass("selected");
+            $iconField.val(icon);
+        });
+    }
 
     CRMSettingsFunnel.prototype.initStagesSection = function() {
         var that = this;
@@ -381,6 +455,7 @@ var CRMSettingsFunnel = ( function($) {
                    // $loading.removeClass('loading').addClass('yes').show();
                     var content_uri = $.crm.app_url + "settings/funnels/" + response.data.id + "/";
                     $.crm.content.load(content_uri);
+                    $(document).trigger('wa_funnel_save');
                 } else {
                 }
             }, "json").always( function() {
@@ -402,7 +477,7 @@ var CRMSettingsFunnel = ( function($) {
                 text: that.locales["delete_confirm_text"],
                 success_button_title: that.locales["delete_confirm_button"],
                 success_button_class: 'danger',
-                cancel_button_title: `${that.locales["delete_cancel_button"]}`,
+                cancel_button_title: `${that.locales["cancel_button"]}`,
                 cancel_button_class: 'light-gray',
                 onSuccess: deleteFunnel
             });
@@ -416,9 +491,54 @@ var CRMSettingsFunnel = ( function($) {
 
             if (!is_locked) {
                 is_locked = true;
-                $.post(href,data, function(response) {
+                $.post(href, data, function(response) {
                     var content_uri = $.crm.app_url + "settings/funnels/";
                     $.crm.content.load(content_uri);
+                    $(document).trigger('wa_funnel_save');
+                }, "json").always( function() {
+                    is_locked = false;
+                });
+            }
+        }
+    };
+
+    CRMSettingsFunnel.prototype.initArchive = function() {
+        var that = this,
+            is_locked = false;
+
+        const $button = that.$wrapper.find(".js-archive-funnel");
+        const state = $button.data("state");
+        $button.on("click", showArchiveConfirm);
+
+        function showArchiveConfirm(event) {
+            event.preventDefault();
+            if (state === "archived") {
+                archiveFunnel();
+                return;
+            }
+            $.waDialog.confirm({
+                title: that.locales["archive_confirm_title"],
+                text: that.locales["archive_confirm_text"],
+                success_button_title: that.locales["archive_confirm_button"],
+                success_button_class: 'brown',
+                cancel_button_title: `${that.locales["cancel_button"]}`,
+                cancel_button_class: 'light-gray',
+                onSuccess: archiveFunnel
+            });
+        }
+
+        function archiveFunnel() {
+            var href = "?module=settings&action=" + (state === "archived" ? "funnelRestore" : "funnelArchive"),
+                data = {
+                    id: that.funnel_id
+                };
+
+            if (!is_locked) {
+                is_locked = true;
+                $.post(href, data, function(response) {
+                    var content_uri = $.crm.app_url + "settings/funnels/";
+                    $.crm.content.load(content_uri);
+                    $(document).trigger('wa_funnel_save');
                 }, "json").always( function() {
                     is_locked = false;
                 });

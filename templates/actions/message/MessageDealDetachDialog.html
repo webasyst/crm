@@ -1,0 +1,55 @@
+{$class = 'c-conversation-associate-deal'}
+{$dialog_id = uniqid($class)}
+
+<div class="dialog crm-dialog-wrapper {$class}" id="{$dialog_id}">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <form>
+            <header class="dialog-header">
+                <h2>
+                    [`Detach message from the deal`]
+                </h2>
+            </header>
+
+            <div class="dialog-content fields">
+                {if !empty($deal)}
+                    <p>{sprintf_wp('Are you sure you want to detach this conversation from the deal “<strong>%s</strong>”?', $deal.name)}'</p>
+                {/if}
+                {if !empty($conversation) && $conversation.count > 1}
+                <div class="small">
+                    <label class="flexbox full-width space-8 custom-mt-4">
+                        <span class="wa-radio">
+                            <input type="radio" name="detach_type" value="conversation" checked="checked">
+                            <span></span>
+                        </span>
+                        <span class="wide">
+                            [`Detach entire conversation from the deal`]
+                        </span>
+                    </label>
+                    <label class="flexbox full-width space-8 custom-mt-4">
+                        <span class="wa-radio">
+                            <input type="radio" name="detach_type" value="message">
+                            <span></span>
+                        </span>
+                        <span class="wide">
+                            [`Move this message to a separate conversation and detach it from the deal`]
+                        </span>
+                    </label>
+                </div>
+                {/if}
+                
+                <div class="js-errors-place"></div>
+
+            </div>
+            <footer class="dialog-footer">
+                <input type="hidden" name="message_id" value="{$message.id}"/>
+                <div class="c-footer-actions js-footer">
+                    <input class="button js-submit" type="submit" value="[`Detach`]">
+                    <a class="button light-gray js-close-dialog js-cancel-dialog" href="javascript:void(0);">[`Cancel`]</a>
+                </div>
+            </footer>
+        </form>
+
+    </div>
+
+</div>

@@ -30,22 +30,7 @@ class crmTagAssignMethod extends crmApiAbstractMethod
             $this->dealTags($deal_ids, $tags);
         }
 
-        $this->response = $this->filterData(
-            $this->getTagModel()->getCloud(null, null, $tags),
-            [
-                'id',
-                'name',
-                'count',
-                'size',
-                'opacity'
-            ],
-            [
-                'id'      => 'integer',
-                'count'   => 'integer',
-                'size'    => 'integer',
-                'opacity' => 'float'
-            ]
-        );
+        $this->response = $this->prepareTags($this->getTagModel()->getCloud(null, null, $tags));
     }
 
     private function contactTags($contact_ids, $tags)

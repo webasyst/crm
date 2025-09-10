@@ -46,7 +46,7 @@ class crmCallAssociateDealDialogAction extends crmBackendViewAction
             'stage_id' => $stage_id,
         ));
 
-        $funnels = $fsm->withStages($fm->getAllFunnels());
+        $funnels = $fsm->withStages($fm->getAllFunnels(true));
         if (empty($funnels[$new_deal['funnel_id']])) {
             throw new waException('Funnel not found');
         }

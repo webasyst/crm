@@ -25,7 +25,7 @@
                         <label for="antispam-checkbox" data-active-text="[`Enabled`]" data-inactive-text="[`Disabled`]">{if !empty($source.params.antispam)}[`Enabled`]{else}[`Disabled`]{/if}</label>
                     </p>
 
-                    <p class="large-hint">
+                    <p class="hint">
                         [`Every time you receive a message from an unknown email address which is not yet stored in your Contacts database, an automatic notification will be sent to the sender's address.`]
                         [`This notification contains a special link which must be clicked to confirm the sending of the first request. You may also add extra instructions for your clients to the notification text.`]
                     </p>
@@ -90,9 +90,9 @@
 
             {$blocks.responsible|default:''}
 
-            <div class="bottombar sticky custom-mt-20 crm-form-buttons">
-                <div class="custom-px-20 custom-py-16 blank c-layout">
-                    <div class="c-column">
+            <div class="c-settings-footer bottombar sticky">
+                <div class="c-footer-actions flexbox middle full-width">
+                    <div>
                         <input type="submit" class="button" value="[`Save`]">
                         <a class="button light-gray" href="{$wa_app_url}settings/message-sources/email/">[`Cancel`]</a>
                         <span class="crm-loading" style="display: none;">
@@ -104,7 +104,7 @@
                     </span>
                     </div>
                     {if $source.id > 0}
-                        <div class="c-column middle right">
+                        <div>
                             <div class="crm-delete-link-wrapper">
                                 <a href="javascript:void(0);" class="button light-gray smaller crm-delete-source-link desktop-only">
                                     <i class="fas fa-trash-alt delete custom-mr-4"></i> [`Delete this source`]

@@ -15,9 +15,9 @@
     <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
     <link href="{$wa_url}wa-content/js/redactor/2/redactor.css?v{$wa->version(true)}" rel="stylesheet">
     <link href="{$wa_app_static_url}js/jquery/jquery-ui.css?v={$wa->version()}" rel="stylesheet">
- 
+
     <script src="https://unpkg.com/@lottiefiles/lottie-player@0.4.0/dist/tgs-player.js"></script>
-    
+
     {wa_js}
         {$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js
         {$wa_app_static_url}js/jquery/jquery-ui.min.js
@@ -91,7 +91,7 @@
 
 <div class="c-messages-page flexbox {if $iframe}iframe-style{/if} {if $full_chat_view}full-chat-style{/if}" id="c-messages-page">
     {if !$iframe || !$full_chat_view}
-    <div class="sidebar width-19rem wide-mobile blank bordered-right {if !empty($view_param) && !$full_chat_view}desktop-and-tablet-only{/if}" id="c-messages-sidebar">
+    <div class="sidebar width-23rem wide-mobile blank bordered-right {if !empty($view_param) && !$full_chat_view}desktop-and-tablet-only{/if}" id="c-messages-sidebar">
         {include file="./MessageListByConversation.html" _active_c=$active_conv inline}
     </div>
     {/if}
@@ -115,7 +115,7 @@
             $.wa_push.init();
         }
     })(jQuery);
-    
+
 </script>
 
 {if $iframe}

@@ -3,7 +3,7 @@
   *}
 
 {foreach $params.field->getOptions() as $k => $v}
-    <label class="flexbox space-8">
+    <label class="crm-input-radio flexbox space-8">
         <span>
             <input type="radio" value="{$k|escape}" name="{$input_name}"
                 {if !empty($params.default_checked)} checked="checked"{/if}

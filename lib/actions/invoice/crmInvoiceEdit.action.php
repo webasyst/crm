@@ -23,21 +23,22 @@ class crmInvoiceEditAction extends crmInvoiceIdAction
             $supported_currencies = array_keys($scm->getCurrencies());
         }
 
+        /*
         // Prepare a clean deal, in case the user wants to create a new for this invoice.
         $deal = $this->view->getVars('deal');
         if (empty($deal)) {
             $clean_data = $this->getCleanDealData();
-        }
+        } */
         $this->view->assign(array(
             'iframe'               => $iframe,
-            'clean_data'           => ifempty($clean_data),
+            //'clean_data'           => ifempty($clean_data),
             'shop_supported'       => $shop_supported,
             'supported_currencies' => $supported_currencies,
             'has_shop_rights'      => crmShop::hasRights(),
             'site_url'             => wa()->getRootUrl(true),
         ));
     }
-
+/*
     protected function getCleanDealData()
     {
         $funnel = $this->getFunnelModel()->getAvailableFunnel();
@@ -75,5 +76,5 @@ class crmInvoiceEditAction extends crmInvoiceIdAction
             'funnels' => $funnels,
             'stages'  => $stages,
         ];
-    }
+    } */
 }

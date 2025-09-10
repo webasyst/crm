@@ -15,10 +15,9 @@
                         {$_active_funnel = $funnels[$funnel_id]}
                     {/if}
                     <div class="dropdown" id="{$funnel_unic_id}">
-                        <button class="dropdown-toggle button light-gray js-visible-link" type="button" style="word-break: break-word;">
+                        <button class="dropdown-toggle button light-gray js-visible-link break-word" type="button">
                             {if !empty($_active_funnel.color)}
-                                {*<i class="icon funnel-state svg-icon" data-color="{$_active_funnel.color}"></i>*}
-                                <i class="fas fa-circle funnel-state" style="color: {$_active_funnel.color}"></i>
+                                <i class="{$_active_funnel.icon|default:'fas fa-briefcase'|escape}" style="color: {$_active_funnel.color};"></i>
                             {/if}
                                 <span class="js-name">{$_active_funnel.name|escape}</span>
                         </button>
@@ -26,11 +25,13 @@
                             <ul class="menu with-icons">
                                 {strip}
                                     {foreach $funnels as $_funnel}
+                                        {if !empty($_funnel.is_archived)}
+                                            {continue}
+                                        {/if}
                                         <li class="{if $funnel_id == $_funnel.id}selected{/if}">
                                             <a href="javascript:void(0);" data-id="{$_funnel.id}">
                                                 {if !empty($_funnel.color)}
-                                                {*<i class="icon funnel-state svg-icon" data-color="{$_funnel.color}"></i>*}
-                                                <i class="fas fa-circle funnel-state" style="color: {$_funnel.color}"></i>
+                                                <i class="{$_funnel.icon|default:'fas fa-briefcase'|escape}" style="color: {$_funnel.color};"></i>
                                                 {/if}
                                                 <span class="js-name">{$_funnel.name|escape}</span>
                                             </a>

@@ -33,21 +33,6 @@
     {$_ignore_include_jquery_ui_js = $options.ignore_include_jquery_ui_js}
 {/if}
 
-{if $need_datepicker && !$_ignore_include_jquery_ui}
-
-    {if !$_ignore_include_jquery_ui_css}
-        <link href="{$wa_app_static_url}js/jquery/jquery-ui.css?v={$wa->version()}" rel="stylesheet">
-    {/if}
-
-    {if !$_ignore_include_jquery_ui_js}
-        <script src="{$wa_app_static_url}js/jquery/jquery-ui.min.js?v={$wa->version()}"></script>
-        {if $_locale_string != 'en'}
-            <script src="{$wa_app_static_url}js/jquery/i18n/datepicker-{$_locale_string}.js?v={$wa->version()}"></script>
-        {/if}
-    {/if}
-
-{/if}
-
 {function form_field_html field=[]}
     {$captionplace = $field.captionplace|default:'left'}
     <div class="crm-form-field {if $captionplace !== 'left'}crm-caption-style-{$captionplace}{/if}" data-id="{$field.id}" data-uid="{$field.uid}">
@@ -88,6 +73,14 @@
                 {foreach $form.params.fields as $field_id => $field}
                     {form_field_html field=$field}
                 {/foreach}
+
+                {* Anti Bot Honey Pot *}
+                {if !empty($form.params.antibot_honey_pot.empty_field_name)}
+                <div class="crm-form-field" data-id="{$form.params.antibot_honey_pot.empty_field_name}" data-uid="{$form.params.antibot_honey_pot.empty_field_name}">
+                    <input type="text" name="crm_form[{$form.params.antibot_honey_pot.empty_field_name}]" value="">
+                </div>
+                {/if}
+
                 <div class="crm-error-msg crm-error-common"></div>
                 <div class="crm-submit-button-wrapper">
                     <input type="hidden" name="crm_form[id]" value="{$form.id}">
@@ -96,8 +89,6 @@
                     <i class="icon16 loading crm-loading" style="display: none;"></i>
                 </div>
             </form>
-
-            <iframe src="javascript:true" name="{$form_id}-target" id="{$form_id}-target" style="width:0 !important;height:0 !important;border:0 !important;"></iframe>
 
             <div class="crm-after-submit-block">
             </div>
@@ -118,7 +109,8 @@
             },
             messages: {
                 server_error: "[`Server error`]",
-            }
+            },
+            bot_hpot: {ifset($form.params.antibot_honey_pot, [])|json_encode}
         });
         if (typeof wa_crm_form_jquery !== 'undefined') {
             wa_crm_form_jquery == undefined;

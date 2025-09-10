@@ -10,9 +10,9 @@
         <h1 class="c-page-header">[`Payment`]</h1>
 
     {strip}
-  
+
         <div class="c-tabs-wrapper flexbox wrap middle full-width">
-            <div class="c-companies-wrapper">
+            <div class="c-companies-wrapper tabs-with-arrows-side-wrapper">
                 <ul class="tabs c-companies-list">
                     {foreach $companies as $_company}
                         {$_is_selected = ($company.id == $_company.id)}
@@ -43,7 +43,7 @@
                 </div>
                 <div class="c-column right custom-pt-16 custom-pb-4">
                     <div class="dropdown">
-                        <button class="dropdown-toggle button yellow js-action" type="button"><i class="fas fa-plus-circle add"></i> [`Add payment option`]</button>
+                        <button class="dropdown-toggle button yellow rounded js-action" type="button"><i class="fas fa-plus-circle add"></i> [`Add payment option`]</button>
                         <div class="dropdown-body">
                             <ul class="menu js-plugins-dropdown">
                                 {foreach $plugins as $_id => $plugin}

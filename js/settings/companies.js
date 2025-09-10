@@ -183,10 +183,10 @@ var CRMSettingsCompanies = ( function($) {
                 start: function(event,ui) {
                 },
                 stop: function(event,ui) {
-                    that.toggleButton(true); 
+                    that.toggleButton(true);
                 },
                 onUpdate: function(event,ui) {
-                    that.toggleButton(true); 
+                    that.toggleButton(true);
                 }
             });
         }
@@ -618,6 +618,14 @@ var CRMSettingsCompanies = ( function($) {
                 ColorPicker.prototype.initClass = function() {
                     var that = this;
 
+                    // Helper function to hide active color icon
+                    var hideColorIcon = function() {
+                        if ($activeColor.length) {
+                            $activeColor.removeClass(active_class);
+                            $activeColor = false;
+                        }
+                    };
+
                     that.farbtastic = $.farbtastic(that.$colorPicker, function(color) {
                         if (that.$field.val() !== color) {
                             hideColorIcon();
@@ -627,12 +635,14 @@ var CRMSettingsCompanies = ( function($) {
 
                     that.$wrapper.data("colorPicker", that);
 
-                    that.$field.on("change keyup", function() {
-                        var color = $(this).val();
-                        //
+                    // Optimized field change handler
+                    var updateColor = function() {
+                        var color = that.$field.val();
                         that.$icon.css("background-color", color);
                         that.farbtastic.setColor(color);
-                    });
+                    };
+
+                    that.$field.on("change keyup", updateColor);
 
                     that.$icon.on("click", function(event) {
                         event.preventDefault();
@@ -647,40 +657,69 @@ var CRMSettingsCompanies = ( function($) {
 
                     that.$field.on("keyup", hideColorIcon);
 
-                    function hideColorIcon() {
-                        if ($activeColor.length) {
-                            $activeColor.removeClass(active_class);
-                            $activeColor = false;
+                    // Optimized document event handler for ESC and click outside
+                    that.documentHandler = function(event) {
+                        if (!that.is_opened) return;
+
+                        // Check if wrapper still exists in DOM
+                        var wrapperEl = that.$wrapper[0];
+                        if (!$.contains(document, wrapperEl)) {
+                            that.cleanup();
+                            return;
                         }
-                    }
 
-                    $(document).on("keyup", that.watcher);
+                        // ESC key handler
+                        if (event.type === 'keyup' && event.keyCode === 27) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            that.displayToggle(false);
+                            return;
+                        }
 
-                    that.watcher = function(event) {
-                        var is_exist = $.contains(document, that.$wrapper[0]);
-                        if (is_exist) {
-                            var code = event.keyCode;
-                            if (code === 27) {
-                                if (that.is_opened) {
-                                    that.displayToggle(false);
-                                }
+                        // Click outside handler
+                        if (event.type === 'click') {
+                            var target = event.target;
+                            // Check if click is inside ColorPicker (more efficient than jQuery closest)
+                            var isClickInside = wrapperEl.contains(target) ||
+                                               target === wrapperEl ||
+                                               $(target).closest(that.$wrapper).length > 0;
+
+                            if (!isClickInside) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                that.displayToggle(false);
                             }
-                        } else {
-                            $(document).off("keyup", that.watcher);
                         }
-                    }
+                    };
+
+                    // Single event listener for both ESC and click outside
+                    document.addEventListener('keyup', that.documentHandler, true);
+                    document.addEventListener('click', that.documentHandler, true);
+
+                    // Cleanup method
+                    that.cleanup = function() {
+                        document.removeEventListener('keyup', that.documentHandler, true);
+                        document.removeEventListener('click', that.documentHandler, true);
+                    };
                 };
 
                 ColorPicker.prototype.displayToggle = function( show ) {
-                    var that = this,
-                        hidden_class = "is-hidden";
+                    // If closing ColorPicker, save current color first
+                    if (!show && this.is_opened && this.farbtastic) {
+                        this.saveCurrentColor();
+                    }
 
-                    if (show) {
-                        that.$wrapper.removeClass(hidden_class);
-                        that.is_opened = true;
-                    } else {
-                        that.$wrapper.addClass(hidden_class);
-                        that.is_opened = false;
+                    this.$wrapper.toggleClass("is-hidden", !show);
+                    this.is_opened = show;
+                };
+
+                // Save current color from Farbtastic to field
+                ColorPicker.prototype.saveCurrentColor = function() {
+                    if (this.farbtastic && this.is_opened) {
+                        var currentColor = this.farbtastic.color;
+                        if (currentColor && this.$field.val() !== currentColor) {
+                            this.$field.val(currentColor).change();
+                        }
                     }
                 };
 

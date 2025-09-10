@@ -33,8 +33,8 @@
 {$_active_sort = $_sort_array[$sort]}
 
 <div class="c-invoices-page flexbox wrap-mobile" id="c-invoices-page">
-    <div class="sidebar blank  c-shadowed flexbox width-20rem wide-mobile overflow-visible" id="js-aside-block">
-        <div class="sidebar-header box js-aside-header c-invoices-header">
+    <div class="sidebar blank flexbox width-23rem wide-mobile overflow-visible" id="js-aside-block">
+        <div class="sidebar-header box js-aside-header c-invoices-header custom-mt-6">
             {* NEW *}
             <div class="flexbox middle full-width">
                 <div class="c-search-wrapper">
@@ -51,7 +51,7 @@
             </div>
 
             {* NAV *}
-            <div class="c-filters flexbox space-8 full-width custom-my-16">
+            <div class="c-filters flexbox space-8 full-width custom-mt-16 custom-mb-4">
                 <div class="dropdown c-dropdown-states">
                     <button class="align-left dropdown-toggle full-width light-gray small" type="button">
                             {if !empty($_active_state.icon)}

@@ -6,38 +6,43 @@ class crmTemplates
      * @var array
      */
     protected static $templates_variants;
+    protected static $templates_variants_contents;
 
     /**
      * @return array
      */
-    public static function getTemplatesVariants()
+    public static function getTemplatesVariants($include_content = false)
     {
+        
         if (self::$templates_variants !== null) {
             return self::$templates_variants;
         }
 
-        $path = dirname(__FILE__).'/../config/data';
+        if (self::$templates_variants === null) {
+            $path = dirname(__FILE__).'/../config/data';
 
-        if (!file_exists($path.'/templates.php')) {
-            return self::$templates_variants = array();
-        }
-
-        $templates = array();
-        $_templates = include($path.'/templates.php');
-
-
-        foreach ($_templates as $i => $t) {
-
-            $t['content'] = '';
-
-            if (file_exists($path.$t['path'])) {
-                $t['content'] = file_get_contents($path.$t['path']);
+            if (!file_exists($path.'/templates.php')) {
+                return self::$templates_variants = [];
             }
 
-            $templates[$i] = $t;
+            self::$templates_variants = include($path.'/templates.php');
+            if (!$include_content) {
+                return self::$templates_variants;
+            }
         }
 
-        return self::$templates_variants = $templates;
+        if (self::$templates_variants_contents === null) {
+            self::$templates_variants_contents = [];
+            $path = dirname(__FILE__).'/../config/data';
+            foreach (self::$templates_variants as $id => $t) {
+                self::$templates_variants_contents[$id] = file_exists($path.$t['path']) ? file_get_contents($path.$t['path']) : '';
+            }
+        }
+
+        return array_map(function ($t) {
+            $t['content'] = self::$templates_variants_contents[$t['origin_id']];
+            return $t;
+        }, self::$templates_variants);
     }
 
     /**
@@ -66,11 +71,11 @@ class crmTemplates
      * @param int $template_id
      * @param string $locale        defaults to current user's locale
      * @returns string
+     * @deprecated
      */
     public function getBasicTemplate($template_id, $locale = null)
     {
         $path = wa('crm')->getConfig()->getAppPath('lib/config/data');
-
         /**
          * Two pre-installed templates are treated in a special way.
          * they always use pre-defined base template file no matter the locale.
@@ -99,6 +104,27 @@ class crmTemplates
         }
     }
 
+    public function getOriginTemplate($origin_id)
+    {
+        $template_path = '/templates/invoices/invoice.template_a.html';
+        $path = wa('crm')->getConfig()->getAppPath('lib/config/data');
+        if (!empty($origin_id) && isset(self::getTemplatesVariants()[$origin_id]) && $data = self::getTemplatesVariants()[$origin_id]) {
+            $template_path = $data['path'];
+        }
+        if (file_exists($path.$template_path)) {
+            return file_get_contents($path.$template_path);
+        }
+    }
+
+    public function getOriginTemplateParams($origin_id)
+    {
+        $params = [];
+        if (!empty($origin_id) && isset(self::getTemplatesVariants()[$origin_id]) && $data = self::getTemplatesVariants()[$origin_id]) {
+            $params = $data['template_params'];
+        }
+        return $params;
+   }
+
     /**
      * Compare template content to the base one, ignoring all whitespace
      *
@@ -110,8 +136,8 @@ class crmTemplates
         if (empty($template['id']) || empty($template['content'])) {
             return false;
         }
-        $basic_template = preg_replace('~\s+~', '', $this->getBasicTemplate($template['id']));
+        $origin_template = preg_replace('~\s+~', '', $this->getOriginTemplate($template['origin_id']));
         $content = preg_replace('~\s+~', '', $template['content']);
-        return $content !== $basic_template;
+        return $content !== $origin_template;
     }
 }

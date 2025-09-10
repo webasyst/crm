@@ -44,6 +44,14 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
             $this->accessDenied();
         }
 
+        $template_style_version = 2;
+        if (!empty($this->invoice['company']['template_id'])) {
+            $template_record = (new crmTemplatesModel)->getById($this->invoice['company']['template_id']);
+            if (!empty($template_record)) {
+                $template_style_version = $template_record['style_version'];
+            }
+        }
+
         $cm = new crmCompanyModel();
         $companies = $cm->getAll('id');
 
@@ -53,6 +61,7 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
         $currencies = $curm->getAll('code');
 
         $deal = null;
+        $funnel = null;
         $deal_access_denied = false;
         if ($this->invoice['deal_id']) {
             $dm = new crmDealModel();
@@ -61,6 +70,9 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
                 $deal_access_denied = true;
                 $deal = null;
             }
+        }
+        if (!empty($deal)) {
+            $funnel = $this->getFunnelModel()->getById($deal['funnel_id']);
         }
 
         $show_url = true;
@@ -125,7 +137,7 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
             $this->invoice['days_left'] = $current_date > $target_date ? -$interval->days : $interval->days;
         }
 
-        $this->view->assign(array(
+        $this->view->assign([
             'iframe'                 => $iframe,
             'invoice'                => $this->invoice,
             'public_url'             => $public_url,
@@ -139,12 +151,14 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
             'company_contact'        => $company_contact,
             'deal'                   => $deal,
             'deal_access_denied'     => $deal_access_denied,
+            'funnel'                 => $funnel,
             'invoice_id'             => $invoice_id,
             'backend_invoice'        => $backend_invoice,
-            'customer'               => $this->invoice['contact_id'] ? (new waContact($this->invoice['contact_id'])) : null,
+            'customer'               => empty($this->invoice['contact_id']) ? null : new waContact($this->invoice['contact_id']),
             'company'                => ifset($this->invoice, 'company', null),
-            'root_path'              => $this->getConfig()->getRootPath().DIRECTORY_SEPARATOR
-        ));
+            'root_path'              => $this->getConfig()->getRootPath().DIRECTORY_SEPARATOR,
+            'style_version'          => $template_style_version < 2 ? '' : '_v' . $template_style_version,
+        ]);
 
         wa('crm')->getConfig()->setLastVisitedUrl('invoice/');
     }
@@ -222,7 +236,7 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
         if (!$contact->exists()) {
             $contact = new waContact();
             $contact['id'] = $contact_id;
-            $contact['name'] = sprintf_wp("Contact with ID %s doesn't exist", $contact_id);
+            $contact['name'] = empty($contact_id) ? _w('Client not specified.') : sprintf_wp("Contact with ID %s doesn't exist", $contact_id);
         }
         return $contact;
     }

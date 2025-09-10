@@ -120,7 +120,7 @@ var CRMSettingsSourceEmail = ( function($) {
 
         var that = this,
             $form = that.$form,
-            $buttons = that.$wrapper.find('.crm-form-buttons'),
+            $buttons = that.$wrapper.find('.c-footer-actions'),
             $loading = $buttons.find('.crm-loading'),
             $button = that.$button,
             $status = $form.find('.crm-success-status'),
@@ -233,7 +233,7 @@ var CRMSettingsSourceEmail = ( function($) {
                     if ($show_block.length) { $show_block.hide(); $hide_block.show() }
                     }
                     else {
-                     wa_switch.$label.text(wa_switch.inactive_text); 
+                     wa_switch.$label.text(wa_switch.inactive_text);
                      $checkbox_wrapper.find(".js-ibutton").attr('checked', false);
                      $block.slideUp(350);
                      if ($show_block.length) { $show_block.show(); $hide_block.hide() }

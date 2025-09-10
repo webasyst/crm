@@ -37,7 +37,7 @@ var MessageContentRouter = ( function($) {
 
     MessageContentRouter.prototype.load = function(content_uri, unset_state, target_props, target_id, $link) {
         var that = this;
-        
+
         var uri_has_app_url = ( content_uri.indexOf( $.crm.app_url ) >= 0 );
         if (!uri_has_app_url) {
             // TODO:
@@ -60,10 +60,6 @@ var MessageContentRouter = ( function($) {
             });
         }
 
-        if ($link) {
-            $link.find('.enable-animation [data-fa-i2svg]').hide().after('<i class="fas fa-spinner fa-spin"></i>');
-        }
-
         var content_url = $.crm.app_url + '?module=messageConversationId&id=' + target_props;
         that.xhr = $.ajax({
             method: 'GET',
@@ -72,17 +68,11 @@ var MessageContentRouter = ( function($) {
             global: false,
             cache: false
         }).done(function(html) {
-            
             if (that.api_enabled && !unset_state) {
                 history.pushState({
                     reload: true,               // force reload history state
                     content_uri: content_uri    // url, string
                 }, "", content_uri);
-            }
-
-            if ($link) {
-                $link.find('.enable-animation [data-fa-i2svg]:first').show();
-                $link.find('.enable-animation [data-fa-i2svg]').slice(1).remove();
             }
 
             that.setContent( html );
@@ -96,10 +86,6 @@ var MessageContentRouter = ( function($) {
                         text: data.responseText,
                         button: "Close",
                     })
-            }
-            if ($link) {
-                $link.find('.enable-animation [data-fa-i2svg]:first').show();
-                $link.find('.enable-animation [data-fa-i2svg]').slice(1).remove();
             }
         });
 
@@ -126,10 +112,10 @@ var MessageContentRouter = ( function($) {
         var that = this;
         that.$content_wrapper = that.$content.find('#js-message-conversation-page');
         that.$skeleton =  that.$content.find('.skeleton-wrapper');
-       
+
         var $content_wrapper = that.$content_wrapper,
             $skeleton = that.$skeleton;
-            
+
             setTimeout( function() {
                 if (show) {
                     $skeleton.show();
@@ -221,7 +207,7 @@ var CRMMessageBodyDialog = ( function($) {
             //
             that.initMessageDeleteLink();
         }
- 
+
     };
 
     CRMMessageBodyDialog.prototype.initSelectDeal = function() {
@@ -247,7 +233,7 @@ var CRMMessageBodyDialog = ( function($) {
 
         // Load deals by contact:
         if (contact_id) {
-            var href = '?module=deal&action=byContact&id=' + contact_id;
+            var href = '?module=deal&action=byContact&only_existing_stage=1&id=' + contact_id;
             $.get(href, function(response) {
                 if (response.status === "ok") {
                     // rendering contact deals
@@ -317,7 +303,10 @@ var CRMMessageBodyDialog = ( function($) {
         });
 
         function renderDeals(deal,funnel) {
-            return '<li><a href="javascript:void(0);" class="js-deal-item" data-deal-id="'+ deal.id +'"><i class="fas fa-circle funnel-state" style="color: '+ funnel.stages[deal.stage_id].color +'"></i><span class="js-text">'+ deal.name +'</span></a></li>';
+            return '<li><a href="javascript:void(0);" class="js-deal-item" data-deal-id="' + deal.id + '">' +
+                    '<i class="' + (funnel.icon || 'fas fa-briefcase') + ' funnel-state" style="color: '+ funnel.stages[deal.stage_id].color +'"></i>'+
+                    '<span class="js-text">' + deal.name + (funnel.is_archived == 1 ? `<span class="gray small custom-ml-4 nowrap">${that.locales['archived']}</span>` : '') + '</span>' +
+                '</a></li>';
         }
 
         function emptyDeal() {
@@ -404,23 +393,23 @@ var CRMMessageBodyDialog = ( function($) {
                 if ($(this).prop('href') !== 'javascript:void(0);') {
                     dialog.close();
                 }
-          
+
             })
     }
 
     CRMMessageBodyDialog.prototype.initMessageReplyBtn = function($dialog_wrapper, dialog) {
                 var that = this;
-        
+
                 $dialog_wrapper.on('click', '.js-message-reply', function () {
                     var $link = $(this),
                         message_id = $link.data('message-id');
                     showLoading(true);
-        
+
                     var href = that.app_url+'?module=message&action=writeReplyDialog',
                         params = { id: message_id };
-        
+
                     $.post(href, params, function(html) {
-        
+
                         $.waDialog({
                             html: html,
                             onClose: onClose
@@ -431,14 +420,14 @@ var CRMMessageBodyDialog = ( function($) {
                     }).always( function() {
                         showLoading(false);
                     });
-        
+
                     function showLoading(show) {
                         var $icon = $link.find(".icon");
                         if (!$icon.length) { return false; }
-            
+
                         var default_class = "fa-undo",
                             loading_class = "fa-spinner fa-spin";
-            
+
                         if (show) {
                             $icon.removeClass(default_class).addClass(loading_class);
                         } else {
@@ -447,35 +436,35 @@ var CRMMessageBodyDialog = ( function($) {
                     }
                 })
     };
-        
+
     CRMMessageBodyDialog.prototype.initMessageForwardBtn = function($dialog_wrapper, dialog) {
                 var that = this;
-        
+
                 $dialog_wrapper.on('click', '.js-message-forward', function () {
                     var $link = $(this),
                         message_id = $link.data('message-id');
                         showLoading(true);
-        
+
                     var href = that.app_url+'?module=message&action=writeForwardDialog',
                         params = { id: message_id };
-        
+
                     $.post(href, params, function(html) {
                        // dialog.hide();
-        
+
                         $.waDialog({
                             html: html,
                         });
                     }).always( function() {
                         showLoading(false);
                     });
-        
+
                     function showLoading(show) {
                         var $icon = $link.find(".icon");
                         if (!$icon.length) { return false; }
-            
+
                         var default_class = "fa-redo",
                             loading_class = "fa-spinner fa-spin";
-            
+
                         if (show) {
                             $icon.removeClass(default_class).addClass(loading_class);
                         } else {
@@ -550,7 +539,7 @@ var CRMMessagesSidebar = ( function($) {
         var is_locked = false;
         that.$wrapper.on('click', '.js-write-message', function(event) {
             event.preventDefault();
-            
+
             if (!is_locked) {
                 is_locked = true;
                 var url = $.crm.app_url + '?module=message&action=writeNewDialog';
@@ -558,14 +547,14 @@ var CRMMessagesSidebar = ( function($) {
                 const deal_id = that.$settings_deal_id ? that.$settings_deal_id : null;
                 data = {contact_id: contact_id, deal_id: deal_id};
                 $.get(url, data, function(html) {
-                    
+
                     $.waDialog({
                         html: html,
                         onOpen: function() {is_locked = false}
                     });
                 });
             }
-           
+
         });
 
         that.$wrapper.on('click', '.js-filter-open', function() {
@@ -575,7 +564,7 @@ var CRMMessagesSidebar = ( function($) {
         if (that.current_page) {
             that.initBackgroundUpdate();
         }
-        
+
     };
 
     CRMMessagesSidebar.prototype.initSearchHandler = function() {
@@ -630,7 +619,7 @@ var CRMMessagesSidebar = ( function($) {
                 $page_name.addClass('mobile-only').show();
                 $search_block.addClass('desktop-and-tablet-only');
             })
-    
+
 
          function selectHandler(user) {
             $.crm.content.load($.crm.app_url + 'message/?contact=' + user.id);
@@ -676,28 +665,28 @@ var CRMMessagesSidebar = ( function($) {
             } else {
                 timeout = setTimeout(request, 120000);
             }
-           
+
         }
 
         function request() {
-            
+
             if (!is_locked) {
                 is_locked = true;
 
                 var is_exist = $.contains(document, that.$wrapper[0]);
-                
+
                 if (is_exist) {
-                    
+
                     var href = "?module=message&action=listByConversation&background_process=1",
                         data = {
                             check: 1
                         };
                     $.post(href, data, function(response) {
-                        
+
                         if (response.status === "ok") {
                             var is_changed = (response.data !== last_message_id),
                                 is_exist = $.contains(document, that.$wrapper[0]);
-                                
+
                             if (is_exist) {
                                 is_changed && !isDialogOpen() ? reload() : runner();
                             }
@@ -727,10 +716,10 @@ var CRMMessagesSidebar = ( function($) {
                 background_process: 1,
                 no_need_to_get_the_conversation: 1
             };
-            
+
             clearGlobalListeners();
             clearListeners();
-           
+
             $.get(content_uri, data, function(html) {
                 const sidebar_list = $(html).find('#c-messages-conversation-list').html();
                 that.$wrapper.html( sidebar_list );
@@ -763,7 +752,7 @@ var CRMMessagesSidebar = ( function($) {
             /*$(document).trigger('changeActiveConversation', {
                 target_id: target_id
             });*/
-            
+
             $.message.content.load(target_link, false, target_props, target_id, $link);
             $list.find('.selected').removeClass('selected');
             $link.parent().addClass('selected').removeClass('unread');
@@ -806,14 +795,14 @@ var CRMMessagesSidebar = ( function($) {
             list_height = $sidebar.find('.c-messages-conversation-list').height(),
             $list = that.$list,
             page_of_item = that.page_of_item;
-            
+
         function checkBigWindow() {
             if (that.current_page == 1 && ($window.height() - 64) > list_height) {
                 return true
             }
             else return false
         }
-            
+
         function startLazyLoading() {
             var $loader = $list.find(".js-lazy-load");
 

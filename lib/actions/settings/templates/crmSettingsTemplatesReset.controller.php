@@ -9,9 +9,8 @@ class crmSettingsTemplatesResetController extends crmJsonController
         }
 
         $template_id = waRequest::post('template_id', null, waRequest::TYPE_INT);
-        $t = new crmTemplates();
-
-        $template = $t->getBasicTemplate($template_id);
+        $template_record = (new crmTemplatesModel)->getById($template_id);
+        $template = (new crmTemplates)->getOriginTemplate(ifset($template_record['origin_id']));
 
         $this->response = array(
             'template' => $template

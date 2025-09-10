@@ -59,7 +59,7 @@
                         {if $company_id}
                             <div class="c-filter-wrapper">
                                 <div class="dropdown" id="dropdown-company-filter">
-                                    <button class="dropdown-toggle light-gray" type="button">
+                                    <button class="dropdown-toggle light-gray small" type="button">
                                         {$companies[$company_id].name|escape}
                                     </button>
                                     <div class="dropdown-body">
@@ -88,7 +88,7 @@
                         {* USERS *}
                         <div class="c-filter-wrapper">
                             <div class="dropdown" id="dropdown-contacts-filter">
-                                <button class="dropdown-toggle light-gray" type="button">
+                                <button class="dropdown-toggle light-gray small" type="button">
                                     {if !empty($users[$user_id].photo_url_16)}
                                         <span class="icon size-16 rounded userpic custom-mr-8" style="background-image: url({$users[$user_id].photo_url_16})"></span>
                                     {/if}
@@ -128,7 +128,7 @@
                         <div class="flexbox wrap middle space-8 c-nav-wrapper">
                             <div class="c-filter-wrapper">
                                 <div class="dropdown" id="dropdown-dates-filter">
-                                    <button class="dropdown-toggle nowrap light-gray" type="button">
+                                    <button class="dropdown-toggle nowrap light-gray small" type="button">
                                         <span class="js-link-text">{$selected_filter_date.name|escape}</span>
                                     </button>
                                     <div class="dropdown-body right">

@@ -39,6 +39,7 @@ class crmHistoryMethod extends crmApiAbstractMethod
                 throw new waAPIException('not_found', _w('User not found.'), 404);
             }
         }
+        $deal = null;
         if (!empty($deal_id)) {
             if ($deal_id < 1) {
                 throw new waAPIException('not_found', _w('Deal not found'), 404);
@@ -222,7 +223,7 @@ class crmHistoryMethod extends crmApiAbstractMethod
             return $l;
         }, $log);
 
-        $log = $this->prepareLog($log, $conversations, $userpic_size);
+        $log = $this->prepareLog($log, $conversations, $userpic_size, $deal);
 
         $this->response = array(
             'count' => ($count < $limit ? count($log) : $count),

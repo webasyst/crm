@@ -53,13 +53,13 @@ var CRMCallPage = ( function($) {
         that.initCustomAudioPlayer();
 
         that.initDotsDetail();
-        
+
         if (!that.iframe && !that.is_lazy_load) {
             that.initContactUpdateDialog();
             that.initContactCreateDialog();
             that.initFilterDrawer();
         }
-        
+
 
         //that.initDownloadLink();
 
@@ -95,7 +95,7 @@ var CRMCallPage = ( function($) {
                 const dialog_html = `<div class="dialog" id="call-create-contact-dialog">
                 <div class="dialog-background"></div>
                 <div class="dialog-body" style="width: 761px">
-                    
+
                     <div class="dialog-content" style="padding: 0;">
                         <iframe src="${href}" frameborder="0" style="height: 94vh; width: 100%;">
                         </iframe>
@@ -142,7 +142,7 @@ var CRMCallPage = ( function($) {
                                 var contactHtml = $contactField.html();
                                 $call_wrapper.closest('.c-column-phone').find('.c-user-wrapper .flexbox.middle.space-8').html(contactHtml);
                             }
-                           
+
                         }
                     });
                 }).always( function() {
@@ -153,7 +153,7 @@ var CRMCallPage = ( function($) {
     };
 
     CRMCallPage.prototype.initFilterDrawer = function() {
-        
+
         var that = this,
             $filter_button = that.$wrapper.find(".js-filter-button"),
             $filter_reload_button = that.$wrapper.find(".js-reload-filter-button"),
@@ -166,7 +166,7 @@ var CRMCallPage = ( function($) {
             $autocomplete_deal = $drawer_content.find(".js-search-field-deal"),
             $autocomplete_deal_w = $autocomplete_deal.parent(),
             $contact_wrapper = $drawer_content.find(".js-call-filter-contact"),
-            
+
             $deal_wrapper = $drawer_content.find(".js-call-filter-deal"),
             started_form_data = $filter_form.serializeArray(),
             started_form_data_text = $filter_form.serialize(),
@@ -183,12 +183,12 @@ var CRMCallPage = ( function($) {
                 {name: 'user', value: ''}
                 ],
             drawerLoaded = false;
-            
+
 
         $filter_button.on('click', function (event) {
         event.preventDefault();
         openDrawer();
-        
+
         });
 
         $filter_reload_button.on('click', function (event) {
@@ -233,7 +233,7 @@ var CRMCallPage = ( function($) {
         }
 
         function restoreFilter() {
-            
+
             if (started_form_data_text !== $filter_form.serialize()){
                 updateFilterData(started_form_data);
             }
@@ -241,7 +241,7 @@ var CRMCallPage = ( function($) {
         }
 
         function openDrawer() {
-            $drawer_content.show(); 
+            $drawer_content.show();
             $('#wa-app').addClass('content-on-top');
             setTimeout(() => {
                 $drawer_content.removeClass('is-hide');
@@ -252,7 +252,7 @@ var CRMCallPage = ( function($) {
         function closeDrawer() {
             $drawer_content.addClass('is-hide');
             setTimeout(() => {
-                $drawer_content.hide();     
+                $drawer_content.hide();
                 $('body').removeClass('is-locked').css("padding-right", "");
                 $('#wa-app').removeClass('content-on-top');
             }, 300);
@@ -268,7 +268,7 @@ var CRMCallPage = ( function($) {
                     if (i === 4 && d.value === 'custom')
                     {
                         var $datepicker_wrapper = $drawer_content.find(".js-datepicker");
-                            
+
                         if ($datepicker_wrapper.eq(0).val() === '') {
                         form_data[5].value = '';
                         }
@@ -280,16 +280,16 @@ var CRMCallPage = ( function($) {
                 }
             })
             $.crm.content.load($.crm.app_url + 'call/?' + that.href_prop);
-            
+
             var $loader = $('<span/>').addClass('icon size-20').append("<i/>").addClass('fas fa-spinner wa-animation-spin speed-1000 ');
-            
+
             if (!is_search) {
                 var $filter_buttom = $drawer_content.find('.c-filter-buttom');
                 $filter_buttom.append($loader);
                 $filter_buttom.children().each( function() {
                     var $field = $(this);
                     $field.prop("disabled",true);
-                }); 
+                });
                 $(document).one('wa_loaded', function () {
                     $loader.remove();
                     $filter_buttom.children().each( function() {
@@ -297,13 +297,13 @@ var CRMCallPage = ( function($) {
                         $field.prop("disabled",false);
                     });
                     closeDrawer();
-                }) 
+                })
             }
 
             else {
                 $filter_button.prop("disabled",true).append($loader);
             }
-            
+
         }
 
         function updateFilterData(data) {
@@ -321,7 +321,7 @@ var CRMCallPage = ( function($) {
 
             (data[2]['value'] === '') ? cancelContact() : renderContact(that.started_contact, data[2]['value'], $contact_wrapper, $autocomplete_client);
             (data[3]['value'] === '' || data[3]['value'] === '0') ? cancelDeal() : renderDeal(that.started_deal, data[3]['value']);
-            
+
             if (data[3]['value'] !== switch_data[3]['value'] && (switch_data[3]['value'] === '0' || data[3]['value'] === '0')) {
                 $deal_switch.trigger('click');
             }
@@ -414,7 +414,8 @@ var CRMCallPage = ( function($) {
                     return false;
                 }
                 }).data("ui-autocomplete")._renderItem = function (ul, item) {
-                return $("<li />").addClass("ui-menu-item-html").append("<div>" +  that.escapeHtml(item.name) + "</div>").appendTo(ul);
+                return $("<li />").addClass("ui-menu-item-html")
+                    .append(`<div><i class="${item.funnel.icon} custom-mr-4" style="color: ${item?.stage?.color};"></i>${that.escapeHtml(item.name)}</div>`).appendTo(ul);
             };
 
             function renderContact(contact, id, $wrapper, $input) {
@@ -450,19 +451,19 @@ var CRMCallPage = ( function($) {
                 var deal_name = that.escapeHtml(deal.name);
                 var deal_html = `
                 <div class="c-deal-wrapper nowrap">
-                <div class="flexbox space-8 ">
-                    <i class="fas fa-circle" style="color: ${deal.stage ? deal.stage.color : ''}"></i>
-                </div>
-                <div>
-                    <div class="c-deal-wrapper--name">${deal_name}</div>
-                    <div>
-                        <span class="hint">${deal.create_datetime ? (deal.create_datetime).split(' ')[0] : ''}</span>
-                        ${deal.closed_datetime ? '<span> - </span>' : ''}
-                        <span class="hint">${deal.closed_datetime ? (deal.closed_datetime).split(' ')[0] : ''}</span>
+                    <div class="flexbox space-8 ">
+                        <i class="${deal.funnel.icon}" style="color: ${deal.stage ? deal.stage.color : ''}"></i>
                     </div>
-                    <div class="hint">${deal.amount ? Math.ceil(+deal.amount) : ''} ${deal.currency_id}</div>   
+                    <div>
+                        <div class="c-deal-wrapper--name">${deal_name}</div>
+                        <div>
+                            <span class="hint">${deal.create_datetime ? (deal.create_datetime).split(' ')[0] : ''}</span>
+                            ${deal.closed_datetime ? '<span> - </span>' : ''}
+                            <span class="hint">${deal.closed_datetime ? (deal.closed_datetime).split(' ')[0] : ''}</span>
+                        </div>
+                        <div class="hint">${deal.amount ? Math.ceil(+deal.amount) : ''} ${deal.currency_id}</div>
+                    </div>
                 </div>
-            </div>
                 <span class="icon js-call-filter-deal-cancel"><i class="fas fa-times-circle"></i></span>`;
                 $drawer_content.find('#input-deal').val(id);
                 $autocomplete_deal.val("");
@@ -494,7 +495,7 @@ var CRMCallPage = ( function($) {
 
             initDatepickers();
 
-        //TODO update lazy load with 
+        //TODO update lazy load with
     }
 
     CRMCallPage.prototype.initDownloadLink = function() {
@@ -525,7 +526,7 @@ var CRMCallPage = ( function($) {
 
             const showRangeProgress = (rangeInput) => {
                 $column_audio[0].style.setProperty('--seek-before-width', rangeInput.value / rangeInput.max * 100 + '%');
-                
+
             }
             const calculateTime = (secs) => {
                 const minutes = Math.floor(secs / 60);
@@ -533,17 +534,17 @@ var CRMCallPage = ( function($) {
                 const returnedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
                 return `${minutes}:${returnedSeconds}`;
             }
-            
+
             const displayDuration = (audio) => {
                 $duration.text(calculateTime(audio.duration));
             }
-            
+
             const setSliderMax = (audio) => {
                 $progressbar_item.max = Math.floor(audio.duration);
-            }  
+            }
 
             if (loading || pause) {
-                
+
                 id = setInterval(getAudio, 50);
                 function getAudio() {
                     var $audio = $target.find('audio');
@@ -578,7 +579,7 @@ var CRMCallPage = ( function($) {
                             cancelAnimationFrame(raf);
                     // }
                     });
-                    
+
                     $progressbar_new.on('input', () => {
                         $audio_el.currentTime = $progressbar_item.value;
                         requestAnimationFrame(whilePlaying);
@@ -586,7 +587,7 @@ var CRMCallPage = ( function($) {
 
                     const whilePlaying = () => {
                         $progressbar_item.value = Math.floor($audio_el.currentTime);
-                        
+
                         $current_time.text(calculateTime($progressbar_item.value));
                         $column_audio[0].style.setProperty('--seek-before-width', `${$progressbar_item.value / $progressbar_item.max * 100}%`);
                         raf = requestAnimationFrame(whilePlaying);
@@ -608,7 +609,7 @@ var CRMCallPage = ( function($) {
                     displayBufferedAmount();
                     requestAnimationFrame(whilePlaying);
 
-            
+
                     }
                     run();
                 }
@@ -633,7 +634,7 @@ var CRMCallPage = ( function($) {
 
                 $detail.toggle();
                 $detail_wrapper.toggleClass('open');
-                
+
             const detailHeight = $detail.height();
             const detailWidth = $detail.width();
             getHeightToBottom($detail_wrapper[0]) < (detailHeight + 30) ? $detail.css("bottom", "30px") : $detail.css("bottom", "unset");
@@ -667,7 +668,7 @@ var CRMCallPage = ( function($) {
                 })
             }
         }
-    
+
     }
 
 
@@ -901,7 +902,7 @@ var CRMCallPage = ( function($) {
                 is_locked = true;
                 console.log(href);
 
-                
+
                 $.post(href, data, function (html) {
                     var $new_list = $(html).find('#js-calls-table').html();
                     $list.append($new_list);
@@ -912,7 +913,7 @@ var CRMCallPage = ( function($) {
                 }).always(function () {
                     is_locked = false;
                 });
-  
+
             }
         }
 
@@ -924,5 +925,3 @@ var CRMCallPage = ( function($) {
     return CRMCallPage;
 
 })(jQuery);
-
- 

@@ -46,9 +46,9 @@ class crmAutocompleteDealController extends crmAutocompleteController
             $where .= " AND cd.status_id = 'OPEN'";
         }
         $deals = $deal_model->query("
-            SELECT cd.id, cd.name, cd.status_id, cd.funnel_id, cd.stage_id, cd.contact_id, cd.create_datetime, cd.expected_date, cd.closed_datetime, cd.amount, cd.currency_id,  wc.name AS contact_name 
-            FROM crm_deal cd 
-            LEFT JOIN wa_contact wc ON wc.id = cd.contact_id 
+            SELECT cd.id, cd.name, cd.status_id, cd.funnel_id, cd.stage_id, cd.contact_id, cd.create_datetime, cd.expected_date, cd.closed_datetime, cd.amount, cd.currency_id,  wc.name AS contact_name
+            FROM crm_deal cd
+            LEFT JOIN wa_contact wc ON wc.id = cd.contact_id
             WHERE $where
             LIMIT i:limit
         ", [
@@ -74,7 +74,8 @@ class crmAutocompleteDealController extends crmAutocompleteController
                     $deal['funnel'] = [
                         'id'    => $_funn_with_st['id'],
                         'name'  => $_funn_with_st['name'],
-                        'color' => $_funn_with_st['color']
+                        'color' => $_funn_with_st['color'],
+                        'icon' => $_funn_with_st['icon'] ?? 'fas fa-briefcase'
                     ];
                     foreach ($_funn_with_st['stages'] as $_stage) {
                         if ($_stage['id'] == $deal['stage_id']) {

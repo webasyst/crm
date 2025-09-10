@@ -2,10 +2,10 @@
 {$_last_cron_time = crmRemindersRecap::getLastCliRunDateTime()}
 {$_cli_ok = crmRemindersRecap::isCliOk()}
 
-<section class="alert c-settings-cron-section {if $_cli_ok}is-set{/if}">
+<section class="alert {if $_cli_ok}success{else}info{/if}">
     {if $_cli_ok}
         <div class="c-is-cli-ok">
-            <p>
+            <p class="small">
                 <i class="fas fa-check yes text-green"></i>
                 [`<tt>Cron</tt> job required for daily recap is set up properly.`]
                 {if $_last_cron_time}
@@ -14,7 +14,7 @@
                 {/if}
             </p>
 
-            <p>
+            <p class="small">
                 {sprintf_wp(
                     'The following <tt>cron</tt> job command is currently in use (%ssetting up a cron job%s):',
                     sprintf(
@@ -29,10 +29,10 @@
         </div>
     {else}
         <div class="c-is-cli-ok">
-                <p>
+                <p class="small">
                     [`<tt>Cron</tt> job required for daily recap.`]
                 </p>
-                <p>
+                <p class="small">
                     {sprintf_wp(
                     'Please set up a <tt>cron</tt> job (<a href="%s" target="_blank">view instructions</a>) using the command specified below in your web-hosting control panel:',
                     _w('https://developers.webasyst.com/installation/tips/cron/')
@@ -42,7 +42,7 @@
                 <p class="bold mobile-scroll"><code>{$_cron_command}</code></p>
 
             {if $_last_cron_time}
-                <p>[`Last execution time:`] {$_last_cron_time|wa_date:'datetime'}</p>
+                <p class="small">[`Last execution time:`] {$_last_cron_time|wa_date:'datetime'}</p>
             {/if}
         </div>
     {/if}

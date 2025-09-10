@@ -13,7 +13,7 @@ class crmDealRadioField extends crmDealSelectField
 
         $html = '<label><input type="hidden" '.$disabled.' '.$attrs.' name="' . $this->getHTMLName($params) . '" value=""></label>';
         foreach ($this->getOptions() as $k => $v) {
-            $html .= '<label class="flexbox full-width space-8"><span><input type="radio"'.($k == $value ? ' checked="checked"' : '').' '.$disabled.' '.$attrs.' name="'.$this->getHTMLName($params).'" value="'.$k.'"></span> <span class="wide">'.htmlspecialchars($v).'</span></label>';
+            $html .= '<label class="flexbox full-width space-8"><span><input type="radio"'.($k == $value ? ' checked="checked"' : '').' '.$disabled.' '.$attrs.' name="'.$this->getHTMLName($params).'" value="'.htmlspecialchars($k).'"></span> <span class="wide">'.htmlspecialchars($v).'</span></label>';
         }
 
         $dom_id = uniqid('c-deal-radio-field');

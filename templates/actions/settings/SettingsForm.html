@@ -1,13 +1,13 @@
-{$_title = "[`Web forms`]"}
+{$_title = "[`Lead forms`]"}
 
 <div class="crm-form-page" id="crm-form-page">
 
     <h1 class="c-page-header">{$_title}</h1>
 
 
-    <div class="c-forms-body">
+    <div class="c-forms-body fields">
 
-        <div class="crm-forms-sidebar">
+        <div class="crm-forms-sidebar fields-group custom-px-16">
             {if $forms}
                 <ul class="menu c-form-list">
                     {foreach $forms as $_form}
@@ -19,7 +19,8 @@
                             {if !empty($_form.funnel)}
                                 {$_funnel_name = $_form.funnel.name|escape}
                                 {$_funnel_color = $_form.funnel.color}
-                                <i class="fas fa-circle funnel-state" style="color: {$_funnel_color}" title="{$_funnel_name}"></i>
+                                {$_funnel_icon = $_form.funnel.icon|default:'fas fa-briefcase'|escape}
+                                <i class="{$_funnel_icon} funnel-state" style="color: {$_funnel_color}" title="{$_funnel_name}"></i>
                                 {if !empty($_form.stage)}
                                     {$stage_id = $_form.stage.id}
                                     {$_stage_name = $_form.stage.name|escape}
@@ -31,27 +32,22 @@
                         </li>
                     {/foreach}
                 </ul>
-            {else}
-                <div class="block">
-                    <p>[`Forms are used to set up customer subscription on your website.`]</p>
-                    <p>[`Create a form, publish it on your website, and visitors will be able to subscribe themselves.`]</p>
-                </div>
             {/if}
 
             <ul class="list">
-                <li>
+                <li class="custom-pl-8">
                     <a href="{$wa_app_url}settings/form/new/" class="button small rounded light-gray crm-add-new-form-link"><i class="fas fa-plus-circle text-green"></i> [`New form`]</a>
                 </li>
             </ul>
 
-            <hr>
+            <hr class="custom-mb-8">
 
             <div class="fields">
-                <div class="fields-group">
+                <div class="custom-px-12 custom-py-4">
                     <div class="field">
                         <div class="name"><i class="fas fa-cog"></i> [`Captcha settings`]</div>
                         <div class="value">
-                            <a href="{$captcha_settings_url}">[`Select a captcha in system settings`]</a>
+                            <a href="{$captcha_settings_url}" class="small">[`Select a captcha in system settings`]</a>
                         </div>
                     </div>
                 </div>

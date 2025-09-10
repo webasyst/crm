@@ -3,33 +3,44 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="robots" content="noindex">
-    <link rel="stylesheet" href="{$wa_app_static_url}css/invoice.css">
+    <link rel="stylesheet" href="{$wa_app_static_url}css/invoice{$style_version}.css">
     <script src="{$wa_url}wa-content/js/jquery/jquery-1.11.1.min.js"></script>
 </head>
 <body style="padding: 0; margin: 0;">
-    <section class="c-invoice-front-section with-background" id="c-invoice-front-section">
+    <section class="c-invoice-front-section with-background"{if empty($set_height)} style="{if !empty($company.invoice_options.bg_color)}background-color: {$company.invoice_options.bg_color};{/if}{if !empty($company.invoice_options.bg_image)}background-image: url({$company.invoice_options.bg_image}); background-size: cover;{/if}" {/if}id="c-invoice-front-section">
         <div class="c-front-invoice-wrapper">
             {$html}
         </div>
     </section>
-
+    {if !empty($style_version) && !$wa->crm->isPremium()}
     <script>
-        {if !empty($set_height)}
-            ( function($) {
-                var set_height = !!(window.parent && window.frameElement);
-                if (set_height) { $(window).load(setHeight); }
-
-                function setHeight() {
-                    var $iframe = $(window.frameElement);
-                    setTimeout(function () {
-                        var height = $(document).height();
-
-                        window.parent.document.documentElement.style.setProperty('--invoice-template-height', height + 'px');
-                        $iframe.height(height);
-                    })
-                }
-            })(jQuery);
-        {/if}
+        ( function($) {
+            $('.c-front-invoice-block').append('<p class="wa-crm c-color-gray"><img src="{$wa_app_static_url}img/crm-bw.svg" alt=""> {sprintf(
+                sprintf(
+                    '<a %s>%s</a>',
+                    'href="%s" target="_blank" rel="noopener"',
+                    _w('Powered by Webasyst CRM')
+                ),
+                'https://www.webasyst.'|cat:(($wa->locale() == 'ru_RU') ? 'ru' : 'com')|cat:'/store/app/crm/'
+            )}</p>');
+        })(jQuery);
     </script>
+    {/if}
+    {if !empty($set_height)}
+    <script>
+        ( function($) {
+            const set_height = !!(window.parent && window.frameElement);
+            if (set_height) {
+                $(window.parent.frameElement || window).load(() => {
+                    const $invoiceTemplateIframe = $(window.frameElement);
+                    const height = $(document).height();
+
+                    window.parent.document.documentElement.style.setProperty('--invoice-template-height', height + 'px');
+                    $invoiceTemplateIframe.height(height);
+                });
+            }
+        })(jQuery);
+    </script>
+    {/if}
 </body>
 </html>

@@ -8,7 +8,7 @@ class crmFunnelModel extends crmModel
      * Take into account rights
      * @return array
      */
-    public function getAllFunnels()
+    public function getAllFunnels($include_archived = false)
     {
         static $funnels = null;
         if ($funnels === null) {
@@ -20,15 +20,23 @@ class crmFunnelModel extends crmModel
                 }
             }
         }
+        if (!$include_archived) {
+            return array_filter($funnels, function($f) {
+                return !$f['is_archived'];
+            });
+        }
         return $funnels;
     }
 
-    public function getAvailableFunnel($contact_id = null)
+    public function getAvailableFunnel($include_archived = false, $contact_id = null)
     {
         $contact_id = $contact_id ? $contact_id : wa()->getUser()->getId();
-        $list = $this->select('*')->order('sort,name')->fetchAll('id');
-        $rights = new crmRights(array('contact' => $contact_id));
-
+        $result_set = $this->select('*');
+        if (!$include_archived) {
+            $result_set = $result_set->where('is_archived=0');
+        }
+        $list = $result_set->order('sort,name')->fetchAll('id');
+        $rights = new crmRights([ 'contact' => $contact_id ]);
         $stored_funnel_id = wa()->getUser()->getSettings('crm', 'deal_funnel_id');
         if ($stored_funnel_id && !empty($list[$stored_funnel_id]) && $rights->funnel($list[$stored_funnel_id])) {
             return $list[$stored_funnel_id];

@@ -146,15 +146,32 @@ class crmMessageAssociateDealSaveController extends crmJsonController
         }
 
         $conversation = $this->getConversationModel()->getById($message['conversation_id']);
-        if (!$conversation) {
+        if (empty($conversation)) {
             return false;
         }
 
-        if (!$conversation['deal_id']) {
-            return $this->getConversationModel()->updateById($conversation['id'], array('deal_id' => $deal_id));
-        }
+        $this->getConversationModel()->updateById($conversation['id'], ['deal_id' => $deal_id]);
 
-        return false;
+        // message of this conversation
+        $message_ids = array_keys($this->getMessageModel()->getByField(['conversation_id' => $conversation['id']], 'id'));
+        $message_ids = waUtils::toIntArray($message_ids);
+        $message_ids = waUtils::dropNotPositive($message_ids);
+
+        if ($message_ids) {
+            // Update all messages from this conversation
+            $this->getMessageModel()->updateByField(['id' => $message_ids], ['deal_id' => $deal_id]);
+
+            // relink log items
+            $this->getLogModel()->updateByField(
+                [
+                    'object_id' => $message_ids,
+                    'object_type' => crmLogModel::OBJECT_TYPE_MESSAGE
+                ],
+                [
+                    'contact_id' => -$deal_id,
+                ]
+            );
+        }
     }
 
     protected function extractNewConversation($message, $deal_id)
@@ -175,14 +192,20 @@ class crmMessageAssociateDealSaveController extends crmJsonController
         ];
 
         $conversation_id = $this->getConversationModel()->add($data, $message['transport']);
-        $this->getMessageModel()->updateById($message['id'], ['conversation_id' => $conversation_id]);
+        $this->getMessageModel()->updateById($message['id'], [
+            'conversation_id' => $conversation_id,
+            'deal_id' => $deal_id,
+        ]);
 
         return $conversation_id;
     }
 
     protected function bindToConversation($message, $conversation)
     {
-        $this->getMessageModel()->updateById($message['id'], ['conversation_id' => $conversation['id']]);
+        $this->getMessageModel()->updateById($message['id'], [
+            'conversation_id' => $conversation['id'],
+            'deal_id' => $conversation['deal_id'],
+        ]);
 
         $conversation_update = [ 'count' => '+1' ];
         if ($conversation['last_message_id'] < $message['id']) {

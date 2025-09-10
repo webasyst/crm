@@ -1,0 +1,92 @@
+{$_title = "[`Tags`]"}
+<div class="c-tags-page" id="c-tags-page">
+
+    <h1 class="c-page-header">[`Tags`]</h1>
+
+    <p class="small">
+        [`To add new tags, select one or more contacts or deals and click ‘Create new tag’.`]
+    </p>
+
+    <form action="" class="fields">
+    {if empty($tags)}
+
+    {else}
+
+    <div class="fields-group custom-pt-4 custom-px-8">
+        <table class="c-color-section custom-mt-0">
+            {foreach $tags as $_tag}
+            <tr class="js-color-selector-wrapper">
+                <td class="custom-pl-8">
+                    <ul class="chips custom-my-0" style="line-height: normal;">
+                        <li class="tag small"><span class="chip"{if !empty($_tag.color) && !empty($_tag.bg_color)} style="color: {$_tag.color}; background: {$_tag.bg_color};--chips-tags-background-color-hover: {$_tag.color}80;"{/if}>{$_tag.name|escape}</span></li>
+                    </ul>
+                </td>
+                <td class="custom-px-0">
+                    <div class="c-layout inline">
+                        <div class="c-column middle">
+                            <ul class="c-colors">
+                                {strip}
+                                {foreach $colors as $_color}
+                                <li class="c-color-wrapper">
+                                    <span class="c-color-item color js-set-color {if $_tag.color == $_color}is-active{/if}" data-color="{$_color}" style="background: {$_color};"></span>
+                                </li>
+                                {/foreach}
+                                {/strip}
+                            </ul>
+                        </div>
+                        <div class="c-column right">
+
+                            <div class="c-toggle-wrapper js-toggle-wrapper is-hidden">
+                                <input class="c-field js-color-field" name="{$_tag.id}" type="text" value="{$_tag.color}">
+                                <div class="c-toggle-block">
+                                    <span class="c-color-item color c-toggle js-toggle" style="background: {$_tag.color};"></span>
+                                    <div class="c-color-picker js-color-picker"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </td>
+                <td class="valign-top small text-dark-gray custom-pt-8 custom-pl-12 custom-pr-4">
+                    {if $_tag.contact_count > 0}
+                        <a href="{$wa_backend_url}crm/contact/tag/{$_tag.id}">{_w('%d contact', '%d contacts', $_tag.contact_count)}</a>
+                    {else}
+                        [`No contacts`]
+                    {/if}
+                </td>
+                <td class="valign-top small text-dark-gray custom-pt-8 custom-pl-12 custom-pr-4">
+                    {if $_tag.deal_count > 0}
+                        <a href="{$wa_backend_url}crm/deal/list?tag={$_tag.id}&all_funnels=1">{_w('%d deal', '%d deals', $_tag.deal_count)}</a>
+                    {else}
+                        [`No deals`]
+                    {/if}
+                </td>
+            </tr>
+            {/foreach}
+        </table>
+    </div>
+
+        <footer class="c-settings-footer bottombar sticky">
+            <div class="c-footer-actions js-footer-actions">
+                <input class="button js-submit-button" type="submit" value="[`Save`]">
+
+                <span class="js-edit-actions">
+                    <a href="{$wa_app_url}settings/tags/" class="button light-gray js-cancel-button">[`Cancel`]</a>
+                </span>
+            </div>
+        </footer>
+
+
+    {/if}
+    </form>
+
+    <script>
+        $.crm.title.set({$_title|json_encode});
+
+        ( function($) {
+            new CRMSettingsTags({
+                $wrapper: $("#c-tags-page")
+            });
+        })(jQuery);
+    </script>
+</div>

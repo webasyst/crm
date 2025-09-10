@@ -4,6 +4,9 @@ class crmSegmentListMethod extends crmApiAbstractMethod
 {
     protected $method = self::METHOD_GET;
 
+    const CATEGORIES_SYNC_INTERVAL = 120;
+    const CATEGORIES_SYNC_KEY = 'segments_sync_with_categories';
+
     public function execute()
     {
         $segments = $this->filterData(
@@ -32,7 +35,18 @@ class crmSegmentListMethod extends crmApiAbstractMethod
 
     protected function getSegments($filter = [])
     {
-        $segments = $this->getSegmentModel()->getAllSegments($filter);
+        $app_settings_model = new waAppSettingsModel();
+        $last_sync_time = (int)$app_settings_model->get('crm', self::CATEGORIES_SYNC_KEY, 0);
+        $segment_model = $this->getSegmentModel();
+        if (time() - $last_sync_time > self::CATEGORIES_SYNC_INTERVAL) {
+            try {
+                $segment_model->syncWithCategories();
+            } catch (waException $e) {
+            }
+            $app_settings_model->set('crm', self::CATEGORIES_SYNC_KEY, time());
+        }
+
+        $segments = $segment_model->getAllSegments($filter);
         foreach ($segments as &$segment) {
             $segment['is_editable'] = $this->getCrmRights()->canEditSegment($segment);
         }

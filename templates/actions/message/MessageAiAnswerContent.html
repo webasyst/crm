@@ -1,0 +1,462 @@
+<div class="c-ai-wrapper js-ai-wrapper">
+    <div class="c-ai-wrapper-header flexbox custom-mb-16">
+        <div class="js-ai-request-wrapper-header flexbox custom-mr-16 middle wide">
+            <span class="small gray">[`AI based on the public site content`]</span>
+            {if $wa->site && class_exists('siteHelper')}
+                {$domains = siteHelper::getDomains(true)}
+                {if $domains}
+                    {$current_domain = siteHelper::getDomain()}
+                        <div class="dropdown small custom-ml-auto js-ai-domain-select">
+                            <a href="javascript:void(0);" class="dropdown-toggle semibold text-gray valign-middle" type="button">{$current_domain|escape}</a>
+                            <div class="dropdown-body">
+                                <ul class="menu">
+                                    {foreach $domains as $d}
+                                        {if empty($d.is_alias)}
+                                            <li>
+                                                <a href="javascript:void(0);" data-id="{$d.name|escape}">
+                                                    <span>{$d.title|escape}</span>
+                                                </a>
+                                            </li>
+                                        {/if}
+                                    {/foreach}
+                                </ul>
+                            </div>
+                            <input id="input" name="domain" type="hidden" value="{$current_domain}">
+                        </div>
+                        <span class="badge gray small" data-wa-tooltip-placement="left" data-wa-tooltip-content="[`Source of AI’s knowledge base which will be used to prepare replies.`] [`Webasyst AI prompt complexity is ×2.`]">&times; 2</span>
+
+                        <script>
+                            ( function($) {
+                                $(".js-ai-domain-select").waDropdown({
+                                    hover: false,
+                                    items: ".menu > li > a",
+                                    change: function(event, target, dropdown) {
+                                        $("#input").val( $(target).data("id") );
+                                    }
+                                });
+                                $("[data-wa-tooltip-content]").waTooltip();
+                            })(jQuery);
+                        </script>
+
+                {/if}
+            {/if}
+        </div>
+        <div class="js-ai-answer-wrapper-header flexbox middle hidden custom-mr-16 wide">
+            <button class="button rounded light-gray js-ai-rewrite-button small">
+                <span class="icon">
+                    <i class="fas fa-undo-alt"></i>
+                </span>
+                [`Try again`]
+            </button>
+            <button class="js-ai-answer-result-button rounded dark-gray small">
+                <span class="icon">
+                    <i class="fas fa-long-arrow-alt-down"></i>
+                </span>
+                [`Add to message`]
+            </button>
+        </div>
+        <a class="js-close-ai-answer-wrapper custom-ml-auto custom-mb-auto smaller text-gray" data-wa-tooltip-content="[`Close`]">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+    <div class="c-ai-request-wrapper-content js-ai-request-wrapper-content">
+        <textarea class="textarea js-message-text" placeholder="[`Which question is to be answered?`]">{$message_text|escape}</textarea>
+        <div class="skeleton --textarea hidden">
+            <div class="skeleton-custom-box"></div>
+        </div>
+        <div class="c-ai-request-button-wrapper">
+            <button class="button --cancel hidden rounded light-gray js-ai-answer-button-cancel">[`Cancel`]</button>
+            <button class="button rounded small black js-ai-answer-button">
+            [`Write a response`]
+            <span class="stars-container custom-ml-4 hidden">
+                <svg class="star" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_10705_126373_1)">
+                        <path class="star1" d="M3.41931 1.04579C3.46018 0.901404 3.66482 0.901404 3.70569 1.04579L4.24658 2.9566C4.29585 3.13064 4.43186 3.26665 4.6059 3.31592L6.51671 3.85681C6.6611 3.89768 6.6611 4.10232 6.51671 4.14319L4.6059 4.68408C4.43186 4.73335 4.29585 4.86936 4.24658 5.0434L3.70569 6.95421C3.66482 7.0986 3.46018 7.0986 3.41931 6.95421L2.87842 5.0434C2.82915 4.86936 2.69314 4.73335 2.5191 4.68408L0.608287 4.14319C0.463904 4.10232 0.463904 3.89768 0.608287 3.85681L2.5191 3.31592C2.69314 3.26665 2.82915 3.13064 2.87842 2.9566L3.41931 1.04579Z" fill="#F5C400" />
+                        <path class="star2" d="M9.46248 4.60767C9.5267 4.38078 9.8483 4.38078 9.91252 4.60767L10.7625 7.61038C10.8399 7.88386 11.0536 8.0976 11.3271 8.17501L14.3298 9.02498C14.5567 9.0892 14.5567 9.4108 14.3298 9.47502L11.3271 10.325C11.0536 10.4024 10.8399 10.6161 10.7625 10.8896L9.91252 13.8923C9.84829 14.1192 9.5267 14.1192 9.46248 13.8923L8.61251 10.8896C8.5351 10.6161 8.32136 10.4024 8.04788 10.325L5.04517 9.47502C4.81828 9.41079 4.81828 9.0892 5.04517 9.02498L8.04788 8.17501C8.32136 8.0976 8.5351 7.88386 8.61251 7.61038L9.46248 4.60767Z" fill="#55DDDD" />
+                    </g>
+                    <defs>
+                        <clipPath id="clip0_10705_126373_1">
+                            <rect width="14" height="14" fill="white" transform="translate(0.5 0.5)" />
+                        </clipPath>
+                    </defs>
+                </svg>
+            </span>
+        </button>
+        </div>
+        <p class="js-error error"></p>
+    </div>
+    <div class="c-ai-answer-wrapper-content js-ai-answer-wrapper-content hidden">
+        <div class="c-ai-answer-result js-ai-answer-result"></div>
+    </div>
+
+    <style>
+        .c-ai-wrapper {
+            position: absolute;
+            bottom: 0;
+            width: calc(100% - 2rem);
+            z-index: 1001;
+            margin-bottom: 1rem;
+            margin-left: 1rem;
+            box-sizing: border-box;
+            background: var(--background-color-blank);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 0 70px var(--dialog-shadow-color);
+            transform: translateY(150%);
+            transition: transform 0.3s ease-in-out;
+
+            &.--show {
+                transform: translateY(0%);
+            }
+
+            .c-ai-request-wrapper-content {
+                display: grid;
+                grid-template-areas: "stack";
+
+                textarea, .--textarea {
+                    grid-area: stack;
+                    width: 100%;
+                    height: 15vh;
+                    resize: none;
+                }
+
+                .--textarea .skeleton-custom-box {
+                    border-radius: 0.5em;
+                    box-sizing: border-box;
+                    width: 100%;
+                    height: 15vh;
+                }
+
+                .c-ai-request-button-wrapper {
+                    grid-area: stack;
+                    align-self: flex-end;
+                    justify-self: right;
+                    margin: .75rem;
+
+                    button {
+                        &.--cancel {
+                            z-index: 0;
+                        }
+
+                        .stars-container {
+                            height: 15px;
+                            transition: opacity 0.3s ease;
+
+                            .star {
+                                opacity: 1;
+                                animation: star-shimmer1 3s ease-in-out infinite;
+                            }
+
+                            .star1 {
+                                width: 15px;
+                                height: 15px;
+                                animation: star-color-change1 3s ease-in-out infinite;
+                            }
+
+                            .star2 {
+                                width: 15px;
+                                height: 15px;
+                                animation: star-color-change2 3s ease-in-out infinite 0.6s;
+                            }
+                        }
+                    }
+                }
+
+                .error:empty {
+                    display: none;
+                }
+            }
+
+            .c-ai-answer-wrapper-content {
+                .c-ai-answer-result {
+                    max-height: 69vh;
+                    overflow-y: auto;
+                }
+            }
+        }
+
+        @media (max-width: 760px) {
+            .c-ai-wrapper {
+                bottom: 6vh;
+            }
+            .c-ai-wrapper:has(+ .focused) {
+                bottom: 0;
+            }
+        }
+
+        .c-message-conversation-page .c-reply-section {
+            z-index: 1001;
+        }
+        .c-messages-page .c-messages-page-content .c-messages-conversation-wrapper {
+            overflow: clip;
+        }
+        .c-messages-page .c-messages-page-content .c-messages-conversation-wrapper .js-message-ai-reply .icon {
+            filter: grayscale(1);
+            opacity: .65;
+        }
+        .c-messages-page .c-messages-page-content .c-messages-conversation-wrapper .js-message-ai-reply:hover .icon {
+            filter: grayscale(1);
+            opacity: 1;
+        }
+
+        @keyframes star-shimmer1 {
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            12.5% {
+                opacity: 0.6;
+            }
+
+            25% {
+                opacity: 1;
+            }
+
+            37.5% {
+                opacity: 0.7;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            62.5% {
+                opacity: 0.6;
+            }
+
+            75% {
+                opacity: 1;
+            }
+
+            87.5% {
+                opacity: 0.8;
+            }
+        }
+        @keyframes star-color-change1 {
+            0%,
+            100% {
+                fill: #f5c400;
+            }
+
+            12.5% {
+                fill: #e62;
+            }
+
+            25% {
+                fill: #5dd;
+            }
+
+            37.5% {
+                fill: #2c2;
+            }
+
+            50% {
+                fill: #08e;
+            }
+
+            62.5% {
+                fill: #f5c400;
+            }
+
+            75% {
+                fill: #e62;
+            }
+
+            87.5% {
+                fill: #5dd;
+            }
+        }
+        @keyframes star-color-change2 {
+            0%,
+            100% {
+                fill: #5dd;
+            }
+
+            12.5% {
+                fill: #08e;
+            }
+
+            25% {
+                fill: #f5c400;
+            }
+
+            37.5% {
+                fill: #e62;
+            }
+
+            50% {
+                fill: #2c2;
+            }
+
+            62.5% {
+                fill: #5dd;
+            }
+
+            75% {
+                fill: #08e;
+            }
+
+            87.5% {
+                fill: #f5c400;
+            }
+        }
+    </style>
+
+
+    <script>
+    (function ($) {
+
+        const $ai_wrapper = $(".js-ai-wrapper");
+
+        const $button_ai = $ai_wrapper.find(".js-ai-answer-button");
+        const $button_ai_stars = $button_ai.find(".stars-container");
+        const $button_ai_cancel = $ai_wrapper.find(".js-ai-answer-button-cancel");
+
+        const $button_close = $ai_wrapper.find(".js-close-ai-answer-wrapper");
+
+        const $skeleton = $ai_wrapper.find(".skeleton.--textarea");
+        const $textarea = $ai_wrapper.find(".js-message-text");
+
+        const $request_header = $ai_wrapper.find(".js-ai-request-wrapper-header");
+        const $answer_header = $ai_wrapper.find(".js-ai-answer-wrapper-header");
+        const $add_answer_to_message_button = $answer_header.find(".js-ai-answer-result-button");
+        const $rewrite_answer_button = $answer_header.find(".js-ai-rewrite-button");
+
+        const $request_content = $ai_wrapper.find(".js-ai-request-wrapper-content");
+        const $answer_content = $ai_wrapper.find(".js-ai-answer-wrapper-content");
+        const $error = $request_content.find(".js-error");
+
+        const $answer_result = $answer_content.find(".js-ai-answer-result");
+
+        const conversation_id = {$conversation_id|json_encode};
+        const message_id = {$message_id|json_encode};
+        const source_id = {$source_id|json_encode};
+        const conversation_type = {$conversation_type|json_encode};
+        const is_email_type = {($conversation_type == crmMessageModel::TRANSPORT_EMAIL) ? 'true' : 'false'};
+        $(document).on("click", ".js-ai-answer", function (e, data) {
+            e.preventDefault();
+
+            let request = null;
+
+            $ai_wrapper.addClass("--show");
+
+            let message_html = $('.js-message-wrapper .c-message-in .c-message-body').last()[is_email_type ? 'text' : 'html']();
+
+            if (data && data.message_id && !is_email_type) {
+                message_html = $('.js-message-wrapper[data-id="' + data.message_id + '"] .c-message-in .c-message-body').text();
+            }
+            if (message_html) {
+                $textarea.val($.trim(message_html.replace(/\&nbsp;/g, ' ')));
+            }
+
+            $button_ai.on("click", function(e) {
+
+                $button_ai.prop("disabled", true).addClass("disabled");
+                $button_ai_stars.removeClass("hidden");
+                $button_ai_cancel.removeClass("hidden");
+                $skeleton.removeClass("hidden");
+                $error.empty();
+
+                request = $.post($.crm.app_url + "?module=messageAiAnswer", {
+                    conversation_id: conversation_id,
+                    message_id: message_id,
+                    source_id: source_id,
+                    domain: $ai_wrapper.find("[name='domain']").val(),
+                    message_text: $textarea.val()
+                }, function(resp) {
+                    if (resp.status == "ok") {
+                        $answer_result.text(resp.data?.answer);
+
+                        const $message_textarea = $(".js-textarea");
+
+                        $request_header.addClass("hidden");
+                        $answer_header.removeClass("hidden");
+                        $request_content.addClass("hidden");
+                        $answer_content.removeClass("hidden");
+
+                        $add_answer_to_message_button.off("click").on("click", function(e) {
+                            e.preventDefault();
+                            $message_textarea.val($message_textarea.val() + "\n" + $answer_result.text()).focus();
+
+                            $button_close.trigger("click");
+                        });
+
+                        $rewrite_answer_button.off("click").on("click", function(e) {
+                            e.preventDefault();
+
+                            $request_header.removeClass("hidden");
+                            $answer_header.addClass("hidden");
+
+                            $request_content.removeClass("hidden");
+                            $answer_content.addClass("hidden");
+                            $answer_result.empty();
+                        });
+                    } else {
+                        if (resp.errors) {
+                            $error.html(resp.errors.join("<br>"));
+                        }else if (typeof resp === "string") {
+                            $error.html(resp);
+                        }
+                    }
+
+                    $button_ai.prop("disabled", false).removeClass("disabled");
+                    $button_ai_stars.addClass("hidden");
+                    $button_ai_cancel.addClass("hidden");
+                    $skeleton.addClass("hidden");
+                })
+            });
+
+            $button_ai_cancel.on("click", function(e) {
+                e.preventDefault();
+                if (request) {
+                    request.abort();
+                }
+
+                $button_ai.prop("disabled", false).removeClass("disabled");
+                $button_ai_stars.addClass("hidden");
+                $button_ai_cancel.addClass("hidden");
+                $skeleton.addClass("hidden");
+            });
+
+            /*
+            var href = $.crm.app_url + "?module=aiAnswer&conversation_id=" + conversation_id;
+            $.get(href, function(html) {
+                $ai_wrapper.find(".drawer-content").html(html);
+            }); */
+
+            $button_close.off('click').on('click', closeButtonAction);
+        });
+
+        $(document).on('click', ".js-message-ai-reply", function(e) {
+            e.preventDefault();
+            $('.js-ai-answer').trigger('click', {
+                message_id: $(this).data('message-id')
+            });
+        });
+
+        $ai_wrapper.on('transitionstart', () => {
+            $ai_wrapper.css('z-index', '1001')
+        }).on('transitionend', () => {
+            if($ai_wrapper.hasClass('--show')) {
+                $ai_wrapper.css('z-index', '1002')
+            }
+        });
+
+        function closeButtonAction() {
+            $ai_wrapper.removeClass("--show").one('transitionend', () => initRequestState());
+        }
+
+        function initRequestState() {
+            $request_header.removeClass("hidden");
+            $answer_header.addClass("hidden");
+
+            $request_content.removeClass("hidden");
+            $answer_content.addClass("hidden");
+            $answer_result.empty();
+            $error.empty();
+            $textarea.val('');
+        }
+    })(jQuery);
+    </script>
+</div>

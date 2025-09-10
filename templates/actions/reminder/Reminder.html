@@ -63,7 +63,7 @@
 
 <div class="c-reminders-page flexbox" id="c-reminders-page">
     {if empty($_hide_sidebar)}
-        <div class="sidebar width-19rem blank bordered-right" id="c-reminders-sidebar">
+        <div class="sidebar width-23rem blank bordered-right" id="c-reminders-sidebar">
             <div id="js-aside-block">
                 <ul class="menu large custom-mt-0 c-users-list">
 
@@ -189,11 +189,11 @@
     {/function}
     <div class="content blank content-mobile-friendly">
         <div class="c-reminder-content-area article" id="js-content-block">
-            
+
             <div class="article-body" {if !empty($iframe)}style="padding: 0;"{/if}>
                 <div class="content-list-wrapper">
 
-                
+
                 {skeleton}
                 {$_user_title = $_title}
                 {if $is_all_reminders}
@@ -327,7 +327,7 @@
                                                         <div class="nowrap hint c-search-contact-wrapper {if $setting_deal_id || $setting_contact_id}is-hidden{/if}">
                                                             <div class="">
                                                                 <span class="icon"><i class="fas fa-user"></i></span>
-                                                                <span class="icon"><i class="fas fa-flag"></i></span>
+                                                                <span class="icon"><i class="fas fa-briefcase"></i></span>
                                                                 <input class="js-autocomplete-deal input-blank" id="input-autocomplete-deal" type="text" value="" placeholder="[`Contact or deal`]">
                                                             </div>
                                                             <span class="custom-pl-4 c-hidden">
@@ -399,6 +399,13 @@
                                 {if $_is_deal && !empty($deals[abs($_reminder.contact_id)])}
                                     {$_deal_id = abs($_reminder.contact_id)}
                                     {$_deal = $deals[$_deal_id]}
+                                    {$_funnel = ifset($funnels[$_deal.funnel_id])}
+                                    {$_icon = ifset($_funnel.icon, 'fas fa-briefcase')}
+                                    {if $_deal.status_id == crmDealModel::STATUS_WON}
+                                        {$_icon = 'fas fa-flag-checkered'}
+                                    {elseif $_deal.status_id == crmDealModel::STATUS_LOST}
+                                        {$_icon = 'fas fa-ban'}
+                                    {/if}
                                     {if !empty($contacts[$_deal.contact_id])}
                                         {$_user = $contacts[$_deal.contact_id]}
                                         {$_userpic = $_user->getPhoto(32)}
@@ -407,6 +414,7 @@
                                         {*if !empty($_userpic)}
                                             <span class="icon size-18 rounded" style="background-image: url({$_userpic});"></span>
                                         {/if*}
+                                        <span class="custom-mr-4" style="color: {ifset($_funnel.color, 'lightgray')};"><i class="{$_icon}"></i></span>
                                         <span class="c-user-name">{$_deal.name|escape}</span>
                                     </a>
                                     {*if !empty($_reminder.rights)}

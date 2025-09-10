@@ -354,4 +354,9 @@ class crmViewHelper
         // return phone converted to international format
         return '+'.$phone_prefix['output_code'].ltrim($phone_digits, $phone_prefix['input_code']);
     }
+
+    public function isPremium()
+    {
+        return crmHelper::isPremium();
+    }
 }

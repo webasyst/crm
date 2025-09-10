@@ -140,7 +140,7 @@ class crmFileListMethod extends crmApiAbstractMethod
         if (class_exists('Imagick')) {
             $img_ext[] = 'pdf';
         }
-        $file_list = array_map(function ($_file) use ($contact_list, $deals, $host_backend, $thumb_size, $img_ext) {
+        $file_list = array_map(function ($_file) use ($contact_list, $deals, $host_backend, $thumb_size, $preview_size, $img_ext) {
             //$_file['url'] = $host_backend.'crm/?module=file&action=download&id='.$_file['id'];
             $_file['url'] = wa()->getConfig()->getBackendUrl(true).'crm/?module=file&action=download&id='.$_file['id'];
             if (isset($contact_list[$_file['creator_contact_id']])) {

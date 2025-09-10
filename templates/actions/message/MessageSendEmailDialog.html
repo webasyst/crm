@@ -80,247 +80,256 @@
 
                 <div class="dialog-content">
                     <div class="fields c-message-form-wrapper">
-
-                        <div class="field">
-                            <div class="name">[`To`]</div>
-                            <div class="value">
-                                <div class="flexbox middle space-8 full-width">
-                                    <div class="c-column">
-                                        {if !empty($contact.id) && !empty($email)}
-                                        <div class="c-user-name">
-                                            <i class="icon userpic" style="background-image: url({waContact::getPhotoUrl($contact.id, $contact.photo, 20)|escape});"></i>
-                                            {$contact.name|escape} <span style="color: #999;">&lt;{$email|escape}&gt;</span>
+                        <a class="js-toggle-email-message-headers hint mobile-only custom-mb-16" href="javascript:void(0)">
+                            [`Headers`]
+                            <div class="icon">
+                                <div class="fas fa-caret-right"></div>
+                            </div>
+                        </a>
+                        <div class="js-email-message-headers desktop-and-tablet-only custom-mt-16-mobile">
+                            <div class="field">
+                                <div class="name">[`To`]</div>
+                                <div class="value">
+                                    <div class="flexbox middle space-8 full-width wrap">
+                                        <div class="c-column">
+                                            {if !empty($contact.id) && !empty($email)}
+                                            <div class="c-user-name">
+                                                <i class="icon userpic" style="background-image: url({waContact::getPhotoUrl($contact.id, $contact.photo, 20)|escape});"></i>
+                                                {$contact.name|escape} <span style="color: #999;">&lt;{$email|escape}&gt;</span>
+                                            </div>
+                                            {else}
+                                            <div class="c-user-name js-to-name">
+                                                <input class="c-to-input js-to-input" type="text" autocomplete="off" placeholder="[`Start typing a name`]..." style="width: 200px;" />
+                                            </div>
+                                            {/if}
                                         </div>
-                                        {else}
-                                        <div class="c-user-name js-to-name">
-                                            <input class="c-to-input js-to-input" type="text" autocomplete="off" placeholder="[`Start typing a name`]..." style="width: 200px;" />
+                                        <div class="c-column right">
+                                            <a href="" class="text-gray small nowrap js-email-copy-link">
+                                                [`Copy`] <i class="icon fas fa-caret-right js-email-copy-link-icon"></i>
+                                            </a>
                                         </div>
-                                        {/if}
-                                    </div>
-                                    <div class="c-column right">
-                                        <a href="" class="text-gray small nowrap js-email-copy-link">
-                                            [`Copy`] <i class="icon fas fa-caret-right js-email-copy-link-icon"></i>
-                                        </a>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="field email-copy-wrapper">
-                            <div class="name">[`Copy`]</div>
-                            <div class="value">
-                                <div class="email-copy-area">
-                                    <div class="email-copy-text">
-                                        {if !empty($recipients)}
-                                            {foreach $recipients as $_recipient}
-                                                <div class="email-copy-user" title="{$_recipient.email|escape}" data-contact-id="{if !empty($_recipient.contact_id)}{$_recipient.contact_id|escape}{else}0{/if}" data-email="{$_recipient.email|escape}">
-                                                    {if !empty($_recipient.photo)}<i class="icon userpic" style="background-image: url({$_recipient.photo});"></i>{/if}
-                                                    <b>
-                                                        {if !empty($_recipient.name)}
-                                                            {$_recipient.name|escape}
-                                                        {else}
-                                                            {$_recipient.email|escape}
+                            <div class="field email-copy-wrapper">
+                                <div class="name">[`Copy`]</div>
+                                <div class="value">
+                                    <div class="email-copy-area">
+                                        <div class="email-copy-text">
+                                            {if !empty($recipients)}
+                                                {foreach $recipients as $_recipient}
+                                                    <div class="email-copy-user" title="{$_recipient.email|escape}" data-contact-id="{if !empty($_recipient.contact_id)}{$_recipient.contact_id|escape}{else}0{/if}" data-email="{$_recipient.email|escape}">
+                                                        {if !empty($_recipient.photo)}<i class="icon userpic" style="background-image: url({$_recipient.photo});"></i>{/if}
+                                                        <b>
+                                                            {if !empty($_recipient.name)}
+                                                                {$_recipient.name|escape}
+                                                            {else}
+                                                                {$_recipient.email|escape}
+                                                            {/if}
+                                                        </b>
+                                                        <a title="[`Remove from CC`]" class="remove-cc js-remove-cc">x</a>
+                                                        <input name="cc[{$_recipient.email|escape}][email]" type="hidden" value="{$_recipient.email|escape}">
+                                                        <input name="cc[{$_recipient.email|escape}][id]" type="hidden" value="{if !empty($_recipient.contact_id)}{$_recipient.contact_id}{else}0{/if}">
+                                                        {if empty($_recipient.id) && !empty($_recipient.name)}
+                                                            <input name="cc[{$_recipient.email|escape}][name]" type="hidden" value="{$_recipient.name|escape|default:""}">
                                                         {/if}
-                                                    </b>
-                                                    <a title="[`Remove from CC`]" class="remove-cc js-remove-cc">x</a>
-                                                    <input name="cc[{$_recipient.email|escape}][email]" type="hidden" value="{$_recipient.email|escape}">
-                                                    <input name="cc[{$_recipient.email|escape}][id]" type="hidden" value="{if !empty($_recipient.contact_id)}{$_recipient.contact_id}{else}0{/if}">
-                                                    {if empty($_recipient.id) && !empty($_recipient.name)}
-                                                        <input name="cc[{$_recipient.email|escape}][name]" type="hidden" value="{$_recipient.name|escape|default:""}">
-                                                    {/if}
-                                                </div>
-                                            {/foreach}
-                                        {/if}
-                                        <div class="email-copy-input-div">
-                                            <input class="email-copy-input js-email-copy-input" type="text" autocomplete="off" placeholder="[`Name or email`]" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="deal-participants-area">
-                                    {if ifset($participants)}
-                                        [`Participants in the deal`]:
-                                        {foreach $participants as $_participant}
-                                        <span class="email-copy-user" title="{$_participant.email[0]|default:''|escape}" data-cc-contact-id="{$_participant.id|escape}" data-cc-email="{$_participant.email[0]|default:''|escape}">
-                                                    <i class="icon userpic" style="background-image: url({$_participant.photo_url_16|escape});"></i>
-                                                    <b>{$_participant.name|escape}</b>
-                                                </span>
-                                        {/foreach}
-                                    {/if}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="field email-copy-wrapper-collapsed{if !empty($recipients)} email-copy-wrapper-collapsed-block{/if}">
-                            <div class="name">[`Copy`]</div>
-                            <div class="value">
-                                <div class="email-copy-area">
-                                    <div class="flexbox space-8 wrap middle email-copy-text-collapsed">
-                                        {if !empty($recipients)}
-                                            {foreach $recipients as $_recipient}
-                                                <div class="email-copy-user" title="{$_recipient.email|escape}" data-contact-id="{if !empty($_recipient.contact_id)}{$_recipient.contact_id|escape}{else}0{/if}" data-email="{$_recipient.email|escape}">
-                                                    {if !empty($_recipient.photo)}<i class="icon userpic" style="background-image: url({$_recipient.photo|escape});"></i>{/if}
-                                                    <b>
-                                                        {if !empty($_recipient.name)}
-                                                            {$_recipient.name|escape}
-                                                        {else}
-                                                            {$_recipient.email|escape}
-                                                        {/if}
-                                                    </b>
-                                                </div>
-                                            {/foreach}
-                                        {/if}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="field">
-                            <div class="name">[`From`]</div>
-                            <div class="value flexbox middle wrap space-8" style="display: flex;">
-                                <span>
-                                    <i class="icon userpic" style="background-image: url({$sender_photo_url});"></i>
-                                    <span class="c-user-name js-sender-name">
-                                        {$sender_name|escape}
-                                    </span>
-                                </span>
-                                
-                                {if $sender_emails|count}
-                                <span class="text-gray">[`via`]</span>
-                                <span class="wa-select">
-                                    <select class="js-sender-email-select">
-                                        {foreach $sender_emails as $_email}
-                                            <option value="{$_email|escape}"{if ($sender_default_email == $_email)} selected{/if}>{$_email|escape}</option>
-                                        {/foreach}
-                                    </select>
-                                </span>
-                              
-                                {/if}
-                                <a href="javascript:void(0)" class="text-gray nowrap js-show-personal-settings-dialog">
-                                    <i class="icon text-gray fas fa-cog settings"></i>
-                                </a>
-                            </div>
-                        </div>
-
-                        {* A field for choosing a deal if a new letter is being created *}
-                        {if empty($deal.id)}
-                        <div class="field{if $action !== "reply"} hidden{/if} js-deal-field">
-                            <div class="name">[`Deal`]</div>
-                            <div class="value js-deal-value">
-                                <div class="c-select-deal js-select-deal">
-                                    <div class="dropdown js-deals-dropdown" id="dropdown-deals-send">
-                                        <button class="dropdown-toggle button light-gray js-visible-link" type="button" style="word-break: break-word;">
-                                            <span class="flexbox space-8 align-left js-text">[`Empty`]</span>
-                                        </button>
-                                        <div class="dropdown-body">
-
-                                            <ul class="menu with-icons js-deals-list">
-                                                <li class="js-create-new-deal">
-                                                    <a href="javascript:void(0);">
-                                                        <span class="js-text">[`Create new`]</span>
-                                                    </a>
-                                                </li>
-                                                <li class="c-empty-deal c-empty-deal-hidden js-empty-deal">
-                                                    <a href="javascript:void(0);">
-                                                        <span class="js-text">[`Empty`]</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                            <input class="js-field js-deal-id" name="deal_id" type="hidden" value="none">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="c-select-funnel hidden js-select-funnel">
-                                    {$_active_funnel = reset($funnels)}
-                                    {if !empty($deal.funnel_id) && !empty($funnels[$deal.funnel_id])}
-                                        {$_active_funnel = $funnels[$deal.funnel_id]}
-                                    {/if}
-
-                                    <div class="c-funnels-list js-funnels-list-send" id="c-funnels-list">
-                                        <div class="dropdown js-deals-dropdown" id="dropdown-funnels-list-send">
-                                            <button class="dropdown-toggle button light-gray js-visible-link" type="button" >
-                                                <span class="js-text">
-                                                    {if !empty($_active_funnel.color)}
-                                                        <i class="icon fas fa-circle funnel-state svg-icon" style="color: {$_active_funnel.color}"></i>
-                                                    {/if}
-                                                    <span class="js-name">{$_active_funnel.name|escape}</span>
-                                            </button>
-                                            <div class="dropdown-body">
-                                                <ul class="menu with-icons ">
-                                                    {strip}
-                                                        {foreach $funnels as $_funnel}
-                                                            <li class="{if $deal.funnel_id == $_funnel.id}selected{/if}">
-                                                                <a href="javascript:void(0);" data-id="{$_funnel.id|escape}">
-                                                                    {if !empty($_funnel.color)}
-                                                                        <i class="icon fas fa-circle funnel-state svg-icon" style="color: {$_funnel.color|escape}"></i>
-                                                                    {/if}
-                                                                <span>{$_funnel.name|escape}</span>
-                                                                </a>
-                                                            </li>
-                                                        {/foreach}
-                                                    {/strip}
-                                                </ul>
-                                                <input class="js-field js-select-deal-funnel" name="deal[funnel_id]" type="hidden" value="{$_active_funnel.id|escape}">
+                                                    </div>
+                                                {/foreach}
+                                            {/if}
+                                            <div class="email-copy-input-div">
+                                                <input class="email-copy-input js-email-copy-input" type="text" autocomplete="off" placeholder="[`Name or email`]" />
                                             </div>
                                         </div>
-                                        <script>
-                                            ( function($) {
-                                                $("#dropdown-funnels-list-send").waDropdown({
-
-                                                });
-                                                var $wrapper = $(".js-funnels-list-send"),
-                                                    $visibleLink = $wrapper.find(".js-visible-link"),
-                                                    $field = $wrapper.find(".js-field"),
-                                                    $menu = $wrapper.find(".menu");
-
-                                                $menu.on("click", "a", function () {
-                                                    var $link = $(this);
-                                                    $visibleLink.find(".js-text").html($link.html());
-
-                                                    $menu.find(".selected").removeClass("selected");
-                                                    $link.closest("li").addClass("selected");
-
-                                                   /* $menu.hide();
-                                                    setTimeout( function() {
-                                                        $menu.removeAttr("style");
-                                                    }, 200);*/
-
-                                                    var id = $link.data("id");
-                                                    $field.val(id).trigger("change");
-                                                });
-
-                                                //$.crm.renderSVG($wrapper);
-
-                                            })(jQuery);
-                                        </script>
                                     </div>
-
-                                    <div class="js-select-stage-wrapper" style="display: inline-block;">
-                                        {include file="templates/actions/deal/DealStagesByFunnel.html" selected_stage=$deal.stage_id inline}
+                                    <div class="deal-participants-area">
+                                        {if ifset($participants)}
+                                            [`Participants in the deal`]:
+                                            {foreach $participants as $_participant}
+                                            <span class="email-copy-user" title="{$_participant.email[0]|default:''|escape}" data-cc-contact-id="{$_participant.id|escape}" data-cc-email="{$_participant.email[0]|default:''|escape}">
+                                                        <i class="icon userpic" style="background-image: url({$_participant.photo_url_16|escape});"></i>
+                                                        <b>{$_participant.name|escape}</b>
+                                                    </span>
+                                            {/foreach}
+                                        {/if}
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        {else}
-                        <div class="field">
-                            <div class="name">[`Deal`]</div>
-                            <div class="value js-message-deal">
-                                {$_funnel = $funnels[$deal.funnel_id]|default:null}
-                                {if $_funnel}
-                                    {$_stage = $stages[$deal.stage_id]|default:null}
-                                    {if $_stage}
-                                        <i class="icon fas fa-circle funnel-state " style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
-                                        <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
-                                    {else}
-                                        <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Stage deleted`]</span>
-                                    {/if}
-                                {else}
-                                    <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Funnel deleted`]</span>
-                                {/if}
-                            </div>
-                        </div>
-                        {/if}
 
+                            <div class="field email-copy-wrapper-collapsed{if !empty($recipients)} email-copy-wrapper-collapsed-block{/if}">
+                                <div class="name">[`Copy`]</div>
+                                <div class="value">
+                                    <div class="email-copy-area">
+                                        <div class="flexbox space-8 wrap middle email-copy-text-collapsed">
+                                            {if !empty($recipients)}
+                                                {foreach $recipients as $_recipient}
+                                                    <div class="email-copy-user" title="{$_recipient.email|escape}" data-contact-id="{if !empty($_recipient.contact_id)}{$_recipient.contact_id|escape}{else}0{/if}" data-email="{$_recipient.email|escape}">
+                                                        {if !empty($_recipient.photo)}<i class="icon userpic" style="background-image: url({$_recipient.photo|escape});"></i>{/if}
+                                                        <b>
+                                                            {if !empty($_recipient.name)}
+                                                                {$_recipient.name|escape}
+                                                            {else}
+                                                                {$_recipient.email|escape}
+                                                            {/if}
+                                                        </b>
+                                                    </div>
+                                                {/foreach}
+                                            {/if}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <div class="name">[`From`]</div>
+                                <div class="value flexbox middle wrap space-8" style="display: flex;">
+                                    <span>
+                                        <i class="icon userpic" style="background-image: url({$sender_photo_url});"></i>
+                                        <span class="c-user-name js-sender-name">
+                                            {$sender_name|escape}
+                                        </span>
+                                    </span>
+
+                                    {if $sender_emails|count}
+                                    <span class="text-gray">[`via`]</span>
+                                    <span class="wa-select">
+                                        <select class="js-sender-email-select">
+                                            {foreach $sender_emails as $_email}
+                                                <option value="{$_email|escape}"{if ($sender_default_email == $_email)} selected{/if}>{$_email|escape}</option>
+                                            {/foreach}
+                                        </select>
+                                    </span>
+
+                                    {/if}
+                                    <a href="javascript:void(0)" class="text-gray nowrap js-show-personal-settings-dialog">
+                                        <i class="icon text-gray fas fa-cog settings"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {* A field for choosing a deal if a new letter is being created *}
+                            {if empty($deal.id)}
+                            <div class="field{if $action !== "reply"} hidden{/if} js-deal-field">
+                                <div class="name">[`Deal`]</div>
+                                <div class="value js-deal-value">
+                                    <div class="c-select-deal js-select-deal">
+                                        <div class="dropdown js-deals-dropdown" id="dropdown-deals-send">
+                                            <button class="dropdown-toggle button light-gray js-visible-link" type="button" style="word-break: break-word;">
+                                                <span class="flexbox space-4 align-left js-text">[`Empty`]</span>
+                                            </button>
+                                            <div class="dropdown-body">
+
+                                                <ul class="menu with-icons js-deals-list">
+                                                    <li class="js-create-new-deal">
+                                                        <a href="javascript:void(0);">
+                                                            <span class="js-text">[`Create new`]</span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="c-empty-deal c-empty-deal-hidden js-empty-deal">
+                                                        <a href="javascript:void(0);">
+                                                            <span class="js-text">[`Empty`]</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                                <input class="js-field js-deal-id" name="deal_id" type="hidden" value="none">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="c-select-funnel hidden js-select-funnel custom-mt-8">
+                                        {$_active_funnel = reset($funnels)}
+                                        {if !empty($deal.funnel_id) && !empty($funnels[$deal.funnel_id])}
+                                            {$_active_funnel = $funnels[$deal.funnel_id]}
+                                        {/if}
+
+                                        <div class="c-funnels-list js-funnels-list-send" id="c-funnels-list">
+                                            <div class="dropdown js-deals-dropdown" id="dropdown-funnels-list-send">
+                                                <button class="dropdown-toggle button light-gray js-visible-link" type="button" >
+                                                    <span class="js-text">
+                                                        {if !empty($_active_funnel.color)}
+                                                            <i class="{$_active_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_active_funnel.color}"></i>
+                                                        {/if}
+                                                        <span class="js-name">{$_active_funnel.name|escape}</span>
+                                                </button>
+                                                <div class="dropdown-body">
+                                                    <ul class="menu with-icons ">
+                                                        {strip}
+                                                            {foreach $funnels as $_funnel}
+                                                                {if !empty($_funnel.is_archived)}
+                                                                    {continue}
+                                                                {/if}
+                                                                <li class="{if $deal.funnel_id == $_funnel.id}selected{/if}">
+                                                                    <a href="javascript:void(0);" data-id="{$_funnel.id|escape}">
+                                                                        {if !empty($_funnel.color)}
+                                                                            <i class="{$_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_funnel.color|escape}"></i>
+                                                                        {/if}
+                                                                    <span>{$_funnel.name|escape}</span>
+                                                                    </a>
+                                                                </li>
+                                                            {/foreach}
+                                                        {/strip}
+                                                    </ul>
+                                                    <input class="js-field js-select-deal-funnel" name="deal[funnel_id]" type="hidden" value="{$_active_funnel.id|escape}">
+                                                </div>
+                                            </div>
+                                            <script>
+                                                ( function($) {
+                                                    $("#dropdown-funnels-list-send").waDropdown({
+
+                                                    });
+                                                    var $wrapper = $(".js-funnels-list-send"),
+                                                        $visibleLink = $wrapper.find(".js-visible-link"),
+                                                        $field = $wrapper.find(".js-field"),
+                                                        $menu = $wrapper.find(".menu");
+
+                                                    $menu.on("click", "a", function () {
+                                                        var $link = $(this);
+                                                        $visibleLink.find(".js-text").html($link.html());
+
+                                                        $menu.find(".selected").removeClass("selected");
+                                                        $link.closest("li").addClass("selected");
+
+                                                    /* $menu.hide();
+                                                        setTimeout( function() {
+                                                            $menu.removeAttr("style");
+                                                        }, 200);*/
+
+                                                        var id = $link.data("id");
+                                                        $field.val(id).trigger("change");
+                                                    });
+
+                                                    //$.crm.renderSVG($wrapper);
+
+                                                })(jQuery);
+                                            </script>
+                                        </div>
+
+                                        <div class="js-select-stage-wrapper" style="display: inline-block;">
+                                            {include file="templates/actions/deal/DealStagesByFunnel.html" selected_stage=$deal.stage_id inline}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {else}
+                            <div class="field">
+                                <div class="name">[`Deal`]</div>
+                                <div class="value js-message-deal">
+                                    {$_funnel = $funnels[$deal.funnel_id]|default:null}
+                                    {if $_funnel}
+                                        {$_stage = $stages[$deal.stage_id]|default:null}
+                                        {if $_stage}
+                                            <i class="{$_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                            <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
+                                        {else}
+                                            <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Stage deleted`]</span>
+                                        {/if}
+                                    {else}
+                                        <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Funnel deleted`]</span>
+                                    {/if}
+                                </div>
+                            </div>
+                            {/if}
+                        </div>
                         <div class="field">
                             <div class="name">[`Subject`]</div>
                             <div class="value">
@@ -454,12 +463,16 @@
         'edit_recipient' => {_w("Edit recipient")},
         'send_error_title' => {_w("Message sending error")},
         'send_error_text' => {_w("Email message has not been sent.")},
-        'close' => {_w("Close")}
+        'close' => {_w("Close")},
+        'archived' => {_w("(archived)")}
     ]}
 
     <script>
         ( function($) {
-
+            if (window.frameElement && window.parent.innerWidth > 760) {
+                $('.c-message-form-dialog .js-toggle-email-message-headers').addClass('hidden');
+                $('.c-message-form-dialog .js-email-message-headers').removeClass('desktop-and-tablet-only');
+            }
             $("#dropdown-deals-send").waDropdown();
            // var $body = $(window.top.document).find("body");
            // $.waDialog({

@@ -10,139 +10,150 @@
 
 {capture assign="_reminderSettingsHtml"}
 <section class="fields-group c-view-options-section">
-    <h3>[`Reminder settings`]</h3>
-  <ul class="c-options-list js-options-list menu">
-    <li>
-      <label>
-        <span class="wa-radio">
-        <input type="radio" name="settings[personal][reminder][setting]" value="my" {if
-          $settings['reminder_setting']=="my" }checked{/if}><span></span></span>
-           [`Show my reminders only`]
-      </label>
-    </li>
-    <li>
-      <label>
-        <span class="wa-radio">
-        <input type="radio" name="settings[personal][reminder][setting]" value="all" {if
-          $settings['reminder_setting']=="all" }checked{/if}><span></span></span>
-           [`Show all reminders`]
-      </label>
-    </li>
-    {if !empty($groups)}
-    <li>
-      <label>
-        <span class="wa-radio"><input type="radio" name="settings[personal][reminder][setting]" value="groups" {if $_is_groups}checked{/if}>
-          <span></span>
-        </span>
-        [`Show reminders assigned to users from selected groups`]
-      </label>
-    </li>
-    {/if}
-  </ul>
+<div class="field">
+    <div class="name">[`Reminder settings`]</div>
+    <div class="value">
+        <ul class="c-options-list js-options-list menu custom-mt-8">
+            <li>
+            <label>
+                <span class="wa-radio">
+                <input type="radio" name="settings[personal][reminder][setting]" value="my" {if
+                $settings['reminder_setting']=="my" }checked{/if}><span></span></span>
+                [`Show my reminders only`]
+            </label>
+            </li>
+            <li>
+            <label>
+                <span class="wa-radio">
+                <input type="radio" name="settings[personal][reminder][setting]" value="all" {if
+                $settings['reminder_setting']=="all" }checked{/if}><span></span></span>
+                [`Show all reminders`]
+            </label>
+            </li>
+            {if !empty($groups)}
+            <li>
+            <label>
+                <span class="wa-radio"><input type="radio" name="settings[personal][reminder][setting]" value="groups" {if $_is_groups}checked{/if}>
+                <span></span>
+                </span>
+                [`Show reminders assigned to users from selected groups`]
+            </label>
+            </li>
+            {/if}
+        </ul>
 
-  {if !empty($groups)}
-  <ul class="c-group-list js-group-list menu" style="margin-left: 2em;{if !$_is_groups}display: none;{/if}">
-    {foreach $groups as $_group}
-    {$_is_active = in_array("{$_group.id}", $_groups_ids)}
-    <li class="js-group" data-group-id="{$_group.id}">
-      <label>
+        {if !empty($groups)}
+        <ul class="c-group-list c-options-list js-group-list menu" style="margin-left: 1.375rem;{if !$_is_groups}display: none;{/if}">
+            {foreach $groups as $_group}
+            {$_is_active = in_array("{$_group.id}", $_groups_ids)}
+            <li class="js-group" data-group-id="{$_group.id}">
+            <label>
 
-        <span class="wa-checkbox">
-          <input type="checkbox" name="settings[personal][reminder][groups][]" {if $_is_active}checked{/if}
-            value="{$_group.id}">
-          <span>
-            <span class="icon">
-              <i class="fas fa-check"></i>
-            </span>
-          </span>
-        </span> {$_group.name|escape}
-      </label>
-    </li>
-    {/foreach}
-  </ul>
-  {/if}
+                <span class="wa-checkbox">
+                <input type="checkbox" name="settings[personal][reminder][groups][]" {if $_is_active}checked{/if}
+                    value="{$_group.id}">
+                <span>
+                    <span class="icon">
+                    <i class="fas fa-check"></i>
+                    </span>
+                </span>
+                </span> {$_group.name|escape}
+            </label>
+            </li>
+            {/foreach}
+        </ul>
+        {/if}
+    </div>
+</div>
 </section>
 <section class="fields-group c-other-options-section">
-  <h3>[`Notify me`]</h3>
-  {if !crmRemindersRecap::isCliOk()}
-  <div class="crm-reminders-recap-error" {if $settings['reminder_recap'] !=1}style="display: none;" {/if}>
-    {include file="templates/actions/settings/SettingsCronDailyRecap.inc.html" inline}
-  </div>
-  {/if}
-  <ul class="c-options-list menu">
-    <li>
-      <label>
-        <span class="wa-checkbox">
-          <input type="checkbox" name="settings[personal][reminder][recap]" value="1" class="daily-recap" {if
-            $settings['reminder_recap']==1}checked{/if}>
-          <span>
-            <span class="icon">
-              <i class="fas fa-check"></i>
-            </span>
-          </span>
-        </span> [`Daily recap on what’s up next`] &nbsp
-      </label>
-      <div class="wa-select solid">
-        <select class='js-select-list' style="font-size: 0.875rem;" name="settings[personal][reminder][daily]" {if empty($settings['reminder_recap'])}disabled{/if}>
-          <option value="today" {if $settings['reminder_daily']=="today" }selected{/if}>[`for today`]</option>
-          <option value="today-tomorrow" {if $settings['reminder_daily']=="today-tomorrow" }selected{/if}>[`for today and tomorrow`]</option>
-        </select>
-      </div>
-    </li>
+    <div class="field">
+        <div class="name">
+            [`Notify me`]
+        </div>
+        <div class="value">
+            {if !crmRemindersRecap::isCliOk()}
+            <div class="crm-reminders-recap-error custom-mt-8" {if $settings['reminder_recap'] !=1}style="display: none;" {/if}>
+                {include file="templates/actions/settings/SettingsCronDailyRecap.inc.html" inline}
+            </div>
+            {/if}
+            <ul class="c-options-list menu custom-mt-4">
+                <li>
+                <label>
+                    <span class="wa-checkbox">
+                    <input type="checkbox" name="settings[personal][reminder][recap]" value="1" class="daily-recap" {if
+                        $settings['reminder_recap']==1}checked{/if}>
+                    <span>
+                        <span class="icon">
+                        <i class="fas fa-check"></i>
+                        </span>
+                    </span>
+                    </span> [`Daily recap on what’s up next`] &nbsp
+                </label>
+                <div class="wa-select solid">
+                    <select class='js-select-list' style="font-size: 0.875rem;" name="settings[personal][reminder][daily]" {if empty($settings['reminder_recap'])}disabled{/if}>
+                    <option value="today" {if $settings['reminder_daily']=="today" }selected{/if}>[`for today`]</option>
+                    <option value="today-tomorrow" {if $settings['reminder_daily']=="today-tomorrow" }selected{/if}>[`for today and tomorrow`]</option>
+                    </select>
+                </div>
+                </li>
 
-    <li>
-      <input type="hidden" name="settings[personal][reminder][pop_up_disabled]" value="1">
-      <label for="pop_up_disabled">
-        <span class="wa-checkbox">
-          <input type="checkbox" name="settings[personal][reminder][pop_up_disabled]" id="pop_up_disabled" value="0"
-            class="pop-up smaller js-pop-up-disabled" {if $settings['reminder_pop_up_disabled'] !=1}checked{/if}>
-          <span>
-            <span class="icon">
-              <i class="fas fa-check"></i>
-            </span>
-          </span>
-        </span>
-        [`Popup `]&nbsp
-      </label>
-      <input type="number" class="js-pop-up-min shortest smaller" name="settings[personal][reminder][pop_up_min]"
-        value="{if !empty($settings['reminder_pop_up_min'])}{$settings['reminder_pop_up_min']}{else}{$pop_up_min}{/if}" {if
-        $settings['reminder_pop_up_disabled']==1}readonly{/if} autocomplete="off" />&nbsp
-      <label for="pop_up_disabled">
-        [`minutes before due time`]&nbsp
-      </label>
-      <span style="color: red; font-weight: bold; float: right; margin-top: 5px; display: none;"
-        class="enter-minutes">[`Enter the number of minutes`]</span>
-    </li>
+                <li>
+                <input type="hidden" name="settings[personal][reminder][pop_up_disabled]" value="1">
+                <label for="pop_up_disabled">
+                    <span class="wa-checkbox">
+                    <input type="checkbox" name="settings[personal][reminder][pop_up_disabled]" id="pop_up_disabled" value="0"
+                        class="pop-up smaller js-pop-up-disabled" {if $settings['reminder_pop_up_disabled'] !=1}checked{/if}>
+                    <span>
+                        <span class="icon">
+                        <i class="fas fa-check"></i>
+                        </span>
+                    </span>
+                    </span>
+                    [`Popup `]&nbsp
+                </label>
+                <input type="number" class="js-pop-up-min shortest smaller" name="settings[personal][reminder][pop_up_min]"
+                    value="{if !empty($settings['reminder_pop_up_min'])}{$settings['reminder_pop_up_min']}{else}{$pop_up_min}{/if}" {if
+                    $settings['reminder_pop_up_disabled']==1}readonly{/if} autocomplete="off" />&nbsp
+                <label for="pop_up_disabled">
+                    [`minutes before due time`]&nbsp
+                </label>
+                <span style="color: red; font-weight: bold; float: right; margin-top: 5px; display: none;"
+                    class="enter-minutes">[`Enter the number of minutes`]</span>
+                </li>
 
-    <li>
-      <label>
-        <input type="hidden" name="settings[personal][reminder][disable_assign]" value="1">
-        <span class="wa-checkbox">
-          <input type="checkbox" name="settings[personal][reminder][disable_assign]" value="0" {if
-            empty($settings['reminder_disable_assign'])}checked{/if}>
-          <span>
-            <span class="icon">
-              <i class="fas fa-check"></i>
-            </span>
-          </span>
-        </span> [`When someone assigns me a reminder`]
-      </label>
-    </li>
-    <li>
-      <label>
-        <input type="hidden" name="settings[personal][reminder][disable_done]" value="1">
-        <span class="wa-checkbox">
-          <input type="checkbox" name="settings[personal][reminder][disable_done]" value="0" {if
-            empty($settings['reminder_disable_done'])}checked{/if}>
-          <span>
-            <span class="icon">
-              <i class="fas fa-check"></i>
-            </span>
-          </span>
-        </span> [`When someone marks my reminder as done`]
-      </label>
-    </li>
-  </ul>
+                <li>
+                <label>
+                    <input type="hidden" name="settings[personal][reminder][disable_assign]" value="1">
+                    <span class="wa-checkbox">
+                    <input type="checkbox" name="settings[personal][reminder][disable_assign]" value="0" {if
+                        empty($settings['reminder_disable_assign'])}checked{/if}>
+                    <span>
+                        <span class="icon">
+                        <i class="fas fa-check"></i>
+                        </span>
+                    </span>
+                    </span> [`When someone assigns me a reminder`]
+                </label>
+                </li>
+                <li>
+                <label>
+                    <input type="hidden" name="settings[personal][reminder][disable_done]" value="1">
+                    <span class="wa-checkbox">
+                    <input type="checkbox" name="settings[personal][reminder][disable_done]" value="0" {if
+                        empty($settings['reminder_disable_done'])}checked{/if}>
+                    <span>
+                        <span class="icon">
+                        <i class="fas fa-check"></i>
+                        </span>
+                    </span>
+                    </span> [`When someone marks my reminder as done`]
+                </label>
+                </li>
+            </ul>
+
+        </div>
+    </div>
 </section>
 {/capture}
 

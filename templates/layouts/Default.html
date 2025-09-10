@@ -45,9 +45,9 @@
 
     <script src="{$wa_url}wa-content/js/jquery-wa/wa.js?v={$wa->version(true)}"></script>
     <script src="{$wa_url}wa-content/js/fontawesome/fontawesome-all.min.js?v={$wa->version(true)}"></script>
-  
+
     <script src="https://unpkg.com/@lottiefiles/lottie-player@0.4.0/dist/tgs-player.js"></script>
-    
+
     {if $_locale_string != 'en'}
         <script src="{$wa_app_static_url}js/jquery/i18n/datepicker-{$_locale_string}.js?v={$wa->version()}"></script>
         <script src="{$wa_url}wa-content/js/redactor/2/{$_locale_string}.js?v{$wa->version(true)}"></script>
@@ -139,6 +139,7 @@
         {$wa_app_static_url}js/settings/messagesBlock.js
         {$wa_app_static_url}js/settings/shop.js
         {$wa_app_static_url}js/settings/pbx.js
+        {$wa_app_static_url}js/settings/tags.js
         {$wa_app_static_url}js/settings/templates.js
         {$wa_app_static_url}js/emailPersonalSettings.js
         {$wa_app_static_url}js/websocket.js
@@ -208,8 +209,10 @@
             is_email_configured: {$is_email_configured},
             contact_list_columns: {$contact_list_columns},
             contact_list_sort: {$contact_list_sort},
+            deal_funnel_columns: {$deal_funnel_columns},
             deal_list_filter: {$deal_list_filter},
             deal_list_sort: {$deal_list_sort},
+            funnel_bricks: {$funnel_bricks},
             rights: {$access_rights},
             user: {
                 id: {$wa->user()->getID()},
@@ -241,7 +244,7 @@
             {* SIDEBAR *}
             {if empty($hide_sidebar)}
             <div class="sidebar-main-wrapper">
-                <div class="sidebar rail width-adaptive overflow-visible flexbox mobile-friendly c-sidebar-wrapper" id="c-sidebar-wrapper">
+                <div class="sidebar width-adaptive overflow-visible flexbox mobile-friendly c-sidebar-wrapper" id="c-sidebar-wrapper">
                     {$sidebar}
                 </div>
             </div>

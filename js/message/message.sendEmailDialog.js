@@ -91,7 +91,7 @@ var CRMSendEmailDialog = ( function($) {
             if ($(window.parent).width() < 760) {
                 $('.dialog .dialog-content', window.parent.document).css('padding',  '0 0.75rem')
             }
-           
+
             that.$wrapper.on('click', '.js-close-dialog', function(e){
                 e.preventDefault();
                 $('.dialog iframe', window.parent.document)[0].dispatchEvent(new Event('close'));
@@ -99,7 +99,10 @@ var CRMSendEmailDialog = ( function($) {
             })
         }
 
-
+        $('.js-toggle-email-message-headers', that.$wrapper).on('click', function() {
+            $(this).find('svg').toggleClass('fa-caret-right fa-caret-down');
+            $('.js-email-message-headers', that.$wrapper).toggleClass('desktop-and-tablet-only');
+        });
     };
 
     CRMSendEmailDialog.prototype.getFilesController = function() {
@@ -261,7 +264,7 @@ var CRMSendEmailDialog = ( function($) {
                                     $bar.css('--progress-value', percent);
                                     if (percent === 100) {
                                         $bar.css('background', 'transparent');
-                                        $success_icon.show(); 
+                                        $success_icon.show();
                                     }
 
                                     //$status.text(percent + "%");
@@ -475,7 +478,7 @@ var CRMSendEmailDialog = ( function($) {
                                     auto_close_timer && clearTimeout(auto_close_timer);
                                     auto_close_timer = null;
                                     $.crm ? $.crm.content.reload() : that.crm.content.reload();
-                                    
+
                                 }
                         }
 
@@ -938,7 +941,7 @@ var CRMSendEmailDialog = ( function($) {
 
             deal_id.val('none');
             if (id) {
-                var href = '?module=deal&action=byContact&id=' + id;
+                var href = '?module=deal&action=byContact&only_existing_stage=1&id=' + id;
                 $.get(href, function(response) {
                     if (response.status === "ok") {
                         // rendering contact deals
@@ -966,7 +969,10 @@ var CRMSendEmailDialog = ( function($) {
         });
 
         function renderDeals(deal,funnel) {
-            return '<li><a href="javascript:void(0);" class="js-deal-item" data-deal-id="'+ deal.id +'"><span class="js-text flexbox"><i class="fas fa-circle funnel-state" style="color: '+ funnel.stages[deal.stage_id].color +'"></i><span class="flexbox">'+ deal.name +'</span></span></a></li>';
+            return '<li><a href="javascript:void(0);" class="js-deal-item" data-deal-id="' + deal.id +'"><span class="js-text flexbox space-4">'+
+                '<i class="' + (funnel.icon || 'fas fa-briefcase') + ' funnel-state" style="color: '+ funnel.stages[deal.stage_id].color +'"></i>'+
+                deal.name + (funnel.is_archived == 1 ? `<span class="gray small custom-ml-4 nowrap">${that.locales['archived']}</span>` : '')+
+            '</span></a></li>';
         }
     };
 

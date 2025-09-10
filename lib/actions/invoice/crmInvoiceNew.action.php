@@ -98,6 +98,7 @@ class crmInvoiceNewAction extends crmInvoiceViewAction
             'currencies'            => $currencies,
             'contact'               => $contact,
             'deal'                  => $deal,
+            'funnel'                => empty($deal['funnel_id']) ? null : $this->getFunnelModel()->getById($deal['funnel_id']),
             'shop_supported'        => crmConfig::isShopSupported() && crmShop::hasRights(),
             'shop_autocomplete_url' => wa()->getAppUrl('shop').'?action=autocomplete&with_counts=1',
             'shop_get_product_url'  => wa()->getAppUrl('shop').'?module=orders&action=getProduct',

@@ -28,4 +28,12 @@ abstract class crmBackendViewAction extends crmViewAction
     {
         return waSMS::adapterExists();
     }
+
+    protected function isEmailConfigured()
+    {
+        $csm = new crmSourceModel();
+        $source = $csm->getActiveEmailSource();
+
+        return !empty($source);
+    }
 }

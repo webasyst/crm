@@ -415,7 +415,7 @@ class crmContactPatchMethod extends crmApiAbstractMethod
                 $result = ($value ? _ws('Yes') : _ws('No'));
                 break;
             case 'waContactDateField':
-                $result = waDateTime::format('humandate', $value);
+                $result = waDateTime::format('humandate', $value, 'server');
                 break;
             case 'waContactTimezoneField':
                 try {

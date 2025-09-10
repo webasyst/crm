@@ -52,7 +52,7 @@ return array(
     ),
     array(
         'event'     => 'deal.create',
-        'name'      => 'Deal created',   // _w('Deal create')
+        'name'      => 'Deal created',   // _w('Deal created')
         'transport' => 'email',
         'status'    => 1,
         'recipient' => 'responsible',
@@ -61,7 +61,7 @@ return array(
     ),
     array(
         'event'     => 'deal.move',
-        'name'      => 'Deal moved to another stage',   // _w('Deal move')
+        'name'      => 'Deal moved to another stage',   // _w('Deal moved to another stage')
         'transport' => 'email',
         'status'    => 1,
         'recipient' => 'responsible',
@@ -88,7 +88,7 @@ return array(
     ),
     array(
         'event'     => 'deal.restore',
-        'name'      => 'Deal reopened',   // _w('Deal restore')
+        'name'      => 'Deal reopened',   // _w('Deal reopened')
         'transport' => 'email',
         'status'    => 1,
         'recipient' => 'responsible',

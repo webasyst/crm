@@ -36,6 +36,13 @@
 {if $_deal_id && !empty($deals[abs($_reminder.contact_id)])}
     {*$_deal_id = abs($_reminder.contact_id)*}
     {$_deal = $deals[$_deal_id]}
+    {$_funnel = ifset($funnels[$_deal.funnel_id])}
+    {$_icon = ifset($_funnel.icon, 'fas fa-briefcase')}
+    {if $_deal.status_id == crmDealModel::STATUS_WON}
+        {$_icon = 'fas fa-flag-checkered'}
+    {elseif $_deal.status_id == crmDealModel::STATUS_LOST}
+        {$_icon = 'fas fa-ban'}
+    {/if}
     {*if !empty($contacts[$_deal.contact_id])}
         {$_user_deal = $contacts[$_deal.contact_id]}
         {$_userpic_deal = $_user_deal->getPhoto(32)}
@@ -46,6 +53,7 @@
         {*if !empty($_userpic_deal)}
             <span class="icon size-18 rounded" style="background-image: url({$_userpic_deal});"></span>
         {/if*}
+        <span class="custom-mr-4" style="color: {ifset($_funnel.color, 'lightgray')};"><i class="{$_icon}"></i></span>
         <span class="c-user-name">{if !empty($_deal)}{$_deal.name|escape}{/if}</span>
     </a>
     <div class="hint custom-pl-12 cursor-pointer js-open-search">
@@ -70,7 +78,7 @@
 <div class="nowrap hint c-search-contact-wrapper {if $_deal_not_empty}is-hidden{/if}">
     <div class="">
         <span class="icon"><i class="fas fa-user"></i></span>
-        <span class="icon"><i class="fas fa-flag"></i></span>
+        <span class="icon"><i class="fas fa-briefcase"></i></span>
         <input class="js-autocomplete-deal input-blank" type="text" id="input-autocomplete-deal" value="" placeholder="[`Contact or deal`]">
     </div>
     <span class="c-hidden custom-pl-4">
@@ -240,14 +248,16 @@
                     type: "{$_active_reminder_type.id}",
                     due_date: "{waDateTime::format('humandate', $_reminder.due_date, 'server')}",
                     due_time: "{$_time}",
-                    contact: { id: "{if !empty($_deal_id)}{$_deal_id}{else}{$_contact_id}{/if}",
-                                photo_url: "{if !empty($_userpic_deal)}{$_userpic_deal}{/if}",
-                                name: "{if !empty($_deal_id) && !empty($_deal)}{$_deal.name|escape}{else if !empty($_contact_name)}{$_contact_name|escape}{/if}"
-                                },
-                    user_contact: { id: "{if !empty($_user.id)}{$_user.id}{/if}",
-                                    photo_url: "{if !empty($_userpic)}{$_userpic}{/if}",
-                                    name: "{if !empty($_user.name)}{$_user.name|escape}{/if}",
-                                }
+                    contact: { 
+                        id: "{if !empty($_deal_id)}{$_deal_id}{else}{$_contact_id}{/if}",
+                        photo_url: "{if !empty($_userpic_deal)}{$_userpic_deal}{/if}",
+                        name: {if !empty($_deal_id) && !empty($_deal)}{$_deal.name|json_encode}{else if !empty($_contact_name)}{$_contact_name|json_encode}{else}""{/if}
+                    },
+                    user_contact: { 
+                        id: "{if !empty($_user.id)}{$_user.id}{/if}",
+                        photo_url: "{if !empty($_userpic)}{$_userpic}{/if}",
+                        name: {if !empty($_user.name)}{$_user.name|json_encode}{else}""{/if},
+                    }
                 },
                 locales: {
                     empty: "[`Required field is empty`]",
