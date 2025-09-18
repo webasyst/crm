@@ -59,7 +59,7 @@ class crmVkPluginCompanyExporter extends crmVkPluginContactExporter
         if ($site) {
             $data['url.work'] = $site;
         } elseif ($screen_name && !$socialnetwork_enabled) {
-            $data['url.work'] = "https://vk.com/{$screen_name}";
+            $data['url.work'] = "https://vk.ru/{$screen_name}";
         }
 
         if ($screen_name && $socialnetwork_enabled) {

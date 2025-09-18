@@ -41,7 +41,7 @@ abstract class crmVkPluginVkEntity
         }
         $this->info = $this->loadInfo();
         if (!$this->info) {
-            throw new crmVkPluginException("Couldn't load data from vk.com");
+            throw new crmVkPluginException("Couldn't load data from vk.ru");
         }
         $this->id = $this->id > 0 ? $this->id : $this->info['id'];
         $this->setIntoCache($this->info);

@@ -15,7 +15,7 @@ class crmVkPluginFrontendCallbackController extends crmJsonController
         }
 
         $event = $this->getEvent();
-        waLog::dump($event, 'vk-callback-debug.log');
+        //waLog::dump($event, 'vk-callback-debug.log');
         try {
             $callback = new crmVkPluginCallback($event, $source);
             $response = $callback->process();

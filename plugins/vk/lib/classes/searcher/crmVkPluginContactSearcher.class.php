@@ -85,7 +85,7 @@ abstract class crmVkPluginContactSearcher
             $values[] = $v;
 
             if (!$looks_like_url) {
-                $domains   = array('vk.com', 'vkontakte.ru');
+                $domains   = ['vk.com', 'vkontakte.ru', 'vk.ru'];
                 $schemas   = array('http', 'https');
                 $end_parts = array('/', '');
                 foreach ($domains as $domain) {

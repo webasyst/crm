@@ -6,7 +6,7 @@ class crmVkPluginApi
 
     protected $access_token;
 
-    protected $url = 'https://api.vk.com/method/';
+    protected $url = 'https://api.vk.ru/method/';
 
     static protected $version = '5.131';
 
@@ -197,7 +197,7 @@ class crmVkPluginApi
 
     /**
      * @param array $params
-     * https://vk.com/dev/messages.markAsRead
+     * https://vk.ru/dev/messages.markAsRead
      * @return bool
      */
     public function markAsRead($params)

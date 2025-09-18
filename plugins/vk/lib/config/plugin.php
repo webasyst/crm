@@ -2,9 +2,9 @@
 
 return [
     'name'        => 'VK',
-    'description' => 'Provides integration with VK.com messages',
+    'description' => 'Provides integration with VK messages',
     'img'         => 'img/vk.png',
-    'version'     => '1.1.0',
+    'version'     => '1.1.1',
     'vendor'      => 'webasyst',
     'custom_settings_url' => '?plugin=vk&action=settings',
     'frontend'            => true,

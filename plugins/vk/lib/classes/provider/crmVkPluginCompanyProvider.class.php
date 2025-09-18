@@ -37,7 +37,7 @@ class crmVkPluginCompanyProvider extends crmVkPluginContactProvider
         // search by site, second try
         $domain = $this->vk_group->getDomain();
         $searcher = new crmVkPluginCompanySearcher(array(
-            'site' => "https://vk.com/{$domain}",
+            'site' => "https://vk.ru/{$domain}",
         ));
         $company = $searcher->findBySite();
         if ($company) {

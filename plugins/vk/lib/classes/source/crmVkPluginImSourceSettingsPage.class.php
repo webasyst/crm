@@ -85,7 +85,7 @@ class crmVkPluginImSourceSettingsPage extends crmImSourceSettingsPage
             return '';
         }
         $group_id = $this->source->getGroupId();
-        return "https://vk.com/club{$group_id}?act=api&server=1";
+        return "https://vk.ru/club{$group_id}?act=api&server=1";
     }
 
     protected function getCallbackUrl()
