@@ -254,8 +254,8 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
             } elseif (ifset($new_message['error_code']) === 400 && $this->is_auto_response) {
                 $this->createInternalServiceMessage(
                     _w('crm_telegram', 'Failed to send message:<blockquote>') . htmlspecialchars($params['text']) . '</blockquote>' .
-                    _w('crm_telegram', 'Message refused by Telegram:') . '<br><i>' . 
-                    htmlspecialchars(ifset($new_message['description'], _wd('crm_telegram', 'Bad request.'))) . '</i>'
+                    _w('crm_telegram', 'Message refused by Telegram:') . '<br><i>' .
+                    htmlspecialchars(ifset($new_message['description'], _wd('crm_telegram', 'Incorrect request to Telegram API.'))) . '</i>'
                 );
             }
             return $this->fail([
@@ -413,7 +413,7 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
                 } elseif (!empty($this->message['contact_id'])) {
                     $crm_file_data['contact_id'] = $this->message['contact_id'];
                 }
-        
+
                 $result['crm_file_id'] = $this->getFileModel()->add($crm_file_data, $this->file_paths[$f['file_id']]);
             } else {
                 $data['params']['footer'] = empty($data['params']['footer']) ? '' : sprintf('%s<br>', $data['params']['footer']);

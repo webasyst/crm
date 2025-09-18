@@ -27,7 +27,7 @@ class crmTelegramPluginFrontendCallbackController extends crmJsonController
             return;
         }
 
-        waLog::log($body, 'telegram-webhook-debug.log');
+        //waLog::log($body, 'telegram-webhook-debug.log');
         
         $body = json_decode($body, true);
         if (!$body) {

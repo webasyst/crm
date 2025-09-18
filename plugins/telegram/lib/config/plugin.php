@@ -4,7 +4,7 @@ return array(
     'name'                => 'Telegram',
     'description'         => 'Provides integration with Telegram Messenger',
     'img'                 => 'img/telegram.png',
-    'version'             => '1.1.4',
+    'version'             => '1.1.5',
     'vendor'              => 'webasyst',
     'custom_settings_url' => '?plugin=telegram&action=settings',
     'frontend'            => true,

@@ -298,8 +298,11 @@ msgstr "Найден другой контакт с этим номером те
 msgid "Internal service message"
 msgstr "Служебное сообщение"
 
-msgid "Telegram supports two ways of processing bot updates — a pull mechanism and a push mechanism. By default the pull mechanism is used. Webhook is a push mechanism, it works faster. <a href=\"%s\" target=\"_blank\">More info</a>."
-msgstr "Telegram поддерживает два способа обработки обновлений бота: <em>pull</em> и <em>push</em>. По умолчанию используется механизм <em>pull</em>. Веб-хук — это механизм <em>push</em>, он работает быстрее. <a href=\"%s\" target=\"_blank\">Подробнее об этом</a>."
+msgid "Telegram supports two ways of processing bot updates — <em>pull</em> and <em>push</em>. By default the <em>pull</em> mechanism is used. <strong>Webhook is a <em>push</em> mechanism, it works faster.</strong>"
+msgstr "Telegram поддерживает два способа обработки обновлений бота: <em>pull</em> и <em>push</em>. По умолчанию используется механизм <em>pull</em>. <strong>Веб-хук — это механизм <em>push</em>, он работает быстрее.</strong>"
+
+msgid "More info"
+msgstr "Подробнее об этом"
 
 msgid "A request for a phone number will be sent to the client."
 msgstr "Клиенту будет отправлена просьба указать номер телефона."
@@ -384,3 +387,6 @@ msgstr "Не удалось отправить сообщение:"
 
 msgid "Message refused by Telegram:"
 msgstr "Telegram отклонил сообщение:"
+
+msgid "Incorrect request to Telegram API."
+msgstr "Некорректный запрос к API Telegram."

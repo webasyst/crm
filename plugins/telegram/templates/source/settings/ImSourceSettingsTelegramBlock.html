@@ -37,8 +37,9 @@
                     {if !empty($source.params.webhook_mode)}checked="checked"{/if}>
                 <div class="hint" style="margin-top: 10px;">
                     {$_doc_page = 'https://core.telegram.org/bots/webhooks'}
-                    {$_hint = _wd('crm_telegram', 'Telegram supports two ways of processing bot updates — a pull mechanism and a push mechanism. By default the pull mechanism is used. Webhook is a push mechanism, it works faster. <a href="%s" target="_blank">More info</a>.')}
+                    {$_hint = _wd('crm_telegram', 'Telegram supports two ways of processing bot updates — <em>pull</em> and <em>push</em>. By default the <em>pull</em> mechanism is used. <strong>Webhook is a <em>push</em> mechanism, it works faster.</strong>')}
                     {sprintf(_wd('crm_telegram', $_hint), $_doc_page)}
+                    <a href="%s" target="_blank">{_wd('crm_telegram', 'More info')}</a>.
                 </div>
             </div>
         </div>

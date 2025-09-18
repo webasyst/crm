@@ -139,7 +139,7 @@ class crmTelegramPluginImSourceWorker extends crmImSourceWorker
 
         $commands = new crmTelegramPluginCommands($this->source, $this->contact, $this->telegram_message['message']);
         $bot_responses = $commands->botCommand();
-        waLog::dump($bot_responses, 'telegram-debug.log');
+        //waLog::dump($bot_responses, 'telegram-debug.log');
         if (isset($this->telegram_message['message']['contact'])) {
             $bot_responses[] = $commands->savePhone();
         }
