@@ -11,20 +11,31 @@
             <div class="dialog c-payments-wrapper js-payments-wrapper">
                 <div class="dialog-background"></div>
                 <div class="dialog-body">
-                    <a href="#" class="dialog-close js-close-dialog">&#x2715;</a>
+                    <a href="#" class="dialog-close js-close-dialog text-white">&#x2715;</a>
+                    <div class="dialog-header">
+                        <p class="dialog-title text-white">{$company.name|escape}</p>
+                    </div>
                     <div class="dialog-content">
                         <form method="post">
 
                             <ul class="c-payment-options">
+                                <li class="c-payment-item c-payment-item-invoice">
+                                    <p class="number">[`Invoice`] [`#`] {$invoice.number|escape}</p>
+                                    <p class="amount">{$invoice.amount|wa_format_amount_currency:$invoice.currency_id}</p>
+                                </li>
                                 {foreach $payment_methods as $m}
-                                    <li class="c-payment-item {if $m.id == $payment_id}is-active{/if} {if !empty($m.error)}has-error{/if}" >
+                                    <li class="c-payment-item{if $m.id == $payment_id} is-active{/if}{if !empty($m.error)} has-error{/if}" style="animation-delay: {$m@index * 2 * 0.1}s">
                                         <label>
-                                            <input class="c-payment-input" type="radio" name="payment_id" value="{$m.id}" {if $m.id == $payment_id}checked{/if} {if !empty($m.error)}disabled="disabled"{/if}>
+                                            <input class="c-payment-input" type="radio" name="payment_id" value="{$m.id}" {if !empty($m.error)}disabled="disabled"{/if}>
                                             <div class="c-payment-header">
-                                                {if !empty($m.logo)}<img class="c-payment-image" src="{$m.logo}">{/if}
+                                                {if !empty($m.logo)}
+                                                    <div class="c-payment-image-wrapper">
+                                                        <img class="c-payment-image" src="{$m.logo}">
+                                                    </div>
+                                                {/if}
                                             </div>
                                             <div class="c-payment-body">
-                                                <p class="c-payment-name">{$m.name|escape}</p>
+                                                <p class="c-payment-name ">{$m.name|escape}</p>
                                                 {if $m.description}
                                                     <p class="c-payment-description">{$m.description}</p>
                                                 {/if}
@@ -32,7 +43,10 @@
                                                     <p class="error"><em>{$m.error}</em></p>
                                                 {/if}
                                                 {if !empty($m.custom_html)}
-                                                    <div class="c-payment-content {if $m.id != $payment_id}is-hidden{/if} wa-form">{$m.custom_html}</div>
+                                                    <div class="c-payment-content wa-form"{if $m.id != $payment_id} style="display: none;"{/if}>
+                                                        {$m.custom_html}
+                                                        <input class="button black full-width largest" type="submit" value="[`Pay`]">
+                                                    </div>
                                                 {/if}
                                             </div>
                                         </label>
@@ -45,7 +59,7 @@
                             </ul>
 
                             <input type="hidden" name="hash" value="{$hash|escape}">
-                            <input class="{if empty($style_version)}button{else}c-button{/if}" type="submit" value="[`Pay`]">
+                            {*<input class="{if empty($style_version)}button{else}c-button{/if}" type="submit" value="[`Pay`]">*}
                         </form>
                     </div>
                 </div>
@@ -54,6 +68,7 @@
                 ( function($) {
                     var $wrapper = $("#c-invoice-front-section");
                     const dialogContent = $wrapper.find(".js-payments-wrapper");
+                    const $paymentItems = dialogContent.find(".c-payment-item");
 
                     $wrapper.on("click", ".js-show-payments", () => {
                         $.waDialog({
@@ -61,35 +76,67 @@
                             onOpen: ($dialog, dialog) => {
                                 const $form = $dialog.find('form');
                                 const $submitButton = $form.find("[type='submit']");
+                                const $paymentContent = $form.find(".c-payment-content");
+                                let paymentContent = null;
                                 let paymentSection = null;
+                                let selectedPayment = null;
+                                let activePayment = null;
 
                                 $form.on('submit', (e) => {
                                     e.preventDefault();
 
-                                    $submitButton.hide();
-
                                     $.post(location.href, $dialog.find('form').serialize(), (response) => {
+
                                         if(typeof response === 'string') {
                                             paymentSection = $(response).find(".c-payment-section");
+
                                             if(paymentSection.length) {
-                                                $form.after(paymentSection);
+                                                if(paymentContent.length) {
+                                                    paymentContent.hide();
+                                                }
+
+                                                paymentSection.find('[type="submit"]').addClass("button black full-width text-ellipsis largest");
+                                                selectedPayment.append(paymentSection);
+                                                
+                                                paymentContent = null;
                                             }
-                                        }else{
-                                            $submitButton.show();
                                         }
 
                                         dialog.resize();
                                     });
                                 });
 
-                                $form.find('li').on('click', () => {
+                                $form.on('change', '[name="payment_id"]', function(e) {
+                                    selectedPayment = $(this).closest(".c-payment-item");
+
+                                    // Проверяем флаг, чтобы предотвратить повторные клики
+                                    if (activePayment == selectedPayment) {
+                                        return;
+                                    }
+
+                                    activePayment = selectedPayment;
+
+                                    paymentContent = selectedPayment.find(".c-payment-content");
+                                    $paymentContent.hide();
+
                                     if(paymentSection) {
                                         paymentSection.remove();
                                         paymentSection = null;
-                                        $submitButton.show();
-                                        dialog.resize();
                                     }
+
+                                    if (paymentContent.length) {
+                                        paymentContent.show();
+                                    }else{
+                                        $form.trigger("submit");
+                                    }
+
+                                    dialog.resize();
                                 });
+
+                                setTimeout(() => $paymentItems.each((i, item) => $(item).addClass("animated")), $paymentItems.length * 200);
+                            },
+                            onClose: () => {
+                                $paymentItems.each((i, item) => $(item).removeClass("animated"));
                             }
                         })
                     });
@@ -598,30 +645,21 @@
                         }
                     }
 
-                    $.waDialog = $.extend($.waDialog || {}, {
-                        alert(options) {
-                            return $.wa.notice(options);
-                        },
-                        confirm(options) {
-                            return $.wa.confirm(options);
-                        },
-                    })
-
                 })(jQuery);
                 {/literal}
             </script>
             <style>
                 html {
                     --background-color-blank:#fff;
-                    --dialog-background-color:rgba(255, 255, 255, 0.8);
+                    --dialog-background-color:rgba(0, 0, 0, 0.5);
                     --dialog-shadow-color:#bbb;
                     --background-color:rgba(0, 20, 80, 0.05);
                 }
 
                 .dialog { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-sizing: border-box; z-index: 1050; background-color: transparent; }
                 .dialog.dialog-opened { display: block; }
-                .dialog .dialog-background { position: absolute; top: 0; left: 0; z-index: 5; width: 100%; height: 100%; box-sizing: border-box; background-color: var(--dialog-background-color); }
-                .dialog .dialog-body { position: absolute; top: 10vh !important; left: 0; z-index: 10; box-sizing: border-box; background: var(--background-color-blank); width: 600px; max-width: 80%; border-radius: 0.75rem; box-shadow: 0 0 70px  var(--dialog-shadow-color); }
+                .dialog .dialog-background { position: absolute; top: 0; left: 0; z-index: 5; width: 100%; height: 100%; box-sizing: border-box; background-color: var(--dialog-background-color); backdrop-filter: blur(20px); }
+                .dialog .dialog-body { position: absolute; top: 10vh !important; left: 0; z-index: 10; box-sizing: border-box; background: none; width: 400px; max-width: 80%;  box-shadow: none; }
                 .dialog .dialog-body.min-width { width: min-content; }
                 .dialog .dialog-body form { overflow: visible; }
                 .dialog .dialog-body .dialog-header { padding: 1.5rem; margin: 0; }
@@ -632,7 +670,7 @@
                 .dialog .dialog-body .dialog-content:empty { display: none; }
                 .dialog .dialog-body .dialog-content.overflow-hidden { overflow: hidden; }
                 .dialog .dialog-body .dialog-footer { margin: 1rem 0 0; padding: 0 1.5rem 1.5rem 1.5rem; }
-                .dialog .dialog-close { position: absolute; top: 0.75rem; right: 1rem; color: inherit; font-size: 1.5rem; opacity: 0.5; padding: 1rem; }
+                .dialog .dialog-close { position: absolute; top: 0.25rem; right: 1rem; color: inherit; font-size: 1.5rem; opacity: 0.5; padding: 1rem; }
                 .dialog .dialog-close:hover { opacity: 1; }
 
                 /* animation */
@@ -642,41 +680,66 @@
                 .dialog.is-animated { transition: opacity 200ms ease-in-out;}
                 .dialog.is-animated .dialog-body { transition: transform 200ms ease-in-out, left 200ms linear, top 200ms linear;}
 
-                .dialog .c-payment-options { margin: 3rem 0 2rem 0; padding: 0; list-style: none; border-radius: .5rem; border: 1px solid #e6e6e6; overflow: hidden; max-height: 80vh; overflow-y: auto; }
-                .dialog .c-payment-options li { padding: 1rem; }
-                .dialog .c-payment-options li:not(:last-child) { border-bottom: 1px solid #e6e6e6; }
+                .dialog .c-payment-options::-webkit-scrollbar { display: none; }
+                .dialog .c-payment-options { margin: 0; padding: 0; list-style: none; overflow: hidden; max-height: 80vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+                .dialog .c-payment-options .c-payment-item:not(.c-payment-item-invoice) {
+                    background: #f8f9fa;
+                    border: 1px solid #e9ecef;
+                    border-radius: 8px;
+                    margin-bottom: 15px;
+                    overflow: hidden;
+                    opacity: 0;
+                    transform: translateY(20px);
+                    animation: fadeInUp 0.6s ease-out forwards;
+
+                    &:hover {
+                        transform: translateY(-2px) !important;
+                    }
+
+                    &.animated {
+                        opacity: 1;
+                        transform: translateY(0);
+                        animation: none;
+                    }
+                }
+                .dialog .c-payment-options li { padding: 1rem; border-radius: 12px; margin-bottom: .75rem; background-color: var(--background-color-blank); transition: transform 200ms ease-in-out; }
+                .dialog .c-payment-options li:last-child { margin-bottom: 0;}
+                .dialog .c-payment-options .c-payment-item-invoice { 
+                    .number {
+                        font-size: 16px;
+                        color: #777;
+                        text-align: center;
+                        margin: 0 0 .5rem 0;
+                    }
+                    .amount {
+                        font-size: 36px;
+                        font-weight: 600;
+                        text-align: center;
+                        margin: 0;
+                    }
+                 }
                 .dialog .c-payment-options li label { display: flex; gap: 1rem; cursor: pointer; }
                 .dialog .c-payment-options li label .c-payment-input { display: none; }
-                .dialog .c-payment-options li:has(.c-payment-input:checked) { background-color: var(--background-color); }
-                .dialog .c-payment-options li label .c-payment-header { flex-basis: 20%; }
-                .dialog .c-payment-options li label .c-payment-header img { max-width: 100%; }
-                .dialog .c-payment-options li label .c-payment-body { flex-basis: 80%; text-align: left; }
+                .dialog .c-payment-options li:has(.c-payment-input:checked) { }
+                .dialog .c-payment-options li label .c-payment-header { flex: 1 0 20%; }
+                .dialog .c-payment-options li label .c-payment-header .c-payment-image-wrapper { border-radius: 6px; border: 1px solid rgba(0, 0, 0, 0.15); padding: 5px; box-sizing: border-box; height: 32px; overflow: clip; }
+                .dialog .c-payment-options li label .c-payment-header img { max-width: 100%; object-fit: scale-down; vertical-align: middle; }
+                .dialog .c-payment-options li label .c-payment-body { flex: 1 1 80%; text-align: left; }
                 .dialog .c-payment-options li label .c-payment-body p:last-of-type { margin-bottom: 0; }
-                .dialog .c-payment-options li label .c-payment-body .c-payment-name { margin-bottom: 0.5rem; font-weight: bold; }
-                .dialog .c-payment-options li label .c-payment-body .c-payment-description { margin-bottom: 0.5rem; font-size: 80%; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-name { margin-bottom: .25rem; font-weight: 500; font-size: 18px; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-description { margin-top: 0; font-size: 13px; color: #888; }
                 .dialog .c-payment-options li .error { color: red; font-style: italic; font-size: 80%; }
-                .dialog .c-payment-options li label .c-payment-body .c-payment-content { margin-bottom: 0.5rem; font-size: 80%; }
-                .dialog .c-payment-options li label .c-payment-body .c-payment-content.is-hidden { display: none; margin-top: 1rem; }
-                .dialog .c-payment-options li label .c-payment-body .c-payment-content .wa-field:not(:last-child) { margin-bottom: .5rem; }
-                .dialog .c-payment-options li label .c-payment-body .c-payment-content .wa-field input { border: 1px solid #e6e6e6; border-radius: .25rem; padding: .5rem; }
-                .dialog .c-button,
-                .dialog .c-payment-section [type="submit"] {
-                    display: flex;
-                    background-color: #256336;
-                    box-sizing: border-box;
-                    color: #fff;
-                    border-radius: 50px;
-                    padding: 8px 21px;
-                    text-decoration: none;
-                    font-size: 18px;
-                    font-weight: 500;
-                    margin-inline: auto;
-                }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-content { margin-top: 1rem; font-size: 14px; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-content .wa-field .wa-name { margin-bottom: .5rem; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-content .wa-field { margin-bottom: 1rem; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-content .wa-field input { border: 1px solid #e6e6e6; border-radius: 4px; padding: .5rem; width: 100%; }
                 .dialog .c-payment-section {
-                    text-align: center;
+                    margin-top: 1rem;
+                    font-size: 14px;
                 }
                 .dialog .c-payment-section:not(:has([type="submit"])) {
                     color: red;
+                    font-size: 14px;
                 }
 
                 @media screen and (max-width: 760px) { /* mobile */
@@ -686,7 +749,13 @@
                     .dialog .dialog-body .dialog-footer { margin-top: auto; padding-top: 1rem; }
 
                 }
-                .dialog ~ .ui-autocomplete { z-index: 1051 !important; }
+
+                @keyframes fadeInUp {
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
             </style>
         {elseif (!empty($payment))}
             {$payment}

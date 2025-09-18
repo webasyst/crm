@@ -1,1 +1,0 @@
-import{a6 as l,h as o,P as f,N as n}from"./main-2290994d.js";const d=l("dealFields",()=>{const e=o([]),{data:s,isFetching:a,error:t,isFinished:r,execute:i}=f("crm.field.list?scope=deal").get().json();n(()=>{Array.isArray(s.value)&&(e.value=s.value)});function c(){r.value&&i()}return{fields:e,isFetching:a,error:t,refetch:c}});export{d as u};

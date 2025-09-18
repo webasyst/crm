@@ -28,9 +28,11 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
         }
     }
 
-    $wrapper.css({
-        'min-height': $wrapper.height()
-    });
+    $wrapper.css({ 'min-height': $wrapper.height() });
+    // repeat define min-height
+    setTimeout(() => {
+        $wrapper.css({ 'min-height': $wrapper.height() });
+    }, 50);
 
     var renderErrors = function ($error, errors) {
         $error.show().html($.map(errors, function (error) {
@@ -175,7 +177,12 @@ var crmFrontendForm = function (uid, submit_to_iframe, options) {
                 window.top.location.replace(r.data.redirect);
             } else {
                 $form.hide();
-                $after_block.height($wrapper.outerHeight());
+                if (window.frameElement) {
+                    $wrapper.css({ 'min-height': 'auto' });
+                } else {
+                    $after_block.height($wrapper.outerHeight());
+                }
+
                 $after_block.html(r.data.html).show();
                 setTimeout(() => {
                     scrollIntoViewIfNeeded($after_block, 100);

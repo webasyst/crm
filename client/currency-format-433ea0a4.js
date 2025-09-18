@@ -1,1 +1,0 @@
-import{B as a}from"./main-2290994d.js";const m=a.lang;function n(t,r){return new Intl.NumberFormat(m,{style:"currency",minimumFractionDigits:0,maximumFractionDigits:4,currency:t}).format(r)}export{n as i};

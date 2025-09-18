@@ -108,7 +108,13 @@
                     <p class="js-technical-info-block js-unknown-error">
                         {sprintf(_w('See detailed error-related information in log file <em>%s</em>.'), "sms.log")}
                     </p>
-                    <p>{sprintf(_w('Check <a target="_top" href="%s">SMS sending settings</a>.'), "`$wa_backend_url`webasyst/settings/sms/")}</a></p>
+                    <p>{sprintf(
+                        sprintf_wp(
+                            'Check <a %s>SMS sending settings</a>.',
+                            'target="_top" href="%s"'
+                        ),
+                        "`$wa_backend_url`webasyst/settings/sms/")
+                    }</a></p>
                 {else}
                     <p>{_ws('Please refer to your system administrator.')}</p>
                 {/if}

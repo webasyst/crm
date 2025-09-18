@@ -21,8 +21,6 @@ class crmMessageAiAnswerController extends waJsonController
         }
 
         try {
-            // !!! improve_query полезен, если передаём запрос от юзера без правок админа. Или если запрос слишком длинный. 
-            //  При improve_query=true веб-поиск будет искать не по строке $message_text, а сначала сделает нейронкой поисковый запрос.
             $search = new crmServicesSearch([
                 'domain' => $domain,
                 'improve_query' => false,

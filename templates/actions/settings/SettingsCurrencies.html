@@ -58,7 +58,7 @@
         </div>
         <div class="c-column middle right">
             {if empty($_change_is_locked) && !empty($currencies)}
-                <a class="button rounded light-gray js-change-primary" href="javascript:void(0);"><i class="fas fa-dollar-sign text-blue"></i> [`Change primary currency`]</a>
+                <a class="button rounded small light-gray js-change-primary" href="javascript:void(0);"><i class="fas fa-dollar-sign text-blue"></i> [`Change primary currency`]</a>
             {/if}
         </div>
     </div>
@@ -68,10 +68,10 @@
     {if $is_shop_supported}
         <div class="c-shop-currency-toggle">
 
-            <span class="switch smaller" id="shop-currency-switch">
+            <span class="switch smaller custom-mr-4" id="shop-currency-switch">
                 <input class="js-shop-currency-toggle" id="js-shop-currency-ibutton" type="checkbox" name="use_shop_currencies" data-use-shop="{if !empty($use_shop_available)}true{/if}" {if $use_shop_currencies}checked{/if}>
             </span>
-            <label for="js-shop-currency-ibutton">[`Copy Shop-Script currency settings`]</label>
+            <label for="js-shop-currency-ibutton" class="small">[`Copy Shop-Script currency settings`]</label>
         </div>
         {if $use_shop_currencies}
             <div class="block hint">[`Currency exchange rates changed in Shop-Script settings are updated in CRM in 1 minute.`]</div>

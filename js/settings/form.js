@@ -110,6 +110,8 @@ var crmSettingsForm = (function ($) {
         that.initViewModeToggler();
         that.initSubmitPlacement();
         that.initColorSection();
+        that.initIconSection();
+        that.initFrontendLinkDropdown();
         //that.initBackButton();
     };
 
@@ -189,6 +191,27 @@ var crmSettingsForm = (function ($) {
                 that.$widget_manual_code.slideDown();
             }
         });
+
+        that.$widget_params.find('.js-widget-add-path').click(function (event) {
+            event.preventDefault();
+            const $this = $(event.target);
+            const $row = $this.closest('tr');
+            const domain = $row.data('domain');
+            const $path_wrapper = $('<div class="flexbox middle space-0 js-widget-path-wrapper"></div>');
+            const $input = $('<input type="text" class="js-widget-path" data-domain="' + domain + '" value="" placeholder="/*">');
+            const $del_button = $('<button class="js-widget-del-path circle light-gray smallest"><i class="fas fa-times"></i></button>');
+            $path_wrapper.append($input).append($del_button);
+            $row.find('.js-widget-paths').append($path_wrapper);
+            $del_button.click(deletePath);
+            $input.focus();
+        });
+
+        that.$widget_params.find('.js-widget-del-path').click(deletePath);
+
+        function deletePath (event) {
+            event.preventDefault();
+            $(event.target).closest('.js-widget-path-wrapper').remove();
+        }
     };
 
     crmSettingsForm.prototype.initDealCreateCheckbox = function () {
@@ -381,14 +404,14 @@ var crmSettingsForm = (function ($) {
                     lang: that.lang
                 });
             };
-        
+
         wrapEditor(
-            that.$form.find('[name="form[params][confirm_mail_body]"]'), 
+            that.$form.find('[name="form[params][confirm_mail_body]"]'),
             ['formatting', 'bold', 'italic', 'link'],
             ['fontcolor', 'fontsize', 'fontfamily']
         );
         wrapEditor(
-            that.$form.find('[name="form[params][html_after_submit]"]'),  
+            that.$form.find('[name="form[params][html_after_submit]"]'),
             [  'format',
                 'inline', 'bold', 'italic', 'underline', 'deleted', 'link', 'image',
                 'alignment', 'lists', 'outdent', 'indent',
@@ -798,7 +821,14 @@ var crmSettingsForm = (function ($) {
 
             that.form.params.widget_path = {};
             $form.find('.js-widget-path').each(function () {
-                that.form.params.widget_path[$(this).data('domain')] = $(this).val();
+                const domain = $(this).data('domain');
+                const path = $(this).val();
+                if (!(domain in that.form.params.widget_path)) {
+                    that.form.params.widget_path[domain] = [];
+                }
+                if (!that.form.params.widget_path[domain].includes(path)) {
+                    that.form.params.widget_path[domain].push(path);
+                }
             });
             data.push({
                 name: 'form[params][widget_path]',
@@ -1242,6 +1272,50 @@ var crmSettingsForm = (function ($) {
             }
         });
     };
+
+    crmSettingsForm.prototype.initIconSection = function() {
+        var that = this,
+            $iconField = that.$wrapper.find(".c-icon-section .js-icon-field"),
+            $iconItem = that.$wrapper.find(".c-icon-section .c-icon-list .js-icon-item");
+
+        $iconItem.on("click", function() {
+            var icon = $(this).data("icon");
+            $iconItem.removeClass("selected");
+            $(this).addClass("selected");
+            $iconField.val(icon);
+        });
+    }
+
+    crmSettingsForm.prototype.initFrontendLinkDropdown = function() {
+        $("#dropdown-frontend-link").waDropdown({
+            hide: false,
+            ready: function ({ $wrapper }) {
+                $wrapper.find(".js-copy-frontend-link").on("click", function (e) {
+                    e.preventDefault();
+
+                    $.wa.copyToClipboard($wrapper.find('.js-frontend-link').attr('href'));
+
+                    const $button = $(this);
+                    const defaultIconClass = $button.data('icon-default');
+                    const successIconClass = $button.data('icon-success');
+                    const $icon = $button.find('.js-icon svg');
+                    if ($icon.length && $icon.hasClass(defaultIconClass)) {
+                        $button.addClass($button.data('class-success'));
+                        $button.find('.js-text').text($button.data('text-success'));
+                        $icon.removeClass(defaultIconClass);
+                        $icon.addClass(successIconClass);
+                        setTimeout(function () {
+                            const $icon = $button.find('.js-icon svg');
+                            $button.find('.js-text').text($button.data('text-default'));
+                            $button.removeClass($button.data('class-success'));
+                            $icon.removeClass(successIconClass);
+                            $icon.addClass(defaultIconClass);
+                        }, 1000)
+                    }
+                });
+            }
+        });
+    }
 
     crmSettingsForm.prototype.initColorSection = function() {
         var that = this,

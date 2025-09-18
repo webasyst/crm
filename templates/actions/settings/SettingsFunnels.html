@@ -7,7 +7,10 @@
 
     {* HEADER *}
     <header class="c-funnels-section">
-        <h1 class="c-page-header">[`Funnels`]</h1>
+        <div class="c-page-header flexbox middle full-width">
+            <h1 class="custom-mb-0">[`Funnels`]</h1>
+            <a class="button small rounded light-gray" href="{$wa_app_url}settings/funnels/new/"><i class="fas fa-plus-circle text-green add"></i> [`Add new funnel`]</a>
+        </div>
 
         {* FUNNELS *}
         <div class="c-funnels-tabs flexbox full-width wrap middle js-funnels-tabs">
@@ -36,9 +39,6 @@
                 </ul>
                 <span class="c-action right" title="[`Next`]"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
                 <span class="c-action left" title="[`Before`]"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
-            </div>
-            <div class="c-add-wrapper">
-                <a class="button small rounded light-gray" href="{$wa_app_url}settings/funnels/new/"><i class="fas fa-plus-circle text-green add"></i> [`Add new funnel`]</a>
             </div>
         </div>
     </header>

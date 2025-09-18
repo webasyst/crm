@@ -9,6 +9,8 @@ class crmForm
      */
     protected $id;
 
+    protected $hash;
+
     /**
      * @var array
      */
@@ -67,6 +69,18 @@ class crmForm
             }
         }
         return $info;
+    }
+
+    public function getHash()
+    {
+        if (empty($this->id)) {
+            return null;
+        }
+        if ($this->hash === null) {
+            $hash = md5($this->obtainInfo()['create_datetime'] . $this->id);
+            $this->hash = substr($hash, 0, 16) . $this->id . substr($hash, -16);
+        }
+        return $this->hash;
     }
 
     /**

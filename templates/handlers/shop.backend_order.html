@@ -356,7 +356,12 @@
                     new CRMContactEmbedded({
                         contact_id: {$contact_id|json_encode},
                         userpic: {$photo|json_encode},
-                        wrapper: document.getElementById('s-order-block')
+                        show_when_available_element: document.getElementById('s-order-block'),
+                        locales: {
+                            link_to_contact: '[`Open customer in CRM app`]'
+                        },
+                        unread_message_count: {$unread_message_count|json_encode},
+                        is_premium: {$wa->crm->isPremium()|json_encode}
                     });
                 });
             {/if}

@@ -2,6 +2,17 @@
 
 class crmSettingsFormIdAction extends crmSettingsViewAction
 {
+    protected $widget_icons = [
+        'fas fa-phone',
+        'fas fa-comment-dots',
+        'fas fa-question-circle',
+        'fas fa-envelope',
+        'fas fa-bell',
+        'fas fa-info-circle',
+        'fas fa-concierge-bell',
+        'fas fa-life-ring',
+    ];
+
     public function execute()
     {
         $this->accessDeniedForNotAdmin();
@@ -13,27 +24,35 @@ class crmSettingsFormIdAction extends crmSettingsViewAction
             $this->notFound();
         }
 
-        $domains = wa()->getRouting()->getByApp($this->getAppId());
-        $storefront_list = array();
-        foreach ($domains as $domain => $storefronts) {
-            $storefront_list[$domain] = $domain . '/' . current($storefronts)['url'];
+        $has_storefronts = !empty(wa()->getRouting()->getByApp($this->getAppId()));
+        $form_info = $form_constructor->getFormInfo();
+
+        $domains = wa()->getRouting()->getDomains();
+        if ($id === 'new') {
+            $form_info['params']['widget_container'] = 'dialog';
+            $form_info['params']['widget_header'] = _w('Send inquiry');
+            $form_info['params']['widget_display_fab'] = 1;
+            $form_info['params']['widget_display_fab_color'] = '#52cc8f';
+            $form_info['params']['widget_display_on_timeout'] = 1;
+            $form_info['params']['widget_display_timeout'] = 1;
+            $form_info['params']['widget_domains'] = empty($domains) ? [] : [$domains[0]];
         }
-        $has_storefronts = !empty($storefront_list);
 
         $this->view->assign([
-            'form' => $form_constructor->getFormInfo(),
+            'form' => $form_info,
             'available_fields' => $form_constructor->getAvailableFields(),
             'messages_block' => $this->getMessagesBlock($form_constructor->getForm()),
             'app_static_url' => wa()->getAppStaticUrl('crm', true),
             'frontend_form_iframe_url' => $this->getIFrameUrl($form_constructor->getFormId()),
-            'frontend_form_url' => $this->getFormUrl($form_constructor->getFormId()),
+            'frontend_form_url' => $this->getFormUrl($form_constructor->getForm()->getHash()),
             'segments' => $this->getSegmentModel()->getMergedSegments($form_constructor->getForm()),
             'default_checked_fields' => $this->getDefaultCheckedFields(),
             'blocks' => $this->getBlocks($form_constructor->getForm()),
             'captcha_is_invisible' => crmFormConstructor::getCaptchaIsInvisible(),
             'captcha_settings_url' => wa()->getAppUrl('webasyst') . 'webasyst/settings/captcha/',
-            'domains' => wa()->getRouting()->getDomains(),
+            'domains' => $domains,
             'has_storefronts' => $has_storefronts,
+            'widget_icons' => $this->widget_icons,
         ]);
     }
 
@@ -109,11 +128,11 @@ class crmSettingsFormIdAction extends crmSettingsViewAction
         );
     }
 
-    protected function getFormUrl($form_id)
+    protected function getFormUrl($form_hash)
     {
         return wa()->getRouting()->getUrl(
             'crm/frontend/form',
-            array('id' => $form_id),
+            ['hash' => $form_hash],
             true
         );
     }

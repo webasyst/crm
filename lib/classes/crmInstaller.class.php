@@ -250,7 +250,7 @@ class crmInstaller
 
         if ($fm->countAll() <= 0 && $fsm->countAll() <= 0) {
 
-            $funnel_name = _w('Funnel');
+            $funnel_name = _w('Sales');
             $id = $fm->insert(array(
                 'name'        => $funnel_name,
                 'color'       => '#6bb532',

@@ -25,7 +25,7 @@
     {/if}
 
     {if !empty($body_formatted)}
-        {$body_formatted}&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="c-message-body-text">{$body_formatted}&nbsp;&nbsp;&nbsp;&nbsp;</div>
     {/if}
     {if !empty($message.caption)}
         {$extra_caption = $message.caption}

@@ -1115,7 +1115,17 @@ var ContentRouter = ( function($) {
 
         const show_spinner = !!$link && !!$link.length && !$link.closest('.sidebar').length;
         if (show_spinner) {
-            $link.find('[data-fa-i2svg]').hide().after('<i class="fas fa-spinner fa-spin"></i>');
+            const fa_i2svg =  $link.find('[data-fa-i2svg]');
+            const form_item = $link.closest('.c-form-item');
+
+            if(form_item.length) {
+                const $wrapper = form_item.closest('.crm-forms-sidebar');
+                const $skeleton =  $wrapper.find('.js-lead-forms-skeleton');
+                $wrapper.find('> *').hide();
+                $skeleton.show();
+            }else if(fa_i2svg.length) {
+                $link.find('[data-fa-i2svg]').hide().after('<i class="fas fa-spinner fa-spin"></i>');
+            }
         } else {
             that.animate().show();
         }
@@ -1135,8 +1145,17 @@ var ContentRouter = ( function($) {
             }
 
             if (show_spinner) {
-                $link.find('[data-fa-i2svg]:first').show();
-                $link.find('[data-fa-i2svg]').slice(1).remove();
+                const fa_i2svg =  $link.find('[data-fa-i2svg]');
+                const form_item = $link.closest('.c-form-item');
+                if(form_item.length) {
+                    const $wrapper = form_item.closest('.crm-forms-sidebar');
+                    const $skeleton =  $wrapper.find('.js-lead-forms-skeleton');
+                    $wrapper.find('> *').show();
+                    $skeleton.hide();
+                }else if(fa_i2svg.length) {
+                    $link.find('[data-fa-i2svg]:first').show();
+                    $link.find('[data-fa-i2svg]').slice(1).remove();
+                }
             } else {
                 that.animate().done();
             }
@@ -1159,8 +1178,17 @@ var ContentRouter = ( function($) {
                     })
             }
             if (show_spinner) {
-                $link.find('[data-fa-i2svg]:first').show();
-                $link.find('[data-fa-i2svg]').slice(1).remove();
+                const fa_i2svg =  $link.find('[data-fa-i2svg]');
+                const form_item = $link.closest('.c-form-item');
+                if(form_item.length) {
+                    const $wrapper = form_item.closest('.crm-forms-sidebar');
+                    const $skeleton =  $wrapper.find('.js-lead-forms-skeleton');
+                    $wrapper.find('> *').show();
+                    $skeleton.hide();
+                }else if(fa_i2svg.length) {
+                    $link.find('[data-fa-i2svg]:first').show();
+                    $link.find('[data-fa-i2svg]').slice(1).remove();
+                }
             } else {
                 that.animate().abort();
             }

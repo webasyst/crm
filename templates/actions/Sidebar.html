@@ -15,7 +15,7 @@
 
         {if !empty($deals_has_access)}
 
-        <div id="c-sidebar-bricks" class="bricks">
+        <div id="c-sidebar-bricks" class="bricks hide-scrollbar">
             {foreach $funnels as $_funnel}
             <a class="brick full-width text-ellipsis" href="{$wa_app_url}deal/?funnel={$_funnel.id}" data-id="{$_funnel.id}" data-wa-tooltip-content="{$_funnel.name|escape}">
                 <span class="icon" style="color: {$_funnel.color};">
@@ -30,18 +30,25 @@
             </a>
             {/foreach}
         </div>
+        <div class="c-bricks-expander custom-px-16 custom-mt-8">
+            <hr class="width-100 custom-mb-0">
+            <a class="js-expand-bricks back" href="javascript:void(0)">
+                <span class="icon size-24"><i class="fas fa-arrow-circle-down"></i></span>
+            </a>
+            <hr class="width-100 custom-mb-0">
+        </div>
 
         {/if}
 
-        <div class="box custom-pt-0">
-            <ul class="menu large rounded">
+        <div class="c-sidebar-sections box custom-pt-0 hide-scrollbar">
+            <ul class="menu large rounded custom-mt-8">
                 <li data-id="contacts">
                     <a href="{$wa_app_url}contact/" data-wa-tooltip-content="[`Contacts`]">
                         {if isset($contacts_count)}
                             <span class="count js-count">{$contacts_count}</span>
                         {/if}
                         <i class="fas fa-users"></i>
-                        <span class="name">[`Contacts`]</span>
+                        <span class="name text-ellipsis">[`Contacts`]</span>
                         {if !empty($contacts_new_count)}
                             <strong class="c-badge badge small js-indicator">{if $contacts_new_count < 100}{$contacts_new_count}{else}99+{/if}</strong>
                         {/if}
@@ -55,7 +62,7 @@
                                 <span class="count js-count">{$deals_count}</span>
                             {/if}
                             <i class="fas fa-briefcase"></i>
-                            <span class="name">[`Funnels`]</span>
+                            <span class="name text-ellipsis">[`Funnels`]</span>
                             {if !empty($deals_new_count)}
                                 <strong class="c-badge badge small js-indicator">{if $deals_new_count < 100}{$deals_new_count}{else}99+{/if}</strong>
                             {/if}
@@ -66,7 +73,7 @@
                 <li{if waRequest::param('module') == 'reminder'} class="selected"{/if}>
                     <a href="{$wa_app_url}reminder/" data-wa-tooltip-content="[`Reminders`]">
                         <i class="fas fa-bell"></i>
-                        <span class="name">[`Reminders`]</span>
+                        <span class="name text-ellipsis">[`Reminders`]</span>
                         {if !empty($reminders_due_count)}
                             <strong class="c-badge badge small js-indicator{if $reminders_state != 'overdue'} indicator {$reminders_state}{/if}">{if $reminders_due_count < 100}{$reminders_due_count}{else}99+{/if}</strong>
                         {/if}
@@ -80,7 +87,7 @@
                                 <span class="count js-count">{$invoices_count|default:""}</span>
                             {/if}
                             <i class="fas fa-receipt"></i>
-                            <span class="name">[`Invoices`]</span>
+                            <span class="name text-ellipsis">[`Invoices`]</span>
                             {if !empty($invoices_new_count)}
                             <strong class="c-badge badge small js-indicator">{if $invoices_new_count < 100}{$invoices_new_count}{else}99+{/if}</strong>
                             {/if}
@@ -93,7 +100,7 @@
                         <a href="{$wa_app_url}call/" data-wa-tooltip-content="[`Calls`]">
                             <span class="count">{if isset($calls_count)}{$calls_count}{/if}</span>
                             <i class="fas fa-phone-alt"></i>
-                            <span class="name">[`Calls`]</span>
+                            <span class="name text-ellipsis">[`Calls`]</span>
                             {if !empty($calls_new_count)}
                             <strong class="c-badge badge small js-indicator">{if $calls_new_count < 100}{$calls_new_count}{else}99+{/if}</strong>
                             {/if}
@@ -105,7 +112,7 @@
                     <a href="{$wa_app_url}message/" data-wa-tooltip-content="[`Messages`]">
                         <span class="count hidden">{if isset($messages_count)}{$messages_count}{/if}</span>
                         <i class="fas fa-comments"></i>
-                        <span class="name">[`Messages`]</span>
+                        <span class="name text-ellipsis">[`Messages`]</span>
                         {if !empty($messages_new_count)}
                         <strong class="c-badge badge small js-indicator">{if $messages_new_count < 100}{$messages_new_count}{else}99+{/if}</strong>
                         {/if}
@@ -115,17 +122,17 @@
                 <li{if waRequest::param('module') == 'report'} class="selected"{/if}>
                     <a href="{$wa_app_url}report/" data-wa-tooltip-content="[`Reports`]">
                         <i class="fas fa-chart-bar"></i>
-                        <span class="name">[`Reports`]</span>
+                        <span class="name text-ellipsis">[`Reports`]</span>
                     </a>
                 </li>
 
                 <li{if waRequest::param('module') == 'log'} class="selected"{/if}>
                     <a href="{$wa_app_url}live/" data-wa-tooltip-content="[`Live`]">
                         <i class="fas fa-bolt"></i>
-                        <span class="name">[`Live`]</span>
+                        <span class="name text-ellipsis">[`Live`]</span>
                     </a>
                 </li>
-                
+
                 {* @event backend_sidebar.%plugin_id%.top_li *}
                 {foreach $backend_sidebar as $_}{ifset($_.top_li)}{/foreach}
             </ul>

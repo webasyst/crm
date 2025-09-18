@@ -27,6 +27,7 @@
          * @param {number} [options.display_scroll] - Прокрутка страницы вниз в пикселях.
          * @param {number} [options.max_width] - Максимальная ширина контейнера в пикселях.
          * @param {boolean} [options.no_brending]
+         * @param {string} [options.display_fab_icon] - Иконка в формате fontawesome
          */
         constructor(options) {
 
@@ -37,7 +38,7 @@
             this.theme = options.theme;
             this.displayContainer = options.display_container || "dialog";
             this.displayConditions = options.display_conditions;
-            this.displayFabText = options.display_fab_text || "Новая форма";
+            this.displayFabText = options.display_fab_text;
             this.displayFabColor = options.display_fab_color;
             this.displayTimeout = options.display_timeout;
             this.container = options.container;
@@ -46,6 +47,7 @@
             this.displayScroll = options.display_scroll;
             this.maxWidth = options.max_width || 400;
             this.noBrending = options.no_brending;
+            this.displayFabIcon  = options.display_fab_icon;
             this.iframeId = `wa-crm-iframe-${this.generateUniqueId()}`;
             this.locale = options.locale || "en";
             this.powered_by = '<a href="https://www.webasyst.com/store/app/crm/" target="_blank" rel="noopener">Powered by Webasyst CRM</a>';
@@ -56,7 +58,13 @@
             this.overlay = null;
             this.escHandlerInited = false;
 
-            this.init();
+            this.availableIcons = ['fas fa-phone', 'fas fa-comment-dots', 'fas fa-question-circle', 'fas fa-envelope', 'fas fa-bell', 'fas fa-info-circle', 'fas fa-concierge-bell', 'fas fa-life-ring'];
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => this.init());
+            } else {
+                this.init();
+            }
         }
 
         /**
@@ -102,6 +110,10 @@
 
                 if (options.custom_element !== undefined && typeof options.custom_element !== 'string') {
                     throw new Error('CRMFormEmbedded: custom_element должен быть строкой');
+                }
+
+                if (options.display_fab_icon !== undefined && typeof options.display_fab_icon !== 'string') {
+                    throw new Error('CRMFormEmbedded: display_fab_icon должен быть строкой');
                 }
 
                 if (options.display_container !== undefined) {
@@ -161,9 +173,7 @@
             this.createIframe();
 
             if (this.displayConditions === 'inline' && this.container) {
-                document.addEventListener("DOMContentLoaded", () => {
-                    this.insertFrameToContainer();
-                });
+                this.insertFrameToContainer();
                 return;
             }
 
@@ -403,6 +413,7 @@
 
             document.body.appendChild(this.overlay);
             document.body.appendChild(this.panel);
+            document.body.classList.add('wa-embeded-widget-opened');
 
             this.addFrameResizer();
 
@@ -451,6 +462,7 @@
                     this.panel.remove();
                     this.overlay = null;
                     this.panel = null;
+                    document.body.classList.remove('wa-embeded-widget-opened');
 
                     this.updateStorage({
                         [this.iframeUrl]: Date.now()
@@ -462,7 +474,14 @@
         createCircle () {
             const circle = document.createElement("div");
             circle.className = 'wa-embeded-widget-fab';
-            circle.innerText = this.displayFabText;
+            if (this.displayFabText) {
+                circle.classList.add('wa-embeded-widget-fab--text');
+                circle.innerText = this.displayFabText;
+            }
+            if (this.availableIcons.includes(this.displayFabIcon)) {
+                circle.classList.add('wa-embeded-widget-fab--icon');
+                circle.dataset.icon = this.displayFabIcon;
+            }
             if (/^#([0-9A-Fa-f]{3}){1,2}([0-9A-Fa-f]{2})?$/.test(this.displayFabColor)) {
                 circle.style.backgroundColor = this.displayFabColor;
             }
@@ -473,42 +492,8 @@
         }
     }
 
-    const config = window.CRMWidgetConfig || {};
-
-    function loadCSS (href) {
-        const l = document.createElement('link');
-        l.rel = 'stylesheet';
-        l.href = href;
-        l.onerror = function () {
-            console.error(`Failed to load CSS file: ${href}`);
-        };
-        document.head.appendChild(l);
+    window.createCRMWidget = (config) => {
+       new CRMFormEmbedded(config); 
     }
-
-    let scriptSrc = '';
-    if (document.currentScript && document.currentScript.src) {
-        scriptSrc = document.currentScript.src;
-    } else {
-        // Fallback: find the script by its filename
-        const scripts = document.getElementsByTagName('script');
-        for (let i = 0; i < scripts.length; i++) {
-            if (scripts[i].src && scripts[i].src.includes('widget.js')) {
-                scriptSrc = scripts[i].src;
-                break;
-            }
-        }
-    }
-    const scriptUrl = new URL(scriptSrc, window.location.origin);
-    const scriptDir = scriptUrl.pathname.split('/').slice(0, -1).join('/') + '/';
-
-    loadCSS('https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&display=swap');
-    loadCSS(`${scriptDir}widget.css`);
-
-    const widgetInstance = new CRMFormEmbedded(config);
-    window.showCRMWidget = function () {
-        if (widgetInstance.showContainer) {
-            widgetInstance.showContainer();
-        }
-    };
 
 })();

@@ -9,14 +9,6 @@
             {$pay_button}
         </div>
 
-        <div class="c-recipient c-text-right">
-            <p class="c-color-gray c-my-0 c-mb-8">
-                {ifempty($company.name, $invoice.company_id)|escape}{if !empty($company.address)},
-                        {$company.address|escape|nl2br}{/if}{if !empty($company.phone)},
-                        {$company.phone|escape}{/if}
-            </p>
-        </div>
-
         <div class="c-details">
 
             <div class="c-payer">
@@ -30,7 +22,7 @@
             </div>
 
             <div class="c-date c-text-nowrap">
-                <p class="c-color-gray c-font-bold fs-16"{if !empty($_color)} style="color: {$_color|escape};"{/if}>[`issued on`]</p>
+                <p class="c-color-gray c-font-bold fs-16"{if !empty($_color)} style="color: {$_color|escape};"{/if}>[`Created`]</p>
                 <p>{$invoice.invoice_date|wa_date}</p>
             </div>
 
@@ -44,6 +36,15 @@
                 <p class="c-font-bold">{$invoice.amount|wa_format_amount_currency:$invoice.currency_id}</p>
             </div>
 
+        </div>
+
+        <div class="c-recipient">
+            <p class="c-color-gray c-font-bold fs-16">[`Provider`]</p>
+            <p>
+                {ifempty($company.name, $invoice.company_id)|escape}{if !empty($company.address)},
+                    {$company.address|escape|nl2br}{/if}{if !empty($company.phone)},
+                    {$company.phone|escape}{/if}
+            </p>
         </div>
 
     </div>
@@ -81,7 +82,7 @@
     <div class="c-total">
         <table>
             <tr>
-                <td class="c-pr-30 fs-16">[`Subtotal`]</td>
+                <td class="c-pr-30 fs-16 c-color-gray">[`Subtotal`]</td>
                 <td>{$_subtotal|wa_format}</td>
             </tr>
             {if ($invoice.tax_type != "NONE")}
@@ -95,7 +96,7 @@
                     {$_name = $invoice.tax_name}
                 {/if}
                 <tr>
-                    <td class="c-pr-30 c-pt-12 fs-16">
+                    <td class="c-pr-30 c-pt-12 fs-16 c-color-gray">
                         {if !empty($_type)}{$_type}&nbsp;{/if}{$_name|escape}&nbsp;{$invoice.tax_percent|escape}%
                     </td>
                     <td class="c-pt-12">
@@ -104,7 +105,7 @@
                 </tr>
             {/if}
             <tr>
-                <td class="c-pr-30 c-pt-12 fs-16">[`Total`]</td>
+                <td class="c-pr-30 c-pt-12 fs-16 c-color-gray">[`Total`]</td>
                 <td class="c-font-bold c-pt-12">{$invoice.amount|wa_format_amount_currency:$invoice.currency_id}</td>
             </tr>
         </table>

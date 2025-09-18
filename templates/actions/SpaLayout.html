@@ -8,10 +8,10 @@
     };
     // Events from SPA
     documentElement.addEventListener('spa:navigateType', (e) => {
-        if (e.detail.name === 'contacts') {
+        if (e.detail.menuItemType === 'contacts') {
             deselectMenuItems();
             document.querySelector('#c-sidebar-block .menu li[data-id="contacts"]').classList.add('selected');
-        } else if (e.detail.name === 'deals') {
+        } else if (e.detail.menuItemType === 'deals') {
             if (e.detail.query.all_funnels) {
                 deselectMenuItems();
                 document.querySelector('#c-sidebar-block ul li[data-id="all_funnels"]').classList.add('selected');

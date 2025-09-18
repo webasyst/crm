@@ -8,7 +8,34 @@
     <div class="c-forms-body fields">
 
         <div class="crm-forms-sidebar fields-group custom-px-16">
+
             {if $forms}
+                <div class="skeleton js-lead-forms-skeleton" style="display: none;" >
+                    <div class="skeleton-header"></div>
+
+                    <div class="flexbox full-width">
+                        {for $i=1 to 3}
+                            <div class="flexbox middle">
+                                <span class="skeleton-list custom-my-0"></span>
+                                <span class="skeleton-line custom-my-0" style="width: 150px; margin-bottom: 8px;"></span>
+                            </div>
+                        {/for}
+                    </div>
+
+                    <div class="fields custom-mt-48">
+                        {for $i=1 to 5}
+                            <div class="field">
+                                <div class="name">
+                                    <span class="skeleton-line"></span>
+                                </div>
+                                <div class="value">
+                                    <span class="skeleton-custom-box" style="width: 450px; height: 40px;"></span>
+                                </div>
+                            </div>
+                        {/for}
+                    </div>
+                </div>
+
                 <ul class="menu c-form-list">
                     {foreach $forms as $_form}
                         <li data-id="{$_form.id}" class="c-form-item">

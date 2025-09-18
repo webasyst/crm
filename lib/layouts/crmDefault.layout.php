@@ -181,7 +181,17 @@ class crmDefaultLayout extends waLayout
     protected function getAccessRights()
     {
         $user = wa()->getUser();
+        $crm_rights = $user->getRights('crm');
+        $deal_access = false;
+        if ($crm_rights) {
+            foreach ($crm_rights as $name => $value) {
+                if (($name == 'backend' && $value >= 2) || stripos($name, 'funnel') !== false) {
+                    $deal_access = true;
+                }
+            }
+        }
         return [
+            'deal'     => $deal_access,
             'call'     => !($user->getRights('crm', 'calls') === crmRightConfig::RIGHT_CALL_NONE),
             'invoice'  => !!$user->getRights('crm', 'manage_invoices'),
             'export'   => !!$user->getRights('crm', 'export'),

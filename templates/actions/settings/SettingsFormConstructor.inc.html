@@ -94,7 +94,7 @@
 
     <div class="crm-form-header">
         <div class="flexbox middle">
-            <a href="{$_back_uri}" class="icon size-32 back js-back-button cursor-pointer custom-mr-8"><i class="icon fas fa-arrow-left"></i></a>
+            <a href="{$_back_uri}" class="icon size-32 back js-back-button cursor-pointer custom-mr-8"><i class="icon fas fa-arrow-circle-left"></i></a>
             <input type="text" name="form[name]" value="{if $form.id > 0}{$form.name|escape}{else}[`New form`]{/if}" placeholder="[`Form name`]" class="crm-name-input">
         </div>
 
@@ -122,12 +122,40 @@
                             [`Embed manually`]
                         </label>
                     </div>
-                    {if $form.id > 0}
-                    <div class="align-right">
-                        <span class="hint">[`Form standalone URL:`]</span><br>
-                        <a target="_blank" class="nowrap small semibold" href="{$frontend_form_url}">{$frontend_form_url}</a>
+
+                    <div style="max-width: 250px;">
+                        {if $form.id > 0}
+                            <div class="dropdown" id="dropdown-frontend-link">
+                                <a class="dropdown-toggle semibold nowrap" href="javscript:void(0)">
+                                    <i class="fas fa-link fa-sm"></i>
+                                    [`Link`]
+                                </a>
+                                <div class="dropdown-body right">
+                                    <div class="box custom-pb-12">
+                                        <a href="{$frontend_form_url}" class="c-frontend-link js-frontend-link bold small" target="_blank">
+                                            {$frontend_form_url} <i class="fas fa-external-link-alt fa-xs custom-ml-2 opacity-70"></i>
+                                        </a>
+                                        <button class="button smaller outlined align-center width-100 custom-mt-16 js-copy-frontend-link"
+                                            type="button"
+                                            data-class-success="green"
+                                            data-icon-default="fa-copy"
+                                            data-icon-success="fa-check"
+                                            data-text-default="[`Copy link`]"
+                                            data-text-success="[`Copied`]"
+                                            style="justify-content: center;">
+                                            <span class="icon js-icon"><i class="fas fa-copy"></i></span>
+                                            <span class="js-text">[`Copy link`]</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {else}
+                            <div class="align-right">
+                                <div class="hint">[`Form’s standalone URL:`]</div>
+                                <span class="small">[`Will be available after saving`]</span>
+                            </div>
+                        {/if}
                     </div>
-                    {/if}
                 </div>
                 <div class="crm-form-section-content">
                     <div class="js-widget-manual-code"{if !empty($form.params.widget_container)} style="display: none;"{/if}>
@@ -197,17 +225,37 @@
                                         {/foreach}
                                     {/strip}
                                     </ul>
-                                    <div class="c-toggle-wrapper js-toggle-wrapper is-hidden">
+                                    <div class="c-toggle-wrapper flexbox middle js-toggle-wrapper is-hidden">
                                         <input class="c-field js-color-field" type="text" name="form[params][widget_display_fab_color]" value="{$_toggle_color}" placeholder="#cc528f">
                                         <div class="c-toggle-block">
-                                            <span class="c-color-item color c-toggle js-toggle" style="background: {$_toggle_color};"></span>
+                                            <span class="c-color-item color c-toggle js-toggle" style="background: {$_toggle_color};">
+                                                <i class="fas fa-eye-dropper text-white smaller"></i>
+                                            </span>
                                             <div class="c-color-picker js-color-picker"></div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="hint">[`Button text (HTML is allowed)`]</div>
+                                <div class="hint">[`Button text`]</div>
                                 <input type="text" name="form[params][widget_display_fab_text]" value="{$form.params.widget_display_fab_text|default:''|escape}" placeholder="[`Subscribe`]">
+
+                                <div class="hint custom-mb-0 custom-mt-16">
+                                    [`Button icon`]
+                                </div>
+                                <section class="c-icon-section js-icon-section">
+                                    {$_selected_icon = $form.params.widget_display_fab_icon|default:''}
+                                    <ul class="c-icon-list">
+                                        {foreach $widget_icons as $_icon}
+                                            <li class="c-icon-item js-icon-item {if $_icon == $_selected_icon}selected{/if}" data-icon="{$_icon}">
+                                                <i class="{$_icon}"></i>
+                                            </li>
+                                        {/foreach}
+                                        <li class="c-icon-item js-icon-item {if empty($_selected_icon)}selected{/if}" data-icon="" title="[`No icon`]">
+                                            [`no`]
+                                        </li>
+                                    </ul>
+                                    <input name="form[params][widget_display_fab_icon]" class="js-icon-field" type="hidden" value="{$_selected_icon}">
+                                </section>
                             </div>
                         </div>
                         <div class="field">
@@ -268,8 +316,8 @@
                         {if !empty($domains)}
                             <table class="borderless">
                             {foreach $domains as $domain}
-                                <tr>
-                                    <td>
+                                <tr data-domain="{$domain}">
+                                    <td valign="top">
                                         <label class="flexbox space-8">
                                             <span class="wa-checkbox custom-mt-4">
                                                 <input type="checkbox" class="js-widget-domain" value="{$domain}"{if !empty($form.params.widget_domains) && in_array($domain, $form.params.widget_domains)} checked{/if}>
@@ -278,8 +326,29 @@
                                             <span>{waIdna::dec($domain)}</span>
                                         </label>
                                     </td>
-                                    <td class="min-width">
-                                        <input type="text" class="js-widget-path" data-domain="{$domain}" value="{$form.params.widget_path[$domain]|default:''}" placeholder="/">
+                                    <td class="js-widget-paths flexbox vertical space-8">
+                                        {$_paths = []}
+                                        {if !empty($form.params.widget_path[$domain])}
+                                            {$_paths = $form.params.widget_path[$domain]}
+                                            {if is_scalar($_paths)}
+                                                {$_paths = [$_paths]}
+                                            {/if}
+                                        {/if}
+                                        {foreach $_paths as $_idx => $_path}
+                                        <div class="flexbox middle space-0 js-widget-path-wrapper">
+                                            <input type="text" class="js-widget-path" data-domain="{$domain}" value="{$_path}" placeholder="/*">
+                                            {if $_idx > 0}
+                                                <button class="js-widget-del-path circle light-gray smallest"><i class="fas fa-times"></i></button>
+                                            {else}
+                                                <button class="js-widget-add-path circle nobutton smallest"><i class="fas fa-plus"></i></button>
+                                            {/if}
+                                        </div>
+                                        {foreachelse}
+                                        <div class="flexbox middle space-0 js-widget-path-wrapper">
+                                            <input type="text" class="js-widget-path" data-domain="{$domain}" value="" placeholder="/*">
+                                            <button class="js-widget-add-path circle nobutton smallest"><i class="fas fa-plus"></i></button>
+                                        </div>
+                                        {/foreach}
                                     </td>
                                 </tr>
                             {/foreach}
@@ -291,11 +360,11 @@
                                 <h5 class="heading">[`Powered by Webasyst CRM`]</h5>
                             </div>
                             <div class="field">
-                                <p>{sprintf_wp(
+                                <p class="small"><i class="fas fa-star text-yellow"></i> {sprintf_wp(
                                     'To hide the link to Webasyst CRM, <a %s>buy premium ›</a>',
                                     sprintf(
-                                        'href="https://www.%s/store/app/crm/premium/" target="_blank"',
-                                        _w('webasyst.com')
+                                        'href="%scrm/upgrade/"',
+                                        $wa_backend_url
                                     )
                                 )}</p>
                             </div>
@@ -663,35 +732,35 @@
             </div>
         </div>
 
-        <div class="c-settings-footer bottombar sticky">
-            <div class="c-footer-actions flexbox middle full-width">
-                <div>
-                    {$wa->csrf()}
-                    <input type="submit" class="button" value="[`Save`]">
-                    <a class="button light-gray js-c-cancel-link" href="javascript:void(0);">[`Cancel`]</a>
-                    <span class="crm-loading" style="display: none;">
+    </div>
+    <div class="c-settings-footer bottombar sticky">
+        <div class="c-footer-actions flexbox middle full-width">
+            <div>
+                {$wa->csrf()}
+                <input type="submit" class="button" value="[`Save`]">
+                <a class="button light-gray js-c-cancel-link" href="javascript:void(0);">[`Cancel`]</a>
+                <span class="crm-loading" style="display: none;">
                     <i class="fas fa-spinner fa-spin loading"></i>
                     </span>
-                    <span class="crm-success-status" style="display: none;">
+                <span class="crm-success-status" style="display: none;">
                         [`Saved`] <i class="fas fa-check-circle yes"></i>
                     </span>
-                </div>
-                {if $form.id > 0}
-                    <div>
-                        <div class="crm-delete-link-wrapper">
-                            <a href="javascript:void(0);" class="button light-gray smaller crm-delete-form-link desktop-only">
-                                <i class="fas fa-trash-alt delete custom-mr-4"></i> [`Delete this form`]
-                            </a>
-                            <a href="javascript:void(0);" class="button light-gray circle crm-delete-form-link mobile-only" title="[`Delete this form`]">
-                                <i class="fas fa-trash-alt delete"></i>
-                            </a>
-                            <a href="javascript:void(0);" class="button light-gray circle crm-delete-form-link tablet-only" title="[`Delete this form`]">
-                                <i class="fas fa-trash-alt delete"></i>
-                            </a>
-                        </div>
-                    </div>
-                {/if}
             </div>
+            {if $form.id > 0}
+                <div>
+                    <div class="crm-delete-link-wrapper">
+                        <a href="javascript:void(0);" class="button light-gray smaller crm-delete-form-link desktop-only">
+                            <i class="fas fa-trash-alt delete custom-mr-4"></i> [`Delete this form`]
+                        </a>
+                        <a href="javascript:void(0);" class="button light-gray circle crm-delete-form-link mobile-only" title="[`Delete this form`]">
+                            <i class="fas fa-trash-alt delete"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="button light-gray circle crm-delete-form-link tablet-only" title="[`Delete this form`]">
+                            <i class="fas fa-trash-alt delete"></i>
+                        </a>
+                    </div>
+                </div>
+            {/if}
         </div>
     </div>
 </form>

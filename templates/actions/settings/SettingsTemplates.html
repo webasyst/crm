@@ -6,7 +6,26 @@
 
     {* HEADER *}
     <header class="c-templates-section">
-        <h1 class="c-page-header">[`Invoice templates`]</h1>
+        <div class="c-page-header flexbox middle full-width">
+            <h1 class="custom-mb-0">[`Invoice templates`]</h1>
+            <div class="dropdown" id="dropdown-origin-variant">
+                <button class="dropdown-toggle button small rounded light-gray"><i class="fas fa-plus-circle text-green add"></i> [`Add new template`]</button>
+                <div class="dropdown-body">
+                    <ul class="menu">
+                        {foreach $origin_variants as $_origin}
+                            <li><a href="{$wa_app_url}settings/templates/new/?origin_id={$_origin.origin_id}">
+                                    {$_origin.name}
+                                </a></li>
+                        {/foreach}
+                    </ul>
+                </div>
+            </div>
+            <script>
+                ( function($) {
+                    $("#dropdown-origin-variant").waDropdown({});
+                })(jQuery);
+            </script>
+        </div>
 
         {* TEMPLATES *}
         <div class="c-tabs-wrapper flexbox wrap middle full-width" >
@@ -38,26 +57,6 @@
                 <span class="c-action right" title="[`Next`]"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
                 <span class="c-action left" title="[`Before`]"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
             </div>
-            <div class="c-add-wrapper">
-                <div class="dropdown" id="dropdown-origin-variant">
-                    <button class="dropdown-toggle button small rounded light-gray"><i class="fas fa-plus-circle text-green add"></i> [`Add new template`]</button>
-                    <div class="dropdown-body">
-                        <ul class="menu">
-                        {foreach $origin_variants as $_origin}
-                            <li><a href="{$wa_app_url}settings/templates/new/?origin_id={$_origin.origin_id}">
-                                {$_origin.name}
-                            </a></li>
-                        {/foreach}
-                        </ul>
-                    </div>
-                </div>
-                <script>
-                    ( function($) {
-                        $("#dropdown-origin-variant").waDropdown({
-                        });
-                    })(jQuery);
-                </script>
-            </div>
         </div>
     </header>
 
@@ -65,7 +64,7 @@
     <section class="c-template-section" id="c-template-section">
         <form action="" class="width-100 fields vertical js-template-form ">
 
-            <input class="wide large js-template-name custom-mt-20" name="data[name]" type="text" value="{$template.name|default: ''|escape}" placeholder="[`Template name`]" required>
+            <input class="wide large bold js-template-name custom-mt-20" name="data[name]" type="text" value="{$template.name|default: ''|escape}" placeholder="[`Template name`]" required>
 
             <section class="c-params-section fields-group custom-mt-20">
                 <h3 class="heading custom-mt-0">[`Custom variables`]</h3>
@@ -138,11 +137,11 @@
             {if $template.style_version|default:'2' == '2' && !$wa->crm->isPremium()}
                 <section class="c-powered-by-section fields-group">
                     <h3 class="heading custom-mt-0">[`Powered by Webasyst CRM`]</h3>
-                    <p>{sprintf_wp(
+                    <p class="small"><i class="fas fa-star text-yellow"></i> {sprintf_wp(
                         'To hide the link to Webasyst CRM, <a %s>buy premium ›</a>',
                         sprintf(
-                            'href="https://www.%s/store/app/crm/premium/" target="_blank"',
-                            _w('webasyst.com')
+                            'href="%scrm/upgrade/"',
+                            $wa_backend_url
                         )
                     )}</p>
                 </section>
@@ -164,9 +163,6 @@
                         <span class="js-hidden-actions" style="{if !empty($template.id)}display: none;{/if}">
                             <a href="{$wa_app_url}settings/templates/{if !empty($template.id)}{$template.id}/{/if}" class="button light-gray">[`Cancel`]</a>
                         </span>
-                        <a class="button light-gray nowrap js-reset-template {if !$reset_template}hidden{/if}" href="javascript:void(0);">
-                            [`Reset changes`]
-                        </a>
                     </div>
                     <div class="c-column c-footer-link-wrapper middle center">
                         {include file='./SettingsNotificationsHelp.inc.html' inline}
@@ -174,6 +170,9 @@
                         <a class="nowrap js-show-preview" href="javascript:void(0);"><i class="fas fa-external-link-alt new-window"></i> [`Preview`]</a>
                     </div>
                     <div class="c-column middle right">
+                        <a class="button light-gray nowrap js-reset-template {if !$reset_template}hidden{/if}" href="javascript:void(0);" title="[`Reset changes`]">
+                            <i class="fas fa-broom text-red"></i>
+                        </a>
                         {if !empty($template.id) && count($templates) > 1}
                             <a class="button light-gray js-delete-template" href="javascript:void(0);" title="[`Delete`]">
                                 <i class="fas fa-trash-alt delete text-red"></i>

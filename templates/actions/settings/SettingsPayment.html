@@ -7,13 +7,46 @@
 
 <div class="c-payments-page s-settings-form" id="c-payments-page">
     <header class="c-companies-header">
-        <h1 class="c-page-header">[`Payment`]</h1>
+        <div class="c-page-header flexbox middle full-width">
+            <h1 class="custom-mb-0">[`Payment`]</h1>
+            {if $company}
+            <div class="dropdown">
+                <button class="dropdown-toggle button small rounded light-gray js-action" type="button"><i class="fas fa-plus-circle add text-green"></i> [`Add payment option`]</button>
+                <div class="dropdown-body">
+                    <ul class="menu js-plugins-dropdown">
+                        {foreach $plugins as $_id => $plugin}
+                            {$_is_installed = in_array($_id, $_installed_plugins)}
 
+                            <li style="{if $_is_installed}display: none;{/if}" data-plugin="{$_id}">
+                                <a class="js-add-payment" href="{$wa_app_url}settings/payment/add/{$company.id}/{$_id}/">
+                                    {if empty($plugin.icon.16)}
+                                    <i class="fas fa-money-check-alt icon" style="font-size: 1rem"></i>
+                                    {else}
+                                    <span class="icon middle size-16"><img src="{$plugin.icon.16}" alt=""></span>
+                                    {/if}
+                                    {$plugin.name|escape}
+                                </a>
+                            </li>
+                        {/foreach}
+
+                        {if !empty($installer)}
+                            <li class="bordered-top">
+                                <a href="{$wa_backend_url}installer/#/plugins/wa-plugins/payment/"
+                                    style="text-align: center;" id="c-browse-plugins">[`Browse payment plugins...`]</a>
+                                <br>
+                                <div class="hint align-center custom-m-8">[`Multiple instances of every payment option with custom settings can be created.`]</div>
+                            </li>
+                        {/if}
+                    </ul>
+                </div>
+            </div>
+            {/if}
+        </div>
     {strip}
 
         <div class="c-tabs-wrapper flexbox wrap middle full-width">
-            <div class="c-companies-wrapper tabs-with-arrows-side-wrapper">
-                <ul class="tabs c-companies-list">
+            <div class="c-companies-wrapper tabs-with-arrows-side-wrapper wide">
+                <ul class="tabs bordered-bottom wide c-companies-list">
                     {foreach $companies as $_company}
                         {$_is_selected = ($company.id == $_company.id)}
                         <li class="c-company {if $_is_selected}selected{/if}">
@@ -26,54 +59,12 @@
                 <span class="c-action right" title="[`Next`]"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
                 <span class="c-action left" title="[`Before`]"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
             </div>
-
-            <div class="c-add-wrapper">
-                <a class="button small rounded light-gray" href="{$wa_app_url}settings/companies/new/"><i class="fas fa-plus-circle text-green add"></i> [`Add new company`]</a>
-            </div>
         </div>
     </header>
     {/strip}
 
     {if $company}
-        <section class="fields c-payment-section block">
-
-            {* HEADER *}
-            <header class="c-payments-header c-layout">
-                <div class="c-column middle">
-                </div>
-                <div class="c-column right custom-pt-16 custom-pb-4">
-                    <div class="dropdown">
-                        <button class="dropdown-toggle button yellow rounded js-action" type="button"><i class="fas fa-plus-circle add"></i> [`Add payment option`]</button>
-                        <div class="dropdown-body">
-                            <ul class="menu js-plugins-dropdown">
-                                {foreach $plugins as $_id => $plugin}
-                                    {$_is_installed = in_array($_id, $_installed_plugins)}
-
-                                    <li style="{if $_is_installed}display: none;{/if}" data-plugin="{$_id}">
-                                        <a class="js-add-payment" href="{$wa_app_url}settings/payment/add/{$company.id}/{$_id}/">
-                                            {if empty($plugin.icon.16)}
-                                            <i class="fas fa-money-check-alt icon" style="font-size: 1rem"></i>
-                                            {else}
-                                            <span class="icon middle size-16"><img src="{$plugin.icon.16}" alt=""></span>
-                                            {/if}
-                                            {$plugin.name|escape}
-                                        </a>
-                                    </li>
-                                {/foreach}
-
-                                {if !empty($installer)}
-                                    <li class="bordered-top">
-                                        <a href="{$wa_backend_url}installer/#/plugins/wa-plugins/payment/"
-                                           style="text-align: center;" id="c-browse-plugins">[`Browse payment plugins...`]</a>
-                                        <br>
-                                        <div class="hint align-center custom-m-8">[`Multiple instances of every payment option with custom settings can be created.`]</div>
-                                    </li>
-                                {/if}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </header>
+        <section class="fields c-payment-section block custom-mt-32">
 
             {* TABLE *}
             <div class="fields-group c-payments-list">

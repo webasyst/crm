@@ -6,8 +6,8 @@
     <h1>{$_title}</h1>
     <div class="block double-padded crm-field-constructor">
         <div class="block not-padded fieldset crm-main-fields fields">
-            <div class="c-main-fields-label field custom-mt-24">
-                <p>[`Main contact fields cannot be modified or disabled.`]</p>
+            <div class="c-main-fields-label field">
+                <p class="small">[`Main contact fields cannot be modified or disabled.`]</p>
             </div>
             <div class="fields-group custom-mt-16">
                 {foreach $fields.main as $field}
@@ -23,7 +23,7 @@
         </div>
         <div class="block not-padded fieldset no-border crm-other-fields fields">
             <div class="custom-mt-20 flexbox middle full-width">
-                <div class="field custom-mt-0">
+                <div class="heading field custom-mt-12">
                     [`Additional contact and transaction fields`]
                 </div>
                 <div class="nowrap c-new-field">

@@ -1,1 +1,0 @@
-import{_ as a,m as s,o as e,i as o,w as c,Y as r,Z as l}from"./main-2290994d.js";const _={};function i(m,p){const t=s("RouterView");return e(),o(t,null,{default:c(({Component:n})=>[(e(),o(r,{include:"FormDealsContact"},[(e(),o(l(n)))],1024))]),_:1})}const f=a(_,[["render",i]]);export{f as default};

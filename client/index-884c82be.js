@@ -1,0 +1,1 @@
+import{B as s}from"./main-d7f03521.js";const E=`${s.waUrl}wa-apps/shop/img/shop.svg`,t=761,_=1024,o="(max-width: 760px)",p="(max-width: 1280px)",R="(max-width: 1024px)";export{R as Q,t as S,_ as a,p as b,o as c,E as d};

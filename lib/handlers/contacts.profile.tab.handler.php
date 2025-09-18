@@ -39,17 +39,27 @@ class crmContactsProfileTabHandler extends waEventHandler
         $all_contacts = array_keys($employees + array($contact_id => 1));
 
         // Deals
-        $dm = new crmDealModel();
-        $deals_count = $dm->countByParticipants($all_contacts);
-        $result[] = array(
-            'id'    => 'deals',
-            'title' => _w('Deals'),
-            'url'   => $backend_url.'crm/?module=deal&action=listByContact&id='.$contact_id,
-            'count' => $deals_count,
-        );
+        $crm_rights = wa()->getUser()->getRights('crm');
+        $can_manage_deals = false;
+        if ($crm_rights) {
+            foreach ($crm_rights as $name => $value) {
+                if (($name == 'backend' && $value >= 2) || stripos($name, 'funnel') !== false) {
+                    $can_manage_deals = true;
+                }
+            }
+        }
+        if ($can_manage_deals) {
+            $dm = new crmDealModel();
+            $deals_count = $dm->countByParticipants($all_contacts);
+            $result[] = array(
+                'id'    => 'deals',
+                'title' => _w('Deals'),
+                'url'   => $backend_url.'crm/?module=deal&action=listByContact&id='.$contact_id,
+                'count' => $deals_count,
+            );
+        }
 
         // Invoices
-
         $manage_invoices_right = wa()->getUser()->getRights('crm', 'manage_invoices');
         $can_manage_invoices = $manage_invoices_right >= 2 || ($manage_invoices_right == 1 && wa()->getUser()->getId() == $contact_id);
 

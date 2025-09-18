@@ -45,8 +45,13 @@
                         "uri" => "`$wa_app_url`settings/companies/"
                     ],
                     [
+                        "icon" => "fa-inbox",
+                        "name" => "[`Lead forms`]",
+                        "uri" => "`$wa_app_url`settings/form/"
+                    ],
+                    [
                         "icon" => "fa-receipt",
-                        "name" => "[`Invoice templates`]",
+                        "name" => "[`Invoices`]",
                         "uri" => "`$wa_app_url`settings/templates/"
                     ],
                     [
@@ -76,18 +81,13 @@
                     ],
                     [
                         "icon" => "fa-recycle",
-                        "name" => "[`Deal resulting`]",
+                        "name" => "[`Deal results`]",
                         "uri" => "`$wa_app_url`settings/lostReasons/"
                     ],
                     [
                         "icon" => "fa-envelope",
                         "name" => "[`Notifications`]",
                         "uri" => "`$wa_app_url`settings/notifications/"
-                    ],
-                    [
-                        "icon" => "fa-inbox",
-                        "name" => "[`Lead forms`]",
-                        "uri" => "`$wa_app_url`settings/form/"
                     ],
                     [
                         "icon" => "fa-at",
@@ -118,8 +118,9 @@
                 {if $shop_app_exists}
                     {$_menu[] = [
                         "icon" => "fa-shopping-cart",
-                        "name" => "[`Shop-Script integration`]",
-                        "uri" => "`$wa_app_url`settings/shop/"
+                        "name" => "Shop-Script",
+                        "uri" => "`$wa_app_url`settings/shop/",
+                        "premium_enabled" => true
                     ]}
                 {/if}
 
@@ -146,6 +147,9 @@
                                         <i class="fas {$_item.icon}"></i>
                                     {/if}
                                     <span class="c-settings-sidebar-name">{$_item.name}</span>
+                                    {if !empty($_item.premium_enabled) && !$wa->crm->isPremium()}
+                                        <span class="count"><i class="fas fa-star text-light-gray small"></i></span>
+                                    {/if}
                                 </a>
                             </li>
                         {/foreach}

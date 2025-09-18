@@ -654,7 +654,7 @@
                                             <a href="javascript:void(0);" class="dropdown-toggle without-arrow">
                                                 <span class="icon size-14"><i class="fas fa-ellipsis-v"></i></span>
                                             </a>
-                                            <div class="dropdown-body{if $_m.direction === crmMessageModel::DIRECTION_OUT} right{/if}">
+                                            <div class="dropdown-body {if $_m.direction === crmMessageModel::DIRECTION_OUT}right{elseif !empty($_m.extras.images) || !empty($_m.extras.audios) || !empty($_m.extras.videos) || !empty($_m.extras.locations) || !empty($_m.attachments) || !empty($_m.body) || !empty($_m.caption)}shifted{/if}">
                                                 <ul class="menu">
                                                     {if $_m.direction === crmMessageModel::DIRECTION_IN}
                                                         <li>
@@ -812,18 +812,21 @@
                                                 <div class="flexbox js-default-drop-area">
                                                     <div class="c-files-wrapper js-files-wrapper">
                                                         <div class="c-drop-wrapper js-drop-area">
-                                                            <span class="{if empty($conversation.aux_items.reply_form_dropdown_items)}custom-pr-12 {/if}icon size-16 js-message-attachment {if !$is_images_enabled}is-disabled{else}cursor-pointer{/if}">
+                                                            <span class="{if empty($conversation.aux_items.reply_form_dropdown_items)}custom-pr-12 {/if}icon size-20 js-message-attachment {if !$is_images_enabled}is-disabled{else}cursor-pointer{/if}">
                                                                 <i class="fas fa-paperclip"></i>
                                                             </span>
                                                             {*<div class="js-drop-text" data-default="[`Attach file`]" data-hover="[`Drop file here`]">[`Attach file`]</div>*}
                                                             <input class="c-drop-field js-drop-field" type="file" multiple {if !$is_images_enabled && !$is_files_enabled}disabled{/if}>
                                                         </div>
                                                     </div>
+                                                    {if !empty($conversation.aux_items.reply_form_ai_answer)}
+                                                        {$conversation.aux_items.reply_form_ai_answer.button}
+                                                    {/if}
                                                     {if !empty($conversation.aux_items.reply_form_dropdown_items)}
                                                     <div class="c-plugin-dropdown ">
                                                         <div class="dropdown" id="js-message-form-dropdown">
                                                             <a href="javascript:void(0);" class="dropdown-toggle without-arrow flexbox c-name">
-                                                                <span class="icon size-14 text-light-gray"><i class="fas fa-ellipsis-h"></i></span>
+                                                                <span class="icon size-18 custom-mb-6 text-light-gray"><i class="fas fa-ellipsis-h"></i></span>
                                                             </a>
                                                             <div class="dropdown-body right" style="width: auto; min-width: 200px;">
                                                                 <ul class="menu" style="margin: 0;">
@@ -839,9 +842,6 @@
                                                             </script>
                                                         </div>
                                                     </div>
-                                                    {/if}
-                                                    {if !empty($conversation.aux_items.reply_form_ai_answer)}
-                                                        {$conversation.aux_items.reply_form_ai_answer.button}
                                                     {/if}
                                                     <div class="width-100 flexbox middle">
                                                         <textarea class="c-textarea js-textarea" name="body" placeholder="[`Message`]"></textarea>

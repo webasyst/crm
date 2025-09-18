@@ -4,7 +4,10 @@
     <h1 class="c-page-header">[`Tags`]</h1>
 
     <p class="small">
-        [`To add new tags, select one or more contacts or deals and click ‘Create new tag’.`]
+        {sprintf_wp(
+            'To add new tags, select one or more contacts or deals and click ‘%s’.',
+            _w('Add tags')
+        )}
     </p>
 
     <form action="" class="fields">
@@ -49,14 +52,14 @@
                 </td>
                 <td class="valign-top small text-dark-gray custom-pt-8 custom-pl-12 custom-pr-4">
                     {if $_tag.contact_count > 0}
-                        <a href="{$wa_backend_url}crm/contact/tag/{$_tag.id}">{_w('%d contact', '%d contacts', $_tag.contact_count)}</a>
+                        <a href="{$wa_backend_url}crm/contact/tag/{$_tag.id}" class="nowrap">{_w('%d contact', '%d contacts', $_tag.contact_count)}</a>
                     {else}
                         [`No contacts`]
                     {/if}
                 </td>
                 <td class="valign-top small text-dark-gray custom-pt-8 custom-pl-12 custom-pr-4">
                     {if $_tag.deal_count > 0}
-                        <a href="{$wa_backend_url}crm/deal/list?tag={$_tag.id}&all_funnels=1">{_w('%d deal', '%d deals', $_tag.deal_count)}</a>
+                        <a href="{$wa_backend_url}crm/deal/list?tag={$_tag.id}&all_funnels=1" class="nowrap">{_w('%d deal', '%d deals', $_tag.deal_count)}</a>
                     {else}
                         [`No deals`]
                     {/if}

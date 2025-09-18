@@ -12,7 +12,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 2.4.3\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -555,6 +555,9 @@ msgstr "Название сделки"
 
 msgid "Funnel"
 msgstr "Воронка"
+
+msgid "Sales"
+msgstr "Продажи"
 
 msgid "Estimated amount"
 msgstr "Предварительная стоимость"
@@ -2216,7 +2219,7 @@ msgid "Write"
 msgstr "Написать"
 
 msgid "Write email letter"
-msgstr "Написать письмо email"
+msgstr "Написать email-сообщение"
 
 msgid "Write message"
 msgstr "Написать сообщение"
@@ -3485,7 +3488,7 @@ msgid "Button color"
 msgstr "Цвет кнопки оплаты"
 
 msgid "Headers color"
-msgstr "Цвет заголовоков"
+msgstr "Цвет заголовков"
 
 msgid "Background color"
 msgstr "Цвет фона"
@@ -3584,7 +3587,7 @@ msgid "Do not change prices"
 msgstr "Не пересчитывать цены"
 
 msgid "Reset changes"
-msgstr "Отменить изменения"
+msgstr "Сбросить изменения"
 
 msgid "Preview"
 msgstr "Просмотр"
@@ -4357,8 +4360,8 @@ msgstr "См. подробную информацию об ошибке в ло�
 msgid "Check <a href=\"%s\">email sending settings</a>."
 msgstr "Проверьте <a href=\"%s\">настройки отправки email-сообщений</a>."
 
-msgid "Check <a target=\"_top\" href=\"%s\">SMS sending settings</a>."
-msgstr "Проверьте <a target=\"_top\" href=\"%s\">настройки отправки sms-сообщений</a>."
+msgid "Check <a %s>SMS sending settings</a>."
+msgstr "Проверьте <a %s>настройки отправки SMS-сообщений</a>."
 
 msgid "Open in Shop-Script"
 msgstr "Открыть в Shop-Script"
@@ -5269,8 +5272,8 @@ msgstr "Файл <b>%s</b> был удален пользователем <b>%s<
 msgid "Responsible user not found: %s."
 msgstr "Ответственный сотрудник не найден: %s."
 
-msgid "The customer cannot be responsible."
-msgstr "Заказчик не может быть ответственным."
+msgid "The customer cannot be selected as responsible."
+msgstr "Заказчик не может быть выбранным в качестве ответственного."
 
 msgid "delivered"
 msgstr "доставлено"
@@ -5422,11 +5425,11 @@ msgstr "Выберите хотя бы один вариант"
 msgid "Lead forms"
 msgstr "Лид-формы"
 
-msgid "Deal resulting"
+msgid "Deal results"
 msgstr "Результаты сделок"
 
-msgid "Do not show confirm password input"
-msgstr "Не показывать поле подтверждения пароля"
+msgid "Do not show password confirmation input"
+msgstr "Не показывать поле для подтверждения пароля"
 
 msgid "(archived)"
 msgstr "(архив)"
@@ -5530,8 +5533,8 @@ msgstr "Показ и скрытие"
 msgid "Floating button"
 msgstr "Плавающая кнопка"
 
-msgid "Button text (HTML is allowed)"
-msgstr "Надпись на кнопке (разрешён HTML)"
+msgid "Button text"
+msgstr "Надпись на кнопке"
 
 msgid "Subscribe"
 msgstr "Подписаться"
@@ -5681,7 +5684,7 @@ msgid "With premium, you are among the first to have access to all features."
 msgstr "С премиум-лицензией вы становитесь одним тех, кто первыми получат доступ ко всем возможностям."
 
 msgid "Give your team the best tools for working with customers the better way and making more money"
-msgstr "Предоставьте своей команде лучшие инструменты для работы с клиентами, чтобы зарабатывать больше"
+msgstr "Предоставьте команде лучшие инструменты для работы с клиентами, зарабатывайте больше"
 
 msgid "Later"
 msgstr "Позже"
@@ -5723,10 +5726,46 @@ msgid "AI based on the public site content"
 msgstr "ИИ по проиндексированной на сайте информации"
 
 msgid "Webasyst AI prompt complexity is ×2."
-msgstr "Расход баланса Webasyst AI имеет коэффициент ×2, так как каждый запрос проходит два этапа: сначала поиск в Яндексе ответа на поставленный вопрос на страницах сайта, затем формулирование ответа на базе полученного объема информации."
+msgstr "Расход баланса Webasyst AI имеет коэффициент ×2, так как каждый запрос проходит два этапа: сначала поиск в «Яндексе» ответа на поставленный вопрос на страницах вашего сайта, затем формулирование ответа на базе полученного объема информации."
 
 msgid "Which question is to be answered?"
 msgstr "На какой вопрос дать ответ?"
 
-msgid "Write a response"
+msgid "Write a reply"
 msgstr "Написать ответ"
+
+msgid "To add new tags, select one or more contacts or deals and click ‘%s’."
+msgstr "Чтобы создать новый тег, выберите один или несколько контактов или сделок и нажмите «%s»."
+
+msgid "Send inquiry"
+msgstr "Отправить заявку"
+
+msgid "Form’s standalone URL:"
+msgstr "Автономный URL формы:"
+
+msgid "With premium, the ‘Powered by Webasyst CRM’ signature is automatically removed."
+msgstr "В премиум-версии ссылка «Работает на Webasyst CRM» автоматически скрывается."
+
+msgid "With CRM premium, integration with Shop-Script is even better. An order screen will automatically show up a customer widget representing full contact profile with conversations, phone calls, notes, reminders, and all business details."
+msgstr "В премиум-версии CRM интеграция с Shop-Script еще лучше. На экране заказа Shop-Script автоматически появится виджет клиента из CRM с полной информацией о контакте, перепиской, звонками, напоминаниями и всей историей взаимодействия с ним."
+
+msgid "Upgrade now"
+msgstr "Купить премиум"
+
+msgid "Button icon"
+msgstr "Иконка для кнопки"
+
+msgid "No icon"
+msgstr "Без иконки"
+
+msgid "Available with Webasyst CRM premium version only. The upgrade will immediately enable this and all other premium features, and this message will go away."
+msgstr "Доступно только с премиум-версией Webasyst CRM. Ее подключение сделает доступными эту и все остальные премиум-возможности, и это сообщение пропадет."
+
+msgid "What’s there in premium?"
+msgstr "Что есть в премиум?"
+
+msgid "Open customer in CRM app"
+msgstr "Открыть покупателя в приложении CRM"
+
+msgid "no"
+msgstr "нет"

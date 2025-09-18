@@ -25,7 +25,7 @@
                             <div class="flexbox middle">
                                 <div class="c-notification-details">
                                     <a href="{$wa_app_url}settings/notifications/edit/{$_notification.id}/">
-                                        <i class="fas fa-{$_icon}"></i>
+                                        <i class="fas fa-{$_icon} custom-mr-8"></i>
                                         <span class="c-notification-name">{$_notification.name|escape}</span>
                                     </a>
                                     {if !empty($_notification.company) && !empty($_notification.company.name)}
@@ -38,7 +38,6 @@
                                 <span class="flexbox middle space-8 wrap c-disable-link-wrapper">
                                     <span class="icon size-16 loading c-loading" style="display: none"><i class="fas fa-spinner fa-spin"></i></span>
                                     <div class="switch-with-text js-c-disable-link">
-                                        <label for="switch-notification-input" data-active-text="[`enable`]" data-inactive-text="[`disable`]">{if $_notification.status}[`disable`]{else}[`enable`]{/if}</label>
                                         <span class="switch smaller" id="switch-{$_notification.id}">
                                             <input type="checkbox" name="" id="switch-notification-input" {if $_notification.status}checked{/if}>
                                         </span>

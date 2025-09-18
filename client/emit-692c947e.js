@@ -1,1 +1,0 @@
-import{V as e,ad as t,aL as i,bb as a}from"./main-2290994d.js";function s(){e(t).emit()}function o(){e(i).emit()}function m(){e(a).emit()}function E(){window.document.documentElement.dispatchEvent(new Event("spa:showReviewWidget"))}export{E as a,m as b,s as c,o as e};

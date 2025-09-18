@@ -834,6 +834,6 @@ class crmHelper
 
     public static function isPremium()
     {
-        return waLicensing::check('crm')->isPremium();
+        return waLicensing::check('crm')->hasPremiumLicense();
     }
 }

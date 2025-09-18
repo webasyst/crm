@@ -15,10 +15,11 @@
     {if !empty($style_version) && !$wa->crm->isPremium()}
     <script>
         ( function($) {
-            $('.c-front-invoice-block').append('<p class="wa-crm c-color-gray"><img src="{$wa_app_static_url}img/crm-bw.svg" alt=""> {sprintf(
+            $('.c-front-invoice-block').append('<p class="wa-crm c-color-gray">{sprintf(
                 sprintf(
-                    '<a %s>%s</a>',
+                    '<a %s><img src="%s" alt="" style="vertical-align: middle;">%s</a>',
                     'href="%s" target="_blank" rel="noopener"',
+                    $wa_app_static_url|cat:'img/crm-bw.svg',
                     _w('Powered by Webasyst CRM')
                 ),
                 'https://www.webasyst.'|cat:(($wa->locale() == 'ru_RU') ? 'ru' : 'com')|cat:'/store/app/crm/'

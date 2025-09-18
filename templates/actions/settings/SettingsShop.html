@@ -1,6 +1,14 @@
 <div class="c-settings-shop-page" id="js-settings-shop-page">
     <h1 class="c-page-header">[`Shop-Script integration`]</h1>
 
+    {if !$wa->crm->isPremium()}
+        <p class="small">
+            <i class="fas fa-star text-yellow"></i> [`With CRM premium, integration with Shop-Script is even better. An order screen will automatically show up a customer widget representing full contact profile with conversations, phone calls, notes, reminders, and all business details.`]
+            <a class="bold" href="{$wa_backend_url}crm/upgrade/">[`Upgrade now`] &rsaquo;</a>
+        </p>
+        <hr>
+    {/if}
+
     <div class="toggle" id="toggle-menu">
         <a class="selected" href="{$wa_app_url}settings/shop/">[`Automatic deal creation`]</a>
         <a href="{$wa_app_url}settings/shop/workflow/">[`Workflow-Funnel synchronization`]</a>

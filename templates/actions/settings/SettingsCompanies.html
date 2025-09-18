@@ -13,7 +13,10 @@
 
         {* HEADER *}
         <header class="c-companies-header bordered-bottom">
-            <h1 class="c-page-header">[`Companies`]</h1>
+            <div class="c-page-header flexbox middle full-width">
+                <h1 class="custom-mb-0">[`Companies`]</h1>
+                <a class="button small rounded light-gray" href="{$wa_app_url}settings/companies/new/"><i class="fas fa-plus-circle text-green"></i> [`Add new company`]</a>
+            </div>
             <div class="c-tabs-wrapper flexbox middle full-width">
                 <div class="c-companies-wrapper tabs-with-arrows-side-wrapper">
                     <ul class="tabs c-companies-list">
@@ -29,15 +32,11 @@
                     <span class="c-action right" title="[`Next`]"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
                     <span class="c-action left" title="[`Before`]"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
                 </div>
-                <div class="c-add-wrapper">
-
-                    <a class="button small rounded light-gray" href="{$wa_app_url}settings/companies/new/"><i class="fas fa-plus-circle text-green"></i> [`Add new company`]</a>
-                </div>
             </div>
         </header>
         <section class="c-companies-section" id="c-companies-section">
             <form class="js-form fields">
-                <input class="large custom-mt-20 width-100" type="text" name="company[name]" value="{$company.name|default: ''|escape}" placeholder="[`Company name`]" required>
+                <input class="larger bold custom-mt-20 width-100" type="text" name="company[name]" value="{$company.name|default: ''|escape}" placeholder="[`Company name`]" required>
 
                 <div class="c-company-section fields-group custom-mt-20">
                     <div class="field">
@@ -140,7 +139,7 @@
                     <div class="c-templates-section">
                         <div class="flexbox full-width">
                             <div class="c-column">
-                                <h3 class="heading custom-mt-0">[`Invoice template`]</h3>
+                                <h3 class="heading custom-mt-8">[`Invoice template`]</h3>
                             </div>
                             <div class="c-column middle right">
                                 <a class="button small rounded light-gray" href="{$wa_app_url}settings/templates/"><i class="fas fa-cog text-blue"></i> [`Template settings`]</a>

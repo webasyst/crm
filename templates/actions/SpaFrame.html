@@ -21,6 +21,7 @@ if (window.parent.appState) {
         can_init_call: {$can_init_call},
         is_sms_configured: {$is_sms_configured},
         is_email_configured: {$is_email_configured},
+        is_premium: {$wa->crm->isPremium()|json_encode},
         rights: {$access_rights},
         user: {
             id: {$wa->user()->getID()},
@@ -45,7 +46,7 @@ if (window.parent.appState) {
             },
         }));
     }, false);
-    
+
     window.parent.document.documentElement.addEventListener('wa-theme-change', (event) => {
         document.documentElement.setAttribute('data-theme', event.target.getAttribute('data-theme'));
     })

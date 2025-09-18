@@ -17,7 +17,7 @@ class crmWaFrontendHeadHandler extends waEventHandler
 
         $widget_forms = $form_params_model->getByField([
             'form_id' => $widget_form_ids,
-            'name' => ['widget_container', 'widget_display_fab', 'widget_display_fab_color', 'widget_display_fab_text', 'widget_display_custom', 'widget_display_custom_selector', 'widget_display_on_timeout', 'widget_display_timeout', 'widget_display_on_scroll', 'widget_display_scroll', 'widget_domains', 'widget_path', 'widget_header', 'widget_show_after_timeout', 'widget_theme', 'max_width'],
+            'name' => ['widget_container', 'widget_display_fab', 'widget_display_fab_color', 'widget_display_fab_text', 'widget_display_fab_icon', 'widget_display_custom', 'widget_display_custom_selector', 'widget_display_on_timeout', 'widget_display_timeout', 'widget_display_on_scroll', 'widget_display_scroll', 'widget_domains', 'widget_path', 'widget_header', 'widget_show_after_timeout', 'widget_theme', 'max_width'],
         ], true);
 
         $widget_forms = array_map(function ($item) {
@@ -36,29 +36,45 @@ class crmWaFrontendHeadHandler extends waEventHandler
             return $result;
         }, []);
         $uri = waRequest::server('REQUEST_URI');
+        
         $widget_forms = array_filter($widget_forms, function ($item) use ($domain, $uri) {
-            $path = ifset($item, 'widget_path', $domain, '');
-            return in_array($domain, $item['widget_domains']) && (empty($path) || strpos($uri, $path) === 0);
+            if (!in_array($domain, $item['widget_domains'])) {
+                return false;
+            }
+            $paths = ifset($item, 'widget_path', $domain, '');
+            if (empty($paths)) {
+                return true;
+            }
+            if (is_scalar($paths)) {
+                $paths = [$paths];
+            }
+            $paths = array_filter($paths, function ($path) use ($uri) {
+                return empty($path) || $uri === $path || (strpos(strrev($path), '*') === 0 && strpos($uri, substr($path, 0, -1)) === 0);
+            });
+            return !empty($paths);
         });
+        
         if (empty($widget_forms)) {
             return;
         }
 
         $app_static_url = wa()->getAppStaticUrl('crm');
         $result = '';
+        $head_addon = '';
         foreach ($widget_forms as $id => $widget_form) {
             $iframe_url = wa()->getRouteUrl('crm/frontend/formIframe', ['id' => $id], true, $domain) ?: wa()->getRouteUrl('crm/frontend/formIframe', ['id' => $id], true);
             $header = json_encode(ifset($widget_form['widget_header'], ''));
             $max_width = ifempty($widget_form['max_width'], 400) + 80;
             $display_container = json_encode(ifempty($widget_form['widget_container'], 'dialog'));
             $display_fab = ifset($widget_form['widget_display_fab'], false);
-            $display_fab_text = ifempty($widget_form['widget_display_fab_text'], _ws('Subscribe'));
+            $display_fab_icon = ifempty($widget_form['widget_display_fab_icon'], '');
+            $display_fab_text = ifempty($widget_form['widget_display_fab_text'], empty($display_fab_icon) ? _ws('Subscribe') : '');
             $display_fab_color = ifempty($widget_form['widget_display_fab_color'], '#cc528f');
             $display_custom = ifset($widget_form['widget_display_custom'], false);
             $display_custom_selector = ifempty($widget_form['widget_display_custom_selector'], null);
             $display_on_timeout = ifset($widget_form['widget_display_on_timeout'], false);
             $display_on_scroll = ifset($widget_form['widget_display_on_scroll'], false);
-            $display_conditions = $display_fab ? ', display_conditions: "fab", display_fab_text: ' . json_encode($display_fab_text) . ', display_fab_color: ' . json_encode($display_fab_color) : '';
+            $display_conditions = $display_fab ? ', display_conditions: "fab", display_fab_text: ' . json_encode($display_fab_text) . ', display_fab_icon: ' . json_encode($display_fab_icon) . ', display_fab_color: ' . json_encode($display_fab_color) : '';
             $custom_element = $display_custom && !empty($display_custom_selector) ? ', custom_element: ' . json_encode($display_custom_selector) : '';
             $display_timeout = $display_on_timeout ? ', display_timeout: ' . ifset($widget_form['widget_display_timeout'], 1) * 1000 : '';
             $display_scroll = $display_on_scroll ? ', display_scroll: ' . ifset($widget_form['widget_display_scroll'], 10) : '';
@@ -69,29 +85,29 @@ class crmWaFrontendHeadHandler extends waEventHandler
             $theme = empty($widget_form['widget_theme']) ? '' : ', theme: ' . json_encode($widget_form['widget_theme']);
             $powered_by = crmHelper::isPremium() ? ', no_brending: true' : '';
 
-            $head_addon = '';
             if (!empty($iframe_url) && ($display_fab || !empty($custom_element) || $display_on_timeout || $display_on_scroll)) {
                 $iframe_url = json_encode($iframe_url);
                 $locale = wa()->getLocale() == 'ru_RU' ? 'ru' : 'en';
-                $head_addon = <<<EOT
-window.CRMWidgetConfig = {
+                $head_addon .= <<<EOT
+createCRMWidget({
     locale: '$locale',
     iframe_url: $iframe_url,
     header: $header,
     max_width: $max_width,
     show_after_timeout: $show_after_timeout,
     display_container: $display_container $display_conditions $custom_element $display_timeout $display_scroll $theme $powered_by
-};
+});
+
 EOT;
             }
         }
 
         if ($head_addon) {
-            $result .= <<<EOT
+            $result = <<<EOT
+<script src="{$app_static_url}js/form/widget.min.js"></script>
 <script>
 $head_addon
 </script>
-<script src="{$app_static_url}js/form/widget.js" async></script></script>
 EOT;
         }
         return $result;

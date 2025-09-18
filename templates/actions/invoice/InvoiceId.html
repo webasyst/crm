@@ -16,6 +16,11 @@
         .iframe-style .fields-group.blank {
             background: var(--background-color) !important;
         }
+        @media screen and (max-width: 760px) {
+            .dialog .dialog-body .dialog-footer {
+                margin-top: unset !important;
+            }
+        }
     </style>
     <link href="{$wa_app_static_url}css/crm.css?v={$wa->version()}" rel="stylesheet">
 

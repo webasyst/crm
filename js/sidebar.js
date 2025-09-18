@@ -22,6 +22,7 @@ var CRMSidebar = (function ($) {
         that.$activeMenuItem = ( that.$wrapper.find("li." + that.selected_class + ":first") || false );
         that.xhr = false;
         that.timer = 0;
+        that.bricks_expander_is_hide = false;
         //that.body_visible = false;
         // that.link_count_update_date = false;
         // that.counters = {};
@@ -40,6 +41,7 @@ var CRMSidebar = (function ($) {
         that.initMobileToggle();
         that.initTooltips();
         that.initRailToggle();
+        that.initExpandBricks();
 
         if (!that.$activeMenuItem.length) {
             that.selectLink();
@@ -234,6 +236,7 @@ var CRMSidebar = (function ($) {
             that.updateBody(html);
             that.initUpdater();
             that.initTooltips();
+            that.toggleBricksExpander();
         });
     };
 
@@ -284,7 +287,7 @@ var CRMSidebar = (function ($) {
     CRMSidebar.prototype.initRailToggle = function () {
         const that = this;
         const $toggle = that.$wrapper.find('.js-toggle-sidebar');
-        
+
         // сохраняем начальное состояние
         that._user_menu_state = that.menu_state;
 
@@ -338,6 +341,7 @@ var CRMSidebar = (function ($) {
                 $toggle.removeClass('hidden');
                 applyState(that._user_menu_state); // возвращаем исходное состояние
             }
+            that.toggleBricksExpander();
         };
 
         // Первичная инициализация
@@ -365,7 +369,51 @@ var CRMSidebar = (function ($) {
 
             return deferred.promise();
         }
-    }
+    };
+
+    CRMSidebar.prototype.initExpandBricks = function() {
+        const that = this;
+
+        that.toggleBricksExpander();
+
+        that.$wrapper.on('click', '.js-expand-bricks', function() {
+            that.$body.removeClass('bricks-peek');
+            $(this).parent().remove();
+            that.bricks_expander_is_hide = true;
+        });
+    };
+
+    CRMSidebar.prototype.toggleBricksExpander = function() {
+        const that = this;
+        if (that.bricks_expander_is_hide) {
+            return;
+        }
+        const $bricks = that.$body.find('#c-sidebar-bricks');
+        const brick_count = $bricks.children().length;
+        if (!brick_count) {
+            return;
+        }
+
+        const brick_height = 72; // px
+        const bricks_expander_height = 26; // px
+        const offset_height = -10; // px
+        const min_bricks_desktop = 2;
+        const min_bricks_mobile = 5;
+
+        const max_height = that.$wrapper.height();
+        const sections_height = that.$body.find('.c-sidebar-sections').height();
+        const footer_height = that.$footer.height();
+
+        let brick_peek_count = Math.max(
+            Math.floor((max_height - footer_height - sections_height - bricks_expander_height - offset_height) / brick_height),
+            min_bricks_desktop
+        );
+        if (window.matchMedia('(max-width: 760px)').matches) {
+            brick_peek_count = min_bricks_mobile;
+        }
+        that.$body.css('--max-height-bricks', brick_height * brick_peek_count + 'px');
+        that.$body.toggleClass('bricks-peek', brick_count > brick_peek_count);
+    };
 
     return CRMSidebar;
 
