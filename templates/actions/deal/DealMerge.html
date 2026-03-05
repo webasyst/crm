@@ -72,7 +72,7 @@
                             </div>
                             <div class="c-column middle">
                                 <div class="line break-words">
-                                    <a href="{$wa_app_url}deal/{$_deal.id}/" class="bold no-underline">{$_deal.name|escape}</a>
+                                    <span class="bold">{$_deal.name|escape}</span>
                                     <span class="c-active-text semibold lowercase">—&nbsp;[`Selected as the main deal`]</span>
                                 </div>
                                 <div class="line flexbox middle space-4 wrap">
@@ -111,10 +111,10 @@
                                                     <ul class="list compact">
                                                         <li style="line-height: 16px;">
                                                             {* name *}
-                                                            <a class="c-name" href="{$wa_app_url}contact/{$_contact.id}/" style="display: inline; padding: 0; margin: 0;">
+                                                            <span class="c-name" style="display: inline; padding: 0; margin: 0;">
                                                                 {$wa->crm->contactName($_contact.name)}
                                                                 {if $_contact.id == $wa->userId()}([`me`]){/if}
-                                                            </a>
+                                                            </span>
 
                                                             {* role *}
                                                             {if !empty($_contact.label)}<span class="c-role-tag">{$_contact.label|escape}</span>{/if}

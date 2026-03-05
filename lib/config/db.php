@@ -259,6 +259,7 @@ return array(
         'discount_amount' => array('decimal', "15,4", 'null' => 0, 'default' => '0.0000'),
         'summary' => array('varchar', 255),
         'comment' => array('text'),
+        'recurrent_id' => array('int', 11),
         'state_id' => array('enum', "'PENDING','PAID','REFUNDED','ARCHIVED','DRAFT','PROCESSING'", 'null' => 0, 'default' => 'DRAFT'),
         'payment_datetime' => array('datetime'),
         'deal_id' => array('int', 11),
@@ -268,6 +269,7 @@ return array(
             'contact_id' => 'contact_id',
             'state_id' => 'state_id',
             'deal_id' => 'deal_id',
+            'recurrent_id' => 'recurrent_id',
         ),
     ),
     'crm_invoice_items' => array(
@@ -292,6 +294,24 @@ return array(
             'PRIMARY' => array('invoice_id', 'name'),
         ),
     ),
+    'crm_invoice_recurrent' => [
+        'id' => array('int', 11, 'null' => 0, 'autoincrement' => 1),
+        'origin_invoice_id' => array('int', 11, 'null' => 0),
+        'create_datetime' => array('datetime', 'null' => 0),
+        'number_template' => array('varchar', 32),
+        'interval_unit' => array('enum', "'DAY','WEEK','MONTH','YEAR'", 'null' => 0),
+        'interval_value' => array('int', 11, 'null' => 0),
+        'counter' => array('int', 11, 'null' => 0, 'default' => '0'),
+        'stop_on_non_payment' => array('int', 11, 'null' => 0),
+        'non_paid_count' => array('int', 11, 'null' => 0, 'default' => '0'),
+        'last_invoice_id' => array('int', 11, 'null' => 1),
+        'last_datetime' => array('datetime', 'null' => 1),
+        'next_date' => array('date', 'null' => 0),
+        'end_datetime' => array('datetime', 'null' => 1),
+        ':keys' => array(
+            'PRIMARY' => 'id',
+        ),
+    ],
     'crm_log' => array(
         'id' => array('int', 11, 'null' => 0, 'autoincrement' => 1),
         'create_datetime' => array('datetime', 'null' => 0),
@@ -390,7 +410,7 @@ return array(
         'id' => array('int', 11, 'null' => 0, 'autoincrement' => 1),
         'event' => array('varchar', 64, 'null' => 0),
         'name' => array('varchar', 255, 'null' => 0),
-        'transport' => array('enum', "'email','sms'", 'null' => 0),
+        'transport' => array('enum', "'email','sms','http','reminder'", 'null' => 0, 'default' => 'email'),
         'status' => array('tinyint', 1, 'null' => 0),
         'subject' => array('varchar', 255),
         'body' => array('text'),
@@ -400,6 +420,14 @@ return array(
         ':keys' => array(
             'PRIMARY' => 'id',
             'event' => 'event',
+        ),
+    ),
+    'crm_notification_params' => array(
+        'notification_id' => array('int', 11, 'null' => 0),
+        'name' => array('varchar', 64, 'null' => 0),
+        'value' => array('text', 'null' => 0),
+        ':keys' => array(
+            'PRIMARY' => array('notification_id', 'name'),
         ),
     ),
     'crm_payment' => array(
@@ -468,6 +496,7 @@ return array(
         'due_datetime' => array('datetime'),
         'complete_datetime' => array('datetime'),
         'content' => array('text'),
+        'report' => array('text'),
         'type' => array('enum', "'MEETING','CALL','MESSAGE','OTHER'", 'null' => 0, 'default' => 'OTHER'),
         'push_sent' => array('tinyint', 1, 'null' => 0, 'default' => '0'),
         ':keys' => array(

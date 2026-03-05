@@ -132,10 +132,17 @@ class crmFormConstructor
         
         $form = $this->getForm();
 
-        $field_ids = array_column($form->getFields(), 'id');
+        $field_checks = array_reduce(
+            $form->getFields(),
+            function ($result, $field) {
+                $result[$field['id']] = ifset($result, $field['id'], 0) + 1;
+                return $result;
+            }, 
+            []
+        );
 
-        $available_fields = array_map(function ($field) use ($field_ids) {
-            $field['checked'] = in_array($field['id'], $field_ids) ? 1 : 0;
+        $available_fields = array_map(function ($field) use ($field_checks) {
+            $field['checked'] = isset($field_checks[$field['id']]) ? $field_checks[$field['id']] + 1 : 0;
             return $field;
         }, $available_fields);
 

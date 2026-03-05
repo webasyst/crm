@@ -8,6 +8,9 @@ class crmReminderDoneMethod extends crmApiAbstractMethod
     {
         $_json = $this->readBodyAsJson();
         $reminder_id = (int) ifempty($_json, 'id', 0);
+        $report = (string) ifempty($_json, 'report', '');
+        $report = trim($report);
+        $report = ifempty($report, null);
         if ($reminder_id === 0) {
             throw new waAPIException('required_param', sprintf_wp('Missing required parameter: “%s”.', 'id'), 400);
         } else if ($reminder_id < 1) {
@@ -19,13 +22,16 @@ class crmReminderDoneMethod extends crmApiAbstractMethod
             throw new waAPIException('not_found', _w('Reminder not found.'), 404);
         } else if (!$this->getCrmRights()->reminderEditable($reminder)) {
             throw new waAPIException('forbidden', _w('Access denied'), 403);
-        } else if ($reminder['complete_datetime']) {
+        } else if ($reminder['complete_datetime'] && empty($report)) {
             $this->http_status_code = 204;
             $this->response = null;
             return;
         }
 
-        $this->getReminderModel()->updateById($reminder_id, ['complete_datetime' => date('Y-m-d H:i:s')]);
+        $this->getReminderModel()->updateById($reminder_id, [
+            'complete_datetime' => date('Y-m-d H:i:s'),
+            'report' => $report,
+        ]);
 
         if (
             $reminder['user_contact_id'] != wa()->getUser()->getId()

@@ -27,7 +27,8 @@ class crmDealParticipantAddMethod extends crmApiAbstractMethod
             throw new waAPIException('invalid_param', sprintf_wp('Invalid “%s” value.', 'role_id'), 400);
         }
         if ($role === crmDealParticipantsModel::ROLE_CLIENT && $is_responsible) {
-            throw new waAPIException('not_available', _w('The customer cannot be selected as responsible.'), 400);
+            //throw new waAPIException('not_available', _w('The customer cannot be selected as responsible.'), 400);
+            $is_responsible = false; // just ignore it in case of client role
         }
         if (!$deal = $this->getDealModel()->getDeal($deal_id, true)) {
             throw new waAPIException('invalid_param', sprintf_wp('Invalid “%s” value.', 'deal_id'), 400);

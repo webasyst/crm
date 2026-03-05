@@ -52,16 +52,14 @@
                                     </span>
                                 </div>
                                 <div class="crm-contact-image-column">
-                                    <a href="{$wa_app_url}contact/{$c.id}/">
-                                        <img src="{$c.photo_url_96}" class="userpic crm-contact-image-column-img" alt="">
-                                    </a>
+                                    <img src="{$c.photo_url_96}" class="userpic crm-contact-image-column-img" alt="">
                                 </div>
                                 <div class="crm-contact-info-column">
                                     <p class="crm-contact-name">
                                         {if $c.master_only}
                                             <i class="fas fa-exclamation-triangle text-yellow"></i>
                                         {/if}
-                                        <a href="{$wa_app_url}contact/{$c.id}/" class="no-underline">{$c.name}</a>
+                                        {$c.name}
                                         <span class="crm-js-hide-when-not-selected bold crm-as-master-text">&mdash; [`selected as a master contact`]</span>
                                     </p>
                                     {if $c.master_only}

@@ -663,10 +663,12 @@ var crmSettingsForm = (function ($) {
             return html && (''+html).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         };
 
-        $field.find('.js-field-label').html(
-            encodeHtml(field.caption) +
-            (field.required && field.id !== '!captcha' ? ' *' : '')
-        );
+        var $field_label = $field.find('.js-field-label');
+        $field_label.html(encodeHtml(field.caption));
+        $field_label.next().remove();
+        if (field.required && field.id !== '!captcha') {
+            $field_label.after('<div>*</div>');
+        }
 
         if (field.type === 'Composite' || field.type === 'Address') {
             if (field.subfield_captionplace === 'none') {

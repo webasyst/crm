@@ -101,7 +101,7 @@ class crmReportAction extends crmBackendViewAction
         $users = array(
                 "all" => array(
                     "id"           => 'all',
-                    "name"         => _wp("All responsibles"),
+                    "name"         => _wp("All responsible users"),
                     "photo_url_16" => wa()->whichUI() === '2.0' ? wa()->getRootUrl()."wa-content/img/userpic.svg" : wa()->getRootUrl()."wa-content/img/userpic20.jpg"
                 )
             ) + $users;

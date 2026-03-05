@@ -8,7 +8,7 @@ class crmFunnelModel extends crmModel
      * Take into account rights
      * @return array
      */
-    public function getAllFunnels($include_archived = false)
+    public function getAllFunnels($include_archived = false, $ignore_personal_sorting = false)
     {
         static $funnels = null;
         if ($funnels === null) {
@@ -20,12 +20,25 @@ class crmFunnelModel extends crmModel
                 }
             }
         }
+        $result = $funnels;
+        if (!$ignore_personal_sorting) {
+            // Apply personal funnel sorting
+            $funnels_sort = wa()->getUser()->getSettings('crm', 'funnels_sort');
+            $funnels_sort = empty($funnels_sort) ? [] : explode(',', $funnels_sort);
+            $sorted_funnels = [];
+            foreach ($funnels_sort as $funnel_id) {
+                if (isset($funnels[$funnel_id])) {
+                    $sorted_funnels[strval($funnel_id)] = $funnels[$funnel_id];
+                }
+            }
+            $result = $sorted_funnels + $funnels;
+        }
         if (!$include_archived) {
-            return array_filter($funnels, function($f) {
+            return array_filter($result, function($f) {
                 return !$f['is_archived'];
             });
         }
-        return $funnels;
+        return $result;
     }
 
     public function getAvailableFunnel($include_archived = false, $contact_id = null)

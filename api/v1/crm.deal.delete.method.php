@@ -35,14 +35,20 @@ class crmDealDeleteMethod extends crmApiAbstractMethod
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
+        $data_deals = $this->getDealModel()->getById($allowed_to_delete);
         $this->getDealModel()->delete(
             $allowed_to_delete,
             ['reset' => ['message', 'conversation']]
         );
 
+        if (count($allowed_to_delete) > 30) {
+            crmHelper::logAction('deals_delete', count($data_deals));
+        } else {
+            crmHelper::logAction('deal_delete', array_column($data_deals, 'name'));
+        }
         if ($is_bulk_delete) {
             $this->http_status_code = 200;
-            $this->response = [ 'deleted' => $allowed_to_delete ];
+            $this->response = ['deleted' => $allowed_to_delete];
         } else {
             $this->http_status_code = 204;
             $this->response = null;

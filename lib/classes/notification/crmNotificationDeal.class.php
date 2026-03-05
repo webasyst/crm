@@ -125,8 +125,8 @@ class crmNotificationDeal extends crmNotification
 
             $this->vars = array_merge($this->vars, array(
                 'deal'        => $deal,
-                'responsible' => $this->deal['__responsible'],
-                'company'     => $this->deal['__company'],
+                'responsible' => ifset($this->deal['__responsible'], []),
+                'company'     => ifset($this->deal['__company'], []),
             ));
         }
         return $this->vars;
@@ -147,6 +147,13 @@ class crmNotificationDeal extends crmNotification
             $this->setDeal($deal);
         }
         $deal = $this->getDeal();
+        if (!empty($deal)) {
+            // Not send notification about deal if notification has funnel and this funnel not the same as in deal
+            $info = $this->getInfo();
+            if (!empty($info['funnel_id']) && $info['funnel_id'] != $deal['funnel_id']) {
+                return false;
+            }
+        }
 
         if (isset($deal['contact_id'])) {
             $old_customer = $this->getCustomer();
@@ -170,26 +177,6 @@ class crmNotificationDeal extends crmNotification
         return $res;
     }
 
-    /**
-     * Replaces the recipient's address with the one that was specified when creating the test message
-     * @param int|string $address
-     * @return bool
-     * @throws waException
-     */
-    public function sendTestNotification($address)
-    {
-        $old_address = $this->recipient_type;
-        $this->notification['recipient'] = $address;
-        try {
-            $this->sendNotification();
-        } catch (waException $e) {
-            $this->recipient_type = $old_address;
-            throw $e;
-        }
-        $this->recipient_type = $old_address;
-        return true;
-    }
-
     protected function sendNotification()
     {
         if ($this->notification && $this->notification['status'] != 1) {
@@ -200,7 +187,7 @@ class crmNotificationDeal extends crmNotification
         $this->recipient_type = $this->notification['recipient'];
 
         // $responsible = $this->getResponsible($this->deal['user_contact_id']);
-        $this->responsible = new waContact($this->deal['user_contact_id']);
+        $this->responsible = new waContact(ifset($this->deal['user_contact_id'], 0));
 
         if ($this->recipient_type == 'client') {
             $recipient = $this->getCustomer();
@@ -218,13 +205,16 @@ class crmNotificationDeal extends crmNotification
             $res = $this->sendNotificationByEmail($recipient, $custom_address);
         } elseif ($transport === crmNotificationModel::TRANSPORT_SMS) {
             $res = $this->sendNotificationBySMS($recipient, $custom_address);
+        } elseif ($transport === crmNotificationModel::TRANSPORT_HTTP) {
+            $res = $this->sendHttp();
+        } elseif ($transport === crmNotificationModel::TRANSPORT_REMINDER) {
+            $user_contact_id = ifset($this->notification['reminder_user_type']) === 'responsible' ? $this->deal['user_contact_id'] : null;
+            $res = $this->createReminder(-1 * ifset($this->deal['id'], 0), $user_contact_id);
         } else {
             $res = false;
         }
 
-        if (!$res) {
-            return false;
-        }
+        return $res;
     }
 
     protected function sendNotificationByEmail($recipient, $custom_address)
@@ -367,7 +357,7 @@ class crmNotificationDeal extends crmNotification
     public static function getVarsForDeal($include_deal_stage = false)
     {
         $vars = array(
-            '$deal' => _w('An array containing information about the deal'),
+            '$deal' => _w('Array of information about the deal'),
         );
 
         $extra = array('stage.name', 'funnel.name');

@@ -56,7 +56,7 @@ class crmHtmlSanitizer
         // Remove all tags except known.
         // We don't rely on this for protection. Everything should be escaped anyway.
         // strip_tags() is here so that unknown tags do not show as escaped sequences, making the text unreadable.
-        $allowable_tags = '<a><b><i><u><s><img><pre><mark><code><blockquote><p><strong><section><em><del><strike><span><ul><ol><li><div><font><br><table><thead><tbody><tfoot><tr><td><th><hr><h1><h2><h3><h4><h5><h6><style>';
+        $allowable_tags = '<a><b><i><u><s><img><pre><mark><kbd><code><blockquote><p><strong><section><em><del><strike><span><ul><ol><li><div><font><br><table><thead><tbody><tfoot><tr><td><th><hr><h1><h2><h3><h4><h5><h6><style>';
         $content = strip_tags($content, $allowable_tags);
 
         // Strip <style>...</style>
@@ -163,7 +163,7 @@ class crmHtmlSanitizer
             '~
                 (?s)
                 &lt;
-                    (/?(?:a|b|i|u|s|pre|blockquote|p|strong|section|em|del|code|strike|span|ul|ol|li|div|font|br|table|thead|tbody|tfoot|tr|td|th|hr|h1|h2|h3|h4|h5|h6)/?)
+                    (/?(?:a|b|i|u|s|pre|blockquote|p|strong|section|em|del|code|mark|kbd|strike|span|ul|ol|li|div|font|br|table|thead|tbody|tfoot|tr|td|th|hr|h1|h2|h3|h4|h5|h6)/?)
                     ((?!&gt;)[^a-z\-\_]((?!&gt;)(\s|.))+)?
                 &gt;
             ~iux',
@@ -226,7 +226,9 @@ class crmHtmlSanitizer
         // Remove \n around <blockquote> startting and ending tags
         $content = preg_replace('~(?U:\n\s*){0,2}<(/?blockquote)>(?U:\s*\n){0,2}~i', '<\1>', $content);
 
-        $content = $this->closeTags($content);
+        $content_fixed = $this->closeBrokenTags($content);
+        // If fixed result lose more then half of content, then try another way to fix by forcely closing all tags
+        $content = strlen($content_fixed) * 2 < strlen($content) ? $this->closeTags($content) : $content_fixed;
 
         // Convert urls to clickable links
         $content = $this->linkify($content, ['target' => '_blank', 'rel' => 'nofollow']);
@@ -336,6 +338,10 @@ class crmHtmlSanitizer
             }
         }
 
+        if (empty($attributes['src']) || !preg_match('!^(https?://|/|data:image/)!i', $attributes['src'])) {
+            return '';
+        }
+
         foreach ($attributes as $attribute => $val) {
             $attributes[$attribute] = $attribute.'="'.$this->attr_start.$val.$this->attr_end.'"';
         }
@@ -357,6 +363,10 @@ class crmHtmlSanitizer
         if (preg_match('~^data:image/~i', $url)) {
             return $url;
         }
+        if (preg_match('~^cid:~i', $url)) {
+            return $url;
+        }
+
         $url_alphanumeric = preg_replace('~&amp;[^;]+;~i', '', $url);
         $url_alphanumeric = preg_replace('~[^a-z0-9:]~i', '', $url_alphanumeric);
         if (preg_match('~^(javascript|vbscript):~i', $url_alphanumeric)) {
@@ -487,7 +497,7 @@ class crmHtmlSanitizer
                     }
                     $close_html = "";
                     foreach ($m_open as $k => $tag) {
-                        if ((!isset($c_tags[$tag]) || $c_tags[$tag]-- <= 0) && !in_array(strtolower($tag), array('br', 'img'))) {
+                        if ((!isset($c_tags[$tag]) || $c_tags[$tag]-- <= 0) && !in_array(strtolower($tag), array('br', 'p', 'hr', 'img'))) {
                             $close_html = $close_html.'</'.$tag.'>';
                         }
                     }
@@ -506,5 +516,44 @@ class crmHtmlSanitizer
             $content = str_replace('</td>', '</div></td>', $content);
         }
         return $content;
+    }
+
+    public function closeBrokenTags($string) {
+        //preg_match_all('#<([a-z]+)(?: .*)?(?<![/|/ ])>#iU', $string, $result);
+        preg_match_all('#<([a-z]+)(|\s+[^>]*)>#iU', $string, $result);
+        $opened_tags = $result[1];
+        $opened_tags = array_values(array_filter($opened_tags, function($tag) { return !in_array(strtolower($tag), ['br', 'p', 'hr', 'img', 'td', 'th', 'tr', 'thead', 'tbody', 'tfoot', 'li', 'span']); }));
+
+        preg_match_all('#</([a-z]+)>#iU', $string, $result);
+        $closed_tags = $result[1];
+        $closed_tags = array_values(array_filter($closed_tags, function($tag) { return !in_array(strtolower($tag), ['br', 'p', 'hr', 'img', 'td', 'th', 'tr', 'thead', 'tbody', 'tfoot', 'li', 'span']); }));
+        if (count($closed_tags) == count($opened_tags)) {
+            return $string;
+        }
+
+        // We have a mismatched opening and closing tags
+        try {
+            libxml_use_internal_errors(true);
+            $string = mb_encode_numericentity(
+                htmlspecialchars_decode(
+                    htmlentities($string, ENT_NOQUOTES, 'UTF-8', true),
+                    ENT_NOQUOTES
+                ), 
+                [0x80, 0x10FFFF, 0, ~0],
+                'UTF-8'
+            );
+            $dom = new DOMDocument( "1.0", "UTF-8" );
+            $dom->encoding = 'UTF-8';
+            $dom->loadHTML($string, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            return $dom->saveHTML();
+        } catch (Exception $e) {
+            $log_record = join(PHP_EOL, [
+                'Exception',
+                $e->getMessage(),
+                $e->getTraceAsString()
+            ]);
+            waLog::log($log_record, 'crm/html-sanitizer-error.log');
+            return $string;
+        }
     }
 }

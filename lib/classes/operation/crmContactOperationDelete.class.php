@@ -55,8 +55,14 @@ class crmContactOperationDelete
             $contact = reset($contacts);
             if (wa_is_int($contact)) {
                 $type = 'int';
+            } else if (is_array($contact)) {
+                if (!isset($contact['crm_vault_id']) || !isset($contact['create_contact_id']) || !isset($contact['crm_user_id'])) {
+                    $contacts = array_column($contacts, 'id');
+                    $type = 'int';
+                }
             }
         }
+
         $this->contact = wa()->getUser();
         $this->contact_id = $this->contact['id'];
         $this->crm_rights = new crmRights(array('contact' => $this->contact));
@@ -68,17 +74,24 @@ class crmContactOperationDelete
                 $contacts[$contact_id] = array('id' => $contact_id);
             }
         }
-        if (isset($contacts[$this->contact_id])) {
-            unset($contacts[$this->contact_id]);
-        }
+
+        // exclude current contact - do not allow self delete
+        $contacts = array_filter($contacts, function ($contact) {
+            return $contact['id'] != $this->contact_id;
+        });
 
         // format names
-        foreach ($contacts as $contact_id => &$contact) {
+        $contacts = array_map(function ($contact) {
             $contact['name'] = waContactNameField::formatName($contact);
-        }
-        unset($contact);
+            return $contact;
+        }, $contacts);
 
-        $this->contacts = $contacts;
+        // force contact ids as contacts array keys
+        $this->contacts = array_reduce($contacts, function ($result, $contact) {
+            $result[$contact['id']] = $contact;
+            return $result;
+        }, []);
+
         $this->is_super_admin = (bool) wa()->getUser()->getRights('webasyst', 'backend');
     }
 
@@ -365,9 +378,9 @@ class crmContactOperationDelete
     protected function getUsers($contacts)
     {
         $users = array();
-        foreach ($contacts as $contact_id => $contact) {
+        foreach ($contacts as $contact) {
             if ($contact['is_user'] > 0) {
-                $users[$contact_id] = $contact;
+                $users[$contact['id']] = $contact;
             }
         }
         return $users;
@@ -389,6 +402,6 @@ class crmContactOperationDelete
 
     protected function getNames($contacts)
     {
-        return waUtils::getFieldValues($contacts, 'name');
+        return array_column($contacts, 'name');
     }
 }

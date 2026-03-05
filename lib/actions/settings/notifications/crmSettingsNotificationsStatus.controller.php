@@ -49,8 +49,9 @@ class crmSettingsNotificationsStatusController extends crmJsonController
 
     protected function saveData($data)
     {
-        $notification = crmNotification::factory(ifset($data['id']));
-        $notification->save($data);
-        return $notification->getInfo();
+        $notification_model = self::getNotificationModel();
+        $notification_model->updateById($data['id'], ['status' => $data['status']]);
+        
+        return $notification_model->getNotification($data['id']) ?: [];
     }
 }

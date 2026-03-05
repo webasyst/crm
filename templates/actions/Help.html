@@ -1,6 +1,7 @@
 <!-- cheat sheet -->
 {$show_body_flag = false}
 {$show_header_flag = false}
+<div class="alert-fixed-box" id="wa-alert-fixed-box"></div>
 <header class="drawer-header bordered-bottom">
     <ul class="tabs">
         {if !empty($vars)}
@@ -43,7 +44,7 @@
         {/if}
     </ul>
 </header>
-<div class="drawer-content custom-mt-0">
+<div class="drawer-content custom-mt-0" id="wa-crm-help">
     <!-- app specific vars -->
     {if !empty($vars)}
         {foreach $vars as $id => $app_vars}

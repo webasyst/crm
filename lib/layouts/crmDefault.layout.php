@@ -33,6 +33,7 @@ class crmDefaultLayout extends waLayout
             'deal_list_sort'       => waUtils::jsonEncode($deal_list_sort),
             'funnel_bricks'        => waUtils::jsonEncode($funnel_bricks),
             'access_rights'        => waUtils::jsonEncode($this->getAccessRights()),
+            'shop_app_exists'      => wa()->appExists('shop') && wa()->getUser()->getRights('shop', 'backend'),
         ]);
     }
 

@@ -2,241 +2,265 @@
 {if !empty($funnel.id)}
     {$_title = "[`Edit funnel`]"}
 {/if}
-
-<div class="c-funnels-page" id="c-funnels-page">
-
-    {* HEADER *}
-    <header class="c-funnels-section">
-        <div class="c-page-header flexbox middle full-width">
-            <h1 class="custom-mb-0">[`Funnels`]</h1>
-            <a class="button small rounded light-gray" href="{$wa_app_url}settings/funnels/new/"><i class="fas fa-plus-circle text-green add"></i> [`Add new funnel`]</a>
-        </div>
-
-        {* FUNNELS *}
-        <div class="c-funnels-tabs flexbox full-width wrap middle js-funnels-tabs">
-            <div class="c-funnels-wrapper tabs-with-arrows-side-wrapper">
-                <ul class="tabs c-funnels-list">
+<script>
+    (function () {
+        $('#c-settings-page .article').addClass('wider');
+    })();
+</script>
+<div class="c-funnels-page flexbox vertical-mobile space-16" id="c-funnels-page">
+    {* DESKTOP FUNNELS *}
+    <div class="desktop-and-tablet-only sidebar" style="height: calc(100vh - 8rem);">
+        <div class="sidebar-body">
+            <div class="c-funnels-tabs flexbox js-funnels-tabs">
+                <ul class="menu c-funnels-list">
                     {if empty($funnel.id)}
-                    {$_new_funnel = [
-                    "0" => [
-                    "id" => false,
-                    "name" => "[`New funnel`]",
-                    "color" => "#f0f0f0"
-                    ]
-                    ]}
-                    {$funnels = $_new_funnel + $funnels}
+                        {$_new_funnel = [
+                            "0" => [
+                                "id" => false,
+                                "name" => "[`New funnel`]",
+                                "color" => "#f0f0f0"
+                            ]
+                        ]}
+                        {$funnels = $_new_funnel + $funnels}
                     {/if}
 
                     {foreach $funnels as $_funnel}
-                    {$_is_selected = ($funnel.id == $_funnel.id)}
-                    <li class="c-funnel {if $_is_selected}selected{/if}" data-id="{$_funnel.id|default:''}">
-                    <a class="c-link flexbox middle space-4{if !empty($_funnel.is_archived)} opacity-50{/if}" href="{if !$_is_selected}{$wa_app_url}settings/funnels/{$_funnel.id}/{else}javascript:void(0);{/if}">
-                        <i class="{$_funnel.icon|default:'fas fa-briefcase'|escape}" style="color: {($_funnel.id) ? $_funnel.color : '#cc5252'}"></i>
-                        <span class="c-name{if !empty($_funnel.is_archived)} brown{/if}">{$_funnel.name|escape}</span>
-                    </a>
-                    </li>
+                        {$_is_selected = ($funnel.id == $_funnel.id)}
+                        <li class="c-funnel rounded {if $_is_selected}selected{/if}" data-id="{$_funnel.id|default:''}">
+                            <a class="c-link flexbox middle space-4{if !empty($_funnel.is_archived)} opacity-50{/if}" href="{if !$_is_selected}{$wa_app_url}settings/funnels/{$_funnel.id}/{else}javascript:void(0);{/if}">
+                                <i class="{$_funnel.icon|default:'fas fa-briefcase'|escape}" style="color: {($_funnel.id) ? $_funnel.color : '#cc5252'}"></i>
+                                <span class="c-name{if !empty($_funnel.is_archived)} brown{/if}">{$_funnel.name|escape}</span>
+                                <span class="count"><i class="fas fa-grip-vertical cursor-move"></i></span>
+                            </a>
+                        </li>
                     {/foreach}
                 </ul>
-                <span class="c-action right" title="[`Next`]"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
-                <span class="c-action left" title="[`Before`]"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
             </div>
         </div>
-    </header>
+        <div class="sidebar-footer">
+            <a class="button nobutton smaller rounded light-gray" href="{$wa_app_url}settings/funnels/new/"><i class="fas fa-plus-circle text-green add"></i> [`Add new funnel`]</a>
+        </div>
+    </div>
 
-    {* FUNNEL *}
-    <section class="fields c-funnel-section" id="c-funnel-section">
-        <form action="">
-            <div class="c-funnel-form">
-                <div class="flexbox space-16 full-width middle">
-                    <input class="wide large js-funnel-name" name="funnel[name]" type="text" value="{$funnel.name|default: ''|escape}" placeholder="[`Funnel name`]" required>
-                    {if $funnel.is_archived}
-                    <span class="text-brown nowrap small">
-                        <i class="fas fa-archive"></i>
-                        [`In archive`]
-                    </span>
-                    {/if}
-                </div>
-
-                <div class="fields-group custom-mt-24">
-                    <h3 class="heading custom-mt-0">[`Color & icon`]</h3>
-                    <section class="c-color-section">
-                        {$_toggle_color = $colors[0]}
-                        {if !empty($funnel.color)}
-                        {$_toggle_color = $funnel.color}
+    <div class="custom-mt-12">
+        {* HEADER *}
+        <header class="c-funnels-section">
+            <div class="flexbox full-width">
+                <h1 class="custom-mb-0">[`Funnels`]</h1>
+                <a class="mobile-only button nobutton rounded light-gray larger" href="{$wa_app_url}settings/funnels/new/"><i class="fas fa-plus-circle text-green add"></i></a>
+            </div>
+            {* MOBILE FUNNELS *}
+            <div class="mobile-only c-funnels-tabs flexbox full-width wrap middle js-funnels-tabs custom-my-4">
+                <div class="c-funnels-wrapper tabs-with-arrows-side-wrapper">
+                    <ul class="tabs c-funnels-list">
+                        {if empty($funnel.id)}
+                            {$_new_funnel = [
+                                "0" => [
+                                    "id" => false,
+                                    "name" => "[`New funnel`]",
+                                    "color" => "#f0f0f0"
+                                ]
+                            ]}
+                            {$funnels = $_new_funnel + $funnels}
                         {/if}
 
-                        <div class="c-layout inline">
-                            <div class="c-column middle">
-
-                                <ul class="c-colors">
-                                    {strip}
-                                    {foreach $colors as $_color}
-                                    <li class="c-color-wrapper">
-                                        <span class="c-funnel-color-item color js-set-color {if $_toggle_color == $_color}is-active{/if}" data-color="{$_color}" style="background: {$_color};"></span>
-                                    </li>
-                                    {/foreach}
-                                    {/strip}
-                                </ul>
-
-                            </div>
-                            <div class="c-column right">
-
-                                <div class="c-toggle-wrapper js-toggle-wrapper is-hidden flexbox middle">
-                                    <input class="c-field js-color-field" name="funnel[color]" type="text" value="{$_toggle_color}" placeholder="{$_toggle_color}">
-                                    <div class="c-toggle-block">
-                                        <span class="c-funnel-color-item color c-toggle js-toggle" style="background: {$_toggle_color};"><i class="fas fa-eye-dropper text-white smaller"></i></span>
-                                        <div class="c-color-picker js-color-picker"></div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <ul class="c-stages js-stages">
-                            {for $i = 1 to 7}
-                            <li class="c-stage">
-                                <div class="c-ornament">
-                                    <i class="svg-icon funnel" data-color="#f0f0f0"></i>
-                                </div>
-                            </li>
-                            {/for}
-                        </ul>
-
-                        <input class="js-start-color-field" name="funnel[open_color]" type="hidden">
-                        <input class="js-end-color-field" name="funnel[close_color]" type="hidden">
-                    </section>
-
-                    <section class="c-icon-section custom-mt-24">
-                        {$_selected_icon = 'fas fa-briefcase'}
-                        {if !empty($funnel.icon)}
-                            {$_selected_icon = $funnel.icon}
-                        {/if}
-                        <ul class="c-icon-list">
-                            {foreach $icons as $_icon}
-                                <li class="c-icon-item js-icon-item {if $_icon == $_selected_icon}selected{/if}" data-icon="{$_icon}">
-                                    <i class="{$_icon}"></i>
-                                </li>
-                            {/foreach}
-                        </ul>
-                        <input name="funnel[icon]" class="js-icon-field" type="hidden" value="{$_selected_icon}">
-                    </section>
-                </div>
-
-                <section class="c-stages-section fields-group">
-                    {function _renderStage}
-                        <li class="c-stage custom-pb-8" {if !empty($_stage['id'])}data-id="{$_stage.id}"{/if}>
-                            <i class="fas fa-grip-vertical text-light-gray c-sort-toggle js-sort-toggle"></i>
-                            <input type="text" class="js-name-field" placeholder="[`Stage name`]" value="{if !empty($_stage)}{$_stage.name|escape}{else}[`New stage`]{/if}" required>
-
-                            <div class="c-time-limit-wrapper js-time-limit-wrapper{if !empty($_stage.limit_hours)} is-extended{/if}">
-                                <div class="c-visible">
-                                    <a href="javascript:void(0);" class="inline-link js-show-time small">[`add time limit`]</a>
-                                </div>
-                                <div class="c-hidden">
-                                    <input class="c-time-field js-visible-time-field" type="text" value="{$_stage.limit_hours|default:""}" placeholder="1">
-
-                                    <div class="wa-select">
-                                        <select class="js-time-period-select">
-                                            <option value="1">[`hours`]</option>
-                                            <option value="24" selected>[`days`]</option>
-                                        </select>
-                                    </div>
-
-                                    <input class="js-hidden-time-field" type="hidden" name="stages[][limit_hours]" value="{$_stage.limit_hours|default:""}">
-
-                                    <a class="inline-link c-delete-link js-remove-limit text-gray" href="javascript:void(0);">
-                                        <span class="icon size-16"><i class="fas fa-calendar-minus"></i></span>
-                                        [`remove limit`]
-                                    </a>
-                                </div>
-                            </div>
-
-                            {if empty($_stage.deals_count)}
-                                <a class="inline-link c-delete-link js-delete-stage nowrap text-red" href="javascript:void(0);" title="[`remove stage`]">
-                                    <span class="icon size-16"><i class="fas fa-trash-alt"></i></span>
+                        {foreach $funnels as $_funnel}
+                            {$_is_selected = ($funnel.id == $_funnel.id)}
+                            <li class="c-funnel {if $_is_selected}selected{/if}" data-id="{$_funnel.id|default:''}">
+                                <a class="c-link flexbox middle space-4{if !empty($_funnel.is_archived)} opacity-50{/if}" href="{if !$_is_selected}{$wa_app_url}settings/funnels/{$_funnel.id}/{else}javascript:void(0);{/if}">
+                                    <i class="{$_funnel.icon|default:'fas fa-briefcase'|escape}" style="color: {($_funnel.id) ? $_funnel.color : '#cc5252'}"></i>
+                                    <span class="c-name{if !empty($_funnel.is_archived)} brown{/if}">{$_funnel.name|escape}</span>
                                 </a>
-                            {else}
-                                <span class="c-delete-link hint">{_w('%d deal in stage', '%d deals in stage', $_stage.deals_count)}</span>
-                            {/if}
-                        </li>
-                    {/function}
-
-                    {capture assign="_stage_template"}{_renderStage _stage=[]}{/capture}
-
-                    <h3 class="heading custom-mt-0">[`Stages`]</h3>
-
-                    <ul class="list compact c-stages-list">
-                        {if !empty($funnel.stages)}
-                        {foreach $funnel.stages as $_stage}
-                        {_renderStage _stage=$_stage}
+                            </li>
                         {/foreach}
-                        {else}
-                        {foreach $baseStages as $_baseStage}
-
-                        {_renderStage _stage=$_baseStage}
-                        {/foreach}
-                        {/if}
                     </ul>
-                    <div class="alert small custom-mt-16 custom-mb-16">
-                        <div class="flexbox space-8">
-                            <span class=""><i class="fas fa-info-circle info"></i></span>
-                            <div class="wide">{sprintf_wp('Use the <em>%s</em> link to set how long a deal is allowed to remain in each of the stages. To learn about overdue deals, <a href="https://support.webasyst.com/27828/crm-deal-funnel-stage-time-limit/" class="nowrap" target="_blank">set up a notification</a> for the “<em>%s</em>” event.', _w('add time limit'), _w('Stage time limit expired for deal'))}
+                    <span class="c-action right" title="[`Next`]"><i class="fas fa-angle-right fa-w-8 fa-2x"></i></span>
+                    <span class="c-action left" title="[`Before`]"><i class="fas fa-angle-left fa-w-8 fa-2x"></i></span>
+                </div>
+            </div>
+        </header>
+
+        {* FUNNEL *}
+        <section class="fields c-funnel-section" id="c-funnel-section">
+            <form action="">
+                <div class="c-funnel-form">
+                    <div class="flexbox space-16 full-width middle">
+                        <input class="wide large js-funnel-name" name="funnel[name]" type="text" value="{$funnel.name|default: ''|escape}" placeholder="[`Funnel name`]" required>
+                        {if $funnel.is_archived|default:0}
+                        <span class="text-brown nowrap small">
+                            <i class="fas fa-archive"></i>
+                            [`In archive`]
+                        </span>
+                        {/if}
+                    </div>
+
+                    <div class="fields-group">
+                        <h3 class="heading custom-mt-0">[`Color & icon`]</h3>
+                        <section class="c-color-section">
+                            {$_toggle_color = $colors[0]}
+                            {if !empty($funnel.color)}
+                            {$_toggle_color = $funnel.color}
+                            {/if}
+
+                            <div class="c-layout inline">
+                                <div class="c-column middle">
+
+                                    <ul class="c-colors">
+                                        {strip}
+                                        {foreach $colors as $_color}
+                                        <li class="c-color-wrapper">
+                                            <span class="c-funnel-color-item color js-set-color {if $_toggle_color == $_color}is-active{/if}" data-color="{$_color}" style="background: {$_color};"></span>
+                                        </li>
+                                        {/foreach}
+                                        {/strip}
+                                    </ul>
+
+                                </div>
+                                <div class="c-column right">
+
+                                    <div class="c-toggle-wrapper js-toggle-wrapper is-hidden flexbox middle">
+                                        <input class="c-field js-color-field" name="funnel[color]" type="text" value="{$_toggle_color}" placeholder="{$_toggle_color}">
+                                        <div class="c-toggle-block">
+                                            <span class="c-funnel-color-item color c-toggle js-toggle" style="background: {$_toggle_color};"><i class="fas fa-eye-dropper text-white smaller"></i></span>
+                                            <div class="c-color-picker js-color-picker"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <ul class="c-stages js-stages">
+                                {for $i = 1 to 7}
+                                <li class="c-stage">
+                                    <div class="c-ornament">
+                                        <i class="svg-icon funnel" data-color="#f0f0f0"></i>
+                                    </div>
+                                </li>
+                                {/for}
+                            </ul>
+
+                            <input class="js-start-color-field" name="funnel[open_color]" type="hidden">
+                            <input class="js-end-color-field" name="funnel[close_color]" type="hidden">
+                        </section>
+
+                        <section class="c-icon-section custom-mt-24">
+                            {$_selected_icon = 'fas fa-briefcase'}
+                            {if !empty($funnel.icon)}
+                                {$_selected_icon = $funnel.icon}
+                            {/if}
+                            <ul class="c-icon-list">
+                                {foreach $icons as $_icon}
+                                    <li class="c-icon-item js-icon-item {if $_icon == $_selected_icon}selected{/if}" data-icon="{$_icon}">
+                                        <i class="{$_icon}"></i>
+                                    </li>
+                                {/foreach}
+                            </ul>
+                            <input name="funnel[icon]" class="js-icon-field" type="hidden" value="{$_selected_icon}">
+                        </section>
+                    </div>
+
+                    <section class="c-stages-section fields-group">
+                        {function _renderStage}
+                            <li class="c-stage custom-pb-8" {if !empty($_stage['id'])}data-id="{$_stage.id}"{/if}>
+                                <i class="fas fa-grip-vertical text-light-gray c-sort-toggle js-sort-toggle"></i>
+                                <input type="text" class="js-name-field" placeholder="[`Stage name`]" value="{if !empty($_stage)}{$_stage.name|escape}{else}[`New stage`]{/if}" required>
+
+                                <div class="c-time-limit-wrapper js-time-limit-wrapper{if !empty($_stage.limit_hours)} is-extended{/if}">
+                                    <div class="c-visible">
+                                        <a href="javascript:void(0);" class="inline-link js-show-time small">[`add time limit`]</a>
+                                    </div>
+                                    <div class="c-hidden">
+                                        <input class="c-time-field js-visible-time-field" type="text" value="{$_stage.limit_hours|default:""}" placeholder="1">
+
+                                        <div class="wa-select">
+                                            <select class="js-time-period-select">
+                                                <option value="1">[`hours`]</option>
+                                                <option value="24" selected>[`days`]</option>
+                                            </select>
+                                        </div>
+
+                                        <input class="js-hidden-time-field" type="hidden" name="stages[][limit_hours]" value="{$_stage.limit_hours|default:""}">
+
+                                        <a class="inline-link c-delete-link js-remove-limit text-gray" href="javascript:void(0);">
+                                            <span class="icon size-16"><i class="fas fa-calendar-minus"></i></span>
+                                            [`remove limit`]
+                                        </a>
+                                    </div>
+                                </div>
+
+                                {if empty($_stage.deals_count)}
+                                    <a class="inline-link c-delete-link js-delete-stage nowrap text-red" href="javascript:void(0);" title="[`remove stage`]">
+                                        <span class="icon size-16"><i class="fas fa-trash-alt"></i></span>
+                                    </a>
+                                {else}
+                                    <span class="c-delete-link hint">{_w('%d deal in stage', '%d deals in stage', $_stage.deals_count)}</span>
+                                {/if}
+                            </li>
+                        {/function}
+
+                        {capture assign="_stage_template"}{_renderStage _stage=[]}{/capture}
+
+                        <h3 class="heading custom-mt-0">[`Stages`]</h3>
+
+                        <ul class="list compact c-stages-list">
+                            {if !empty($funnel.stages)}
+                            {foreach $funnel.stages as $_stage}
+                            {_renderStage _stage=$_stage}
+                            {/foreach}
+                            {else}
+                            {foreach $baseStages as $_baseStage}
+
+                            {_renderStage _stage=$_baseStage}
+                            {/foreach}
+                            {/if}
+                        </ul>
+                        <div class="alert small custom-mt-16 custom-mb-16">
+                            <div class="flexbox space-8">
+                                <span class=""><i class="fas fa-info-circle info"></i></span>
+                                <div class="wide">{sprintf_wp('Use the <em>%s</em> link to set how long a deal is allowed to remain in each of the stages. To learn about overdue deals, <a href="https://support.webasyst.com/27828/crm-deal-funnel-stage-time-limit/" class="nowrap" target="_blank">set up a notification</a> for the “<em>%s</em>” event.', _w('add time limit'), _w('Stage time limit expired for deal'))}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="c-actions">
-                        <a class="button small rounded light-gray js-add-stage" href="javascript:void(0);">
-                            <i class="fas fa-plus-circle text-green add"></i>
-                             [`Add stage`]
-                        </a>
-                    </div>
-                </section>
+                        <div class="c-actions">
+                            <a class="button small rounded light-gray js-add-stage" href="javascript:void(0);">
+                                <i class="fas fa-plus-circle text-green add"></i>
+                                [`Add stage`]
+                            </a>
+                        </div>
+                    </section>
 
-                {if $deal_fields}
-                    <section class="c-deal-fields fields-group">
-                        <header class="c-layout">
-                            <div class="c-column">
-                                <h3 class="heading custom-mt-0">[`Deal fields`]</h3>
-                            </div>
-                            <div class="c-column middle right">
-                                <a href="{$wa_app_url}settings/field/" class="button small rounded light-gray"><i class="fas fa-cog text-blue"></i> [`Field constructor`]</a>
-                            </div>
-                        </header>
-                        <div class="fields">
-                            <div class="field title">
-                                <span class="name">[`Field name`]</span>
-                                <span class="value">[`Required`]</span>
-                                <span class="value">[`Filter`]</span>
-                            </div>
-                            {foreach $deal_fields as $deal_field}
-                                {$_deal_field_id = $deal_field->getId()|escape}
-                                {$_funnel_params = []}
-                                {if $funnel && $funnel.id > 0 }
-                                    {$_funnel_params = $deal_field->getFunnelParameters($funnel.id)}
-                                {/if}
-                                {if $deal_field->getType() === 'Checkbox'}
-                                    {continue}
-                                {/if}
-                                <div class="field">
-                                    <div class="name">{$deal_field->getName()|escape}</div>
-                                    <div class="value">
-                                        <label>
-                                            <input type="hidden" name="deal_field_params[{$_deal_field_id}][required]" value="0">
-                                            <span class="wa-checkbox"><input type="checkbox" name="deal_field_params[{$_deal_field_id}][required]" value="1" {if !empty($_funnel_params.required)}checked="checked"{/if}>
-                                                <span>
-                                                    <span class="icon">
-                                                        <i class="fas fa-check"></i>
-                                                    </span>
-                                                </span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                    {if $deal_field->getType() === 'Select'}
+                    {if $deal_fields}
+                        <section class="c-deal-fields fields-group">
+                            <header class="c-layout">
+                                <div class="c-column">
+                                    <h3 class="heading custom-mt-0">[`Deal fields`]</h3>
+                                </div>
+                                <div class="c-column middle right">
+                                    <a href="{$wa_app_url}settings/field/" class="button small rounded light-gray"><i class="fas fa-cog text-blue"></i> [`Field constructor`]</a>
+                                </div>
+                            </header>
+                            <div class="fields">
+                                <div class="field title">
+                                    <span class="name">[`Field name`]</span>
+                                    <span class="value">[`Required`]</span>
+                                    <span class="value">[`Filter`]</span>
+                                </div>
+                                {foreach $deal_fields as $deal_field}
+                                    {$_deal_field_id = $deal_field->getId()|escape}
+                                    {$_funnel_params = []}
+                                    {if $funnel && $funnel.id > 0 }
+                                        {$_funnel_params = $deal_field->getFunnelParameters($funnel.id)}
+                                    {/if}
+                                    {if $deal_field->getType() === 'Checkbox'}
+                                        {continue}
+                                    {/if}
+                                    <div class="field">
+                                        <div class="name">{$deal_field->getName()|escape}</div>
                                         <div class="value">
                                             <label>
-                                                <input type="hidden" name="deal_field_params[{$_deal_field_id}][filter]" value="0">
-                                                <span class="wa-checkbox"><input type="checkbox" name="deal_field_params[{$_deal_field_id}][filter]" value="1" {if !empty($_funnel_params.filter)}checked="checked"{/if}>
+                                                <input type="hidden" name="deal_field_params[{$_deal_field_id}][required]" value="0">
+                                                <span class="wa-checkbox"><input type="checkbox" name="deal_field_params[{$_deal_field_id}][required]" value="1" {if !empty($_funnel_params.required)}checked="checked"{/if}>
                                                     <span>
                                                         <span class="icon">
                                                             <i class="fas fa-check"></i>
@@ -245,152 +269,166 @@
                                                 </span>
                                             </label>
                                         </div>
-                                    {else}
-                                        <div class="value"></div>
-                                    {/if}
-                                </div>
-                            {/foreach}
-                        </div>
-                    </section>
-                {/if}
-
-                <section class="c-access-section fields-group">
-                    <h3 class="heading custom-mt-0">[`Access`]</h3>
-                    {function name="_groupList" _g=[]}
-                    <div class="field">
-                        <div class="name">{$_g.name|escape}</div>
-                        <div class="value">
-                                <span class="c-access-item" title="{if $_g.rights > crmRightConfig::RIGHT_FUNNEL_ALL}[`Full access to CRM app`]{elseif $_g.rights === null}[`No access to CRM app yet`]{/if}">
-                                    {if $_g.rights > crmRightConfig::RIGHT_FUNNEL_ALL}
-                                    <span class="icon size-16 custom-pr-4"><i class="fas fa-lock-open lock-unlocked"></i></span>
-                                    {elseif $_g.rights === null}
-                                    <span class="icon size-16 custom-pr-4"><i class="fas fa-lock lock-bw"></i></span>
-                                    {elseif $_g.rights < 0}
-                                    <span class="icon size-16 custom-pr-4"><i class="fas fa-lock lock"></i></span>
-                                    {else}
-                                    <span class="icon size-16 custom-pr-4"><i class="fas fa-lock-open lock-unlocked"></i></span>
-                                    {/if}
-
-                                    <div class="wa-select">
-                                        <select name="funnel[groups][{$_g.id}]"{if $_g.rights > crmRightConfig::RIGHT_FUNNEL_ALL} disabled{/if}>
-                                            {if $_g.rights > crmRightConfig::RIGHT_FUNNEL_ALL}
-                                                <option value="0" selected>[`Full access`]</option>
-                                            {else}
-                                                <option value="0"{if !$_g.rights} selected{/if}>[`No access`]</option>
-                                            <option value="{crmRightConfig::RIGHT_FUNNEL_OWN}"{if $_g.rights == crmRightConfig::RIGHT_FUNNEL_OWN} selected{/if}>[`Only own deals`]</option>
-                                            <option value="{crmRightConfig::RIGHT_FUNNEL_OWN_UNASSIGNED}"{if $_g.rights == crmRightConfig::RIGHT_FUNNEL_OWN_UNASSIGNED} selected{/if}>[`Own and unassigned deals`]</option>
-                                            <option value="{crmRightConfig::RIGHT_FUNNEL_ALL}"{if $_g.rights == crmRightConfig::RIGHT_FUNNEL_ALL} selected{/if}>[`Full access`]</option>
-                                            {/if}
-                                        </select>
+                                        {if $deal_field->getType() === 'Select'}
+                                            <div class="value">
+                                                <label>
+                                                    <input type="hidden" name="deal_field_params[{$_deal_field_id}][filter]" value="0">
+                                                    <span class="wa-checkbox"><input type="checkbox" name="deal_field_params[{$_deal_field_id}][filter]" value="1" {if !empty($_funnel_params.filter)}checked="checked"{/if}>
+                                                        <span>
+                                                            <span class="icon">
+                                                                <i class="fas fa-check"></i>
+                                                            </span>
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        {else}
+                                            <div class="value"></div>
+                                        {/if}
                                     </div>
-                                </span>
-                        </div>
-                    </div>
-                    {/function}
-
-                    {if $groups.backend}
-                    <div class="fields">
-                    {foreach $groups.backend as $_g}
-                    {_groupList _g = $_g}
-                    {/foreach}
-                    </div>
+                                {/foreach}
+                            </div>
+                        </section>
                     {/if}
 
-                    {if $groups.no_access}
-                    <div class="c-no-access-wrapper js-no-access-wrapper">
-                        <div class="c-visible" style="margin: 20px 0 0;">
-                            <div class="field">
-                                <div class="name"></div>
-                                <div class="value">
-                                    <a href="javascript:void(0);" class="inline-link js-show-access-list">[`Show groups without access to CRM app`]</a>
+                    <section class="c-access-section fields-group">
+                        <h3 class="heading custom-mt-0">[`Access`]</h3>
+                        {function name="_groupList" _g=[]}
+                        <div class="field">
+                            <div class="name">{$_g.name|escape}</div>
+                            <div class="value">
+                                    <span class="c-access-item" title="{if $_g.rights > crmRightConfig::RIGHT_FUNNEL_ALL}[`Full access to CRM app`]{elseif $_g.rights === null}[`No access to CRM app yet`]{/if}">
+                                        {if $_g.rights > crmRightConfig::RIGHT_FUNNEL_ALL}
+                                        <span class="icon size-16 custom-pr-4"><i class="fas fa-lock-open lock-unlocked"></i></span>
+                                        {elseif $_g.rights === null}
+                                        <span class="icon size-16 custom-pr-4"><i class="fas fa-lock lock-bw"></i></span>
+                                        {elseif $_g.rights < 0}
+                                        <span class="icon size-16 custom-pr-4"><i class="fas fa-lock lock"></i></span>
+                                        {else}
+                                        <span class="icon size-16 custom-pr-4"><i class="fas fa-lock-open lock-unlocked"></i></span>
+                                        {/if}
+
+                                        <div class="wa-select">
+                                            <select name="funnel[groups][{$_g.id}]"{if $_g.rights > crmRightConfig::RIGHT_FUNNEL_ALL} disabled{/if}>
+                                                {if $_g.rights > crmRightConfig::RIGHT_FUNNEL_ALL}
+                                                    <option value="0" selected>[`Full access`]</option>
+                                                {else}
+                                                    <option value="0"{if !$_g.rights} selected{/if}>[`No access`]</option>
+                                                <option value="{crmRightConfig::RIGHT_FUNNEL_OWN}"{if $_g.rights == crmRightConfig::RIGHT_FUNNEL_OWN} selected{/if}>[`Only own deals`]</option>
+                                                <option value="{crmRightConfig::RIGHT_FUNNEL_OWN_UNASSIGNED}"{if $_g.rights == crmRightConfig::RIGHT_FUNNEL_OWN_UNASSIGNED} selected{/if}>[`Own and unassigned deals`]</option>
+                                                <option value="{crmRightConfig::RIGHT_FUNNEL_ALL}"{if $_g.rights == crmRightConfig::RIGHT_FUNNEL_ALL} selected{/if}>[`Full access`]</option>
+                                                {/if}
+                                            </select>
+                                        </div>
+                                    </span>
+                            </div>
+                        </div>
+                        {/function}
+
+                        {if $groups.backend}
+                        <div class="fields">
+                        {foreach $groups.backend as $_g}
+                        {_groupList _g = $_g}
+                        {/foreach}
+                        </div>
+                        {/if}
+
+                        {if $groups.no_access}
+                        <div class="c-no-access-wrapper js-no-access-wrapper">
+                            <div class="c-visible" style="margin: 20px 0 0;">
+                                <div class="field">
+                                    <div class="name"></div>
+                                    <div class="value">
+                                        <a href="javascript:void(0);" class="inline-link js-show-access-list">[`Show groups without access to CRM app`]</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="c-hidden">
+                                <div class="field" style="margin: 20px 0;">
+                                    <div class="name"></div>
+                                    <div class="value">
+                                        <a href="javascript:void(0);" class="inline-link js-hide-access-list">[`Hide groups without access to CRM app`]</a>
+                                    </div>
+                                </div>
+                                <div class="fields">
+                                {foreach $groups.no_access as $_g}{_groupList _g = $_g}{/foreach}
                                 </div>
                             </div>
                         </div>
-                        <div class="c-hidden">
-                            <div class="field" style="margin: 20px 0;">
-                                <div class="name"></div>
-                                <div class="value">
-                                    <a href="javascript:void(0);" class="inline-link js-hide-access-list">[`Hide groups without access to CRM app`]</a>
-                                </div>
-                            </div>
-                            <div class="fields">
-                            {foreach $groups.no_access as $_g}{_groupList _g = $_g}{/foreach}
-                            </div>
-                        </div>
-                    </div>
-                    {/if}
-
-                </section>
-
-            </div>
-
-            <div class="c-settings-footer bottombar sticky">
-                <div class="flexbox middle full-width">
-                    <div>
-                        <input class="button js-funnel-save-button" type="submit" value="{if !empty($funnel.id)}[`Save`]{else}[`Create`]{/if}">
-                        <span class="js-hidden-actions" style="{if !empty($funnel.id)}display: none;{/if}">
-                            <a class="button light-gray" href="{$wa_app_url}settings/funnels/{if !empty($funnel.id)}{$funnel.id}/{/if}">[`Cancel`]</a>
-                        </span>
-                    </div>
-
-                    {if !empty($funnel.id)}
-                    <div>
-                        {if empty($funnel.deals_count)}
-                        <span class="hint">[`No deals in funnel`]</span>
-                        {else}
-                        <span class="hint">{_w('%d deal in funnel', '%d deals in funnel', $funnel.deals_count)}</span>
                         {/if}
-                        {if empty($funnel.is_archived)}
-                        <a class="button small brown outlined custom-ml-8 js-archive-funnel" data-state="active" href="javascript:void(0);">
-                            <i class="fas fa-archive"></i> [`Archive`]
-                        </a>
-                        {else}
-                        <a class="button small brown outlined custom-ml-8 js-archive-funnel" data-state="archived" href="javascript:void(0);">
-                            <i class="fas fa-trash-restore"></i> [`Restore`]
-                        </a>
-                        {/if}
-                        {if empty($funnel.deals_count)}
-                            <a class="button small red outlined js-delete-funnel" href="javascript:void(0);">
-                                <i class="fas fa-times-circle delete"></i> [`Delete`]
-                            </a>
-                        {else}
 
-                        {/if}
-                    </div>
-                    {/if}
+                    </section>
+
                 </div>
-            </div>
 
-            <input name="funnel[id]" value="{$funnel.id}" type="hidden" >
-        </form>
+                <div class="c-settings-footer bottombar sticky">
+                    <div class="flexbox middle full-width">
+                        <div>
+                            <input class="button js-funnel-save-button" type="submit" value="{if !empty($funnel.id)}[`Save`]{else}[`Create`]{/if}">
+                            <span class="js-hidden-actions" style="{if !empty($funnel.id)}display: none;{/if}">
+                                <a class="button light-gray" href="{$wa_app_url}settings/funnels/{if !empty($funnel.id)}{$funnel.id}/{/if}">[`Cancel`]</a>
+                            </span>
+                        </div>
+
+                        {if !empty($funnel.id)}
+                        <div>
+                            {if empty($funnel.deals_count)}
+                            <span class="hint">[`No deals in funnel`]</span>
+                            {else}
+                            <span class="hint">{_w('%d deal in funnel', '%d deals in funnel', $funnel.deals_count)}</span>
+                            {/if}
+                            {if empty($funnel.is_archived)}
+                            <a class="button smaller light-gray custom-ml-8 js-archive-funnel" data-state="active" href="javascript:void(0);">
+                                <i class="fas fa-archive text-brown"></i> [`Archive`]
+                            </a>
+                            {else}
+                            <a class="button small brown outlined custom-ml-8 js-archive-funnel" data-state="archived" href="javascript:void(0);">
+                                <i class="fas fa-trash-restore"></i> [`Restore`]
+                            </a>
+                            {/if}
+                            {if empty($funnel.deals_count) && count($funnels) > 1}
+                                <a class="button smaller light-gray js-delete-funnel" href="javascript:void(0);">
+                                    <i class="fas fa-trash-alt delete text-red"></i> [`Delete`]
+                                </a>
+                            {else}
+
+                            {/if}
+                        </div>
+                        {/if}
+                    </div>
+                </div>
+
+                <input name="funnel[id]" value="{$funnel.id}" type="hidden" >
+            </form>
+
+            <script>
+                $.crm.title.set({$_title|json_encode});
+
+                ( function($) {
+                    new CRMSettingsFunnel({
+                        $wrapper: $("#c-funnel-section"),
+                        funnel_id: "{$funnel.id}",
+                        stage_html: {$_stage_template|json_encode},
+                        locales: {
+                            delete_confirm_title: "{sprintf_wp('Delete funnel %s', $funnel.name|stripslashes|escape|default: '')}",
+                            delete_confirm_text: "[`The funnel and all its settings will be permanently deleted.`] [`Are you sure?`]",
+                            delete_confirm_button: "[`Delete`]",
+                            archive_confirm_title: "{sprintf_wp('Archive funnel %s', $funnel.name|stripslashes|escape|default: '')}",
+                            archive_confirm_text: "[`The funnel and all its deals will be moved to the archive and will be hidden from funnel lists.`] [`Are you sure?`]",
+                            archive_confirm_button: "[`Archive`]",
+                            cancel_button: "[`Cancel`]"
+                        }
+                    });
+                })(jQuery);
+            </script>
+        </section>
 
         <script>
-            $.crm.title.set({$_title|json_encode});
-
             ( function($) {
-                new CRMSettingsFunnel({
-                    $wrapper: $("#c-funnel-section"),
-                    funnel_id: "{$funnel.id}",
-                    stage_html: {$_stage_template|json_encode},
-                    locales: {
-                        delete_confirm_title: "{sprintf_wp('Delete funnel %s', $funnel.name|stripslashes|escape|default: '')}",
-                        delete_confirm_text: "[`The funnel and all its settings will be permanently deleted.`] [`Are you sure?`]",
-                        delete_confirm_button: "[`Delete`]",
-                        archive_confirm_title: "{sprintf_wp('Archive funnel %s', $funnel.name|stripslashes|escape|default: '')}",
-                        archive_confirm_text: "[`The funnel and all its deals will be moved to the archive and will be hidden from funnel lists.`] [`Are you sure?`]",
-                        archive_confirm_button: "[`Archive`]",
-                        cancel_button: "[`Cancel`]"
-                    }
+                new CRMSettingsFunnels({
+                    $wrapper: $("#c-funnels-page")
                 });
             })(jQuery);
         </script>
-    </section>
-
-    <script>
-        ( function($) {
-            new CRMSettingsFunnels({
-                $wrapper: $("#c-funnels-page")
-            });
-        })(jQuery);
-    </script>
+    </div>
 </div>

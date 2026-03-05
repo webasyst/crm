@@ -170,13 +170,13 @@ class crmPushService
         $due_time_str = waDateTime::format('humandatetime', $reminder['due_datetime'], null, $locale);
         $reminder_type_str = _w('Reminder');
         switch ($reminder['type']) {
-            case 'CALL':
+            case crmReminderModel::TYPE_CALL:
                 $reminder_type_str = _w('Call');
                 break;
-            case 'MESSAGE':
+            case crmReminderModel::TYPE_MESSAGE:
                 $reminder_type_str = _w('Message');
                 break;
-            case 'MEETING':
+            case crmReminderModel::TYPE_MEETING:
                 $reminder_type_str = _w('Meeting');
                 break;
         }

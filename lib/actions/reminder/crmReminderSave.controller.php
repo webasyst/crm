@@ -71,6 +71,7 @@ class crmReminderSaveController extends crmJsonController
             'update_datetime' => $now,
             'user_contact_id' => $data['user_contact_id'],
             'content'         => $data['content'],
+            'report'          => $data['report'],
             'contact_id'      => $data['contact_id'] ? $data['contact_id'] : null,
             'type'            => ifset($types[$data['type']]) ? $data['type'] : 'OTHER',
         );
@@ -110,6 +111,7 @@ class crmReminderSaveController extends crmJsonController
                 $reminder = array(
                     'update_datetime' => $now,
                     'content'         => $data['content'],
+                    'report'          => $data['report'],
                 );
             } elseif ($reminder['due_datetime']) {
                 $reminder['push_sent'] = 0;
@@ -136,6 +138,7 @@ class crmReminderSaveController extends crmJsonController
         $data['due_date'] = ifset($data['due_date']);
         $data['due_time'] = ifset($data['due_time']);
         $data['content'] = ifset($data['content']);
+        $data['report'] = ifset($data['report']);
         $data['contact_id'] = intval(!empty($data['deal_id']) ? $data['deal_id'] * -1 : (!empty($data['contact_id']) ? $data['contact_id'] : 0));
         $data['type'] = ifset($data['type']);
 

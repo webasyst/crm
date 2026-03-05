@@ -372,7 +372,7 @@ class crmContactsExporter
                         $v = $v !== '..' ? $v : '';
                         $data[$f['full_id']] = $v;
                     } else {
-                        $v = $contact['contact'][$f_id];
+                        $v = ifset($contact['contact'][$f_id]);
                         if (!empty($f['options']) && isset($f['options'][$v])) {
                             $v = $f['options'][$v];
                         }

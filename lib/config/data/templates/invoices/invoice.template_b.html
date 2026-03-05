@@ -69,7 +69,7 @@
                     <span data-order="{$_item@iteration}.">{$_item.name|escape}</span>
                     <span class="c-d-mobile c-color-gray">{$_item.price|wa_format} x {$_item.quantity|wa_format}</span>
                 </td>
-                <td class="c-h-mobile c-text-nowrap c-align-top c-text-right c-pr-30 c-pt-12">{$_item@iteration}</td>
+                <td class="c-h-mobile c-text-nowrap c-align-top c-text-right c-pr-30 c-pt-12">{$_item.quantity|wa_format}</td>
                 <td class="c-h-mobile c-text-nowrap c-align-top c-text-right c-pr-30 c-pt-12">{$_item.price|wa_format}</td>
                 <td class="c-text-nowrap c-align-top c-text-right c-pt-12">{$_item_total|wa_format}</td>
                 {$_subtotal = $_subtotal + $_item_total}

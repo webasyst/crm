@@ -23,6 +23,8 @@ class crmContactOperationExportProcessController extends waLongActionController
             // need include fields names
             'export_fields_name' => $this->getRequest()->request('export_fields_name'),
 
+            'total_count_export' => $this->getRequest()->request('total_count'),
+
             // not export empty columns flag
             'not_export_empty_columns' => $this->getRequest()->request('not_export_empty_columns'),
 
@@ -139,6 +141,17 @@ class crmContactOperationExportProcessController extends waLongActionController
                 'progress' => $this->isDone() ? 100 : $this->getExporter()->getCurrentProgress(),
                 'file' => basename($this->data['filename'])
             ]);
+        }
+        if ($this->data['total_count_export'] > 0) {
+            try {
+                if (!class_exists('waLogModel')) {
+                    wa('webasyst');
+                }
+                (new waLogModel())->add('contact_export', $this->data['total_count_export']);
+                wa('crm');
+            } catch (Exception $ex) {
+                waLog::log(sprintf('Error on systemLogAction. Error: %s. Trace: %s', $ex->getMessage(), $ex->getTraceAsString()), 'crm/system_log_action.log');
+            }
         }
 
         return true;

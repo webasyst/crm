@@ -169,7 +169,11 @@
                                 <div class="small">
                                     <i class="fas fa-cog text-gray"></i>
                                     [`Web push notifications are not configured yet.`]
-                                    <a href="{$wa_backend_url}webasyst/settings/push/">[`Set up web push notifications`]&nbsp;›</a>
+                                    {if $wa->user()->isAdmin()}
+                                        <a href="{$wa_backend_url}webasyst/settings/push/">[`Set up web push notifications`]&nbsp;›</a>
+                                    {else}
+                                        {_ws('Please refer to your system administrator.')}
+                                    {/if}
                                 </div>
                             {/if}
                         </div>
@@ -414,7 +418,9 @@
                                                         {elseif !empty($_source.icon_fa)}
                                                             <i class="fas fa-{$_source.icon_fa}" title="{$_source.name|escape}" style="color:{$_source.icon_color}"></i>
                                                         {elseif !empty($_source.icon_url)}
-                                                            <img src="{$_source.icon_url}" title="{$_source.name|escape}" data-fa-i2svg>
+                                                            <span class="icon">
+                                                                <img src="{$_source.icon_url}" title="{$_source.name|escape}" data-fa-i2svg>
+                                                            </span>
                                                         {/if}
                                                         <em>{$_source.name|escape}</em>
                                                     </span>

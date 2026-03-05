@@ -2,9 +2,47 @@
 
 class crmInvoiceModel extends crmModel
 {
+    const STATE_PENDING = 'PENDING';
+    const STATE_PAID = 'PAID';
+    const STATE_REFUNDED = 'REFUNDED';
+    const STATE_ARCHIVED = 'ARCHIVED';
+    const STATE_DRAFT = 'DRAFT';
+    const STATE_PROCESSING = 'PROCESSING';
+
     protected $table = 'crm_invoice';
 
     protected $link_contact_field = array('creator_contact_id', 'contact_id');
+
+    public function insert($data, $type = 0)
+    {
+        if (empty($data['create_datetime'])) {
+            $data['create_datetime'] = date('Y-m-d H:i:s');
+        }
+        if (empty($data['update_datetime'])) {
+            $data['update_datetime'] = $data['create_datetime'];
+        }
+        if (!isset($data['currency_rate'])) {
+            $data['currency_rate'] = 1;
+        }
+        if (empty($data['state_id'])) {
+            $data['state_id'] = self::STATE_DRAFT;
+        }
+
+        $result = parent::insert($data, $type);
+        if (empty($data['number'])) {
+            $numder = null;
+            if (wa_is_int($result)) {
+                $numder = $result;
+            } elseif (is_array($result)) {
+                $numder = $result['id'];
+            }
+            if ($numder) {
+                $this->updateById($numder, ['number' => $numder]);
+            }
+        }
+        
+        return $result;
+    }
 
     public function getInvoice($id)
     {
@@ -138,7 +176,7 @@ class crmInvoiceModel extends crmModel
 
         // Exclude ARCHIVED rows
         if (empty($params['state_id'])) {
-            $filter_conditions .= " AND i.`state_id` <> 'ARCHIVED'";
+            $filter_conditions .= " AND i.`state_id` <> '".$this->escape(crmInvoiceModel::STATE_ARCHIVED)."'";
         }
 
         if (!empty($params['payment_start_date'])) {
@@ -192,8 +230,17 @@ class crmInvoiceModel extends crmModel
         if (!$contact_ids) {
             return;
         }
-        $sql = "DELETE FROM {$this->getTableName()} WHERE contact_id IN('".join("','", $contact_ids)."') AND state_id IN('DRAFT','ARCHIVED')";
-        $this->exec($sql);
+
+        $invoices_do_delete = $this->getByField([
+            'contact_id' => $contact_ids,
+            'state_id' => [ crmInvoiceModel::STATE_DRAFT, crmInvoiceModel::STATE_ARCHIVED ]
+        ], 'id');
+        if (!empty($invoices_do_delete)) {
+            $delete_ids = array_keys($invoices_do_delete);
+            $this->deleteById($delete_ids);
+            (new crmInvoiceItemsModel())->deleteByField(['invoice_id' => $delete_ids]);
+            (new crmInvoiceParamsModel())->deleteByField(['invoice_id' => $delete_ids]);
+        }
     }
 
     public function getPaidChart($chart_params, $value = null)
@@ -218,12 +265,12 @@ class crmInvoiceModel extends crmModel
         $val = $value != 'sum' ? 'COUNT(*)' : "SUM(amount * currency_rate)";
 
         $sql = "SELECT $select, $val cnt FROM {$this->getTableName()} i
-            WHERE i.state_id = 'PAID'
+            WHERE i.state_id = :paid_state
             AND i.payment_datetime >= '".$this->escape($chart_params['start_date'])." 00:00:00'
             AND i.payment_datetime <= '".$this->escape($chart_params['end_date'])." 23:59:59'
             $condition GROUP BY $group_by ORDER BY $group_by";
 
-        $res = $this->query($sql)->fetchAll();
+        $res = $this->query($sql, ['paid_state' => self::STATE_PAID])->fetchAll();
 
         if ($chart_params['group_by'] == 'months') {
             $chart_params['start_date'] = date('Y-m-01', strtotime($chart_params['start_date']));

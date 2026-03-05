@@ -33,15 +33,15 @@ class crmPopup20Controller extends crmJsonController
             foreach ($reminders as $reminder) {
 
                 switch ($reminder['type']) {
-                    case 'CALL':
+                    case crmReminderModel::TYPE_CALL:
                         $icon = 'fas fa-phone';
                         $action = '<span class="notifi-type">'._w('Call').'</span>';
                         break;
-                    case 'MESSAGE':
+                    case crmReminderModel::TYPE_MESSAGE:
                         $icon = 'fas fa-envelope';
                         $action = '<span class="notifi-type">'._w('Message').'</span>';
                         break;
-                    case 'MEETING':
+                    case crmReminderModel::TYPE_MEETING:
                         $icon = 'fas fa-coffee';
                         $action = '<span class="notifi-type">'._w('Meeting').'</span>';
                         break;

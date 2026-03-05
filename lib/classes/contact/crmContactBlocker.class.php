@@ -22,6 +22,12 @@ class crmContactBlocker
         }
 
         (new waContactModel)->updateById($contact['id'], ['is_user' => -1]);
+        (new waContactDataTextModel)->replace([
+            'contact_id' => $contact['id'],
+            'field'      => 'ban_reason',
+            'value'      => $reason,
+            'sort'       => 0,
+        ]);
 
         $log_item_params = empty($reason) ? null : json_encode(['reason' => $reason]);
         (new waLogModel)->add('access_disable', $log_item_params, $contact['id'], wa()->getUser()->getId());
@@ -55,6 +61,7 @@ class crmContactBlocker
         }
 
         (new waContactModel)->updateById($contact['id'], ['is_user' => 0]);
+        (new waContactDataTextModel)->deleteByField(['contact_id' => $contact['id'], 'field' => 'ban_reason']);
         (new waLogModel)->add('access_enable', null, $contact['id'], wa()->getUser()->getId());
         (new crmLogModel)->add([
             'action'           => 'contact_unban',

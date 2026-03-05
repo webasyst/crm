@@ -42,6 +42,7 @@ var CRMSidebar = (function ($) {
         that.initTooltips();
         that.initRailToggle();
         that.initExpandBricks();
+        that.initSortBricks();
 
         if (!that.$activeMenuItem.length) {
             that.selectLink();
@@ -237,6 +238,7 @@ var CRMSidebar = (function ($) {
             that.initUpdater();
             that.initTooltips();
             that.toggleBricksExpander();
+            that.initSortBricks();
         });
     };
 
@@ -383,33 +385,69 @@ var CRMSidebar = (function ($) {
         });
     };
 
+    CRMSidebar.prototype.initSortBricks = function() {
+        const that = this;
+        const $bricks_wrapper = that.$body.find('#c-sidebar-bricks');
+        const url = $.crm.app_url + '?module=funnel&action=sortSave';
+
+        const saveSort = () => {
+            const $ids = $bricks_wrapper.children().map((i, brick) => brick.dataset.id);
+            const idsString = Array.from($ids).join(',');
+            $.post(url, { ids: idsString });
+        };
+
+        let start_index = null;
+        $bricks_wrapper.uiSortable({
+            distance: 10,
+            items: '> [data-id]',
+            axis: 'y',
+            tolerance: 'pointer',
+            start: (_, ui) => {
+                start_index = ui.item.index();
+                $bricks_wrapper.css('scroll-snap-type', 'none');
+                ui.item.css({
+                    left: 0,
+                    transition: 'none'
+                });
+            },
+            stop: (_, ui) => {
+                $bricks_wrapper.removeAttr('style');
+                ui.item.removeAttr('style');
+                if (start_index === ui.item.index()) {
+                    start_index = null
+                    return;
+                }
+                start_index = null;
+                saveSort();
+            }
+        });
+    };
+
     CRMSidebar.prototype.toggleBricksExpander = function() {
         const that = this;
-        if (that.bricks_expander_is_hide) {
-            return;
-        }
-        const $bricks = that.$body.find('#c-sidebar-bricks');
-        const brick_count = $bricks.children().length;
-        if (!brick_count) {
-            return;
-        }
+        if (that.bricks_expander_is_hide) return;
 
         const brick_height = 72; // px
         const bricks_expander_height = 26; // px
         const offset_height = -10; // px
         const min_bricks_desktop = 2;
         const min_bricks_mobile = 5;
+        const is_mobile = window.matchMedia('(max-width: 760px)').matches;
+
+        const $bricks_wrapper = that.$body.find('#c-sidebar-bricks');
+        const brick_count = $bricks_wrapper.children().length;
+        if ((is_mobile ? min_bricks_mobile : min_bricks_desktop) >= brick_count) return;
 
         const max_height = that.$wrapper.height();
         const sections_height = that.$body.find('.c-sidebar-sections').height();
         const footer_height = that.$footer.height();
 
-        let brick_peek_count = Math.max(
-            Math.floor((max_height - footer_height - sections_height - bricks_expander_height - offset_height) / brick_height),
-            min_bricks_desktop
-        );
-        if (window.matchMedia('(max-width: 760px)').matches) {
-            brick_peek_count = min_bricks_mobile;
+        let brick_peek_count = min_bricks_mobile;
+        if (!is_mobile) {
+            brick_peek_count = Math.max(
+                Math.floor((max_height - footer_height - sections_height - bricks_expander_height - offset_height) / brick_height),
+                min_bricks_desktop
+            );
         }
         that.$body.css('--max-height-bricks', brick_height * brick_peek_count + 'px');
         that.$body.toggleClass('bricks-peek', brick_count > brick_peek_count);

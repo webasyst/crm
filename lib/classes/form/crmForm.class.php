@@ -130,8 +130,8 @@ class crmForm
         if (!$this->info) {
             $this->info = self::getFormModel()->getEmptyRow();
             $this->info['params'] = [
-                'html_after_submit' => $this->getDefaultHtmlAfterSubmit(),
-                'after_antispam_confirm_text' => $this->getDefaultAfterAntispamConfirmText(),
+                'html_after_submit' => self::getDefaultHtmlAfterSubmit(),
+                'after_antispam_confirm_text' => self::getDefaultAfterAntispamConfirmText(),
             ];
         } else {
             $this->info['params'] = self::unserializeParams(self::getFormParamsModel()->get($this->id));
@@ -188,20 +188,20 @@ class crmForm
         return $this->info;
     }
 
-    protected function getDefaultHtmlAfterSubmit()
+    public static function getDefaultHtmlAfterSubmit($text = '')
     {
         $root_uri = wa()->getRootUrl();
-        $text = _w('Thanks for subscribing!');
+        $text = $text ?: _w('Thanks for subscribing!');
         return <<<HTML
 <p style="text-align: center"><img src="{$root_uri}wa-apps/crm/img/success.svg"></p>
 <p style="text-align: center">{$text}</p>
 HTML;
     }
 
-        protected function getDefaultAfterAntispamConfirmText()
+    public static function getDefaultAfterAntispamConfirmText($text = '')
     {
         $root_uri = wa()->getRootUrl();
-        $text = _w('Confirmed');
+        $text = $text ?: _w('Confirmed');
         return <<<HTML
 <p style="text-align: center"><img src="{$root_uri}wa-apps/crm/img/success.svg"></p>
 <p style="text-align: center">{$text}</p>
@@ -456,7 +456,9 @@ HTML;
          * @param array $data
          * @return void
          */
+        $data_params['_tmp__old_params'] = $info_params;
         wa('crm')->event('form_settings_save', $data_params);
+        unset($data_params['_tmp__old_params']);
 
         $data_params = self::serializeParams($data_params);
         $data['params'] = $data_params;
@@ -527,18 +529,26 @@ HTML;
 
     public static function getDefaultMessageMailTemplate()
     {
-        if (wa()->getLocale() == 'ru_RU') {
-            return '{SEPARATOR}'.
-                '<p>Мы ответим вам в ближайшее время.</p>'.
-                '<p>Спасибо!</p>'.
-                '<p>--</p>'.
-                '<p>{$company_name}</p>';
+        $path = wa('crm')->getConfig()->getAppPath('lib/config/data');
+        $template_name = '/templates/form.client.'.(wa()->getLocale() == 'ru_RU' ? 'ru_RU.html' : 'en_US.html');
+
+        if (file_exists($path.$template_name)) {
+            return file_get_contents($path.$template_name);
         }
-        return '{SEPARATOR}'.
-            '<p>We shall reply to you as soon as possible.</p>'.
-            '<p>Thank you!</p>'.
-            '<p>--</p>'.
-            '<p>{$company_name}</p>';
+
+        return '';
+    }
+
+    public static function getDefaultMessageAdminMailTemplate()
+    {
+        $path = wa('crm')->getConfig()->getAppPath('lib/config/data');
+        $template_name = '/templates/form.admin.'.(wa()->getLocale() == 'ru_RU' ? 'ru_RU.html' : 'en_US.html');
+
+        if (file_exists($path.$template_name)) {
+            return file_get_contents($path.$template_name);
+        }
+
+        return '';
     }
 
     /**

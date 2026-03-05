@@ -281,7 +281,7 @@
                             if (!is_locked) {
                                 is_locked = true;
 
-                                var href = "{$wa_backend_url}crm/?module=deal&action=createDialog",
+                                var href = "{$wa_backend_url}crm/?module=deal&action=createDialog&ui={$wa->whichUI('shop')}",
                                     data = {
                                         order_id: {$order_id|json_encode},
                                         contact_id: {$contact_id|json_encode}

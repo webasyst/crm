@@ -1,11 +1,11 @@
 {strip}
 {$_states = [
-    "DRAFT" => [
+    crmInvoiceModel::STATE_DRAFT => [
         "name" => _w('Draft'),
         "icon" => "status-gray-tiny",
         "class" => "draft"
     ],
-    "PENDING" => [
+    crmInvoiceModel::STATE_PENDING => [
         "name" => _w('Pending'),
         "icon" => "status-green-tiny",
         "class" => "pending"
@@ -15,22 +15,22 @@
         "icon" => "status-green-tiny",
         "class" => "payment-expired"
     ],
-    "PROCESSING" => [
+    crmInvoiceModel::STATE_PROCESSING => [
         "name" => _w('Processing'),
         "icon" => "light-bulb",
         "class" => "processing"
     ],
-    "PAID" => [
+    crmInvoiceModel::STATE_PAID => [
         "name" => _w('Paid'),
         "icon" => "yes-bw",
         "class" => "paid"
     ],
-    "REFUNDED" => [
+    crmInvoiceModel::STATE_REFUNDED => [
         "name" => _w('Refunded'),
         "icon" => "no-bw",
         "class" => "refunded"
     ],
-    "ARCHIVED" => [
+    crmInvoiceModel::STATE_ARCHIVED => [
         "name" => _w('Archived'),
         "icon" => "trash",
         "class" => "archived"
@@ -41,11 +41,11 @@
 
 {$_state = false}
 {if $invoice.state_id && !empty($_states[$invoice.state_id])}
-    {$is_payment_expired = $invoice.state_id === 'PENDING' && $invoice.due_date && {$invoice.due_date|strtotime|date_format:"Y-m-d"} < {$smarty.now|date_format:"Y-m-d"}}
-    {if $is_payment_expired}
-        {$_state = $_states['PAYMENT_EXPIRED']}
-    {else}
-        {$_state = $_states[$invoice.state_id]}
+    {$_state = $_states[$invoice.state_id]}
+    {if $invoice.state_id === crmInvoiceModel::STATE_PENDING && !empty($invoice.due_date)}
+        {if {$invoice.due_date|strtotime|date_format:"Y-m-d"} < {$smarty.now|date_format:"Y-m-d"}}
+            {$_state = $_states['PAYMENT_EXPIRED']}
+        {/if}
     {/if}
 {/if}
 
@@ -76,7 +76,7 @@
                     </span>
                     {if !empty($invoice.amount)}
                     <div class="custom-ml-auto nowrap semibold">
-                        {if ifset($invoice.state_id) === 'PAID'}
+                        {if ifset($invoice.state_id) === crmInvoiceModel::STATE_PAID}
                         <i class="fas fa-check-circle text-green custom-mr-4 small"></i>
                         {/if}
                         <span class="count c-price">{$invoice.amount|wa_currency_html:$invoice.currency_id}</span>

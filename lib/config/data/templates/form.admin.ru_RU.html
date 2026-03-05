@@ -1,0 +1,17 @@
+{SEPARATOR}Поступила заявка{SEPARATOR}
+<p>Получена заявка.</p>
+
+<p>
+    {rtrim($wa->url(true), '/')}{$wa_backend_url}crm/contact/{$customer.id|escape}
+</p>
+
+<p>
+    Имя: {$customer.firstname|escape}<br>
+    Фамилия: {$customer.lastname|escape}<br>
+    Эл. почта: {$customer->get('email', 'default')|escape}<br>
+    Телефон: {$customer->get('phone', 'default')|escape}
+</p>
+
+<p>--</p>
+
+<p>{$company_name}</p>

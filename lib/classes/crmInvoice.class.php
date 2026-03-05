@@ -20,50 +20,50 @@ class crmInvoice
     public static function getStates($all = false)
     {
         $wa_app_url = wa()->getAppUrl('crm', true);
-        $states = array(
-            "DRAFT" => array(
-                "id" => "DRAFT",
+        $states = [
+            crmInvoiceModel::STATE_DRAFT => [
+                "id" => crmInvoiceModel::STATE_DRAFT,
                 "name" => _w('Draft'),
                 "uri" => $wa_app_url."invoice/?state=draft",
                 "icon" => "status-gray-tiny",
                 "class" => "draft"
-            ),
-            "PENDING" => array(
-                "id" => "PENDING",
+            ],
+            crmInvoiceModel::STATE_PENDING => [
+                "id" => crmInvoiceModel::STATE_PENDING,
                 "name" => _w('Pending'),
                 "uri" => $wa_app_url."invoice/?state=pending",
                 "icon" => "status-green-tiny",
                 "class" => "pending"
-            ),
-            "PROCESSING" => array(
-                "id" => "PROCESSING",
+            ],
+            crmInvoiceModel::STATE_PROCESSING => [
+                "id" => crmInvoiceModel::STATE_PROCESSING,
                 "name" => _w('Processing'),
                 "uri" => $wa_app_url."invoice/?state=processing",
                 "icon" => "light-bulb",
                 "class" => "processing"
-            ),
-            "PAID" => array(
-                "id" => "PAID",
+            ],
+            crmInvoiceModel::STATE_PAID => [
+                "id" => crmInvoiceModel::STATE_PAID,
                 "name" => _w('Paid'),
                 "uri" => $wa_app_url."invoice/?state=paid",
                 "icon" => "yes-bw",
                 "class" => "paid"
-            ),
-            "REFUNDED" => array(
-                "id" => "REFUNDED",
+            ],
+            crmInvoiceModel::STATE_REFUNDED => [
+                "id" => crmInvoiceModel::STATE_REFUNDED,
                 "name" => _w('Refunded'),
                 "uri" => $wa_app_url."invoice/?state=refunded",
                 "icon" => "no-bw",
                 "class" => "refunded"
-            ),
-            "ARCHIVED" => array(
-                "id" => "ARCHIVED",
+            ],
+            crmInvoiceModel::STATE_ARCHIVED => [
+                "id" => crmInvoiceModel::STATE_ARCHIVED,
                 "name" => _w('Archived'),
                 "uri" => $wa_app_url."invoice/?state=archived",
                 "icon" => "trash",
                 "class" => "archived"
-            ),
-        );
+            ],
+        ];
 
         if ($all) {
             return array(
@@ -94,12 +94,15 @@ class crmInvoice
         $now = date('Y-m-d');
         $count = 0;
 
-        $list = $im->select('*')->where("due_date IS NOT NULL AND due_date < '$now' AND state_id = 'PENDING'")->fetchAll();
+        $list = $im->select('*')->where('due_date IS NOT NULL AND due_date < :now AND state_id = :state_pending', [
+            'now' => $now, 
+            'state_pending' => crmInvoiceModel::STATE_PENDING
+        ])->fetchAll();
         foreach ($list as $invoice) {
-            $im->updateById($invoice['id'], array(
-                'state_id'        => 'ARCHIVED',
+            $im->updateById($invoice['id'], [
+                'state_id'        => crmInvoiceModel::STATE_ARCHIVED,
                 'update_datetime' => date('Y-m-d H:i:s'),
-            ));
+            ]);
 
             $crm_log_id = self::logPush('invoice_archived', $invoice);
             $params = [
@@ -169,7 +172,7 @@ class crmInvoice
         }
         $now = date('Y-m-d H:i:s');
         $im = new crmInvoiceModel();
-        $invoice['state_id'] = 'PAID';
+        $invoice['state_id'] = crmInvoiceModel::STATE_PAID;
         $im->updateById($invoice['id'], [
             'state_id'         => $invoice['state_id'],
             'payment_datetime' => $now,
@@ -219,7 +222,7 @@ class crmInvoice
             return $errors;
         }
         $im = new crmInvoiceModel();
-        $invoice['state_id'] = 'PENDING';
+        $invoice['state_id'] = crmInvoiceModel::STATE_PENDING;
         $im->updateById($invoice['id'], [
             'state_id'        => $invoice['state_id'],
             'update_datetime' => date('Y-m-d H:i:s'),
@@ -262,7 +265,7 @@ class crmInvoice
             return $errors;
         }
         $im = new crmInvoiceModel();
-        $invoice['state_id'] = 'REFUNDED';
+        $invoice['state_id'] = crmInvoiceModel::STATE_REFUNDED;
         $im->updateById($invoice['id'], [
             'state_id'        => $invoice['state_id'],
             'update_datetime' => date('Y-m-d H:i:s'),
@@ -286,16 +289,31 @@ class crmInvoice
 
     public static function paid($invoice)
     {
-        if ($invoice['state_id'] != 'PENDING') {
+        if ($invoice['state_id'] != crmInvoiceModel::STATE_PENDING) {
             return [(new waRightsException())->getMessage()];
         }
         $im = new crmInvoiceModel();
-        $invoice['state_id'] = 'PAID';
+        $invoice['state_id'] = crmInvoiceModel::STATE_PAID;
         $im->updateById($invoice['id'], [
             'state_id'         => $invoice['state_id'],
             'payment_datetime' => date('Y-m-d H:i:s'),
             'update_datetime'  => date('Y-m-d H:i:s'),
         ]);
+
+        if (!empty($invoice['recurrent_id'])) {
+            $recurrent_model = new crmInvoiceRecurrentModel();
+            $recurrent_record = $recurrent_model->getById($invoice['recurrent_id']);
+            if (!empty($recurrent_record)) {
+                $non_paid_count = $recurrent_record['non_paid_count'];
+                if ($non_paid_count > 0) {
+                    $non_paid_count = $recurrent_record['last_invoice_id'] == $invoice['id'] ? 0 : $non_paid_count - 1;
+                    $recurrent_model->updateById($invoice['recurrent_id'], [
+                        'non_paid_count' => $non_paid_count
+                    ]);
+                }
+            }
+        }
+
         $log_id = self::logPush('invoice_paid', $invoice);
         $params = [
             'invoice'    => $invoice,
@@ -315,11 +333,11 @@ class crmInvoice
 
     public static function activate($invoice)
     {
-        if ($invoice['state_id'] != 'DRAFT') {
+        if ($invoice['state_id'] != crmInvoiceModel::STATE_DRAFT) {
             return [(new waRightsException())->getMessage()];
         }
         $im = new crmInvoiceModel();
-        $invoice['state_id'] = 'PENDING';
+        $invoice['state_id'] = crmInvoiceModel::STATE_PENDING;
         $im->updateById($invoice['id'], [
             'state_id'        => $invoice['state_id'],
             'update_datetime' => date('Y-m-d H:i:s'),
@@ -349,7 +367,7 @@ class crmInvoice
 
     public static function delete($invoice)
     {
-        if ($invoice['state_id'] != 'DRAFT') {
+        if ($invoice['state_id'] != crmInvoiceModel::STATE_DRAFT) {
             return [(new waRightsException())->getMessage()];
         }
         $im = new crmInvoiceModel();
@@ -365,11 +383,11 @@ class crmInvoice
 
     public static function archive($invoice)
     {
-        if ($invoice['state_id'] != 'PENDING') {
+        if ($invoice['state_id'] != crmInvoiceModel::STATE_PENDING) {
             return [(new waRightsException())->getMessage()];
         }
         $im = new crmInvoiceModel();
-        $invoice['state_id'] = 'ARCHIVED';
+        $invoice['state_id'] = crmInvoiceModel::STATE_ARCHIVED;
         $im->updateById($invoice['id'], [
             'state_id'        => $invoice['state_id'],
             'update_datetime' => date('Y-m-d H:i:s'),
@@ -393,7 +411,7 @@ class crmInvoice
 
     public static function cancel($invoice)
     {
-        if ($invoice['state_id'] != 'PAID' || strtotime($invoice['payment_datetime']) < time() - 60 * 60) {
+        if ($invoice['state_id'] != crmInvoiceModel::STATE_PAID || strtotime($invoice['payment_datetime']) < time() - 60 * 60) {
             return [(new waRightsException())->getMessage()];
         }
         $tm = new waTransactionModel();
@@ -411,7 +429,7 @@ class crmInvoice
             return [(new waRightsException())->getMessage()];
         }
         $im = new crmInvoiceModel();
-        $invoice['state_id'] = 'PENDING';
+        $invoice['state_id'] = crmInvoiceModel::STATE_PENDING;
         $im->updateById($invoice['id'], [
             'state_id'         => $invoice['state_id'],
             'payment_datetime' => null,
@@ -423,11 +441,11 @@ class crmInvoice
 
     public static function draft($invoice)
     {
-        if ($invoice['state_id'] != 'PENDING') {
+        if ($invoice['state_id'] != crmInvoiceModel::STATE_PENDING) {
             return [(new waRightsException())->getMessage()];
         }
         $im = new crmInvoiceModel();
-        $invoice['state_id'] = 'DRAFT';
+        $invoice['state_id'] = crmInvoiceModel::STATE_DRAFT;
         $im->updateById($invoice['id'], [
             'state_id'        => $invoice['state_id'],
             'update_datetime' => date('Y-m-d H:i:s'),
@@ -463,5 +481,127 @@ class crmInvoice
             $contact_id,
             ifset($invoice, 'id', null)
         );
+    }
+
+    public static function recurrentIssue()
+    {
+        if (!crmHelper::isPremium()) {
+            // Only for premium
+            return;
+        }
+
+        $app_settings_model = new waAppSettingsModel();
+        $last_start_ts = $app_settings_model->get('crm', 'recurrent_invoice_issue_last_start');
+        if (!empty($last_start_ts) && $last_start_ts + 30*60 > time()) {
+            // Recentry started (maybe still running)
+            return;
+        }
+
+        $last_run_date = $app_settings_model->get('crm', 'recurrent_invoice_issue_last_run');
+        if (!empty($last_run_date) && $last_run_date >= date('Y-m-d')) {
+            // Already executed today
+            return;
+        }
+
+        $app_settings_model->set('crm', 'recurrent_invoice_issue_last_start', time());
+
+        $invoice_model = new crmInvoiceModel();
+        $invoice_items_model = new crmInvoiceItemsModel();
+        $invoice_recurrent_model = new crmInvoiceRecurrentModel();
+        $currency_model = new crmCurrencyModel();
+
+        // get issue list
+        $issue_list = $invoice_recurrent_model->getIssueList();
+
+        // prepare origin invoices
+        $origin_ids = array_column($issue_list, 'origin_invoice_id');
+        $origin_invoices = $invoice_model->getById($origin_ids);
+        $currency_ids = array_column($origin_invoices, 'currency_id');
+        $currency_info = $currency_model->getById($currency_ids);
+        $origin_invoices = array_map(function($invoice) use ($currency_info) {
+            unset($invoice['id']);
+            unset($invoice['number']);
+            unset($invoice['payment_datetime']);
+            $invoice['create_datetime'] = date('Y-m-d H:i:s');
+            $invoice['update_datetime'] = date('Y-m-d H:i:s');
+            $invoice['creator_contact_id'] = 0;
+            
+            $result_invoice['currency_rate'] = ifset($currency_info[$invoice['currency_id']]['rate'], 1);
+            if (!empty($invoice['due_days']) && $invoice['due_days'] > 0) {
+                $invoice['due_date'] = date('Y-m-d', strtotime('+'.$invoice['due_days'].' day'));
+            } elseif (!empty($invoice['due_date']) && !empty($invoice['invoice_date'])) {
+                $issueed_date = new DateTimeImmutable($invoice['invoice_date']);
+                $due_date = new DateTimeImmutable($invoice['due_date']);
+                $interval = $issueed_date->diff($due_date);
+                $invoice['due_date'] = date('Y-m-d', strtotime('+'.$interval->days.' day'));
+            } else {
+                unset($invoice['due_date']);
+            }
+            $invoice['invoice_date'] = date('Y-m-d');
+            $invoice['state_id'] = crmInvoiceModel::STATE_DRAFT;
+            return $invoice;
+        }, $origin_invoices);
+
+        // prepare origin invoice items
+        $origin_invoice_items = $invoice_items_model->getByField(['invoice_id' => $origin_ids], true);
+        $origin_invoice_items = array_reduce($origin_invoice_items, function($result, $item) {
+            $invoice_id = $item['invoice_id'];
+            if (!isset($result[$invoice_id])) {
+                $result[$invoice_id] = [];
+            }
+            unset($item['id']);
+            unset($item['invoice_id']);
+            $result[$invoice_id][] = $item;
+            return $result;
+        }, []);
+
+        $issued_invoice_ids = [];
+
+        foreach ($issue_list as $recurrent) {
+            $invoice = ifset($origin_invoices[$recurrent['origin_invoice_id']]);
+            if (empty($invoice)) {
+                continue;
+            }
+
+            $invoice_items = $origin_invoice_items[$recurrent['origin_invoice_id']] ?? [];
+            $recurrent_counter = $recurrent['counter'] + 1;
+            
+            if (!empty($recurrent['number_template'])) {
+                $invoice['number'] = str_replace('%COUNT', $recurrent_counter, $recurrent['number_template']);
+                $invoice['number'] = str_replace('%MONTH', date('m'), $invoice['number']);
+                $invoice['number'] = str_replace('%YEAR', date('Y'), $invoice['number']);
+            }
+
+            $invoice_id = $invoice_model->insert($invoice);
+            $invoice['id'] = $invoice_id;
+            $issued_invoice_ids[] = $invoice_id;
+            if (!empty($recurrent['number_template']) && strpos($recurrent['number_template'], '%ID') !== false) {
+                $invoice['number'] = str_replace('%ID', $invoice_id, $invoice['number']);
+                $invoice_model->updateById($invoice_id, ['number' => $invoice['number']]);
+            }
+
+            if (!empty($invoice_items)) {
+                $invoice_items = array_map(function($item) use ($invoice_id) {
+                    $item['invoice_id'] = $invoice_id;
+                    return $item;
+                }, $invoice_items);
+
+                $invoice_items_model->multipleInsert($invoice_items);
+            }
+
+            self::activate($invoice);
+
+            $invoice_recurrent_model->updateById($recurrent['id'], [
+                'counter' => $recurrent_counter,
+                'non_paid_count' => $recurrent['non_paid_count'] + 1,
+                'last_datetime' => date('Y-m-d H:i:s'),
+                'last_invoice_id' => $invoice_id,
+                'next_date' => date('Y-m-d', strtotime('+'.$recurrent['interval_value'].' '.$recurrent['interval_unit']))
+            ]);
+        }
+
+        $app_settings_model->set('crm', 'recurrent_invoice_issue_last_run', date('Y-m-d'));
+
+        return $issued_invoice_ids;
     }
 }

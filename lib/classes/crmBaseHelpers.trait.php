@@ -195,6 +195,14 @@ trait crmBaseHelpersTrait
     }
 
     /**
+     * @return crmInvoiceRecurrentModel
+     */
+    protected function getInvoiceRecurrentModel()
+    {
+        return $this->getModel('invoice_recurrent', 'crmInvoiceRecurrentModel');
+    }
+
+    /**
      * @return crmLogModel
      */
     protected function getLogModel()

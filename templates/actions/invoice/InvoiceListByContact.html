@@ -35,7 +35,7 @@
 
         <table class="c-invoices-list zebra single-lined">
             {foreach $invoices as $_i}
-                {$_state = $_states["PENDING"]["class"]}
+                {$_state = $_states[crmInvoiceModel::STATE_PENDING]["class"]}
                 {if !empty($_i.state_id) && !empty($_states[$_i.state_id])}
                     {$_state = $_states[$_i.state_id]["class"]}
                 {/if}

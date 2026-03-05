@@ -38,12 +38,16 @@
             </div>
             <div class="flexbox full-width wide crm-field-edit">
                 <div class="field wide{if $field.id === '!agreement_checkbox' || $field.type === 'Checkbox'} custom-mt-4{/if}">
-                    <div class="name for-input js-field-label">{strip}
-                        {if $field.id !== '!agreement_checkbox' && $type !== 'Checkbox'}
-                            {$caption|escape}
-                        {/if}
-                        {if !empty($field.required) && $field.id !== '!captcha'} *{/if}
-                    {/strip}</div>
+                    <div class="name for-input">
+                        <div class="name-inner">
+                            <div class="js-field-label">{strip}
+                                {if $field.id !== '!agreement_checkbox' && $type !== 'Checkbox'}
+                                    {$caption|escape}
+                                {/if}
+                            {strip}</div>
+                            {if !empty($field.required) && $field.id !== '!captcha'}<div>*</div>{/if}
+                        </div>
+                    </div>
                     <div class="value js-field-input">
                         {if $type === 'Checkbox'}
                             <label class="flexbox full-width space-8">
@@ -98,25 +102,24 @@
             <input type="text" name="form[name]" value="{if $form.id > 0}{$form.name|escape}{else}[`New form`]{/if}" placeholder="[`Form name`]" class="crm-name-input">
         </div>
 
-
         <div class="crm-form-section fields">
             <div class="fields-group">
                 <div class="flexbox full-width space-16 custom-mb-24">
                     <div class="flexbox wide wrap large space-16 custom-mt-4">
                         <label class="nowrap">
-                            <span class="wa-radio custom-mt-4">
+                            <span class="wa-radio custom-mt-4 custom-mr-4">
                                 <input type="radio" class="js-widget-container" name="form[params][widget_container]"{if !empty($form.params.widget_container) && $form.params.widget_container == 'dialog'} checked{/if} value="dialog"><span></span>
                             </span>
                             [`Dialog`]
                         </label>
                         <label class="nowrap">
-                            <span class="wa-radio custom-mt-4">
+                            <span class="wa-radio custom-mt-4 custom-mr-4">
                                 <input type="radio" class="js-widget-container" name="form[params][widget_container]"{if !empty($form.params.widget_container) && $form.params.widget_container == 'drawer'} checked{/if} value="drawer"><span></span>
                             </span>
                             [`Drawer`]
                         </label>
                         <label class="nowrap">
-                            <span class="wa-radio custom-mt-4">
+                            <span class="wa-radio custom-mt-4 custom-mr-4">
                                 <input type="radio" class="js-widget-container" name="form[params][widget_container]"{if empty($form.params.widget_container)} checked{/if} value=""><span></span>
                             </span>
                             [`Embed manually`]
@@ -127,7 +130,7 @@
                         {if $form.id > 0}
                             <div class="dropdown" id="dropdown-frontend-link">
                                 <a class="dropdown-toggle semibold nowrap" href="javscript:void(0)">
-                                    <i class="fas fa-link fa-sm"></i>
+                                    <i class="fas fa-link fa-sm custom-mr-4"></i>
                                     [`Link`]
                                 </a>
                                 <div class="dropdown-body right">
@@ -162,7 +165,7 @@
                         <div class="flexbox full-width space-8 wrap custom-my-8">
                             <div class="hint">[`To publish this form on your website use this code:`]
                                 {if $form.id > 0}
-                                    <code class="crm-smarty-helper bold nowrap">{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}</code>
+                                    <code class="crm-smarty-helper bold nowrap custom-mr-4">{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}</code>
                                     <a class="icon crm-copy js-copy" data-content="{literal}{$wa->crm->form({/literal}{$form.id}{literal})}{/literal}" title="[`Copy to clipboard`]"><i class="fas fa-copy"></i></a>
                                 {else}
                                     <strong>[`Will be available after saving`]</strong>
@@ -190,7 +193,7 @@
                             <div class="name for-input"></div>
                             <div class="value small">
                                 <label>
-                                    <span class="wa-checkbox">
+                                    <span class="wa-checkbox custom-mr-4">
                                         <input type="checkbox" name="form[params][widget_theme]"{if !empty($form.params.widget_theme) && $form.params.widget_theme == 'dark'} checked{/if} value="dark">
                                         <span><span class="icon"><i class="fas fa-check"></i></span></span>
                                     </span>
@@ -204,7 +207,7 @@
                         <div class="field">
                             <div class="name for-checkbox">
                                 <label>
-                                    <span class="wa-checkbox">
+                                    <span class="wa-checkbox custom-mr-4">
                                         <input type="checkbox" class="js-widget-fab" name="form[params][widget_display_fab]"{if !empty($form.params.widget_display_fab)} checked{/if} value="1">
                                         <span><span class="icon"><i class="fas fa-check"></i></span></span>
                                     </span>
@@ -576,7 +579,7 @@
                 <div class="field">
                     <div class="name for-input">
                         <label class="flexbox space-8 full-width">
-                            <span class="wa-radio custom-mt-4"><input type="radio" name="form[params][after_submit]"{if !empty($form.params.after_submit) && $form.params.after_submit == 'redirect'} checked{/if} value="redirect"><span></span></span>
+                            <span class="wa-radio custom-mt-2"><input type="radio" name="form[params][after_submit]"{if !empty($form.params.after_submit) && $form.params.after_submit == 'redirect'} checked{/if} value="redirect"><span></span></span>
                             <span class="wide">
                                 [`Redirect to URL`]
                             </span>
@@ -590,7 +593,7 @@
                 <div class="field">
                     <div class="name">
                         <label class="flexbox space-8 full-width">
-                            <span class="wa-radio custom-mt-4"><input type="radio" name="form[params][after_submit]" {if empty($form.params.after_submit) || $form.params.after_submit == 'html'} checked{/if} value="html"><span></span></span>
+                            <span class="wa-radio custom-mt-2"><input type="radio" name="form[params][after_submit]" {if empty($form.params.after_submit) || $form.params.after_submit == 'html'} checked{/if} value="html"><span></span></span>
                             <span class="wide">
                                 [`Display text instead of the form`]
                             </span>
@@ -750,13 +753,13 @@
                 <div>
                     <div class="crm-delete-link-wrapper">
                         <a href="javascript:void(0);" class="button light-gray smaller crm-delete-form-link desktop-only">
-                            <i class="fas fa-trash-alt delete custom-mr-4"></i> [`Delete this form`]
+                            <i class="fas fa-trash-alt delete custom-mr-4 text-red"></i> [`Delete this form`]
                         </a>
-                        <a href="javascript:void(0);" class="button light-gray circle crm-delete-form-link mobile-only" title="[`Delete this form`]">
-                            <i class="fas fa-trash-alt delete"></i>
+                        <a href="javascript:void(0);" class="button light-gray crm-delete-form-link mobile-only" title="[`Delete this form`]">
+                            <i class="fas fa-trash-alt delete text-red"></i>
                         </a>
-                        <a href="javascript:void(0);" class="button light-gray circle crm-delete-form-link tablet-only" title="[`Delete this form`]">
-                            <i class="fas fa-trash-alt delete"></i>
+                        <a href="javascript:void(0);" class="button light-gray crm-delete-form-link tablet-only" title="[`Delete this form`]">
+                            <i class="fas fa-trash-alt delete text-red"></i>
                         </a>
                     </div>
                 </div>

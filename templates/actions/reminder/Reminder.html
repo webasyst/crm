@@ -460,11 +460,11 @@
                             {if $_reminder_classes[0] == "actual"}
                                 {$_reminder_mark_content = "!"}
                             {/if}
-                            <li class="flexbox middle vertical c-reminder-wrapper js-edit-reminder {$_reminder_classes|join:" "}" data-id="{$_reminder.id}" id="c-reminder-{$_reminder.id}">
+                            <li class="flexbox middle vertical c-reminder-wrapper js-edit-reminder {$_reminder_classes|join:" "}" style="position: relative;" data-id="{$_reminder.id}" id="c-reminder-{$_reminder.id}">
                                 {* VIEW *}
                                 <div class="flexbox middle space-12 width-100  custom-pl-12 custom-pt-12 c-step is-view is-shown">
                                     {if !empty($_reminder.rights)}
-                                        <span class="c-marker c-mark-done js-mark-done" title="[`mark as done`]">
+                                        <span class="c-marker c-mark-done js-done" title="[`mark as done`]">
                                             <span class="c-marker-content">{$_reminder_mark_content}</span>
                                             <span class="icon size-12 c-marker-icon">
                                                 <svg width="20" height="15" viewBox="0 0 20 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -529,7 +529,7 @@
 
                                         <div class="flexbox vertical full-width c-icons-right">
 
-                                            <div class="flexbox middle space-4 c-creator-contact hint">
+                                            <div class="flexbox middle space-4 c-creator-contact hint custom-mb-24">
                                             {$creator_id = $_reminder.creator_contact_id}
                                             {if $show_user_block}
                                                 {if !empty($users[$creator_id])}
@@ -560,12 +560,6 @@
                                             {/if}
                                             </div>
 
-
-                                            {if !empty($_reminder.rights)}
-                                            <div class="c-right-actions js-dots-wrapper hint">
-                                                <span class="icon size-14 dots"><i class="fas fa-ellipsis-h" title="[`edit`]"></i></span>
-                                            </div>
-                                            {/if}
                                         </div>
                                     </div>
                                 </div>
@@ -590,13 +584,29 @@
                                     </div>
                                 </div>
 
+                                {* REPORT *}
+                                <div class="c-step is-report width-100">
+                                    <div class="custom-mx-48 width-100 custom-py-16">
+                                        <textarea class="width-100 custom-mb-16 js-report-textarea" style="height:fit-content;" name="report" placeholder="[`Execution result`]">{$_reminder.report|escape}</textarea>
+                                        <div class="c-actions">
+                                            <button class="button small js-mark-done"><i class="fas fa-check"></i> [`Mark as done`]</button>
+                                            <button class="button small nowrap light-gray js-report-cancel">[`Cancel`]</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {if !empty($_reminder.rights)}
+                                <div class="c-right-actions js-dots-wrapper hint" style="position: absolute; bottom: 0.5rem; right: 1rem;">
+                                    <span class="icon size-14 dots"><i class="fas fa-ellipsis-h" title="[`edit`]"></i></span>
+                                </div>
+                                {/if}
                                 <div class="c-dots-detail">
                                     <div class="flexbox vertical nowrap">
                                         <span class="c-create-date small custom-mb-16 align-center"><span class="first-part">[`Created at`]:</span><br><span class="">{$_reminder.create_datetime|wa_date:"d.m.Y H:i"}</span></span>
-                                        <button class="button light-gray smaller width-100 js-edit custom-mb-8"><i class="fas fa-pencil-alt bold edit"></i> [`Edit`]</button>
-                                        <button  class="button light-gray smaller width-100 js-remove"><i class="fas fa-trash-alt text-red bold delete"></i> [`Delete`]</button>
+                                        <button class="button light-gray smaller width-100 js-edit custom-mb-8"><i class="fas fa-pencil-alt text-gray custom-mr-4"></i> [`Edit`]</button>
+                                        <button class="button light-gray smaller width-100 js-done custom-mb-8"><i class="fas fa-check text-green custom-mr-4"></i> [`Mark as done`]</button>
+                                        <button  class="button light-gray smaller width-100 js-remove"><i class="fas fa-trash-alt text-red custom-mr-4"></i> [`Delete`]</button>
                                     </div>
-
                                 </div>
 
 

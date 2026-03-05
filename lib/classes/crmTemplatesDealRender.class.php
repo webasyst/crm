@@ -47,6 +47,8 @@ class crmTemplatesDealRender extends waController
      */
     public $responsible;
 
+    private $options;
+
     /**
      * If options have an deal_id, then the data of a particular deal will be received, otherwise the base deal data will be received
      * crmTemplatesDealRender constructor.
@@ -59,7 +61,8 @@ class crmTemplatesDealRender extends waController
             'deal_template_id' => null,
             'company_id'       => null,
             'template'         => null,
-            'deal_id'          => null
+            'deal_id'          => null,
+            'ignore_template_errors' => false,
         );
 
         $this->deal_template_id = $options['deal_template_id'];
@@ -81,6 +84,7 @@ class crmTemplatesDealRender extends waController
             $this->company = $this->_content['company'];
         }
         $this->customer = $this->responsible = wa()->getUser();
+        $this->options = $options;
     }
 
     public static function render($options = array())
@@ -107,8 +111,14 @@ class crmTemplatesDealRender extends waController
             'responsible' => $this->responsible,
             'company'     => $this->getStaticInfoCompany(),
         ));
-
-        return $view->fetch('string:'.$this->getTemplate());
+        try {
+            return $view->fetch('string:'.$this->getTemplate());
+        } catch (Exception $e) {
+            if (!$this->options['ignore_template_errors']) {
+                throw $e;
+            }
+            return $this->getTemplate();
+        }
     }
 
     /**

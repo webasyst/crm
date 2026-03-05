@@ -36,17 +36,22 @@ class crmSettingsNotificationsEditSaveController extends crmJsonController
         }
 
         $data['transport'] = $transport;
-        if ($data['transport'] === crmNotificationModel::TRANSPORT_SMS) {
+        if ($data['transport'] !== crmNotificationModel::TRANSPORT_EMAIL) {
             $data['subject'] = null;
         }
+        if (!in_array($data['transport'], array(crmNotificationModel::TRANSPORT_EMAIL, crmNotificationModel::TRANSPORT_SMS))) {
+            $data['body'] = null;
+        }
 
-        $pattern = '/^[\+\d\(\)\ -]{4,14}\d$/';
-        $phone = preg_match($pattern, $data['recipient']);
+        if (!empty($data['recipient'])) {
+            $pattern = '/^[\+\d\(\)\ -]{4,14}\d$/';
+            $phone = preg_match($pattern, $data['recipient']);
 
-        if ($phone) {
-            class_exists('waContactPhoneField');
-            $formatter = new waContactPhoneFormatter();
-            $data['recipient'] = $formatter->format($data['recipient']);
+            if ($phone) {
+                class_exists('waContactPhoneField');
+                $formatter = new waContactPhoneFormatter();
+                $data['recipient'] = $formatter->format($data['recipient']);
+            }
         }
 
         if ($transport === crmNotificationModel::TRANSPORT_EMAIL) {
@@ -71,6 +76,30 @@ class crmSettingsNotificationsEditSaveController extends crmJsonController
             $data['company_id'] = null;
         }
 
+        if (isset($data['transport']) && !in_array($data['transport'], [crmNotificationModel::TRANSPORT_EMAIL, crmNotificationModel::TRANSPORT_SMS])) {
+            unset($data['recipient']);
+            unset($data['sender']);
+            unset($data['subject']);
+            unset($data['body']);
+        }
+        
+        if (isset($data['transport']) && $data['transport'] !== crmNotificationModel::TRANSPORT_HTTP) {
+            unset($data['url']);
+            unset($data['method']);
+            unset($data['headers']);
+            unset($data['get']);
+            unset($data['post']);
+            unset($data['format']);
+        }
+
+        if (isset($data['transport']) && $data['transport'] !== crmNotificationModel::TRANSPORT_REMINDER) {
+            unset($data['reminder_due_date']);
+            unset($data['reminder_user_type']);
+            unset($data['responsible_contact_id']);
+            unset($data['reminder_type']);
+            unset($data['reminder_content']);
+        }
+
         return $data;
     }
 
@@ -80,11 +109,16 @@ class crmSettingsNotificationsEditSaveController extends crmJsonController
             throw new waRightsException();
         }
 
-        $errors = array();
+        $errors = [];
+        $required = ['event', 'name'];
 
-        $required = array('event', 'body', 'name');
-        if ($data['transport'] == 'email') {
-            $required[] = 'subject';
+        if (in_array($data['transport'], [crmNotificationModel::TRANSPORT_EMAIL, crmNotificationModel::TRANSPORT_SMS])) {
+            $required[] = 'body';
+            if ($data['transport'] == crmNotificationModel::TRANSPORT_EMAIL) {
+                $required[] = 'subject';
+            }
+        } elseif ($data['transport'] == crmNotificationModel::TRANSPORT_HTTP) {
+            $required[] = 'url';
         }
 
         foreach ($required as $field) {

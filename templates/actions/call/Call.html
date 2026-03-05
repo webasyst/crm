@@ -339,7 +339,7 @@
                                                 <i class="icon"><img src="{$active_user.photo_url_32}" class="rounded" alt="{$active_user.name|escape}"></i>
                                                 <span>{$active_user.name|escape}</span>
                                             {else}
-                                                <span>[`All responsibles`]</span>
+                                                <span>[`All responsible users`]</span>
                                             {/if}
                                         </span>
                                     </button>
@@ -348,7 +348,7 @@
                                             <li class="{if !$active_user}selected{/if}">
                                                 <a href="javascript:void(0);" data-filter="">
                                                 <span class="flexbox space-4">
-                                                    <span>[`All responsibles`]</span>
+                                                    <span>[`All responsible users`]</span>
                                                 </a>
                                             </li>
                                             {foreach $users as $_user}

@@ -38,6 +38,8 @@ class crmDealListMethod extends crmApiAbstractMethod
         $sort_field = waRequest::get('sort', '', waRequest::TYPE_STRING_TRIM);
         $userpic_size = abs(waRequest::get('userpic_size', self::USERPIC_SIZE, waRequest::TYPE_INT));
         $limit = waRequest::get('limit', self::DEFAULT_LIMIT, waRequest::TYPE_INT);
+        $min_id = abs(waRequest::get('min_id', 0, waRequest::TYPE_INT));
+
         $this->limit = ($limit > self::MAX_LIMIT || $limit < 1 ? self::DEFAULT_LIMIT : $limit);
         $this->user_id = 'all';
 
@@ -79,6 +81,9 @@ class crmDealListMethod extends crmApiAbstractMethod
         if ($search) {
             $this->list_params['deal_ids'] = $this->dealSearch($search);
         }
+        if (!empty($min_id)) {
+            $this->list_params['min_id'] = $min_id;
+        }
 
         $logs = [];
         $pinned_recent = (in_array('is_pinned', $fields) || $pinned_only) ? $this->getRecent(false) : [];
@@ -93,8 +98,6 @@ class crmDealListMethod extends crmApiAbstractMethod
         }
 
         $data = $this->prepareData(true, $fields);
-
-        //wa_dump($data);
 
         $deal_tags = $data['deal_tags'];
         $funnels = ifempty($data, 'funnels', []);

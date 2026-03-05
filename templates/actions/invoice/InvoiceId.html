@@ -44,7 +44,7 @@
 {$_title = '[`Invoice`]'}
 
 {$invoice.contact = $contact}
-{$is_pending = $invoice.state_id === 'PENDING'}
+{$is_pending = $invoice.state_id === crmInvoiceModel::STATE_PENDING}
 {$is_payment_expired = $is_pending && $invoice.days_left && $invoice.days_left < 0}
 <div class="c-invoice-page custom-mb-32" id="c-invoice-page" data-id="{$invoice.id}">
 
@@ -88,12 +88,12 @@
             {$_exists = $_contact->exists()}
             {* $_disabled = !$_exists *}
 
-            {if $invoice.state_id == 'PROCESSING'}
+            {if $invoice.state_id == crmInvoiceModel::STATE_PROCESSING}
                 <button class="button large green js-change-state" type="button" data-action="accept" {if $_disabled}disabled="disabled"{/if}>[`Accept payment`]</button>
                 <button class="button large gray js-change-state" type="button" data-action="refuse" {if $_disabled}disabled="disabled"{/if}>[`Refuse payment`]</button>
-            {elseif $invoice.state_id == 'PAID'}
-                <button class="button large red flexbox middle space-4 js-change-refund" type="button" data-action="refund" {if $_disabled}disabled="disabled"{/if}>
-                    <span class="icon size-12">
+            {elseif $invoice.state_id == crmInvoiceModel::STATE_PAID}
+                <button class="button large red js-change-refund" type="button" data-action="refund" {if $_disabled}disabled="disabled"{/if}>
+                    <span class="icon custom-mr-4">
                         <i class="fas fa-times-circle"></i>
                     </span>
                     [`Make a refund`]
@@ -101,11 +101,58 @@
                 {if $is_cancel_available}
                     <button class="button large gray js-change-state" type="button" data-action="cancel" {if $_disabled}disabled="disabled"{/if}>[`Cancel payment`]</button>
                 {/if}
-            {elseif $invoice.state_id == 'PENDING'}
+            {elseif $invoice.state_id == crmInvoiceModel::STATE_PENDING}
                 <button class="button large green js-change-state" type="button" data-action="paid" {if $_disabled}disabled="disabled"{/if}>[`Mark as paid`]</button>
                 <button class="button large gray js-change-state" type="button" data-action="draft" {if $_disabled}disabled="disabled"{/if}>[`Return to draft`]</button>
-            {elseif $invoice.state_id == 'DRAFT' && floatval($invoice.amount)}
+            {elseif $invoice.state_id == crmInvoiceModel::STATE_DRAFT && floatval($invoice.amount)}
                 <button class="button large green js-change-state" type="button" data-action="activate" {if $_disabled}disabled="disabled"{/if}>[`Activate`]</button>
+            {/if}
+
+            {if $is_recurrent_available}
+                <div class="dropdown custom-mr-6" id="dropdown-recurrent">
+                    <button class="dropdown-toggle button light-gray large{if !$wa->crm->isPremium()} opacity-70{/if}" type="button">
+                        <span class="icon custom-mr-4">
+                            {if !$wa->crm->isPremium() && !empty($recurrent_description)}
+                                <i class="fas fa-exclamation-circle text-orange"></i>
+                            {else}
+                                <i class="fas fa-redo-alt"></i>
+                            {/if}
+                        </span>
+                        <span class="js-recurrent-description">
+                        {if empty($recurrent_description)}
+                            [`Recurrence`]
+                        {else}
+                            {$recurrent_description}
+                        {/if}
+                        </span>
+                    </button>
+                    <div class="dropdown-body" style="width: auto;">
+                        {if !$wa->crm->isPremium()}
+                            <div class="small box nowrap">
+                                <a href="{$wa_app_url}upgrade/" class=""><i class="fas fa-star fa-xs"></i> [`premium only`]</a>
+                            </div>
+                        {/if}
+                        <ul class="menu custom-mt-0">
+                            <li{if !$wa->crm->isPremium()} class="disabled"{elseif empty($recurrent)} class="selected disabled"{/if}>
+                                <div class="item js-recurrent-none" data-description="[`Recurrence`]">
+                                    [`No`]
+                                </div>
+                            </li>
+                            {foreach $recurrent_options as $id => $option}
+                            <li{if !$wa->crm->isPremium()} class="disabled"{elseif !empty($recurrent) && $recurrent.interval_value == 1 && $recurrent.interval_unit == $id} class="selected"{/if}>
+                                <div class="item js-recurrent-set" data-id="{$id}">
+                                    {$option}
+                                </div>
+                            </li>
+                            {/foreach}
+                            <li{if !$wa->crm->isPremium()} class="disabled"{/if}>
+                                <div class="item js-recurrent-tune">
+                                    [`Manual...`]
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             {/if}
 
             <!-- plugin hook: 'backend_invoice.action_button' -->
@@ -115,7 +162,9 @@
             {if $show_url && !empty($public_url)}
                 <div class="dropdown" id="dropdown-public-link">
                     <button class="dropdown-toggle button light-gray large" type="button">
-                        <i class="fas fa-link fa-sm"></i>
+                        <span class="icon custom-mr-4">
+                            <i class="fas fa-link"></i>
+                        </span>
                         [`Link`]
                     </button>
                     <div class="dropdown-body right">
@@ -145,21 +194,21 @@
                 <li>
                     <a class="nowrap js-action-link" href="{$wa_app_url}invoice/new/{$invoice.id}/{if $iframe}?iframe={$iframe}{/if}" data-action="copy"><span class="icon"><i class="fas fa-copy"></i></span>[`Create copy`]</a>
                 </li>
-                {if $invoice.state_id == 'DRAFT' || $invoice.state_id == 'PENDING'}
+                {if $invoice.state_id == crmInvoiceModel::STATE_DRAFT || $invoice.state_id == crmInvoiceModel::STATE_PENDING}
                     <li>
                         <a class="nowrap js-action-link js-disable-router" href="{$wa_app_url}invoice/{$invoice.id}/edit/{if $iframe}?iframe={$iframe}{/if}" data-action="edit"><span class="icon"><i class="fas fa-pencil-alt edit"></i></span>[`Edit`]</a>
                     </li>
                 {/if}
-                {if $invoice.state_id == 'PENDING'}
+                {if $invoice.state_id == crmInvoiceModel::STATE_PENDING}
                     <li>
                         <a class="nowrap js-change-state" href="javascript:void(0);" data-action="archive"><span class="icon"><i class="fas fa-archive"></i></span>[`Archive`]</a>
                     </li>
-                {elseif $invoice.state_id == 'DRAFT'}
+                {elseif $invoice.state_id == crmInvoiceModel::STATE_DRAFT}
                     <li>
                         <a class="nowrap js-delete-invoice" href="javascript:void(0);" data-action="delete"><span class="icon"><i class="fas fa-trash-alt delete"></i></span>[`Delete`]</a>
                     </li>
                 {/if}
-                {if $invoice.state_id == 'ARCHIVED'}
+                {if $invoice.state_id == crmInvoiceModel::STATE_ARCHIVED}
                     <li>
                         <a class="nowrap js-restore-invoice" href="javascript:void(0);"><span class="icon"><i class="fas fa-trash-restore"></i></span>[`Restore`]</a>
                     </li>
@@ -176,18 +225,18 @@
                         <div class="name">[`Expires in`]</div>
                         <div class="value">
                             <div class="flexbox middle space-8">
-                                {if $invoice.state_id == 'PENDING' && !$is_payment_expired}
+                                {if $invoice.state_id == crmInvoiceModel::STATE_PENDING && !$is_payment_expired}
                                     <span class="icon text-yellow">
                                         <i class="fas fa-clock"></i>
                                     </span>
                                 {/if}
-                                {if $invoice.state_id == 'PAID'}
+                                {if $invoice.state_id == crmInvoiceModel::STATE_PAID}
                                     <span class="icon text-green">
                                         <i class="fas fa-check-circle"></i>
                                     </span>
                                 {/if}
                                 <span class="c-details-expires-in">{if $invoice.days_left >= 0}{_w('%s day', '%s days', $invoice.days_left)} [`to`] {/if}{$invoice.due_date|wa_date}</span>
-                                {if in_array($invoice.state_id, ['PENDING', 'DRAFT']) && $invoice.days_left < 0}
+                                {if in_array($invoice.state_id, [crmInvoiceModel::STATE_PENDING, crmInvoiceModel::STATE_DRAFT]) && $invoice.days_left < 0}
                                     <span style="color: var(--alert-warning-text-color)">
                                         <span class="icon">
                                             <i class="fas fa-hourglass-end"></i>
@@ -199,8 +248,15 @@
                         </div>
                     </div>
                     {if $invoice.days_left < 0 && !crmInvoice::isCliOk()}
-                        <div class="crm-invoices-recap-error custom-my-16">
-                            {include file="templates/actions/settings/SettingsCronInvoicesArchive.inc.html" inline}
+                        <div class="crm-invoices-recap-error custom-my-16 alert">
+                            <p class="small">
+                                <i class="fas fa-clock text-orange"></i>
+                                {sprintf_wp(
+                                    '<a href="%s"><tt>Cron</tt> job required</a> to automatically handle invoices expiration.',
+                                    "`$wa_app_url`settings/cron/"
+                                )}
+                            </p>
+                            {* include file="templates/actions/settings/SettingsCronInvoicesArchive.inc.html" inline *}
                         </div>
                     {/if}
                 {/if}
@@ -248,7 +304,9 @@
                     <div class="field">
                         <div class="name">[`Comment`]</div>
                         <div class="value">
-                            {$invoice.comment_sanitized}
+                            <div>
+                                {$invoice.comment_sanitized}
+                            </div>
                         </div>
                     </div>
                 {/if}
@@ -373,10 +431,16 @@
             new CRMInvoicePage({
                 $wrapper: $("#c-invoice-page"),
                 invoice_id: {$invoice.id|json_encode},
+                recurrent_id: {$invoice.recurrent_id|json_encode},
                 locales: {
                     delete_confirm_title: "[`Delete invoice`] [`#`]{$invoice.number|escape}",
                     delete_confirm_text: '<i class="fas fa-exclamation-triangle text-orange"></i> [`Invoice deletion cannot be undone.`]',
-                    delete_confirm_button: "[`Delete`]"
+                    delete_confirm_button: "[`Delete`]",
+                    delete_confirm_cancel_button: "[`Cancel`]",
+                    recurring_off_title: "[`Stop recurring issuing`]",
+                    recurring_off_text: "[`Are you sure you want to stop recurring invoice issuing?`]",
+                    recurring_off_button: "[`Stop`]",
+                    recurring_off_cancel_button: "[`Cancel`]"
                 }
             });
 

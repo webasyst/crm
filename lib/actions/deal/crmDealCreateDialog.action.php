@@ -12,6 +12,10 @@ class crmDealCreateDialogAction extends crmViewAction
         }
         $dm = new crmDealModel();
 
+        if (waRequest::get('ui', wa()->whichUI('crm')) === '1.3') {
+            $this->setTemplate('templates/actions-legacy/deal/DealCreateDialog.html');
+        }
+
         $this->view->assign(array(
             'order_id'   => waRequest::request('order_id'),
             'funnels'    => $funnels,

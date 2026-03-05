@@ -43,7 +43,7 @@
             {/if}
         </div>
     </div>
-    <div class="small custom-mt-16{if $is_premium} hidden{/if}">{if !empty($_p.body)}{$_p.body}{/if}</div>
+    <div class="small custom-mt-16{if $is_premium && empty($_p.do_not_hide_body)} hidden{/if}">{if !empty($_p.body)}{$_p.body}{/if}</div>
 </div>
 {/function}
 
@@ -115,20 +115,16 @@
 
         {$_premium_stuff[] = [
           'title' => '[`More automation!`]',
-          'eta' => '[`Fall 2025`]',
-          'eta_class' => 'yellow',
           'body' => '[`Setting up custom action rules for various system events in the “event → action” format. An event can be either an HTTP request (webhook), or the execution of a basic CRM action such as auto-issuing of an invoice upon deal creation or moving a deal to a certain stage, or setting a reminder to a selected employee.`]'
         ]}
         {$_premium_stuff[] = [
-          'title' => '[`Recurrent invoices`]',
-          'eta' => '[`Fall 2025`]',
-          'eta_class' => 'yellow',
+          'title' => '[`Recurring invoices`]',
           'body' => '[`Auto-issuing (repeating) invoices by schedule.`]'
         ]}
         {$_premium_stuff[] = [
           'title' => '[`More reports on user’ work efficiency`]',
-          'eta' => '[`Fall 2025`]',
-          'eta_class' => 'yellow',
+          'eta' => '[`Later`]',
+          'eta_class' => 'light-gray',
           'body' => '[`Work load and efficiency of your employees within CRM in handling deals, invoices, calls, and conversations.`]'
         ]}
         {$_premium_stuff[] = [
@@ -139,8 +135,8 @@
         ]}
         {$_premium_stuff[] = [
           'title' => '[`Client LTV`]',
-          'eta' => '[`Fall 2025`]',
-          'eta_class' => 'yellow',
+          'eta' => '[`Later`]',
+          'eta_class' => 'light-gray',
           'body' => '[`Main, important, and comprehensible client metric with the sorting and filtering options. Calculated from the data of paid invoices and Shop-Script orders.`]'
         ]}
         {$_premium_stuff[] = [
@@ -159,6 +155,7 @@
         {$_premium_stuff[] = [
           'title' => '[`Suggest a feature`]',
           'eta' => ' ',
+          'do_not_hide_body' => true,
           'body' => sprintf_wp(
               'Share your feedback and suggestions, <a %s>post your ideas on the forum ›</a>',
               sprintf(

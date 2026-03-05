@@ -1,6 +1,300 @@
 <div class="c-settings-cron-page">
     <h1 class="c-page-header">[`Cron Jobs`]</h1>
 
+
+    <div class="fields custom-mb-32">
+
+    {if $has_non_halthy && (!$is_waid || !empty($waid_error))}
+    <div class="fields-group">
+        <div class="field">
+            <div class="value">
+                {if !$is_waid}
+                    <span class="small">
+                    {sprintf_wp(
+                        '<a %s>Connect to Webasyst ID</a> to use the <b>Webasyst CRON service</b>.',
+                        sprintf(
+                            'href="%s"',
+                            "{$wa_backend_url}webasyst/settings/waid/"
+                        )
+                    )}
+                    </span>
+                {elseif !empty($waid_error)}
+                    <span class="state-caution-hint">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {$waid_error}
+                    </span>
+                {/if}
+            </div>
+        </div>
+    </div>
+    {/if}
+
+    {foreach $cron_actions as $action}
+    <div class="fields-group js-action" id="action-{$action.alias}">
+        <h5 class="heading">
+            <span>
+                {$action.name}
+            </span>
+
+            <div class="align-right js-last-run {if $action.is_healthy}state-success{else}state-caution{/if}" title="[`Last execution time`]">
+                {if $action.is_healthy}
+                    <i class="fas fa-check-circle"></i>
+                {else}
+                    <i class="fas fa-exclamation-circle"></i>
+                {/if}
+                {if empty($action.last_call_datetime)}
+                    [`Never executed`]
+                {else}
+                    {$action.last_call_datetime|wa_datetime:'humandatetime'}
+                {/if}
+            </div>
+        </h5>
+
+        <div class="small custom-my-8">
+            <div class="js-description-success"{if !$action.is_healthy} style="display: none;"{/if}>{$action.description_success}</div>
+            <div class="js-description-warning"{if $action.is_healthy} style="display: none;"{/if}>
+                {if $action.is_healthy && !empty($action.legacy_cli_run)}
+                    {$action.description_success}
+                {else}
+                    {$action.description_warning}
+                {/if}
+            </div>
+        </div>
+
+        <div class="small js-status">
+        {if $is_waid && $is_cron_service}
+            {$_is_cron_tab = empty($action.legacy_cli_run) || !$action.is_healthy || !empty($action.scheduled) && $action.scheduled.status == 'READY'}
+            <div class="toggle" id="toggle-{$action.alias}">
+                <span{if $_is_cron_tab} class="selected"{/if} data-action="wa">[`Webasyst CRON`]</span>
+                <span{if !$_is_cron_tab} class="selected"{/if} data-action="self">[`Set up manually`]</span>
+            </div>
+            <script>
+                ( function($) {
+                    $("#toggle-{$action.alias}").waToggle({
+                        change: function(event, target, toggle) {
+                            const action = $(target).data('action');
+                            $(target).closest(".fields-group").find(".js-toggle-option").toggle();
+                        }
+                    });
+                })(jQuery);
+            </script>
+
+            <div class="js-wa-cron js-toggle-option custom-mt-8 custom-ml-8"{if !$_is_cron_tab} style="display: none;"{/if}>
+                {if !empty($action.scheduled)}
+                    {if $action.scheduled.status != 'READY'}
+                        <div class="custom-my-8">
+                            [`Execution status:`]
+                            <i class="fas fa-exclamation-circle state-caution"></i>
+                            <b>{_ws($action.scheduled.status)}</b>
+                            {if !empty($action.scheduled.last_run_at)}
+                                {$action.scheduled.last_run_at|wa_datetime:'humandatetime'}
+                            {/if}
+                        </div>
+                        <div class="custom-my-8">
+                            {if !empty($action.scheduled.last_success_run_at)}
+                                [`Last successful:`] <b>{$action.scheduled.last_success_run_at|wa_datetime:'humandatetime'}</b> /
+                            {/if}
+                            [`Failed attempts:`] <b>{$action.scheduled.failed_count}</b>
+                        </div>
+                        <button class="button js-cron" data-action="{$action.alias|escape}">[`Restart`]</button>
+                    {elseif $action.scheduled.cron_expression != $action.expression}
+                        <div class="custom-my-8">
+                            [`The recommended execution schedule has changed, it is advisable to update it.`]
+                        </div>
+                        <button class="button js-cron" data-action="{$action.alias|escape}">[`Update schedule`]</button>
+                    {/if}
+                {/if}
+                
+                {if empty($action.scheduled)}
+                    <p>
+                        [`The job execution according to the required schedule will be managed by the Webasyst CRON service.`]
+                        [`To use the Webasyst CRON service, your website must be online.`]
+                    </p>
+                    <button class="button js-cron" data-action="{$action.alias|escape}">
+                        [`Enable`]
+                    </button>
+                {elseif $action.is_healthy && $action.scheduled.status == 'READY'}
+                    <div class="custom-my-8">
+                        [`The job is executed by the Webasyst CRON service as follows:`]
+                        <code>{$action.scheduled.cron_expression}</code>
+                    </div>
+                    <div class="custom-my-8">
+                        [`Next scheduled execution:`] <b>{$action.scheduled.next_run_at|wa_datetime:'humandatetime'}</b>.
+                    </div>
+                {/if}
+                {if !empty($action.scheduled)}
+                    <button class="button light-gray js-cron-stop" data-action="{$action.alias|escape}">
+                        [`Disable`]
+                    </button>
+                {/if}
+            </div>
+            <div class="custom-mt-8 custom-ml-8 js-toggle-option js-self-cron"{if $_is_cron_tab} style="display: none;"{/if}>
+                {if $action.is_healthy}
+                    {if !empty($action.legacy_cli_run) && !empty($action.legacy_cli)}
+                        <div class="custom-my-8">
+                            [`Job command executed by the web hosting scheduler:`]<br>
+                            <code>php {$root_path}cli.php crm worker {$action.legacy_cli}</code>
+                        </div>
+                    {else}
+                        <div class="custom-my-8">
+                            [`Crontab instruction executed by the web hosting scheduler:`]<br>
+                            <code>{$action.expression} php {$root_path}cli.php --cron crm {$action.alias}</code>
+                        </div>
+                    {/if}
+                {else}
+                    {sprintf_wp(
+                    'Please set up a <tt>cron</tt> job (<a href="%s" target="_blank">view instructions</a>) using the command specified below in your web-hosting control panel:',
+                    _w('https://developers.webasyst.com/installation/tips/cron/')
+                    )}
+                    <div class="custom-mt-8">
+                        <code>{$action.expression} php {$root_path}cli.php --cron crm {$action.alias}</code>
+                        <span>
+                            <button class="circle light-gray js-copy" title="[`copy`]" data-value-to-copy="{$action.expression} php {$root_path}cli.php --cron crm {$action.alias}"><i class="far fa-copy"></i></button>
+                            <button class="circle light-gray js-copied" style="display:none;"><i class="fas fa-check state-success"></i></button>
+                        </span>
+                    </div>
+                {/if}
+            </div>
+        {else}
+        
+            {if $action.is_healthy}
+                {if !empty($action.legacy_cli_run) && !empty($action.legacy_cli)}
+                    <div class="custom-my-8">
+                        [`Job command executed by the web hosting scheduler:`]<br>
+                        <code>php {$root_path}cli.php crm worker {$action.legacy_cli}</code>
+                    </div>
+                {else}
+                    <div class="custom-my-8">
+                        [`Crontab instruction executed by the web hosting scheduler:`]<br>
+                        <code>{$action.expression} php {$root_path}cli.php --cron crm {$action.alias}</code>
+                    </div>
+                {/if}
+            {else}
+                {sprintf_wp(
+                    'Set up a cron job (<a %s>view setup tips</a>), using the following command, in your web hosting control panel:',
+                    sprintf(
+                        'href="%s"',
+                        _w('https://developers.webasyst.com/docs/installation/tips/cron/')
+                    )
+                )}
+                <div class="custom-mt-8">
+                    <code>{$action.expression} php {$root_path}cli.php --cron crm {$action.alias}</code>
+                    <span>
+                        <button class="circle light-gray js-copy" data-value-to-copy="{$action.expression} php {$root_path}cli.php --cron crm {$action.alias}"><i class="far fa-copy"></i></button>
+                        <button class="circle light-gray js-copied" style="display:none;"><i class="fas fa-check state-success"></i></button>
+                    </span>
+                </div>
+            {/if}
+        
+        {/if}
+        </div>
+    </div>
+    {/foreach}
+</div>
+
+<div class="alert-fixed-box" id="alert-fixed-box"></div>
+
+{if $is_waid && $is_cron_service && empty($waid_error)}
+<script>
+    (function ($) {
+
+        const $alert_box = $('#alert-fixed-box');
+
+        function schedule(event) {
+            const $button = $(event.target);
+            $button.addClass('disabled').prop('disabled', true).parent().append('<span class="spinner js-loading"></span>');
+            $.get('?module=cron&action=schedule&cron_action='+ $button.data('action'), function (data) {
+                let status = data.status || '-';
+                if (status === 'fail') {
+                    console.warn('schedule', data);
+                    const $alert = $('<div class="alert danger"><span class="cursor-pointer alert-close js-alert-error-close"><i class="fas fa-times"></i></span>' + data.errors?.error_description + '</div>');
+                    $alert_box.append($alert);
+                    $alert.find('.js-alert-error-close').on('click', function () {
+                        $alert.remove();
+                    })
+                    setTimeout(() => {
+                        $alert.remove();
+                    }, 5000);
+                } else {
+                    $button.closest(".js-wa-cron").html('<div class="custom-my-8">[`The job is executed by the Webasyst CRON service as follows:`]<code>'+data.data.cron_expression+'</code></div><div class="custom-my-8">[`Next scheduled execution:`] <b>'+data.data.next_run_at+'</b>.</div><button class="button light-gray js-cron-stop" data-action="'+$button.data('action')+'">[`Disable`]</button>');
+                    $('.js-cron-stop').off('click');
+                    $('.js-cron-stop').on('click', stop);
+
+                    const $row = $("#action-"+$button.data('action'));
+                    $row.find(".js-description-warning").hide();
+                    $row.find(".js-description-success").show();
+                    if (data.data.last_run_at) {
+                        $row.find('.js-last-run')
+                            .removeClass('state-caution')
+                            .addClass('state-success')
+                            .html('<i class="fas fa-check-circle"></i> ' + data.data.last_run_at);
+                    }
+                }
+                $button.removeClass('disabled').prop('disabled', false).parent().find('.js-loading').remove();
+            });
+        }
+
+        function stop(event) {
+            const $button = $(event.target);
+            $button.addClass('disabled').prop('disabled', true).parent().append('<span class="spinner js-loading"></span>');
+
+            $.waDialog.confirm({
+                title: "[`Delete cron job`]",
+                text: "[`Are you sure you want to stop the cron job execution?`]",
+                success_button_title: "[`Delete cron job`]",
+                success_button_class: 'danger',
+                cancel_button_title: "[`Cancel`]",
+                cancel_button_class: 'light-gray',
+                onSuccess: function () {
+                    $.post('?module=cron&action=stop', { cron_action: $button.data('action') }, function (data) {
+                        let status = data.status || '-';
+                        if (status === 'fail') {
+                            console.warn('schedule', data);
+                            const $alert = $('<div class="alert danger"><span class="cursor-pointer alert-close js-alert-error-close"><i class="fas fa-times"></i></span>' + data.errors?.error_description + '</div>');
+                            $alert_box.append($alert);
+                            $alert.find('.js-alert-error-close').on('click', function () {
+                                $alert.remove();
+                            })
+                            setTimeout(() => {
+                                $alert.remove();
+                            }, 5000);
+                        } else {
+                            $button.closest(".js-wa-cron").html('<p>[`The job execution according to the required schedule will be managed by the Webasyst CRON service.`][`To use the Webasyst CRON service, your website must be online.`]</p><button class="button js-cron" data-action="' + $button.data('action') + '">[`Enable`]</button>');
+                            $('.js-cron').off('click');
+                            $('.js-cron').on('click', schedule);
+
+                            const $row = $("#action-"+$button.data('action'));
+                            $row.find(".js-description-success").hide();
+                            $row.find(".js-description-warning").show();
+                        }
+                        $button.removeClass('disabled').prop('disabled', false).parent().find('.js-loading').remove();
+                    });
+                },
+                onCancel: function () {
+                    $button.removeClass('disabled').prop('disabled', false).parent().find('.js-loading').remove();
+                }
+            });
+        }
+
+        $('.js-cron').on('click', schedule);
+
+        $('.js-cron-stop').on('click', stop);
+
+        $('.js-copy').on('click', function () {
+            $.wa.copyToClipboard($(this).data('value-to-copy'));
+            $(this).hide();
+            $(this).parent().find('.js-copied').show();
+            setTimeout(() => {
+                $(this).parent().find('.js-copied').hide();
+                $(this).show();
+            }, 3000);
+        });
+
+    })(jQuery);
+</script>
+{/if}
+
+{*
     {include file="./SettingsCronEmailSource.inc.html" inline}
 
     {include file="./SettingsCronNotificationBirthday.inc.html" inline}
@@ -12,4 +306,5 @@
     {include file="./SettingsCronDealStagesOverDue.inc.html" inline}
 
     {include file="./SettingsCronCurrenciesCopy.inc.html" inline}
+*}
 </div>

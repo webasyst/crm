@@ -102,9 +102,21 @@ class crmMessageReadModel extends crmModel
         $insert_sql = "INSERT IGNORE INTO `crm_message_read` (`message_id`, `contact_id`) 
                             {$select_sql}";
 
-        $this->exec($insert_sql, [
-            'contact_id' => $contact_id,
-            'conversation_id' => $conversation_id
-        ]);
+        $lock_name = 'wa_read_conversation';
+        try {
+            $this->exec("SELECT GET_LOCK(?, -1)", [ $lock_name ]);
+            $this->exec($insert_sql, [
+                'contact_id' => $contact_id,
+                'conversation_id' => $conversation_id
+            ]);
+        } catch (Exception $e) {
+            waLog::log($e->getMessage());
+        } finally {
+            try {
+                $this->exec("SELECT RELEASE_LOCK(?)", [ $lock_name ]);
+            } catch (Exception $e) {
+                // do nothing
+            }
+        }
     }
 }

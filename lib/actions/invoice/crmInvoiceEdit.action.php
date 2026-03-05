@@ -12,7 +12,7 @@ class crmInvoiceEditAction extends crmInvoiceIdAction
             $this->setLayout();
         }
         parent::execute();
-        if ($this->invoice['state_id'] != 'DRAFT' && $this->invoice['state_id'] != 'PENDING') {
+        if ($this->invoice['state_id'] != crmInvoiceModel::STATE_DRAFT && $this->invoice['state_id'] != crmInvoiceModel::STATE_PENDING) {
             throw new waRightsException();
         }
         $shop_supported = crmConfig::isShopSupported();

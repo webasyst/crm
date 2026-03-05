@@ -31,6 +31,10 @@ abstract class crmApiAbstractMethod extends waAPIMethod
                 ], 'error.log');
             }
         });
+        if (class_exists('Smarty')) {
+            // https://www.smarty.net/docs/en/api.mute.expected.errors.tpl
+            Smarty::muteExpectedErrors();
+        }
 
         return parent::getResponse($internal);
     }
@@ -204,7 +208,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
         }
         return $this->filterFields(
             $data,
-            ['id', 'create_datetime', 'creator_contact_id', 'contact_id', 'deal_id', 'user_contact_id', 'due_date', 'due_datetime', 'complete_datetime', 'content', 'type'],
+            ['id', 'create_datetime', 'creator_contact_id', 'contact_id', 'deal_id', 'user_contact_id', 'due_date', 'due_datetime', 'complete_datetime', 'content', 'report', 'type'],
             ['id' => 'integer', 'creator_contact_id' => 'integer', 'contact_id' => 'integer', 'deal_id' => 'integer', 'user_contact_id' => 'integer', 'create_datetime' => 'datetime', 'due_datetime' => 'datetime', 'complete_datetime' => 'datetime']
         );
     }
@@ -320,6 +324,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
         if (empty($phone_list) || !is_array($phone_list)) {
             return null;
         }
+        class_exists('waContactPhoneField');
         $phone_formatter = new waContactPhoneFormatter();
         return array_map(function ($phone) use ($phone_formatter) {
             $phone['data'] = $this->doPhonePrefix($phone['value']);
@@ -540,7 +545,7 @@ abstract class crmApiAbstractMethod extends waAPIMethod
                         $l['order_log_item'] = $this->filterFields($l['order_log_item'], ['id', 'order_id', 'contact_id', 'action_id', 'text', 'datetime', 'before_state_id', 'after_state_id'] , ['id' => 'integer', 'order_id' => 'integer', 'contact_id' => 'integer', 'datetime' => 'datetime']);
                     }
                     if (isset($l['order'])) {
-                        $l['order'] = $this->filterFields($l['order'], ['id', 'contact_id', 'create_datetime', 'update_datetime', 'paid_datetime', 'shipping_datetime', 'state_id', 'total', 'currency', 'rate', 'tax', 'shipping', 'discount', 'assigned_contact_id', 'number', 'comment', 'contact'] , ['id' => 'integer', 'contact_id' => 'integer', 'assigned_contact_id' => 'integer', 'create_datetime' => 'datetime', 'update_datetime' => 'datetime', 'paid_datetime' => 'datetime', 'shipping_datetime' => 'datetime', 'total' => 'float','rate' => 'float', 'tax' => 'float', 'shipping' => 'float', 'discount' => 'float']);
+                        $l['order'] = $this->filterFields($l['order'], ['id', 'contact_id', 'create_datetime', 'update_datetime', 'paid_datetime', 'shipping_datetime', 'state_id', 'total', 'currency', 'rate', 'tax', 'shipping', 'discount', 'assigned_contact_id', 'number', 'url', 'comment', 'contact'] , ['id' => 'integer', 'contact_id' => 'integer', 'assigned_contact_id' => 'integer', 'create_datetime' => 'datetime', 'update_datetime' => 'datetime', 'paid_datetime' => 'datetime', 'shipping_datetime' => 'datetime', 'total' => 'float','rate' => 'float', 'tax' => 'float', 'shipping' => 'float', 'discount' => 'float']);
                         if (isset($l['order']['contact'])) {
                             $l['order']['contact'] = $this->prepareUserpic($l['order']['contact'], $userpic_size);
                         }

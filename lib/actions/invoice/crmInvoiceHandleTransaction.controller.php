@@ -23,6 +23,9 @@ class crmInvoiceHandleTransactionController extends crmJsonController
         if ($errors = crmInvoice::$action($this->invoice, $this->data)) {
             $this->errors[] = $errors;
         }
+        if ($action === 'delete') {
+            crmHelper::logAction('invoice_delete');
+        }
 
         $this->invoice['state_id'] = $this->getInvoiceModel()
             ->select('state_id')

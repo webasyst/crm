@@ -253,7 +253,7 @@ abstract class crmEmailSourceWorkerStrategy
     {
         $inline_attachments = array();
         foreach ($attachments as $attachment) {
-            if (empty($attachment['inline']) || empty($attachment['content-id']) || empty($attachment['file_id'])) {
+            if (empty($attachment['content-id']) || empty($attachment['file_id'])) {
                 continue;
             }
             $inline_attachments[$attachment['content-id']] = $attachment;

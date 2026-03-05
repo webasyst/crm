@@ -10,6 +10,7 @@ class crmDealMoveMethod extends crmApiAbstractMethod
         $stage_id = ifset($_json, 'stage_id', null);
         $force = ifset($_json, 'force', false);
         $deal_id = (int) $this->get('id', true);
+        $with_count = waRequest::get('with_count', false, waRequest::TYPE_INT);
 
         if (!isset($stage_id)) {
             throw new waAPIException('empty_id', sprintf_wp('Missing required parameter: “%s”.', 'stage_id'), 400);
@@ -46,6 +47,12 @@ class crmDealMoveMethod extends crmApiAbstractMethod
         $this->response = null;
         if ($before_stage['id'] == $after_stage['id']) {
             // do nothing
+            if ($with_count) {
+                $this->http_status_code = 200;
+                $this->response = [
+                    'changed_counts' => []
+                ];
+            }
             return;
         }
 
@@ -74,5 +81,35 @@ class crmDealMoveMethod extends crmApiAbstractMethod
             null,
             ['stage_id_before' => $before_stage['id'], 'stage_id_after' => $after_stage['id']]
         );
+
+        if ($with_count) {
+            $currency_id = wa()->getSetting('currency');
+            list($funnel_before_count, $funnel_before_amount) = $this->getDealModel()->countOpen(['funnel_id' => $before_stage['funnel_id']], true);
+            list($stage_before_count, $stage_before_amount) = $this->getDealModel()->countOpen(['funnel_id' => $before_stage['funnel_id'], 'stage_id' => $before_stage['id']], true);
+            list($funnel_after_count, $funnel_after_amount) = $this->getDealModel()->countOpen(['funnel_id' => $after_stage['funnel_id']], true);
+            list($stage_after_count, $stage_after_amount) = $this->getDealModel()->countOpen(['funnel_id' => $after_stage['funnel_id'], 'stage_id' => $after_stage['id']], true);
+
+            $this->http_status_code = 200;
+            $this->response['changed_counts'] = [
+                [
+                    'funnel_id' => $before_stage['funnel_id'],
+                    'stage_id' => $before_stage['id'],
+                    'funnel_count' => $funnel_before_count,
+                    'funnel_amount' => $funnel_before_amount,
+                    'stage_count' => $stage_before_count,
+                    'stage_amount' => $stage_before_amount,
+                    'currency_id' => $currency_id,
+                ],
+                [
+                    'funnel_id' => $after_stage['funnel_id'],
+                    'stage_id' => $after_stage['id'],
+                    'funnel_count' => $funnel_after_count,
+                    'funnel_amount' => $funnel_after_amount,
+                    'stage_count' => $stage_after_count,
+                    'stage_amount' => $stage_after_amount,
+                    'currency_id' => $currency_id,
+                ],
+            ];
+        }
     }
 }

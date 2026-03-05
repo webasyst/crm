@@ -162,7 +162,8 @@ class crmReminderActualAction extends crmBackendViewAction
             'setting_deal_id'           => $deal_id,
             'setting_contact_id'        => $contact_id,
             'iframe'                    => $iframe,
-            'is_all_reminders'          => $is_all_reminders
+            'is_all_reminders'          => $is_all_reminders,
+            'funnels'                   => (new crmFunnelModel)->getAllFunnels(true),
         ));
         wa()->getResponse()->setCookie('reminder_max_id', $rm->select('MAX(id) mid')->fetchField('mid'), time() + 86400);
 

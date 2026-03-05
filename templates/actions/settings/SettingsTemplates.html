@@ -164,17 +164,16 @@
                             <a href="{$wa_app_url}settings/templates/{if !empty($template.id)}{$template.id}/{/if}" class="button light-gray">[`Cancel`]</a>
                         </span>
                     </div>
-                    <div class="c-column c-footer-link-wrapper middle center">
-                        {include file='./SettingsNotificationsHelp.inc.html' inline}
-
-                        <a class="nowrap js-show-preview" href="javascript:void(0);"><i class="fas fa-external-link-alt new-window"></i> [`Preview`]</a>
-                    </div>
                     <div class="c-column middle right">
-                        <a class="button light-gray nowrap js-reset-template {if !$reset_template}hidden{/if}" href="javascript:void(0);" title="[`Reset changes`]">
+                        <a class="button smaller light-gray js-show-preview" href="javascript:void(0);"><i class="fas fa-external-link-alt new-window"></i> [`Preview`]</a>
+
+                        {include file='./SettingsNotificationsHelp.inc.html' link_class="button smaller light-gray" inline}
+
+                        <a class="button smaller light-gray nowrap js-reset-template {if !$reset_template}hidden{/if}" href="javascript:void(0);" title="[`Reset changes`]">
                             <i class="fas fa-broom text-red"></i>
                         </a>
                         {if !empty($template.id) && count($templates) > 1}
-                            <a class="button light-gray js-delete-template" href="javascript:void(0);" title="[`Delete`]">
+                            <a class="button smaller light-gray js-delete-template" href="javascript:void(0);" title="[`Delete`]">
                                 <i class="fas fa-trash-alt delete text-red"></i>
                             </a>
                         {/if}

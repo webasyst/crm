@@ -235,7 +235,7 @@ class crmDeal
         crmHelper::logAction($action_id, array('deal_id' => $deal_id));
 
         $rm = new crmReminderModel();
-        $sql = "UPDATE {$rm->getTableName()} SET complete_datetime='$now' WHERE contact_id=".($deal_id * -1);
+        $sql = "UPDATE {$rm->getTableName()} SET complete_datetime='$now' WHERE complete_datetime IS NULL AND create_datetime < '$now' AND contact_id=".($deal_id * -1);
         $rm->exec($sql);
     }
 

@@ -73,8 +73,15 @@
         </div>
         <div class="value">
             {if !crmRemindersRecap::isCliOk()}
-            <div class="crm-reminders-recap-error custom-mt-8" {if $settings['reminder_recap'] !=1}style="display: none;" {/if}>
-                {include file="templates/actions/settings/SettingsCronDailyRecap.inc.html" inline}
+            <div class="crm-reminders-recap-error custom-mt-8 alert" {if $settings['reminder_recap'] !=1}style="display: none;" {/if}>
+                <p class="small">
+                    <i class="fas fa-clock text-orange"></i>
+                    {sprintf_wp(
+                        '<a href="%s"><tt>Cron</tt> job required</a> for daily recap.', 
+                        "`$wa_app_url`settings/cron/"
+                    )}
+                </p>
+                {* include file="templates/actions/settings/SettingsCronDailyRecap.inc.html" inline *}
             </div>
             {/if}
             <ul class="c-options-list menu custom-mt-4">

@@ -598,6 +598,7 @@ class crmLogModel extends crmModel
         $invoice_rights_level = wa()->getUser()->getRights('crm', 'manage_invoices');
         $call_rights_level = wa()->getUser()->getRights('crm', 'calls');
         $exclude_log_ids = [];
+        $host_backend_url = rtrim(wa()->getConfig()->getHostUrl(), '/').wa()->getConfig()->getBackendUrl(true);
 
         foreach ($log as $id => &$l) {
             if (!empty($contacts[$l['actor_contact_id']])) {
@@ -866,6 +867,7 @@ class crmLogModel extends crmModel
                     if (isset($l['order_log_item']['order_id']) && isset($orders[$l['order_log_item']['order_id']])) {
                         $l['order'] = $orders[$l['order_log_item']['order_id']];
                         $l['order']['number'] = shopHelper::encodeOrderId($l['order']['id']);
+                        $l['order']['url'] = $host_backend_url.'shop/?action=orders#/order/'.$l['order']['id'].'/';
                         if ($l['order']['contact_id'] > 0 && !empty($contacts[$l['order']['contact_id']])) {
                             $l['order']['contact'] = $contacts[$l['order']['contact_id']];
                             if (empty($l['contact'])) {

@@ -615,6 +615,9 @@ table.zebra tr.selected .c-single-line:after {
 .sidebar-main-wrapper .sidebar {
   transition: width 0.3s ease-in-out;
 }
+.sidebar-main-wrapper .sidebar .sidebar-body #c-sidebar-bricks {
+  position: relative;
+}
 .sidebar-main-wrapper .sidebar .sidebar-body #c-sidebar-bricks .brick .icon {
   font-size: 1.25rem;
 }
@@ -11098,6 +11101,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   align-self: flex-start;
   line-height: 30px;
   padding-right: 0.25rem;
+  max-width: calc(100% - 4.25rem);
 }
 .crm-form-page .crm-forms-sidebar ul.c-form-list .c-form-item .icon.funnel-state {
   margin: 0;
@@ -11126,10 +11130,8 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   margin: 0 auto;
   width: 100%;
 }
-.crm-form-page .crm-form-content .crm-form-constructor .crm-form-preview-block .crm-available-fields {
+.crm-form-page .crm-form-content .crm-form-constructor .crm-form-preview-block #add-field-dropdown .dropdown-body {
   max-height: 400px;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 .crm-form-page .crm-form-content .crm-form-constructor .crm-form-preview-block .crm-available-fields .crm-form-field {
   cursor: pointer;
@@ -11575,6 +11577,11 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   box-sizing: content-box !important;
   width: var(--crm-form-caption-width, 20%);
 }
+.crm-form-page .crm-form-content .crm-form-constructor .crm-form-preview-block .crm-form-fields-block .crm-form-fields .crm-form-field .fields .field .name .name-inner {
+  display: flex;
+  gap: 0.125rem;
+  flex-wrap: nowrap;
+}
 .crm-form-page .crm-form-content .crm-form-constructor .crm-form-preview-block .crm-form-fields-block .crm-form-fields .crm-form-field .fields .field .name.for-input,
 .crm-form-page .crm-form-content .crm-form-constructor .crm-form-preview-block .crm-form-fields-block .crm-form-fields .crm-form-field .fields .field .name.for-button,
 .crm-form-page .crm-form-content .crm-form-constructor .crm-form-preview-block .crm-form-fields-block .crm-form-fields .crm-form-field .fields .field .name.for-checkbox {
@@ -11838,7 +11845,6 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
   border: 1px solid var(--light-gray);
 }
 .c-funnels-page .c-funnel-section {
-  border-top: 1px solid var(--light-gray);
   padding: 20px 0 0;
 }
 .c-funnels-page .c-funnel-section .c-funnel-form .c-color-section {
@@ -14675,20 +14681,17 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 .c-vault-edit-dialog .dialog-body .fields .dialog-content {
   overflow-y: unset;
 }
-.crm-settings-form-edit-field-wrapper .crm-field-redactor {
+.crm-field-redactor {
   display: table;
 }
-.crm-settings-form-edit-field-wrapper .crm-field-redactor .crm-redactors-radio-block {
+.crm-field-redactor .crm-redactors-radio-block {
   display: table-row;
 }
-.crm-settings-form-edit-field-wrapper .crm-field-redactor .crm-redactors-radio-block .crm-redactors-radio-column {
+.crm-field-redactor .crm-redactors-radio-block .crm-redactors-radio-column {
   display: table-cell;
 }
-.crm-settings-form-edit-field-wrapper .crm-field-redactor .crm-redactors-radio-block .crm-redactors-radio-column .crm-redactor-image {
-  margin-top: 2px;
-}
-.crm-settings-form-edit-field-wrapper.crm-dialog-wrapper {
-  z-index: 100;
+.crm-field-redactor .crm-redactors-radio-block .crm-redactors-radio-column .crm-redactor-image {
+  margin-top: 0.25rem;
 }
 .c-settings-form-agreement-checkbox-edit-wrapper .c-html-label-textarea-wrapper textarea {
   min-width: 350px;

@@ -1,0 +1,197 @@
+<div class="dialog c-invoice-recurrent-dialog" id="js-invoice-recurrent-dialog">
+    <div class="dialog-background"></div>
+    <div class="dialog-body">
+        <form>
+            <header class="dialog-header">
+                <h1>[`Recurring invoice rule`] [`#`]{$invoice.number|escape}</h1>
+            </header>
+
+            <div class="dialog-content" style="min-height: 100px;">
+                <form action="?module=invoice&action=recurrentSave">
+                <div class="fields">
+                    <div class="field">
+                        <div class="name for-input">
+                            [`Interval`]
+                        </div>
+                        <div class="value">
+                            <input name="interval_value" class="shortest js-interval-value" type="number" value="{$recurrent.interval_value|escape}">
+                            <div class="wa-select">
+                                <select name="interval_unit" class="shorter js-interval-unit">
+                                {foreach $interval_units as $unit_id => $unit}
+                                    <option value="{$unit_id}" {if $recurrent.interval_unit == $unit_id}selected="selected"{/if}>{$unit}</option>
+                                {/foreach}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name for-input">
+                            [`Next invoice issue date`]
+                        </div>
+                        <div class="value">
+                            <input type="date" class="js-next-date" name="next_date" value="{$recurrent.next_date|escape}">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name for-input">
+                            [`Invoice numbers template`]
+                        </div>
+                        <div class="value">
+                            <input type="text" name="number_template" value="{$recurrent.number_template|escape}" placeholder="{$number_template_placeholder|escape}">
+                            <div class="hint">
+                                <p>[`Add variables to the template to generate unique invoice numbers:`]</p>
+                                <ul class="list separated">
+                                    <li><code>%ID</code> [`invoice ID`]</li>
+                                    <li><code>%COUNT</code> [`recurring payment counter`]</li>
+                                    <li><code>%MONTH</code> [`month number`]</li>
+                                    <li><code>%YEAR</code> [`year`]</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="name">
+
+                        </div>
+                        <div class="value">
+                            <label class="flexbox space-8">
+                                <span class="wa-checkbox">
+                                    <input type="checkbox" id="checkbox-non-payment"{if $recurrent.stop_on_non_payment} checked="checked"{/if}>
+                                    <span>
+                                        <span class="icon">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                    </span>
+                                </span>
+                                <span class="wide" style="margin-top: -2px;">
+                                    [`Stop recurring invoices on non-payment`]
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="field js-non-payment"{if !$recurrent.stop_on_non_payment} style="display: none;"{/if}>
+                        <div class="name align-right for-input">
+                            [`Stop after`]
+                        </div>
+                        <div class="value">
+                            <input type="number" class="shortest js-non-payment-value" name="stop_on_non_payment" value="{$recurrent.stop_on_non_payment|escape}">
+                            [`non-paid invoices`]
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="invoice_id" value="{$invoice.id}">
+                </form>
+            </div>
+
+            <footer class="dialog-footer">
+                <button class="button js-submit-button" type="submit">[`Save`]</button>
+                <button class="button light-gray js-close-dialog" type="button">[`Cancel`]</button>
+            </footer>
+        </form>
+    </div>
+
+    <script>
+        ( function($) {
+            const $wrapper = $("#js-invoice-recurrent-dialog");
+            const $interval_value = $wrapper.find(".js-interval-value");
+            const $interval_unit = $wrapper.find(".js-interval-unit");
+            const $next_date = $wrapper.find(".js-next-date");
+
+            $wrapper.find("#checkbox-non-payment").on("click", function() {
+                if (this.checked) {
+                    $wrapper.find(".js-non-payment").show().find("input").val("1");
+                } else {
+                    $wrapper.find(".js-non-payment").hide().find("input").val("0");
+                }
+            });
+            var is_locked = false;
+
+            $wrapper.find(".js-non-payment-value").on("change", function() {
+                if (this.value <= 0) {
+                    this.value = 1;
+                }
+            });
+
+            $wrapper.find(".js-submit-button").on("click", function(event) {
+                event.preventDefault();
+                if (is_locked) {
+                    return;
+                }
+                is_locked = true;
+                const spinner = spinnerView(0);
+                spinner.show();
+
+                const data = $wrapper.find("form").serializeArray();
+                const href = $.crm.app_url + "?module=invoice&action=recurrentSave";
+                $.post(href, data, function(response) {
+                    if (response.status === "ok") {
+                        const $dropdown = $("#dropdown-recurrent");
+                        $dropdown.find(".js-recurrent-description").text(response.data.recurrent_description);
+                        $dropdown.find(".selected").removeClass("selected");
+                        if (response.data.interval_value == 1) {
+                            $dropdown.find(".item[data-id='" + response.data.interval_unit + "']").closest("li").addClass("selected");
+                        }
+                        $wrapper.find(".js-close-dialog").trigger("click");
+                    } else {
+                        showErrors(response.errors);
+                    }
+                }).always( function() {
+                    is_locked = false;
+                    spinner.hide();
+                });
+            });
+
+            function spinnerView (timeout = 350) {
+                const $loading = $('<span class="spinner js-loading"></span>');
+                const $footer = $wrapper.find(".dialog-footer");
+                const $button = $wrapper.find(".js-submit-button");
+                return {
+                    show: function () {
+                        $footer.append($loading);
+                        $button.prop('disabled', true);
+                    },
+                    hide: function () {
+                        setTimeout(() => {
+                            $button.removeAttr('disabled');
+                            $button.find('.js-loading').remove();
+                        }, timeout);
+                    }
+                }
+            }
+
+            $interval_unit.on("change", function() {
+                setNextDate();
+            });
+            $interval_value.on("change", function() {
+                setNextDate();
+            });
+
+            function setNextDate() {
+                const init_date = new Date({if !empty($recurrent.last_datetime)}{$recurrent.last_datetime|json_encode}{/if});
+                const interval_unit = $interval_unit.val();
+                const interval_value = 1*$interval_value.val();
+
+                var days = 0;
+                if (interval_unit == "DAY") {
+                    days = interval_value;
+                } else if (interval_unit == "WEEK") {
+                    days = 7*interval_value;
+                }
+                if (days > 0) {
+                    const next_date = new Date(init_date.getTime() + days*24*60*60*1000);
+                    $next_date.val(next_date.toISOString().substring(0, 10));
+                    return;
+                }
+
+                const next_date = new Date(init_date.getTime());
+                if (interval_unit == "MONTH") {
+                    next_date.setMonth(init_date.getMonth() + interval_value);
+                    $next_date.val(next_date.toISOString().substring(0, 10));
+                } else if (interval_unit == "YEAR") {
+                    next_date.setFullYear(init_date.getFullYear() + interval_value);
+                    $next_date.val(next_date.toISOString().substring(0, 10));
+                }
+            }
+        })(jQuery);
+    </script>
+</div>

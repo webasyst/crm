@@ -39,7 +39,6 @@ var crmSettingsFormParagraphEditDialog = (function ($) {
             $textarea = that.$textarea,
             field = that.settingsForm.getField(that.id, that.checked);
 
-        console.log(field);
 
         $textarea.val(field && field.text || '');
         //

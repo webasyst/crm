@@ -299,16 +299,18 @@ class crmEmailSourceWorkerIncomingStrategy extends crmEmailSourceWorkerStrategy
                     $to_contact = new crmContact($to);
                 }
 
-                if (!$to_contact) {
-                    continue;
+                if (empty($to_contact)) {
+                    if (!(new waEmailValidator)->isValid($to)) {
+                        continue;
+                    }
+                } else {
+                    $email = $to_contact->getDefaultEmailValue();
+                    if (empty($email)) {
+                        continue;
+                    }
+                    $to = array($email => $to_contact->getName());
                 }
 
-                $email = $to_contact->getDefaultEmailValue();
-                if (!$email) {
-                    continue;
-                }
-
-                $to = array($email => $to_contact->getName());
                 $from = waMail::getDefaultFrom();
 
                 $this->sendEmail($subject, $body, $from, $to);

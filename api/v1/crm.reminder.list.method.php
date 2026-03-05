@@ -33,7 +33,12 @@ class crmReminderListMethod extends crmApiAbstractMethod
         if (!empty($reminder_ids)) {
             $where[] = 'id IN ('.join(',', $reminder_ids).')';
         }
-        if (!empty($type) && in_array($type, ['MEETING', 'CALL', 'MESSAGE', 'OTHER'])) {
+        if (!empty($type) && in_array($type, [
+            crmReminderModel::TYPE_CALL,
+            crmReminderModel::TYPE_MEETING,
+            crmReminderModel::TYPE_MESSAGE,
+            crmReminderModel::TYPE_OTHER,
+        ])) {
             $condition['type'] = $type;
             $where[] = 'type = s:type';
         }
@@ -99,6 +104,7 @@ class crmReminderListMethod extends crmApiAbstractMethod
                 'due_datetime',
                 'complete_datetime',
                 'content',
+                'report',
                 'type',
                 'state',
                 'can_edit',

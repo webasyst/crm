@@ -1748,6 +1748,7 @@ var CRMInvoicePage = ( function($) {
 
         // VARS
         that.invoice_id = options["invoice_id"];
+        that.recurrent_id = options["recurrent_id"];
         that.locales = options["locales"];
 
         // DYNAMIC VARS
@@ -1762,6 +1763,8 @@ var CRMInvoicePage = ( function($) {
         that.initChangeState();
         //
         that.initDelete();
+        //
+        that.initRecurrent();
         //
         that.initRefund();
         //
@@ -1836,7 +1839,7 @@ var CRMInvoicePage = ( function($) {
                 text: that.locales["delete_confirm_text"],
                 success_button_title: that.locales["delete_confirm_button"],
                 success_button_class: 'danger',
-                cancel_button_title: $.crm.locales['cancel'],
+                cancel_button_title: that.locales["delete_confirm_cancel_button"],
                 cancel_button_class: 'light-gray',
                 onSuccess: deleteInvoice
             });
@@ -1870,6 +1873,100 @@ var CRMInvoicePage = ( function($) {
                 });
             }
         }
+    };
+
+    CRMInvoicePage.prototype.initRecurrent = function() {
+        var that = this,
+            is_locked = false;
+
+        const $dropdown = that.$wrapper.find("#dropdown-recurrent");
+        const $button = $dropdown.find(".dropdown-toggle");
+
+        $dropdown.waDropdown({
+            hover: true,
+        });
+
+        $dropdown.find(".js-recurrent-set").on("click", function(event) {
+            event.preventDefault();
+            if (is_locked) {
+                return;
+            }
+            is_locked = true;
+            const spinner = spinnerView($button, 0);
+            spinner.show();
+
+            const $item = $(event.target);
+            const val = $(event.target).data("id");
+            const href = $.crm.app_url + "?module=invoice&action=recurrentSave",
+                data = {
+                    recurrent_id: that.recurrent_id,
+                    invoice_id: that.invoice_id,
+                    interval_unit: val
+                };
+            $.post(href, data, function(response) {
+                if (response.status === "ok") {
+                    $dropdown.find(".js-recurrent-description").text(response.data.recurrent_description);
+                    $dropdown.find(".selected").removeClass("selected");
+                    $item.closest("li").addClass("selected");
+                    $dropdown.find(".js-recurrent-none").closest("li").removeClass("disabled");
+                } else {
+                    showErrors(response.errors);
+                }
+            }, "json").always( function() {
+                spinner.hide();
+                is_locked = false;
+            });
+        });
+
+        $dropdown.find(".js-recurrent-tune").on("click", function(event) {
+            event.preventDefault();
+            if (is_locked) {
+                return;
+            }
+            is_locked = true;
+            const spinner = spinnerView($button, 0);
+            spinner.show();
+
+            const href = $.crm.app_url + "?module=invoice&action=recurrentDialog&invoice_id=" + that.invoice_id;
+            $.get(href, function(html) {
+                $.waDialog({
+                    html: html,
+                });
+            }).always( function() {
+                spinner.hide();
+                is_locked = false;
+            });
+        });
+
+        $dropdown.find(".js-recurrent-none").on("click", function(event) {
+            event.preventDefault();
+            const $item = $(event.target);
+
+            $.waDialog.confirm({
+                title: that.locales["recurring_off_title"],
+                text: that.locales["recurring_off_text"],
+                success_button_title: that.locales["recurring_off_button"],
+                success_button_class: 'danger',
+                cancel_button_title: that.locales["recurring_off_cancel_button"],
+                cancel_button_class: 'light-gray',
+                onSuccess: function(dialog) {
+                    const href = $.crm.app_url + "?module=invoice&action=recurrentDelete";
+                    $.post(href, {
+                        recurrent_id: that.recurrent_id,
+                        invoice_id: that.invoice_id
+                    }, function(response) {
+                        if (response.status === "ok") {
+                            $(".js-recurrent-description").text($item.data('description'));
+                            $item.closest("ul.menu").find(".selected").removeClass("selected");
+                            $item.closest("li").addClass("selected").addClass("disabled");
+                        }
+                    }, "json").always( function() {
+                        //spinner.hide();
+                        //is_locked = false;
+                    });
+                }
+            });
+        });
     };
 
     CRMInvoicePage.prototype.initRefund = function() {
@@ -2094,7 +2191,7 @@ function getIframeIfExists () {
 }
 
 function spinnerView ($button, timeout = 350) {
-    const $loading = $('<span class="icon size-16 custom-mr-8 js-loading"><i class="fas fa-spinner wa-animation-spin"></i></span>');
+    const $loading = $('<span class="icon custom-mr-4 js-loading"><i class="fas fa-spinner wa-animation-spin"></i></span>');
     const $existsIcon = $button.find('.icon:not(.js-loading)')
     return {
         show: function () {

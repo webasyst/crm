@@ -8,6 +8,10 @@ return array(
     'contact_delete' => array(
         'name' => /*_w*/('deleted contact')
     ),
+    'contacts_delete' => array(
+        'name' => /*_w*/('deleted contacts'),
+        'plural' => ['deleted %d contact', 'deleted %d contacts']
+    ),
     'contact_edit' => array(
         'name' => /*_w*/('edited contact'),
         'subject' => true,
@@ -61,6 +65,17 @@ return array(
     ),
     'deal_transfer' => array(
         'name' => /*_w*/('changed deal owner'),
+    ),
+    'deal_export' => array(
+        'name' => /*_w*/('exported deals'),
+        'plural' => ['exported %d deal', 'exported %d deals']
+    ),
+    'deal_delete' => array(
+        'name' => /*_w*/('deleted deal'),
+    ),
+    'deals_delete' => array(
+        'name' => /*_w*/('deleted deals'),
+        'plural' => ['deleted %d deal', 'deleted %d deals']
     ),
     'reminder_add' => array(
         'name' => /*_w*/('added reminder'),
@@ -149,5 +164,9 @@ return array(
     ),
     'contact_transfer' => array(
         'name' => /*_w*/('changed contact owner'),
+    ),
+    'contact_export' => array(
+        'name' => /*_w*/('exported contacts'),
+        'plural' => ['exported %d contact', 'exported %d contacts']
     ),
 );

@@ -157,7 +157,9 @@
                                 {elseif !empty($active_filter_transport.icon_fa)}
                                     <i class="fas fa-{$active_filter_transport.icon_fa}" style="color:{$active_filter_transport.icon_color}"></i>
                                 {elseif !empty($active_filter_transport.icon_url)}
-                                    <img src="{$active_filter_transport.icon_url}" data-fa-i2svg>
+                                    <span class="icon">
+                                        <img src="{$active_filter_transport.icon_url}">
+                                    </span>
                                 {/if}
                                 <span class="dropdown-toggle--name">{sprintf_wp($active_filter_transport.name)|escape}</span>
                             </button>
@@ -180,7 +182,9 @@
                                             {elseif !empty($_source.icon_fa)}
                                                 <i class="fas fa-{$_source.icon_fa}" title="{$_source.name|escape}" style="color:{$_source.icon_color}"></i>
                                             {elseif !empty($_source.icon_url)}
-                                                <img src="{$_source.icon_url}" title="{$_source.name|escape}" data-fa-i2svg>
+                                                <span class="icon">
+                                                    <img src="{$_source.icon_url}" title="{$_source.name|escape}">
+                                                </span>
                                             {/if}
                                             <span class="dropdown-body--name" title="{$_source.name|escape}">{$_source.name|escape}</span>
                                         </a>

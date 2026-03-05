@@ -10,7 +10,7 @@ class crmFileDownloadController extends crmJsonController
 
         $thumb = waRequest::get('thumb', 0, waRequest::TYPE_INT);
         $do_not_crop_thumb = waRequest::get('do_not_crop_thumb', false, waRequest::TYPE_INT);
-        if (in_array($file['ext'], ['jpg', 'jpeg', 'png', 'gif', 'pdf']) && $thumb > 10) {
+        if (in_array($file['ext'], ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'webp']) && $thumb > 10) {
             list($is_success, $path, $name) = $this->getThumb($file, $thumb, $do_not_crop_thumb);
             if ($is_success) {
                 waFiles::readFile($path, $name);
@@ -46,7 +46,7 @@ class crmFileDownloadController extends crmJsonController
 
     protected function getThumb($file, $size, $do_not_crop = false)
     {
-        if (!in_array($file['ext'], ['jpg', 'jpeg', 'png', 'gif', 'pdf'])) {
+        if (!in_array($file['ext'], ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'webp'])) {
             return [ false, null, null ];
         }
 

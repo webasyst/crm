@@ -30,7 +30,13 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
         wa()->getStorage()->set('crm_frontend_invoices', $invoices);
         wa()->getStorage()->set('crm/invoice_id', $id);
 
-        $available_states = array('PENDING', 'PAID', 'PROCESSING', 'DRAFT', 'ARCHIVED');
+        $available_states = [
+            crmInvoiceModel::STATE_DRAFT,
+            crmInvoiceModel::STATE_PENDING,
+            crmInvoiceModel::STATE_PAID,
+            crmInvoiceModel::STATE_ARCHIVED,
+            crmInvoiceModel::STATE_PROCESSING
+        ];
         if (!in_array($this->invoice['state_id'], $available_states)) {
             throw new waRightsException();
         }
@@ -54,7 +60,7 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
             $this->invoice['contact'] = new waContact();
         }
 
-        if ($this->invoice['state_id'] == 'PENDING') {
+        if ($this->invoice['state_id'] == crmInvoiceModel::STATE_PENDING) {
             if (!waRequest::post('hash')) {
                 $this->getPayments();
             } else {

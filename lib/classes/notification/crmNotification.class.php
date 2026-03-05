@@ -108,7 +108,7 @@ class crmNotification
     public function isDealEvent()
     {
         $event_id = $this->getEvent();
-        return substr($event_id, 0, 8) == 'deal.';
+        return substr($event_id, 0, 5) == 'deal.';
     }
 
     /**
@@ -124,6 +124,16 @@ class crmNotification
         }
         $cm = new crmCompanyModel();
         return $cm->getById($info['company_id']);
+    }
+
+    public function getFunnel()
+    {
+        $info = $this->getInfo();
+        if (!$this->isDealEvent() || $info['funnel_id'] <= 0) {
+            return null;
+        }
+        $cm = new crmFunnelModel();
+        return $cm->getById($info['funnel_id']);
     }
 
     /**
@@ -152,6 +162,11 @@ class crmNotification
             return $this->notification['__rendered_subject'];
         }
         return $this->notification['subject'];
+    }
+
+    protected function getVars()
+    {
+        return [];
     }
 
     protected function renderNotificationTemplates()
@@ -197,12 +212,13 @@ class crmNotification
 
         $id = $this->getId();
         if ($id > 0) {
-            self::getNotificationModel()->updateById($id, $data);
+            $data['id'] = $id;
         } else {
             $data = array_merge($this->getInfo(), $data);
             unset($data['id']);
-            $id = self::getNotificationModel()->insert($data);
         }
+
+        $id = self::getNotificationModel()->save($data);
         $this->notification = $this->obtainNotification($id);
 
         /**
@@ -311,7 +327,6 @@ class crmNotification
                 $instances[$notification['id']] = new crmNotificationInvoice($notification, $options);
             }
         }
-
         return $instances;
     }
 
@@ -339,6 +354,28 @@ class crmNotification
      */
     public function sendTestNotification($address)
     {
+        $old_address = $this->recipient_type;
+        $this->notification['recipient'] = $address;
+        $this->notification['url'] = $address;
+        $this->notification['status'] = 1;
+        $this->notification['test_mode'] = true;
+        if ($this->notification['transport'] == crmNotificationModel::TRANSPORT_REMINDER) {
+            $this->notification['recipient'] = 'reminder';
+            $this->notification['reminder_user_type'] = 'selected';
+        }
+        $res = false;
+        try {
+            $res = $this->sendNotification();
+        } catch (waException $e) {
+            $this->recipient_type = $old_address;
+            throw $e;
+        }
+        $this->recipient_type = $old_address;
+        return $res;
+    }
+
+    protected function sendNotification()
+    {
         return false;
     }
 
@@ -351,6 +388,212 @@ class crmNotification
     public function send($options = array())
     {
         return false;
+    }
+
+    protected function createReminder($contact_id, $user_contact_id = null)
+    {
+        if (!crmHelper::isPremium()) {
+            return false;
+        }
+
+        if (!isset($this->notification['reminder_due_date']) || !wa_is_int($this->notification['reminder_due_date'])) {
+            return false;
+        }
+
+        if (!empty($this->notification['test_mode'])) {
+            $user_contact_id = wa()->getUser()->getId();
+        }
+
+        if (empty($user_contact_id)) {
+            if (empty($this->notification['responsible_contact_id']) || !wa_is_int($this->notification['responsible_contact_id'])) {
+                return false;
+            }
+
+            $user_contact_id = $this->notification['responsible_contact_id'] > 0 ?
+                $this->notification['responsible_contact_id'] :
+                (new crmDealModel)->getResponsibleUserOfGroup(-1 * $this->notification['responsible_contact_id']);
+        }
+
+        if (empty($user_contact_id)) {
+            return false;
+        }
+
+        $content = ifset($this->notification['reminder_content'], '');
+        if (!empty($content)) {
+            list($content) = $this->renderTemplates([$content], $this->getVars());
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $types = crmConfig::getReminderType();
+        $reminder = [
+            'create_datetime' => $now,
+            'update_datetime' => $now,
+            'creator_contact_id' => wa()->getUser()->getId(),
+            'user_contact_id' => $user_contact_id,
+            'content'         => $content,
+            'contact_id'      => $contact_id,
+            'type'            => ifset($types[ifset($this->notification['reminder_type'])]) ? $this->notification['reminder_type'] : 'OTHER',
+            'due_date'        => date('Y-m-d', strtotime('+'.$this->notification['reminder_due_date'].' day')),
+            'due_datetime'    => null,
+        ];
+
+        if (!empty($this->notification['test_mode'])) {
+            return [
+                'data' => [
+                    'message' => '<p>'._w('Reminder successfully created. It is not saved in the test mode.') . '</p><p class="small"><span class="hint">'._w('Due date') . ': '. waDateTime::format('humandate', $reminder['due_date']) .'</span><br>'.$content.'</p>',
+                ],
+            ];
+        }
+
+        $id = $reminder['id'] = (new crmReminderModel)->insert($reminder);
+        crmReminder::sendNotification($reminder, array($reminder['user_contact_id']), 'reminder_new');
+
+        if (!empty($reminder['contact_id'])) {
+            crmDeal::updateReminder($reminder['contact_id']);
+        }
+
+        (new crmLogModel)->log('reminder_add', $reminder['contact_id'], $id);
+
+        return true;
+    }
+
+    protected function sendHttp()
+    {
+        if (!crmHelper::isPremium()) {
+            return false;
+        }
+
+        $n = $this->notification;
+        $webhook_url = ifempty($n, 'url', false);
+        if (!$webhook_url) {
+            return false;
+        }
+
+        if (!in_array(ifset($n, 'method', ''), [waNet::METHOD_GET, waNet::METHOD_POST, waNet::METHOD_PUT, waNet::METHOD_PATCH, waNet::METHOD_DELETE])) {
+            $n['method'] = waNet::METHOD_GET;
+        }
+
+        if ($n['method'] === waNet::METHOD_GET) {
+            $n['post'] = null;
+        }
+
+        $data = $this->getVars();
+
+        //GET params
+        if (!empty($n['get'])) {
+            $n['get'] = self::prepareHttpParam($data, $n['get']);
+            if (!empty($n['get'])) {
+                $webhook_url.= (strpos($webhook_url, '?') === false) ? '?' : '&';
+                $webhook_url.= http_build_query($n['get']);
+            }
+        }
+
+        //POST params
+        if (!empty($n['post'])) {
+            $n['post'] = self::prepareHttpParam($data, $n['post']);
+        }
+
+        // HTTP headers
+        if (!empty($n['headers'])) {
+            $n['headers'] = self::prepareHttpParam($data, $n['headers']);
+        }
+
+        $options = [
+            'request_format' => $n['format'] === 'raw' ? waNet::FORMAT_RAW : waNet::FORMAT_JSON,
+            'format' => $n['format'] === 'raw' ? waNet::FORMAT_RAW : waNet::FORMAT_JSON,
+            'tolerate_empty_body_request' => true,
+            'expected_http_code' => null,
+        ];
+
+        $net = new waNet($options, ifempty($n, 'headers', []));
+        try {
+            $net->query($webhook_url, ifempty($n, 'post', []), $n['method']);
+        } catch (waException $e) {
+            waLog::dump($e->getMessage(), 'crm/webhook.error.log');
+            return empty($this->notification['test_mode']) ? false : ['status' => false, 'errors' => [$e->getMessage()]];
+        }
+
+        if (!empty($this->notification['test_mode'])) {
+            $response_code = $net->getResponseHeader('http_code');
+            $response_body = $net->getResponse(true);
+            if (!empty($response_body) && mb_strlen($response_body) > 1000) {
+                $response_body = mb_substr($response_body, 0, 1000) . '...';
+            }
+            $response_body = htmlspecialchars($response_body);
+            $message = ($response_code < 400) ? _w('HTTP request successfully sent.') : _w('HTTP request failed.');
+            $message = '<p>'. $message . '</p><div class="small">'._w('Response code').': ' . $response_code . '<br>'._w('Response body').': <pre>' . $response_body . '</pre></div>';
+            return [
+                'data' => [
+                    'message' => $message,
+                ],
+            ];
+        }
+
+        return true;
+    }
+
+    private static function prepareHttpParam($data, $params_string)
+    {
+        $params_string = trim($params_string);
+        $view = wa()->getView();
+        $view->assign($data);
+        $params = self::parseParams($params_string);
+        if (!empty($params_string) && empty($params)) {
+            return self::tryJsonDecode($params_string, $view);
+        }
+        foreach ($params as &$param) {
+            //Skip text e.g. order=order
+            if (strpos($param, '{') === false) {
+                continue;
+            }
+            //Check for existing keys in order data
+            $preset_key = trim($param,'{$}');
+            if (array_key_exists($preset_key, $data)) {
+                $param = $data[$preset_key];
+                continue;
+            }
+            try {
+                $param = $view->fetch('string:' . $param);
+            } catch (Exception $e) {
+                waLog::dump($e->getMessage(), 'crm/webhook.error.log');
+                continue;
+            }
+            //Check if param is encoded array like order={$order.items|json_encode}
+            try {
+                $test_array = @json_decode($param, true);
+                if (is_array($test_array)) {
+                    $param = $test_array;
+                }
+            } catch (Exception $e) {
+                continue;
+            }
+        }
+        return $params;
+    }
+
+    protected static function parseParams($params)
+    {
+        $result = [];
+        if ($params) {
+            $params = explode("\n", $params);
+            foreach ($params as $param) {
+                $param = explode('=', trim($param), 2);
+                if (count($param) === 2) { //?
+                    $result[$param[0]] = $param[1];
+                }
+            }
+        }
+        return $result;
+    }
+
+    protected static function tryJsonDecode($string, $view)
+    {
+        $string = $view->fetch('string:' . $string);
+        try {
+            return json_decode($string, true);
+        } catch (Exception $e) {
+            return [];
+        }
     }
 
     /**
@@ -448,13 +691,25 @@ class crmNotification
     {
         return array(
             crmNotificationModel::TRANSPORT_EMAIL => array(
-                'name' => _w('Email'),
-                'icon' => 'email'
+                'name' => _w('Send email'),
+                'icon' => 'envelope',
+                'is_premium_only' => false,
             ),
             crmNotificationModel::TRANSPORT_SMS   => array(
-                'name' => _w('SMS'),
-                'icon' => 'mobile'
-            )
+                'name' => _w('Send SMS'),
+                'icon' => 'mobile-alt',
+                'is_premium_only' => false,
+            ),
+            crmNotificationModel::TRANSPORT_HTTP   => array(
+                'name' => _w('Send HTTP request'),
+                'icon' => 'globe',
+                'is_premium_only' => true,
+            ),
+            crmNotificationModel::TRANSPORT_REMINDER   => array(
+                'name' => _w('Create reminder'),
+                'icon' => 'bell',
+                'is_premium_only' => true,
+            ),
         );
     }
 
@@ -501,7 +756,7 @@ class crmNotification
         if (!waSMS::adapterExists()) {
             return $sms_from;
         }
-        
+
         $sms_config = wa()->getConfig()->getConfigFile('sms');
 
         // sender '*' in CRM names "System default", so in foreach skip '*'

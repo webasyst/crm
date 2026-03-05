@@ -8,6 +8,11 @@ class crmShopBackend_customers_listHandler extends waEventHandler
             return null;
         }
 
+        $single_app_mode_app_id = wa()->isSingleAppMode();
+        if (!empty($single_app_mode_app_id) && $single_app_mode_app_id !== 'crm') {
+            return null;
+        }
+
         $button_text = htmlspecialchars(_wd('crm', 'Open in CRM'));
 
         $hash = $params['hash'];
@@ -27,7 +32,9 @@ class crmShopBackend_customers_listHandler extends waEventHandler
 
         if (wa()->getUser()->getRights('crm')) {
             return array(
-                'top_li' => '<input type="button" onclick="location.href=\'' . $url . '\'" value="' . $button_text . '">',
+                'top_li' => wa()->whichUI('shop') == '1.3' ? 
+                    '<input type="button" onclick="location.href=\'' . $url . '\'" value="' . $button_text . '">' : 
+                    '<button class="light-gray" onclick="location.href=\'' . $url . '\'"><i class="icon size-20" style="background-image: url(\''. wa()->getConfig()->getRootUrl().'wa-apps/crm/img/crm96.png\'); border-radius: 0; margin: -3px 0 -3px -4px;"></i> ' . $button_text . '</button>',
             );
         }
     }

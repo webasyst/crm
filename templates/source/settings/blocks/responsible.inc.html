@@ -63,7 +63,8 @@
 <div class="alert small custom-mt-16 custom-mb-4 js-group-hint" {if !$show_hint}style="display: none"{/if}>
     <div class="flexbox space-8">
         <span class=""><i class="fas fa-info-circle"></i></span>
-        <div class="wide">[`For each new deal, a randomly selected user with the lowest number of assigned deals will be assigned as the responsible person.`]
+        <div class="wide">
+            {$hint|default:_w('For each new deal, a randomly selected user with the lowest number of assigned deals will be assigned as the responsible person.')|escape}
         </div>
     </div>
 </div>

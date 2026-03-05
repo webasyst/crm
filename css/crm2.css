@@ -33,7 +33,7 @@
 .redactor-box .redactor-layer:hover { border-color: var(--border-color-input-hover)}
 .redactor-box .redactor-layer:focus { transition: background-color .2s; border-color: var(--accent-color); background-color: var(--background-color-blank)}
 .redactor-box .redactor-placeholder:before { color: var(--text-color-hint) }
-.dialog .dialog-body .redactor-box .redactor-layer {max-height: 300px;}
+.dialog-body .redactor-box .redactor-layer { max-height: 300px; }
 
 button.flexbox { display: flex; }
 

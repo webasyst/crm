@@ -43,18 +43,21 @@
                                 <img src="{$wa_app_static_url}img/source/source-form.png" alt="" class="desktop-only">
                                 <span class='c-name'>{$_form.name|escape}</span>
 
-                            {if !empty($_form.funnel)}
-                                {$_funnel_name = $_form.funnel.name|escape}
-                                {$_funnel_color = $_form.funnel.color}
-                                {$_funnel_icon = $_form.funnel.icon|default:'fas fa-briefcase'|escape}
-                                <i class="{$_funnel_icon} funnel-state" style="color: {$_funnel_color}" title="{$_funnel_name}"></i>
-                                {if !empty($_form.stage)}
-                                    {$stage_id = $_form.stage.id}
-                                    {$_stage_name = $_form.stage.name|escape}
-                                    {$_stage_color = $_form.funnel.stages[$stage_id].color}
-                                    <span class="c-state" style="background: {$_stage_color}">{$_stage_name}</span>
+                                {if !empty($_form.funnel)}
+                                    {$_funnel_name = $_form.funnel.name|escape}
+                                    {$_funnel_color = $_form.funnel.color}
+                                    {$_funnel_icon = $_form.funnel.icon|default:'fas fa-briefcase'|escape}
+                                    <i class="{$_funnel_icon} funnel-state" style="color: {$_funnel_color}" title="{$_funnel_name}"></i>
+                                    {if !empty($_form.stage)}
+                                        {$stage_id = $_form.stage.id}
+                                        {$_stage_name = $_form.stage.name|escape}
+                                        {$_stage_color = $_form.funnel.stages[$stage_id].color}
+                                        <span class="c-state" style="background: {$_stage_color}">{$_stage_name}</span>
+                                    {/if}
                                 {/if}
-                            {/if}
+                                <div class="wide align-right">
+                                    <button class="crm-delete-form-link button nobutton circle" type="button" title="[`Delete this form`]"><i class="fas fa-trash-alt delete gray"></i></button>
+                                </div>
                             </a>
                         </li>
                     {/foreach}
@@ -88,7 +91,12 @@
         ( function($) {
             $.crm.title.set("{$_title}");
             new CRMSettingsForms({
-                $wrapper: $('#crm-form-page')
+                $wrapper: $('#crm-form-page'),
+                messages: {
+                    'delete_confirm_title': '[`Delete form`]',
+                    'delete_confirm_text': '[`Are you sure?`]',
+                    'delete_confirm_button': '[`Delete`]'
+                }
             });
         })(jQuery);
     </script>

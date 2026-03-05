@@ -224,11 +224,13 @@
                     {* update in sidebar template *}
                     total: 0
                 }
-            }
+            },
+            shop_app_exists: {$shop_app_exists|json_encode}
         };
         window.crmAction = {
             setTitle: $.crm.title.set
-        }
+        };
+        $.fn.uiSortable = $.fn.sortable;
     </script>
 
 </head>

@@ -120,6 +120,7 @@ var CRMReminders = (function ($) {
         $textarea.on("keydown", function (event) {
             var key = event.keyCode,
                 is_enter = ( key === 13 );
+            
             if (wrapper_is_open) {
                 if (is_enter && !event.shiftKey) {
                     event.preventDefault();
@@ -210,8 +211,13 @@ var CRMReminders = (function ($) {
                     key = event.keyCode,
                     is_enter = ( key === 13 ),
                     is_esc = ( key === 27 );
-
-                if (is_enter && !wrapper_is_open) {
+                if ($target.hasClass('js-report-textarea')) {
+                    var scroll_h = $target[0].scrollHeight;
+                    if (scroll_h > $target[0].clientHeight) {
+                        scroll_h += 20;
+                        $target.css("min-height", scroll_h + "px");
+                    }
+                } else if (is_enter && !wrapper_is_open) {
                     //event.preventDefault();
                     //const is_edited = $target.hasClass('c-text-edited');
                     const is_completed = $target.hasClass('c-text-field');
@@ -1026,6 +1032,7 @@ var CRMReminder = (function ($) {
         that.$view = that.$steps.filter(".is-view");
         that.$edit = that.$steps.filter(".is-edit");
         that.$confirm = that.$steps.filter(".is-confirm");
+        that.$report = that.$steps.filter(".is-report");
         that.$textarea = that.$edit.find("textarea");
         that.$dots_button = that.$wrapper.find(".js-dots-wrapper");
         that.$dots_detail = that.$wrapper.find(".c-dots-detail");
@@ -1074,6 +1081,22 @@ var CRMReminder = (function ($) {
                     return;
                 }
 
+                if (!!( $target.closest(".js-report-cancel").length )) {
+                    toggleReport(false);
+                    return;
+                }
+
+                if (!!( $target.closest(".is-report").length )) {
+                    that.$dots_detail.hide();
+                    return;
+                }
+
+                if (!!( $target.closest(".js-done").length )) {
+                    toggleReport(true);
+                    that.$dots_detail.hide();
+                    return;
+                }
+                
                 if (!!( $target.closest(".js-confirm-delete").length )) {
                     that.remove();
                     return;
@@ -1157,6 +1180,17 @@ var CRMReminder = (function ($) {
                 that.$confirm.removeClass(active_class);
             }
         }
+
+        function toggleReport(show) {
+            var active_class = "is-shown";
+            if (show) {
+                that.$report.addClass(active_class);
+                that.$report.find("textarea").focus();
+            } else {
+                that.$report.removeClass(active_class);
+            }
+        }
+
     };
 
     CRMReminder.prototype.setPadding = function(update) {
@@ -1185,7 +1219,8 @@ var CRMReminder = (function ($) {
             href = "?module=reminder&action=markAsDone" + href_params,
             data = {
                 id: id,
-                user_id: that.user_id ? that.user_id : 'all'
+                user_id: that.user_id ? that.user_id : 'all',
+                report: $reminder.find(".js-report-textarea").val()
             };
 
         is_locked = true;
@@ -1356,7 +1391,7 @@ var CRMCompletedReminder = (function ($) {
             }*/
         });
 
-           $textarea.on("input", toggleHeight);
+        $textarea.on("input", toggleHeight);
 
 
         $textarea.on("keydown", function (event) {
@@ -1409,9 +1444,11 @@ var CRMCompletedReminder = (function ($) {
         }
 
         function toggleHeight() {
-            $textarea.css("min-height", 0);
-            var scroll_h = $textarea[0].scrollHeight;
-            $textarea.css("min-height", scroll_h + "px");
+            $textarea.each(function () {
+                $(this).css("min-height", 0);
+                var scroll_h = this.scrollHeight;
+                $(this).css("min-height", scroll_h + "px");
+            })
         }
     };
 

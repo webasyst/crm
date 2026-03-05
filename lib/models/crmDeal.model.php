@@ -1010,6 +1010,9 @@ class crmDealModel extends crmModel
         if (isset($params['deal_ids']) && is_array($params['deal_ids'])) {
             $filter_conditions .= (empty($params['deal_ids']) ? " AND d.id = 0" : " AND d.id IN (".$this->escape(implode(',', $params['deal_ids'])).")");
         }
+        if (!empty($params['min_id'])) {
+            $filter_conditions .= " AND d.id > ".intval($params['min_id']);
+        }
 
         // WHERE: filter by fields
         $fields_join = '';

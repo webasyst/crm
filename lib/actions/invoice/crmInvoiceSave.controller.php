@@ -26,7 +26,7 @@ class crmInvoiceSaveController extends crmJsonController
             if (!$invoice || !$this->getCrmRights()->contact($invoice['contact_id'])) {
                 $this->accessDenied();
             }
-            if ($invoice['state_id'] != 'DRAFT' && $invoice['state_id'] != 'PENDING') {
+            if ($invoice['state_id'] != crmInvoiceModel::STATE_DRAFT && $invoice['state_id'] != crmInvoiceModel::STATE_PENDING) {
                 $this->accessDenied();
             }
 

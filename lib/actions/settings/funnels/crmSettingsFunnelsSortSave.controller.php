@@ -21,5 +21,10 @@ class crmSettingsFunnelsSortSaveController extends crmJsonController
             }
             $fm->updateById($ids[$sort], array('sort' => $sort));
         }
+
+        if (!empty(wa()->getUser()->getSettings('crm', 'funnels_sort'))) {
+            // if admin has personal funnel sorting clear it
+            wa()->getUser()->delSettings('crm', 'funnels_sort');
+        }
     }
 }

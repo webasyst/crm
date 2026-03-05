@@ -60,11 +60,17 @@
 
                     {if !empty($_reminder.rights)}
                         <div class="c-quick-content-toggle-wrapper js-quick-content-toggle-wrapper width-100">
-                            <form>
+                            <form class="flexbox vertical space-12">
                                 {if !empty($_reminder.content)}
                                 <div class="width-100">
                                     <textarea class="c-text-field js-textarea" name="data[content]" data-text="{$_reminder.content|escape}">{$_reminder.content|escape}</textarea>
                                 </div>
+                                {/if}
+                                {if !empty($_reminder.report)}
+                                <blockquote class="custom-px-12 custom-py-8">
+                                    <div class="text-gray">[`Execution report`]</div>
+                                    <textarea class="c-text-field js-textarea" name="data[report]" data-text="{$_reminder.report|escape}">{$_reminder.report|escape}</textarea>
+                                </blockquote>
                                 {/if}
                                 <input name="data[id]" type="hidden" value="{$_reminder.id}">
                                 <input name="data[contact_id]" type="hidden" value="{$_reminder.contact_id}">
@@ -81,6 +87,12 @@
                         </div>
                     {else}
                         <span class="js-text">{$_reminder.content|escape|nl2br}</span>
+                        {if !empty($_reminder.report)}
+                        <blockquote class="custom-px-12 custom-py-8">
+                            <div class="text-gray">[`Execution report`]</div>
+                            <div>{$_reminder.report|escape|nl2br}</div>
+                        </blockquote>
+                        {/if}
                     {/if}
                 </div>
 

@@ -40,7 +40,7 @@ class crmWorkerCli extends waCliController
             }
         }
 
-        if (!$tasks || isset($tasks['calls'])) {
+        if (!$tasks || isset($tasks['calls']) || isset($tasks['sources'])) {
             crmPbxActions::cleanUpCalls();
         }
 
@@ -50,6 +50,7 @@ class crmWorkerCli extends waCliController
 
         if (!$tasks || isset($tasks['invoices_archive'])) {
             crmInvoice::cliInvoicesArchive();
+            crmInvoice::recurrentIssue();
         }
 
         if (!$tasks || isset($tasks['currencies_copy'])) {

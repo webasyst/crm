@@ -43,7 +43,7 @@
                             [`Verification link text`]
                         </div>
                         <div class="value">
-                            <input class="equal-width" type="text" name="source[params][verify_request_button]" value="{$source.params.verify_request_button|default:$default_verify_request_button|escape}">
+                            <input class="long" type="text" name="source[params][verify_request_button]" value="{$source.params.verify_request_button|default:$default_verify_request_button|escape}">
                         </div>
                     </div>
                     <div class="field top-padded" style="margin-bottom: 16px;">
@@ -95,13 +95,13 @@
                         <div>
                             <div class="crm-delete-link-wrapper">
                                 <a href="javascript:void(0);" class="button light-gray smaller crm-delete-source-link desktop-only">
-                                    <i class="fas fa-trash-alt delete custom-mr-4"></i> [`Delete this source`]
+                                    <i class="fas fa-trash-alt delete custom-mr-4 text-red"></i> [`Delete this source`]
                                 </a>
-                                <a href="javascript:void(0);" class="button light-gray circle crm-delete-source-link mobile-only" title="[`Delete this source`]">
-                                    <i class="fas fa-trash-alt delete"></i>
+                                <a href="javascript:void(0);" class="button light-gray smaller crm-delete-source-link mobile-only" title="[`Delete this source`]">
+                                    <i class="fas fa-trash-alt delete text-red"></i>
                                 </a>
-                                <a href="javascript:void(0);" class="button light-gray circle crm-delete-source-link tablet-only" title="[`Delete this source`]">
-                                    <i class="fas fa-trash-alt delete"></i>
+                                <a href="javascript:void(0);" class="button light-gray smaller crm-delete-source-link tablet-only" title="[`Delete this source`]">
+                                    <i class="fas fa-trash-alt delete text-red"></i>
                                 </a>
                             </div>
                         </div>

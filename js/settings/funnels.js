@@ -6,10 +6,6 @@ var CRMSettingsFunnels = ( function($) {
         // DOM
         that.$wrapper = options["$wrapper"];
 
-        // VARS
-
-        // DYNAMIC VARS
-
         // INIT
         that.initClass();
     };
@@ -17,13 +13,46 @@ var CRMSettingsFunnels = ( function($) {
     CRMSettingsFunnels.prototype.initClass = function() {
         var that = this;
 
-        //
-        that.initTabs();
+        // STATES
+        that.sidebar_inited = false;
+        that.tabs_inited = false;
+
+        that.init();
+
+        var timer_id = null;
+        $(window).on('resize', () => {
+            if (timer_id) {
+                clearTimeout(timer_id);
+            }
+            timer_id = setTimeout(() => {
+                that.init();
+                timer_id = null;
+            }, 300);
+        });
+    };
+
+    CRMSettingsFunnels.prototype.init = function() {
+        var that = this;
+
+        const is_mobile = innerWidth <= 760;
+        if (is_mobile) {
+            if (that.tabs_inited) return;
+
+            that.initTabs();
+
+            that.tabs_inited = true;
+        } else {
+            if (that.sidebar_inited) return;
+
+            that.initSidebar();
+
+            that.sidebar_inited = true;
+        }
     };
 
     CRMSettingsFunnels.prototype.initTabs = function() {
         var that = this,
-            $section = that.$wrapper.find(".js-funnels-tabs"),
+            $section = that.$wrapper.find(".c-funnels-section .js-funnels-tabs"),
             $companies = that.$wrapper.find(".c-funnels-wrapper"),
             $list = $companies.find(".c-funnels-list"),
             $activeTab = $list.find(".c-funnel.selected");
@@ -32,9 +61,7 @@ var CRMSettingsFunnels = ( function($) {
 
         initSlider();
 
-        initSort();
-
-        //
+        that.initSort($list, 'x');
 
         function initSetWidth() {
             var $window = $(window),
@@ -67,48 +94,60 @@ var CRMSettingsFunnels = ( function($) {
                 $activeSlide: ($activeTab.length ? $activeTab : false)
             });
         }
+    };
 
-        function initSort() {
-            var xhr = false;
+    CRMSettingsFunnels.prototype.initSidebar = function() {
+        var that = this,
+            $list = that.$wrapper.find(".sidebar .c-funnels-list");
 
-            $list.sortable({
-                //helper: "clone",
-                distance: 10,
-                items: "> li",
-                axis: "x",
-                stop: save,
-                onUpdate: save
+        that.initSort($list);
+    };
+
+    CRMSettingsFunnels.prototype.initSort = function($list, axis = 'y') {
+        let xhr = false;
+        let initialSortIds = [];
+
+        $list.uiSortable({
+            distance: 10,
+            axis,
+            items: "> li",
+            start: () => {
+                initialSortIds = getIds().replace(',,', ',');
+            },
+            stop: save,
+            onUpdate: save
+        });
+
+        function save() {
+            var href = "?module=settings&action=funnelsSortSave",
+                ids = getIds(),
+                data = {
+                    ids: ids
+                };
+
+            if (xhr) {
+                xhr.abort();
+            }
+
+            xhr = $.post(href, data, function() {
+                if (initialSortIds !== ids) {
+                    $(document).trigger('wa_funnel_save');
+                }
+            }).always( function() {
+                xhr = false;
+            });
+        }
+
+        function getIds() {
+            var result = [];
+
+            $list.find(".c-funnel").each( function() {
+                result.push( $(this).data("id") );
             });
 
-            function save() {
-                var href = "?module=settings&action=funnelsSortSave",
-                    ids = getIds(),
-                    data = {
-                        ids: ids
-                    };
-
-                if (xhr) {
-                    xhr.abort();
-                }
-
-                xhr = $.post(href, data, function(response) {
-
-                }).always( function() {
-                    xhr = false;
-                });
-
-                function getIds() {
-                    var result = [];
-
-                    $list.find(".c-funnel").each( function() {
-                        result.push( $(this).data("id") );
-                    });
-
-                    return result.join(",");
-                }
-            }
+            return result.join(",");
         }
-    };
+    }
 
     return CRMSettingsFunnels;
 

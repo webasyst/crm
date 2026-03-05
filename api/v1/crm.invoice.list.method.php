@@ -5,32 +5,59 @@ class crmInvoiceListMethod extends crmApiAbstractMethod
     const MAX_LIMIT = 500;
     const DEFAULT_LIMIT = 30;
 
+    protected static $invoice_states = [
+        crmInvoiceModel::STATE_DRAFT,
+        crmInvoiceModel::STATE_PENDING,
+        crmInvoiceModel::STATE_PAID,
+        crmInvoiceModel::STATE_REFUNDED,
+        crmInvoiceModel::STATE_ARCHIVED,
+        crmInvoiceModel::STATE_PROCESSING
+    ];
+
     public function execute()
     {
-        $contact_id = (int) $this->get('contact_id');
+        if (!wa()->getUser()->getRights('crm', 'manage_invoices')) {
+            throw new waAPIException('forbidden', _w('Access denied'), 403);
+        }
+
+        $contact_ids = $this->get('contact_id');
+        if (!empty($contact_ids) && !is_array($contact_ids)) {
+            $contact_ids = [$contact_ids];
+        }
+        $deal_ids = $this->get('deal_id');
+        if (!empty($deal_ids) && !is_array($deal_ids)) {
+            $deal_ids = [$deal_ids];
+        }
+        $state_ids = $this->get('state_id');
+        if (!empty($state_ids) && !is_array($state_ids)) {
+            $state_ids = [$state_ids];
+        }
+
         $userpic_sz = (int) $this->get('userpic_size');
-        $deal_id    = (int) $this->get('deal_id');
         $number     = (string) $this->get('number');
-        $state_id   = (string) $this->get('state_id');
+        
         $sort       = (string) $this->get('sort');
         $sort       = ($sort ?: 'create_datetime');
         $asc        = (bool) $this->get('asc');
         $offset     = (int) $this->get('offset');
         $limit      = (int) $this->get('limit');
 
-        if (!wa()->getUser()->getRights('crm', 'manage_invoices')) {
-            throw new waAPIException('forbidden', _w('Access denied'), 403);
-        } elseif (!empty($contact_id) && $contact_id < 1) {
-            throw new waAPIException('not_found', _w('Contact not found'), 404);
-        } elseif (!empty($deal_id) && $deal_id < 1) {
-            throw new waAPIException('not_found', _w('Deal not found'), 404);
-        } elseif (!empty($state_id) && !in_array($state_id, ['PENDING', 'PAID', 'REFUNDED', 'ARCHIVED', 'DRAFT', 'PROCESSING'])) {
+        if (!empty($contact_ids) && !empty(array_filter($contact_ids, function ($value) { return !wa_is_int($value); }))) {
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid parameter: “%s”.', 'contact_id'), 400);
+        }
+        if (!empty($deal_ids) && !empty(array_filter($deal_ids, function ($value) { return !wa_is_int($value); }))) {
+            throw new waAPIException('invalid_param', sprintf_wp('Invalid parameter: “%s”.', 'deal_id'), 400);
+        }
+        if (!empty($state_ids) && !empty(array_filter($state_ids, function ($value) { return !in_array($value, self::$invoice_states); }))) {
             throw new waAPIException('invalid_param', sprintf_wp('Invalid parameter: “%s”.', 'state_id'), 400);
-        } elseif (!in_array($sort, ['create_datetime', 'update_datetime', 'payment_datetime'])) {
+        }
+        if (!in_array($sort, ['create_datetime', 'update_datetime', 'payment_datetime'])) {
             throw new waAPIException('invalid_param', sprintf_wp('Invalid parameter: “%s”.', 'sort'), 400);
-        } elseif (!empty($limit) && $limit < 1) {
+        }
+        if (!empty($limit) && $limit < 1) {
             throw new waAPIException('invalid_param', sprintf_wp('Invalid parameter: “%s”.', 'limit'), 400);
-        } elseif (!empty($offset) && $offset < 1) {
+        }
+        if (!empty($offset) && $offset < 1) {
             throw new waAPIException('invalid_param', sprintf_wp('Invalid parameter: “%s”.', 'offset'), 400);
         }
 
@@ -42,17 +69,17 @@ class crmInvoiceListMethod extends crmApiAbstractMethod
             'limit'  => $limit
         ];
         $invoice_model = $this->getInvoiceModel();
-        if (!empty($contact_id)) {
-            $where[] = 'contact_id = i:contact_id';
-            $filter['contact_id'] = $contact_id;
+        if (!empty($contact_ids)) {
+            $where[] = 'contact_id IN (:contact_ids)';
+            $filter['contact_ids'] = $contact_ids;
         }
-        if (!empty($deal_id)) {
-            $where[] = 'deal_id = i:deal_id';
-            $filter['deal_id'] = $deal_id;
+        if (!empty($deal_ids)) {
+            $where[] = 'deal_id IN (:deal_ids)';
+            $filter['deal_ids'] = $deal_ids;
         }
-        if (!empty($state_id)) {
-            $where[] = 'state_id = s:state_id';
-            $filter['state_id'] = $state_id;
+        if (!empty($state_ids)) {
+            $where[] = 'state_id IN (:state_ids)';
+            $filter['state_ids'] = $state_ids;
         }
         if (!empty($number)) {
             $where[] = "number LIKE '%".$invoice_model->escape($number)."%'";

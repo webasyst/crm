@@ -27,6 +27,7 @@ class crmInstaller
         $this->installTags();
         $this->installNotes();
         $this->installForms();
+        $this->installLeadForms();
         $this->installFields();
         $this->installFunnels();
         $this->installCompany();
@@ -145,12 +146,17 @@ class crmInstaller
             if (wa()->appExists('shop')) {
                 wa('shop');
             }
+            $is_initiated = false;
             if (crmConfig::isShopSupported()) {
                 $sql = "INSERT INTO {$cm->getTableName()} (code, rate, sort)
                   SELECT code, rate, sort FROM shop_currency";
                 $cm->exec($sql);
-                $asm->set('crm', 'currency', $asm->get('shop', 'currency'));
-            } else {
+                if ($cm->countAll() > 0) {
+                    $asm->set('crm', 'currency', $asm->get('shop', 'currency'));
+                    $is_initiated = true;
+                }
+            }
+            if (!$is_initiated) {
                 $currency = wa()->getLocale() == 'ru_RU' ? 'RUB' : 'USD';
                 $cm->insert(array(
                     'code' => $currency,
@@ -482,10 +488,12 @@ class crmInstaller
     public function installCompany()
     {
         $cm = new crmCompanyModel();
-        $sql = "INSERT INTO `{$cm->getTableName()}` SET name='".$cm->escape(wa()->accountName())."'";
         if ($cm->countAll() <= 0) {
             try {
-                $cm->exec($sql);
+                $cm->insert([
+                    'name' => wa()->accountName(),
+                    'template_id' => 1,
+                ]);
                 return true;
             } catch (waDbException $e) {
             }
@@ -677,5 +685,160 @@ class crmInstaller
             ]);
             waLog::log($error, 'crm/install.error.log');
         }
+    }
+
+    public function installLeadForms()
+    {
+        $locale = wa()->getLocale();
+        $is_ru = $locale == 'ru_RU';
+        $crm_source_model = new crmSourceModel();
+        $crm_form_model = new crmFormModel();
+        $crm_source_params_model = new crmSourceParamsModel();
+        $crm_form_params_model = new crmFormParamsModel();
+
+        try {
+            $source_data = [
+                'creator_contact_id' => 0,
+                'create_datetime'    => date('Y-m-d H:i:s'),
+                'type'               => crmSourceModel::TYPE_FORM,
+                'provider'           => '',
+                'name'               => $is_ru ? 'Форма подписки' : 'Subscription form',
+                'disabled'           => 1
+            ];
+            $source_id = $crm_source_model->insert($source_data);
+        } catch (waDbException $dbex) {
+            return false;
+        }
+
+        try {
+            $form_data = [
+                'name'            => $is_ru ? 'Форма подписки' : 'Subscription form',
+                'create_datetime' => date('Y-m-d H:i:s'),
+                'contact_id'      => 0,
+                'locale'          => $locale
+            ];
+            $form_id = $crm_form_model->insert($form_data);
+        } catch (waDbException $dbex) {
+            return false;
+        }
+
+        try {
+            $source_params = [
+                [
+                    'source_id' => $source_id,
+                    'name'      => 'form_id',
+                    'value'     => $form_id
+                ], [
+                    'source_id' => $source_id,
+                    'name'      => 'locale',
+                    'value'     => $locale
+                ]
+            ];
+            $crm_source_params_model->multipleInsert($source_params);
+        } catch (waDbException $dbex) {
+            return false;
+        }
+
+        try {
+            $locale = $locale == 'ru_RU';
+            $domains = wa()->getRouting()->getDomains();
+            $fields = [
+                [
+                    'id'               => 'firstname',
+                    'name'             => $is_ru ? 'Имя' : 'Firstname',
+                    'type'             => 'NameSubfield',
+                    'caption'          => $is_ru ? 'Имя' : 'Firstname',
+                ], [
+                    'id'               => 'lastname',
+                    'name'             => $is_ru ? 'Фамилия' : 'Lastname',
+                    'type'             => 'NameSubfield',
+                    'caption'          => $is_ru ? 'Фамилия' : 'Lastname',
+                ], [
+                    'id'               => 'email',
+                    'name'             => 'Email',
+                    'type'             => 'Email',
+                    'caption'          => 'Email',
+                ], [
+                    'id'               => 'phone',
+                    'name'             => $is_ru ? 'Телефон' : 'Phone',
+                    'type'             => 'Phone',
+                    'caption'          => $is_ru ? 'Телефон' : 'Phone',
+                ],
+            ];
+
+            foreach ($fields as &$_field) {
+                $_field += [
+                    'field'            => [],
+                    'is_multi'         => false,
+                    'placeholder_need' => true,
+                    'form_field_type'  => crmFormConstructor::FIELD_TYPE_CONTACT,
+                    'person_enabled'   => true,
+                    'company_enabled'  => false,
+                    'required'         => '',
+                    'required_always'  => false,
+                    'checked'          => 1,
+                    'captionplace'     => 'left',
+                    'placeholder'      => '',
+                    'uid'              => $_field['id'].'_1',
+                ];
+            }
+            $data = [
+                'widget_container'            => 'dialog',
+                'widget_header'               => ($is_ru ? 'Отправить запрос' : 'Send inquiry'),
+                'widget_display_fab'          => '1',
+                'widget_display_fab_color'    => '#52cc8f',
+                'widget_display_fab_text'     => ($is_ru ? 'Подписаться' : 'Subscribe'),
+                'widget_display_fab_icon'     => 'fas fa-concierge-bell',
+                'widget_display_timeout'      => '0',
+                'max_width'                   => '600',
+                'fields_space'                => '16',
+                'caption_space'               => '8',
+                'caption_width'               => '20',
+                'after_submit'                => 'html',
+                'button'                      => json_encode(['captionplace' => '', 'width' => 'auto', 'caption' => ($is_ru ? 'Отправить' : 'Submit')]),
+                'widget_domains'              => json_encode(array_values($domains)),
+                'widget_path'                 => json_encode(array_fill_keys($domains, [''])),
+                'source_id'                   => $source_id,
+                'confirm_mail_subject'        => ($is_ru ? 'Подтвердите свой email-адрес' : 'Please confirm your email'),
+                'after_antispam_confirm'      => 'text',
+                '_version'                    => '2',
+                'create_deal'                 => '0',
+                'fields'                      => serialize(array_values($fields)),
+                'confirm_mail_body'           => '<p>'.($is_ru ? 'Пожалуйста, перейдите по этой ссылке для подтверждения регистрации:' : 'Please follow this link to confirm your registration:').' <a href="{CONFIRM_URL}">{CONFIRM_URL}</a>.<br>'.($is_ru ? 'Спасибо!' : 'Thank you!').'</p>',
+                'html_after_submit'           => crmForm::getDefaultHtmlAfterSubmit($is_ru ? 'Спасибо за подписку!' : 'Thanks for subscribing!'),
+                'after_antispam_confirm_text' => crmForm::getDefaultAfterAntispamConfirmText($is_ru ? 'Подтверждено' : 'Confirmed'),
+                'antibot_honey_pot'           => serialize([
+                    'empty_field_name'   => '!f'.waUtils::getRandomHexString(6),
+                    'filled_field_name'  => '!f'.waUtils::getRandomHexString(6),
+                    'filled_field_value' => waUtils::getRandomHexString(32),
+                ]),
+                'messages' => serialize([
+                    [
+                        'tmpl'           => crmForm::getDefaultMessageMailTemplate(),
+                        'to'             => ['client' => 1],
+                        'is_smarty_tmpl' => true
+                    ], [
+                        'tmpl'           => crmForm::getDefaultMessageAdminMailTemplate(),
+                        'to'             => [wa()->getSetting('email', '', 'webasyst') => 1],
+                        'is_smarty_tmpl' => true
+                    ]
+                ])
+            ];
+
+            $form_params_data = [];
+            foreach ($data as $name => $value) {
+                $form_params_data[] = [
+                    'form_id' => $form_id,
+                    'name'    => $name,
+                    'value'   => $value,
+                ];
+            }
+
+            $crm_form_params_model->multipleInsert($form_params_data);
+        } catch (waDbException $dbex) {
+            return false;
+        }
+
+        return true;
     }
 }

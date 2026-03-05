@@ -7,13 +7,14 @@ class crmContactPatchMethod extends crmApiAbstractMethod
     private $all_columns = [];
     protected $method = self::METHOD_PATCH;
     private $contact_id;
+    private $contact;
 
     public function execute()
     {
         $this->contact_id = (int) $this->get('id');
         $_json = $this->readBodyAsJson();
         $fields_data = (array) ifempty($_json, []);
-        $contact = $this->getContact($this->contact_id);
+        $this->contact = $this->getContact($this->contact_id);
         if (
             !$this->firstValidate($fields_data)
             || !$this->secondValidate($fields_data)
@@ -23,7 +24,7 @@ class crmContactPatchMethod extends crmApiAbstractMethod
             return;
         }
         $this->setData($fields_data);
-        if ($errors = $contact->save($this->data, true)) {
+        if ($errors = $this->contact->save($this->data, true)) {
             $this->http_status_code = 400;
             $this->response = [
                 'error' => 'patch_error',
@@ -35,7 +36,7 @@ class crmContactPatchMethod extends crmApiAbstractMethod
         
         $this->getLogModel()->log('contact_edit', $this->contact_id, $this->contact_id);
 
-        $this->setResponse($contact);
+        $this->setResponse($this->contact);
     }
 
     /**
@@ -89,16 +90,7 @@ class crmContactPatchMethod extends crmApiAbstractMethod
         $error_fields = [];
         /** проверка на заполненность данных */
         foreach ($fields_data as &$field_data) {
-            if (!array_key_exists('value', $field_data)) {
-                $error_fields[] = [
-                    'field' => ifset($field_data, 'field', ''),
-                    'value' => '',
-                    'code'  => 'invalid_param',
-                    'description' => _w('This field is required')
-                ];
-                continue;
-            }
-            $field_data += array_fill_keys(['field', 'value', 'ext'], '');
+            $field_data += array_fill_keys(['value', 'ext'], null);
             $field_data['is_composite'] = (is_array($field_data['value']));
 
             if ($field_data['is_composite']) {
@@ -329,9 +321,16 @@ class crmContactPatchMethod extends crmApiAbstractMethod
             }
         }
         if (isset($this->data['company_contact_id'])) {
-            $company = $this->getContactModel()->getById($this->data['company_contact_id']);
-            $this->data['company'] = ifset($company, 'company', '');
-            $this->data['company_contact_id'] = ifset($company, 'id', 0);
+            if (empty($this->data['company_contact_id'])) {
+                $this->data['company'] = null;
+                $this->data['company_contact_id'] = 0;
+            } else {
+                $company = $this->getContactModel()->getByField(['id' => $this->data['company_contact_id'], 'is_company' => 1]);
+                $this->data['company'] = ifset($company, 'company', '');
+                $this->data['company_contact_id'] = ifset($company, 'id', 0);
+            }
+        } elseif (isset($this->data['company']) && $this->data['company'] !== $this->contact->get('company')) {
+            $this->data['company_contact_id'] = 0;
         }
     }
 

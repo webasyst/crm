@@ -25,7 +25,10 @@ class crmReminderUndoneMethod extends crmApiAbstractMethod
             return;
         }
 
-        $this->getReminderModel()->updateById($reminder_id, ['complete_datetime' => null]);
+        $this->getReminderModel()->updateById($reminder_id, [
+            'complete_datetime' => null,
+            'report' => null,
+        ]);
 
         try {
             crmDeal::updateReminder($reminder['contact_id']);

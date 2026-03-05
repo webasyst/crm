@@ -21,6 +21,7 @@ var CRMNotificationEdit = (function ($) {
 
         that.$sender = that.$wrapper.find('.js-sender-list');
         that.$sender_block = that.$wrapper.find('.js-senders-block');
+        that.$sender_recepient_block = that.$wrapper.find('.js-sender-recepient-block');
 
         that.$sms_sender = that.$wrapper.find('.js-sms-sender-list');
         that.$sms_sender_block = that.$wrapper.find('.js-sms-senders-block');
@@ -87,10 +88,20 @@ var CRMNotificationEdit = (function ($) {
             event.preventDefault();
 
             $(document).trigger("updateEditorTextarea");
+            var transportVal = that.$wrapper.find(".js-transport-toggle").filter(":checked").first().val();
+            if (!transportVal) {
+                transportVal = that.notification.transport;
+            }
+            var title = that.locales["send_confirm_title"];
+            if (transportVal == 'reminder') {
+                title = that.locales["send_reminder_confirm_title"];
+            } else if (transportVal == 'http') {
+                title = that.locales["send_http_confirm_title"];
+            }
 
             $.waDialog.confirm({
-                title: that.locales["send_confirm_title"],
-                text: getHtml(),
+                title: title,
+                text: getHtml(transportVal),
                 success_button_title: that.locales["send_confirm_button"],
                 success_button_class: 'warning',
                 cancel_button_title: that.locales["delete_cancel_button"],
@@ -98,16 +109,30 @@ var CRMNotificationEdit = (function ($) {
                 onSuccess: request
             });
 
-            function getHtml() {
-                var $template = $(that.dialog_template),
-                    transportVal = that.$wrapper.find(".js-transport-toggle").filter(":checked").first().val();
-
-                if (transportVal == 'sms') {
-                    contact = that.user_data['phone'];
+            function getHtml(transportVal) {
+                var $template = $(that.dialog_template);
+                const $inp = $template.find('.js-user-contact');
+                const $user = $template.find('.js-user');
+                const $inpLabel = $template.find('.js-user-contact-label');
+                const $userLabel = $template.find('.js-user-label');
+                if (transportVal == 'reminder') {
+                    $user.show();
+                    $userLabel.show();
+                    $inp.hide();
+                    $inpLabel.hide();
                 } else {
-                    contact = that.user_data['email'];
+                    $user.hide();
+                    $userLabel.hide();
+                    $inp.show();
+                    $inpLabel.show();
+                    if (transportVal == 'sms') {
+                        $inp.attr('value', that.user_data['phone']).attr('readonly', false);
+                    } else if (transportVal == 'email') {
+                        $inp.attr('value', that.user_data['email']).attr('readonly', false);
+                    } else if (transportVal == 'http') {
+                        $inp.attr('value', that.$wrapper.find('.js-notification-url').val()).attr('readonly', false);
+                    }
                 }
-                $template.find('.js-user-contact').attr('value', contact);
 
                 return $template["0"].outerHTML;
             }
@@ -128,19 +153,25 @@ var CRMNotificationEdit = (function ($) {
                         if (response.status === "ok") {
                             // dialog.find(".dialog-body").html(that.success_html);
                             //dialog.resize();
+                            const warnings = response.data.warnings;
+                            let text = response.data.message || that.locales["success_text"];
+                            if (warnings && warnings.length) {
+                                text += '<br><span class="text-red">' + warnings.join('<br>') + '</span>';
+                            }
                             $.waDialog.alert({
                                 //title: "Alert title",
-                                text: that.locales["success_text"],
+                                text: text,
                                 button_title: that.locales["close_button"],
                                 button_class: 'light-gray',
                             });
-    
-                            setTimeout( function() {
-                                var is_exist = $.contains(document, $('.dialog')[0]);
-                                if (is_exist) {
-                                    $('.dialog').remove();
-                                }
-                            }, 10000);
+                        } else if (response.status === "fail" && response.errors) {
+                            const error_mess = Array.isArray(response.errors) ? response.errors.join('<br>') : that.locales["error_text"];
+                            $.waDialog.alert({
+                                //title: "Alert title",
+                                text: '<span class="text-red">' + error_mess + '</span>',
+                                button_title: that.locales["close_button"],
+                                button_class: 'light-gray',
+                            });
                         }
                
                     }, "json").always( function() {
@@ -156,7 +187,10 @@ var CRMNotificationEdit = (function ($) {
     CRMNotificationEdit.prototype.initSender = function () {
         var that = this,
             notification = that.notification,
-            $transportToggle = that.$wrapper.find(".js-transport-toggle");
+            $transportToggle = that.$wrapper.find(".js-transport-toggle"),
+            $responsibleBlock = that.$wrapper.find(".js-responsible-recepient-block"),
+            $userTypeRadio = $responsibleBlock.find(".js-reminder-user-type"),
+            $responsibleSelect = $responsibleBlock.find(".js-reminder-user-select");
 
         function getTransportVal() {
             if (notification && notification.id > 0) {
@@ -166,12 +200,23 @@ var CRMNotificationEdit = (function ($) {
         }
 
         function onChange() {
-            if (getTransportVal() === 'email') {
+            const transport = getTransportVal();
+            if (transport === 'email') {
                 showEmailSenders(that.$sender.val() === 'specified');
                 hideSmsSenders();
-            } else {
+                $responsibleBlock.hide();
+            } else if (transport === 'sms') {
                 showSmsSenders(that.$sms_sender.val() === 'specified');
                 hideEmailSenders();
+                $responsibleBlock.hide();
+            } else if (transport === 'reminder') {
+                $responsibleBlock.show();
+                hideEmailSenders();
+                hideSmsSenders();
+            } else {
+                hideEmailSenders();
+                hideSmsSenders();
+                $responsibleBlock.hide();
             }
         }
 
@@ -242,6 +287,13 @@ var CRMNotificationEdit = (function ($) {
         that.$sender.on("change", onChange);
         that.$sms_sender.on("change", onChange);
 
+        $userTypeRadio.on("click", function () {
+            if ($(this).val() === 'selected') {
+                $responsibleSelect.show();
+            } else {
+                $responsibleSelect.hide();
+            }
+        });
     };
 
     CRMNotificationEdit.prototype.initRecipient = function () {
@@ -289,9 +341,11 @@ var CRMNotificationEdit = (function ($) {
     CRMNotificationEdit.prototype.initChangeEvent = function () {
         const that = this,
             $eventToggle = that.$wrapper.find(".js-event-toggle"),
-            $fieldsGroup = that.$wrapper.find(".js-fields-group");
-        const $companyField = $fieldsGroup.find('.js-company-field');
-        const $companySelector = $companyField.find(".js-event-company");
+            $fieldsGroup = that.$wrapper.find(".js-fields-group"),
+            $companyField = $fieldsGroup.find('.js-company-field'),
+            $companySelector = $companyField.find(".js-event-company"),
+            $funnelField = $fieldsGroup.find('.js-funnel-field'),
+            $funnelSelector = $funnelField.find(".js-event-funnel");
 
         $eventToggle.on("change", onChange);
 
@@ -324,8 +378,16 @@ var CRMNotificationEdit = (function ($) {
                 $companySelector.attr('disabled', true).hide();
                 $companyField.hide();
             }
+            if (event_id.substr(0, 5) === 'deal.') {
+                $funnelField.show();
+                $funnelSelector.removeAttr('disabled').show();
+            } else {
+                $funnelSelector.attr('disabled', true).hide();
+                $funnelField.hide();
+            }
 
             $fieldsGroup.show();
+            that.$wrapper.find(".js-send-test").attr("disabled", false).removeClass("disabled").show();
         }
     };
 
@@ -359,6 +421,11 @@ var CRMNotificationEdit = (function ($) {
 
             $content.find("input, textarea").attr("disabled", false);
             $activeContent = $content.addClass(active_class);
+            if (['email', 'sms'].includes(value)) {
+                that.$sender_recepient_block.show();
+            } else {
+                that.$sender_recepient_block.hide();
+            }
         }
     };
 
@@ -494,8 +561,9 @@ var CRMNotificationEdit = (function ($) {
                 var href = "?module=settings&action=notificationsEditSave";
 
                 var saving = that.locales.saving,
-                    $loading = $(saving);
-                that.$footer.append($loading);
+                    $loading = $(saving),
+                    $actions = that.$footer.find('.js-submit-actions');
+                $actions.append($loading);
 
                 $.post(href, data, 'json')
                     .done(function (response) {
@@ -513,7 +581,7 @@ var CRMNotificationEdit = (function ($) {
 
                         var saved = that.locales.saved,
                             $saved = $(saved);
-                        that.$footer.append($saved);
+                        $actions.append($saved);
 
                         setTimeout(function () {
                             var is_exist = $.contains(document, $saved[0]);
@@ -660,15 +728,22 @@ var CRMNotificationEdit = (function ($) {
 
         function printVars(event) {
             event.preventDefault();
-            $body = that.$emailBody;
-            if (that.transport === 'sms') {
-                $body = that.$smsBody;
+            const text = $.trim($(this).find('.js-var').text());
+            /*
+            let editor = null;
+            if (that.transport === 'email') {
+                editor = that.$emailBody.data("wa_editor");
+            } else if (that.transport === 'sms') {
+                editor = that.$smsBody.data("wa_editor");
             }
-            var editor = $body.data("wa_editor");
             if (editor) {
-                editor.insert($.trim($(this).find('.js-var').text()));
-                that.drawer.hide();
-            } 
+                editor.insert(text);
+            }
+            */
+            $.wa.copyToClipboard(text);
+            $('#wa-alert-fixed-box').append( '<span class="alert success"><i class="fas fa-check-circle"></i> ' + that.locales.copied + '</span>');
+            setTimeout(() => $('#wa-alert-fixed-box .alert').remove(), 3000);
+            //that.drawer.hide();
         }
 
     };

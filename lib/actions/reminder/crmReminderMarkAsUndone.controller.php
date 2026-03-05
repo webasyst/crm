@@ -17,7 +17,10 @@ class crmReminderMarkAsUndoneController extends crmJsonController
         if (!$this->getCrmRights()->reminderEditable($reminder)) {
             throw new waRightsException();
         }
-        $rm->updateById($id, array('complete_datetime' => null));
+        $rm->updateById($id, [
+            'complete_datetime' => null,
+            'report' => null,
+        ]);
 
         try {
             crmDeal::updateReminder($reminder['contact_id']);

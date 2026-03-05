@@ -76,7 +76,7 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
         }
 
         $show_url = true;
-        if (in_array($this->invoice['state_id'], array('DRAFT', 'ARCHIVED', 'REFUNDED'))) {
+        if (in_array($this->invoice['state_id'], [ crmInvoiceModel::STATE_DRAFT, crmInvoiceModel::STATE_ARCHIVED, crmInvoiceModel::STATE_REFUNDED ])) {
             $show_url = false;
         }
 
@@ -158,8 +158,24 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
             'company'                => ifset($this->invoice, 'company', null),
             'root_path'              => $this->getConfig()->getRootPath().DIRECTORY_SEPARATOR,
             'style_version'          => $template_style_version < 2 ? '' : '_v' . $template_style_version,
+            'is_recurrent_available' => true, // TODO: возможно надо будет условия опредлелять
         ]);
 
+        if (!empty($this->invoice['recurrent_id'])) {
+            $recurrent = $this->getInvoiceRecurrentModel()->getById($this->invoice['recurrent_id']);
+            if (!empty($recurrent) && empty($recurrent['end_datetime'])) {
+                $this->view->assign('recurrent', $recurrent);
+                $this->view->assign('recurrent_description', crmInvoiceRecurrentModel::getDescription($recurrent));
+            }
+        }
+
+        $recurrent_options = [
+            crmInvoiceRecurrentModel::UNIT_WEEK => _w('Every week'),
+            crmInvoiceRecurrentModel::UNIT_MONTH => _w('Monthly'),
+            crmInvoiceRecurrentModel::UNIT_YEAR => _w('Once a year'),
+        ];
+        $this->view->assign('recurrent_options', $recurrent_options);
+        
         wa('crm')->getConfig()->setLastVisitedUrl('invoice/');
     }
 
@@ -175,7 +191,7 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
 
     protected static function isCancellable($invoice, $transactions)
     {
-        if ($invoice['state_id'] == 'PAID' && strtotime($invoice['payment_datetime']) > time() - 60 * 60) {
+        if ($invoice['state_id'] == crmInvoiceModel::STATE_PAID && strtotime($invoice['payment_datetime']) > time() - 60 * 60) {
             foreach ($transactions as $t) {
                 if ($t['state'] == waPayment::STATE_CAPTURED) {
                     return false;

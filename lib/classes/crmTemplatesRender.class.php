@@ -64,6 +64,7 @@ class crmTemplatesRender extends waController
             'invoice_id'          => null,
             'invoice'             => null,
             'origin_id'           => null,
+            'ignore_template_errors' => false,
         ];
 
         $this->invoice_template_id = $options['invoice_template_id'];
@@ -125,20 +126,30 @@ class crmTemplatesRender extends waController
             'link'     => $this->_content['link'],
         ]);
 
-        return $view->fetch('string:'.$this->getTemplate());
+        try {
+            return $view->fetch('string:'.$this->getTemplate());
+        } catch (Exception $e) {
+            if (!$this->options['ignore_template_errors']) {
+                throw $e;
+            }
+            return $this->getTemplate();
+        }
     }
 
     protected function getRenderedPayButton()
     {
-        if (!empty($this->options['style_version']) && !empty($this->options['invoice']['state_id']) && in_array($this->options['invoice']['state_id'], ['PROCESSING', 'PAID'])) {
-            if ($this->options['invoice']['state_id'] == 'PROCESSING') {
+        if (!empty($this->options['style_version']) && 
+            !empty($this->options['invoice']['state_id']) && 
+            in_array($this->options['invoice']['state_id'], [ crmInvoiceModel::STATE_PROCESSING, crmInvoiceModel::STATE_PAID ])
+        ) {
+            if ($this->options['invoice']['state_id'] == crmInvoiceModel::STATE_PROCESSING) {
                 return '<p style="text-align:center; font-size: 1.5rem;"><span style="color:#7256ee"><b>'._w('Payment is in process').'</b></span></p>';
-            } elseif ($this->options['invoice']['state_id'] == 'PAID') {
+            } elseif ($this->options['invoice']['state_id'] == crmInvoiceModel::STATE_PAID) {
                 return '<p style="text-align:center; font-size: 1.5rem;"><span style="color:#22d13d"><b>'._w('Invoice is paid').'</b></span></p>';
             }
         }
         if (wa()->getEnv() == 'frontend') {
-            if ($this->options['invoice']['state_id'] == 'PENDING' && waRequest::get('result') == 'success') {
+            if ($this->options['invoice']['state_id'] == crmInvoiceModel::STATE_PENDING && waRequest::get('result') == 'success') {
                 return '';
             }
             

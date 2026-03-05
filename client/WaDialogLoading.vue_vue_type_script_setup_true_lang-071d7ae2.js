@@ -1,0 +1,1 @@
+import{W as t}from"./ButtonSubmit-5edb3705.js";import{d as a,o as r,i as n,c as i,p,r as c}from"./main-fdc675e0.js";const l={key:1},k=a({__name:"WaDialogLoading",props:{isFetching:{type:Boolean},error:{}},setup(s){const e=s;return(o,m)=>e.isFetching?(r(),n(t,{key:0})):e.error?(r(),i("div",l,p(o.error),1)):c(o.$slots,"default",{key:2})}});export{k as _};

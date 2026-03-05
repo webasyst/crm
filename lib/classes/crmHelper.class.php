@@ -313,7 +313,7 @@ class crmHelper
      */
     public static function formatFileSize($file_size)
     {
-        return waFiles::formatSize($file_size, '%d');
+        return waFiles::formatSize($file_size);
     }
 
     /**
@@ -399,8 +399,8 @@ class crmHelper
     public static function getInvoiceHash($invoice)
     {
         self::isTemplate();
-        $md5 = md5($invoice['id'].$invoice['create_datetime']);
-        return substr($md5, 0, 16).$invoice['id'].substr($md5, -16);
+        $md5 = md5(ifset($invoice['id'], 0).ifset($invoice['create_datetime'], date('Y-m-d H:i:s')));
+        return substr($md5, 0, 16).ifset($invoice['id'], 0).substr($md5, -16);
     }
 
     public static function renderViewAction($action)

@@ -1327,17 +1327,17 @@ var CRMMessageConversationPage = ( function($) {
                 is_locked = true;
                 var $link = $(this),
                     message_id = $link.data('message-id'),
-                    href = that.app_url+'?module=message&action=writeReplyDialog',
+                    href = $.crm.app_url+'?module=message&action=writeReplyDialog',
                     params = { id: message_id };
 
                 $.post(href, params, function(html) {
+                    is_locked = false;
                     $.waDialog({
-                        html: html,
-                        onClose: function () {
-                            is_locked = false;
-                        }
+                        html: html
                     });
                 });
+            } else {
+                console.log(is_locked);
             }
         });
 
@@ -1347,15 +1347,13 @@ var CRMMessageConversationPage = ( function($) {
                 is_locked = true;
                 var $link = $(this),
                     message_id = $link.data('message-id'),
-                    href = that.app_url+'?module=message&action=writeForwardDialog',
+                    href = $.crm.app_url+'?module=message&action=writeForwardDialog',
                     params = { id: message_id };
 
                 $.post(href, params, function(html) {
+                    is_locked = false;
                     $.waDialog({
-                        html: html,
-                        onClose: function () {
-                            is_locked = false;
-                        }
+                        html: html
                     });
                 });
             }

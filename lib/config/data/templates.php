@@ -2,35 +2,35 @@
 
 return [
     1 => [
-        'name'            => _w('Variant A'),
+        'name'            => _wd('crm', 'Variant A'),
         'path'            => '/templates/invoices/invoice.template_a.html',
         'origin_id'       => 1,
         'style_version'   => 2,
         'template_params' => [
             [
                 'code'        => 'button_color',
-                'name'        => _w('Button color'),
+                'name'        => _wd('crm', 'Button color'),
                 'placeholder' => '#cc5252',
                 'type'        => crmTemplatesModel::PARAM_TYPE_COLOR,
                 'sort'        => '1',
             ],
             [
                 'code'        => 'headers_color',
-                'name'        => _w('Headers color'),
+                'name'        => _wd('crm', 'Headers color'),
                 'placeholder' => '#cc5252',
                 'type'        => crmTemplatesModel::PARAM_TYPE_COLOR,
                 'sort'        => '2',
             ],
             [
                 'code'        => 'bg_color',
-                'name'        => _w('Background color'),
+                'name'        => _wd('crm', 'Background color'),
                 'placeholder' => '#f3f5fa',
                 'type'        => crmTemplatesModel::PARAM_TYPE_COLOR,
                 'sort'        => '3',
             ],
             [
                 'code'        => 'bg_image',
-                'name'        => _w('Background image'),
+                'name'        => _wd('crm', 'Background image'),
                 'placeholder' => '',
                 'type'        => crmTemplatesModel::PARAM_TYPE_IMAGE,
                 'sort'        => '4',
@@ -39,21 +39,21 @@ return [
         ]
     ],
     2 => [
-        'name'            => _w('Variant B'),
+        'name'            => _wd('crm', 'Variant B'),
         'path'            => '/templates/invoices/invoice.template_b.html',
         'origin_id'       => 2,
         'style_version'   => 2,
         'template_params' => [
             [
                 'code'        => 'button_color',
-                'name'        => _w('Button color'),
+                'name'        => _wd('crm', 'Button color'),
                 'placeholder' => '#cc5252',
                 'type'        => 'COLOR',
                 'sort'        => '1',
             ],
             [
                 'code'        => 'bg_color',
-                'name'        => _w('Background color'),
+                'name'        => _wd('crm', 'Background color'),
                 'placeholder' => '#f3f5fa',
                 'type'        => crmTemplatesModel::PARAM_TYPE_COLOR,
                 'sort'        => '2',
@@ -61,7 +61,7 @@ return [
             ],
             [
                 'code'        => 'bg_image',
-                'name'        => _w('Background image'),
+                'name'        => _wd('crm', 'Background image'),
                 'placeholder' => '',
                 'type'        => crmTemplatesModel::PARAM_TYPE_IMAGE,
                 'sort'        => '3',
@@ -69,35 +69,35 @@ return [
         ]
     ],
     3 => [
-        'name'            => _w('Variant C'),
+        'name'            => _wd('crm', 'Variant C'),
         'path'            => '/templates/invoices/invoice.template_c.html',
         'origin_id'       => 3,
         'style_version'   => 2,
         'template_params' => [
             [
                 'code'        => 'button_color',
-                'name'        => _w('Button color'),
+                'name'        => _wd('crm', 'Button color'),
                 'placeholder' => '#cc5252',
                 'type'        => 'COLOR',
                 'sort'        => '1',
             ],
             [
                 'code'        => 'headers_color',
-                'name'        => _w('Headers color'),
+                'name'        => _wd('crm', 'Headers color'),
                 'placeholder' => '#cc5252',
                 'type'        => crmTemplatesModel::PARAM_TYPE_COLOR,
                 'sort'        => '2',
             ],
             [
                 'code'        => 'bg_color',
-                'name'        => _w('Background color'),
+                'name'        => _wd('crm', 'Background color'),
                 'placeholder' => '#f3f5fa',
                 'type'        => crmTemplatesModel::PARAM_TYPE_COLOR,
                 'sort'        => '3',
             ],
             [
                 'code'        => 'bg_image',
-                'name'        => _w('Background image'),
+                'name'        => _wd('crm', 'Background image'),
                 'placeholder' => '',
                 'type'        => crmTemplatesModel::PARAM_TYPE_IMAGE,
                 'sort'        => '4',

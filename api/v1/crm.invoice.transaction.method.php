@@ -46,6 +46,9 @@ class crmInvoiceTransactionMethod extends crmApiAbstractMethod
         if ($errors = crmInvoice::$action($invoice)) {
             throw new waAPIException('error', implode("\n", $errors), 400);
         }
+        if ($action === 'delete') {
+            crmHelper::logAction('invoice_delete');
+        }
 
         $this->http_status_code = 204;
         $this->response = null;

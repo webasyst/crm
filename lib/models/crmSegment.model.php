@@ -711,15 +711,14 @@ class crmSegmentModel extends crmModel
                   AND `cc`.`id` IS NULL";
         $this->query($sql);
 
-        $sql = "SELECT `cc`.`id`
+        $sql = "SELECT `cc`.`id`, `cc`.`cnt`
                 FROM `wa_contact_category` `cc`
                   LEFT JOIN {$table} {$al}
                     ON {$al}.`category_id` = `cc`.`id`
-                WHERE {$al}.`category_id` IS NULL
-                  AND `cc`.`system_id` IS NULL";
+                WHERE {$al}.`category_id` IS NULL";
 
-        $category_ids = $this->query($sql)->fetchAll(null, true);
-        if (!$category_ids) {
+        $categories = $this->query($sql)->fetchAll('id', true);
+        if (empty($categories)) {
             return;
         }
 
@@ -731,18 +730,19 @@ class crmSegmentModel extends crmModel
             $model = new contactsViewModel();
             $views = $model->select('`category_id`, `create_datetime`, `contact_id`, `shared`, `count`, `icon`')
                         ->where('category_id IN (:ids)', array(
-                            'ids' => $category_ids
+                            'ids' => array_keys($categories)
                         ))->fetchAll('category_id', true);
         }
 
-        foreach ($category_ids as $category_id) {
-            $insert_item = array(
+        foreach ($categories as $category_id => $count) {
+            $insert_item = [
                 'type' => self::TYPE_CATEGORY,
                 'sort' => $sort++,
                 'create_datetime' => date('Y-m-d H:i:s'),
                 'shared' => 1,
-                'category_id' => $category_id
-            );
+                'category_id' => $category_id,
+                'count' => $count,
+            ];
             $insert_item = array_merge($insert_item, (array)ifset($views[$category_id]));
 
             // CAUSE MULTIPLE INSERT HAS OWN "REQUIREMENTS" TO ARRAY KEYS FOR WORK, DO SINGLE INSERT
@@ -838,6 +838,7 @@ class crmSegmentModel extends crmModel
 
     private function workup(&$segments)
     {
+        $has_shared = false;
         foreach ($segments as &$segment) {
             if ($segment['type'] === self::TYPE_CATEGORY) {
                 if (!empty($segment['system_id']) && wa()->appExists($segment['system_id'])) {
@@ -866,19 +867,46 @@ class crmSegmentModel extends crmModel
                 }
             }
 
-            // bind personal counters counters
-            $user = wa()->getUser();
-            $is_admin = $user->isAdmin();
-            $is_shared = $segment['shared'] ? true : false;
-            if (!$is_admin && $is_shared) {
-                $counters = $this->getSegmentCountModel()->getCounters(array_keys($segments), $user->getId());
-                foreach ($counters as $segment_id => $counter) {
-                    if ($counter !== null) {
-                        $segments[$segment_id]['count'] = $counter;
-                    }
+            $has_shared = $segment['shared'] ? true : false;
+        }
+
+        $segments = $this->recountSegments($segments, true);
+
+        // bind personal counters counters
+        $user = wa()->getUser();
+        $is_admin = $user->isAdmin();
+        
+        if (!$is_admin && $has_shared) {
+            $counters = $this->getSegmentCountModel()->getCounters(array_keys($segments), $user->getId());
+            foreach ($counters as $segment_id => $counter) {
+                if ($counter !== null) {
+                    $segments[$segment_id]['count'] = $counter;
                 }
             }
         }
+    }
+
+    public function recountSegments($segments, $only_empty = false)
+    {
+        if (empty($segments)) {
+            return $segments;
+        }
+        $categories_segments = array_filter($segments, function ($segment) use ($only_empty) {
+            return $segment['type'] === self::TYPE_CATEGORY && (!$only_empty || $segment['count'] == 0);
+        });
+        if (empty($categories_segments)) {
+            return $segments;
+        }
+        $category_ids = array_column($categories_segments, 'category_id');
+        $sql = "SELECT category_id, COUNT(*) cnt FROM wa_contact_categories WHERE category_id IN (:ids) GROUP BY category_id";
+        $result = (new waContactCategoriesModel)->query($sql, ['ids' => $category_ids])->fetchAll('category_id');
+        foreach ($segments as &$segment) {
+            if (isset($result[$segment['category_id']]) && $segment['count'] != $result[$segment['category_id']]['cnt']) {
+                $segment['count'] = $result[$segment['category_id']]['cnt'];
+                $this->updateById($segment['id'], ['count' => $segment['count']]);
+            }
+        }
+        return $segments;
     }
 
     private function toIntArray($items)

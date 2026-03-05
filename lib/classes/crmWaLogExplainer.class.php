@@ -3,10 +3,12 @@
 class crmWaLogExplainer
 {
     protected $log_items;
+    protected $log_actions;
 
-    public function __construct($log_items)
+    public function __construct($log_items, $log_actions = [])
     {
         $this->log_items = $log_items;
+        $this->log_actions = $log_actions;
     }
 
     public function explain()
@@ -22,6 +24,18 @@ class crmWaLogExplainer
         foreach ($log_items as &$log_item) {
             if ($this->isContactDeleteLogItem($log_item)) {
                 $this->explainDeleteContactLogItem($log_item);
+            } elseif (in_array($log_item['action'], ['contact_export', 'deal_export', 'contacts_delete', 'deals_delete'])) {
+                $log_item['action_name'] = sprintf($log_item['action_name'], ifset($log_item, 'params', ''));
+                if (!empty($log_item['params']) && wa_is_int($log_item['params']) && !empty($this->log_actions[$log_item['action']]['plural'])) {
+                    $plural = $this->log_actions[$log_item['action']]['plural'];
+                    if (is_array($plural) && count($plural) > 1) {
+                        $log_item['action_name'] = _w(array_shift($plural), array_shift($plural), $log_item['params']);
+                    }
+                }
+            } elseif ($log_item['action'] === 'deal_delete') {
+                $log_item['params_html'] = implode(', ', array_map(function ($item) {
+                    return sprintf(_w('“%s”'), $item);
+                }, ifset($log_item, 'params', [])));
             }
         }
         unset($log_item);

@@ -319,11 +319,11 @@ class crmPayment extends waAppPayment
 
                         $im->updateById(
                             self::$invoice['id'],
-                            array(
-                                'state_id'         => 'PAID',
+                            [
+                                'state_id'         => crmInvoiceModel::STATE_PAID,
                                 'payment_datetime' => date('Y-m-d H:i:s'),
                                 'update_datetime'  => date('Y-m-d H:i:s'),
-                            )
+                            ]
                         );
                         $result['result'] = true;
 
@@ -347,19 +347,15 @@ class crmPayment extends waAppPayment
 
                     $im->updateById(
                         self::$invoice['id'],
-                        array(
-                            'state_id' => 'PROCESSING',
-                        )
+                        [ 'state_id' => crmInvoiceModel::STATE_PROCESSING ]
                     );
                 }
             } elseif ($transaction_data['type'] == waPayment::OPERATION_CANCEL) {
-                if (self::$invoice['state_id'] == 'PROCESSING') {
+                if (self::$invoice['state_id'] == crmInvoiceModel::STATE_PROCESSING) {
 
                     $im->updateById(
                         self::$invoice['id'],
-                        array(
-                            'state_id' => 'PENDING',
-                        )
+                        [ 'state_id' => crmInvoiceModel::STATE_PENDING ]
                     );
                 }
             }
@@ -435,7 +431,7 @@ class crmPayment extends waAppPayment
             $result['result'] = true;
 
             $error = null;
-            if (!$this->isAmountValid($transaction_data, $error) || self::$invoice['state_id'] != 'PENDING') {
+            if (!$this->isAmountValid($transaction_data, $error) || self::$invoice['state_id'] != crmInvoiceModel::STATE_PENDING) {
                 $result['result'] = false;
                 $result['error'] = $error;
             }
@@ -488,5 +484,11 @@ class crmPayment extends waAppPayment
         $order['params'] = (array)$order['params'];
 
         return waOrder::factory($order);
+    }
+
+    public function setOrderParams($order_id, $params)
+    {
+        $params_model = new crmInvoiceParamsModel();
+        $params_model->set($order_id, $params, false);
     }
 }

@@ -88,9 +88,9 @@ class crmNotificationInvoice extends crmNotification
 
         $invoice = $this->getInvoice();
         if ($invoice) {
-
+            $company_id = ifset($invoice['company_id'], 0);
             $cm = new crmCompanyModel();
-            $template_id = $cm->select('template_id')->where("`id` = {$invoice['company_id']}")->fetchField('template_id');
+            $template_id = $cm->select('template_id')->where("`id` = {$company_id}")->fetchField('template_id');
             $cpm = new crmCompanyParamsModel();
             $company_params = $cpm->getParams($invoice['company_id'], $template_id);
 
@@ -106,7 +106,7 @@ class crmNotificationInvoice extends crmNotification
                 $link = self::getLink($invoice);
             }
 
-            $company = $invoice['__company'];
+            $company = ifset($invoice['__company'], []);
 
             // unset special fields begin with '__'
             foreach ($invoice as $field => $value) {
@@ -209,26 +209,6 @@ class crmNotificationInvoice extends crmNotification
         return $res;
     }
 
-    /**
-     * Replaces the recipient's address with the one that was specified when creating the test message
-     * @param int|string $address
-     * @return bool
-     * @throws waException
-     */
-    public function sendTestNotification($address)
-    {
-        $old_address = $this->recipient_type;
-        $this->notification['recipient'] = $address;
-        try {
-            $this->sendNotification();
-        } catch (waException $e) {
-            $this->recipient_type = $old_address;
-            throw $e;
-        }
-        $this->recipient_type = $old_address;
-        return true;
-    }
-
     protected function sendNotification()
     {
         if ($this->notification && $this->notification['status'] != 1) {
@@ -246,23 +226,43 @@ class crmNotificationInvoice extends crmNotification
             $custom_address = $this->recipient_type;
         }
 
-        if (!$recipient && !$custom_address) {
+        $transport = $this->getTransport();
+
+        if (in_array($transport, [crmNotificationModel::TRANSPORT_EMAIL, crmNotificationModel::TRANSPORT_SMS]) && !$recipient && !$custom_address) {
             return true;
         }
-
-        $transport = $this->getTransport();
 
         if ($transport === crmNotificationModel::TRANSPORT_EMAIL) {
             $res = $this->sendNotificationByEmail($recipient, $custom_address);
         } elseif ($transport === crmNotificationModel::TRANSPORT_SMS) {
             $res = $this->sendNotificationBySMS($recipient, $custom_address);
+        } elseif ($transport === crmNotificationModel::TRANSPORT_HTTP) {
+            $res = $this->sendHttp();
+        } elseif ($transport === crmNotificationModel::TRANSPORT_REMINDER) {
+            if (ifset($this->notification['reminder_user_type']) === 'responsible') {
+                $user_contact_id = null;
+                if (strpos($this->notification['event'], 'customer.') === 0) {
+                    $user_contact_id = $this->getCustomer()->get('crm_user_id');
+                } else {
+                    if (!empty($this->invoice['contact_id'])) {
+                        $contact = new waContact($this->invoice['contact_id']);
+                        $user_contact_id = $contact->get('crm_user_id');
+                    }
+                    if (empty($user_contact_id) && !empty($this->invoice['creator_contact_id']) && (new waContact($this->invoice['creator_contact_id']))->get('is_user') == 1) {
+                        $user_contact_id = $this->invoice['creator_contact_id'];
+                    }
+                }
+                if (!empty($user_contact_id)) {
+                    $res = $this->createReminder(ifset($this->invoice['contact_id'], 0), $user_contact_id);
+                }
+            } else {
+                $res = $this->createReminder(ifset($this->invoice['contact_id'], 0));
+            }
         } else {
             $res = false;
         }
 
-        if (!$res) {
-            return false;
-        }
+        return $res;
     }
 
     protected function sendNotificationByEmail($recipient, $custom_address)

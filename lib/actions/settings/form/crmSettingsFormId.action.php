@@ -35,7 +35,7 @@ class crmSettingsFormIdAction extends crmSettingsViewAction
             $form_info['params']['widget_display_fab_color'] = '#52cc8f';
             $form_info['params']['widget_display_on_timeout'] = 1;
             $form_info['params']['widget_display_timeout'] = 1;
-            $form_info['params']['widget_domains'] = empty($domains) ? [] : [$domains[0]];
+            $form_info['params']['widget_domains'] = empty($domains) ? [] : [reset($domains)];
         }
 
         $this->view->assign([

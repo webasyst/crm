@@ -97,11 +97,14 @@ class crmSettingsFunnelsAction extends crmSettingsViewAction
 
         $funnel_id = waRequest::param('id');
 
-        $funnels = $fsm->withStages($fm->getAllFunnels(true));
-        foreach ($funnels as &$funnel) {
-            $funnel = $fm->fixFunnelColors($funnel);
+        $funnels = $fsm->withStages($fm->getAllFunnels(true, true)) ?: [];
+        $funnels = array_map(function($funnel) use ($fm) {
+            return $fm->fixFunnelColors($funnel);
+        }, $funnels);
+
+        if (empty($funnels)) {
+            $funnel_id = 'new';
         }
-        unset($funnel);
 
         if ($funnel_id && isset($funnels[$funnel_id])) {
             $funnel = $funnels[$funnel_id];

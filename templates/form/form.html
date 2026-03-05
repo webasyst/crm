@@ -67,10 +67,12 @@
     <div class="crm-form-field field crm-caption-style-{$captionplace}" data-id="{$field.id}" data-uid="{$field.uid}">
         {if $captionplace !== 'none'}
             <div class="name for-input">
-                {if $field.id !== '!agreement_checkbox' && $type !== 'Checkbox'}
-                    {$caption|escape}
-                {/if}
-                {if !empty($field.required) && $field.id !== '!captcha'} *{/if}
+                <div class="name-inner">
+                    {if $field.id !== '!agreement_checkbox' && $type !== 'Checkbox'}
+                        <div>{$caption|escape}</div>
+                    {/if}
+                    {if !empty($field.required) && $field.id !== '!captcha'}<div>*</div>{/if}
+                </div>
             </div>
         {/if}
         <div class="value">

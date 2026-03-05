@@ -52,7 +52,7 @@ class crmReportInvoicesAction extends crmBackendViewAction
             $start_date = date('Y-m-d', strtotime("-365 days"));
             $end_date = date('Y-m-d');
         } elseif ($timeframe == "all") {
-            if ($start_date = $im->select('MIN(payment_datetime) dt')->where("state_id = 'PAID'")->fetchField('dt')) {
+            if ($start_date = $im->select('MIN(payment_datetime) dt')->where('state_id = ?', crmInvoiceModel::STATE_PAID)->fetchField('dt')) {
                 $start_date = date('Y-m-d', strtotime($start_date));
             } else {
                 $start_date = date('Y-m-d');
@@ -87,13 +87,13 @@ class crmReportInvoicesAction extends crmBackendViewAction
             ) + $companies;
 
         // All backend users assigned to invoices
-        $user_ids = array_keys($im->select('DISTINCT(creator_contact_id)')->where("state_id = 'PAID'")->fetchAll('creator_contact_id', true));
+        $user_ids = array_keys($im->select('DISTINCT(creator_contact_id)')->where('state_id = ?', crmInvoiceModel::STATE_PAID)->fetchAll('creator_contact_id', true));
 
         $users = $this->getContactsByIds($user_ids);
         $users = array(
                 "all" => array(
                     "id"           => 'all',
-                    "name"         => _wp("All responsibles"),
+                    "name"         => _wp("All responsible users"),
                     "photo_url_16" => wa()->whichUI() === '2.0' ? wa()->getRootUrl()."wa-content/img/userpic.svg" : wa()->getRootUrl()."wa-content/img/userpic20.jpg"
                 )
             ) + $users;
@@ -172,7 +172,7 @@ class crmReportInvoicesAction extends crmBackendViewAction
 
         $list_params = array(
             'company_id'   => $company_id,
-            'state_id'     => 'PAID',
+            'state_id'     => crmInvoiceModel::STATE_PAID,
             'check_rights' => true,
         );
         if ($user_id && is_numeric($user_id)) {

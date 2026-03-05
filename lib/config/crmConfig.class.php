@@ -414,23 +414,23 @@ class crmConfig extends waAppConfig
     public static function getReminderType($key = null)
     {
         $types = array(
-            'MEETING' => array(
-                "id" => "MEETING",
+            crmReminderModel::TYPE_MEETING => array(
+                "id" => crmReminderModel::TYPE_MEETING,
                 "name" => _w('Meeting'),
                 "icon" => "cup"
             ),
-            'CALL' => array(
-                "id" => "CALL",
+            crmReminderModel::TYPE_CALL => array(
+                "id" => crmReminderModel::TYPE_CALL,
                 "name" => _w('Call'),
                 "icon" => "phone"
             ),
-            'MESSAGE' => array(
-                "id" => "MESSAGE",
+            crmReminderModel::TYPE_MESSAGE => array(
+                "id" => crmReminderModel::TYPE_MESSAGE,
                 "name" => _w('Message'),
                 "icon" => "email"
             ),
-            'OTHER' => array(
-                "id" => "OTHER",
+            crmReminderModel::TYPE_OTHER => array(
+                "id" => crmReminderModel::TYPE_OTHER,
                 "name" => _w('Other'),
                 "icon" => "clock"
             )
@@ -445,23 +445,23 @@ class crmConfig extends waAppConfig
     public static function getReminderTypeUI2($key = null)
     {
         $types = array(
-            'MEETING' => array(
-                "id" => "MEETING",
+            crmReminderModel::TYPE_MEETING => array(
+                "id" => crmReminderModel::TYPE_MEETING,
                 "name" => _w('Meeting'),
                 "icon" => "coffee"
             ),
-            'CALL' => array(
-                "id" => "CALL",
+            crmReminderModel::TYPE_CALL => array(
+                "id" => crmReminderModel::TYPE_CALL,
                 "name" => _w('Call'),
                 "icon" => "phone-alt"
             ),
-            'MESSAGE' => array(
-                "id" => "MESSAGE",
+            crmReminderModel::TYPE_MESSAGE => array(
+                "id" => crmReminderModel::TYPE_MESSAGE,
                 "name" => _w('Message'),
                 "icon" => "envelope"
             ),
-            'OTHER' => array(
-                "id" => "OTHER",
+            crmReminderModel::TYPE_OTHER => array(
+                "id" => crmReminderModel::TYPE_OTHER,
                 "name" => _w('Other'),
                 "icon" => "clock"
             )
@@ -637,7 +637,7 @@ class crmConfig extends waAppConfig
     public function explainLogs($logs)
     {
         $logs = parent::explainLogs($logs);
-        $explainer = new crmWaLogExplainer($logs);
+        $explainer = new crmWaLogExplainer($logs, ifempty($this->log_actions, []));
         return $explainer->explain();
     }
 

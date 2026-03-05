@@ -21,7 +21,7 @@ class crmContactInfoMethod extends crmApiAbstractMethod
             throw new waAPIException('forbidden', _w('Access denied'), 403);
         }
 
-        $fields = $this->getContactData($contact);
+        $fields = $this->getContactData($contact) ?? [];
         $data = $this->formatData($fields);
         $main_fields = ['name', 'title', 'firstname', 'middlename', 'lastname', 'jobtitle', 'company', 'company_contact_id', 'sex', 'birthday', 'locale', 'timezone', 'email', 'phone', 'address', 'url', 'im', 'socialnetwork', 'about'];
         $main = [];
@@ -55,21 +55,30 @@ class crmContactInfoMethod extends crmApiAbstractMethod
             }
         }
 
+        $apps = wa()->getApps();
         $create_app_id = $contact->get('create_app_id');
         $create_app = null;
         if (!empty($create_app_id)) {
-            $apps = wa()->getApps();
             if (!empty($apps[$create_app_id])) {
                 $create_app = $apps[$create_app_id]['name'];
             }
         }
         $main['create_app'] = $create_app;
 
+
+
         $fields = array_filter($fields, function ($el) use ($main_fields) {
             return !in_array($el['id'], $main_fields);
         });
 
         if (isset($main['address'])) {
+            $main['address'] = array_filter($main['address'], function ($el) {
+                // Hide uncomplete addresses with country only and no other data
+                return !empty(array_filter($el['data'], function ($el) {
+                    return !in_array($el['id'], ['country', 'lng', 'lat']);
+                }));
+            });
+
             $main['address'] = array_map(function ($el) {
                 $res = [];
                 foreach ($el['data'] as $idx => $field) {
@@ -94,6 +103,17 @@ class crmContactInfoMethod extends crmApiAbstractMethod
             }, ifempty($main['address'], []));
         }
 
+        $is_banned = $contact->get('is_user') == -1;
+        $ban_reason = null;
+        if ($is_banned) {
+            $ban_reason_record = (new waContactDataTextModel)->getByField([
+                'contact_id' => $contact_id,
+                'field'      => 'ban_reason',
+            ]);
+            if (!empty($ban_reason_record)) {
+                $ban_reason = $ban_reason_record['value'];
+            }
+        }
         $this->response = [
             'id'          => intval($contact_id),
             'main'        => $main,
@@ -107,7 +127,8 @@ class crmContactInfoMethod extends crmApiAbstractMethod
                 'is_company'         => !empty($contact->get('is_company')),
                 'company_contact_id' => intval($contact->get('company_contact_id')),
                 'is_user'            => !empty($contact->get('is_user')) && $contact->get('is_user') != -1,
-                'is_banned'          => ($contact->get('is_user') == -1),
+                'is_banned'          => $is_banned,
+                'ban_reason'         => $ban_reason,
                 'login'              => $contact->get('login'),
                 'sex'                => $contact->get('sex'),
                 'has_password'       => !empty($contact->get('password')),
@@ -171,6 +192,37 @@ class crmContactInfoMethod extends crmApiAbstractMethod
             }
         }
 
+        // Add origin
+        if (!empty($create_app_id)) {
+            $this->response['origin'] = [
+                'app' => $create_app ?? $create_app_id,
+                'method' => $contact->get('create_method'),
+                'icon' => $this->getAppIcon($create_app_id),
+            ];
+        }
+
+        // Add last activity
+        /*
+        $log = (new waLogModel)->select('*')
+            ->where("contact_id = i:id AND action != 'signup' AND action != 'logout' AND action != 'login_failed'", ['id' => $contact_id])
+            ->order('datetime DESC')->limit(1)->fetchAll();
+        if (!empty($log)) {
+            $rec = reset($log);
+            if (wa()->appExists($rec['app_id'])) {
+                $log = wa($rec['app_id'])->getConfig()->explainLogs($log);
+                $log_actions_config = wa($rec['app_id'])->getConfig()->getLogActions(true);
+                $rec = reset($log);
+                $this->response['last_activity'] = [
+                    'datetime' => $this->formatDatetimeToISO8601($rec['datetime']),
+                    'app' => empty($apps[$rec['app_id']]) ? $rec['app_id'] : $apps[$rec['app_id']]['name'],
+                    'icon' => $this->getAppIcon($rec['app_id']),
+                    'action' => ifset($log_actions_config, $rec['action'], 'name', $rec['action']),
+                    'html' => $rec['params_html'],
+                ];                
+            }
+        }
+        */
+
         if (waRequest::get('with_counters', false)) {
             $deal_ids = array_keys($this->getDealParticipantsModel()->getByField([
                 'contact_id' => $contact_id, 
@@ -229,11 +281,15 @@ class crmContactInfoMethod extends crmApiAbstractMethod
     protected function getContactData(waContact $contact, array $fields = [])
     {
         $result = [];
+        if (empty($contact)) {
+            return $result;
+        }
         if (empty($fields)) {
             // if no fields specified get all fields
             $fields = waContactFields::getInfo($contact['is_company'] ? 'company' : 'person', true);
         }
         $all_columns = crmContact::getAllColumns();
+        class_exists('waContactPhoneField');
         $phone_formatter = new waContactPhoneFormatter();
 
         foreach ($fields as $field) {
@@ -408,6 +464,9 @@ class crmContactInfoMethod extends crmApiAbstractMethod
     }
 
     protected function getField($field_id, array $fields) {
+        if (empty($field_id) || empty($fields)) {
+            return null;
+        }
         foreach($fields as $field) {
             if ($field['id'] === $field_id) {
                 return $field;
@@ -418,17 +477,26 @@ class crmContactInfoMethod extends crmApiAbstractMethod
 
     protected function getTags($contact_id)
     {
+        if (empty($contact_id)) {
+            return [];
+        }
         return $this->prepareTags((new crmTagModel)->getByContact($contact_id));
     }
 
     protected function getSegments($contact_id)
     {
+        if (empty($contact_id)) {
+            return [];
+        }
         return $this->prepareSegments((new crmSegmentModel)->getByContact($contact_id));
     }
 
     private function formatData($fields)
     {
         $result = [];
+        if (empty($fields)) {
+            return $result;
+        }
         $one_name_field = wa()->getSetting('one_name_field', '', 'crm');
         $continue_fields = (empty($one_name_field) ? ['name'] : ['firstname', 'lastname', 'middlename']);
         foreach ($fields as $_val) {
@@ -485,6 +553,9 @@ class crmContactInfoMethod extends crmApiAbstractMethod
      */
     private function isPinned($contact_id)
     {
+        if (empty($contact_id)) {
+            return false;
+        }
         $recent = $this->getRecentModel()->getByField([
             'user_contact_id' => $this->getUser()->getId(),
             'contact_id'      => $contact_id
@@ -499,6 +570,9 @@ class crmContactInfoMethod extends crmApiAbstractMethod
      */
     private function formatAddress($addresses)
     {
+        if (empty($addresses)) {
+            return [];
+        }
         $address_fields = waContactFields::get('address')->getFields();
         foreach ((array) $addresses as $key => $_address) {
             $value = [];

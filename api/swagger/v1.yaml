@@ -637,7 +637,6 @@ paths:
                 type: object
                 required:
                   - field
-                  - value
                 properties:
                   field:
                     type: string
@@ -646,6 +645,7 @@ paths:
                     oneOf:
                       - type: string
                         description: Значение поля
+                        nullable: true
                       - type: array
                         description: Данные составного поля
                         items:
@@ -2136,6 +2136,11 @@ paths:
             default: 30
             maximum: 500
         - in: query
+          name: min_id
+          description: Минимальный ID сделки, начиная с которого нужно получить список сделок
+          schema:
+            type: integer
+        - in: query
           name: userpic_size
           description: Размер изображений сотрудников в пикселях, URL которых нужно получить в составе информации о сделках
           schema:
@@ -2189,10 +2194,10 @@ paths:
                         properties:
                           funnel_id:
                             type: integer
-                            description: ID сделки
+                            description: ID воронки
                           stage_id:
                             type: integer
-                            description: ID воронки
+                            description: ID этапа воронки
                           tag_id:
                             type: integer
                             description: ID тега
@@ -2313,6 +2318,15 @@ paths:
           required: true
           schema:
             type: integer
+        - in: query
+          name: with_count
+          description: Флаг, обозначающий необходимость получить обновленные данные о количестве и общей сумме сделок в задействованных этапах и воронках
+          required: false
+          schema:
+            type: integer
+            enum:
+              - 1
+              - 0
       requestBody:
         content:
           application/json:
@@ -2323,11 +2337,45 @@ paths:
               properties:
                 stage_id:
                   type: integer
-                  description: ID воронки
+                  description: ID этапа воронки
                 force:
                   type: boolean
                   description: Флаг, обозначающий смену этапа без подтверждения пользователем
       responses:
+        200:
+          description: Успешное выполнение запроса + расчет измененных статистических данных по задействованным этапам и воронкам.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  changed_counts:
+                    type: array
+                    description: Список изменений количества и общей суммы сделок в этапах и воронках
+                    items:
+                      type: object
+                      properties:
+                        funnel_id:
+                          type: integer
+                          description: ID воронки
+                        stage_id:
+                          type: integer
+                          description: ID этапа воронки
+                        funnel_count:
+                          type: integer
+                          description: Количество сделок в воронке
+                        funnel_amount:
+                          type: number
+                          description: Общая сумма сделок в воронке
+                        stage_count:
+                          type: integer
+                          description: Количество сделок в этапе
+                        stage_amount:
+                          type: number
+                          description: Общая сумма сделок в этапе
+                        currency_id:
+                          type: string
+                          description: 3-буквенный код валюты
         204:
           description: Успешное выполнение запроса.
         400:
@@ -3203,7 +3251,7 @@ paths:
                       type: integer
                       description: Количество открытых сделок в воронке
                     deal_total_amount:
-                      type: integer
+                      type: number
                       description: Общая сумма в открытых сделках в воронке
                     currency_id:
                       type: string
@@ -3237,7 +3285,7 @@ paths:
                             type: integer
                             description: Количество открытых сделок на этапе
                           deal_total_amount:
-                            type: integer
+                            type: number
                             description: Общая сумма в открытых сделках на этапе
                           currency_id:
                             type: string
@@ -3256,6 +3304,52 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
         500:
           description: Внутренняя ошибка сервера.
+  /crm.funnel.stats:
+    get:
+      security:
+        - BearerAuth: [ ]
+#      externalDocs:
+#        description: crm.funnel.list
+#        url: https://developers.webasyst.ru/api/explorer/crm/crm.funnel.stats/
+      summary: Возвращает статистические данные по заданной воронке.
+      parameters:
+        - in: query
+          name: id
+          description: ID воронки
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Статистические данные по воронке.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stages:
+                    type: array
+                    description: Статистические данные по этапам воронки
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: ID этапа воронки
+                        deal_count:
+                          type: integer
+                          description: Количество открытых сделок в этапе
+                        deal_total_amount:
+                          type: number
+                          description: Общая сумма открытых сделок в этапе
+                  deal_count:
+                    type: integer
+                    description: Количество открытых сделок в воронке
+                  deal_total_amount:
+                    type: number
+                    description: Общая сумма в открытых сделках в воронке
+                  currency_id:
+                    type: string
+                    description: 3-буквенный код валюты
   /crm.history:
     get:
       security:
@@ -3431,6 +3525,13 @@ paths:
           schema:
             type: integer
         - in: query
+          name: contact_id[]
+          description: ID контактов клиентов, если нужно получить счета, связанные со списком клиентов
+          schema:
+            type: array
+            items:
+              type: integer
+        - in: query
           name: userpic_size
           description: Размер изображений контактов в пикселях, URL которых нужно получить в составе информации о счетах
           schema:
@@ -3441,6 +3542,13 @@ paths:
           description: ID сделки, если нужно получить только счета, связанные с этой сделкой
           schema:
             type: integer
+        - in: query
+          name: deal_id[]
+          description: ID сделок, если нужно получить счета, связанные со списком сделок
+          schema:
+            type: array
+            items:
+              type: integer
         - in: query
           name: number
           description: Любая часть редактируемого номера счёта, если нужно получить только счета, в номерах которых есть указанный фрагмент
@@ -3465,6 +3573,21 @@ paths:
               - ARCHIVED
               - DRAFT
               - PROCESSING
+        - in: query
+          name: state_id[]
+          description: |
+            Статусы счётов, если нужно получить только счета в заданном наборе статусов
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - PENDING
+                - PAID
+                - REFUNDED
+                - ARCHIVED
+                - DRAFT
+                - PROCESSING
         - in: query
           name: sort
           description: |
@@ -4530,6 +4653,11 @@ paths:
                 id:
                   type: integer
                   description: ID напоминания
+                report:
+                  type: string
+                  format: text
+                  nullable: true
+                  description: Отчет о выполнении
               required:
                 - id
       responses:
@@ -4740,6 +4868,11 @@ paths:
                   type: string
                   format: text
                   description: Текст напоминания
+                report:
+                  type: string
+                  format: text
+                  nullable: true
+                  description: Отчёт о выполнении
                 type:
                   type: string
                   description: |
@@ -4765,7 +4898,6 @@ paths:
                   description: Дата и время напоминания в формате «гггг-мм-дд чч:мм»
               required:
                 - user_id
-                - content
       responses:
         204:
           description: Успешное выполнение запроса.
@@ -6171,6 +6303,10 @@ components:
             is_banned:
               type: boolean
               description: Признак того, что контакт заблокирован
+            ban_reason:
+              type: string
+              description: Причина блокировки
+              nullable: true
             login:
               type: string
               description: Имя для входа (только для сотрудников)
@@ -6259,6 +6395,21 @@ components:
           description: Сотрудник, создавший контакт
           allOf:
             - $ref: '#/components/schemas/contactMinimal'
+        origin:
+          type: object
+          description: Источник создания контакта
+          properties:
+            app:
+              type: string
+              description: Приложение, с помощью которого был создан контакт
+            method:
+              nullable: true
+              type: string
+              description: Метод, с помощью которого был создан контакт
+            icon:
+              description: Иконка приложения, с помощью которого был создан контакт
+              allOf:
+                - $ref: '#/components/schemas/icon'
         responsible:
           nullable: true
           description: Сотрудник, ответственный за контакт
@@ -6567,27 +6718,17 @@ components:
             number:
               type: string
               description: Отформатированный номер заказа
+            url:
+              type: string
+              format: uri
+              description: URL заказа в бекенде Shop-Script
             contact:
               description: Покупатель
               allOf:
                 - $ref: '#/components/schemas/contactMinimal'
         icon:
           description: Иконка для отображения записи
-          type: object
-          properties:
-            fa:
-              type: string
-              description: Класс иконки Font Awesome из классического набора
-            fab:
-              type: string
-              description: Класс иконки Font Awesome из набора брендов
-            color:
-              type: string
-              description: HTML-значение цвета
-            url:
-              type: string
-              format: uri
-              description: URL изображения
+          $ref: '#/components/schemas/icon'
     invoice:
       type: object
       description: Счёт
@@ -6793,6 +6934,10 @@ components:
         content:
           type: string
           description: Текст напоминания
+        report:
+          type: string
+          description: Отчёт о выполнении
+          nullable: true
         type:
           type: string
           description: |
@@ -8088,6 +8233,22 @@ components:
         count:
           type: integer
           description: Количество контактов в классе
+    icon:
+      type: object
+      properties:
+        fa:
+          type: string
+          description: Класс иконки Font Awesome из классического набора
+        fab:
+          type: string
+          description: Класс иконки Font Awesome из набора брендов
+        color:
+          type: string
+          description: HTML-значение цвета
+        url:
+          type: string
+          format: uri
+          description: URL изображения
     errorResponse:
       type: object
       properties:

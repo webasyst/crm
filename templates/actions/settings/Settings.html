@@ -30,14 +30,14 @@
 
                 {$_menu = [
                     [
-                    "icon" => "fa-user-cog",
-                    "name" => "[`Personal settings`]",
-                    "uri" => "`$wa_app_url`settings/"
+                        "icon" => "fa-user-cog",
+                        "name" => "[`Personal settings`]",
+                        "uri" => "`$wa_app_url`settings/"
                     ],
                     [
-                    "icon" => "fa-sliders-h",
-                    "name" => "[`General settings`]",
-                    "uri" => "`$wa_app_url`settings/general/"
+                        "icon" => "fa-sliders-h",
+                        "name" => "[`General settings`]",
+                        "uri" => "`$wa_app_url`settings/general/"
                     ],
                     [
                         "icon" => "fa-university",
@@ -85,9 +85,10 @@
                         "uri" => "`$wa_app_url`settings/lostReasons/"
                     ],
                     [
-                        "icon" => "fa-envelope",
-                        "name" => "[`Notifications`]",
-                        "uri" => "`$wa_app_url`settings/notifications/"
+                        "icon" => "fa-robot",
+                        "name" => "[`Automation`]",
+                        "uri" => "`$wa_app_url`settings/notifications/",
+                        "premium_enabled" => true
                     ],
                     [
                         "icon" => "fa-at",
@@ -148,7 +149,7 @@
                                     {/if}
                                     <span class="c-settings-sidebar-name">{$_item.name}</span>
                                     {if !empty($_item.premium_enabled) && !$wa->crm->isPremium()}
-                                        <span class="count"><i class="fas fa-star text-light-gray small"></i></span>
+                                        <span class="count small"><i class="fas fa-star text-light-gray"></i></span>
                                     {/if}
                                 </a>
                             </li>

@@ -10,7 +10,7 @@ class crmContactLinksMethod extends crmApiAbstractMethod
         }
 
         $contact_ids = crmHelper::dropNotPositive($contact_ids);
-        $contacts = $this->getContactsMicrolist($contact_ids, ['id', 'name', 'userpic'], self::USERPIC_SIZE);
+        $contacts = $this->getContactsMicrolist($contact_ids, ['id', 'name', 'userpic', 'crm_vault_id', 'crm_user_id', 'create_contact_id'], self::USERPIC_SIZE);
         $operation = new crmContactOperationDelete([
             'contacts' => array_combine(array_column($contacts, 'id'), $contacts)
         ]);

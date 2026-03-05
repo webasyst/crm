@@ -1,0 +1,17 @@
+{SEPARATOR}Application received{SEPARATOR}
+<p>Application received.</p>
+
+<p>
+    {rtrim($wa->url(true), '/')}{$wa_backend_url}crm/contact/{$customer.id|escape}
+</p>
+
+<p>
+    Firstname: {$customer.firstname|escape}<br>
+    Lastname: {$customer.lastname|escape}<br>
+    Email: {$customer->get('email', 'default')|escape}<br>
+    Phone: {$customer->get('phone', 'default')|escape}
+</p>
+
+<p>--</p>
+
+<p>{$company_name}</p>

@@ -4,6 +4,11 @@ class crmReminderModel extends crmModel
 {
     const POP_UP_MIN = 10;  // minutes;
 
+    const TYPE_MEETING = 'MEETING';
+    const TYPE_CALL = 'CALL';
+    const TYPE_MESSAGE = 'MESSAGE';
+    const TYPE_OTHER = 'OTHER';
+
     protected $table = 'crm_reminder';
 
     protected $link_contact_field = array('creator_contact_id', 'contact_id', 'user_contact_id');
@@ -17,6 +22,9 @@ class crmReminderModel extends crmModel
      */
     public function deleteByContact($contact_id)
     {
+        if (empty($contact_id)) {
+            return;
+        }
         $contact_ids = crmHelper::toIntArray($contact_id);
         $contact_ids = crmHelper::dropNotPositive($contact_ids);
         if (!$contact_ids) {
@@ -58,6 +66,10 @@ class crmReminderModel extends crmModel
 
 
     public function getReminders($id, $date) {
+        if (empty($id) || empty($date)) {
+            return [];
+        }
+        
         $sql = "SELECT
                   due_date,
                   due_datetime,
@@ -94,7 +106,7 @@ class crmReminderModel extends crmModel
     public function getUsersCounts($user_id = null, $options = array())
     {
 
-        $cond = $user_id ? "AND user_contact_id = ".(int)$user_id : '';
+        $cond = !empty($user_id) ? "AND user_contact_id = ".(int)$user_id : '';
 
         $select = array(
             "user_contact_id AS id"
@@ -131,7 +143,7 @@ class crmReminderModel extends crmModel
             'd_tomorrow' => date('Y-m-d', strtotime('+1 day')),
         ));
 
-        if (!$user_id) {
+        if (empty($user_id)) {
             return $res->fetchAll('id', true);
         } else {
             return $res->fetchAssoc();

@@ -23,7 +23,7 @@ class crmDealExportProcessController extends waLongActionController
             'encoding' => $this->getEncoding(),
 
             'export_fields_name' => $this->getRequest()->request('export_fields_name'),
-
+            'total_count_export' => count($this->getRequest()->request('ids', [], waRequest::TYPE_ARRAY)),
             'not_export_empty_columns' => $this->getRequest()->request('not_export_empty_columns'),
 
             'deals_export_result' => array(),
@@ -35,10 +35,9 @@ class crmDealExportProcessController extends waLongActionController
 
         $ids = $this->getIds();
 
-        $this->deals_exporter = $this->getDealsExporter($this->getIds());
+        $this->deals_exporter = $this->getDealsExporter($ids);
 
-        $dm = new crmDealModel();
-        $contact_ids = $dm->select('DISTINCT contact_id')->where('id IN (:ids)', array('ids' => $ids))->fetchAll(null, true);
+        $contact_ids = empty($ids) ? [] : (new crmDealModel)->select('DISTINCT contact_id')->where('id IN (:ids)', array('ids' => $ids))->fetchAll(null, true);
 
         $this->contacts_exporter = $this->getContactsExporter($contact_ids);
 
@@ -285,6 +284,17 @@ class crmDealExportProcessController extends waLongActionController
                 'progress'  => $this->getProgress(),
                 'file'      => basename($this->data['filename'])
             ]);
+        }
+        if ($this->data['total_count_export'] > 0) {
+            try {
+                if (!class_exists('waLogModel')) {
+                    wa('webasyst');
+                }
+                (new waLogModel())->add('deal_export', $this->data['total_count_export']);
+                wa('crm');
+            } catch (Exception $ex) {
+                waLog::log(sprintf('Error on systemLogAction. Error: %s. Trace: %s', $ex->getMessage(), $ex->getTraceAsString()), 'crm/system_log_action.log');
+            }
         }
 
         return true;

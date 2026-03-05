@@ -42,6 +42,11 @@
   text-align: left;
   box-sizing: content-box !important;
 }
+.crm-form-block .crm-form-fields-block .fields .field > .name .name-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: .125rem;
+}
 .crm-form-block .crm-form-fields-block .fields .field > .name .value .crm-composite-field.fields .field > .name {
   width: 100%;
 }

@@ -130,7 +130,7 @@ return array(
             )
         ),
         'category' => array(
-            'name' => 'Category',    // _w('Category')
+            'name' => 'Segment',    // _w('Segment')
             'multi' => true,
             'joins' => array(
                 ':contact_categories' => array(
@@ -147,7 +147,7 @@ return array(
             ),
             'items' => array(
                 'category' => array(
-                    'name' => 'Category', // _w('Category')
+                    'name' => 'Segment', // _w('Segment')
                     'items' => array(
                         ':values' => array(
                             'autocomplete' => 1,

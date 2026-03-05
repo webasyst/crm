@@ -7,9 +7,10 @@ class crmReminderMarkAsDoneController extends crmJsonController
     public function execute()
     {
         $id = waRequest::request('id', null, waRequest::TYPE_INT);
-        $user_id = waRequest::request('user_id', wa()->getUser()->getId(),waRequest::TYPE_STRING_TRIM);
+        $user_id = waRequest::request('user_id', wa()->getUser()->getId(), waRequest::TYPE_STRING_TRIM);
         $contact_id = waRequest::get('contact', null, waRequest::TYPE_INT);
         $deal_id = abs(waRequest::get('deal', 0, waRequest::TYPE_INT));
+        $report = waRequest::post('report', null, waRequest::TYPE_STRING_TRIM);
 
         $rm = new crmReminderModel();
         $reminder = $rm->getById($id);
@@ -21,7 +22,10 @@ class crmReminderMarkAsDoneController extends crmJsonController
             throw new waRightsException();
         }
 
-        $result = $rm->updateById($id, array('complete_datetime' => date('Y-m-d H:i:s')));
+        $result = $rm->updateById($id, [
+            'complete_datetime' => date('Y-m-d H:i:s'),
+            'report' => $report,
+        ]);
         if ($result) {
             $user_id = ($user_id === 'all' ? null : $user_id);
             if (!empty($deal_id)) {
@@ -73,6 +77,10 @@ class crmReminderMarkAsDoneController extends crmJsonController
 
         $this->logAction('reminder_done', array('reminder_id' => $id));
         $lm = new crmLogModel();
-        $lm->log('reminder_done', $reminder['contact_id'], $id);
+        $log_params = null;
+        if (!empty($report)) {
+            //$log_params = ['report' => $report];
+        }
+        $lm->log('reminder_done', $reminder['contact_id'], $id, null, null, wa()->getUser()->getId(), $log_params);
     }
 }
