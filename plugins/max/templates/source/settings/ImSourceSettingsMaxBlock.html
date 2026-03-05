@@ -1,0 +1,163 @@
+{$block_class = 'c-source-settings-max-block'}
+{$block_id = uniqid($block_class)}
+<div class="{$block_class} c-connection-settings-block not-styled" id="{$block_id}">
+
+    <div class="fields-group">
+        <div class="field">
+            <p class="large-hint">
+                <a href="https://support.webasyst.ru/48535/crm-max-messages/" target="_blank">{_wd('crm_max', 'Step-by-step manual on connecting to MAX')}</a>
+            </p>
+        </div>
+        <div class="field">
+            <div class="name">
+                {_wd('crm_max', 'Name')}
+            </div>
+            <div class="value">
+                <input class="js-name-input" type="text" name="source[name]" value="{$source.name|default:''|escape}">
+            </div>
+        </div>
+        <div class="field top-padded" style="margin-bottom: 16px;">
+            <div class="name">
+                {_wd('crm_max', 'Token')}
+                <br>
+                <span class="hint"><a href="https://dev.max.ru/docs/chatbots/bots-create" target="_blank">{_wd('crm_max', 'more info')}</a></span>
+            </div>
+            <div class="value">
+                <input class="equal-width js-token-input" type="text" name="source[params][token]" value="{$source.params.token|default:''|escape}" autocomplete="off">
+            </div>
+        </div>
+        <div class="field top-padded" style="margin-bottom: 16px;">
+            <div class="name">
+                <label for="c-webhook-checkbox">
+                    {_wd('crm_max', 'Webhook update mode')}
+                </label>
+            </div>
+            <div class="value">
+                <input type="checkbox" name="source[params][webhook_mode]" value="1" id="c-webhook-checkbox"
+                    {if !empty($webhook_mode)}checked="checked"{/if}>
+                <div class="hint" style="margin-top: 10px;">
+                    {$_doc_page = 'https://dev.max.ru/docs-api'}
+                    {sprintf(_wd('crm_max', 'MAX supports two ways of processing bot updates — <em>pull</em> and <em>push</em>. By default the <em>pull</em> mechanism is used. <strong>Webhook is a <em>push</em> mechanism, it works faster.</strong>'), $_doc_page)}
+                    <a href="{$_doc_page}" target="_blank">{_wd('crm_max', 'More info')}</a>.
+                </div>
+                <input type="hidden" name="source[params][webhook_secret]" value="{$webhook_secret|default:''|escape}">
+            </div>
+        </div>
+        <div class="field top-padded" style="margin-bottom: 16px;">
+            <div class="name">
+                <label for="c-filesave-checkbox">
+                    {_wd('crm_max', 'Do not save attachments')}
+                </label>
+            </div>
+            <div class="value">
+                <input type="checkbox" name="source[params][do_not_save_attachments]" value="1" id="c-filesave-checkbox"
+                    {if !empty($source.params.do_not_save_attachments)}checked="checked"{/if}>
+                <div class="hint" style="margin-top: 10px;">
+                    {_wd('crm_max', 'Files attached to messages will not be saved on the server. Instead, files will be available by their direct links in MAX.')}
+                    {_wd('crm_max', 'This setting does not apply to video and voice messages.')}
+                </div>
+            </div>
+        </div>
+        <div class="field crm-section">
+            {_wd('crm_max', 'Auto-response to bot commands')}
+        </div>
+        <div class="field top-padded" style="margin-bottom: 16px;">
+            <div class="name">
+                {_wd('crm_max', 'Start message')}
+            </div>
+            <div class="value">
+                <textarea class="start_response_textarea" name="source[params][start_response]">{$source.params.start_response|default:$default_start_response|escape}</textarea>
+                <span class="hint">
+                    {_wd('crm_max', 'Supported variables:')} <code>$contact_name</code>, <code>$site_name</code>, <code>$site_url</code>, <code>$site_link</code>, <code>$bot_name</code>, <code>$bot_username</code>
+                    <br>
+                    {_wd('crm_max', 'Supported markup:')} <a href="https://dev.max.ru/docs-api#HTML" target="_blank">HTML</a>
+                </span>
+            </div>
+        </div>
+        <div class="js-commands">
+        {if !empty($source.params.commands)}
+            {foreach $source.params.commands.command as $_idx => $_command}
+                <div class="field top-padded js-command" style="margin-bottom: 16px;">
+                    <div class="name">
+                        <input class="js-command-input short" type="text" name="source[params][commands][command][{$_idx}]" value="{$_command|escape}" placeholder="/command">
+                    </div>
+                    <div class="value">
+                        <div class="flexbox space-16 full-width">
+                            <div class="wide">
+                                <textarea class="js-command-response-textarea wide" placeholder="{_wd('crm_max', 'Response text')}" name="source[params][commands][response][{$_idx}]">{ifset($source.params.commands.response[$_idx], '')|escape}</textarea>
+                                <div class="hint">
+                                    {_wd('crm_max', 'Supported markup:')} <a href="https://dev.max.ru/docs-api#HTML" target="_blank">HTML</a>
+                                </div>
+                                <label>
+                                    <input type="checkbox" class="js-command-checkbox" value="1"{if !empty($source.params.commands.save[$_idx])} checked="checked"{/if}>
+                                    {_wd('crm_max', 'Show response in conversation')}
+                                </label>
+                                <input type="hidden" class="js-command-hidden" name="source[params][commands][save][{$_idx}]" value="{ifset($source.params.commands.save[$_idx], 0)|escape}">
+                            </div>
+                            <a class="button nobutton circle js-command-remove" title="{_wd('crm_max', 'delete')}">
+                                <i class="far fa-trash-alt text-gray"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {/foreach}
+        {/if}
+        </div>
+        <div class="field top-padded" style="margin-bottom: 16px;">
+            <div class="name"></div>
+            <div class="value">
+                <a href="javascript:void(0);" class="button rounded small nobutton js-add-command">
+                    <i class="fas fa-plus-circle text-green"></i>
+                    {_wd('crm_max', 'Add auto-response')}
+                </a>
+            </div>
+        </div>
+
+        <template class="js-command-template">
+            <div class="field top-padded js-command" style="margin-bottom: 16px;">
+                <div class="name">
+                    <input class="js-command-input short" type="text" name="source[params][commands][command][]" value="" placeholder="/command">
+                </div>
+                <div class="value">
+                    <div class="flexbox space-16 full-width">
+                        <div class="wide">
+                            <textarea class="js-command-response-textarea wide" placeholder="{_wd('crm_max', 'Response text')}" name="source[params][commands][response][]"></textarea>
+                            <div class="hint">
+                                {_wd('crm_max', 'Supported markup:')} <a href="https://dev.max.ru/docs-api#HTML" target="_blank">HTML</a>
+                            </div>
+                            <label>
+                                <input type="checkbox" class="js-command-checkbox" value="1">
+                                {_wd('crm_max', 'Show response in conversation')}
+                            </label>
+                            <input type="hidden" class="js-command-hidden" name="source[params][commands][save][]" value="0">
+                        </div>
+                        <a class="button nobutton circle js-command-remove" title="{_wd('crm_max', 'delete')}">
+                            <i class="far fa-trash-alt text-gray"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <div class="">
+        <div class="field">
+            <div class="value">
+                <div class="crm-common-errors-block"></div>
+            </div>
+        </div>
+    </div>
+
+    <input class="js-bot-id-input" type="hidden" name="source[params][bot_id]" value="{$source.params.bot_id|default:''|escape}" />
+    <input class="js-username-input" type="hidden" name="source[params][username]" value="{$source.params.username|default:''|escape}" />
+    <input class="js-firstname-input" type="hidden" name="source[params][firstname]" value="{$source.params.firstname|default:''|escape}" />
+    <input class="js-webhook-token-input" type="hidden" name="source[params][webhook_token]" value="{$source.params.webhook_token|default:''|escape}" />
+</div>
+<script>
+(function ($) {
+    new CRMMaxPluginSettings({
+        $wrapper: $("#{$block_id}"),
+        action: {if $source.id <= 0}'create'{else}'edit'{/if},
+    });
+})(jQuery);
+</script>

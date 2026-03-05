@@ -1,0 +1,21 @@
+<style>
+    .c-max-plugin-settings-page {
+      margin: 80px auto;
+      text-align: center;
+      color: #aaa;
+    }
+</style>
+    
+<div class="c-max-plugin-settings-page">
+    <p><b>{sprintf(_wd('crm_max', 'Plugin %s is installed and working.'), 'MAX')}</b></p>
+    <p>{sprintf(
+        _wd('crm_max', 'Save configuration parameters in the <a %s>messenger settings</a>.'),
+        sprintf('href="%s"', $source_settings_url)
+    )}</p>
+
+    {if $need_show_review_widget}
+        <div>
+            {$wa->installer->reviewWidget("plugin/crm/max", ['is_inline' => true])}
+        </div>
+    {/if}
+</div>

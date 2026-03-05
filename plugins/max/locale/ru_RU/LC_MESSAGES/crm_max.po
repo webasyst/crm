@@ -1,0 +1,209 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm/plugin/telegram\n"
+"POT-Creation-Date: 2016-11-14 16:26+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: crm/plugin/telegram\n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: .\n"
+"X-Generator: Poedit 3.4.2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "Supported variables:"
+msgstr "Поддерживаются переменные:"
+
+msgid "Supported markup:"
+msgstr "Поддерживается разметка:"
+
+msgid "Webhook update mode"
+msgstr "Обновление с помощью веб-хука"
+
+msgid "Internal service message"
+msgstr "Служебное сообщение"
+
+msgid "MAX supports two ways of processing bot updates — <em>pull</em> and <em>push</em>. By default the <em>pull</em> mechanism is used. <strong>Webhook is a <em>push</em> mechanism, it works faster.</strong>"
+msgstr "MAX поддерживает два способа обработки обновлений бота: <em>pull</em> и <em>push</em>. По умолчанию используется механизм <em>pull</em>. <strong>Веб-хук — это механизм <em>push</em>, он работает быстрее.</strong>"
+
+msgid "More info"
+msgstr "Подробнее об этом"
+
+msgid "Unknown command"
+msgstr "Неизвестная команда"
+
+msgid "Blocked by the client."
+msgstr "Заблокировано клиентом."
+
+msgid "Show response in conversation"
+msgstr "Показывать ответ в переписке"
+
+msgid "Add auto-response"
+msgstr "Добавить автоответ"
+
+msgid "Auto-response to bot commands"
+msgstr "Автоответы на команды бота"
+
+msgid "Failed to send the message:"
+msgstr "Не удалось оправить сообщение:"
+
+msgid "Message refused by MAX:"
+msgstr "MAX отклонил сообщение:"
+
+msgid "Incorrect request to MAX API."
+msgstr "Некорректный запрос к API MAX."
+
+msgid "Fill in the fields below:"
+msgstr "Заполните поля ниже:"
+
+msgid "Access token is required."
+msgstr "Access token обязателен."
+
+msgid "Invalid access token."
+msgstr "Неверный access token."
+
+msgid "Name"
+msgstr "Название"
+
+msgid "Plugin %s is installed and working."
+msgstr "Плагин «%s» установлен и работает."
+
+msgid "Save configuration parameters in the <a %s>messenger settings</a>."
+msgstr "Сохранить параметры конфигурации в <a %s>настройках мессенджеров</a>."
+
+msgid "Token"
+msgstr "Токен"
+
+msgid "more info"
+msgstr "подробнее"
+
+msgid "Do not save attachments"
+msgstr "Не сохранять вложения"
+
+msgid "Files attached to messages will not be saved on the server. Instead, files will be available by their direct links in MAX."
+msgstr "Файлы, прикреплённые к сообщениям, не будут сохраняться на сервере. Вместо этого файлы будут доступны по прямым ссылкам в MAX."
+
+msgid "This setting does not apply to video and voice messages."
+msgstr "Эта настройка не относится к видео- и голосовым сообщениям."
+
+msgid "Start message"
+msgstr "Стартовое сообщение"
+
+msgid "Response text"
+msgstr "Текст ответа"
+
+msgid "delete"
+msgstr "удалить"
+
+msgid "A CRM site rule is required."
+msgstr "Требуется правило CRM в настройках сайта."
+
+msgid "Failed to upload the file to MAX API. HTTP error code: %d."
+msgstr "Не удалось загрузить файл в API MAX. Код ошибки HTTP: %d."
+
+msgid "This MAX bot has webhooks enabled for other integrations. It can work in the webhook mode only."
+msgstr "Для этого бота MAX включены веб-хуки для интеграции с другими сервисами. Он может работать только в режиме веб-хука."
+
+msgid "A CRM site rule is required. Add a rule in the <em>Site</em> app."
+msgstr "Требуется правило CRM в настройках сайта. Добавьте правило с помощью приложения «Сайт»."
+
+msgid "Webhook creation error."
+msgstr "Ошибка создания веб-хука."
+
+msgid "Webhook creation error: %s"
+msgstr "Ошибка создания веб-хука: %s"
+
+msgid "Hello $contact_name!"
+msgstr "Здравствуйте, $contact_name!"
+
+msgid "Ask a question, and we’ll reply promptly."
+msgstr "Задайте вопрос, и мы скоро вам ответим."
+
+msgid "Your $site_link"
+msgstr "Команда $site_link"
+
+msgid "Please send your phone number."
+msgstr "Пожалуйста, отправьте ваш номер телефона."
+
+msgid "Send phone number"
+msgstr "Отправить номер телефона"
+
+msgid "Thank you!"
+msgstr "Спасибо!"
+
+msgid "This message type is not currently supported by MAX."
+msgstr "Этот тип сообщений пока не поддерживается MAX."
+
+msgid "Failed to render the message."
+msgstr "Не удалось отобразить сообщение."
+
+msgid "Failed to upload the file."
+msgstr "Не удалось загрузить файл."
+
+msgid "Unknown MAX user ID."
+msgstr "Неизвестный ID пользователя MAX."
+
+msgid "Bot’s auto-reply"
+msgstr "Автоответ бота"
+
+msgid "Please verify your client profile."
+msgstr "Пожалуйста, подтвердите ваш профиль клиента."
+
+msgid "Verify client profile"
+msgstr "Подтвердить профиль клиента"
+
+msgid "This is a required field."
+msgstr "Это поле обязательное."
+
+msgid "Step-by-step manual on connecting to MAX"
+msgstr "Пошаговая инструкция по подключению к MAX"
+
+msgid "To make bold text, add double asterisks around it."
+msgstr "Чтобы выделить текст жирным, поставьте вокруг него двойные звёздочки."
+
+msgid "Important text"
+msgstr "Важный текст"
+
+msgid "To make italic text, add double underscores around it."
+msgstr "Чтобы выделить текст курсивом, поставьте вокруг него двойное подчёркивание."
+
+msgid "Italic text"
+msgstr "Курсивный текст"
+
+msgid "To strike through text, add double tildes around it."
+msgstr "Чтобы зачеркнуть текст, поставьте вокруг него двойные тильды."
+
+msgid "Strike-through text"
+msgstr "Зачёркнутый текст"
+
+msgid "To add a link, type its name inside brackets followed, without a white space, by the link URL inside parenthesis. A URL must begin with <em>http://</em>, <em>https://</em> or <em>www.</em>"
+msgstr "Чтобы добавить ссылку, напишите её текст внутри квадратных скобок, затем без пробела адрес ссылки в круглых скобках. Адрес должен начинаться с <em>http://</em>, <em>https://</em> или <em>www.</em>"
+
+msgid "Link name"
+msgstr "Текст ссылки"
+
+msgid "To add a quote, put <code>&gt;</code> at the beginning of each quoted line of text."
+msgstr "Чтобы вставить цитату, добавьте <code>&gt;</code> в начало каждой строки цитируемого текста."
+
+msgid "Quoted line #1"
+msgstr "Строка цитаты №1"
+
+msgid "Quoted line #2"
+msgstr "Строка цитаты №2"
+
+msgid "To format text with a monospace font, add backticks around it."
+msgstr "Чтобы выделить текст моноширинным шрифтом, поставьте вокруг него обратные апострофы."
+
+msgid "Monospace text"
+msgstr "Моноширинный текст"
+
+msgid "To sent a block of programming code, add triple backticks before and after it."
+msgstr "Чтобы отправить блок программного кода, поставьте тройные обратные апострофы перед ним и после него."
+
+msgid "Formatting options"
+msgstr "Форматирование"
