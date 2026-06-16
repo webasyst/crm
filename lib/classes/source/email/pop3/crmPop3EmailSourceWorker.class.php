@@ -13,6 +13,7 @@ class crmPop3EmailSourceWorker extends crmEmailSourceWorker
             return $this->cache['mail_reader'];
         }
         try {
+            //$reader = new waMailPOP3(['read_timeout' => 600] + $this->source->getConnectionParams());
             $reader = new waMailPOP3($this->source->getConnectionParams());
             $this->cache['mail_reader'] = $reader;
         } catch (Exception $e) {

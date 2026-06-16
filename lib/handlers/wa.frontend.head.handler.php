@@ -4,6 +4,11 @@ class crmWaFrontendHeadHandler extends waEventHandler
 {
     public function execute(&$params)
     {
+        $single_app = waSystemConfig::systemOption('single_app_mode') ? waSystemConfig::systemOption('single_app_id') : null;
+        if (!empty($single_app) && $single_app != 'crm') {
+            return;
+        }
+
         $domain = $params['domain'];
         $form_params_model = new crmFormParamsModel();
         $widget_forms = $form_params_model->getByField([

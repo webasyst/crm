@@ -164,6 +164,105 @@ abstract class crmEmailSourceSettingsPage extends crmSourceSettingsPage
             $data['responsible_contact_id'] = null;
         }
 
+        $data = $this->syncLoginWithEmailInSubmitData($data);
+        return $this->applyMailProviderPresetsAfterWorkup($data);
+    }
+
+    /**
+     * When “Same as email” is on (value 1), copy email into login before validation/save.
+     * Form uses hidden 2 + checkbox 1 (same pattern as leave_messages_on_server).
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function syncLoginWithEmailInSubmitData($data)
+    {
+        if (!isset($data['params']) || !is_array($data['params'])) {
+            return $data;
+        }
+        $p = &$data['params'];
+        $same = isset($p['login_same_as_email']) ? (string) $p['login_same_as_email'] : '1';
+        unset($p['login_same_as_email']);
+        if ($same === '1') {
+            $email = isset($p['email']) ? trim((string) $p['email']) : '';
+            if ($email !== '') {
+                $p['login'] = $email;
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Whether stored login differs from email (for showing username field and checkbox on edit).
+     *
+     * @param array $source_info result of {@see crmSource::getInfo()}
+     * @return bool
+     */
+    public static function emailSourceLoginDiffersFromEmail(array $source_info)
+    {
+        $p = isset($source_info['params']) && is_array($source_info['params']) ? $source_info['params'] : array();
+        $email = isset($p['email']) ? trim((string) $p['email']) : '';
+        $login = isset($p['login']) ? trim((string) $p['login']) : '';
+        if ($email === '' || $login === '') {
+            return false;
+        }
+        if (function_exists('mb_strtolower')) {
+            return mb_strtolower($email, 'UTF-8') !== mb_strtolower($login, 'UTF-8');
+        }
+        return strtolower($email) !== strtolower($login);
+    }
+
+    /**
+     * Subclasses that show the mail provider dropdown return 'pop3' or 'imap'; others return null.
+     *
+     * @return string|null
+     */
+    protected function getMailProviderConnectionKind()
+    {
+        return null;
+    }
+
+    /**
+     * Param name for the provider id (built-in POP3/IMAP use mail_provider; imap4 plugin uses imap_provider).
+     *
+     * @return string
+     */
+    protected function getMailProviderParamKey()
+    {
+        return 'mail_provider';
+    }
+
+    /**
+     * After parent workup (empty fields → null), apply preset server/port/ssl so validation and save see correct values.
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function applyMailProviderPresetsAfterWorkup($data)
+    {
+        $kind = $this->getMailProviderConnectionKind();
+        if ($kind === null || $kind === '') {
+            return $data;
+        }
+        if (!isset($data['params']) || !is_array($data['params'])) {
+            return $data;
+        }
+        $p = &$data['params'];
+        $param_key = $this->getMailProviderParamKey();
+        if (!isset($p[$param_key]) || $p[$param_key] === null || $p[$param_key] === '') {
+            if ($this->source->exists()) {
+                $stored = $this->source->getParam($param_key, 'custom');
+                $p[$param_key] = ($stored !== null && $stored !== '') ? (string) $stored : 'custom';
+            } else {
+                $p[$param_key] = crmEmailSource::DEFAULT_MAIL_PROVIDER_ID;
+            }
+        }
+        $provider = (string) $p[$param_key];
+        $allowed = array_keys(crmEmailSource::getMailProvidersForUi());
+        if (!in_array($provider, $allowed, true)) {
+            $p[$param_key] = 'custom';
+        }
+        crmEmailSource::applyMailProviderPresetToParams($data['params'], $kind, $param_key);
         return $data;
     }
 

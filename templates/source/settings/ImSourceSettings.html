@@ -64,6 +64,19 @@
                     </div>
                 </div>
                 <input type="hidden" name="source[params][verification_key]" value="{$verification_key|escape}">
+                <div class="alert small">
+                    <div class="flexbox space-8">
+                        <span><i class="fas fa-info-circle"></i></span>
+                        <div class="wide">{sprintf_wp(
+                            'Use the “%s” menu item in the reply text editing field, when communicating with a client in the “%s” section, to send a special link, which will connect the client’s user ID in the messenger app with their registered account in your CRM database. This will help you view the full client profile on the conversation screen.',
+                            sprintf(
+                                '<em>%s</em>',
+                                _w('Request authorization')
+                            ),
+                            _w('Messages')
+                        )} </div>
+                    </div>
+                </div>
             </div>
 
             {*<div class="field"><hr></div>*}

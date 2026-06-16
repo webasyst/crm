@@ -1,11 +1,15 @@
 {if empty($_hide_payments) && (!empty($payment_methods) || !empty($payment))}
-    <section class="c-payment-section">
+    <section class="c-payment-section" data-payment-image-url="{$payment_image_url|default:''|escape}" data-is-mobile="{if $wa->isMobile()}1{else}0{/if}" data-sbp-label="{'Оплатить СБП'|escape}">
         {if !empty($payment_methods)}
 
             {if empty($style_version)}
                 <input class="c-button button js-show-payments" type="button" value="[`Pay`]">
+                <span class="spinner js-show-payments-spinner custom-ml-4" style="display: none; top: 2px;"></span>
             {else}
-                <a href="javascript:void(0);" class="c-button js-show-payments"{if !empty($company.invoice_options.button_color)} style="background-color: {$company.invoice_options.button_color};"{/if}>[`Pay`]</a>
+                <a href="javascript:void(0);" class="c-button js-show-payments"{if !empty($company.invoice_options.button_color)} style="background-color: {$company.invoice_options.button_color};"{/if}>
+                    <i class="fas fa-spinner wa-animation-spin speed-1000 custom-mr-4 js-show-payments-spinner" style="display: none;"></i>
+                    [`Pay`]
+                </a>
             {/if}
 
             <div class="dialog c-payments-wrapper js-payments-wrapper">
@@ -16,28 +20,60 @@
                         <p class="dialog-title text-white">{$company.name|escape}</p>
                     </div>
                     <div class="dialog-content">
-                        <form method="post">
+                        <form method="post" class="js-main-payment-form">
 
                             <ul class="c-payment-options">
                                 <li class="c-payment-item c-payment-item-invoice">
                                     <p class="number">[`Invoice`] [`#`] {$invoice.number|escape}</p>
                                     <p class="amount">{$invoice.amount|wa_format_amount_currency:$invoice.currency_id}</p>
                                 </li>
+                                <li class="c-payment-item js-payment-image-item" style="display:none;"></li>
+                                {$has_pay_plugin = false}
+                                {$has_pay_plugin_divider = false}
                                 {foreach $payment_methods as $m}
-                                    <li class="c-payment-item{if $m.id == $payment_id} is-active{/if}{if !empty($m.error)} has-error{/if}" style="animation-delay: {$m@index * 2 * 0.1}s">
+                                    {if $m.plugin == 'pay'}
+                                        {$has_pay_plugin = true}
+                                    {/if}
+                                    {if $has_pay_plugin && !$has_pay_plugin_divider && $m.plugin != 'pay'}
+                                        {$has_pay_plugin_divider = true}
+                                        <li class="c-payment-item divider">
+                                            [`More payment options`]
+                                        </li>
+                                    {/if}
+                                    {$empty_provider = $m.plugin === 'pay' && !empty($m.is_empty_provider)}
+                                    <li class="c-payment-item{if $m.id == $payment_id} is-active{/if}{if !empty($m.error)} has-error{/if}{if $has_pay_plugin && $m.plugin != 'pay'} lighter-bg{/if}"
+                                        style="animation-delay: {$m@index * 2 * 0.1}s"
+                                        data-id="{$m.id|escape}"
+                                    >
                                         <label>
-                                            <input class="c-payment-input" type="radio" name="payment_id" value="{$m.id}" {if !empty($m.error)}disabled="disabled"{/if}>
-                                            <div class="c-payment-header">
-                                                {if !empty($m.logo)}
-                                                    <div class="c-payment-image-wrapper">
-                                                        <img class="c-payment-image" src="{$m.logo}">
-                                                    </div>
+                                            <input class="c-payment-input" type="radio" name="payment_id" value="{$m.id}" {if !empty($m.error) || $empty_provider}disabled="disabled"{/if}>
+                                            {if $m.plugin != 'pay'}
+                                                <div class="c-payment-header">
+                                                    {if !empty($m.logo)}
+                                                        <div class="c-payment-image-wrapper">
+                                                            <img class="c-payment-image" src="{$m.logo}">
+                                                        </div>
+                                                    {/if}
+                                                </div>
+                                            {/if}
+                                            <div class="c-payment-body{if $m.plugin == 'pay'} is-pay-plugin{/if}">
+                                                {if !empty($m.name)}
+                                                    <p class="c-payment-name">
+                                                    {$m.name|escape}
+                                                    {if $m.plugin == 'pay' && !$empty_provider}
+                                                        &nbsp;
+                                                        <img class="c-payment-icon" src="{$wa_url}wa-content/img/payment/mir.svg" alt="МИР" />
+                                                        <img class="c-payment-icon" src="{$wa_url}wa-content/img/payment/mastercard.svg" alt="MasterCard" />
+                                                        <img class="c-payment-icon" src="{$wa_url}wa-content/img/payment/visa.svg" alt="VISA" />
+                                                    {/if}
+                                                    </p>
                                                 {/if}
-                                            </div>
-                                            <div class="c-payment-body">
-                                                <p class="c-payment-name ">{$m.name|escape}</p>
-                                                {if $m.description}
+
+                                                {if !empty($m.description)}
                                                     <p class="c-payment-description">{$m.description}</p>
+                                                {/if}
+                                                {if $empty_provider}
+                                                    <span class="c-payment-button js-close-dialog">[s`OK, thanks`]</span>
                                                 {/if}
                                                 {if !empty($m.error)}
                                                     <p class="error"><em>{$m.error}</em></p>
@@ -45,7 +81,7 @@
                                                 {if !empty($m.custom_html)}
                                                     <div class="c-payment-content wa-form"{if $m.id != $payment_id} style="display: none;"{/if}>
                                                         {$m.custom_html}
-                                                        <input class="button black full-width largest" type="submit" value="[`Pay`]">
+                                                        <input class="button black full-width largest js-payment-item-button" type="submit" value="[`Pay`]">
                                                     </div>
                                                 {/if}
                                             </div>
@@ -69,76 +105,235 @@
                     var $wrapper = $("#c-invoice-front-section");
                     const dialogContent = $wrapper.find(".js-payments-wrapper");
                     const $paymentItems = dialogContent.find(".c-payment-item");
+                    const paymentImageUrl = $wrapper.find(".c-payment-section").data("payment-image-url");
+                    const invoiceHash = dialogContent.find('input[name="hash"]').val();
+                    const isMobileClient = !!$wrapper.find(".c-payment-section").data("is-mobile");
+                    const sbpLabel = $wrapper.find(".c-payment-section").data("sbp-label");
+                    let paymentImageLoaded = false;
+                    let paymentImageFailed = false;
+                    let paymentPollingStarted = false;
+                    let paymentStatusCheckUrl = null;
+                    let paymentImageRequest = null;
+                    let preparingPaymentsDialog = false;
 
-                    $wrapper.on("click", ".js-show-payments", () => {
-                        $.waDialog({
-                            $wrapper: dialogContent,
-                            onOpen: ($dialog, dialog) => {
-                                const $form = $dialog.find('form');
-                                const $submitButton = $form.find("[type='submit']");
-                                const $paymentContent = $form.find(".c-payment-content");
-                                let paymentContent = null;
-                                let paymentSection = null;
-                                let selectedPayment = null;
-                                let activePayment = null;
+                    function escapeHtml(value) {
+                        return $("<div>").text(value || "").html();
+                    }
 
-                                $form.on('submit', (e) => {
-                                    e.preventDefault();
+                    function renderPaymentImage($dialog, paymentImage) {
+                        const $item = $dialog.find(".js-payment-image-item");
+                        if (!$item.length || !paymentImage) {
+                            return;
+                        }
 
-                                    $.post(location.href, $dialog.find('form').serialize(), (response) => {
+                        if (paymentImage.qr_payload && isMobileClient) {
+                            $item
+                                .removeClass("c-payment-item-qr")
+                                .addClass("c-payment-item-sbp")
+                                .html(
+                                    '<a href="' + escapeHtml(paymentImage.qr_payload) + '" class="c-button-core">' +
+                                        '<div class="c-payment-image-wrapper">' +
+                                            '<img class="c-payment-image" src="' + escapeHtml(paymentImage.logo) + '">' +
+                                        '</div>' +
+                                        '<span class="c-payment-name">' + escapeHtml(sbpLabel) + '</span>' +
+                                    '</a>'
+                                )
+                                .show();
+                            return;
+                        }
 
-                                        if(typeof response === 'string') {
-                                            paymentSection = $(response).find(".c-payment-section");
+                        const imageSrc = paymentImage.image_data_url || paymentImage.image_url || "";
+                        const description = paymentImage.description ? '<p class="c-payment-description">' + escapeHtml(paymentImage.description) + '</p>' : "";
+                        $item
+                            .removeClass("c-payment-item-sbp")
+                            .addClass("c-payment-item-qr")
+                            .html(
+                                '<div class="c-payment-item-inner">' +
+                                    '<div class="c-payment-header">' +
+                                        '<div class="c-payment-image-wrapper">' +
+                                            '<img class="c-payment-image" src="' + escapeHtml(imageSrc) + '" alt="">' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="c-payment-body">' +
+                                        description +
+                                    '</div>' +
+                                '</div>'
+                            )
+                            .show();
+                    }
 
-                                            if(paymentSection.length) {
-                                                if(paymentContent.length) {
-                                                    paymentContent.hide();
+                    function startStatusPolling() {
+                        if (paymentPollingStarted || !paymentStatusCheckUrl || !invoiceHash) {
+                            return;
+                        }
+                        paymentPollingStarted = true;
+                        const PERIOD = 9000;
+
+                        (function schedule() {
+                            setTimeout(function() {
+                                $.post(paymentStatusCheckUrl, { hash: invoiceHash }, function(r) {
+                                    if (r && r.is_paid) {
+                                        window.location.reload();
+                                    }
+                                }).always(function() {
+                                    schedule();
+                                });
+                            }, PERIOD);
+                        }());
+                    }
+
+                    function ensurePaymentImage($dialog, dialog) {
+                    {if $has_pay_plugin}
+                        if (paymentImageLoaded) {
+                            startStatusPolling();
+                            return $.Deferred().resolve().promise();
+                        }
+                        if (!invoiceHash || !paymentImageUrl || paymentImageFailed) {
+                            return $.Deferred().resolve().promise();
+                        }
+
+                        if (paymentImageRequest) {
+                            return paymentImageRequest;
+                        }
+
+                        paymentImageRequest = $.post(paymentImageUrl, { hash: invoiceHash }, function(response) {
+                            if (!response || response.error || !response.payment_image) {
+                                paymentImageFailed = true;
+                                return;
+                            }
+                            renderPaymentImage($dialog, response.payment_image);
+                            paymentImageLoaded = true;
+                            paymentStatusCheckUrl = response.status_check_url || null;
+                            startStatusPolling();
+                            if (dialog && typeof dialog.resize === "function") {
+                                dialog.resize();
+                            }
+                        }).always(function() {
+                            paymentImageRequest = null;
+                        });
+
+                        return paymentImageRequest;
+                    {else}
+                        return $.Deferred().resolve().promise();
+                    {/if}
+                    }
+
+                    function setShowPaymentsLoading($button, isLoading) {
+                        const $spinner = $wrapper.find(".js-show-payments-spinner");
+                        $button.prop("disabled", isLoading);
+                        $spinner.toggle(!!isLoading);
+                    }
+
+                    $wrapper.on("click", ".js-show-payments", function(e) {
+                        e.preventDefault();
+
+                        if (preparingPaymentsDialog) {
+                            return;
+                        }
+                        preparingPaymentsDialog = true;
+
+                        const $button = $(this);
+                        setShowPaymentsLoading($button, true);
+
+                        ensurePaymentImage(dialogContent).done(() => {
+                            $.waDialog({
+                                $wrapper: dialogContent,
+                                onOpen: ($dialog, dialog) => {
+                                    setShowPaymentsLoading($button, false);
+                                    preparingPaymentsDialog = false;
+                                    ensurePaymentImage($dialog, dialog);
+                                    const $form = $dialog.find('form.js-main-payment-form');
+                                    const $submitButton = $form.find("[type='submit']");
+                                    const $paymentContent = $form.find(".c-payment-content");
+                                    let paymentContent = null;
+                                    let paymentSection = null;
+                                    let selectedPayment = null;
+                                    let activePaymentId = null;
+
+                                    $form.on('submit', (e) => {
+                                        e.preventDefault();
+
+                                        $.post(location.href, $dialog.find('form').serialize(), (response) => {
+
+                                            if (typeof response === 'string') {
+                                                paymentSection = $(response).find(".c-payment-section");
+
+                                                if (paymentSection.length) {
+                                                    if (paymentContent.length) {
+                                                        paymentContent.hide();
+                                                    }
+
+                                                    paymentSection.find('[type="submit"]').addClass("button black full-width text-ellipsis largest js-payment-item-button");
+                                                    selectedPayment.append(paymentSection);
+
+                                                    paymentContent = null;
+                                                } else {
+                                                    dialog.close();
+                                                    return;
                                                 }
-
-                                                paymentSection.find('[type="submit"]').addClass("button black full-width text-ellipsis largest");
-                                                selectedPayment.append(paymentSection);
-                                                
-                                                paymentContent = null;
                                             }
+
+                                            dialog.resize();
+                                        });
+                                    });
+
+                                    $form.find('.c-payment-item').on('click', function(e) {
+                                        const $payment_radio = $(this).find('.c-payment-input');
+                                        if (!$payment_radio || $payment_radio.length == 0) {
+                                            return;
+                                        }
+
+                                        const $target = $(e.target);
+                                        if ($target.hasClass("js-payment-item-button")) {
+                                            const $local_form = $target.closest("form").not(".js-main-payment-form");
+                                            if ($local_form.length > 0) {
+                                                return;
+                                            }
+                                        }
+                                        
+                                        const selected_payment_id = $payment_radio.val();
+                                        // Prevent double clicks
+                                        if (activePaymentId == selected_payment_id) {
+                                            return;
+                                        }
+                                        activePaymentId = selected_payment_id;
+
+                                        // Allow repeated clicks after 5 sec
+                                        setTimeout(() => {
+                                            activePaymentId = null;
+                                        }, 5000);
+
+                                        e.preventDefault();
+
+                                        $payment_radio.prop("checked", true);
+                                        selectedPayment = $(this);
+                                        paymentContent = selectedPayment.find(".c-payment-content");
+                                        $paymentContent.hide();
+
+                                        if(paymentSection) {
+                                            paymentSection.remove();
+                                            paymentSection = null;
+                                        }
+
+                                        if (paymentContent.length) {
+                                            paymentContent.show();
+                                        }else{
+                                            $form.trigger("submit");
                                         }
 
                                         dialog.resize();
                                     });
-                                });
 
-                                $form.on('change', '[name="payment_id"]', function(e) {
-                                    selectedPayment = $(this).closest(".c-payment-item");
-
-                                    // Проверяем флаг, чтобы предотвратить повторные клики
-                                    if (activePayment == selectedPayment) {
-                                        return;
-                                    }
-
-                                    activePayment = selectedPayment;
-
-                                    paymentContent = selectedPayment.find(".c-payment-content");
-                                    $paymentContent.hide();
-
-                                    if(paymentSection) {
-                                        paymentSection.remove();
-                                        paymentSection = null;
-                                    }
-
-                                    if (paymentContent.length) {
-                                        paymentContent.show();
-                                    }else{
-                                        $form.trigger("submit");
-                                    }
-
-                                    dialog.resize();
-                                });
-
-                                setTimeout(() => $paymentItems.each((i, item) => $(item).addClass("animated")), $paymentItems.length * 200);
-                            },
-                            onClose: () => {
-                                $paymentItems.each((i, item) => $(item).removeClass("animated"));
-                            }
-                        })
+                                    setTimeout(() => $paymentItems.each((i, item) => $(item).addClass("animated")), $paymentItems.length * 200);
+                                },
+                                onClose: () => {
+                                    $paymentItems.each((i, item) => $(item).removeClass("animated"));
+                                }
+                            });
+                        }).fail(() => {
+                            setShowPaymentsLoading($button, false);
+                            preparingPaymentsDialog = false;
+                        });
                     });
                 })(jQuery);
 
@@ -682,10 +877,9 @@
 
                 .dialog .c-payment-options::-webkit-scrollbar { display: none; }
                 .dialog .c-payment-options { margin: 0; padding: 0; list-style: none; overflow: hidden; max-height: 80vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
-                .dialog .c-payment-options .c-payment-item:not(.c-payment-item-invoice) {
+                .dialog .c-payment-options .c-payment-item:not(.c-payment-item-invoice):not(.divider) {
                     background: #f8f9fa;
                     border: 1px solid #e9ecef;
-                    border-radius: 8px;
                     margin-bottom: 15px;
                     overflow: hidden;
                     opacity: 0;
@@ -702,9 +896,11 @@
                         animation: none;
                     }
                 }
-                .dialog .c-payment-options li { padding: 1rem; border-radius: 12px; margin-bottom: .75rem; background-color: var(--background-color-blank); transition: transform 200ms ease-in-out; }
-                .dialog .c-payment-options li:last-child { margin-bottom: 0;}
-                .dialog .c-payment-options .c-payment-item-invoice { 
+                .dialog .c-payment-options .c-payment-item.lighter-bg { background-color: #f3f3f3 !important; }
+                .dialog .c-payment-options li:not(.divider) { padding: 1rem; border-radius: 1rem; margin-bottom: .75rem; background-color: var(--background-color-blank); transition: transform 200ms ease-in-out; }
+                .dialog .c-payment-options li.divider { font-size: 1.2rem; color: #fff; font-weight: bold; text-align: center; padding: .25rem; margin-bottom: 1rem; }
+                .dialog .c-payment-options li:last-child { margin-bottom: 0; }
+                .dialog .c-payment-options .c-payment-item-invoice {
                     .number {
                         font-size: 16px;
                         color: #777;
@@ -716,23 +912,25 @@
                         font-weight: 600;
                         text-align: center;
                         margin: 0;
+                        color: #000;
                     }
                  }
                 .dialog .c-payment-options li label { display: flex; gap: 1rem; cursor: pointer; }
                 .dialog .c-payment-options li label .c-payment-input { display: none; }
-                .dialog .c-payment-options li:has(.c-payment-input:checked) { }
                 .dialog .c-payment-options li label .c-payment-header { flex: 1 0 20%; }
-                .dialog .c-payment-options li label .c-payment-header .c-payment-image-wrapper { border-radius: 6px; border: 1px solid rgba(0, 0, 0, 0.15); padding: 5px; box-sizing: border-box; height: 32px; overflow: clip; }
+                .dialog .c-payment-options li .c-payment-header .c-payment-image-wrapper { border-radius: 6px; border: 1px solid rgba(0, 0, 0, 0.15); padding: 5px; box-sizing: border-box; height: 32px; overflow: clip; }
                 .dialog .c-payment-options li label .c-payment-header img { max-width: 100%; object-fit: scale-down; vertical-align: middle; }
                 .dialog .c-payment-options li label .c-payment-body { flex: 1 1 80%; text-align: left; }
                 .dialog .c-payment-options li label .c-payment-body p:last-of-type { margin-bottom: 0; }
-                .dialog .c-payment-options li label .c-payment-body .c-payment-name { margin-bottom: .25rem; font-weight: 500; font-size: 18px; }
-                .dialog .c-payment-options li label .c-payment-body .c-payment-description { margin-top: 0; font-size: 13px; color: #888; }
+                .dialog .c-payment-options li label .c-payment-body .c-payment-name { margin-bottom: .25rem; font-weight: 500; font-size: 18px; color: #000; }
+                .dialog .c-payment-options li .c-payment-body .c-payment-description { margin-top: 0; font-size: 13px; color: #888; }
                 .dialog .c-payment-options li .error { color: red; font-style: italic; font-size: 80%; }
                 .dialog .c-payment-options li label .c-payment-body .c-payment-content { margin-top: 1rem; font-size: 14px; }
                 .dialog .c-payment-options li label .c-payment-body .c-payment-content .wa-field .wa-name { margin-bottom: .5rem; }
                 .dialog .c-payment-options li label .c-payment-body .c-payment-content .wa-field { margin-bottom: 1rem; }
                 .dialog .c-payment-options li label .c-payment-body .c-payment-content .wa-field input { border: 1px solid #e6e6e6; border-radius: 4px; padding: .5rem; width: 100%; }
+                .dialog .c-payment-options li label .c-payment-body.is-pay-plugin { text-align: center; }
+                .dialog .c-payment-options li label .c-payment-body.is-pay-plugin .c-payment-icon { display: inline-block; height: 10px; width: auto; margin-left: 0.125rem; }
                 .dialog .c-payment-section {
                     margin-top: 1rem;
                     font-size: 14px;
@@ -740,6 +938,72 @@
                 .dialog .c-payment-section:not(:has([type="submit"])) {
                     color: red;
                     font-size: 14px;
+                }
+                .dialog .c-payment-options li.c-payment-item .c-payment-body .c-payment-button {
+                    background-color: #dedede;
+                    padding: 9px 0px;
+                    border-radius: 10px;
+                    margin-top: 15px;
+                    width: 100%;
+                    display: block;
+                    color: #333;
+                }
+               .dialog .c-payment-options li.c-payment-item:hover .c-payment-body .c-payment-button {
+                    background-color: #d3d3d3;
+                    transition: 0.2s;
+                }
+
+                .dialog .c-payment-options .c-payment-item.c-payment-item-qr .c-payment-item-inner {
+                    display: flex;
+                    gap: 1rem;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                }
+                .dialog .c-payment-options .c-payment-item.c-payment-item-qr .c-payment-item-inner .c-payment-image-wrapper {
+                    height: auto;
+                }
+                .dialog .c-payment-options .c-payment-item.c-payment-item-qr .c-payment-item-inner .c-payment-image-wrapper img {
+                    max-width: 100%;
+                    max-height: 210px;
+                    object-fit: scale-down;
+                    display: block;
+                    margin: 0 auto;
+                }
+                .dialog .c-payment-options .c-payment-item.c-payment-item-qr .c-payment-item-inner .c-payment-body {
+                    flex: 1 0 100%;
+                    text-align: center;
+                    line-height: 1.4;
+                }
+
+                .dialog .c-payment-options .c-payment-item.c-payment-item-sbp .c-button-core {
+                    background-color: #1A1442;
+                    width: 100%;
+                    height: auto;
+                    max-width: 100%;
+                    padding: 1.25rem 1.25rem 1rem;
+                    border-radius: 1rem;
+                    text-align: center;
+                    display: block;
+                    line-height: 1.4;
+                }
+                .dialog .c-payment-options .c-payment-item:not(.c-payment-item-invoice):not(.divider).c-payment-item-sbp {
+                    padding: 0;
+                    background: none;
+                    border: none;
+                    display: flex;
+                }
+                .dialog .c-payment-options .c-payment-item.c-payment-item-sbp img {
+                    width: 2.25rem;
+                    height: 2.25rem;
+                    margin: 0 auto 1rem;
+                    display: block;
+                }
+                .dialog .c-payment-options .c-payment-item.c-payment-item-sbp .c-payment-name {
+                    font-size: 1.06125rem;
+                    color: #fff;
+                    font-weight: bold;
                 }
 
                 @media screen and (max-width: 760px) { /* mobile */

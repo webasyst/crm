@@ -129,11 +129,12 @@ var CRMInvoices = ( function($) {
             const $link = $(this),
                   content_uri = ( $link.hasClass("js-disable-router") ? $link.attr("href") : false );
 
-            const isMobile = () => that.$content.is(':hidden');
-
-            if (!content_uri) return true;
+            const isMac = navigator.platform.startsWith('Mac');
+            const isPrevent = (isMac && event.metaKey) || event.ctrlKey || event.shiftKey;
+            if (!content_uri || isPrevent) return true;
 
             event.preventDefault();
+            const isMobile = () => that.$content.is(':hidden');
             if (is_enabled) {
 
                 if (need_confirm) {

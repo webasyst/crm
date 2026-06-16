@@ -702,8 +702,8 @@
                                                 <a class="js-redirect-call" href="javascript:void(0);" title="[`Redirect call`]"><i class="fas fa-exchange-alt text-blue"></i> [`Redirect call`]</a>
                                             </div>
                                             {/if}
-                                            <div class="c-column-actions nowrap js-delete-call">
-                                                {if !empty($_is_admin)}
+                                            {if !empty($_is_admin)}
+                                                <div class="c-column-actions nowrap js-delete-call">
                                                     <div class="c-actions-wrapper">
                                                         {$_status_name = ""}{if !empty($_state)}{$_status_name = "<span style='color: {$_state.color|escape|default:"inherit"};'>{sprintf_wp($_state.name)|escape}</span>"}{/if}
                                                         {$_direction = "[`to`]"}{if $_call.direction === "IN"}{$_direction = "[`from`]"}{/if}
@@ -713,8 +713,8 @@
 
                                                         <a class="c-delete-call" href="javascript:void(0);" data-title="{$_delete_confirm_title|escape}" title="[`delete`]"><i class="fas fa-trash text-red delete"></i> [`Delete`]</a>
                                                     </div>
-                                                {/if}
-                                            </div>
+                                                </div>
+                                            {/if}
                                         </div>
                                     </div>
                                 </div>

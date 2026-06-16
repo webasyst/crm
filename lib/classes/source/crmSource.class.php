@@ -178,6 +178,19 @@ abstract class crmSource
     }
 
     /**
+     * Returns Font Awesome icon name from fas scope and color
+     * as array with keys icon_fa & icon_color
+     * @return array
+     */
+    public function getFontAwesomeIcon()
+    {
+        return [
+            'icon_fa' => null,
+            'icon_color' => null,
+        ];
+    }
+
+    /**
      * @return string
      */
     public function getType()

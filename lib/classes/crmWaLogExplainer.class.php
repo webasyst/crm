@@ -24,7 +24,7 @@ class crmWaLogExplainer
         foreach ($log_items as &$log_item) {
             if ($this->isContactDeleteLogItem($log_item)) {
                 $this->explainDeleteContactLogItem($log_item);
-            } elseif (in_array($log_item['action'], ['contact_export', 'deal_export', 'contacts_delete', 'deals_delete'])) {
+            } elseif (in_array($log_item['action'], ['contact_export', 'deal_export', 'contacts_delete', 'deals_delete', 'deals_step', 'deals_won', 'deals_lost', 'deals_transfer'])) {
                 $log_item['action_name'] = sprintf($log_item['action_name'], ifset($log_item, 'params', ''));
                 if (!empty($log_item['params']) && wa_is_int($log_item['params']) && !empty($this->log_actions[$log_item['action']]['plural'])) {
                     $plural = $this->log_actions[$log_item['action']]['plural'];
@@ -41,6 +41,7 @@ class crmWaLogExplainer
         unset($log_item);
 
         $this->explainLogItemsWithSubjectContactIds($log_items);
+        $this->explainLogItemsWithDealIds($log_items);
 
         if ($app_info['id'] != 'crm') {
             wa($app_info['id'], true);
@@ -130,6 +131,75 @@ class crmWaLogExplainer
                 $log_item['params_html'] = $subject_contact_str;
             }
 
+        }
+        unset($log_item);
+    }
+
+    protected function explainLogItemsWithDealIds(&$log_items)
+    {
+        $deal_ids = array();
+
+        foreach ($log_items as $log_item) {
+            $is_crm = isset($log_item['app_id']) && $log_item['app_id'] === 'crm';
+            $params = ifset($log_item, 'params', null);
+            if (!$is_crm || !is_array($params) || empty($params['deal_id'])) {
+                continue;
+            }
+            $deal_id = (int) $params['deal_id'];
+            if (wa_is_int($deal_id) && $deal_id > 0) {
+                $deal_ids[] = $deal_id;
+            }
+        }
+
+        if (!$deal_ids) {
+            return;
+        }
+
+        $deal_ids = array_unique($deal_ids);
+        $deals = (new crmDealModel())->getById($deal_ids);
+        if (!is_array($deals)) {
+            $deals = array();
+        } elseif (isset($deals['id'])) {
+            $deals = array($deals['id'] => $deals);
+        }
+
+        $crm_app_url = wa()->getAppUrl('crm');
+
+        foreach ($log_items as &$log_item) {
+            $is_crm = isset($log_item['app_id']) && $log_item['app_id'] === 'crm';
+            $params = ifset($log_item, 'params', null);
+            if (!$is_crm || !is_array($params) || empty($params['deal_id'])) {
+                continue;
+            }
+
+            $deal_id = (int) $params['deal_id'];
+            if (!wa_is_int($deal_id) || $deal_id <= 0) {
+                continue;
+            }
+
+            $deal = ifset($deals, $deal_id, null);
+            if (!$deal) {
+                $deal_link = null;
+                $deal_name = sprintf(_w('“%s”'), _w('Deleted deal') . ' ' . $deal_id);
+            } else {
+                $deal_link = "{$crm_app_url}deal/{$deal_id}";
+                $deal_name = trim(ifset($deal, 'name', ''));
+                if (strlen($deal_name) <= 0) {
+                    $deal_name = '(' . _w("no name") . ')';
+                }
+            }
+
+            if ($deal_link) {
+                $deal_str = sprintf("<a href='%s'>%s</a>", $deal_link, htmlspecialchars($deal_name));
+            } else {
+                $deal_str = htmlspecialchars($deal_name);
+            }
+
+            if (strlen(ifset($log_item, 'params_html', '')) > 0) {
+                $log_item['params_html'] = $log_item['params_html'] . ', ' . $deal_str;
+            } else {
+                $log_item['params_html'] = $deal_str;
+            }
         }
         unset($log_item);
     }

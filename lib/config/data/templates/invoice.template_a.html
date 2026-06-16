@@ -143,7 +143,7 @@
                             {$_name = $invoice.tax_name}
                         {/if}
 
-                        <span>{if !empty($_type)}{$_type}&nbsp;{/if}{$_name|escape}&nbsp;{$invoice.tax_percent|escape}%</span>
+                        <span>{if !empty($_type)}{$_type}&nbsp;{/if}{$_name|escape}&nbsp;{$invoice.tax_percent|floatval|wa_format_number:false}%</span>
                     </td>
                     <td class="c-total right">
                         <span>{$invoice.tax_amount|wa_format}</span>

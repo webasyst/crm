@@ -38,3 +38,5 @@
 button.flexbox { display: flex; }
 
 #wa-app > .content { min-width: 0; flex-basis: auto !important; }
+
+.leading-13 { line-height: 1.3 !important; }

@@ -4,28 +4,13 @@ class crmDealStagesModel extends crmModel
 {
     protected $table = 'crm_deal_stages';
 
-    public function open($deal_id, $stage_id, $old_stage_id = null)
+    public function open($deal_id, $stage_id)
     {
-        $last = null;
-        if ($old_stage_id) {
-            $fsm = new crmFunnelStageModel();
-            $stages = $fsm->select('*')->where('id IN('.intval($stage_id).','.intval($old_stage_id).')')->fetchAll('id');
-            if ($stages[$old_stage_id]['number'] > $stages[$stage_id]['number']) {
-                $last = $this->select('*')->where('deal_id='.intval($deal_id).' AND stage_id='.intval($stage_id))->order('id DESC')->limit(1)->fetchAssoc();
-            }
-        }
-        if (!$last) {
-            $this->insert(array(
-                'deal_id'     => $deal_id,
-                'stage_id'    => $stage_id,
-                'in_datetime' => date('Y-m-d H:i:s'),
-            ));
-        } else {
-            $this->updateById($last['id'], array(
-                'out_datetime' => null,
-                'minutes' => null,
-            ));
-        }
+        $this->insert(array(
+            'deal_id'     => $deal_id,
+            'stage_id'    => $stage_id,
+            'in_datetime' => date('Y-m-d H:i:s'),
+        ));
     }
 
     public function close($deal_id, $stage_id)
@@ -37,6 +22,83 @@ class crmDealStagesModel extends crmModel
             $minutes = (time() - strtotime($stage['in_datetime'])) / 60;
             $this->updateById($stage['id'], array('out_datetime' => date('Y-m-d H:i:s'), 'minutes' => $minutes));
         }
+    }
+
+    /**
+     * Same as open() for many deals: batched stage lookups, one grouped SELECT for reopen targets,
+     * one UPDATE to reopen rows, one multi-insert for new periods.
+     *
+     * @param array $pairs List of arrays with keys deal_id, stage_id (new)
+     */
+    public function openBulk(array $pairs)
+    {
+        if (empty($pairs)) {
+            return;
+        }
+        $insert_rows = [];
+        $now = date('Y-m-d H:i:s');
+        foreach ($pairs as $item) {
+            $deal_id = (int) ifset($item, 'deal_id', 0);
+            $stage_id = (int) ifset($item, 'stage_id', 0);
+            if ($deal_id < 1 || $stage_id < 1) {
+                continue;
+            }
+            $insert_rows[] = [
+                'deal_id'     => $deal_id,
+                'stage_id'    => $stage_id,
+                'in_datetime' => $now,
+            ];
+        }
+        if (empty($insert_rows)) {
+            return;
+        }
+
+        $this->multipleInsert($insert_rows);
+    }
+
+    /**
+     * Same as close() for many deals: one SELECT of open rows, one UPDATE with CASE id for minutes.
+     *
+     * @param array $pairs List of arrays with keys deal_id, stage_id (int)
+     */
+    public function closeBulk(array $pairs)
+    {
+        if (!$pairs) {
+            return;
+        }
+        $conditions = [];
+        foreach ($pairs as $p) {
+            $deal_id = (int) ifset($p, 'deal_id', 0);
+            $stage_id = (int) ifset($p, 'stage_id', 0);
+            if ($deal_id < 1 || $stage_id < 1) {
+                continue;
+            }
+            $conditions[] = '(deal_id='.$deal_id.' AND stage_id='.$stage_id.')';
+        }
+        if (!$conditions) {
+            return;
+        }
+        $where = 'out_datetime IS NULL AND ('.implode(' OR ', $conditions).')';
+        $rows = $this->select('*')->where($where)->fetchAll();
+        if (!$rows) {
+            return;
+        }
+        $now = date('Y-m-d H:i:s');
+        $ts = time();
+        $case_parts = [];
+        $ids = [];
+        foreach ($rows as $row) {
+            $ids[] = (int) $row['id'];
+            $minutes = ($ts - strtotime($row['in_datetime'])) / 60;
+            $case_parts[] = 'WHEN '.(int) $row['id'].' THEN '.(is_finite($minutes) ? (float) $minutes : 0);
+        }
+        if (!$ids) {
+            return;
+        }
+        $this->exec(
+            'UPDATE '.$this->getTableName().' SET out_datetime = s:now, minutes = CASE id '.implode(' ', $case_parts).' END WHERE id IN ('.implode(',', $ids).')',
+            ['now' => $now]
+        );
     }
 
     public function getChartMin($chart_params, $stages, $threshold = 1)

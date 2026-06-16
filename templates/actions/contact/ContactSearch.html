@@ -21,6 +21,7 @@
 <link href="{$wa_app_static_url}css/crm2.css?v={$wa->version()}" rel="stylesheet">
 
 <script src="{$wa_url}wa-content/js/jquery/jquery-3.6.0.min.js"></script>
+<script src="{$wa_url}wa-content/js/jquery-wa/wa.js?v={$wa->version()}"></script>
 <script type="text/javascript" src="{$wa_app_static_url}js/jquery/jquery-ui.min.js?v={$wa->version()}"></script>
 <script type="text/javascript" src="{$wa_url}wa-content/js/jquery-plugins/jquery.store.js?v={$wa->version()}"></script>
 <script type="text/javascript" src="{$wa_app_static_url}js/crm.js?v={$wa->version()}"></script>
@@ -56,14 +57,14 @@
                             {foreach $config as $section_id => $cnfg}
                                 <div class="block not-padded collapsable-wrapper custom-pt-8" data-id="{$section_id}">
                                     <div class="collapse-header collapse-handler cursor-pointer {if empty($sidebar_map[$section_id])}close{else}open{/if}">
-                                        <span class="custom-pr-4 ">{_wp($cnfg.name)|escape}</span>
+                                        <span class="custom-pr-4 ">{_wp($cnfg.name|default:$section_id)|escape}</span>
                                         <i class="fas fa-caret-right"></i>
                                     </div>
                                     <ul class="menu collapsable" {if empty($sidebar_map[$section_id])}style="display:none;"{/if}>
                                         {foreach $cnfg.items as $id => $item}
                                             {if empty($item.parent)}
                                                 <li data-id="{$section_id}.{$id}" class="add-condition-item" {if !empty($item.multiple)}data-multiple="1"{/if}>
-                                                    <a href="javascript:void(0);">{_wp($item.name)|escape}</a>
+                                                    <a href="javascript:void(0);">{_wp($item.name|default:$id)|escape}</a>
                                                 </li>
                                             {/if}
                                         {/foreach}
@@ -138,8 +139,16 @@
 
             var container = $('#c-search-container');
             var form = $('#c-search-container').find('form');
+            var current_segment_id = {if !empty($segment.id)}{$segment.id|intval}{else}0{/if};
             var getActionUrl = function (action, params) {
-                return $.crm.app_url + '?module=contactSearch&action=' + action + (params ? '&' + params : '');
+                var extra = [];
+                if (params) {
+                    extra.push(params);
+                }
+                if (current_segment_id > 0) {
+                    extra.push('segment_id=' + current_segment_id);
+                }
+                return $.crm.app_url + '?module=contactSearch&action=' + action + (extra.length ? '&' + extra.join('&') : '');
             };
             var getResultUrl = function (hash) {
                 return $.crm.app_url + 'contact/search/result/' + hash;
@@ -149,11 +158,7 @@
                 var wrapper = $(this).closest('.collapsable-wrapper');
                 wrapper.find('.collapsable :input').attr('disabled', true);
                 wrapper.find('.hide-when-expand :input').attr('disabled', false);
-                var block = $(this).closest('.js-field');
-                block.find('.subfield :input').attr('disabled', true);
-                if (block.data('id') === 'contact_info.name') {
-                    block.find('.subfield[data-id$=firstname] input').focus();
-                }
+                wrapper.find('.hide-when-expand :input').focus();
                 $.get(getActionUrl('condition'), {
                     op: 'collapse_section',
                     id: wrapper.data('id') }
@@ -164,8 +169,12 @@
                 wrapper.find('.collapsable :input').attr('disabled', false);
                 wrapper.find('.hide-when-expand :input').attr('disabled', true);
                 var block = $(this).closest('.js-field');
-                block.find('input:first').focus();
-                block.find('.subfield :input').attr('disabled', false);
+                if (block.data('id') === 'contact_info.name') {
+                    block.find('.subfield[data-id$=firstname] input').focus();
+                } else {
+                    block.find('.collapsable').find('input:first').focus();
+                }
+                
                 $.get(getActionUrl('condition'), { op: 'expand_section', id: wrapper.data('id') });
             };
             var collapse = function(h) {
@@ -400,6 +409,10 @@
 
                 return false;
             });
+            $('.add-condition-item', container).on('after_load_condition', function(e, id, item) {
+                initCategoryMode(item);
+                initCategorySetCollapsibles(item);
+            });
             form.find('input[type=text]').keydown(function(e) {
                 if (e.keyCode === 13) {
                     $(this).trigger('enter');
@@ -415,9 +428,238 @@
             });
 
             var formSearchHash = function (ignore_encoding) {
+                form.find('.js-category-set').each(function () {
+                    var block = $(this);
+                    block.find('.js-category-set-rows').each(function () {
+                        var rows = $(this);
+                        var role = rows.data('role');
+                        var values = rows.find('.js-category-set-row').map(function () {
+                            var row = $(this);
+                            var selected = (row.find('.js-category-set-row-select').val() || '').trim();
+                            var hidden = (row.find('.custom-combobox input[type="hidden"]').val() || '').trim();
+                            var val = hidden || selected;
+                            if (/^\d+$/.test(val)) {
+                                return val;
+                            }
+                            return '';
+                        }).toArray().filter(function (v) {
+                            return !!v;
+                        });
+                        values = $.grep(values, function (v, idx) {
+                            return $.inArray(v, values) === idx;
+                        });
+                        block.find('input[name="' + block.data('id') + '.' + role + '"]').val(values.join(','));
+                    });
+                    // Remove combobox internal row params from hash payload.
+                    block.find('.js-category-set-row .custom-combobox input[type="hidden"]').attr('name', '');
+                });
                 $.crm.search.indexBlocks();
                 return $.crm.search.serialize(form, undefined, undefined, ignore_encoding);
             };
+
+            var initCategorySetRowCombobox = function (scope) {
+                var target = scope || container;
+                target.find('.js-category-set-row-select.combobox').combobox({
+                    url: getActionUrl('values')
+                });
+            };
+
+            var getCategorySetRowName = function (rows) {
+                var role = rows.data('role');
+                var block = rows.closest('.js-category-set');
+                return block.data('id') + '.' + role + '_row';
+            };
+
+            var getLegacyCategoryId = function (block) {
+                var legacy = block.find('.js-legacy-category-pane');
+                var hidden = (legacy.find('.custom-combobox input[type="hidden"]').first().val() || '').trim();
+                if (/^\d+$/.test(hidden)) {
+                    return hidden;
+                }
+                return '';
+            };
+
+            var setCategorySetRowValue = function (row, value) {
+                var select = row.find('.js-category-set-row-select').first();
+                if (!select.length) {
+                    return;
+                }
+                select.val(value);
+                var text = select.find('option:selected').text() || '';
+                var wrapper = row.find('.custom-combobox');
+                if (wrapper.length) {
+                    wrapper.find("input[type='hidden']").val(value);
+                    wrapper.find("input[type='search']").val(text);
+                    wrapper.find('.c-label').text(value ? '=' : '');
+                }
+            };
+
+            var ensureIncludeAnyHasLegacy = function (block, legacy_id) {
+                if (!legacy_id) {
+                    return;
+                }
+                var include_rows = block.find('.js-category-set-rows[data-role="include_any"]');
+                var exists = include_rows.find('.js-category-set-row').toArray().some(function (el) {
+                    var row = $(el);
+                    var hidden = (row.find('.custom-combobox input[type="hidden"]').val() || '').trim();
+                    var selected = (row.find('.js-category-set-row-select').val() || '').trim();
+                    return hidden === legacy_id || selected === legacy_id;
+                });
+                if (exists) {
+                    return;
+                }
+                var first_row = include_rows.find('.js-category-set-row:first');
+                if (first_row.length) {
+                    var first_val = (first_row.find('.custom-combobox input[type="hidden"]').val() || first_row.find('.js-category-set-row-select').val() || '').trim();
+                    if (!first_val) {
+                        setCategorySetRowValue(first_row, legacy_id);
+                        return;
+                    }
+                }
+                var add_btn = block.find('.js-category-set-add[data-role="include_any"]').first();
+                if (add_btn.length) {
+                    add_btn.trigger('click');
+                    setCategorySetRowValue(include_rows.find('.js-category-set-row:last'), legacy_id);
+                }
+            };
+
+            var applyCategoryMode = function (block, mode, transform_legacy) {
+                var simple = block.find('.js-category-mode-pane[data-role="simple"]');
+                var advanced = block.find('.js-category-mode-pane[data-role="advanced"]');
+                var is_advanced = mode === 'advanced';
+
+                if (is_advanced && transform_legacy) {
+                    ensureIncludeAnyHasLegacy(block, getLegacyCategoryId(block));
+                    var includeToggle = block.find('.js-category-set-collapse-toggle').first();
+                    var includeRows = block.find('.js-category-set-rows[data-role="include_any"]');
+                    var hasIncludeVal = includeRows.find('.js-category-set-row').toArray().some(function (row) {
+                        var $r = $(row);
+                        var v = ($r.find('.js-category-set-row-select').val() || $r.find('.custom-combobox input[type="hidden"]').val() || '').trim();
+                        return !!v;
+                    });
+                    if (hasIncludeVal && includeToggle.length) {
+                        setCategorySetSectionExpanded(includeToggle, true);
+                    }
+                }
+
+                simple.toggle(!is_advanced);
+                advanced.toggle(is_advanced);
+                simple.find(':input').prop('disabled', is_advanced);
+                advanced.find(':input').prop('disabled', !is_advanced);
+            };
+
+            var initCategoryMode = function (scope) {
+                var target = scope || container;
+                target.find('.js-category-mode-switcher').each(function () {
+                    var switcher = $(this);
+                    var block = switcher.closest('.js-field');
+                    if (!block.length) {
+                        return;
+                    }
+                    var mode = switcher.data('default-mode') || 'simple';
+                    var $switch = switcher.find('.js-category-mode-switch');
+                    var $label = $switch.siblings('label');
+                    if ($switch.length) {
+                        $switch.waSwitch({
+                            ready: function (wa_switch) {
+                                wa_switch.$label = $label;
+                                wa_switch.active_text = $label.data('active-text');
+                                wa_switch.inactive_text = $label.data('inactive-text');
+                                var is_active = !!$switch.find('input:checkbox').prop('checked');
+                                $label.text(is_active ? wa_switch.active_text : wa_switch.inactive_text);
+                            },
+                            change: function (active, wa_switch) {
+                                var from_mode = switcher.data('default-mode') || 'simple';
+                                var next_mode = active ? 'advanced' : 'simple';
+                                if (wa_switch.$label) {
+                                    wa_switch.$label.text(active ? wa_switch.active_text : wa_switch.inactive_text);
+                                }
+                                applyCategoryMode(block, next_mode, from_mode === 'simple' && next_mode === 'advanced');
+                                switcher.data('default-mode', next_mode);
+                            }
+                        });
+                    }
+                    applyCategoryMode(block, mode, false);
+                });
+            };
+
+            var setCategorySetSectionExpanded = function (toggle, expanded) {
+                var body = toggle.next('.js-category-set-collapse-body');
+                var icon = toggle.find('.js-category-set-collapse-icon');
+                if (!body.length) {
+                    return;
+                }
+                if (expanded) {
+                    body.show();
+                    icon.addClass('fa-rotate-90');
+                } else {
+                    body.hide();
+                    icon.removeClass('fa-rotate-90');
+                }
+            };
+
+            var initCategorySetCollapsibles = function (scope) {
+                var target = scope || container;
+                target.find('.js-category-set-collapse-toggle').each(function () {
+                    var toggle = $(this);
+                    var attr = toggle.attr('data-expand-default');
+                    var expanded = (attr === undefined || attr === '') ? true : (attr === '1');
+                    setCategorySetSectionExpanded(toggle, expanded);
+                });
+            };
+
+            container.on('click', '.js-category-set-add', function () {
+                var button = $(this);
+                var role = button.data('role');
+                var rows = button.siblings('.js-category-set-rows[data-role="' + role + '"]');
+                var source = rows.find('.js-category-set-row:first .js-category-set-row-select');
+                if (!source.length) {
+                    return false;
+                }
+                var row = $('<div class="custom-mb-4 js-category-set-row flexbox"></div>');
+                var select = source.clone().val('');
+                select.attr('name', getCategorySetRowName(rows));
+                select.removeData('custom.combobox.inited');
+                row.append(select);
+                row.append('<button class="nobutton circle js-category-set-delete"><i class="fas fa-times"></i></button>');
+                rows.append(row);
+                initCategorySetRowCombobox(row);
+                return false;
+            });
+
+            container.on('click', '.js-category-set-delete', function () {
+                var row = $(this).closest('.js-category-set-row');
+                var rows = row.closest('.js-category-set-rows');
+                var fallback_select = row.find('.js-category-set-row-select:first').clone();
+                row.remove();
+                
+                if (!rows.find('.js-category-set-row').length) {
+                    var source = rows.find('.js-category-set-row-select:first');
+                    var select = source.length ? source.clone() : fallback_select;
+                    if (select.length) {
+                        var empty_row = $('<div class="custom-mb-4 js-category-set-row flexbox"></div>');
+                        select.val('');
+                        select.attr('name', getCategorySetRowName(rows));
+                        select.removeData('custom.combobox.inited');
+                        empty_row.append(select);
+                        empty_row.append('<button class="nobutton circle js-category-set-delete"><i class="fas fa-times"></i></button>');
+                        rows.append(empty_row);
+                        initCategorySetRowCombobox(empty_row);
+                    }
+                }
+                
+                return false;
+            });
+
+            container.on('click', '.js-category-set-collapse-toggle', function () {
+                var toggle = $(this);
+                var body = toggle.next('.js-category-set-collapse-body');
+                setCategorySetSectionExpanded(toggle, !body.is(':visible'));
+                return false;
+            });
+
+            initCategoryMode(container);
+            initCategorySetCollapsibles(container);
 
             form.submit(function(e) {
                 e.preventDefault();
@@ -448,7 +690,7 @@
                 {/if}
             });
 
-            container.on('click', '.killer', function() {
+            container.on('click', '.js-killer', function() {
                 var item = $(this).closest('div.js-field');
                 var id = item.data('id');
                 item.remove();

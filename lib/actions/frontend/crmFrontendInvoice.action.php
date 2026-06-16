@@ -12,9 +12,6 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
             throw new waException(_w('Invoice not found'), 404);
         }
         $im = new crmInvoiceModel();
-        $iim = new crmInvoiceItemsModel();
-        $ipm = new crmInvoiceParamsModel();
-        $cm = new crmCompanyModel();
 
         $id = intval(substr($hash, 16, -16));
         if (!$id) {
@@ -40,9 +37,8 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
         if (!in_array($this->invoice['state_id'], $available_states)) {
             throw new waRightsException();
         }
-        $this->invoice['items'] = $iim->getByField('invoice_id', $id, true);
+        $this->invoice['items'] = (new crmInvoiceItemsModel)->getItems($id);
         $this->invoice['contact'] = null;
-        $this->invoice['params'] = $ipm->getParams($id);
         $template = null;
         $style_version = 2;
         if (!empty($this->invoice['company']['template_id'])) {
@@ -123,6 +119,14 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
                 $plugin_info = $plugin->info($m['plugin']);
                 $methods[$key]['icon'] = $plugin_info['icon'];
 
+                // set hint for id:pay
+                if ($plugin->getId() === 'pay' && $plugin->getSettings('provider') === 'empty') {
+                    $methods[$key]['is_empty_provider'] = true;
+                    $methods[$key]['description'] = '';
+                    $text = $plugin->getSettings('text');
+                    if ($text) $methods[$key]['name'] = $text;
+                }
+
                 $custom_fields = $this->getCustomFields($method_id, $plugin);
 
                 $custom_html = '';
@@ -152,8 +156,25 @@ class crmFrontendInvoiceAction extends crmFrontendViewAction
             }
         }
 
-        $this->view->assign('payment_methods', $allowed_methods);
-        $this->view->assign('payment_id', $selected);
+        uasort($allowed_methods, function($a, $b) {
+            return (int)($b['plugin'] == 'pay') - (int)($a['plugin'] == 'pay');
+        });
+
+        if ($this->invoice['state_id'] == crmInvoiceModel::STATE_PENDING && (empty(waRequest::get('result')) || waRequest::get('result') == 'success')) {
+            $params = ['state_polling' => null];
+            if (empty(waRequest::get('result'))) {
+                $params['last_open_ts'] = time();
+            } 
+            (new crmInvoiceParamsModel)->set($this->invoice['id'], $params, false);
+        }
+
+        $this->view->assign([
+            'payment_methods'  => $allowed_methods,
+            'payment_id'       => $selected,
+            'payment_image'    => null,
+            'status_check_url' => wa()->getRouteUrl('crm/frontend/invoicePaymentStatus', ['hash' => waRequest::param('hash')]),
+            'payment_image_url' => wa()->getRouteUrl('crm/frontend/invoicePaymentImage', ['hash' => waRequest::param('hash')]),
+        ]);
     }
 
     protected function getCustomFields($id, waPayment $plugin)

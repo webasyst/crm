@@ -18,10 +18,12 @@ var CRMMessageConversationPage = ( function($) {
         that.check_interval = options["check_interval"];
         that.$replySection = that.$wrapper.find(".c-reply-section");
         that.iframe = options["iframe"];
+        that.noemail = options["noemail"];
         that.old_message_id = options["old_message_id"];
         that.$dropdown_name = that.$wrapper.find("#dropdown-c-name");
         that.short_link = options["short_link"];
         that.do_confirm_verification = options["do_confirm_verification"];
+        that.app_url = options['app_url'] || ($ && $.crm && $.crm.app_url);
         // DYNAMIC VARS
         // INIT
         that.initClass();
@@ -45,6 +47,61 @@ var CRMMessageConversationPage = ( function($) {
             }
         }
     }
+
+    CRMMessageConversationPage.prototype.initLazyVideos = function() {
+        var that = this;
+
+        that.$wrapper.on("click", ".js-lazy-video-trigger, video.js-lazy-video", function(event) {
+            var $target = $(event.currentTarget),
+                $video_wrapper = $target.closest(".js-lazy-video-wrapper"),
+                video = $video_wrapper.find("video.js-lazy-video").get(0);
+
+            if (!video) {
+                return;
+            }
+
+            if ($target.is(".js-lazy-video-trigger")) {
+                event.preventDefault();
+            }
+
+            loadLazyVideo(video, $video_wrapper);
+        });
+
+        function loadLazyVideo(video, $video_wrapper) {
+            var $video = $(video),
+                src = $video.data("src");
+
+            if (!src) {
+                return;
+            }
+
+            if ($video_wrapper.hasClass("is-error")) {
+                return;
+            }
+
+            if (!$video.attr("src")) {
+                $video_wrapper.removeClass("is-loaded is-error").addClass("is-loading");
+
+                video.addEventListener("loadeddata", function() {
+                    $video_wrapper.removeClass("is-loading is-error").addClass("is-loaded");
+                }, { once: true });
+
+                video.addEventListener("error", function() {
+                    $video_wrapper.removeClass("is-loading is-loaded").addClass("is-error");
+                }, { once: true });
+
+                $video.attr("src", src);
+                video.load();
+            }
+
+            if (video.play) {
+                var play_promise = video.play();
+                if (play_promise && play_promise.catch) {
+                    play_promise.catch(function() {});
+                }
+            }
+        }
+    };
 
     CRMMessageConversationPage.prototype.initClass = function() {
         var that = this;
@@ -70,6 +127,8 @@ var CRMMessageConversationPage = ( function($) {
         //
         that.initMessageDeleteLink();
 
+        that.initLazyVideos();
+
         function iOS() {
             return [
               'iPad Simulator',
@@ -85,7 +144,9 @@ var CRMMessageConversationPage = ( function($) {
 
         function onImagesLoaded() {
             var images = that.$wrapper[0].getElementsByTagName("img"),
-            videos = that.$wrapper[0].getElementsByTagName("video");
+            videos = $.grep(that.$wrapper[0].getElementsByTagName("video"), function(video) {
+                return !!video.getAttribute("src");
+            });
             var loaded = images.length + videos.length;
 
             /*if (iOS()) {
@@ -1061,28 +1122,39 @@ var CRMMessageConversationPage = ( function($) {
     CRMMessageConversationPage.prototype.initBackgroundActions = function() {
         var that = this,
             is_locked = false,
+            is_updating = false,
             timeout = 0;
 
-        $(document).on('wa_before_load', function(){
+        var event_ns = '.crmConvBg';
+
+        $(document).off(event_ns);
+
+        $(document).on('wa_before_load' + event_ns, function(){
             clearTimeout(timeout);
-            $(document).off('wa_before_load');
+            $(document).off(event_ns);
         });
 
-        $(document).on('msg_conversation_updated', function() {
+        $(document).on('msg_conversation_updated' + event_ns, function() {
             setTimeout(function() {
                 that.initBlockquotToggle();
                 that.scroll2bottom(true, true);
             }, 500);
         });
 
-        $(document).on('msg_conversation_update', function() {
-            updateMessages().then( function(new_messages) {
-                if (new_messages.length) {
-                    that.initBlockquotToggle();
-                    that.scroll2bottom(true, true);
-                }
-                runner();
-            });
+        $(document).on('msg_conversation_update' + event_ns, function() {
+            clearTimeout(timeout);
+            if (!is_updating) {
+                is_updating = true;
+                updateMessages().then( function(new_messages) {
+                    if (new_messages.length) {
+                        that.initBlockquotToggle();
+                        that.scroll2bottom(true, true);
+                    }
+                }).always( function() {
+                    is_updating = false;
+                    runner();
+                });
+            }
         });
 
         runner();
@@ -1098,7 +1170,7 @@ var CRMMessageConversationPage = ( function($) {
         }
 
         function request() {
-            if (!is_locked) {
+            if (!is_locked && !is_updating) {
                 is_locked = true;
                 var href = "?module=message&action=conversationIdCheck&background_process=1",
                     data = {
@@ -1108,12 +1180,15 @@ var CRMMessageConversationPage = ( function($) {
                 $.post(href, data, function(response) {
                     if (response.status === "ok") {
                         var is_changed = (1 * response.data !== 1 * that.last_message_id);
-                        if (is_changed) {
+                        if (is_changed && !is_updating) {
+                            is_updating = true;
                             updateMessages().then( function(new_messages) {
                                 if (new_messages.length) {
                                     that.initBlockquotToggle();
                                     that.scroll2bottom(true, true);
                                 }
+                            }).always( function() {
+                                is_updating = false;
                                 runner();
                             });
 
@@ -1197,6 +1272,8 @@ var CRMMessageConversationPage = ( function($) {
                         $document.off("unmark-new-messages", unmark);
                     }
                 }
+            }).fail(function() {
+                $deferred.resolve([]);
             });
 
             return $deferred.promise();
@@ -1220,20 +1297,39 @@ var CRMMessageConversationPage = ( function($) {
         });
 
         function deleteConversation() {
-            var href_param_contact = (that.filter_contact_id ? 'contact=' + that.filter_contact_id : that.filter_deal_id ? 'deal=' + that.filter_deal_id : null),
-                href_param_iframe = (that.iframe ? '?iframe=1' : ''),
-                href_param_contact = (href_param_contact ? (that.iframe ? '&' : '?') + href_param_contact : ''),
-                $sidebar = that.$wrapper.closest('#c-messages-page').find('#c-messages-sidebar'),
-                reload_link = $.crm.app_url + "message/" + href_param_iframe + href_param_contact;
-                if ($sidebar.is(':visible')) {
-                    var $next_conversation = $sidebar.find(`.c-message-wrapper[data-id='${that.conversation_id}']`).next('.c-message-wrapper');
-                    reload_link = $next_conversation.length ? $next_conversation.find('a.item').prop('href') + href_param_contact : reload_link;
-                }
+            const params = new URLSearchParams();
+            if (that.filter_contact_id) {
+                params.append('contact', that.filter_contact_id);
+            } else if (that.filter_deal_id) {
+                params.append('deal', that.filter_deal_id);
+            }
+            if (that.iframe) {
+                params.append('iframe', '1');
+            }
+            if (that.noemail) {
+                params.append('noemail', '1');
+            }
+            const $sidebar = that.$wrapper.closest('#c-messages-page').find('#c-messages-sidebar');
+            let reload_link = $.crm.app_url + "message/?" + params.toString();
 
-                var href = $.crm.app_url + "?module=message&action=conversationIdDelete",
-                    data = {
-                        id: that.conversation_id
-                    };
+            if ($sidebar.is(':visible')) {
+                const $next_conversation = $sidebar
+                    .find(`.c-message-wrapper[data-id='${that.conversation_id}']`)
+                    .next('.c-message-wrapper');
+
+                if ($next_conversation.length) {
+                    const url = new URL($next_conversation.find('a.item').prop('href'));
+                    params.forEach((value, key) => {
+                        url.searchParams.set(key, value);
+                    });
+                    reload_link = url.toString();
+                }
+            }
+
+            const href = $.crm.app_url + "?module=message&action=conversationIdDelete";
+            const data = {
+                id: that.conversation_id
+            };
 
             $.post(href, data, function(response) {
                 if (response.status === "ok") {
@@ -1285,19 +1381,12 @@ var CRMMessageConversationPage = ( function($) {
 
         that.$wrapper.on("click", ".js-open-detail-message", function(event) {
             event.preventDefault();
-            if (!is_locked ) {
-                is_locked = true;
-                var href = $(this).data('dialog-url');
-
-                $.get(href, function(html) {
-                    $.waDialog({
-                        html: html,
-                        onClose: function () {
-                            is_locked = false;
-                        }
-                    });
+            var href = $(this).data('dialog-url');
+            $.get(href, function(html) {
+                $.waDialog({
+                    html: html,
                 });
-            }
+            });
         });
 
         that.$wrapper.on('click', '.js-message-im-reply', function (event) {
@@ -2674,7 +2763,9 @@ var CRMEmailConversationEmailSender = ( function($) { //форма ответа 
                         function onImagesLoaded() {
 
                                 var images = $blank_list[0].getElementsByTagName("img"),
-                                videos = $blank_list[0].getElementsByTagName("video");
+                                videos = $.grep($blank_list[0].getElementsByTagName("video"), function(video) {
+                                    return !!video.getAttribute("src");
+                                });
                                 var loaded = images.length + videos.length;
                                 function checkLoadingData() {
                                     if (loaded == 0) {

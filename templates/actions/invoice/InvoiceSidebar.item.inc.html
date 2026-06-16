@@ -60,7 +60,8 @@
     {$_invoice_classes[] = "highlighted"}
 {/if}
 
-<li class="c-invoice {$_invoice_classes|join:' '}" data-id="{$invoice.id}">
+{$_payment_expired = $invoice.state_id === crmInvoiceModel::STATE_PENDING && !empty($_state) && $_state.class === 'payment-expired'}
+<li class="c-invoice {$_invoice_classes|join:' '}" data-id="{$invoice.id}" data-state-id="{$invoice.state_id|escape}" data-payment-expired="{if $_payment_expired}1{else}0{/if}">
     <a class="flexbox full-width space-4 box js-disable-router" href="{$wa_app_url}invoice/{$invoice.id}/">
         {if !empty($_userpic)}
             <div class="image custom-mr-8">

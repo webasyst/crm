@@ -31,7 +31,11 @@ return array(
         'name' => /*_w*/('added deal'),
     ),
     'deal_step' => array(
-        'name' => /*_w*/('changed stage'),
+        'name' => /*_w*/('changed deal stage'),
+    ),
+    'deals_step' => array(
+        'name' => /*_w*/('changed deals stage'),
+        'plural' => ['changed the stage for %d deal', 'changed the stage for %d deals'],
     ),
     'deal_addcontact' => array(
         'name' => /*_w*/('added contact to a deal'),
@@ -54,8 +58,16 @@ return array(
     'deal_won' => array(
         'name' => /*_w*/('closed deal as won'),
     ),
+    'deals_won' => array(
+        'name' => /*_w*/('closed deals as won'),
+        'plural' => ['closed %d deal as won', 'closed %d deals as won']
+    ),
     'deal_lost' => array(
         'name' => /*_w*/('closed deal as lost'),
+    ),
+    'deals_lost' => array(
+        'name' => /*_w*/('closed deals as lost'),
+        'plural' => ['closed %d deal as lost', 'closed %d deals as lost']
     ),
     'deal_edit' => array(
         'name' => /*_w*/('edited deal'),
@@ -65,6 +77,10 @@ return array(
     ),
     'deal_transfer' => array(
         'name' => /*_w*/('changed deal owner'),
+    ),
+    'deals_transfer' => array(
+        'name' => /*_w*/('changed deals owner'),
+        'plural' => ['changed owner for %d deal', 'changed owner for %d deals'],
     ),
     'deal_export' => array(
         'name' => /*_w*/('exported deals'),

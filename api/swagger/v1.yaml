@@ -1811,12 +1811,12 @@ paths:
       externalDocs:
         description: crm.deal.close
         url: https://developers.webasyst.ru/api/explorer/crm/crm.deal.close/
-      summary: Закрывает сделку с установкой статуса «выиграна» или «проиграна».
+      summary: Закрывает одну или несколько сделок со статусом «выиграна» или «проиграна».
       parameters:
         - in: query
           name: id
           description: ID сделки
-          required: true
+          required: false
           schema:
             type: integer
       requestBody:
@@ -1845,9 +1845,26 @@ paths:
                 force:
                   type: boolean
                   description: Признак закрытия сделки без подтверждения пользователем
+                id:
+                  type: array
+                  items:
+                    type: integer
+                  description: Список ID сделок
       responses:
+        200:
+          description: Успешное массовое закрытие; в теле — список закрытых сделок.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  closed:
+                    type: array
+                    items:
+                      type: integer
+                    description: ID сделок, по которым выполнено закрытие
         204:
-          description: Успешное выполнение запроса.
+          description: Успешное выполнение запроса (закрыта одна сделка).
         400:
           description: Некорректное содержимое запроса.
           content:
@@ -2310,12 +2327,12 @@ paths:
       externalDocs:
         description: crm.deal.move
         url: https://developers.webasyst.ru/api/explorer/crm/crm.deal.move/
-      summary: Перемещает сделку на другой этап.
+      summary: Перемещает одну или несколько сделок на другой этап (в т.ч. в другую воронку).
       parameters:
         - in: query
           name: id
           description: ID сделки
-          required: true
+          required: false
           schema:
             type: integer
         - in: query
@@ -2341,14 +2358,24 @@ paths:
                 force:
                   type: boolean
                   description: Флаг, обозначающий смену этапа без подтверждения пользователем
+                id:
+                  type: array
+                  description: Несколько ID сделок
+                  items:
+                    type: integer
       responses:
         200:
-          description: Успешное выполнение запроса + расчет измененных статистических данных по задействованным этапам и воронкам.
+          description: Успешное выполнение запроса; при with_count — расчёт статистики по всем затронутым этапам и воронкам; при массовом переносе — список перемещённых сделок.
           content:
             application/json:
               schema:
                 type: object
                 properties:
+                  moved:
+                    type: array
+                    description: ID сделок, фактически перемещённых (только при запросе более одной сделки)
+                    items:
+                      type: integer
                   changed_counts:
                     type: array
                     description: Список изменений количества и общей суммы сделок в этапах и воронках
@@ -2524,6 +2551,87 @@ paths:
                     description: HTML-код для показа сотруднику информационного сообщения в виде диалога
         500:
           description: Внутренняя ошибка сервера.
+  /crm.deal.owner.set:
+    post:
+      security:
+        - BearerAuth: [ ]
+      externalDocs:
+        description: crm.deal.owner.set
+        url: https://developers.webasyst.ru/api/explorer/crm/crm.deal.owner.set/
+      summary: Назначает ответственного по одной или нескольким сделкам.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_contact_id
+                - deal_id
+              properties:
+                user_contact_id:
+                  type: integer
+                  description: ID контакта сотрудника — новый ответственный по сделке
+                deal_id:
+                  type: array
+                  description: Список ID сделок
+                  items:
+                    type: integer
+                label:
+                  type: string
+                  description: Подпись роли ответственного в сделке (необязательно)
+                keep_current_user:
+                  type: boolean
+                  description: |
+                    Если true, прежний ответственный остаётся в списке участников сделки как сотрудник (USER), но не как ответственный.
+                  default: false
+      responses:
+        204:
+          description: Ответственный успешно назначен по всем переданным сделкам, к которым есть доступ.
+        200:
+          description: Часть сделок обработана или не все идентификаторы были допустимы.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: array
+                    description: ID сделок, по которым ответственный обновлён
+                    items:
+                      type: integer
+                  unallowed_deals:
+                    type: array
+                    description: ID сделок без права редактирования
+                    items:
+                      type: integer
+                  unaccessable_deals:
+                    type: array
+                    description: ID сделок, по которым у нового ответственного нет доступа к воронке
+                    items:
+                      type: integer
+                  skipped_deals:
+                    type: array
+                    description: ID сделок, по которым операция пропущена из‑за прав на смену ответственного
+                    items:
+                      type: integer
+        400:
+          description: Некорректное содержимое запроса.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        403:
+          description: Запрещён доступ к приложению CRM или данному методу API.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        404:
+          description: Сделка не найдена (запрос ровно одной сделки).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /crm.deal.participant.delete:
     delete:
       security:
@@ -7611,6 +7719,12 @@ components:
               type: string
               format: date
               description: Дата оплаты заказа
+        can_edit:
+          type: boolean
+          description: Признак наличия доступа к редактированию сделки
+        can_manage_responsible:
+          type: boolean
+          description: Признак наличия доступа к изменению ответственного за сделку
         can_delete:
           type: boolean
           description: Признак наличия доступа у пользователя для удаления сделки

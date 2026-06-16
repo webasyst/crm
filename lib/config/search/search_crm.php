@@ -130,7 +130,7 @@ return array(
             )
         ),
         'category' => array(
-            'name' => 'Segment',    // _w('Segment')
+            'name' => 'Segment (Category)', // _w('Segment (Category)')
             'multi' => true,
             'joins' => array(
                 ':contact_categories' => array(
@@ -146,12 +146,41 @@ return array(
                 ),
             ),
             'items' => array(
+                'category_set' => array(
+                    'name' => 'Segment set', // _w('Segment set')
+                ),
                 'category' => array(
                     'name' => 'Segment', // _w('Segment')
+                    'multiple' => true,
                     'items' => array(
                         ':values' => array(
                             'autocomplete' => 1,
                             'class' => 'crmContactsSearchSegmentValues'
+                        )
+                    )
+                )
+            ),
+        ),
+        'search_segment' => array(
+            'name' => 'Segment (Saved search)',    // _w('Segment (Saved search)')
+            'multi' => true,
+            'joins' => array(
+                ':segment' => array(
+                    'table' => 'crm_segment',
+                    'on' => ":table.type = 'search' AND :table.id = -1"
+                ),
+            ),
+            'items' => array(
+                'search_segment_set' => array(
+                    'name' => 'Segment set', // _w('Saved search set')
+                ),
+                'search_segment' => array(
+                    'name' => 'Segment', // _w('Saved search')
+                    'multiple' => true,
+                    'items' => array(
+                        ':values' => array(
+                            'autocomplete' => 1,
+                            'class' => 'crmContactsSearchSearchSegmentValues'
                         )
                     )
                 )

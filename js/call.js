@@ -626,6 +626,15 @@ var CRMCallPage = ( function($) {
 
     CRMCallPage.prototype.initDotsDetail = function() {
         var that = this;
+        setTimeout(function() {
+            that.$wrapper.find('.js-dots-wrapper').each(function() {
+                var $target = $(this);
+                    $actions = $target.find('.c-column-actions');
+                if ($actions.length === 0) {
+                    $target.remove();
+                }
+            });
+        }, 1000);
         that.$wrapper.on("click", ".js-dots", function(event) {
             var $target = $(this);
 

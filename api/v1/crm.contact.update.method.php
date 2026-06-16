@@ -388,7 +388,7 @@ class crmContactUpdateMethod extends crmApiAbstractMethod
             if (is_array($_error)) {
                 foreach ($_error as $key => $_val) {
                     $_value = ifset($this->data, $_field_name, '');
-                    $_value = (is_array($_value) ? ifset($_value, $key, '') : '');
+                    $_value = (is_array($_value) ? ifset($_value, $key, '') : $_value);
                     $error_fields[] = [
                         'field' => $_field_name,
                         'value' => $_value,

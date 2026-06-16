@@ -18,40 +18,37 @@ class crmMessageWriteReplyEmailDialogAction extends crmSendEmailDialogAction
 
     public function execute()
     {
-        $dm = new crmDealModel();
-        $fm = new crmFunnelModel();
-        $fsm = new crmFunnelStageModel();
-
-        $participants_ids = array();
+        $funnels = $stages = $participants_ids = [];
         $deal = $this->getDeal();
         if ($deal) {
             $participants_ids = $this->getParticipantsIds($deal['participants']);
         } else {
-            $funnel = $fm->getAvailableFunnel();
-            if (!$funnel) {
-                throw new waRightsException();
+            $funnel = $this->getFunnelModel()->getAvailableFunnel();
+            if (!empty($funnel)) {
+                $stage_id = $this->getFunnelStageModel()->select('id')->where(
+                    'funnel_id = '.(int)$funnel['id']
+                )->order('number')->limit(1)->fetchField('id');
+
+                // Just empty deal, for new message
+                $now = date('Y-m-d H:i:s');
+                $deal = $this->getDealModel()->getEmptyDeal();
+                $deal = array_merge($deal, array(
+                    'creator_contact_id' => wa()->getUser()->getId(),
+                    'create_datetime'    => $now,
+                    'update_datetime'    => $now,
+                    'funnel_id'          => $funnel['id'],
+                    'stage_id'           => $stage_id,
+                ));
             }
-            $stage_id = $fsm->select('id')->where(
-                'funnel_id = '.(int)$funnel['id']
-            )->order('number')->limit(1)->fetchField('id');
-
-            // Just empty deal, for new message
-            $now = date('Y-m-d H:i:s');
-            $deal = $dm->getEmptyDeal();
-            $deal = array_merge($deal, array(
-                'creator_contact_id' => wa()->getUser()->getId(),
-                'create_datetime'    => $now,
-                'update_datetime'    => $now,
-                'funnel_id'          => $funnel['id'],
-                'stage_id'           => $stage_id,
-            ));
         }
 
-        $funnels = $fm->getAllFunnels(true);
-        if (empty($funnels[$deal['funnel_id']])) {
-            throw new waException('Funnel not found');
+        if (!empty($deal)) {
+            $funnels = $this->getFunnelModel()->getAllFunnels(true);
+            if (empty($funnels[$deal['funnel_id']])) {
+                throw new waException('Funnel not found');
+            }
+            $stages = $this->getFunnelStageModel()->getStagesByFunnel($funnels[$deal['funnel_id']]);
         }
-        $stages = $fsm->getStagesByFunnel($funnels[$deal['funnel_id']]);
 
         $this->view->assign(array(
             'deal'            => $deal,

@@ -489,9 +489,10 @@ return array(
                 'items' => array(
                     'method' => array(
                         'name' => 'Method',         // _w('Method')
-                        'readonly' => true,
+                        //'readonly' => true,
                         'items' => array(
                             ':values' => array(
+                                'autocomplete' => 1,
                                 'class' => 'crmContactsSearchCreateMethodValues'
                             )
                         ),

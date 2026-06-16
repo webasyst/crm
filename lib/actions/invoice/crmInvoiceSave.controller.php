@@ -102,7 +102,7 @@ class crmInvoiceSaveController extends crmJsonController
     {
         $result = array();
 
-        foreach (waRequest::post('items', array(), waRequest::TYPE_ARRAY_TRIM) as $i) {
+        foreach (waRequest::post('items', array(), waRequest::TYPE_ARRAY_TRIM) as $sort => $i) {
             if (!empty($i['id']) && empty($items[$i['id']])) {
                 throw new waException('Item not found', 404);
             }
@@ -114,6 +114,7 @@ class crmInvoiceSaveController extends crmJsonController
                 'price'       => str_replace(',', '.', ifset($i['price'])),
                 'quantity'    => str_replace(',', '.', ifset($i['quantity'])),
                 'product_id'  => ifset($i['product_id']),
+                'sort'        => (int)$sort,
                 /* Item taxes */
                 'tax_type'    => ifempty($i['tax_type'], 'NONE'),
                 'tax_percent' => ifset($i['tax_percent']),

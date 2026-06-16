@@ -6,23 +6,20 @@
         </header>
 
         <div class="dialog-content">
-            <table width="100%;">
-                <tr>
-                    <td align="center">
-                        <div class="datepicker start"></div>
-                    </td>
-                    <td align="center">&mdash;</td>
-                    <td align="center">
-                        <div class="datepicker end"></div>
-                    </td>
-                </tr>
-            </table>
+            <div class="flexbox full-width middle space-16">
+                <div class="align-center">
+                    <div class="datepicker start custom-mx-auto custom-mt-8"></div>
+                </div>
+                <div class="text-gray">&mdash;</div>
+                <div class="align-center">
+                    <div class="datepicker end custom-mx-auto custom-mt-8"></div>
+                </div>
+            </div>
         </div>
 
         <footer class="dialog-footer">
-            <input class="button crm-button js-apply-action" type="button" value="[`Apply`]">
-            <span style="margin: 0 4px;">[`or`]</span>
-            <a class="js-cancel-action" href="javascript:void(0);">[`cancel`]</a>
+            <input class="button crm-button gray js-apply-action" type="button" value="[`Apply`]">
+            <input class="button crm-button light-gray js-cancel-action" type="button" value="[`Cancel`]">
         </footer>
 
     </div>

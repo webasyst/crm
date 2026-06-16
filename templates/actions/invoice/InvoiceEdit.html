@@ -65,6 +65,16 @@
 <body class="iframe-style">
 {/if}
 
+<style>
+    .c-sort-handle,
+    .c-sort-handle i {
+        cursor: move;
+    }
+    .c-sort {
+        padding-right: 0 !important;
+    }
+</style>
+
 {$_title = '[`Invoice`]'}
 
 {$_contact_id = ""}
@@ -258,6 +268,9 @@
         <div class="c-product-table fields">
             {function tableRow}
                 <tr>
+                    <td class="c-sort" aria-label="[`Move`]">
+                        <span class="c-sort-handle js-sort-handle"><i class="fas fa-grip-vertical text-light-gray"></i></span>
+                    </td>
                     <td class="c-number" aria-label="[`#`]">
                         <span class="c-field js-product-number">{if !empty($_index)}{$_index}{else}1{/if}</span>
                     </td>
@@ -322,6 +335,7 @@
 
                 <thead>
                     <tr>
+                        <th class="c-sort"></th>
                         <th class="c-number">[`#`]</th>
                         <th class="c-name">[`Product or service`]</th>
                         <th class="c-amount right">[`Qty`]</th>
@@ -347,14 +361,14 @@
                 <table class="c-products-table">
                 <tfoot>
                     <tr>
-                        <td colspan="5" class="right">[`Subtotal`]</td>
+                        <td colspan="6" class="right">[`Subtotal`]</td>
                         <td class="c-total right">
                             <span class="js-subtotal">0,00</span>
                         </td>
                     </tr>
                     <tr>
 
-                        <td colspan="5" class="right custom-py-8">
+                        <td colspan="6" class="right custom-py-8">
                             <span class="js-empty-tax" style="display: none">[`Tax rules are not set up for the selected company.`]
                                 <a href="#" data-href="{$wa_backend_url}crm/settings/companies/" class="js-empty-tax-link">
                                     [`Set up`]
@@ -374,7 +388,7 @@
                         </td>
                     </tr>
                     <tr class="large bold">
-                        <td colspan="5" class="right">[`Total`]</td>
+                        <td colspan="6" class="right">[`Total`]</td>
                         <td class="c-total right">
                             <span class="js-total">0,00</span>
                         </td>

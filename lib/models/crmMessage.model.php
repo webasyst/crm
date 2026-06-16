@@ -619,10 +619,19 @@ class crmMessageModel extends crmModel
             }
 
             if (isset($params['direction'])) {
-                $cond[] = "direction = '" . $this->escape($params['direction']) . "'";
+                $cond[] = "m.direction = '" . $this->escape($params['direction']) . "'";
             }
             if (isset($params['transport'])) {
-                $cond[] = "transport = '" . $this->escape($params['transport']) . "'";
+                $cond[] = "m.transport = '" . $this->escape($params['transport']) . "'";
+            }
+            if (isset($params['contact_id'])) {
+                $cond[] = "m.contact_id = '" . $this->escape($params['contact_id']) . "'";
+            }
+            if (isset($params['deal_id'])) {
+                $cond[] = "m.deal_id = '" . $this->escape($params['deal_id']) . "'";
+            }
+            if (isset($params['source_id'])) {
+                $cond[] = "m.source_id = '" . $this->escape($params['source_id']) . "'";
             }
 
             // User filter
@@ -874,7 +883,7 @@ class crmMessageModel extends crmModel
                 LEFT JOIN crm_message_read mr
                     ON mr.message_id=m.id AND mr.contact_id=".wa()->getUser()->getId()."
                 WHERE m.id IN (:ids)
-                ORDER BY id DESC";
+                ORDER BY m.id DESC";
 
             $result = $this->query($sql, array('ids' => $ids))->fetchAll('id');
 
@@ -905,6 +914,8 @@ class crmMessageModel extends crmModel
 
             $item['icon_url'] = null;
             $item['icon'] = 'exclamation';
+            $item['icon_fa'] = null;
+            $item['icon_color'] = '#BB64FF';
             $item['transport_name'] = _w('Unknown');
 
             if ($item['source_id'] > 0) {
@@ -912,9 +923,11 @@ class crmMessageModel extends crmModel
             }
             if ($item['transport'] == self::TRANSPORT_EMAIL) {
                 $item['icon'] = 'email';
+                $item['icon_fa'] = 'envelope';
                 $item['transport_name'] = 'Email';
             } elseif ($item['transport'] == self::TRANSPORT_SMS) {
                 $item['icon'] = 'mobile';
+                $item['icon_fa'] = 'mobile';
                 $item['transport_name'] = 'SMS';
             }
         }

@@ -7,6 +7,12 @@
 {if !empty($contacts[$conversation.contact_id])}
     {$_contact = $contacts[$conversation.contact_id]}
 {/if}
+{if !isset($iframe)}
+    {$iframe = waRequest::request('iframe', null, waRequest::TYPE_INT)}
+{/if}
+{if !isset($noemail)}
+    {$noemail = waRequest::request('noemail', null, waRequest::TYPE_INT)}
+{/if}
 
 {$filter_contact_id = waRequest::request('contact', waRequest::get('contact', null, waRequest::TYPE_INT), waRequest::TYPE_INT)}
 {$filter_deal_id = waRequest::request('deal', waRequest::get('deal', null, waRequest::TYPE_INT), waRequest::TYPE_INT)}
@@ -962,6 +968,7 @@
 
                 new CRMMessageConversationPage({
                     iframe: {$iframe|default:0},
+                    noemail: {$noemail|default:0},
                     $wrapper: $(".c-messages-page-content-wrapper"),
                     conversation_id: {$conversation.id},
                     old_message_id: {if !empty($old_message_id)}{$old_message_id.id}{else}0{/if},

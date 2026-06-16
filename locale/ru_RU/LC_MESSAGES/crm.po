@@ -12,7 +12,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 2.4.3\n"
+"X-Generator: Poedit 3.9\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -1285,6 +1285,9 @@ msgstr "Создайте форму, опубликуйте ее на сайте
 msgid "Are you sure delete this form?"
 msgstr "Точно удалить эту форму?"
 
+msgid "Are you sure you want to delete the “%s” form?"
+msgstr "Вы уверены, что хотите удалить форму «%s»?"
+
 msgid "Allows your subscriber to create a password for further authorization on your site and log in to their customer portal. Requires Email field in the form."
 msgstr "Позволяет подписчику придумать себе пароль для входа в личный кабинет на вашем сайте. В форме должно быть поле Email."
 
@@ -1888,8 +1891,17 @@ msgstr "объединил контакты"
 msgid "added deal"
 msgstr "добавил сделку"
 
-msgid "changed stage"
-msgstr "изменил этап"
+msgid "changed deal stage"
+msgstr "изменил этап сделки"
+
+msgid "changed deals stage"
+msgstr "изменил этап нескольких сделок"
+
+msgid "changed the stage for %d deal"
+msgid_plural "changed the stage for %d deals"
+msgstr[0] "изменил этап в %d сделке"
+msgstr[1] "изменил этап в %d сделках"
+msgstr[2] "изменил этап в %d сделках"
 
 msgid "changed funnel"
 msgstr "изменил воронку"
@@ -1906,8 +1918,20 @@ msgstr "переоткрыл сделку"
 msgid "closed deal as won"
 msgstr "закрыл сделку как выигранную"
 
+msgid "closed %d deal as won"
+msgid_plural "closed %d deals as won"
+msgstr[0] "закрыл %d сделку как выигранную"
+msgstr[1] "закрыл %d сделки как выигранные"
+msgstr[2] "закрыл %d сделок как выигранные"
+
 msgid "closed deal as lost"
 msgstr "закрыл сделку как проигранную"
+
+msgid "closed %d deal as lost"
+msgid_plural "closed %d deals as lost"
+msgstr[0] "закрыл %d сделку как проигранную"
+msgstr[1] "закрыл %d сделки как проигранные"
+msgstr[2] "закрыл %d сделок как проигранные"
 
 msgid "edited deal"
 msgstr "изменил сделку"
@@ -1917,6 +1941,15 @@ msgstr "изменил контакт сделки"
 
 msgid "changed deal owner"
 msgstr "изменил ответственного сделки"
+
+msgid "changed deals owner"
+msgstr "изменил ответственного в сделках"
+
+msgid "changed owner for %d deal"
+msgid_plural "changed owner for %d deals"
+msgstr[0] "изменил ответственного в %d сделке"
+msgstr[1] "изменил ответственного в %d сделках"
+msgstr[2] "изменил ответственного в %d сделках"
 
 msgid "remove deal owner"
 msgstr "удалил ответственного сделки"
@@ -6177,3 +6210,117 @@ msgstr "Удалить форму"
 
 msgid "Delete email source"
 msgstr "Удалить email-источник"
+
+msgid "Use the “%s” menu item in the reply text editing field, when communicating with a client in the “%s” section, to send a special link, which will connect the client’s user ID in the messenger app with their registered account in your CRM database. This will help you view the full client profile on the conversation screen."
+msgstr "Используйте пункт меню «%s» в поле редактирования ответа, когда вы переписываетесь с клиентом в разделе «%s», чтобы отправить специальную ссылку для связи пользователя мессенджера с аккаунтом зарегистрированного клиента в базе данных CRM. Это позволит вам видеть полный профиль клиента на странице с перепиской."
+
+msgid "Use email as username"
+msgstr "Использовать электронную почту"
+
+msgid "Change password"
+msgstr "Сменить пароль"
+
+msgid "Mail provider"
+msgstr "Почтовый сервис"
+
+msgid "Webasyst Cloud Mail"
+msgstr "Почта в облаке Webasyst"
+
+msgid "Yandex"
+msgstr "Яндекс"
+
+msgid "Mail.ru"
+msgstr "Mail.ru"
+
+msgid "Rambler"
+msgstr "Рамблер"
+
+msgid "Gmail"
+msgstr "Gmail"
+
+msgid "Yahoo Mail"
+msgstr "Yahoo Почта"
+
+msgid "Outlook.com / Hotmail / Office365"
+msgstr "Outlook.com / Hotmail / Office365"
+
+msgid "iCloud"
+msgstr "iCloud"
+
+msgid "Zoho Mail"
+msgstr "Zoho Mail"
+
+msgid "GMX"
+msgstr "GMX"
+
+msgid "Other mail server"
+msgstr "Другой почтовый сервер"
+
+msgid "Deleted deal"
+msgstr "Удалённая сделка"
+
+msgid "closed deals as won"
+msgstr "закрыл сделки как выигранные"
+
+msgid "closed deals as lost"
+msgstr "закрыл сделки как проигранные"
+
+msgid "Failed to save the deal log."
+msgstr "Не удалось сохранить историю сделки."
+
+msgid "Missing or invalid “%s” parameter value."
+msgstr "Отсутствующее либо недопустимое значение параметра %s."
+
+msgid "An error occurred during an attempt to connect with specified settings."
+msgstr "При попытке подключиться с указанными параметрами возникла ошибка."
+
+msgid "IMAP error from %s: %s"
+msgstr "Ошибка IMAP от %s: %s"
+
+msgid "More payment options"
+msgstr "Другие способы оплаты"
+
+msgid "Failed to load video"
+msgstr "Не удалось загрузить видео"
+
+msgid "in any of"
+msgstr "в любом из"
+
+msgid "in all of"
+msgstr "в каждом из"
+
+msgid "excluding"
+msgstr "исключая"
+
+msgid "Add segment"
+msgstr "Добавить сегмент"
+
+msgid "In any selected segments"
+msgstr "В любом из заданных сегментов"
+
+msgid "In all selected segments"
+msgstr "В каждом из заданных сегментов"
+
+msgid "Exclude selected segments"
+msgstr "Исключить заданные сегменты"
+
+msgid "Complex conditions"
+msgstr "Несколько условий"
+
+msgid "Complex conditions (switched off)"
+msgstr "Несколько условий (выключено)"
+
+msgid "Segment (Category)"
+msgstr "Сегмент (Категория)"
+
+msgid "Segment set"
+msgstr "Набор сегментов"
+
+msgid "Segment (Saved search)"
+msgstr "Сегмент (Сохраненный фильтр)"
+
+msgid "On"
+msgstr "Включено"
+
+msgid "Off"
+msgstr "Выключено"

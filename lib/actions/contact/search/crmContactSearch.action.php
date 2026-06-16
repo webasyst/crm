@@ -2,6 +2,11 @@
 
 class crmContactSearchAction extends crmBackendViewAction
 {
+    protected $segment_items;
+
+    /** @var array|null */
+    protected $search_segment_set_items;
+
     public function execute()
     {
         $hash = $this->getHash();
@@ -96,6 +101,8 @@ class crmContactSearchAction extends crmBackendViewAction
             'app_url' =>  wa()->getAppUrl($app_id),
             'static_url' => wa()->getAppStaticUrl($app_id),
             'sidebar_map' => $this->getSidebarMap(),
+            'category_set_values' => $this->getCategorySetValues(),
+            'search_segment_set_values' => $this->getSearchSegmentSetValues(),
             'lang' => substr(wa()->getLocale(), 0, 2),
             'segment' => $this->getSegment(),
             'iframe' => $iframe
@@ -171,5 +178,56 @@ class crmContactSearchAction extends crmBackendViewAction
             return null;
         }
         return $this->getSegmentModel()->getSegment($id);
+    }
+
+    protected function getCategorySetValues()
+    {
+        if ($this->segment_items !== null) {
+            return $this->segment_items;
+        }
+
+        $values_provider = new crmContactsSearchSegmentValues();
+        $rows = $values_provider->getValues([
+            'limit' => 500
+        ]);
+        $this->segment_items = [];
+        foreach ((array) $rows as $row) {
+            if (empty($row['value']) || !wa_is_int($row['value'])) {
+                continue;
+            }
+            $this->segment_items[] = [
+                'id' => (int) $row['value'],
+                'name' => ifset($row, 'name', '')
+            ];
+        }
+
+        return $this->segment_items;
+    }
+
+    protected function getSearchSegmentSetValues()
+    {
+        if ($this->search_segment_set_items !== null) {
+            return $this->search_segment_set_items;
+        }
+
+        $segment = $this->getSegment();
+        $exclude_id = !empty($segment['id']) ? (int) $segment['id'] : 0;
+        $values_provider = new crmContactsSearchSearchSegmentValues();
+        $rows = $values_provider->getValues([
+            'limit' => 500,
+            'exclude_id' => $exclude_id
+        ]);
+        $this->search_segment_set_items = [];
+        foreach ((array) $rows as $row) {
+            if (empty($row['value']) || !wa_is_int($row['value'])) {
+                continue;
+            }
+            $this->search_segment_set_items[] = [
+                'id' => (int) $row['value'],
+                'name' => ifset($row, 'name', '')
+            ];
+        }
+
+        return $this->search_segment_set_items;
     }
 }

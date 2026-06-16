@@ -15,9 +15,8 @@ var waGallery = ( function($) {
 
         // SETTINGS
         that.settings = $.extend({
-            start_time: 300,
-            animate_time: 0,
-            close_time: 300,
+            animate_time: 1,
+            close_time: 150,
             zoom: 0,
             width: 600,
             isFrame: false,
@@ -43,6 +42,8 @@ var waGallery = ( function($) {
         that.active_link_index = false;
         that.slider = {};
         that.$close = false;
+        that.is_zoom = false;
+        that.ctrl_pressed = false;
 
         // INIT
         that.initGallery();
@@ -114,8 +115,10 @@ var waGallery = ( function($) {
             previewItems = that.getPreviewItems(index),
             invisible_class = that.storage.invisible,
             zoom = that.settings['zoom'],
-            width = that.settings['width'],
-            start_time = that.settings['start_time'];
+            width = that.settings['width'];
+
+        if (that.is_opening) return;
+        that.is_opening = true;
 
         // set Area
         var $link = link.$link;
@@ -128,82 +131,78 @@ var waGallery = ( function($) {
 
         that.setActive(index);
 
-        // Start Timeout
-        link.timer = setTimeout( function() {
+        // Set preview size
+        $preview
+            .css({
+                width: link.linkArea.width,
+                height: link.linkArea.height,
+                top: link.linkArea.top,
+                left: link.linkArea.left,
+                position: "fixed"
+            })
+            .addClass(invisible_class)
+            .html(previewItems);
 
-            // Set preview size
-            $preview
-                .css({
-                    width: link.linkArea.width,
-                    height: link.linkArea.height,
-                    top: link.linkArea.top,
-                    left: link.linkArea.left,
-                    position: "fixed"
-                })
-                .addClass(invisible_class)
-                .html(previewItems);
+        // Render Preview
+        that.$body.append($preview);
 
-            // Render Preview
-            that.$body.append($preview);
+        // Save data
+        link.$preview = $preview;
+        link.is_active = true;
 
-            // Save data
-            link.$preview = $preview;
-            link.is_active = true;
+        var previewArea = {
+            width: link.linkArea.width,
+            height: link.linkArea.height,
+            top: link.linkArea.top,
+            left: link.linkArea.left
+        };
 
-            setTimeout( function() {
+        if (zoom) {
+            previewArea = that.offsetCorrection({
+                width: parseInt(link.linkArea.width * zoom),
+                height: parseInt(link.linkArea.height * zoom),
+                top: link.linkArea.top - parseInt(link.linkArea.height * (zoom - 1) / 2),
+                left: link.linkArea.left - parseInt(link.linkArea.width * (zoom - 1) / 2)
+            });
+        }
+        if (width && !that.settings.isFrame) {
+            previewArea = that.offsetCorrection({
+                width: width,
+                height: width,
+                top: link.linkArea.top - parseInt( (width - link.linkArea.width)/2 ),
+                left: link.linkArea.left - parseInt( (width - link.linkArea.width)/2 )
+            });
+        }
 
-                var previewArea = {
-                    width: link.linkArea.width,
-                    height: link.linkArea.height,
-                    top: link.linkArea.top,
-                    left: link.linkArea.left
-                };
+        // Animation + new bind events
+        $preview
+            .removeClass(invisible_class)
+            .css(previewArea)
+            .on("click", function() {
+                that.showFullImage( index );
+                return false;
+            });
 
-                if (zoom) {
-                    previewArea = that.offsetCorrection({
-                        width: parseInt(link.linkArea.width * zoom),
-                        height: parseInt(link.linkArea.height * zoom),
-                        top: link.linkArea.top - parseInt(link.linkArea.height * (zoom - 1) / 2),
-                        left: link.linkArea.left - parseInt(link.linkArea.width * (zoom - 1) / 2)
-                    });
-                }
-                if (width && !that.settings.isFrame) {
-                    previewArea = that.offsetCorrection({
-                        width: width,
-                        height: width,
-                        top: link.linkArea.top - parseInt( (width - link.linkArea.width)/2 ),
-                        left: link.linkArea.left - parseInt( (width - link.linkArea.width)/2 )
-                    });
-                }
+        if (that.settings.isFrame) {
+            that.renderControls( index, true );
+        } else {
+            $preview.on("mouseleave", function() {
+                clearTimeout( link.timer );
 
-                // Animation + new bind events
-                $preview
-                    .removeClass(invisible_class)
-                    .css(previewArea)
-                    .on("click", function() {
-                        that.showFullImage( index );
-                        return false;
-                    });
-                
-                if (that.settings.isFrame) {
-                    that.renderControls( index, true );
-                } else {
-                    $preview.on("mouseleave", function() {
-                        clearTimeout( link.timer );
+                link.timer = setTimeout( function() {
+                    that.hidePreview( link );
+                }, that.settings['close_time']);
+            }).on("mouseenter", function() {
+                clearTimeout( link.timer );
+            });
+        }
 
-                        link.timer = setTimeout( function() {
-                            that.hidePreview( link );
-                        }, that.settings['close_time']);
-                    }).on("mouseenter", function() {
-                        clearTimeout( link.timer );
-                    });
-                }
-            }, 0);
-            if (that.settings.forceFullPreview) {
-                setTimeout(() => that.showFullImage( index ), 100);
-            }
-
-        }, start_time);
+        if (that.settings.forceFullPreview) {
+            setTimeout(() => that.showFullImage( index ), 100);
+        }
+        setTimeout(() => {
+            that.is_opening = false;
+        }, 700);
     };
 
     waGallery.prototype.hidePreview = function( link ) {
@@ -211,6 +210,8 @@ var waGallery = ( function($) {
             $preview = link.$preview,
             linkArea = link.linkArea,
             time = that.settings['animate_time'];
+
+        if (that.is_opening) return;
 
         var is_animated_hide = true;
         if ( is_animated_hide && !time ) {
@@ -337,10 +338,14 @@ var waGallery = ( function($) {
         var $topControlWrapper = $('<div class="wa-gallery-controls top"></div>'),
             $bottomControlWrapper = $('<div class="wa-gallery-controls bottom"></div>'),
             $close = $('<a href="javascript:void(0);" class="wa-gallery-close largest custom-pr-16"><i class="fas fa-times"></i></a>'),
+            $zoomIn = $('<a href="javascript:void(0);" class="wa-gallery-zoom-in wa-gallery-arrow largest"><i class="fas fa-search-plus"></i></a>'),
+            $zoomOut = $('<a href="javascript:void(0);" class="wa-gallery-zoom-out wa-gallery-arrow largest"><i class="fas fa-search-minus"></i></a>'),
             $download = $('<a href="javascript:void(0);" class="wa-gallery-download largest"><i class="fas fa-file-download"></i></a>'),
             $rightArrow = $('<a href="javascript:void(0);" class="wa-gallery-arrow right largest custom-pr-16"><i class="fas fa-chevron-right"></i></a>'),
             $leftArrow = $('<a href="javascript:void(0);" class="wa-gallery-arrow left largest"><i class="fas fa-chevron-left"></i></a>');
 
+        $topControlWrapper.append($zoomIn);
+        $topControlWrapper.append($zoomOut);
         $topControlWrapper.append($download);
         $topControlWrapper.append($close);
         $preview.append($topControlWrapper);
@@ -352,7 +357,8 @@ var waGallery = ( function($) {
         }
 
         // INIT
-        that.initSlider( index );
+        that.initSlider(index);
+        that.initZoom();
 
         // BIND EVENTS
         $close.on("click", function() {
@@ -401,6 +407,7 @@ var waGallery = ( function($) {
         };
 
         var closeFullPreview = function() {
+            if (that.ctrl_pressed) return;
             $close.trigger("click");
             that.$body.off("mousewheel DOMMouseScroll", closeFullPreview);
         };
@@ -433,6 +440,164 @@ var waGallery = ( function($) {
             slide_count: that.links.length - 1,
             $slides: $slides,
             $activeSlide: $slides.eq(index)
+        }
+    };
+
+    waGallery.prototype.initZoom = function() {
+        const that = this;
+        const $image = that.slider.$activeSlide;
+        const $preview = $image.closest('.wa-gallery-preview');
+        const $zoomIn = $preview.find('.wa-gallery-zoom-in');
+        const $zoomOut = $preview.find('.wa-gallery-zoom-out');
+
+        const MIN_SCALE = 1;
+        const MAX_SCALE = 6;
+        let transformation = {
+            originX: 0,
+            originY: 0,
+            translateX: 0,
+            translateY: 0,
+            scale: 1
+        };
+        let previousPosition = {
+            x: null,
+            y: null
+        };
+
+        that.is_zoom = false;
+        that.ctrl_pressed = false
+        updateTransform();
+
+        // Events
+        const onZoomIn = () => {
+            const previousScale = transformation.scale;
+            transformation.scale++;
+            transformation.scale = Math.min(transformation.scale, MAX_SCALE);
+            // находим центральную точку изображения
+            if (previousPosition.x === null) {
+                const rect = $image[0].getBoundingClientRect();
+                previousPosition.x = (rect.right + rect.left)/transformation.scale;
+                previousPosition.y = (rect.bottom + rect.top)/transformation.scale;
+            }
+            updateTransformWithOrigin({ ...previousPosition,  previousScale });
+        };
+
+        const onZoomOut = () => {
+            transformation.scale--;
+            transformation.scale = Math.max(transformation.scale, MIN_SCALE);
+            updateTransform();
+        };
+
+        const onWheel = (e) => {
+            that.ctrl_pressed = e.ctrlKey;
+            if (!that.ctrl_pressed) return;
+            e.preventDefault();
+
+            const previousScale = transformation.scale;
+            const delta = e.originalEvent.deltaY;
+            if (delta < 0) {
+                transformation.scale += 0.1;
+                transformation.scale = Math.min(transformation.scale, MAX_SCALE);
+            } else {
+                transformation.scale -= 0.1
+                transformation.scale = Math.max(transformation.scale, MIN_SCALE);
+            }
+
+            updateTransformWithOrigin({ ...getCoords(e), previousScale });
+        };
+
+        const onMove = (e) => {
+            if (transformation.scale === MIN_SCALE) return;
+            e.preventDefault();
+
+            previousPosition = { x: null, y: null };
+            const previousPos = getCoords(e);
+
+            $image.on('mousemove touchmove', (e) => {
+                const { x, y } = getCoords(e);
+                const originX = previousPosition.x === null ? previousPos.x - x : x - previousPosition.x; // originX: e.originalEvent.movementX,
+                const originY = previousPosition.y === null ? previousPos.y - y : y - previousPosition.y; // originY: e.originalEvent.movementY,
+
+                transformation.translateX += originX;
+                transformation.translateY += originY;
+                updateTransform();
+
+                previousPosition.x = x;
+                previousPosition.y = y;
+            });
+
+            $image.one('mouseup touchend', (e) => {
+                e.preventDefault();
+                $image.off('mousemove touchmove');
+            });
+        };
+
+        $zoomIn.off('click').on('click', onZoomIn);
+        $zoomOut.off('click').on('click', onZoomOut);
+        $image.off('wheel').on('wheel', onWheel);
+        $image.off('mousedown touchstart').on('mousedown touchstart', onMove);
+
+        // Methods
+        function updateTransform () {
+            that.is_zoom = transformation.scale !== MIN_SCALE;
+            if (!that.is_zoom) {
+                clearPosition();
+            }
+            setTransform();
+        };
+
+        function setTransform () {
+            const { scale, translateX, translateY } = transformation;
+            $image[0].style.transform = `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`;
+        };
+
+        function getTranslate (scale) {
+            const valueInRange = (scale) => scale <= MAX_SCALE && scale >= MIN_SCALE;
+
+            return ({ pos, prevPos, translate }) => {
+                return valueInRange(scale) && pos !== prevPos
+                    ? translate + (pos - prevPos * scale) * (1 - 1 / scale)
+                    : translate;
+            }
+        }
+
+        function updateTransformWithOrigin ({ x, y, previousScale }) {
+            const image = $image[0];
+            const rect = image.getBoundingClientRect();
+
+            const originX = x - rect.left;
+            const originY = y - rect.top;
+
+            // Корректируем позицию, чтобы центрировать масштабирование
+            const newOriginX = originX / previousScale;
+            const newOriginY = originY / previousScale;
+            // Перемещаем размер изображения так, чтобы курсор оставался на месте
+            image.style.transformOrigin = `${newOriginX}px ${newOriginY}px`;
+
+            const translate = getTranslate(previousScale);
+            transformation.translateX = translate({ pos: originX, prevPos: transformation.originX, translate: transformation.translateX });
+            transformation.translateY = translate({ pos: originY, prevPos: transformation.originY, translate: transformation.translateY });
+
+            transformation.originX = newOriginX;
+            transformation.originY = newOriginY;
+            updateTransform();
+        }
+
+        function getCoords(e) {
+            e = e.touches ? e.touches[0] : e;
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        function clearPosition () {
+            transformation = {
+                originX: 0,
+                originY: 0,
+                translateX: 0,
+                translateY: 0,
+                scale: 1
+            };
+            previousPosition = { x: null, y: null };
+            $image[0].style.transformOrigin = '50% 50%';
         }
     };
 
@@ -487,6 +652,7 @@ var waGallery = ( function($) {
         slider.$activeSlide = $new_slide;
 
         that.addImage();
+        that.initZoom();
     };
 
     waGallery.prototype.offsetCorrection = function(previewArea) {
@@ -542,9 +708,8 @@ var waGallery = ( function($) {
                 }
             })
             .on("click", function() {
-                var $closeButton = that.$close;
-                if ($closeButton.length) {
-                    $closeButton.trigger("click");
+                if (that.$close && !that.is_zoom) {
+                    that.$close.trigger("click");
                 }
             })
             .attr("src", full_image_src);

@@ -20,5 +20,10 @@ class crmMessageDeleteController extends crmJsonController
         }
 
         $mm->delete($id);
+        if (empty((new crmConversationModel)->getById($message['conversation_id']))) {
+            $this->response = [
+                'conversation_deleted' => true,
+            ];
+        }
     }
 }

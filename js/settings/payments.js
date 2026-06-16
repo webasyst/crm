@@ -1,5 +1,5 @@
 var CRMSettingsPayments = (function ($) {
-    
+
     CRMSettingsPayments = function (options) {
         var that = this;
 
@@ -149,7 +149,7 @@ var CRMSettingsPayments = (function ($) {
     CRMSettingsPayments.prototype.initSortable = function () {
         var that = this,
             xhr = false;
-            
+
         var $t_body = that.$table.find('tbody');
 
         $t_body.sortable({
@@ -229,6 +229,7 @@ var CRMPaymentEdit = (function ($) {
         var that = this,
             is_locked = false,
             $form = that.$form;
+        const $submit = $form.find('[type="submit"]');
 
         $form.on("submit", function (event) {
             event.preventDefault();
@@ -246,13 +247,15 @@ var CRMPaymentEdit = (function ($) {
 
                 var saving = that.locales.saving,
                     $loading = $(saving);
-                that.$footer.append($loading);
-
+                $submit.prepend($loading);
+                $submit.prop('disabled', true);
                 var href = "?module=settings&action=paymentSave";
 
                 $.post(href, data, function (response) {
                     if (response.status == "ok") {
                         $loading.remove();
+                        $submit.prop('disabled', false);
+                        $submit.removeClass('yellow');
 
                         if (!that.instance_id) {
                             var content_uri = $.crm.app_url + "settings/payment/?company=" + that.company_id;
@@ -260,7 +263,7 @@ var CRMPaymentEdit = (function ($) {
                         } else {
                             var saved = that.locales.saved,
                                 $saved = $(saved);
-                            that.$footer.append($saved);
+                            $submit.prepend($saved);
                             //
                             setTimeout(function () {
                                 var is_exist = $.contains(document, $saved[0]);

@@ -801,12 +801,23 @@
             var process = function () {
                 try {
 
-                    var run = function () {
+                    var run = function (post_data) {
 
                         timer && clearTimeout(timer);
                         xhr && xhr.abort();
 
-                        xhr = $.post(url, { process_id: id });
+                        if (typeof post_data === 'undefined') {
+                            post_data = { process_id: id };
+                        }
+                        xhr = $.post(url, post_data);
+                        xhr.done(function (data) {
+                            if (data.status == 'ok' && data.data && data.data.not_finished) {
+                                run({
+                                    forced_source: data.data.not_finished,
+                                    process_id: id
+                                });
+                            }
+                        });
                         xhr.always(function () {
                             xhr = null;
                             timer = setTimeout(run, delay);

@@ -54,6 +54,8 @@ var CRMInvoiceEdit = ( function($) {
 
         that.initDatePickers();
         //
+        that.initSortable();
+        //
         that.initTableEvents();
         //
         that.initWYSIWYG();
@@ -74,7 +76,31 @@ var CRMInvoiceEdit = ( function($) {
         // must be init after "tax"
         that.initChangeCompany();
         //
-        that.initToggleButton();
+        that.initFooterToggle();
+    };
+
+    CRMInvoiceEdit.prototype.initSortable = function() {
+        var that = this;
+
+        that.$tableBody.sortable({
+            axis: "y",
+            handle: ".js-sort-handle",
+            items: "> tr",
+            tolerance: "pointer",
+            helper: function(event, $tr) {
+                var $helper = $tr.clone();
+                $helper.children().each(function(index) {
+                    $(this).width($tr.children().eq(index).outerWidth());
+                });
+                return $helper;
+            },
+            update: function() {
+                that.reindexRows();
+                that.refreshTable();
+                that.$wrapper.trigger("invoiceItemsChanged");
+                $(document).trigger("unsavedChanges", true);
+            }
+        });
     };
 
     CRMInvoiceEdit.prototype.initTableEvents = function() {
@@ -195,6 +221,7 @@ var CRMInvoiceEdit = ( function($) {
         that.renderProductTaxOptions($row);
         //
         that.$tableBody.append($row);
+        that.reindexRows();
 
         that.renderProductTaxFields();
 
@@ -210,11 +237,17 @@ var CRMInvoiceEdit = ( function($) {
         // remove
         $tr.remove();
         // remap indexes
-        that.$tableBody.find("tr").each( function(index) {
-            $(this).find(".js-product-number").text(index + 1);
-        });
+        that.reindexRows();
 
         that.refreshTable();
+        that.$wrapper.trigger("invoiceItemsChanged");
+    };
+
+    CRMInvoiceEdit.prototype.reindexRows = function() {
+        var that = this;
+        that.$tableBody.find("tr").each(function(index) {
+            $(this).find(".js-product-number").text(index + 1);
+        });
     };
 
     CRMInvoiceEdit.prototype.changeTableRow = function($field) {
@@ -1155,6 +1188,11 @@ var CRMInvoiceEdit = ( function($) {
         var $textarea = that.$wrapper.find(".js-wysiwyg");
 
         $.crm.initWYSIWYG($textarea, {
+            callbacks: {
+                change: function() {
+                    $textarea.trigger("invoiceCommentChanged");
+                }
+            },
             keydownCallback: function (e) {
                 //if (e.keyCode == 13 && e.ctrlKey) {
                     //return addComment(); // Ctrl+Enter disabled
@@ -1237,6 +1275,16 @@ var CRMInvoiceEdit = ( function($) {
                         that.$wrapper.trigger("searchProduct");
                     }
                 }
+            });
+
+            // Close dropdown when focus leaves the name field; mousedown on the list
+            // keeps focus on the input so a list click runs before the menu is cleared.
+            $list.on("mousedown", function(e) {
+                e.preventDefault();
+            });
+
+            $nameField.on("blur", function() {
+                setTimeout(hide, 0);
             });
 
             $nameField.on("change", function() {
@@ -1481,13 +1529,21 @@ var CRMInvoiceEdit = ( function($) {
         }
     };
 
-    CRMInvoiceEdit.prototype.initToggleButton = function() {
+    CRMInvoiceEdit.prototype.initFooterToggle = function() {
         var that = this,
             active_class = "is-changed",
             $footer = that.$wrapper.find(".js-footer-actions"),
             $button = $footer.find(".js-submit-button");
 
         that.$wrapper.on("change keydown", "input, textarea, select", function() {
+            toggle(true);
+        });
+
+        that.$wrapper.on("invoiceCommentChanged", ".js-wysiwyg", function() {
+            toggle(true);
+        });
+
+        that.$wrapper.on("invoiceItemsChanged", function() {
             toggle(true);
         });
 
@@ -1748,6 +1804,7 @@ var CRMInvoicePage = ( function($) {
 
         // VARS
         that.invoice_id = options["invoice_id"];
+        that.sidebar_item_html = options["sidebar_item_html"] || null;
         that.recurrent_id = options["recurrent_id"];
         that.locales = options["locales"];
 
@@ -1769,6 +1826,8 @@ var CRMInvoicePage = ( function($) {
         that.initRefund();
         //
         that.initRestore();
+        //
+        that.syncSidebarState();
         // set active in sidebar
         setTimeout( function() {
             $(document).trigger("viewInvoice", that.invoice_id);
@@ -1779,6 +1838,23 @@ var CRMInvoicePage = ( function($) {
         $('.js-action-link').one("click", function (e) {
             spinnerView($(this)).show();
         })
+    };
+
+    CRMInvoicePage.prototype.syncSidebarState = function() {
+        var that = this,
+            $sidebar_item = $(".js-invoices-list .c-invoice[data-id=\"" + that.invoice_id + "\"]"),
+            page_state_id = that.$wrapper.data("stateId"),
+            sidebar_state_id = $sidebar_item.data("stateId"),
+            page_payment_expired = that.$wrapper.data("paymentExpired"),
+            sidebar_payment_expired = $sidebar_item.data("paymentExpired");
+
+        if (!$sidebar_item.length || !that.sidebar_item_html || !page_state_id || !sidebar_state_id) {
+            return;
+        }
+
+        if (sidebar_state_id !== page_state_id || sidebar_payment_expired !== page_payment_expired) {
+            updateInvoiceAtSidebar(that.invoice_id, that.sidebar_item_html);
+        }
     };
 
     CRMInvoicePage.prototype.initChangeState = function() {

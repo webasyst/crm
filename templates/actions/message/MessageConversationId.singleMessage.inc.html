@@ -103,7 +103,7 @@
                         {$extra_link = $_video.url}
                     {/if}
                     <div class="c-message-body-video">
-                        <video controls="true" width="100%" src="{$extra_link}" playsinline>
+                        <video class="js-lazy-video" controls="true" width="100%" data-src="{$extra_link}" preload="none" playsinline>
                         </video>
                     </div>
                     {/foreach}

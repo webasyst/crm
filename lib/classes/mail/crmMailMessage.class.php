@@ -135,6 +135,9 @@ class crmMailMessage
     public function getReplyEmail()
     {
         $to = $this->getReplyTo();
+        if (empty($to)) {
+            return null;
+        }
         return $to['email'];
     }
 
@@ -184,7 +187,7 @@ class crmMailMessage
         }
 
         if (!$valid_emails) {
-            $this->mail['__reply_to'] !== false;
+            $this->mail['__reply_to'] = false;
             return null;
         }
 

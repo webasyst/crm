@@ -32,11 +32,15 @@ var CRMSettingsForms = ( function($) {
             e.preventDefault();
             e.stopImmediatePropagation();
 
-            const form_id = $(this).closest('[data-id]').data('id');
+            const $form_item = $(this).closest('[data-id]');
+            const form_id = $form_item.data('id');
+            const form_name = $.trim($form_item.find('.c-name').text());
+            const confirm_text_template = that.messages['delete_confirm_text'] || '';
+            const confirm_text = confirm_text_template.replace('%s', form_name);
 
             $.crm.confirm.show({
                 title: that.messages['delete_confirm_title'],
-                text: that.messages['delete_confirm_text'],
+                text: confirm_text,
                 button: that.messages['delete_confirm_button'],
 
                 onConfirm: function() {

@@ -38,6 +38,16 @@
                     {else}
                         <option class="cond"></option>
                     {/if}
+
+                    {if $id == 'crm.category.category'}
+                        {foreach $category_set_values as $segment}
+                            <option class="value" value="{$segment.id}">{$segment.name|escape}</option>
+                        {/foreach}
+                    {elseif $id == 'crm.search_segment.search_segment'}
+                        {foreach $search_segment_set_values as $segment}
+                            <option class="value" value="{$segment.id}">{$segment.name|escape}</option>
+                        {/foreach}
+                    {/if}
                 {/if}
 
                 {foreach $item.items as $k => $it}
@@ -122,14 +132,141 @@
     {else if !empty($item['items'])}
         {$children = array_slice($item['items'], 1)}
     {/if}
-    <div class="children collapsable" {if !$show}style="display:none;"{/if}>
+    <div class="collapsable" {if !$show}style="display:none;"{/if}>
         {foreach $children as $it_id => $it}
             {include file="./ContactSearchCondition.inc.html" id=$it.id item=$it conds=$conds[$it_id]|default:null extra=$extra class="subfield" not_removable=true inline}
         {/foreach}
     </div>
 {/function}
 
-<div class="field js-field collapsable-wrapper {if !empty($class)}{$class}{/if} {if !empty($item.type) && $item.type === 'Composite'}composite{/if}" data-id="{$id}" {if !empty($item.multiple)}data-multiple="1"{/if}>
+{function render_segment_set_block id="" it_id="" conds_set=[] segment_values=[]}
+    {$include_any = []}
+    {$require_all = []}
+    {$exclude_any = []}
+    {if !empty($conds_set.include_any.val)}
+        {$include_any = ","|explode:$conds_set.include_any.val}
+    {/if}
+    {if !empty($conds_set.require_all.val)}
+        {$require_all = ","|explode:$conds_set.require_all.val}
+    {/if}
+    {if !empty($conds_set.exclude_any.val)}
+        {$exclude_any = ","|explode:$conds_set.exclude_any.val}
+    {/if}
+    <div class="js-category-set" data-id="{$id}.{$it_id}">
+        <div class="custom-my-4 heading js-category-set-collapse-toggle cursor-pointer" style="display: block;" data-expand-default="{if !empty($conds_set.include_any.val)}1{else}0{/if}">
+            <span class="custom-pr-4">[`In any selected segments`]</span>
+            <i class="fas fa-caret-right js-category-set-collapse-icon{if !empty($conds_set.include_any.val)} fa-rotate-90{/if}"></i>
+        </div>
+        <div class="custom-mb-16 js-category-set-collapse-body"{if empty($conds_set.include_any.val)} style="display:none;"{/if}>
+            <div class="js-category-set-rows" data-role="include_any">
+                {if $include_any}
+                    {foreach $include_any as $selected_id}
+                        <div class="custom-mb-4 js-category-set-row flexbox">
+                            <select name="{$id}.{$it_id}.include_any_row" class="combobox js-category-set-row-select" data-autocomplete="1" style="min-width: 18rem;">
+                                <option value=""></option>
+                                {foreach $segment_values as $segment}
+                                    <option class="value" value="{$segment.id}" {if (string)$segment.id === (string)$selected_id}selected{/if}>{$segment.name|escape}</option>
+                                {/foreach}
+                            </select>
+                            <button class="nobutton circle js-category-set-delete"><i class="fas fa-times"></i></button>
+                        </div>
+                    {/foreach}
+                {else}
+                    <div class="custom-mb-4 js-category-set-row flexbox">
+                        <select name="{$id}.{$it_id}.include_any_row" class="combobox js-category-set-row-select" data-autocomplete="1" style="min-width: 18rem;">
+                            <option value="" selected></option>
+                            {foreach $segment_values as $segment}
+                                <option class="value" value="{$segment.id}">{$segment.name|escape}</option>
+                            {/foreach}
+                        </select>
+                        <button class="nobutton circle js-category-set-delete"><i class="fas fa-times"></i></button>
+                    </div>
+                {/if}
+            </div>
+            <button class="rounded light-gray smaller js-category-set-add" data-role="include_any">
+                <i class="fas fa-plus-circle text-green custom-mr-4"></i>
+                [`Add segment`]
+            </button>
+            <input type="hidden" name="{$id}.{$it_id}.include_any" value="">
+        </div>
+
+        <div class="custom-mb-4 custom-mt-8 heading js-category-set-collapse-toggle cursor-pointer" style="display: block;" data-expand-default="{if !empty($conds_set.require_all.val)}1{else}0{/if}">
+            <span class="custom-pr-4">[`In all selected segments`]</span>
+            <i class="fas fa-caret-right js-category-set-collapse-icon{if !empty($conds_set.require_all.val)} fa-rotate-90{/if}"></i>
+        </div>
+        <div class="custom-mb-16 js-category-set-collapse-body"{if empty($conds_set.require_all.val)} style="display:none;"{/if}>
+            <div class="js-category-set-rows" data-role="require_all">
+                {if $require_all}
+                    {foreach $require_all as $selected_id}
+                        <div class="custom-mb-4 js-category-set-row flexbox">
+                            <select name="{$id}.{$it_id}.require_all_row" class="combobox js-category-set-row-select" data-autocomplete="1" style="min-width: 18rem;">
+                                <option value=""></option>
+                                {foreach $segment_values as $segment}
+                                    <option class="value" value="{$segment.id}" {if (string)$segment.id === (string)$selected_id}selected{/if}>{$segment.name|escape}</option>
+                                {/foreach}
+                            </select>
+                            <button class="nobutton circle js-category-set-delete"><i class="fas fa-times"></i></button>
+                        </div>
+                    {/foreach}
+                {else}
+                    <div class="custom-mb-4 js-category-set-row flexbox">
+                        <select name="{$id}.{$it_id}.require_all_row" class="combobox js-category-set-row-select" data-autocomplete="1" style="min-width: 18rem;">
+                            <option value="" selected></option>
+                            {foreach $segment_values as $segment}
+                                <option class="value" value="{$segment.id}">{$segment.name|escape}</option>
+                            {/foreach}
+                        </select>
+                        <button class="nobutton circle js-category-set-delete"><i class="fas fa-times"></i></button>
+                    </div>
+                {/if}
+            </div>
+            <button class="rounded light-gray smaller js-category-set-add" data-role="require_all">
+                <i class="fas fa-plus-circle text-green custom-mr-4"></i>
+                [`Add segment`]
+            </button>
+            <input type="hidden" name="{$id}.{$it_id}.require_all" value="">
+        </div>
+
+        <div class="custom-mb-4 custom-mt-8 heading js-category-set-collapse-toggle cursor-pointer" style="display: block;" data-expand-default="{if !empty($conds_set.exclude_any.val)}1{else}0{/if}">
+            <span class="custom-pr-4">[`Exclude selected segments`]</span>
+            <i class="fas fa-caret-right js-category-set-collapse-icon{if !empty($conds_set.exclude_any.val)} fa-rotate-90{/if}"></i>
+        </div>
+        <div class="custom-mb-16 js-category-set-collapse-body"{if empty($conds_set.exclude_any.val)} style="display:none;"{/if}>
+            <div class="js-category-set-rows" data-role="exclude_any">
+                {if $exclude_any}
+                    {foreach $exclude_any as $selected_id}
+                        <div class="custom-mb-4 js-category-set-row flexbox">
+                            <select name="{$id}.{$it_id}.exclude_any_row" class="combobox js-category-set-row-select" data-autocomplete="1" style="min-width: 18rem;">
+                                <option value=""></option>
+                                {foreach $segment_values as $segment}
+                                    <option class="value" value="{$segment.id}" {if (string)$segment.id === (string)$selected_id}selected{/if}>{$segment.name|escape}</option>
+                                {/foreach}
+                            </select>
+                            <button class="nobutton circle js-category-set-delete"><i class="fas fa-times"></i></button>
+                        </div>
+                    {/foreach}
+                {else}
+                    <div class="custom-mb-4 js-category-set-row flexbox">
+                        <select name="{$id}.{$it_id}.exclude_any_row" class="combobox js-category-set-row-select" data-autocomplete="1" style="min-width: 18rem;">
+                            <option value="" selected></option>
+                            {foreach $segment_values as $segment}
+                                <option class="value" value="{$segment.id}">{$segment.name|escape}</option>
+                            {/foreach}
+                        </select>
+                        <button class="nobutton circle js-category-set-delete"><i class="fas fa-times"></i></button>
+                    </div>
+                {/if}
+            </div>
+            <button class="rounded light-gray smaller js-category-set-add" data-role="exclude_any">
+                <i class="fas fa-plus-circle text-green custom-mr-4"></i>
+                [`Add segment`]
+            </button>
+            <input type="hidden" name="{$id}.{$it_id}.exclude_any" value="">
+        </div>
+    </div>
+{/function}
+
+<div class="field js-field collapsable-wrapper{if !empty($class)} {$class}{/if}{if !empty($item.type) && $item.type === 'Composite' || !empty($item.children)} composite fields-group{/if}{if !empty($item.multi)} fields-group{/if}" data-id="{$id}" {if !empty($item.multiple)}data-multiple="1"{/if}>
     {if !empty($item.html)}
         <div class="name">
             {_wp($item.name)|escape}
@@ -138,64 +275,73 @@
             {$item.html}
         </div>
     {else if !empty($item.type) && $item.type === 'Composite'}
-        <div class="name">
-            {_wp($item.name)|escape}
-        </div>
-        <div class="value children">
-            {render_composite_field item=$item conds=$conds id=$id extra=$extra}
-        </div>
-        <div>
-            {if empty($not_removable)}
-            <a href="javascript:void(0)" class="killer" title="[`Hide`]" data-id="1"><i class="fas fa-trash-alt text-red delete"></i></a>
-            {/if}
-            <span class="count bold">{if isset($count)}{$count}{/if}</span>
-        </div>
-    {else if empty($item.multi)}
-        <div class="name">
-            {if !empty($item['children'])}
-                {$children_conds = []}
-                {$parent_conds = []}
-                {if is_array($conds)}
-                    {foreach $conds as $k => $c}
-                        {if $k !== 'name' && isset($item['items'][$k])}
-                            {$children_conds[$k] = $conds[$k]}
-                        {else if $k === 'name'}
-                            {if is_string($conds[$k])}
-                                {$parent_conds = $conds[$k]}
-                            {else}
-                                {$parent_conds = array_merge($parent_conds, $conds[$k])}
-                            {/if}
-                        {else}
-                            {$parent_conds[$k] = $conds[$k]}
-                        {/if}
-                    {/foreach}
-                {else}
-                    {$parent_conds = $conds}
-                {/if}
-                <span class="collapse-handler cursor-pointer {if !$children_conds}close{else}open{/if}">
-                    <span class="custom-pr-4 ">{_wp($item.name)|escape}</span>
-                    <i class="fas fa-caret-right"></i>
-                </span>
-            {else}
-                {_wp($item.name)|escape}
-            {/if}
-        </div>
-        <div class="value">
-            <div class="flexbox middle wrap {if !empty($item['children'])}hide-when-expand{/if}" {if !empty($item['children']) && $children_conds}style="display:none;"{/if}>
-                {if empty($item['children'])}
-                    {render_combobox_field item=$item id=$id conds=$conds}
-                {else}
-                    {$it = reset($item['items'])}
-                    {render_combobox_field item=$it id=$it.id conds=$parent_conds}
-                {/if}
+        <div class="flexbox middle full-width width-100 nowrap inline-value">
+            <span class="bold">{_wp($item.name)|escape}</span>
+            <div>
                 {if empty($not_removable)}
-                <a href="javascript:void(0)" class="custom-pl-16 killer" title="[`Hide`]" data-id="2"><i class="fas fa-trash-alt text-red delete"></i></a>
+                <a href="javascript:void(0)" class="js-killer button circle light-gray smaller" title="[`Hide`]" data-id="1"><i class="fas fa-trash-alt delete"></i></a>
                 {/if}
                 <span class="count bold">{if isset($count)}{$count}{/if}</span>
             </div>
-            {if !empty($item['children'])}
-                {render_children_subfields item=$item conds=$conds show=!empty($children_conds)}
-            {/if}
+        </div>
+        <div class="flexbox wrap space-8">
+            {render_composite_field item=$item conds=$conds id=$id extra=$extra}
+        </div>
+   {else if !empty($item.children)}
+        <div class="flexbox middle full-width width-100 nowrap inline-value">
+            <div class="field subfield wide custom-mt-0">
+                <div class="name bold for-input">
+                    {$children_conds = []}
+                    {$parent_conds = []}
+                    {if is_array($conds)}
+                        {foreach $conds as $k => $c}
+                            {if $k !== 'name' && isset($item['items'][$k])}
+                                {$children_conds[$k] = $conds[$k]}
+                            {else if $k === 'name'}
+                                {if is_string($conds[$k])}
+                                    {$parent_conds = $conds[$k]}
+                                {else}
+                                    {$parent_conds = array_merge($parent_conds, $conds[$k])}
+                                {/if}
+                            {else}
+                                {$parent_conds[$k] = $conds[$k]}
+                            {/if}
+                        {/foreach}
+                    {else}
+                        {$parent_conds = $conds}
+                    {/if}
+                    <span class="collapse-handler cursor-pointer {if !$children_conds}close{else}open{/if}">
+                        <span class="custom-pr-8">{_wp($item.name)|escape}</span>
+                        <i class="fas fa-caret-right"></i>
+                    </span>                
+                </div>
+                <div class="value hide-when-expand" {if $children_conds}style="display:none;"{/if}>
+                    {$it = reset($item['items'])}
+                    {render_combobox_field item=$it id=$it.id conds=$parent_conds}
+                </div>
+            </div>
+            <div>
+                {if empty($not_removable)}
+                    <a href="javascript:void(0)" class="js-killer button circle light-gray smaller" style="margin-top: 0.25em;" title="[`Hide`]" data-id="2"><i class="fas fa-trash-alt delete"></i></a>
+                {/if}
+                <span class="count bold">{if isset($count)}{$count}{/if}</span>
+            </div>
+        </div>
+        <div class="custom-mt-8">
+            {render_children_subfields item=$item conds=$conds show=!empty($children_conds)}
+        </div>
+    {else if empty($item.multi)}
+        <div class="name">
+            {_wp($item.name)|escape}
+        </div>
+        <div class="value">
+            <div class="flexbox middle wrap">
+                {render_combobox_field item=$item id=$id conds=$conds}
+                {if empty($not_removable)}
+                    <a href="javascript:void(0)" class="js-killer button circle light-gray smaller" title="[`Hide`]" data-id="2"><i class="fas fa-trash-alt delete"></i></a>
+                {/if}
+                <span class="count bold">{if isset($count)}{$count}{/if}</span>
+            </div>
         </div>
     {else}
         <div class="flexbox middle full-width width-100 nowrap inline-value">
@@ -209,30 +355,65 @@
             {/if}
             <div>
             {if empty($not_removable)}
-                <a href="javascript:void(0);" class="killer" title="[`Hide`]" data-id="3"><i class="fas fa-trash-alt text-red delete"></i></a>
+                <a href="javascript:void(0);" class="js-killer button circle light-gray smaller" title="[`Hide`]" data-id="3"><i class="fas fa-trash-alt delete"></i></a>
             {/if}
                 <span class="count bold">{if isset($count)}{$count}{/if}</span>
             </div>
         </div>
         <div class="flexbox wrap space-8">
+            {$is_category_block = (substr($id, -9) === '.category' || $id === 'category') && !empty($item.items.category) && !empty($item.items.category_set)}
+            {$show_advanced_mode = $is_category_block && !empty($conds.category_set)}
+            {$is_search_segment_block = (substr($id, -15) === '.search_segment') && !empty($item.items.search_segment) && !empty($item.items.search_segment_set)}
+            {$show_advanced_mode_ss = $is_search_segment_block && !empty($conds.search_segment_set)}
+            {if $is_category_block || $is_search_segment_block}
+                {if $is_category_block}
+                    {$_mode_switch_id = "category-mode-"|cat:($id|replace:'.':'-')}
+                    {$_show_advanced = $show_advanced_mode}
+                {else}
+                    {$_mode_switch_id = "search-segment-mode-"|cat:($id|replace:'.':'-')}
+                    {$_show_advanced = $show_advanced_mode_ss}
+                {/if}
+                <div class="field subfield width-100 js-category-mode-switcher" data-default-mode="{if $_show_advanced}advanced{else}simple{/if}">
+                    <div class="name">[`Mode`]</div>
+                    <div class="value small">
+                        <span class="switch small js-category-mode-switch custom-mr-4">
+                            <input id="{$_mode_switch_id|escape}" type="checkbox" class="not-styled js-category-mode-input" {if $_show_advanced}checked{/if}>
+                        </span>
+                        <label for="{$_mode_switch_id|escape}" data-active-text="[`Complex conditions`]" data-inactive-text="[`Complex conditions (switched off)`]">[`Complex conditions (switched off)`]</label>
+                    </div>
+                </div>
+            {/if}
             {if !empty($item.items)}
                 {foreach $item.items as $it_id => $it}
-                    <div class="field subfield {if !empty($it.checkbox)}checkbox{/if}">
+                    <div class="field subfield {if !empty($it.checkbox)}checkbox{/if} {if $is_category_block && $it_id === 'category'}js-category-mode-pane js-legacy-category-pane{else if $is_category_block && $it_id === 'category_set'}js-category-mode-pane js-advanced-category-pane{else if $is_search_segment_block && $it_id === 'search_segment'}js-category-mode-pane js-legacy-category-pane{else if $is_search_segment_block && $it_id === 'search_segment_set'}js-category-mode-pane js-advanced-category-pane{/if}" {if ($is_category_block && $it_id === 'category' && $show_advanced_mode) || ($is_search_segment_block && $it_id === 'search_segment' && $show_advanced_mode_ss)}style="display:none;"{/if} {if ($is_category_block && $it_id === 'category_set' && !$show_advanced_mode) || ($is_search_segment_block && $it_id === 'search_segment_set' && !$show_advanced_mode_ss)}style="display:none;"{/if} {if ($is_category_block && $it_id === 'category_set') || ($is_search_segment_block && $it_id === 'search_segment_set')}data-role="advanced"{/if} {if ($is_category_block && $it_id === 'category') || ($is_search_segment_block && $it_id === 'search_segment')}data-role="simple"{/if}>
                         <div class="name">{if empty($it.checkbox)}{_wp($it.name)|escape}{/if}</div>
                         <div class="value">
-                            {if !empty($it.html)}
+                            {if ($it_id === 'category_set' && $is_category_block) || ($it_id === 'search_segment_set' && $is_search_segment_block)}
+                                {if $it_id === 'category_set'}
+                                    {$_segment_set_values = $category_set_values}
+                                {else}
+                                    {$_segment_set_values = $search_segment_set_values}
+                                {/if}
+                                {render_segment_set_block id=$id it_id=$it_id conds_set=$conds[$it_id]|default:[] segment_values=$_segment_set_values}
+                            {else if !empty($it.html)}
                                 {$it.html}
                             {else if !empty($it.checkbox)}
                                 <label><input type="checkbox" name="{$it.id}" value="1" {if !empty($it.extra.val)}checked="checked"{/if}> {_wp($it.name)|escape}</label>
                             {else}
-                                {render_combobox_field item=$it conds=$conds[$it_id]|default:[] id="{$id}.{$it_id}" need_strip=false extra=[]}
+                                {if ($is_category_block && $it_id === 'category') || ($is_search_segment_block && $it_id === 'search_segment')}
+                                    <div class="js-legacy-category-control">
+                                        {render_combobox_field item=$it conds=$conds[$it_id]|default:[] id="{$id}.{$it_id}" need_strip=false extra=[]}
+                                    </div>
+                                {else}
+                                    {render_combobox_field item=$it conds=$conds[$it_id]|default:[] id="{$id}.{$it_id}" need_strip=false extra=[]}
+                                {/if}
                             {/if}
                         </div>
                     </div>
                 {/foreach}
             {else}
                 {if empty($not_removable)}
-                    <a href="javascript:void(0)" class="killer" title="[`Hide`]" data-id="4"><i class="fas fa-trash-alt text-red delete"></i></a>
+                    <a href="javascript:void(0)" class="js-killer button circle light-gray smaller" title="[`Hide`]" data-id="4"><i class="fas fa-trash-alt delete"></i></a>
                 {/if}
             {/if}
         </div>

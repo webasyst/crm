@@ -222,7 +222,7 @@ class crmContactsSearchHelper
     }
 
 
-    protected static function updateItem($id, $item_config)
+    public static function updateItem($id, $item_config)
     {
         $config = self::getRawConfig(false);
         $keys = array();
@@ -1213,6 +1213,25 @@ class crmContactsSearchHelper
             }
         }
 
+        $values_class = isset($item['items'][':values']['class']) ? (string) $item['items'][':values']['class'] : '';
+        if ($name === null && wa_is_int($value) && (int) $value > 0) {
+            if ($values_class === 'crmContactsSearchSegmentValues') {
+                $map = self::getCrmSegmentNamesByIds([(int) $value], crmSegmentModel::TYPE_CATEGORY);
+                if (!empty($map[(int) $value])) {
+                    $name = $map[(int) $value];
+                }
+            } elseif ($values_class === 'crmContactsSearchSearchSegmentValues') {
+                $map = self::getCrmSegmentNamesByIds([(int) $value], crmSegmentModel::TYPE_SEARCH);
+                if (!empty($map[(int) $value])) {
+                    $name = $map[(int) $value];
+                }
+            }
+        }
+
+        if ($name === null && ($values_class === 'crmContactsSearchSegmentValues' || $values_class === 'crmContactsSearchSearchSegmentValues') && wa_is_int($value)) {
+            return _w('Unnamed segment');
+        }
+
         return $name !== null ? $name : $value;
     }
 
@@ -1426,6 +1445,9 @@ class crmContactsSearchHelper
                             }
                             $subtitle = array();
                             foreach ($item['items'] as $itm_id => $itm) {
+                                if ($itm_id === 'category_set' || $itm_id === 'search_segment_set') {
+                                    continue;
+                                }
                                 if (isset($conds_ex[$section_id][$item_id]) && is_array($conds_ex[$section_id][$item_id])) {
                                     if (!isset($conds_ex[$section_id][$item_id][$itm_id])) {
                                         continue;
@@ -1470,7 +1492,19 @@ class crmContactsSearchHelper
                             }
                         }
 
-                        $title[] = $title_item;
+                        $omit_multi_parent_only = false;
+                        if (!$subtitle && !empty($conds_ex[$section_id][$item_id]) && is_array($conds_ex[$section_id][$item_id])) {
+                            $omit_multi_parent_only = true;
+                            foreach (array_keys($conds_ex[$section_id][$item_id]) as $cond_key) {
+                                if ($cond_key !== 'category_set' && $cond_key !== 'search_segment_set') {
+                                    $omit_multi_parent_only = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!$omit_multi_parent_only) {
+                            $title[] = $title_item;
+                        }
 
                     } else {
 
@@ -1901,7 +1935,19 @@ class crmContactsSearchHelper
             }
         }
 
-        if (empty($conds)) {
+        $category_set = self::extractCategorySetConds($conds);
+        $has_category_set = !empty($category_set);
+        if ($has_category_set) {
+            self::applyCategorySetConds($collection, $category_set);
+        }
+
+        $search_segment_set = self::extractSearchSegmentSetConds($conds);
+        $has_search_segment_set = !empty($search_segment_set);
+        if ($has_search_segment_set) {
+            self::applySearchSegmentSetConds($collection, $search_segment_set);
+        }
+
+        if (empty($conds) && !$has_category_set && !$has_search_segment_set) {
             $collection->addWhere(0);
         }
 
@@ -2157,8 +2203,23 @@ class crmContactsSearchHelper
         $collection->setGroupBy('c.id');
 
         if ($auto_title) {
+            $default_search_label = _wp('Search results');
+            $segment_title = self::composeSegmentSetSearchTitles(
+                $has_category_set ? $category_set : [],
+                $has_search_segment_set ? $search_segment_set : []
+            );
+            if ($segment_title !== '') {
+                $needs_rich = ($has_category_set && self::segmentSetNeedsInformativeTitle($category_set))
+                    || ($has_search_segment_set && self::segmentSetNeedsInformativeTitle($search_segment_set));
+                $default_title = (trim((string) $title) === '' || $title === $default_search_label);
+                if ($needs_rich) {
+                    $title = $default_title ? $segment_title : trim($title) . ', ' . $segment_title;
+                } elseif ($default_title) {
+                    $title = $segment_title;
+                }
+            }
             if (!$title) {
-                $title = _wp('Search results');
+                $title = $default_search_label;
             }
             $collection->setTitle($title);
         }
@@ -2167,6 +2228,298 @@ class crmContactsSearchHelper
         $info['highlight_terms'] = $highlight_terms;
         $collection->setInfo($info);
 
+    }
+
+    protected static function extractCategorySetConds(&$conds)
+    {
+        $res = [
+            'include_any' => [],
+            'require_all' => [],
+            'exclude_any' => []
+        ];
+
+        $legacy_conds = [];
+        if (!empty($conds['crm']['category']['category'])) {
+            $legacy_conds = $conds['crm']['category']['category'];
+            unset($conds['crm']['category']['category']);
+        } else if (!empty($conds['category']['category'])) {
+            $legacy_conds = $conds['category']['category'];
+            unset($conds['category']['category']);
+        }
+        if ($legacy_conds) {
+            if (!self::isNumericArray($legacy_conds)) {
+                $legacy_conds = [$legacy_conds];
+            }
+            foreach ($legacy_conds as $legacy_cond) {
+                if (!is_array($legacy_cond) || !isset($legacy_cond['val'])) {
+                    continue;
+                }
+                $segment_id = (int) $legacy_cond['val'];
+                if ($segment_id > 0) {
+                    $res['include_any'][] = $segment_id;
+                }
+            }
+        }
+
+        $set = [];
+        if (!empty($conds['crm']['category']['category_set']) && is_array($conds['crm']['category']['category_set'])) {
+            $set = $conds['crm']['category']['category_set'];
+            unset($conds['crm']['category']['category_set']);
+        } else if (!empty($conds['category']['category_set']) && is_array($conds['category']['category_set'])) {
+            $set = $conds['category']['category_set'];
+            unset($conds['category']['category_set']);
+        }
+        if ($set) {
+            foreach (['include_any', 'require_all', 'exclude_any'] as $key) {
+                if (!empty($set[$key]['val'])) {
+                    $res[$key] = array_merge($res[$key], self::extractPositiveInts($set[$key]['val']));
+                }
+            }
+        }
+
+        if (isset($conds['crm']['category']) && empty($conds['crm']['category'])) {
+            unset($conds['crm']['category']);
+        }
+        if (isset($conds['crm']) && empty($conds['crm'])) {
+            unset($conds['crm']);
+        }
+        if (isset($conds['category']) && empty($conds['category'])) {
+            unset($conds['category']);
+        }
+
+        $res['include_any'] = array_values(array_unique($res['include_any']));
+        $res['require_all'] = array_values(array_unique($res['require_all']));
+        $res['exclude_any'] = array_values(array_unique($res['exclude_any']));
+
+        return $res['include_any'] || $res['require_all'] || $res['exclude_any'] ? $res : [];
+    }
+
+    protected static function extractSearchSegmentSetConds(&$conds)
+    {
+        $res = [
+            'include_any' => [],
+            'require_all' => [],
+            'exclude_any' => [],
+        ];
+
+        $legacy_conds = [];
+        if (!empty($conds['crm']['search_segment']['search_segment'])) {
+            $legacy_conds = $conds['crm']['search_segment']['search_segment'];
+            unset($conds['crm']['search_segment']['search_segment']);
+        } elseif (!empty($conds['search_segment']['search_segment'])) {
+            $legacy_conds = $conds['search_segment']['search_segment'];
+            unset($conds['search_segment']['search_segment']);
+        }
+        if ($legacy_conds) {
+            if (!self::isNumericArray($legacy_conds)) {
+                $legacy_conds = [$legacy_conds];
+            }
+            foreach ($legacy_conds as $legacy_cond) {
+                if (!is_array($legacy_cond) || !isset($legacy_cond['val'])) {
+                    continue;
+                }
+                $segment_id = (int) $legacy_cond['val'];
+                if ($segment_id > 0) {
+                    $res['include_any'][] = $segment_id;
+                }
+            }
+        }
+
+        $set = [];
+        if (!empty($conds['crm']['search_segment']['search_segment_set']) && is_array($conds['crm']['search_segment']['search_segment_set'])) {
+            $set = $conds['crm']['search_segment']['search_segment_set'];
+            unset($conds['crm']['search_segment']['search_segment_set']);
+        } elseif (!empty($conds['search_segment']['search_segment_set']) && is_array($conds['search_segment']['search_segment_set'])) {
+            $set = $conds['search_segment']['search_segment_set'];
+            unset($conds['search_segment']['search_segment_set']);
+        }
+        if ($set) {
+            foreach (['include_any', 'require_all', 'exclude_any'] as $key) {
+                if (!empty($set[$key]['val'])) {
+                    $res[$key] = array_merge($res[$key], self::extractPositiveInts($set[$key]['val']));
+                }
+            }
+        }
+
+        if (isset($conds['crm']['search_segment']) && empty($conds['crm']['search_segment'])) {
+            unset($conds['crm']['search_segment']);
+        }
+        if (isset($conds['crm']) && empty($conds['crm'])) {
+            unset($conds['crm']);
+        }
+        if (isset($conds['search_segment']) && empty($conds['search_segment'])) {
+            unset($conds['search_segment']);
+        }
+
+        $res['include_any'] = array_values(array_unique($res['include_any']));
+        $res['require_all'] = array_values(array_unique($res['require_all']));
+        $res['exclude_any'] = array_values(array_unique($res['exclude_any']));
+
+        return $res['include_any'] || $res['require_all'] || $res['exclude_any'] ? $res : [];
+    }
+
+    protected static function extractPositiveInts($value)
+    {
+        if (is_array($value)) {
+            $value = join(',', $value);
+        }
+        if (!is_string($value) || $value === '') {
+            return [];
+        }
+        $parts = preg_split('/[\s,]+/', $value);
+        $ids = [];
+        foreach ((array) $parts as $part) {
+            if (wa_is_int($part)) {
+                $id = (int) $part;
+                if ($id > 0) {
+                    $ids[] = $id;
+                }
+            }
+        }
+        return $ids;
+    }
+
+    protected static function applyCategorySetConds(waContactsCollection $collection, array $segment_set)
+    {
+        if ($collection instanceof crmContactsCollection) {
+            $collection->applyCategorySetFilter($segment_set);
+            return;
+        }
+
+        // Fallback for non-CRM collections: no-op.
+    }
+
+    protected static function applySearchSegmentSetConds(waContactsCollection $collection, array $segment_set)
+    {
+        if ($collection instanceof crmContactsCollection) {
+            $collection->applySearchSegmentSetFilter($segment_set);
+            return;
+        }
+    }
+
+    /**
+     * Human-readable title fragment for static (category) and dynamic (saved search) segment sets.
+     */
+    protected static function composeSegmentSetSearchTitles(array $category_set, array $search_segment_set)
+    {
+        $chunks = [];
+        if ($category_set) {
+            $t = self::composeSegmentSetTitleForType($category_set, crmSegmentModel::TYPE_CATEGORY, _wp('Segment'));
+            if ($t !== '') {
+                $chunks[] = $t;
+            }
+        }
+        if ($search_segment_set) {
+            $t = self::composeSegmentSetTitleForType($search_segment_set, crmSegmentModel::TYPE_SEARCH, _wp('Saved search'));
+            if ($t !== '') {
+                $chunks[] = $t;
+            }
+        }
+        return $chunks ? implode(', ', $chunks) : '';
+    }
+
+    /**
+     * @param string $type crmSegmentModel::TYPE_CATEGORY or TYPE_SEARCH
+     */
+    protected static function composeSegmentSetTitleForType(array $set, $type, $block_label)
+    {
+        $inc = array_values(array_unique(array_map('intval', (array) ifset($set, 'include_any', []))));
+        $req = array_values(array_unique(array_map('intval', (array) ifset($set, 'require_all', []))));
+        $exc = array_values(array_unique(array_map('intval', (array) ifset($set, 'exclude_any', []))));
+        $inc = array_values(array_filter($inc, function ($id) { return $id > 0; }));
+        $req = array_values(array_filter($req, function ($id) { return $id > 0; }));
+        $exc = array_values(array_filter($exc, function ($id) { return $id > 0; }));
+        if (!$inc && !$req && !$exc) {
+            return '';
+        }
+        $ids = array_values(array_unique(array_merge($inc, $req, $exc)));
+        $id_to_name = self::getCrmSegmentNamesByIds($ids, $type);
+        $parts = [];
+        if ($inc) {
+            $parts[] = _w('in any of') . ': ' . self::implodeSegmentNamesForTitle($inc, $id_to_name);
+        }
+        if ($req) {
+            $parts[] = _w('in all of') . ': ' . self::implodeSegmentNamesForTitle($req, $id_to_name);
+        }
+        if ($exc) {
+            $parts[] = _w('excluding') . ': ' . self::implodeSegmentNamesForTitle($exc, $id_to_name);
+        }
+        return $block_label . ' (' . implode('; ', $parts) . ')';
+    }
+
+    protected static function segmentSetNeedsInformativeTitle(array $set)
+    {
+        $inc = (array) ifset($set, 'include_any', []);
+        $req = (array) ifset($set, 'require_all', []);
+        $exc = (array) ifset($set, 'exclude_any', []);
+        return count($req) > 0 || count($exc) > 0 || count($inc) > 1;
+    }
+
+    /**
+     * @param string $type crmSegmentModel::TYPE_CATEGORY or TYPE_SEARCH
+     * @return array<int,string> id => display name (never numeric id)
+     */
+    protected static function getCrmSegmentNamesByIds(array $ids, $type)
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        $ids = array_values(array_filter($ids, function ($id) {
+            return $id > 0;
+        }));
+        if (!$ids) {
+            return [];
+        }
+        $fallback = _w('Unnamed segment');
+        $sm = new crmSegmentModel();
+        $rows = [];
+        if ($type === crmSegmentModel::TYPE_CATEGORY) {
+            $sql = "SELECT cs.`id`,
+                    TRIM(IF(
+                        cs.`name` IS NOT NULL AND cs.`name` != '',
+                        cs.`name`,
+                        IFNULL(cc.`name`, '')
+                    )) AS `display_name`
+                FROM `crm_segment` cs
+                LEFT JOIN `wa_contact_category` cc ON cc.`id` = cs.`category_id`
+                WHERE cs.`type` = 'category' AND cs.`id` IN (i:ids)";
+            $rows = $sm->query($sql, ['ids' => $ids])->fetchAll('id');
+        } else {
+            $rows = $sm->select('id, name')
+                ->where('id IN (:ids)', ['ids' => $ids])
+                ->where('type = ?', crmSegmentModel::TYPE_SEARCH)
+                ->fetchAll('id');
+        }
+        $map = [];
+        foreach ($ids as $id) {
+            $label = $fallback;
+            if (isset($rows[$id])) {
+                if ($type === crmSegmentModel::TYPE_CATEGORY) {
+                    $label = trim((string) ifset($rows[$id], 'display_name', ''));
+                } else {
+                    $label = trim((string) ifset($rows[$id], 'name', ''));
+                }
+            }
+            if ($label === '') {
+                $label = $fallback;
+            }
+            $map[$id] = $label;
+        }
+        return $map;
+    }
+
+    protected static function implodeSegmentNamesForTitle(array $ids, array $id_to_name)
+    {
+        $fallback = _w('Unnamed segment');
+        $out = [];
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            if ($id <= 0) {
+                continue;
+            }
+            $out[] = isset($id_to_name[$id]) && (string) $id_to_name[$id] !== ''
+                ? (string) $id_to_name[$id]
+                : $fallback;
+        }
+        return implode(', ', $out);
     }
 
     public static function buildSearchHash($hash, $prefix = null)
@@ -2231,35 +2584,97 @@ class crmContactsSearchHelper
                     $table = $model->getTableName();
                 }
             }
-            if ($table === 'wa_contact_data' || $table === 'wa_contact') {
-                $table = 'wa_contact_data';
+            if ($table === 'wa_contact_data') {
                 $sql_t = "(SELECT COUNT(*) FROM `{$table}` WHERE contact_id = c.id AND field = '{$field_id}') :comparation ";
                 $config = array(
                     'field_id' => $field_id,
                 );
-                $config['items'] = array(
-                    'blank' => array(
+                $config['items'] = [
+                    'blank' => [
                         'name' => 'Empty',
                         'where' => str_replace(':comparation', "= 0", $sql_t)
-                    ),
-                    'not_blank' => array(
+                    ],
+                    'not_blank' => [
                         'name' => 'Not empty',
                         'where' => str_replace(':comparation', "> 0", $sql_t)
-                    ),
-                    ':sep' => array(),
-                    ':values' => array(
-                        "autocomplete" => "AND value LIKE '%:term%'",
-                        "limit" => 10,
-                        "sql" => "SELECT value, value AS name, COUNT(*) count
-                    FROM {$table}
-                    WHERE field = '{$field_id}' :autocomplete
-                    GROUP BY value
-                    ORDER BY count DESC
-                    LIMIT :limit",
-                        "count" => "SELECT COUNT(DISTINCT value) FROM `{$table}` WHERE field = '{$field_id}'"
-                    )
-                );
+                    ],
+                    ':sep' => [],
+                ];
+                if ($field instanceof waContactSelectField) {
+                    $config['readonly'] = true;
+                    $config['items'][':values'] = [
+                        'autocomplete' => 1,
+                        'sql' => "SELECT value, value AS name, COUNT(*) count
+                                FROM {$table}
+                                WHERE field = '{$field_id}'
+                                GROUP BY value
+                                ORDER BY count DESC",
+                        'count' => "SELECT COUNT(DISTINCT value) FROM `{$table}` WHERE field = '{$field_id}'"
+                    ];
+                } elseif ($field instanceof waContactCheckboxField) {
+                    $config['readonly'] = true;
+                    $config['items'] = [
+                            'blank' => [
+                            'name' => 'Off',
+                            'where' => str_replace(':comparation', "= 0", $sql_t)
+                        ],
+                        'not_blank' => [
+                            'name' => 'On',
+                            'where' => str_replace(':comparation', "> 0", $sql_t)
+                        ],
+                    ];
+                } elseif ($field instanceof waContactDateField) {
+                    $config['readonly'] = true;
+                    $sql_tt = "(SELECT COUNT(*) FROM `{$table}` WHERE contact_id = c.id AND field = '{$field_id}' AND :condition ) > 0 ";
+                    $config['items'] += [
+                        'today' => [
+                            'name' => 'today',     // _w('today')
+                            'where' => str_replace(':condition', 'DATE(value) = DATE(NOW())', $sql_tt),
+                        ],
+                        'today_or_tomorrow' => [
+                            'name' => 'today or tomorrow',         // _w('today or tomorrow')
+                            'where' => str_replace(':condition', '(DATE(value) = DATE(NOW()) OR DATE(value) = DATE(DATE_ADD(NOW(), INTERVAL 1 DAY)))', $sql_tt),
+                        ],
+                        'week' => [
+                            'name' => 'in the nearest week',       // _w('in the nearest week')
+                            'where' => str_replace(':condition', 'DATE(value) BETWEEN DATE(NOW()) AND DATE_ADD(NOW(), INTERVAL 7 DAY)', $sql_tt),
+                        ],
+                        'month' => [
+                            'name' => 'in the nearest month',      // _w('in the nearest month')
+                            'where' => str_replace(':condition', 'DATE(value) BETWEEN DATE(NOW()) AND DATE_ADD(NOW(), INTERVAL 1 MONTH)', $sql_tt),
+                        ],
+                        ':period' => [
+                            'name' => 'select a period',       // _w('select a period')
+                            'where' => [
+                                ':between' => str_replace(':condition', "DATE(value) BETWEEN DATE(':0') AND DATE(':1')", $sql_tt),
+                                ':gt' => str_replace(':condition', "DATE(value) >= DATE(':?')", $sql_tt),
+                                ':lt' => str_replace(':condition', "DATE(value) <= DATE(':?')", $sql_tt),
+                            ]
+                        ]
+                    ];
+                } else {
+                    $config['items'][':values'] = [
+                        'autocomplete' => "AND value LIKE '%:term%'",
+                        'limit' => 10,
+                        'sql' => "SELECT value, value AS name, COUNT(*) count
+                                FROM {$table}
+                                WHERE field = '{$field_id}' :autocomplete
+                                GROUP BY value
+                                ORDER BY count DESC
+                                LIMIT :limit",
+                        'count' => "SELECT COUNT(DISTINCT value) FROM `{$table}` WHERE field = '{$field_id}'"
+                    ];
+                }
                 self::updateItem("contact_info.{$field_id}", $config);
+            } else {
+                $original_config_path = wa('crm')->getConfig()->getAppConfigPath('search/search');
+                if (file_exists($original_config_path)) {
+                    $data = include($original_config_path);
+                    if (isset($data['contact_info']['items'][$field_id])) {
+                        $config = $data['contact_info']['items'][$field_id];
+                        self::updateItem("contact_info.{$field_id}", $config);
+                    }
+                }
             }
         }
     }

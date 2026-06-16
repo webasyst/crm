@@ -112,7 +112,7 @@
                     <a href="{$wa_app_url}message/" data-wa-tooltip-content="[`Messages`]">
                         <span class="count hidden">{if isset($messages_count)}{$messages_count}{/if}</span>
                         <i class="fas fa-comments"></i>
-                        <span class="name text-ellipsis">[`Messages`]</span>
+                        <span class="name">[`Messages`]</span>
                         {if !empty($messages_new_count)}
                         <strong class="c-badge badge small js-indicator">{if $messages_new_count < 100}{$messages_new_count}{else}99+{/if}</strong>
                         {/if}
@@ -122,14 +122,14 @@
                 <li{if waRequest::param('module') == 'report'} class="selected"{/if}>
                     <a href="{$wa_app_url}report/" data-wa-tooltip-content="[`Reports`]">
                         <i class="fas fa-chart-bar"></i>
-                        <span class="name text-ellipsis">[`Reports`]</span>
+                        <span class="name">[`Reports`]</span>
                     </a>
                 </li>
 
                 <li{if waRequest::param('module') == 'log'} class="selected"{/if}>
                     <a href="{$wa_app_url}live/" data-wa-tooltip-content="[`Live`]">
                         <i class="fas fa-bolt"></i>
-                        <span class="name text-ellipsis">[`Live`]</span>
+                        <span class="name">[`Live`]</span>
                     </a>
                 </li>
 

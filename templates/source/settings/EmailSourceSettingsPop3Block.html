@@ -1,4 +1,9 @@
 {$block_id = uniqid('c-source-settings-pop3-block')}
+{if $source.id}
+{assign var="mail_provider_cur" value=$source.params.mail_provider|default:'custom'}
+{else}
+{assign var="mail_provider_cur" value=$source.params.mail_provider|default:$mail_provider_default}
+{/if}
 <div class="c-source-settings-pop3-block c-connection-settings-block" id="{$block_id}">
     <div class="field">
         <div class="flexbox vertical middle">
@@ -15,41 +20,77 @@
     <div class="field" style="margin-top: 20px">
         <div class="value">
             <div class="field top-padded">
-                <div class="name">[`Email`]</div>
+                <div class="name for-input">
+                    [`Email`]
+                </div>
                 <div class="value">
-                    <input type="text" name="source[params][email]" value="{$source.params.email|default:''|escape}" class="equal-width js-connection-settings-input">
+                    <input type="text" name="source[params][email]" autocomplete="off" value="{$source.params.email|default:''|escape}" class="equal-width js-connection-settings-input js-login-sync-email">
+                </div>
+            </div>
+            <div class="field js-login-username-input-wrap">
+                <div class="name for-checkbox">[`Username`]</div>
+                <div class="value">
+                    <div class="flexbox wrap middle space-8">
+                        <input type="text" name="source[params][login]" value="{if !empty($login_differs_from_email)}{$source.params.login|default:''|escape}{else}{$source.params.email|default:$source.params.login|default:''|escape}{/if}" autocomplete="new-password" class="equal-width js-connection-settings-input js-login-username-input"{if empty($login_differs_from_email)} disabled="disabled"{/if}>
+                        <input type="hidden" name="source[params][login_same_as_email]" value="2">
+                        <label class="flexbox space-8 hint">
+                            <span class="wa-checkbox custom-mt-4">
+                                <input type="checkbox" name="source[params][login_same_as_email]" value="1" class="js-login-same-as-email-checkbox"{if empty($login_differs_from_email)} checked="checked"{/if}>
+                                <span>
+                                    <span class="icon">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                </span>
+                            </span>
+                            [`Use email as username`]
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class="field">
-                <div class="name">[`Username`]</div>
-                <div class="value">
-                    <input type="text" name="source[params][login]" value="{$source.params.login|default:''|escape}" autocomplete="off" class="equal-width js-connection-settings-input">
-                </div>
-            </div>
-            <div class="field">
-                <div class="name">
+                <div class="name for-input">
                     [`Password`]
                 </div>
                 <div class="value">
-                    <input type="password" name="source[params][password]" value="" autocomplete="off" class="equal-width js-connection-settings-input">
                     {if $source.id}
-                        <p class="hint">[`Leave blank to keep current value unchanged.`]</p>
+                        <div class="js-disabled-email-source-password">
+                            <input type="password" value="******" disabled="disabled">
+                            <a href="javascript:void(0);" class="hint inline-link js-change-email-source-password">[`Change password`]</a>
+                        </div>
+                        <div class="js-email-source-password-fields" style="display: none;">
+                            <input type="password" name="source[params][password]" value="" autocomplete="new-password" class="equal-width js-connection-settings-input">
+                            <p class="hint custom-mt-4">[`Leave blank to keep current value unchanged.`]</p>
+                        </div>
+                    {else}
+                        <input type="password" name="source[params][password]" value="" autocomplete="new-password" class="equal-width js-connection-settings-input">
                     {/if}
                 </div>
             </div>
             <div class="field">
+                <div class="name for-input">[`Mail provider`]</div>
+                <div class="value">
+                    <div class="wa-select">
+                        <select name="source[params][mail_provider]" class="equal-width js-connection-settings-input js-mail-provider-select">
+                            {foreach $mail_providers as $pid => $plabel}
+                                <option value="{$pid|escape}"{if $mail_provider_cur == $pid} selected="selected"{/if}>{$plabel|escape}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="field js-mail-provider-custom-fields">
                 <div class="name">[`Incoming server`]</div>
                 <div class="value">
                     <input type="text" name="source[params][server]" value="{$source.params.server|default:''|escape}" class="equal-width js-connection-settings-input">
                 </div>
             </div>
-            <div class="field">
+            <div class="field js-mail-provider-custom-fields">
                 <div class="name">[`POP3 Port`]</div>
                 <div class="value">
-                    <input type="text" name="source[params][port]" value="{$source.params.port|default:'110'|escape}" class="equal-width js-connection-settings-input">
+                    <input type="number" name="source[params][port]" value="{$source.params.port|default:'110'|escape}" class="shortest equal-width js-connection-settings-input">
                 </div>
             </div>
-            <div class="field">
+            <div class="field js-mail-provider-custom-fields">
                 <div class="name"><br/></div>
                 <div class="value">
                     <input type="hidden" name="source[params][tls]" value="">
@@ -58,13 +99,13 @@
                     <ul class="menu-v">
                         <li>
                             <label>
-                                <input class="c-secure-checkbox js-connection-settings-checkbox" type="checkbox" name="source[params][tls]" value="1" {if !empty($source.params.tls)} checked="checked"{/if}>
+                                <input class="c-secure-checkbox js-connection-settings-checkbox js-mail-provider-tls-checkbox" type="checkbox" name="source[params][tls]" value="1" {if !empty($source.params.tls)} checked="checked"{/if}>
                                 [`Use Secure STARTTLS Settings`]
                             </label>
                         </li>
                         <li>
                             <label>
-                                <input class="c-secure-checkbox js-connection-settings-checkbox" type="checkbox" name="source[params][ssl]" value="1"{if !empty($source.params.ssl) && empty($source.params.tls)} checked="checked"{/if}>
+                                <input class="c-secure-checkbox js-connection-settings-checkbox js-mail-provider-ssl-checkbox" type="checkbox" name="source[params][ssl]" value="1"{if !empty($source.params.ssl) && empty($source.params.tls)} checked="checked"{/if}>
                                 [`Use Secure SSL/TLS Settings`]
                             </label>
                         </li>
@@ -107,8 +148,111 @@
 
         <script>
             ( function($) {
+                var presets = {$mail_presets|json_encode};
+                var providerDomainMap = {$mail_provider_domain_map|json_encode};
+                var $block = $("#{$block_id}");
+                var $email = $block.find(".js-login-sync-email");
+                var $login = $block.find(".js-login-username-input");
+                var $loginCb = $block.find(".js-login-same-as-email-checkbox");
+                function syncLoginFromEmail() {
+                    if ($loginCb.is(":checked")) {
+                        $login.val($.trim($email.val()));
+                    }
+                }
+                function toggleLoginInput() {
+                    if ($loginCb.is(":checked")) {
+                        syncLoginFromEmail();
+                        $login.prop("disabled", true);
+                    } else {
+                        $login.prop("disabled", false);
+                    }
+                }
+                function emailDomainMatchesRule(domain, rule) {
+                    domain = $.trim(domain).toLowerCase();
+                    rule = $.trim(rule).toLowerCase();
+                    if (!domain || !rule) {
+                        return false;
+                    }
+                    if (rule.charAt(0) === ".") {
+                        return domain.length >= rule.length && domain.slice(-rule.length) === rule;
+                    }
+                    return domain === rule;
+                }
+                function suggestMailProviderFromEmail(email) {
+                    email = $.trim(email);
+                    var at = email.lastIndexOf("@");
+                    if (at < 0) {
+                        return null;
+                    }
+                    var domain = email.slice(at + 1);
+                    if (!domain) {
+                        return null;
+                    }
+                    var provider, rules, i;
+                    for (provider in providerDomainMap) {
+                        if (!providerDomainMap.hasOwnProperty(provider)) {
+                            continue;
+                        }
+                        rules = providerDomainMap[provider];
+                        for (i = 0; i < rules.length; i++) {
+                            if (emailDomainMatchesRule(domain, rules[i])) {
+                                return provider;
+                            }
+                        }
+                    }
+                    return "custom";
+                }
+                var $sel = $block.find(".js-mail-provider-select");
+                function suggestMailProviderFromEmailField() {
+                    var suggested = suggestMailProviderFromEmail($email.val());
+                    if (!suggested || !$sel.find('option[value="' + suggested + '"]').length) {
+                        return;
+                    }
+                    if ($sel.val() !== suggested) {
+                        $sel.val(suggested).trigger("change");
+                    }
+                }
+                var emailSuggestTimer = null;
+                $email.on("change blur", function() {
+                    syncLoginFromEmail();
+                    suggestMailProviderFromEmailField();
+                });
+                $email.on("keyup", function() {
+                    if (emailSuggestTimer) {
+                        clearTimeout(emailSuggestTimer);
+                    }
+                    emailSuggestTimer = setTimeout(suggestMailProviderFromEmailField, 300);
+                });
+                $loginCb.on("change", toggleLoginInput);
+                toggleLoginInput();
+                var $custom = $block.find(".js-mail-provider-custom-fields");
+                var $srv = $block.find('input[name="source[params][server]"]');
+                var $port = $block.find('input[name="source[params][port]"]');
+                var $tls = $block.find(".js-mail-provider-tls-checkbox");
+                var $ssl = $block.find(".js-mail-provider-ssl-checkbox");
+                function applyMailProvider() {
+                    var v = $sel.val();
+                    if (v === "custom") {
+                        $custom.show();
+                    } else {
+                        $custom.hide();
+                        if (presets[v]) {
+                            $srv.val(presets[v].server);
+                            $port.val(String(presets[v].port));
+                            $tls.prop("checked", !!presets[v].tls);
+                            $ssl.prop("checked", !!presets[v].ssl);
+                        }
+                    }
+                }
+                $sel.on("change", applyMailProvider);
+                applyMailProvider();
+                $block.find(".js-change-email-source-password").on("click", function (e) {
+                    e.preventDefault();
+                    $block.find('.js-disabled-email-source-password').hide();
+                    $block.find(".js-email-source-password-fields").show().find("input").first().focus();
+                });
                 new CRMSettingsSourceEmailConnectionTestBlock({
-                    $wrapper: $("#{$block_id}"),
+                    $wrapper: $block,
                     source: {$source|json_encode}
                 });
             })(jQuery);

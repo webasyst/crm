@@ -105,6 +105,12 @@ abstract class crmSourceHelper
         if (ifset($fa_icon['icon_fab'])) {
             $conversation['icon_fab'] = $fa_icon['icon_fab'];
             $conversation['icon_color'] = $fa_icon['icon_color'];
+        } else {
+            $fa_icon = $this->source->getFontAwesomeIcon();
+            if (ifset($fa_icon['icon_fa'])) {
+                $conversation['icon_fa'] = $fa_icon['icon_fa'];
+                $conversation['icon_color'] = $fa_icon['icon_color'];
+            }
         }
         return $conversation;
     }

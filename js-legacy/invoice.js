@@ -1702,6 +1702,7 @@ var CRMInvoicePage = ( function($) {
 
         // VARS
         that.invoice_id = options["invoice_id"];
+        that.sidebar_item_html = options["sidebar_item_html"] || null;
         that.locales = options["locales"];
 
         // DYNAMIC VARS
@@ -1720,12 +1721,31 @@ var CRMInvoicePage = ( function($) {
         that.initRefund();
         //
         that.initRestore();
+        //
+        that.syncSidebarState();
         // set active in sidebar
         setTimeout( function() {
             $(document).trigger("viewInvoice", that.invoice_id);
         }, 100);
 
         that.$wrapper.data("page", that);
+    };
+
+    CRMInvoicePage.prototype.syncSidebarState = function() {
+        var that = this,
+            $sidebar_item = $(".js-invoices-list .c-invoice[data-id=\"" + that.invoice_id + "\"]"),
+            page_state_id = that.$wrapper.data("stateId"),
+            sidebar_state_id = $sidebar_item.data("stateId"),
+            page_payment_expired = that.$wrapper.data("paymentExpired"),
+            sidebar_payment_expired = $sidebar_item.data("paymentExpired");
+
+        if (!$sidebar_item.length || !that.sidebar_item_html || !page_state_id || !sidebar_state_id) {
+            return;
+        }
+
+        if (sidebar_state_id !== page_state_id || sidebar_payment_expired !== page_payment_expired) {
+            updateInvoiceAtSidebar(that.invoice_id, that.sidebar_item_html);
+        }
     };
 
     CRMInvoicePage.prototype.initChangeState = function() {

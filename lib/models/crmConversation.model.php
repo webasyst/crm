@@ -216,7 +216,7 @@ class crmConversationModel extends crmModel
             FROM {$this->table} AS c
             {$join}
             {$condition}
-            ORDER BY update_datetime DESC";
+            ORDER BY c.update_datetime DESC";
         if ($limit) {
             $sql .= " LIMIT $offset, $limit";
         }

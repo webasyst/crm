@@ -85,11 +85,26 @@ class crmInvoiceListMethod extends crmApiAbstractMethod
             $where[] = "number LIKE '%".$invoice_model->escape($number)."%'";
             $filter['number'] = $number;
         }
+        $access_rights_join = '';
+        if (!wa()->getUser()->isAdmin('crm')) {
+            // Only keep contacts from available vaults
+            $rights = new crmRights();
+            $where[] = 'wa_contact.crm_vault_id IN (:vault_ids)';
+            $filter['vault_ids'] = $rights->getAvailableVaultIds();
+            $access_rights_join = 'INNER JOIN wa_contact ON wa_contact.id=crm_invoice.contact_id';
+
+            // Show only our invoices if access does not allow for more (wa_contact_rights.manage_invoices = 1)
+            if (wa()->getUser()->getRights('crm', 'manage_invoices') == 1) {
+                $where[] = 'creator_contact_id = :user_id';
+                $filter['user_id'] = wa()->getUser()->getId();
+            }
+        }
         $invoices = $invoice_model->query("
-            SELECT SQL_CALC_FOUND_ROWS *
+            SELECT SQL_CALC_FOUND_ROWS crm_invoice.*
             FROM crm_invoice
+            $access_rights_join
             WHERE ".implode(' AND ', $where)."
-            ORDER BY $sort ".($asc ? 'ASC' : 'DESC')." LIMIT i:offset, i:limit
+            ORDER BY crm_invoice.{$sort} ".($asc ? 'ASC' : 'DESC')." LIMIT i:offset, i:limit
         ", $filter)->fetchAll();
         $total_count = $invoice_model->query('SELECT FOUND_ROWS()')->fetchField();
         $contact_ids = array_unique(array_column($invoices, 'contact_id'));

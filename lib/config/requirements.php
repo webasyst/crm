@@ -9,4 +9,8 @@ return array(
         'version' => '>=2.2.2',
         'strict' => true,
     ),
+    'php' => array(
+        'version' => '>=8.2.0',
+        'strict'  => true,
+    ),
 );

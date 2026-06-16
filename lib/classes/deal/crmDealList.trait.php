@@ -45,7 +45,7 @@ trait crmDealListTrait
             $is_deals_limit = true;
         } else {
             $deals = $this->getDeals($list_params, $users, $total_count);
-            $this->extendByCanDeleteFlag($deals, $funnels);
+            $this->extendByRights($deals, $funnels);
         }
 
         $last_message_ids = array();
@@ -179,18 +179,27 @@ trait crmDealListTrait
         );
     }
 
-    protected function extendByCanDeleteFlag(array &$deals, array $funnels)
+    protected function extendByRights(array &$deals, array $funnels)
     {
         $can_delete_deals = [];
+        $can_edit_deals = [];
+        $funnel_access_rights = [];
         foreach ($funnels as $f) {
             if ($f['id'] !== 'all') {
-                $can_delete_deals[$f['id']] = $this->getCrmRights()->funnel($f) >= crmRightConfig::RIGHT_FUNNEL_ALL;
+                $_rights = $this->getCrmRights()->funnel($f);
+                $can_delete_deals[$f['id']] = $_rights >= crmRightConfig::RIGHT_FUNNEL_ALL;
+                $can_edit_deals[$f['id']] = $_rights > crmRightConfig::RIGHT_DEAL_VIEW;
+                $funnel_access_rights[$f['id']] = $_rights;
             }
         }
+        unset($_rights);
 
         foreach ($deals as &$deal) {
-            $can_delete = isset($can_delete_deals[$deal['funnel_id']]) ? $can_delete_deals[$deal['funnel_id']] : true;
-            $deal['can_delete'] = $can_delete;
+            $deal['can_delete'] = isset($can_delete_deals[$deal['funnel_id']]) ? $can_delete_deals[$deal['funnel_id']] : true;
+            $deal['can_edit'] = isset($can_edit_deals[$deal['funnel_id']]) ? $can_edit_deals[$deal['funnel_id']] : true;
+            $deal['can_manage_responsible'] = $deal['user_contact_id'] == $this->getUser()->getId()
+                || $funnel_access_rights[$deal['funnel_id']] > crmRightConfig::RIGHT_DEAL_EDIT
+                || !$deal['contacts']['user'] && $funnel_access_rights[$deal['funnel_id']] > crmRightConfig::RIGHT_DEAL_NONE;
         }
         unset($deal);
 

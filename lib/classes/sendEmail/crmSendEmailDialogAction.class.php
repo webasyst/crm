@@ -88,7 +88,7 @@ class crmSendEmailDialogAction extends crmBackendViewAction
         }
 
         if (!$message['reply_allowed']) {
-            $this->accessDenied();
+            $this->accessDenied('Reply is not allowed');
         }
 
         return $this->message = $message;
@@ -117,7 +117,7 @@ class crmSendEmailDialogAction extends crmBackendViewAction
             $this->notFound();
         }
         if (!$this->getCrmRights()->contact($id)) {
-            $this->accessDenied();
+            $this->accessDenied('No access to contact');
         }
         return new crmContact($id);
     }
@@ -139,7 +139,7 @@ class crmSendEmailDialogAction extends crmBackendViewAction
             $this->notFound();
         }
         if (!$this->getCrmRights()->deal($deal)) {
-            $this->accessDenied();
+            $this->accessDenied('No access to deal');
         }
         return $deal;
     }

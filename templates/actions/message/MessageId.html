@@ -1,0 +1,797 @@
+{if !empty($message)}
+
+{$_contact = [
+    'id'   => null,
+    'name' => '[`Deleted contact`]'
+]}
+{if !empty($contacts[$message.contact_id])}
+    {$_contact = $contacts[$message.contact_id]}
+{/if}
+
+{$filter_contact_id = waRequest::request('contact', waRequest::get('contact', null, waRequest::TYPE_INT), waRequest::TYPE_INT)}
+{$filter_deal_id = waRequest::request('deal', waRequest::get('deal', null, waRequest::TYPE_INT), waRequest::TYPE_INT)}
+{$_sender = $contacts[$wa->userId()]}
+
+{function name="_renderFromContact" _contact=[]}
+    {if !empty($_contact.id)}
+        <a href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top" class="flexbox middle nowrap c-contact-link {if !empty($_is_bold)}bold{/if}">
+            <span class="icon size-18 custom-mr-4 "><i class="userpic" style="background-image: url({$_contact.photo_url_16});" title="{$_contact.name|escape}"></i></span><span class="c-contact-link--name">{$_contact.name|escape}</span>
+        </a>
+    {elseif isset($_contact.id) && $_contact.id === 0 && !empty($source)}
+        <span class="c-contact-link--name">{$source->getName()|escape}</span>
+    {else}
+        <span class="c-contact-link--name">{$_contact.name|escape}</span>
+    {/if}
+{/function}
+
+{function name="_renderToRecipient" recipient=[]}
+    {if $recipient.contact_id > 0}
+        <a href="{$wa_app_url}contact/{$recipient.contact_id}/" target="_top" data-link="top" class="c-contact-link">
+            {if !empty($recipient.photo_url_16)}
+                <i class="icon userpic custom-mr-4" style="background-image: url({$recipient.photo_url_16});" title="{$recipient.name|escape}"></i>
+            {/if}
+            {$recipient.name|escape}
+        </a>
+        <span class="gray">&lt;{$recipient.destination|escape}&gt;</span>
+    {else}
+        {if !empty($recipient.photo_url_16)}
+            <i class="icon userpic custom-mr-4" style="background-image: url({$recipient.photo_url_16});" title="{$recipient.name|escape}"></i>
+        {/if}
+        {$recipient.name|escape}&nbsp;
+        <span class="gray">&lt;{$recipient.destination|escape}&gt;</span>
+    {/if}
+{/function}
+
+{function name="_renderRecipient" _contact=[]}
+    {if !empty($_contact.name)}
+        {if !empty($_contact.contact_id)}
+            <a href="{$wa_app_url}contact/{$_contact.contact_id}/" target="_top" data-link="top" class="c-contact-link">
+                {if !empty($_contact.photo)}<i class="icon userpic custom-mr-4" style="background-image: url({$_contact.photo});" title="{$_contact.name|escape}"></i>{/if}
+                <span class="c-contact-link--name">{$_contact.name|escape}</span>
+            </a>
+        {else}
+        <span class="c-contact-link--name">{$_contact.name|escape}</span>
+        {/if}
+    {/if}
+
+    {if !empty($_contact.destination)}
+        <span style="color: #999;">&lt;{$_contact.destination|escape}&gt;</span>
+    {elseif !empty($_contact.email)}
+        <span style="color: black;">&lt;{$_contact.email|escape}&gt;</span>
+    {/if}
+{/function}
+
+{function _renderMessageBody message=[]}
+    <div class="js-message-body">
+        {include file="../message/MessageBody.inc.html" message=$message inline}
+    </div>
+{/function}
+
+{function skeleton}
+<div class="skeleton-wrapper" >
+    <div class="skeleton">
+        <div class="header-skeleton">
+            <span class="skeleton-list"></span>
+        </div>
+        <div class="body-skeleton">
+            <span class="skeleton-custom-box" style="align-self: flex-start; width: 200px; height: 60px; margin-top: 30px"></span>
+            <span class="skeleton-custom-box" style="align-self: flex-start; width: 200px; height: 40px;"></span>
+            <span class="skeleton-custom-box" style="align-self: flex-end; width: 200px; height: 60px;"></span>
+            <span class="skeleton-custom-box" style="align-self: flex-start; width: 200px; height: 90px;"></span>
+            <span class="skeleton-custom-box" style="align-self: flex-end; width: 200px; height: 50px;"></span>
+        </div>
+        <div class="footer-skeleton">
+            <span class="skeleton-list"></span>
+        </div>
+    </div>
+</div>
+{/function}
+<div class="c-messages-conversation-wrapper">
+    {* skeleton *}
+<div class="c-messages-page-content-wrapper">
+    <div class="c-message-conversation-page shadowed" id="js-message-conversation-page" data-message-id="{$message.id}">
+        <div class="c-conversation-body">
+        {strip}
+        <header class="flexbox middle space-12 c-page-header-section">
+            <div class="align-center custom-my-12 mobile-only">
+                <button class="button small circle js-expand-sidebar"><i class="fas fa-arrow-left"></i></button>
+            </div>
+            {if !empty($_contact.id)}
+                {$_photo = $_contact.photo_url_50}
+                {* $_jobtitle = $_contact->get('jobtitle') *}
+                {* $_company = $_contact->get('company') *}
+                {* CLIENT PHOTO *}
+                {if !empty($_photo)}
+                <div class="c-user-photo userpic userpic-32 rounded">
+                    <img src="{$_photo}" alt="{$_contact.name|escape}">
+                </div>
+                {/if}
+            {else}
+                <div class="c-user-photo userpic userpic-32">
+                    <img class="" src="/wa-content/img/userpic.svg" />
+                </div>
+            {/if}
+            <div class="flexbox vertical c-client-data">
+                <div class="flexbox full-width c-name-wrapper">
+                    <div class="flexbox middle space-8 c-name-wrapper--name">
+                        <div class="c-name">{$_contact.name|escape}</div>
+                        <div class="flexbox middle space-4 custom-pt-4">
+                            <div class="icon size-16" style="align-self: center;">
+                                {if !empty($conversation.icon_fab)}
+                                    <i class="fab fa-{$conversation.icon_fab}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
+                                {elseif !empty($conversation.icon_fa)}
+                                    <i class="fas fa-{$conversation.icon_fa}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
+                                {elseif !empty($conversation.icon_url)}
+                                    <img src="{$conversation.icon_url}" data-fa-i2svg>
+                                {/if}
+                            </div>
+                            <div class="hint desktop-only">{$conversation.transport_name|escape}</div>
+                        </div>
+                    </div>
+                    <div class="dropdown" id="dropdown-c-name">
+                        <a href="javascript:void(0);" class="dropdown-toggle without-arrow c-name">
+                            <span class="icon size-14"><i class="fas fa-ellipsis-h"></i></span>
+                        </a>
+                        <div class="dropdown-body right">
+                            <ul class="menu">
+                                <li>
+                                    <a class="flexbox middle" href="{$wa_app_url}contact/{$_contact.id}/" target="_top" data-link="top" data-id="1">
+                                    {if !empty($_contact.id)}
+                                        {$_photo = $_contact.photo_url_32}
+                                        {* $_jobtitle = $_contact->get('jobtitle') *}
+                                        {* $_company = $_contact->get('company') *}
+                                        {* CLIENT PHOTO *}
+                                        {if !empty($_photo)}
+                                        <span class="custom-ml-0 c-user-photo userpic userpic-16 rounded" style="background-image: url('{$_photo}');">
+                                        </span>
+                                        {/if}
+                                    {else}
+                                        <span class="c-user-photo userpic userpic-16" style="background-image: url('/wa-content/img/userpic.svg');">
+                                        </span>
+                                    {/if}
+                                        <span>[`Client profile`]</span>
+                                    </a>
+                                </li>
+
+                                {if $message.direction === crmMessageModel::DIRECTION_IN}
+                                    <li>
+                                        <a href="javascript:void(0);" class="flexbox middle js-message-reply" data-message-id="{$message.id}">
+                                            <i class="fas fa-reply"></i>
+                                            <span>[`Reply`]</span>
+                                        </a>
+                                    </li>
+                                    {if $message.transport == crmMessageModel::TRANSPORT_EMAIL}
+                                        <li>
+                                            <a href="javascript:void(0);" class="flexbox middle js-message-forward" data-message-id="{$message.id}">
+                                                <i class="fas fa-share"></i>
+                                                <span>[`Forward message`]</span>
+                                            </a>
+                                        </li>
+                                    {/if}
+                                {/if}
+                                {if $message.original}
+                                    <li>
+                                        <a class="flexbox middle js-disable-router" href="?module=file&action=downloadEml&id={$message.id}">
+                                            <i class="fas fa-arrow-down"></i>
+                                            <span>[`Download original`]</span>
+                                        </a>
+                                    </li>
+                                {/if}
+
+                                {if !empty($deal)}
+                                    <li>
+                                        <a class="flexbox middle" href="{$wa_app_url}deal/{$deal.id}/" target="_top" data-link="top">
+                                        {if $deal.stage_id && isset($funnel.stages[$deal.stage_id])}
+                                            {$_stage = $funnel.stages[$deal.stage_id]}
+                                        {else}
+                                            {$_stage = null}
+                                        {/if}
+                                        {if $deal.status_id == "WON"}
+                                            <i class="custom-mr-8 fas fa-flag-checkered" style="color: {$_stage.color|escape}" title=" [`WON`]"></i>
+                                        {elseif $deal.status_id == "LOST"}
+                                            <i class="custom-mr-8 fas fa-ban" style="color: {$_stage.color|escape}" title=" [`LOST`]"></i>
+                                        {else}
+                                            {if $_stage}
+                                                <i class="custom-mr-8 {$deal.funnel.icon|default:'fas fa-briefcase'|escape} funnel-state" style="color: {$_stage.color|escape}" title="{$deal.funnel.name|escape} / {$_stage.name|escape}"></i>
+                                            {else}
+                                                <i class="custom-mr-8 fas fa-exclamation-circle gray" title=" [`Stage deleted`]"></i>
+                                            {/if}
+                                        {/if}
+                                        {if $deal.funnel}
+                                        <span class="flexbox vertical js-deal-link">
+                                            <span class="flexbox full-width smaller text-gray">
+                                                <span class="wide">[`Deal`]
+                                                {if !empty($deal.funnel.is_archived)}
+                                                    <span class="custom-ml-4 nowrap"> [`(archived)`]</span>
+                                                {/if}
+                                                </span>
+                                                <span class="small">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </span>
+                                            </span>
+                                            <div class="text-ellipsis" style="max-width: 130px;" title="{strip_tags($deal.name)|escape}">
+                                                {strip_tags($deal.name)|escape}
+                                            </div>
+                                        </span>
+                                        {/if}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="flexbox middle c-deal-wrapper {if $can_edit_conversation}js-associate-message-deal{/if}" data-dialog-url="{$wa_app_url}?module=message&action=associateDealDialog&message_id={$message.id}">
+                                            <i class="icon fas fa-pen"></i> [`Attach to another deal`]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="flexbox middle inline-link js-detach-message-deal" href="javascript:void(0);" data-dialog-url="{$wa_app_url}?module=message&action=dealDetachDialog&message_id={$message.id}">
+                                            <i class="icon fas fa-times-circle"></i> [`Detach from deal`]
+                                        </a>
+                                    </li>
+                                {elseif !empty($contacts[$message.contact_id]) && !empty($clean_data.deal) && empty($message.deal_id)}
+                                    <li>
+                                        <a href="javascript:void(0);" class="flexbox middle js-associate-message-deal nowrap" data-dialog-url="{$wa_app_url}?module=message&action=associateDealDialog&message_id={$message.id}">
+                                            <i class="custom-mr-8 fas fa-plus add"></i>
+                                            <span>[`Associate with a deal`]</span>
+                                        </a>
+                                    </li>
+                                {/if}
+
+                                {if !empty($message.aux_items.header_dropdown_items)}
+                                    {foreach $message.aux_items.header_dropdown_items as $_item}
+                                        <li>{$_item}</li>
+                                    {/foreach}
+                                {/if}
+
+                                {if $wa->user()->isAdmin('crm') || empty($message['user_contact_id']) || $message['user_contact_id'] == $wa->user()->getId()}
+                                <li>
+                                    <a class="flexbox middle js-delete-message" href="javascript:void(0);" data-message-id="{$message.id}">
+                                        <i class="icon fas fa-trash-alt delete"></i> [`Delete message`]
+                                    </a>
+                                </li>
+                                {/if}
+                            </ul>
+                        </div>
+                        <script>
+                            ( function($) {
+                                $("#dropdown-c-name").waDropdown({
+                                    hover: false,
+                                });
+                            })(jQuery);
+                        </script>
+                    </div>
+                </div>
+                <div class="c-summary" title="{$message.subject|escape}">{$message.subject|escape}</div>
+            </div>
+
+        </header>
+        {/strip}
+
+        {$current_user_id = $wa->userId()}
+
+
+            {if $message.transport == 'EMAIL'}
+                <section class="c-email-conversation-section js-wa-gallery" id="js-email-conversation-section">
+                    <div>
+                    <div class="c-messages-list c-email-messages-list js-messages-list hide-scrollbar">
+                        <div>
+                        {$_m = $message}
+
+                            {* _renderChatTime _date=$_m.create_datetime *}
+                            {$message_date = waDateTime::format('date', $_m.create_datetime)}
+                            {$current_date = $message_date}
+                            {$is_another_user = ($_m.direction == crmMessageModel::DIRECTION_OUT && $_m.creator_contact_id !== $current_user_id)}
+                            {$is_verification_message = !empty($_m.params) && !empty($_m.params.is_contact_updated) && $_m.params.is_contact_updated == '1'}
+
+                            <div class="c-message-wrapper js-message-wrapper {if $is_verification_message}verification_message{/if}"
+                            data-id="{$_m.id}" {if $is_verification_message}data-verification="{$_m.contact_id}"{/if}>
+                                
+                                    
+                                    <div class="flexbox middle nowrap space-16 c-message-header custom-mr-8">
+                                        <div class="badge squared light-gray">
+                                            {if $message.direction == crmMessageModel::DIRECTION_IN}
+                                                [`Incoming`]
+                                            {else}
+                                                [`Outgoing`]
+                                            {/if}
+                                        </div>
+
+
+                                        {if !empty($_m.create_datetime)}
+                                            <span class="nowrap c-date gray custom-ml-auto{if $_m.direction == crmMessageModel::DIRECTION_OUT} text-strong{/if}">
+                                                {$_m.create_datetime|wa_datetime:'time'}
+                                            </span>
+                                        {/if}
+                                    </div>
+
+                                    <div class="fields c-message-info">
+                                        <div class="field">
+                                            <div class="name">[`From`]</div>
+                                            <div class="value small">
+                                                {_renderFromContact _contact=$from}
+                                            </div>
+                                        </div>
+
+                                        {if !empty($message.to)}
+                                            <div class="field">
+                                                <div class="name">[`To`]</div>
+                                                <div class="value small">
+                                                    <div class="flexbox vertical" style="row-gap: 8px;">
+                                                        {foreach $to_list as $_recipient}
+                                                            <div>{_renderToRecipient recipient=$_recipient|default:0}</div>
+                                                        {/foreach}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {/if}
+
+                                        {if !empty($copy_recipients)}
+                                            <div class="field">
+                                                <div class="name">[`Copy`]</div>
+                                                <div class="value small">
+                                                    <div class="flexbox vertical" style="row-gap: 8px;">
+                                                        {foreach $copy_recipients as $_recipient}
+                                                            <div>{_renderRecipient _contact=$_recipient}</div>
+                                                        {/foreach}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {/if}
+                                    </div>
+
+                                <div class="custom-py-32">
+                                    <div class="c-message-body{if $_m.direction == crmMessageModel::DIRECTION_OUT} text-strong{/if}">
+                                        {$_m.body_sanitized}
+                                        {*strip_tags($_m.subject)|escape*}
+                                    </div>
+                                    {if !empty($_m.params.footer)}
+                                        <hr class="custom-my-12">
+                                        <p class="hint custom-mt-4">{crmHtmlSanitizer::work($_m.params.footer)}</p>
+                                    {/if}
+                                    {if $_m.attachments}
+                                        <div class="c-message-attachments">
+                                            <hr class="custom-my-12">
+                                            <ul class="menu c-restored-list c-attachments-list">
+                                                {foreach $_m.attachments as $a}
+                                                    {if isset($a.id)}
+                                                        {$file_link = "?module=file&action=download&id=`$a.id`"}
+                                                    {elseif isset($a.url)}
+                                                        {$file_link = $a.url}
+                                                    {/if}
+                                                    {if isset($a.name)}
+                                                        {assign var="clean_file_name" value=$a.name|escape}
+                                                        {assign var="offset_last_dot" value=$clean_file_name|strrpos:"."}
+                                                        {if $offset_last_dot !== False}
+                                                            {assign var="name_without_ext" value=$clean_file_name|substr:0:($offset_last_dot)}
+                                                        {else}
+                                                            {assign var="name_without_ext" value=$clean_file_name}
+                                                        {/if}
+                                                    {/if}
+                                                    <li class="custom-pt-4">
+                                                        <a class="js-disable-router flexbox space-4{if isset($a.id) && in_array($a.ext, ['jpg', 'jpeg', 'png'])} wa-gallery-image{/if}" href="{$file_link}">
+                                                            <span class="attachments-icon"{if isset($a.id) && in_array($a.ext, ['jpg', 'jpeg', 'png'])} style="background-image: url('?module=file&action=download&id={$a.id}&thumb=48');"{/if}>
+                                                                <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                {if !isset($a.id) || !in_array($a.ext, ['jpg', 'jpeg', 'png'])}
+                                                                    <path d="M3.31445 19.1816H12.6836C14.5732 19.1816 15.5488 18.1885 15.5488 16.29V8.30957C15.5488 7.0791 15.3906 6.5166 14.626 5.73438L10.0293 1.06738C9.28223 0.311523 8.66699 0.135742 7.55957 0.135742H3.31445C1.43359 0.135742 0.449219 1.12891 0.449219 3.03613V16.29C0.449219 18.1885 1.43359 19.1816 3.31445 19.1816ZM3.46387 17.4238C2.62012 17.4238 2.19824 16.9844 2.19824 16.1758V3.1416C2.19824 2.3418 2.62012 1.89355 3.47266 1.89355H7.19922V6.6748C7.19922 7.94922 7.82324 8.56445 9.08887 8.56445H13.7998V16.1758C13.7998 16.9844 13.3779 17.4238 12.5254 17.4238H3.46387ZM9.25586 7.02637C8.88672 7.02637 8.72852 6.86816 8.72852 6.50781V2.12207L13.5625 7.02637H9.25586ZM11.0928 10.8672H4.74707C4.41309 10.8672 4.17578 11.1045 4.17578 11.4121C4.17578 11.7285 4.41309 11.9746 4.74707 11.9746H11.0928C11.4092 11.9746 11.6465 11.7285 11.6465 11.4121C11.6465 11.1045 11.4092 10.8672 11.0928 10.8672ZM11.0928 13.8027H4.74707C4.41309 13.8027 4.17578 14.0488 4.17578 14.3652C4.17578 14.6729 4.41309 14.9102 4.74707 14.9102H11.0928C11.4092 14.9102 11.6465 14.6729 11.6465 14.3652C11.6465 14.0488 11.4092 13.8027 11.0928 13.8027Z" fill="#8E8E93"/>
+                                                                {/if}
+                                                                </svg>
+                                                            </span>
+                                                            <div class="custom-pt-8 attachments-name-wrapper">
+                                                                <div class="flexbox attachments-name">
+                                                                    <div class="text-ellipsis">{$name_without_ext}</div>
+                                                                    <span class="nowrap">.{$a.ext}</span>
+                                                                </div>
+                                                                <div class="c-size hint">{crmHelper::formatFileSize($a.size)}</div>
+                                                            </div>
+                                                        </a>
+                                                    </li>
+                                                {/foreach}
+                                            </ul>
+                                        </div>
+                                    {/if}
+                                </div>
+                            </div>
+                        
+                        </div>
+                    </div>
+                    </div>
+                </section>
+
+                <section class="c-reply-section">
+                    <button class="button light-gray rounded js-messages-list--to-bottom-button">
+                        <i class="fas fa-angle-down"></i>
+                    </button>
+                    <div class="flexbox middle full-width custom-p-16">
+                        <div class="flexbox middle wide">
+
+                        {if $message.direction === crmMessageModel::DIRECTION_IN}
+                            <a href="javascript:void(0);" class="button light-gray rounded js-message-reply" data-message-id="{$message.id}">
+                                <i class="fas fa-reply"></i>
+                                <span>[`Reply`]</span>
+                            </a>
+                            {if $message.transport == crmMessageModel::TRANSPORT_EMAIL}
+                                <a href="javascript:void(0);" class="button light-gray rounded js-message-forward" data-message-id="{$message.id}">
+                                    <i class="fas fa-share"></i>
+                                    <span>[`Forward`]</span>
+                                </a>
+                            {/if}
+                        {/if}
+                        {if $message.original}
+                            <a class="js-disable-router button light-gray rounded" href="?module=file&action=downloadEml&id={$message.id}" title="[`Download original`]">
+                                <i class="fas fa-arrow-down"></i>
+                            </a>
+                        {/if}
+                        </div>
+                        {if $wa->user()->isAdmin('crm') || empty($message['user_contact_id']) || $message['user_contact_id'] == $wa->user()->getId()}
+                            <a class="js-delete-message button light-gray rounded" href="javascript:void(0);" data-message-id="{$message.id}">
+                                <i class="icon fas fa-trash-alt delete"></i> [`Delete`]
+                            </a>
+                        {/if}
+                    </div>
+                </section>
+
+                {* if !empty($source_is_disabled)}
+                    <section class="c-reply-section">
+                        <button class="button light-gray rounded js-messages-list--to-bottom-button">
+                            <i class="fas fa-angle-down"></i>
+                        </button>
+                        <div class="flexbox middle custom-p-16 source-not-found">[`Oops, sorry, this message source is disabled :(`]</div>
+                    </section>
+                {elseif $message.contact_id && !empty($contacts[$message.contact_id])}
+                    <section class="c-reply-section">
+                        <button class="button light-gray rounded js-messages-list--to-bottom-button">
+                            <i class="fas fa-angle-down"></i>
+                        </button>
+                        <div class="c-reply-form-wrapper js-reply-wrapper">
+
+                            {include file="./MessageConversationId.replyEmail.inc.html" _c_icon_url=$message.icon_url _c_icon = $message.icon_fa inline}
+
+                        </div>
+                    </section>
+                {/if *}
+
+            {elseif $message.transport == 'IM'}
+                <section class="c-im-conversation-section js-wa-gallery" id="js-im-conversation-section">
+                    <div>
+                    <div class="c-messages-list c-im-messages-list js-messages-list hide-scrollbar">
+                        <div>
+                        {$_m = $message}
+
+                            {* _renderChatTime _date=$_m.create_datetime *}
+                            {$message_date = waDateTime::format('date', $_m.create_datetime)}
+                            {$current_date = $message_date}
+                            {$_contact_name = null}
+                            {$is_another_user = ($_m.direction == crmMessageModel::DIRECTION_OUT && $_m.creator_contact_id !== $current_user_id)}
+                            {$is_verification_message = !empty($_m.params) && !empty($_m.params.is_contact_updated) && $_m.params.is_contact_updated == '1'}
+
+                            {if $_m.direction == crmMessageModel::DIRECTION_OUT}
+                                {if isset($_m.from_formatted)}
+                                    {$_contact_name = $_m.from_formatted}
+                                {else}
+                                    {$_contact_name = $_m.from|escape}
+                                {/if}
+                                {if !empty($contacts[$_m.creator_contact_id])}
+                                    {capture assign=_contact_name}{_renderFromContact _contact=$contacts[$_m.creator_contact_id]}{/capture}
+                                {/if}
+                            {/if}
+
+                            <div class="c-message-wrapper js-message-wrapper {if $_m.direction == 'IN'}left{else}right{/if} {if $is_verification_message}verification_message{/if}"
+                            data-id="{$_m.id}" {if $is_verification_message}data-verification="{$_m.contact_id}"{/if}>
+                                <div class="fields c-message-item {if $_m.direction == 'IN'}c-message-in{else}c-message-out{/if} {if $is_another_user}another-user{/if} {if in_array(ifset($_m.error_code), ['unsupported', 'not_delivered'])}unsupported{/if}">
+
+                                    <div class="c-message-tail">
+                                        <svg width="13" height="18" viewBox="0 0 13 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M4.4379 17.0078C4.4379 17.0078 4.70548 9.45488 4.13562 5.87589C3.79545 3.73945 2.30345 2.05672 1.15597 1.04732C0.778405 0.715178 1.00664 0.0465164 1.5065 0.101429C3.67696 0.339867 7.49978 1.09173 10.7859 3.45844C15.6976 6.99592 4.4379 17.0078 4.4379 17.0078Z" fill="white"/>
+                                        </svg>
+                                    </div>
+                                    <div class="flexbox middle nowrap space-8 c-message-header">
+                                        {if !empty($_contact_name)}
+                                        <span class="flexbox middle space-4 c-contact">
+                                            {$_contact_name}
+                                        </span>
+                                        {/if}
+
+                                        {if !empty($_m.create_datetime)}
+                                            <span class="nowrap c-date hint custom-ml-auto{if $_m.direction == crmMessageModel::DIRECTION_OUT} text-strong{/if}">
+                                                {if !empty($_m.params.edit_ts)}
+                                                    {$_edit_datetime = date('Y-m-d H:i:s', $_m.params.edit_ts)}
+                                                    <span class="hint js-message-edited custom-pr-4" title="{$_edit_datetime|wa_datetime:'humandatetime'}">
+                                                        [`Edited`]
+                                                    </span>
+                                                {/if}
+                                                {$_m.create_datetime|wa_datetime:'time'}
+                                            </span>
+                                        {/if}
+                                    </div>
+
+                                    {_renderMessageBody message=$_m}
+
+                                    {if !empty($_m.params.status)}
+                                        <div class="small custom-pr-8 custom-pb-4 c-message-status">
+                                            {if $_m.params.status === crmImSource::STATUS_DELIVERED}
+                                                <i class="fas fa-check opacity-30" title="[`delivered`]"></i>
+                                            {elseif $_m.params.status == crmImSource::STATUS_READ}
+                                                <i class="fas fa-check-double opacity-50 state-success" title="[`read`]"></i>
+                                            {elseif $_m.params.status == crmImSource::STATUS_FAILED}
+                                                <i class="fas fa-ban state-error" title="[`not delivered`]"></i>
+                                            {/if}
+                                        </div>
+                                    {/if}
+
+                                </div>
+                            </div>
+
+                        
+                        </div>
+                    </div>
+                    </div>
+                </section>
+                {if !empty($source_is_disabled)}
+                <section class="c-reply-section">
+                    <button class="button light-gray rounded js-messages-list--to-bottom-button">
+                        <i class="fas fa-angle-down"></i>
+                    </button>
+                    <div class="flexbox middle custom-p-16 source-not-found">[`Oops, sorry, this messenger is disabled :(`]</div>
+                </section>
+                {elseif $message.contact_id && !empty($contacts[$message.contact_id])}
+                    <section class="c-reply-section">
+                        <button class="button light-gray rounded js-messages-list--to-bottom-button">
+                            <i class="fas fa-angle-down"></i>
+                        </button>
+                        <div class="c-reply-form-wrapper js-reply-wrapper">
+                            <div class="flexbox middle c-visible">
+                                {* RENDER OVERLOADED REPLY FORM *}
+                                {$is_images_enabled = !empty($source_features.images)}
+                                {$is_files_enabled = !empty($source_features.attachments)}
+                                {*if empty($conversation.reply_form_html)}
+                                    {$conversation.reply_form_html}
+                                    <div class="c-column middle right">
+                                        <a class="button light-gray js-revert" href="javascript:void(0);">[`Cancel`]</a>
+                                    </div> *}
+                                {* RENDER DEFAULT REPLY FORM *}
+                                {if isset($message.source_id)}
+                                    <form class="flexbox full-width space-8 middle width-100" action="">
+
+                                            {* Hidden fields *}
+                                            <input name="deal_id" type="hidden" value="{$message.deal_id|default:"none"}" class="js-field js-deal-id">
+                                            <input name="message_id" value="{$message.id|escape|default:""}" type="hidden">
+                                            <input name="contact_id" value="{$_contact.id|escape|default:""}" type="hidden">
+                                            <input name="name" value="" type="hidden" class="js-to-new-name">
+                                            <input name="hash" value="{$hash|default:""}" type="hidden">
+                                            {if ifset($source_features.html)}
+                                                <input name="is_plain_text" value="1" type="hidden">
+                                            {/if}
+                                            <div class="flexbox width-100 vertical ">
+                                                <div class="flexbox js-default-drop-area">
+                                                    <div class="c-files-wrapper js-files-wrapper">
+                                                        <div class="c-drop-wrapper js-drop-area">
+                                                            <span class="{* if empty($source.aux_items.reply_form_dropdown_items) *}custom-pr-12 {* /if *}icon size-16 js-message-attachment {if !$is_images_enabled}is-disabled{else}cursor-pointer{/if}">
+                                                                <i class="fas fa-paperclip"></i>
+                                                            </span>
+                                                            {*<div class="js-drop-text" data-default="[`Attach file`]" data-hover="[`Drop file here`]">[`Attach file`]</div>*}
+                                                            <input class="c-drop-field js-drop-field" type="file" multiple {if !$is_images_enabled && !$is_files_enabled}disabled{/if}>
+                                                        </div>
+                                                    </div>
+                                                    {* if !empty($conversation.aux_items.reply_form_dropdown_items)}
+                                                    <div class="c-plugin-dropdown ">
+                                                        <div class="dropdown" id="js-message-form-dropdown">
+                                                            <a href="javascript:void(0);" class="dropdown-toggle without-arrow flexbox c-name">
+                                                                <span class="icon size-14 text-light-gray"><i class="fas fa-ellipsis-h"></i></span>
+                                                            </a>
+                                                            <div class="dropdown-body right" style="width: auto; min-width: 200px;">
+                                                                <ul class="menu" style="margin: 0;">
+                                                                    {foreach $conversation.aux_items.reply_form_dropdown_items as $_item}
+                                                                        <li>{$_item}</li>
+                                                                    {/foreach}
+                                                                </ul>
+                                                            </div>
+                                                            <script>
+                                                                ( function($) {
+                                                                    $("#js-message-form-dropdown").waDropdown();
+                                                                })(jQuery);
+                                                            </script>
+                                                        </div>
+                                                    </div>
+                                                    {/if *}
+                                                    <div class="width-100 flexbox middle">
+                                                        <textarea class="c-textarea js-textarea" name="body" placeholder="[`Message`]"></textarea>
+                                                    </div>
+                                                    {* ACTIONS *}
+                                                    <div class="c-form-actions">
+                                                        <div class="c-column middle right">
+                                                            <button class="button rounded c-im-save-button js-save-button" type="submit" disabled>
+                                                                <i class="fas fa-arrow-up"></i>
+                                                            </button>
+                                                            {*<a class="button light-gray js-revert" href="javascript:void(0);">[`Cancel`]</a>*}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            {* FILES *}
+
+                                                <div class="flexbox wrap c-upload-list js-upload-list">
+                                                    {capture assign="_file_template_html"}
+                                                        <div class="small c-upload-item flexbox space-4 middle ">
+                                                            <i class="icon fas fa-file"></i>
+                                                            <span class="c-name js-name"></span>
+                                                            <div class="c-progress-wrapper progress js-bar">
+                                                                <progress class="bar js-progress" id="js-progress" min="0" max="100" value=""></progress>
+                                                                <span class="icon text-green size-14 js-progress-success-icon"><i class="fas fa-check-circle"></i></span>
+                                                            </div>
+                                                            <button class="nobutton flexbox middle text-gray js-file-delete"><i class="icon fas fa-times-circle delete"></i></button>
+                                                            <div class="js-status" id="tooltip-error" data-wa-tooltip-content="[`Your file is too large. You need to increase the file upload size limit in the PHP configuration.`]">
+                                                                <i class="fas fa-exclamation-triangle state-error"></i>
+                                                            </div>
+                                                        </div>
+                                                        <script>
+                                                            ( function($) {
+                                                                $("#tooltip-error").waTooltip();
+                                                            })(jQuery);
+                                                        </script>
+                                                    {/capture}
+                                                    <div class="js-status-message" id="tooltip-error-message" >
+                                                    </div>
+                                                </div>
+                                        </div>
+                                    </form>
+                                    <script>
+                                        ( function($) {
+                                            new CRMImConversationSection({
+                                                $wrapper: $(".c-reply-form-wrapper.js-reply-wrapper"),
+                                                send_action_url: {$send_action_url|default:''|json_encode},
+                                                hash: "{$hash|default:""}",
+                                                file_template_html: {$_file_template_html|json_encode},
+                                                max_upload_size: {waRequest::getUploadMaxFilesize()},
+                                                is_images_enabled: {$is_images_enabled|json_encode},
+                                                is_files_enabled: {$is_files_enabled|json_encode}
+                                            });
+                                        })(jQuery);
+                                    </script>
+                                {else}
+                                    <div class="c-reply-form-error">[`Source not found`]</div>
+                                {/if}
+
+                            </div>
+                            {*<div class="flexbox middle c-invisible">
+                                <span class="custom-pr-12 icon size-16">
+                                {if !empty($conversation.icon_fab)}
+                                    <i class="fab fa-{$conversation.icon_fab}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
+                                {elseif !empty($conversation.icon_fa)}
+                                    <i class="fas fa-{$conversation.icon_fa}" {if !empty($conversation.icon_color)}style="color:{$conversation.icon_color}"{/if}></i>
+                                {else}
+                                    <img src="{$conversation.icon_url}" data-fa-i2svg>
+                                {/if}
+                                </span>
+                                <span class="custom-pr-12 icon size-16">
+                                    <i class="fas fa-plus"></i>
+                                </span>
+                                <textarea class="c-textarea js-visible-textarea-old" placeholder="[`Message`]"></textarea>
+                            </div>*}
+
+                        </div>
+                    </section>
+                {/if}
+            {/if}
+            <div class="c-conversation-body--blank" style="opacity: 0; position: absolute; top: 0;">
+
+            </div>
+        </div>
+
+        <script>
+            (function ($) {
+
+                $.crm.title.set("[`Message `] " + {$message.subject|json_encode});
+                if (typeof prettyPrint != 'undefined' && $.isFunction(prettyPrint)) {
+                    prettyPrint();
+                }
+
+                {$_locales = [
+                    "deal_empty"                    => {_w("Empty")},
+                    "deal_create"                   => {_w("Create deal")},
+                    "deal_select"                   => {_w("Select deal")},
+                    "deal_add"                      => {_w("Add deal")},
+                    "deal_detach_title"             => {_w("Detach from deal")},
+                    "deal_detach_text"              => {_w("Are you sure you want to detach this conversation from the deal “<strong>%s</strong>”?")},
+                    "deal_detach_confirm_button"    => {_w("Detach")},
+                    "funnel_deleted"                => {_w("Funnel deleted")},
+                    "delete"                        => {_w("Delete")},
+                    "delete_message"                => {_w("Delete message")},
+                    "delete_message_text"           => {_w("Are you sure you want to delete this message?")},
+                    "close"                         => {_w("Close")},
+                    "archived"                      => {_w("(archived)")}
+                ]}
+
+                new CRMMessageConversationPage({
+                    iframe: {$iframe|default:0},
+                    $wrapper: $(".c-messages-page-content-wrapper"),
+                    funnel_id: {$funnel.id|default:0},
+                    contact_id: {$_contact.id|default:0},
+                    filter_contact_id: {$filter_contact_id|default:0},
+                    filter_deal_id: {$filter_deal_id|default:0},
+                    locales: {$_locales|json_encode},
+                });
+            })(jQuery);
+        </script>
+    </div>
+</div>
+</div>
+
+{elseif empty($is_empty_case)}
+    <div class="flexbox middle width-100 no-messages">[`No messages`]</div>
+{/if}
+
+{if empty($iframe) && !empty($message)}
+<div class="sidebar right width-20rem not-blank bordered-left desktop-only" id="c-messages-sidebar-right" style="top: 0;">
+    {if $_contact.id|default:null}
+
+        <div class="custom-px-16 c-info-additional js-info-additional hidden" id="c-messages-info-additional">
+            <div class="small gray cursor-pointer c-info-toggle js-info-toggle custom-mb-24">
+                <span class="flexbox middle space-4">
+                    [`More information`]<span class="c-info-toggle-caret custom-mt-4 icon" ><i class="fas fa-caret-right"></i></span>
+                </span>
+            </div>
+            <div class="c-info-list js-info-list" style="display: none;">
+                <ul class="list c-drawer-list js-drawer-list">
+                    <li class="custom-mb-16 bold">
+                        <a href="javascript:void(0);" class="js-drawer-list-link js-drawer-list--deals" data-dialog-url="{$wa_app_url}frame/deal/?contact_id={$_contact.id}" data-class-name="deals">
+                            <span class="js-drawer-list-link--header">[`Deals`]</span>
+                            <span class="hint custom-ml-4 js-drawer-list-counter--deals"></span>
+                        </a>
+                    </li>
+                    <li class="custom-mb-16 bold">
+                        <a href="javascript:void(0);" class="js-drawer-list-link js-drawer-list--reminders" data-dialog-url="{$wa_app_url}reminder/all/?iframe=1&contact={$_contact.id}" data-class-name="reminders">
+                            <span class="js-drawer-list-link--header">[`Reminders`]</span>
+                            <span class="hint custom-ml-4 js-drawer-list-counter--reminders"></span>
+                        </a>
+                    </li>
+                    <li class="custom-mb-16 bold">
+                        <a href="javascript:void(0);" class="js-drawer-list-link js-drawer-list--notes" data-dialog-url="{$wa_app_url}frame/note/?contact_id={$_contact.id}" data-class-name="note">
+                            <span class="js-drawer-list-link--header">[`Notes`]</span>
+                            <span class="hint custom-ml-4 js-drawer-list-counter--notes"></span>
+                        </a>
+                    </li>
+                    <li class="custom-mb-16 bold">
+                        <a href="javascript:void(0);" class="js-drawer-list-link js-drawer-list--files" data-dialog-url="{$wa_app_url}frame/file/?contact_id={$_contact.id}" data-class-name="file">
+                            <span class="js-drawer-list-link--header">[`Files`]</span>
+                            <span class="hint custom-ml-4 js-drawer-list-counter--files"></span>
+                        </a>
+                    </li>
+                    <li class="custom-mb-16 bold">
+                        <a href="javascript:void(0);" class="js-drawer-list-link js-drawer-list--invoice" data-dialog-url="{$wa_app_url}frame/invoice/?contact_id={$_contact.id}" data-class-name="invoice">
+                            <span class="js-drawer-list-link--header">[`Invoices`]</span>
+                            <span class="hint custom-ml-4 js-drawer-list-counter--invoices"></span>
+                        </a>
+                    </li>
+                    <li class="custom-mb-16 bold">
+                        <a href="javascript:void(0);" class="js-drawer-list-link js-drawer-list--calls" data-dialog-url="{$wa_app_url}call/?direction=all&status=ALL&iframe=1&contact={$_contact.id}&no_deals=1" data-class-name="calls">
+                            <span class="js-drawer-list-link--header">[`Calls`]</span>
+                            <span class="hint custom-ml-4 js-drawer-list-counter--calls"></span>
+                        </a>
+                    </li>
+                    <div class="skeleton" style="width: 70%;">
+                        <span class="skeleton-line"></span>
+                        <span class="skeleton-line"></span>
+                        <span class="skeleton-line"></span>
+                        <span class="skeleton-line"></span>
+                        <span class="skeleton-line"></span>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        <script>
+            (function($) {
+
+                new CRMMessagesProfileAdditional({
+                    $wrapper: $("#c-messages-sidebar-right"),
+                    contact_id: {$_contact.id|default:null},
+
+                });
+
+            })(jQuery);
+        </script>
+
+    {else}
+    <div class="flexbox middle width-100 no-messages">
+        [`User not found.`]
+    </div>
+    {/if}
+</div>
+{/if}

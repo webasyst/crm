@@ -233,6 +233,8 @@ class crmDealListMethod extends crmApiAbstractMethod
                     'source',
                     'shop_order',
                     'can_delete',
+                    'can_edit',
+                    'can_manage_responsible',
                     'reminder_state',
                     'reminder_title',
                     'message_unread',
@@ -253,6 +255,8 @@ class crmDealListMethod extends crmApiAbstractMethod
                     'currency_rate'     => 'float',
                     'lost_id'           => 'integer',
                     'can_delete'        => 'boolean',
+                    'can_edit'          => 'boolean',
+                    'can_manage_responsible' => 'boolean',
                     'message_unread'    => 'boolean',
                     'is_pinned'         => 'boolean',
                 ]

@@ -36,10 +36,14 @@ class crmContactSearchConditionAction extends waViewAction
                 $extra = $country;
             }
         }
+        $unwrap_values = array(
+            'when_readonly' => true
+        );
+        if ($id === 'contact_info.creating') {
+            $unwrap_values = true;
+        }
         $item = crmContactsSearchHelper::getItem($id, $hash, array(
-            'unwrap_values' => array(
-                'when_readonly' => true
-            )
+            'unwrap_values' => $unwrap_values
         ));
         
         crmContactsSearchHelper::setContactItems($id);
@@ -50,7 +54,9 @@ class crmContactSearchConditionAction extends waViewAction
             'condition' => $item,
             'count' => $count,
             'conds' => $conds,
-            'extra' => $extra
+            'extra' => $extra,
+            'category_set_values' => $this->getCategorySetValues(),
+            'search_segment_set_values' => $this->getSearchSegmentSetValues()
         ));
     }
     
@@ -58,5 +64,56 @@ class crmContactSearchConditionAction extends waViewAction
     {
         return is_array($ar) && count(array_filter(array_keys($ar), "is_numeric")) === count($ar);
     }
-    
+
+    protected function getCategorySetValues()
+    {
+        $values_provider = new crmContactsSearchSegmentValues();
+        $rows = $values_provider->getValues([
+            'limit' => 500
+        ]);
+        $result = [];
+        foreach ((array) $rows as $row) {
+            if (empty($row['value']) || !wa_is_int($row['value'])) {
+                continue;
+            }
+            $result[] = [
+                'id' => (int) $row['value'],
+                'name' => ifset($row, 'name', '')
+            ];
+        }
+        return $result;
+    }
+
+    protected function getSearchSegmentSetValues()
+    {
+        $exclude_id = $this->getCurrentSegmentId();
+        $values_provider = new crmContactsSearchSearchSegmentValues();
+        $rows = $values_provider->getValues([
+            'limit' => 500,
+            'exclude_id' => $exclude_id
+        ]);
+        $result = [];
+        foreach ((array) $rows as $row) {
+            if (empty($row['value']) || !wa_is_int($row['value'])) {
+                continue;
+            }
+            $result[] = [
+                'id' => (int) $row['value'],
+                'name' => ifset($row, 'name', '')
+            ];
+        }
+        return $result;
+    }
+
+    protected function getCurrentSegmentId()
+    {
+        $id = (int) $this->getRequest()->param('segment_id');
+        if ($id > 0) {
+            return $id;
+        }
+
+        $id = (int) $this->getRequest()->request('segment_id', 0, waRequest::TYPE_INT);
+        return $id > 0 ? $id : 0;
+    }
+
 }

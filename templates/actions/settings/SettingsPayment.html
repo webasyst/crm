@@ -17,7 +17,7 @@
                         {foreach $plugins as $_id => $plugin}
                             {$_is_installed = in_array($_id, $_installed_plugins)}
 
-                            <li style="{if $_is_installed || $_id == 'pay'}display: none;{/if}" data-plugin="{$_id}">
+                            <li{if $_is_installed} style="display: none;"{/if} data-plugin="{$_id}">
                                 <a class="js-add-payment" href="{$wa_app_url}settings/payment/add/{$company.id}/{$_id}/">
                                     {if empty($plugin.icon.16)}
                                     <i class="fas fa-money-check-alt icon" style="font-size: 1rem"></i>

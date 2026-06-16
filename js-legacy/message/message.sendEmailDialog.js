@@ -432,11 +432,11 @@ var CRMSendEmailDialog = ( function($) {
                     // if there are any other errors, print in log
                     delete errors_to_show.common;
                     if (!$.isEmptyObject(errors_to_show)) {
-                        console.log.error(errors_to_show);
+                        console.error(errors_to_show);
                     }
                 }
                 if (log_object) {
-                    console.log.error(log_object);
+                    console.error(log_object);
                 }
             };
 

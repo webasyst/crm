@@ -18,10 +18,11 @@ var MessageContentRouter = ( function($) {
         // DOM
         that.$content = options["$content"];
 
-       that.iframe = options["iframe"];
+        that.iframe = options["iframe"];
         // VARS
         that.app_url = options['app_url'] || ($ && $.crm && $.crm.app_url);
         that.api_enabled = !!(window.history && window.history.pushState);
+        that.load_url = options['load_url'];
 
         // DYNAMIC VARS
         that.xhr = false;
@@ -60,7 +61,7 @@ var MessageContentRouter = ( function($) {
             });
         }
 
-        var content_url = $.crm.app_url + '?module=messageConversationId&id=' + target_props;
+        var content_url = that.load_url + "&id=" + target_props;
         that.xhr = $.ajax({
             method: 'GET',
             url: content_url,
@@ -504,6 +505,9 @@ var CRMMessagesSidebar = ( function($) {
         // VARS
         that.iframe = options["iframe"];
         that.noemail = options["noemail"];
+        that.load_url = options["load_url"];
+        that.content_load_path = options["content_load_path"];
+        that.filter_params = options["filter_params"] || {};
 
         // DYNAMIC VARS
 
@@ -604,7 +608,7 @@ var CRMMessagesSidebar = ( function($) {
 
             $search_wrapper.on('click', '.js-search-contact-cancel', function() {
                 that.$skeleton.show();
-                $.crm.content.load($.crm.app_url + 'message/');
+                $.crm.content.load($.crm.app_url + 'message/' + that.content_load_path);
             })
             $search_wrapper.on('click', '.js-search-mobile-show', function(event) {
                 $search_wrapper.find('.js-search-mobile-show').removeClass('mobile-only').hide();
@@ -622,7 +626,7 @@ var CRMMessagesSidebar = ( function($) {
 
 
          function selectHandler(user) {
-            $.crm.content.load($.crm.app_url + 'message/?contact=' + user.id);
+            $.crm.content.load($.crm.app_url + 'message/' + that.content_load_path + '?contact=' + user.id);
         }
     }
 
@@ -677,15 +681,17 @@ var CRMMessagesSidebar = ( function($) {
 
                 if (is_exist) {
 
-                    var href = "?module=message&action=listByConversation&background_process=1",
-                        data = {
+                    var href = that.load_url,
+                        data = $.extend({}, that.filter_params, {
                             check: 1
-                        };
+                        });
                     $.post(href, data, function(response) {
 
                         if (response.status === "ok") {
                             var is_changed = (response.data !== last_message_id),
                                 is_exist = $.contains(document, that.$wrapper[0]);
+
+                            console.log(response.data, last_message_id, is_exist);
 
                             if (is_exist) {
                                 is_changed && !isDialogOpen() ? reload() : runner();
@@ -704,25 +710,24 @@ var CRMMessagesSidebar = ( function($) {
 
         function reload() {
             //$.crm.content.reload();
-            const active_id = that.active_id ? 'conversation/' + that.active_id + '/' : '';
+            const active_id = that.active_id ? '&id=' + that.active_id : '';
             const iframe = that.iframe ? '&iframe=' + that.iframe : '';
             const noemail = that.noemail ? '&noemail=1' : '';
             const contact_id = that.$settings_contact_id ? '&contact='+that.$settings_contact_id : that.$settings_deal_id ? '&deal='+that.$settings_deal_id : '';
 
-            var content_uri = $.crm.app_url + "message/" + active_id + "?reload=1" + contact_id + iframe + noemail;
-            var data = {
+            var content_uri = that.load_url + "&reload=1" + active_id + contact_id + iframe + noemail;
+            var data = $.extend({}, that.filter_params, {
                 ui: that.$ui,
                 id: +that.active_id,
                 background_process: 1,
                 no_need_to_get_the_conversation: 1
-            };
+            });
 
             clearGlobalListeners();
             clearListeners();
 
             $.get(content_uri, data, function(html) {
-                const sidebar_list = $(html).find('#c-messages-conversation-list').html();
-                that.$wrapper.html( sidebar_list );
+                that.$wrapper.html( html );
             });
         }
     };
@@ -736,6 +741,10 @@ var CRMMessagesSidebar = ( function($) {
             $window = $(window);
 
         function openConversationList(event) {
+            const isMac = navigator.platform.startsWith('Mac');
+            const isPrevent = (isMac && event.metaKey) || event.ctrlKey || event.shiftKey;
+            if (isPrevent) return;
+
             event.preventDefault();
             event.stopPropagation();
             var $link = $(this),
@@ -825,8 +834,6 @@ var CRMMessagesSidebar = ( function($) {
                 $sidebar.on("scroll touchmove", useMain);
             }
 
-
-
             function useMain() {
                 var is_exist = $.contains(document, $loader[0]);
                 if (is_exist) {
@@ -837,40 +844,40 @@ var CRMMessagesSidebar = ( function($) {
             }
         }
 
-            function onScroll($loader) {
-                var scroll_top = $window.scrollTop(),
-                    display_h = $window.height(),
-                    loader_top = $loader.offset().top;
-                if (scroll_top + display_h >= loader_top) {
-                    if (!is_locked) {
-                        load($loader);
-                    }
+        function onScroll($loader) {
+            var scroll_top = $window.scrollTop(),
+                display_h = $window.height(),
+                loader_top = $loader.offset().top;
+            if (scroll_top + display_h >= loader_top) {
+                if (!is_locked) {
+                    load($loader);
                 }
             }
+        }
 
-            function load($loader) {
-                var href = $.crm.app_url + '?module=messageListByConversation',
-                    contact__id = that.$settings_contact_id ? +that.$settings_contact_id : undefined,
-                    deal__id = that.$settings_deal_id ? +that.$settings_deal_id : undefined;
-                data = {
-                    id: +that.active_id,
-                    page: ++that.current_page,
-                    contact: contact__id,
-                    deal: deal__id,
-                    reload: 1,
-                    iframe: that.iframe
-                };
+        function load($loader) {
+            var href = that.load_url,
+                contact__id = that.$settings_contact_id ? +that.$settings_contact_id : undefined,
+                deal__id = that.$settings_deal_id ? +that.$settings_deal_id : undefined;
+            var data = $.extend({}, that.filter_params, {
+                id: +that.active_id,
+                page: ++that.current_page,
+                contact: contact__id,
+                deal: deal__id,
+                reload: 1,
+                iframe: that.iframe
+            });
 
-                is_locked = true;
-                $.post(href, data, function (html) {
-                    if ($loader) $loader.remove();
-                    var $new_list = $(html).find('.c-messages-table-section').html();
-                    $list.append($new_list);
-                    startLazyLoading();
-                }).always(function () {
+            is_locked = true;
+            $.post(href, data, function (html) {
+                if ($loader) $loader.remove();
+                var $new_list = $(html).find('.c-messages-table-section').html();
+                $list.append($new_list);
+                startLazyLoading();
+            }).always(function () {
 
-                });
-            }
+            });
+        }
 
         startLazyLoading();
     }

@@ -1,5 +1,6 @@
 body.wa-gallery-is-shown {
   overflow: hidden;
+  --wa-gallery-animate-time: 333ms;
 }
 .wa-gallery-preview {
   position: absolute;
@@ -14,13 +15,14 @@ body.wa-gallery-is-shown {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
+  will-change: transform, opacity;
 }
 .wa-gallery-preview.is-animated {
-  -webkit-transition: all 333ms ease-in-out;
-  -moz-transition: all 333ms ease-in-out;
-  -o-transition: all 333ms ease-in-out;
-  -ms-transition: all 333ms ease-in-out;
-  transition: all 333ms ease-in-out;
+  -webkit-transition: all var(--wa-gallery-animate-time) ease-in-out;
+  -moz-transition: all var(--wa-gallery-animate-time) ease-in-out;
+  -o-transition: all var(--wa-gallery-animate-time) ease-in-out;
+  -ms-transition: all var(--wa-gallery-animate-time) ease-in-out;
+  transition: all var(--wa-gallery-animate-time) ease-in-out;
 }
 .wa-gallery-preview.is-invisible {
   opacity: 0;
@@ -79,11 +81,11 @@ body.wa-gallery-is-shown {
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=66)";
   filter: alpha(opacity=66);
   text-align: right;
-  -webkit-transition: opacity 333ms linear;
-  -moz-transition: opacity 333ms linear;
-  -o-transition: opacity 333ms linear;
-  -ms-transition: opacity 333ms linear;
-  transition: opacity 333ms linear;
+  -webkit-transition: opacity var(--wa-gallery-animate-time) linear;
+  -moz-transition: opacity var(--wa-gallery-animate-time) linear;
+  -o-transition: opacity var(--wa-gallery-animate-time) linear;
+  -ms-transition: opacity var(--wa-gallery-animate-time) linear;
+  transition: opacity var(--wa-gallery-animate-time) linear;
 }
 .wa-gallery-preview .wa-gallery-controls:hover {
   opacity: 1;

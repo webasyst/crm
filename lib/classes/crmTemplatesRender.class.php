@@ -150,7 +150,7 @@ class crmTemplatesRender extends waController
         }
         if (wa()->getEnv() == 'frontend') {
             if ($this->options['invoice']['state_id'] == crmInvoiceModel::STATE_PENDING && waRequest::get('result') == 'success') {
-                return '';
+                return '<p style="text-align:center; font-size: 1.5rem;"><span style="color:#7256ee"><b>'._w('Payment is in process').'</b></span></p>';
             }
             
             $file = wa('crm')->getConfig()->getAppPath('templates/actions/frontend/invoice/payment.section.inc.html');

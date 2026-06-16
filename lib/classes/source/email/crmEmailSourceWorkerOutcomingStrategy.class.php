@@ -15,8 +15,7 @@ class crmEmailSourceWorkerOutcomingStrategy extends crmEmailSourceWorkerStrategy
         }
         $result = $this->processForDeal($customer);
         if ($result) {
-            $mm = new crmMessageModel();
-            $message = $mm->getMessage($result['message_id']);
+            $message = self::getMessageModel()->getMessage($result['message_id']);
             $this->doConversationProcessPart($customer, $message, $result['deal']);
         }
         return $result;
@@ -31,8 +30,8 @@ class crmEmailSourceWorkerOutcomingStrategy extends crmEmailSourceWorkerStrategy
         } else {
             $conversation_id = $this->createConversation($customer, $message, $deal);
         }
-        $mm = new crmMessageModel();
-        $mm->addToConversation($message, $conversation_id);
+
+        self::getMessageModel()->addToConversation($message, $conversation_id);
 
         /*
         if ($conversation) {

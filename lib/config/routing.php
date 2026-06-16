@@ -8,6 +8,8 @@ return array(
     'form/<hash>/?'                         => 'frontend/form',
     'confirm_email/<hash>/?'                => 'frontend/confirmEmail',
     'invoice/<hash>/?'                      => 'frontend/invoice',
+    'payment/image/<hash>/?'                => 'frontend/invoicePaymentImage',
+    'payment/status/<hash>/?'               => 'frontend/invoicePaymentStatus',
     'data/payment/<plugin_id>/<action_id>/' => 'frontend/paymentPlugin',
     'verification' => [
         'url' => 'verification/<verification_key>/<message_id>/<hash>/?',

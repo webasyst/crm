@@ -6,6 +6,6 @@ class crmInvoiceItemsModel extends crmModel
 
     public function getItems($id)
     {
-        return $this->select('*')->where("invoice_id = ".intval($id))->order('id')->fetchAll();
+        return $this->select('*')->where("invoice_id = ".intval($id))->order('sort, id')->fetchAll();
     }
 }

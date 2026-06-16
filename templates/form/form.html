@@ -139,6 +139,19 @@
 </div>
 <script>
     (function (jQuery) {
+        if (window.self !== window.top) {
+            try {
+                var parentUrl = parent.location.href;
+            } catch (e) {
+                var parentUrl = document.referrer;
+            }
+            if (parentUrl) {
+                var input = document.querySelector('#{$form_id} input[name="crm_form[!form_page_url]"]');
+                if (input) {
+                    input.value = parentUrl;
+                }
+            }
+        }
         crmFrontendForm('{$block_id}', false, {
             wa_url: {$wa_url|json_encode},
             wa_version: {$wa->version(true)|json_encode},

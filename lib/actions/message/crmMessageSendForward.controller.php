@@ -138,6 +138,12 @@ class crmMessageSendForwardController extends crmSendEmailController
             $notification['references'] = $original_message->getReferences();
             $notification['references'][] = $notification['in_reply_to'];
             $notification['references'] = array_unique($notification['references']);
+        } else {
+            $message = $this->getMessage();
+            $message_id = ifset($message, 'params', 'email_message_id', null);
+            if ($message_id) {
+                $notification['references'] = [$message_id];
+            }
         }
 
         $notification['message_id'] = crmEmailSourceWorker::generateMessageId($deal_id);

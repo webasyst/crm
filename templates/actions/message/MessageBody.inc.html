@@ -86,9 +86,17 @@
             {elseif isset($_video.url)}
                 {$extra_link = $_video.url}
             {/if}
-            <div class="c-message-body-video">
-                <video controls="true" width="100%" src="{$extra_link}" playsinline>
+            <div class="c-message-body-video js-lazy-video-wrapper">
+                <video class="js-lazy-video" controls="true" width="100%" data-src="{$extra_link}" preload="none" playsinline>
                 </video>
+                <button type="button" class="js-lazy-video-trigger c-lazy-video-trigger" aria-label="Play video">
+                    <i class="fas fa-play js-lazy-video-icon-play"></i>
+                    <i class="fas fa-spinner wa-animation-spin speed-1000 js-lazy-video-icon-spinner"></i>
+                    <span class="c-lazy-video-error js-lazy-video-error">
+                        <i class="fas fa-times"></i>
+                        <span class="custom-ml-8">[`Failed to load video`]</span>
+                    </span>
+                </button>
             </div>
             {/foreach}
         </div>

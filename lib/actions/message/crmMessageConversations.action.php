@@ -4,11 +4,28 @@ class crmMessageConversationsAction extends crmBackendViewAction
 {
     public function execute()
     {
+        $disable_flat_mode = waRequest::request('disable_flat_mode', 0, waRequest::TYPE_INT);
+        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
+        if ($disable_flat_mode) {
+            wa()->getUser()->setSettings('crm', 'messages_flat_mode_enabled', 0);
+        }
+
+        $conversation_id = waRequest::param('id', null, waRequest::TYPE_INT);
+        $flat_mode_enabled = wa()->getUser()->getSettings('crm', 'messages_flat_mode_enabled', 0);
+        if (!$disable_flat_mode && !$iframe && empty($conversation_id) && $flat_mode_enabled) {
+            $query = waRequest::get();
+            unset($query['disable_flat_mode']);
+            $query_string = http_build_query($query);
+            $url = wa()->getConfig()->getBackendUrl(true) . 'crm/message/flat/';
+            if ($query_string !== '') {
+                $url .= '?' . $query_string;
+            }
+            $this->redirect($url);
+        }
+
         $listAction = new crmMessageListByConversationAction();
         $listAction->execute();
-        $conversation_id = waRequest::param('id', null, waRequest::TYPE_INT);
         $view_param = waRequest::get('view', null, waRequest::TYPE_STRING);
-        $iframe = waRequest::request('iframe', 0, waRequest::TYPE_INT);
 
         if (!empty($iframe) && wa()->whichUI('crm') !== '1.3') {
             $this->setLayout();
@@ -16,7 +33,7 @@ class crmMessageConversationsAction extends crmBackendViewAction
         }
 
         if (empty($conversation_id)) {
-            $conversations = $this->view->getVars('conversations');
+            $conversations = $this->view->getVars('list');
             if (!empty($conversations)) {
                 $available_conversations = array_filter($conversations, function ($item) {
                     return ifset($item, 'can_view', false);
@@ -34,11 +51,12 @@ class crmMessageConversationsAction extends crmBackendViewAction
             $conversationAction->execute();
         }
 
-        $this->view->assign(array(
-            'active_conv'    => $conversation_id,
+        $this->view->assign([
+            'active_id'      => $conversation_id,
             'view_param'     => $view_param,
             'iframe'         => $iframe,
             'backend_assets' => ifset($backend_assets, []),
-        ));
+            'content_load_url' => '?module=messageConversationId',
+        ]);
     }
 }

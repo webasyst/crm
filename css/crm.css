@@ -1712,6 +1712,7 @@ ul.pager li {
 .c-contact-form-wrapper .field .value input[type="text"],
 .c-contact-form-wrapper .field .value input[type="password"] {
   min-width: 350px !important;
+  line-height: 1.3;
 }
 .c-contact-form-wrapper .field .value input.long,
 .c-contact-form-wrapper .field .value textarea {
@@ -2822,6 +2823,9 @@ ul.pager li {
 .c-messages-conversation-list .c-messages-header .c-message-filter .c-message-filter-name {
   padding: 0;
 }
+.c-messages-conversation-list .c-messages-header .c-message-filter .c-dropdown-filter .dropdown-toggle {
+  padding-block: 0.3125em;
+}
 .c-messages-conversation-list .c-messages-header .c-message-filter .c-dropdown-filter .dropdown-toggle .dropdown-toggle--name {
   vertical-align: middle;
   overflow: hidden;
@@ -2830,6 +2834,7 @@ ul.pager li {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   word-break: break-word;
+  line-height: 1.3;
 }
 .c-messages-conversation-list .c-messages-header .c-message-filter .c-dropdown-filter .dropdown-body {
   width: 215px;
@@ -3220,6 +3225,55 @@ ul.pager li {
   background: var(--background-color-message-blockquote);
   border-left: 1px solid var(--light-gray);
   border-radius: 0;
+}
+.c-message-body-video.js-lazy-video-wrapper {
+  position: relative;
+}
+.c-message-body-video.js-lazy-video-wrapper .c-lazy-video-trigger {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: rgba(0,0,0,0.2);
+  color: #fff;
+  cursor: pointer;
+  font-size: 2rem;
+  transition: opacity 150ms ease;
+}
+.c-message-body-video.js-lazy-video-wrapper .js-lazy-video-icon-spinner {
+  display: none;
+}
+.c-message-body-video.js-lazy-video-wrapper .js-lazy-video-error {
+  display: none;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  text-align: center;
+}
+.c-message-body-video.js-lazy-video-wrapper .js-lazy-video-error .fas {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+.c-message-body-video.js-lazy-video-wrapper.is-loading .js-lazy-video-icon-play {
+  display: none;
+}
+.c-message-body-video.js-lazy-video-wrapper.is-loading .js-lazy-video-icon-spinner {
+  display: inline-block;
+}
+.c-message-body-video.js-lazy-video-wrapper.is-error .js-lazy-video-icon-play,
+.c-message-body-video.js-lazy-video-wrapper.is-error .js-lazy-video-icon-spinner {
+  display: none;
+}
+.c-message-body-video.js-lazy-video-wrapper.is-error .js-lazy-video-error {
+  display: inline-block;
+}
+.c-message-body-video.js-lazy-video-wrapper.is-loaded .c-lazy-video-trigger {
+  display: none;
 }
 .c-message-form-dialog .c-files-wrapper .c-message-attachment-icon {
   color: var(--menu-glyph-color);
@@ -4047,6 +4101,11 @@ ul.pager li {
 }
 .c-message-conversation-page .c-im-conversation-section .c-message-item.c-message-out .c-message-tail svg path {
   fill: var(--background-color-zebra-row-odd-hover);
+}
+.c-message-conversation-page .c-im-conversation-section .c-message-item .c-message-status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
 .c-message-conversation-page .c-im-conversation-section .c-message-item .c-message-tail {
   position: absolute;
@@ -10468,11 +10527,14 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .crm-search-container-wrapper #c-search-container .field .inline-value {
   display: flex;
-  max-width: 476px;
+  max-width: 462px;
 }
 .crm-search-container-wrapper #c-search-container .field.collapsable-wrapper {
   display: flex;
   flex-wrap: wrap;
+}
+.crm-search-container-wrapper #c-search-container .field.fields-group {
+  max-width: 462px;
 }
 .crm-search-container-wrapper #c-search-container .field input[type=text] {
   width: 270px;
@@ -10481,6 +10543,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 .crm-search-container-wrapper #c-search-container .field input[type=search] {
   width: 270px;
   min-width: 111px;
+  padding-right: 20px;
 }
 .crm-search-container-wrapper #c-search-container .field select {
   width: 270px;
@@ -10503,6 +10566,12 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 .crm-search-container-wrapper #c-search-container .field .subfield {
   display: block;
   margin-top: 10px;
+}
+.crm-search-container-wrapper #c-search-container .field .subfield .heading {
+  text-transform: none;
+}
+.crm-search-container-wrapper #c-search-container .field .subfield .name {
+  width: 130px;
 }
 .crm-search-container-wrapper #c-search-container .field .subfield.checkbox {
   font-size: 0.9em;
@@ -10533,6 +10602,26 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .dialog.crm-dialog-search-period-wrapper .dialog-body {
   width: 700px;
+}
+.dialog.crm-dialog-search-period-wrapper .dialog-body .ui-datepicker.ui-widget-content {
+  box-shadow: none !important;
+  border: solid 1px #ddd !important;
+  border-radius: 0.25rem;
+  background: none !important;
+}
+.dialog.crm-dialog-search-period-wrapper.is-iframe-context .dialog-body {
+  width: auto;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+}
+.dialog.crm-dialog-search-period-wrapper.is-iframe-context .dialog-content {
+  overflow-y: auto;
+}
+.dialog.crm-dialog-search-period-wrapper.is-iframe-context .dialog-content .flexbox {
+  flex-wrap: wrap;
+  justify-content: center;
 }
 .c-reminder-edit-form-wrapper .errormsg {
   color: var(--alert-warning-text-color);
@@ -12068,6 +12157,7 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 }
 .c-payments-page .c-payment-section .c-payments-list .s-payment-shipping-logo {
   max-width: 60px;
+  border-radius: 0.25rem;
 }
 .c-payments-page .c-payment-section .c-payments-list .sort {
   cursor: move;
@@ -12075,14 +12165,25 @@ html[data-theme="dark"] .c-live-page .c-chart-section .c-chart-wrapper svg .axis
 .c-payments-page .c-payment-section .dropdown > .dropdown-body {
   max-height: 300px;
 }
-.c-payment-page .field .value textarea {
-  max-width: 100%;
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
+.c-payment-page .c-payment-page-edit .s-payment-logo-wrapper {
+  max-width: calc(100% - 4rem);
 }
 .c-payment-page .c-payment-page-edit .s-payment-shipping-logo {
-  vertical-align: top;
+  max-height: 2rem;
+  width: 4rem;
+  border-radius: 0.25rem;
+}
+.c-payment-page .c-payment-page-edit .field .value textarea {
+  width: 100%;
+  max-width: 24rem;
+}
+@container crm-settings-body (max-width: 760px) {
+  .c-payment-page .c-payment-page-edit .s-payment-logo-wrapper {
+    max-width: 100%;
+  }
+  .c-payment-page .c-payment-page-edit .field .value textarea {
+    max-width: 100%;
+  }
 }
 .c-companies-page .c-companies-header .c-add-wrapper {
   display: inline-block;

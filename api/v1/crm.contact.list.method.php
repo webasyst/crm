@@ -228,6 +228,7 @@ class crmContactListMethod extends crmApiAbstractMethod
             'vault',
             'responsible',
             'crmSearch',
+            'search',
             'import',
             'recent'
         ];

@@ -61,8 +61,8 @@ class crmDealInfoMethod extends crmApiAbstractMethod
         $can_edit_deal = ($deal_access_level > crmRightConfig::RIGHT_DEAL_VIEW);
         $can_delete = ($deal_access_level === crmRightConfig::RIGHT_DEAL_ALL);
         $can_manage_responsible = ($this->deal['user_contact_id'] == $this->getUser()->getId()
-            || $funnel_rights_value > 2
-            || !$this->deal['contacts']['user'] && $funnel_rights_value > 0);
+            || $funnel_rights_value > crmRightConfig::RIGHT_DEAL_EDIT
+            || !$this->deal['contacts']['user'] && $funnel_rights_value > crmRightConfig::RIGHT_DEAL_NONE);
 
         $this->deal['rights'] = [
             'can_edit'               => $can_edit_deal,

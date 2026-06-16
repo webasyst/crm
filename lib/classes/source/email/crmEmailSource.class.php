@@ -11,6 +11,11 @@ abstract class crmEmailSource extends crmSource
     const EMAIL_SUFFIX_SUPPORTING_UNKNOWN = 'unknown';
     const EMAIL_SUFFIX_SUPPORTING_CLARIFYING = 'clarifying';
 
+    /**
+     * Default mail provider preset when creating a new email source (POP3 / IMAP provider dropdown).
+     */
+    const DEFAULT_MAIL_PROVIDER_ID = 'webasyst_cloud';
+
     protected $type = crmSourceModel::TYPE_EMAIL;
 
     public function __construct($id = null, array $options = array())
@@ -38,7 +43,7 @@ abstract class crmEmailSource extends crmSource
     public static function factory($id, array $options = array())
     {
         $instance = parent::factory($id, $options);
-        if (!($instance instanceof crmEmailSource)) {
+        if (!($instance instanceof crmEmailSource) && !($instance instanceof crmNullSource)) {
             throw new crmSourceException(sprintf("Can't factory email source '%s'", $id));
         }
         return $instance;
@@ -209,6 +214,180 @@ abstract class crmEmailSource extends crmSource
             '{ORIGINAL_TEXT}' => _w('Text of the original message'),
             '{CONFIRM_URL}' => _w('URL for non-registered clients to confirm their email addresses.')
         );
+    }
+
+    /**
+     * Presets for built-in email source settings (POP3 / IMAP).
+     *
+     * @param string $kind 'pop3' or 'imap'
+     * @return array<string, array<string, int|string>>
+     */
+    public static function getMailProviderPresets($kind)
+    {
+        $kind = (string) $kind;
+        if ($kind === 'pop3') {
+            $ssl = array('ssl' => 1, 'tls' => 0);
+            return array(
+                //'gmail' => array_merge(array('server' => 'pop.gmail.com', 'port' => 995), $ssl),
+                'yandex' => array_merge(array('server' => 'pop.yandex.com', 'port' => 995), $ssl),
+                'mailru' => array_merge(array('server' => 'pop.mail.ru', 'port' => 995), $ssl),
+                'rambler' => array_merge(array('server' => 'pop.rambler.ru', 'port' => 995), $ssl),
+                'yahoo' => array_merge(array('server' => 'pop.mail.yahoo.com', 'port' => 995), $ssl),
+                'outlook' => array_merge(array('server' => 'outlook.office365.com', 'port' => 995), $ssl),
+                'icloud' => array_merge(array('server' => 'pop.mail.me.com', 'port' => 995), $ssl),
+                'zoho' => array_merge(array('server' => 'pop.zoho.com', 'port' => 995), $ssl),
+                'gmx' => array_merge(array('server' => 'pop.gmx.com', 'port' => 995), $ssl),
+                'webasyst_cloud' => array_merge(array('server' => 'mail2.host.webasyst.com', 'port' => 995), $ssl),
+            );
+        }
+        if ($kind === 'imap') {
+            return array(
+                //'gmail' => array('server' => 'imap.gmail.com', 'port' => 993, 'ssl' => 1),
+                'yandex' => array('server' => 'imap.yandex.com', 'port' => 993, 'ssl' => 1),
+                'mailru' => array('server' => 'imap.mail.ru', 'port' => 993, 'ssl' => 1),
+                'rambler' => array('server' => 'imap.rambler.ru', 'port' => 993, 'ssl' => 1),
+                'yahoo' => array('server' => 'imap.mail.yahoo.com', 'port' => 993, 'ssl' => 1),
+                'outlook' => array('server' => 'outlook.office365.com', 'port' => 993, 'ssl' => 1),
+                'icloud' => array('server' => 'imap.mail.me.com', 'port' => 993, 'ssl' => 1),
+                'zoho' => array('server' => 'imap.zoho.com', 'port' => 993, 'ssl' => 1),
+                'gmx' => array('server' => 'imap.gmx.com', 'port' => 993, 'ssl' => 1),
+                'webasyst_cloud' => array('server' => 'mail2.host.webasyst.com', 'port' => 993, 'ssl' => 1),
+            );
+        }
+        return array();
+    }
+
+    /**
+     * Ordered list for provider dropdown (last key must be custom).
+     *
+     * @return array<string, string>
+     */
+    public static function getMailProvidersForUi()
+    {
+        if (wa()->getLocale() === 'ru_RU') {
+            return [
+                'webasyst_cloud' => _w('Webasyst Cloud Mail'),
+                'yandex' => _w('Yandex'),
+                'mailru' => _w('Mail.ru'),
+                'rambler' => _w('Rambler'),
+                //'gmail' => _w('Gmail'),
+                'yahoo' => _w('Yahoo Mail'),
+                'outlook' => _w('Outlook.com / Hotmail / Office365'),
+                'icloud' => _w('iCloud'),
+                'zoho' => _w('Zoho Mail'),
+                'gmx' => _w('GMX'),
+                'custom' => _w('Other mail server'),
+            ];
+        }
+        return [
+            'webasyst_cloud' => _w('Webasyst Cloud Mail'),
+            //'gmail' => _w('Gmail'),
+            'yandex' => _w('Yandex'),
+            'mailru' => _w('Mail.ru'),
+            'rambler' => _w('Rambler'),
+            'yahoo' => _w('Yahoo Mail'),
+            'outlook' => _w('Outlook.com / Hotmail / Office365'),
+            'icloud' => _w('iCloud'),
+            'zoho' => _w('Zoho Mail'),
+            'gmx' => _w('GMX'),
+            'custom' => _w('Other mail server'),
+        ];
+    }
+
+    /**
+     * Email domain rules for auto-suggesting mail provider on source settings forms.
+     * Rule is exact host (yandex.ru) or suffix (.webasyst.cloud).
+     *
+     * @return array<string, string[]>
+     */
+    public static function getMailProviderDomainMap()
+    {
+        return array(
+            'webasyst_cloud' => array('host.webasyst.com', '.webasyst.cloud'),
+            'yandex' => array('yandex.ru', 'yandex.com', 'yandex.by', 'yandex.kz', 'ya.ru'),
+            'mailru' => array('mail.ru', 'inbox.ru', 'bk.ru', 'list.ru', 'internet.ru'),
+            'rambler' => array('rambler.ru', 'autorambler.ru', 'ro.ru', 'lenta.ru'),
+            'yahoo' => array('yahoo.com', 'yahoo.co.uk', 'yahoo.de', 'yahoo.fr', 'yahoo.it', 'yahoo.es', 'ymail.com', 'rocketmail.com'),
+            'outlook' => array('outlook.com', 'hotmail.com', 'hotmail.co.uk', 'live.com', 'live.ru', 'msn.com', 'office365.com'),
+            'icloud' => array('icloud.com', 'me.com', 'mac.com'),
+            'zoho' => array('zoho.com', 'zoho.eu', 'zoho.in', 'zoho.com.au', 'zohomail.com'),
+            'gmx' => array('gmx.com', 'gmx.de', 'gmx.net', 'gmx.at'),
+        );
+    }
+
+    /**
+     * Suggest built-in mail provider id from email address domain.
+     *
+     * @param string $email
+     * @return string|null provider id, 'custom', or null when domain cannot be parsed
+     */
+    public static function suggestMailProviderFromEmail($email)
+    {
+        $email = trim((string) $email);
+        $at = strrpos($email, '@');
+        if ($at === false) {
+            return null;
+        }
+        $domain = substr($email, $at + 1);
+        if ($domain === '') {
+            return null;
+        }
+        foreach (self::getMailProviderDomainMap() as $provider => $rules) {
+            foreach ($rules as $rule) {
+                if (self::emailDomainMatchesProviderRule($domain, $rule)) {
+                    return $provider;
+                }
+            }
+        }
+        return 'custom';
+    }
+
+    /**
+     * @param string $domain
+     * @param string $rule
+     * @return bool
+     */
+    protected static function emailDomainMatchesProviderRule($domain, $rule)
+    {
+        if (function_exists('mb_strtolower')) {
+            $domain = mb_strtolower($domain, 'UTF-8');
+            $rule = mb_strtolower($rule, 'UTF-8');
+        } else {
+            $domain = strtolower($domain);
+            $rule = strtolower($rule);
+        }
+        if ($rule !== '' && $rule[0] === '.') {
+            $len = strlen($rule);
+            return strlen($domain) >= $len && substr($domain, -$len) === $rule;
+        }
+        return $domain === $rule;
+    }
+
+    /**
+     * Fills server/port/(ssl|tls) from preset when provider is not custom.
+     *
+     * @param string $kind 'pop3' or 'imap'
+     * @param string $param_key storage key, e.g. mail_provider or imap_provider
+     */
+    public static function applyMailProviderPresetToParams(array &$params, $kind, $param_key = 'mail_provider')
+    {
+        $key = isset($params[$param_key]) ? (string) $params[$param_key] : '';
+        if ($key === '' || $key === 'custom') {
+            return;
+        }
+        $presets = self::getMailProviderPresets($kind);
+        if (!isset($presets[$key])) {
+            return;
+        }
+        $p = $presets[$key];
+        $params['server'] = $p['server'];
+        $params['port'] = (string) $p['port'];
+        if ($kind === 'pop3') {
+            $params['ssl'] = !empty($p['ssl']) ? 1 : 0;
+            $params['tls'] = !empty($p['tls']) ? 1 : 0;
+        } else {
+            $params['ssl'] = !empty($p['ssl']) ? 1 : 0;
+        }
     }
 
     /**

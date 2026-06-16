@@ -46,7 +46,7 @@
 {$invoice.contact = $contact}
 {$is_pending = $invoice.state_id === crmInvoiceModel::STATE_PENDING}
 {$is_payment_expired = $is_pending && $invoice.days_left && $invoice.days_left < 0}
-<div class="c-invoice-page custom-mb-32" id="c-invoice-page" data-id="{$invoice.id}">
+<div class="c-invoice-page custom-mb-32" id="c-invoice-page" data-id="{$invoice.id}" data-state-id="{$invoice.state_id|escape}" data-payment-expired="{if $is_payment_expired}1{else}0{/if}">
 
     <h1 class="c-page-header flexbox space-8">
         <a href="javascript:void(0);" class="back {if $iframe}js-cancel-button{else}js-invoice-hide-mobile mobile-only{/if}"><i class="fas fa-arrow-circle-left"></i></a>
@@ -431,6 +431,7 @@
             new CRMInvoicePage({
                 $wrapper: $("#c-invoice-page"),
                 invoice_id: {$invoice.id|json_encode},
+                sidebar_item_html: {if !empty($sidebar_item_html)}{$sidebar_item_html|json_encode}{else}null{/if},
                 recurrent_id: {$invoice.recurrent_id|json_encode},
                 locales: {
                     delete_confirm_title: "[`Delete invoice`] [`#`]{$invoice.number|escape}",

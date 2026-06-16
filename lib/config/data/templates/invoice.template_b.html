@@ -92,7 +92,7 @@
                         {if ($_item.tax_type == "NONE")}
                             [`without`] {$invoice.tax_name}
                         {else}
-                            {$_item.tax_percent|floatval}%
+                            {$_item.tax_percent|floatval|wa_format_number:false}%
                         {/if}
                     </td>
                     <td class="c-total right">

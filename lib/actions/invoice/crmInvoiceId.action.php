@@ -44,6 +44,33 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
             $this->accessDenied();
         }
 
+        if ($this->invoice['state_id'] == crmInvoiceModel::STATE_PENDING && 
+            $this->invoice['currency_id'] == 'RUB' &&
+            !empty($this->invoice['params']['last_open_ts']) &&
+            $this->invoice['params']['last_open_ts'] < strtotime('-1 minutes') &&
+            $method = (new crmPaymentModel())->getByField([
+                'plugin' => 'pay',
+                'company_id' => $this->invoice['company_id'], 
+                'status' => 1,
+            ])
+        ) {
+            // Check payment status
+            try {
+                $plugin = crmPayment::getPlugin($method['plugin'], $method['company_id']);
+                crmPayment::statePolling($this->invoice, $plugin, empty($this->invoice['params']['state_polling']));
+
+                // Reload invoice, to check status after polling
+                $invoice = $im->getById($this->invoice['id']);
+                if ($this->invoice['state_id'] != $invoice['state_id']) {
+                    $this->invoice['state_id'] = $invoice['state_id'];
+                    $this->invoice['payment_datetime'] = $invoice['payment_datetime'];
+                }                    
+            } catch (Throwable $e) {
+                waLog::log($e->getMessage());
+                waLog::log($e->getTraceAsString());
+            }
+        }
+
         $template_style_version = 2;
         if (!empty($this->invoice['company']['template_id'])) {
             $template_record = (new crmTemplatesModel)->getById($this->invoice['company']['template_id']);
@@ -137,6 +164,9 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
             $this->invoice['days_left'] = $current_date > $target_date ? -$interval->days : $interval->days;
         }
 
+        $this->invoice['contact'] = $contact;
+        $sidebar_item_html = $this->renderSidebarInvoiceItem($invoice_id);
+
         $this->view->assign([
             'iframe'                 => $iframe,
             'invoice'                => $this->invoice,
@@ -159,6 +189,7 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
             'root_path'              => $this->getConfig()->getRootPath().DIRECTORY_SEPARATOR,
             'style_version'          => $template_style_version < 2 ? '' : '_v' . $template_style_version,
             'is_recurrent_available' => true, // TODO: возможно надо будет условия опредлелять
+            'sidebar_item_html'      => $sidebar_item_html,
         ]);
 
         if (!empty($this->invoice['recurrent_id'])) {
@@ -255,5 +286,17 @@ class crmInvoiceIdAction extends crmInvoiceViewAction
             $contact['name'] = empty($contact_id) ? _w('Client not specified.') : sprintf_wp("Contact with ID %s doesn't exist", $contact_id);
         }
         return $contact;
+    }
+
+    protected function renderSidebarInvoiceItem($invoice_id)
+    {
+        $view = wa()->getView();
+        $view->assign([
+            'invoice'    => $this->invoice,
+            'invoice_id' => $invoice_id,
+        ]);
+        $actions_path = wa('crm')->whichUI('crm') === '1.3' ? 'actions-legacy' : 'actions';
+
+        return $view->fetch(wa()->getAppPath('templates/'.$actions_path.'/invoice/InvoiceSidebar.item.inc.html', 'crm'));
     }
 }

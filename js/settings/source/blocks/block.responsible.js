@@ -77,7 +77,7 @@ var CRMSettingsSourceResponsibleBlock = ( function($) {
         });
 
         $user.autocomplete({
-            source: $.crm.app_url + "?module=autocomplete&type=user&funnel_id=" + that.funnel_id,
+            source: $.crm.app_url + "?module=autocomplete&type=user" + (!!that.source.params.create_deal ? '&funnel_id=' + that.funnel_id : ''),
             minLength: 0,
             html: true,
             focus: function() {
@@ -85,7 +85,7 @@ var CRMSettingsSourceResponsibleBlock = ( function($) {
             },
             select: function(event, ui) {
                 $user.val("");
-                if (ui.item.rights <= 0) {
+                if (!!that.source.params.create_deal && that.funnel_id > 0 && ui.item.rights <= 0) {
                     return false;
                 }
                 hideUserInput();
@@ -105,8 +105,7 @@ var CRMSettingsSourceResponsibleBlock = ( function($) {
             var $item = $("<li />");
 
             $item.addClass("ui-menu-item-html").append("<div>"+ item.value + "</div>").appendTo( ul );
-
-            if (that.funnel_id > 0 && !item.rights) {
+            if (!!that.source.params.create_deal && that.funnel_id > 0 && !item.rights) {
                 $item.addClass("is-locked");
                 $item.on("click" + that.ns, function(event) {
                     event.preventDefault();
@@ -145,7 +144,7 @@ var CRMSettingsSourceResponsibleBlock = ( function($) {
         data.namespace = that.namespace;
 
         if (typeof data.funnel_id === 'undefined') {
-            data.funnel_id = that.funnel_id;
+            data.funnel_id = $('.js-deal-section').data('block_object')?.$funnel?.val();
         }
 
         data.responsible_contact_id = that.$user_id.val();

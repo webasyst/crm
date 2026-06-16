@@ -161,14 +161,15 @@ class crmPopup20Controller extends crmJsonController
             if ($message['deal_id']) {
                 $deal = $this->getDealModel()->getDeal($message['deal_id']);
                 if ($deal) {
-                    $funnel = $this->funnels[$deal['funnel_id']];
-                    $stage = $this->funnels[$deal['funnel_id']]['stages'][$deal['stage_id']];
+                    $funnel = ifset($this->funnels[$deal['funnel_id']]);
+                    $stage = ifset($this->funnels[$deal['funnel_id']]['stages'][$deal['stage_id']]);
 
-                    $funnel_name = $funnel['name'];
-                    $stage_name = $stage['name'];
-                    $color = $stage['color'];
-
-                    $poligon_svg = $this->getPoligonSvg($funnel_name, $stage_name, $color);
+                    if (!empty($funnel) && !empty($stage)) {
+                        $funnel_name = $funnel['name'];
+                        $stage_name = $stage['name'];
+                        $color = $stage['color'];
+                        $poligon_svg = $this->getPoligonSvg($funnel_name, $stage_name, $color);                        
+                    }
                 }
             }
 

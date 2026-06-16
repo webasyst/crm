@@ -407,8 +407,8 @@ var CRMPageMessagesOperations = (function ($) {
                     $.post(url, data_set)
                         .done(function ( response ) {
 
-                            var data_set_key = Object.keys(data_set)[0],
-                                response_ids = response.data[data_set_key];
+                            var response_data_key = view === 'conversation' ? 'conversation_ids' : 'message_ids',
+                                response_ids = response.data[response_data_key] || [];
 
                             if (response_ids.length) {
 
@@ -491,8 +491,8 @@ var CRMPageMessagesOperations = (function ($) {
         $.post(url, data_set)
             .done(function( response ) {
 
-                var data_set_key = Object.keys(data_set)[0],
-                    response_ids = response.data[data_set_key];
+                var response_data_key = view === 'conversation' ? 'conversation_ids' : 'message_ids',
+                    response_ids = response.data[response_data_key] || [];
 
                 if (response_ids.length) {
                     response_ids.map(function (id) {
@@ -548,8 +548,8 @@ var CRMPageMessagesOperations = (function ($) {
         $.post(url, data_set)
             .done(function( response ) {
 
-                var data_set_key = Object.keys(data_set)[0],
-                    response_ids = response.data[data_set_key];
+                var response_data_key = view === 'conversation' ? 'conversation_ids' : 'message_ids',
+                    response_ids = response.data[response_data_key] || [];
 
                 if (response_ids.length) {
 
@@ -654,9 +654,8 @@ var CRMPageMessagesOperations = (function ($) {
                     $.post(url, data)
                         .done(function( response ) {
 
-                            var data_set_keys = Object.keys(data),
-                                data_set_key = data_set_keys[data_set_keys.length-1],
-                                response_ids = response.data[data_set_key];
+                            var response_data_key = view === 'conversation' ? 'conversation_ids' : 'message_ids',
+                                response_ids = response.data[response_data_key] || [];
 
                             if (response_ids.length) {
 

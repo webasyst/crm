@@ -12,6 +12,8 @@ abstract class crmSourceWorker
      */
     protected static $runtime_cache = array();
 
+    public static $not_finished = false;
+
     /**
      * @var array
      */
@@ -156,7 +158,6 @@ abstract class crmSourceWorker
                 break;
             }
         }
-
         return $result;
     }
 

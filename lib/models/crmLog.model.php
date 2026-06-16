@@ -121,6 +121,187 @@ class crmLogModel extends crmModel
         return $this->add($data);
     }
 
+    /**
+     * Insert several log rows in one statement; applies the same crm_deal / wa_contact updates as add() for DEAL rows.
+     *
+     * @param array $rows Each item: action, contact_id, object_id, before, after, params (array|string|null), actor_contact_id (optional)
+     * @param array|null $out_deal_log_map If a variable is passed here, it is filled with deal_id => crm_log.id for DEAL rows (same order as $rows)
+     * @return bool
+     */
+    public function logBatch(array $rows, &$out_deal_log_map = null)
+    {
+        if (!$rows) {
+            if (func_num_args() > 1) {
+                $out_deal_log_map = [];
+            }
+            return true;
+        }
+
+        $create_datetime = date('Y-m-d H:i:s');
+        $default_actor = (int) wa()->getUser()->getId();
+        $insert_rows = [];
+
+        foreach ($rows as $row) {
+            $action = (string) ifset($row, 'action', '');
+            if (strlen($action) <= 0) {
+                return false;
+            }
+            if (preg_match('/^([^_]+)_/', $action, $m)) {
+                $object_type = strtoupper(ifempty($m[1], $m[0]));
+            } else {
+                $object_type = strtoupper($action);
+            }
+            if (!in_array('OBJECT_TYPE_'.$object_type, $this->getObjectTypes())) {
+                return false;
+            }
+            $params = ifset($row, 'params', []);
+            $insert_rows[] = [
+                'create_datetime'  => $create_datetime,
+                'actor_contact_id' => array_key_exists('actor_contact_id', $row) ? (int) $row['actor_contact_id'] : $default_actor,
+                'action'           => $action,
+                'contact_id'       => (int) ifset($row, 'contact_id', 0),
+                'object_id'        => (int) ifset($row, 'object_id', 0),
+                'object_type'      => $object_type,
+                'before'           => $this->normalizeLogVarcharField(ifset($row, 'before', null)),
+                'after'            => $this->normalizeLogVarcharField(ifset($row, 'after', null)),
+                'params'           => empty($params) ? null : (is_string($params) ? $params : json_encode($params)),
+            ];
+        }
+
+        $insert_rows = array_values($insert_rows);
+        $result = $this->insertLogRowsBulk($insert_rows);
+        if (!$result || !$this->isAutoIncrement()) {
+            return (bool) $result;
+        }
+
+        $first_id = (int) $result->lastInsertId();
+        $n = count($insert_rows);
+        if ($n < 1 || $first_id < 1) {
+            return (bool) $result;
+        }
+
+        $deal_log = [];
+        for ($i = 0; $i < $n; $i++) {
+            if ($insert_rows[$i]['object_type'] !== self::OBJECT_TYPE_DEAL) {
+                continue;
+            }
+            $deal_id = (int) $insert_rows[$i]['object_id'];
+            if ($deal_id > 0) {
+                $deal_log[$deal_id] = $first_id + $i;
+            }
+        }
+
+        if (!$deal_log) {
+            if (func_num_args() > 1) {
+                $out_deal_log_map = [];
+            }
+            return true;
+        }
+
+        $case_parts = [];
+        foreach ($deal_log as $deal_id => $log_id) {
+            $case_parts[] = 'WHEN '.(int) $deal_id.' THEN '.(int) $log_id;
+        }
+        $ids_in = join(',', array_map('intval', array_keys($deal_log)));
+        $this->exec(
+            'UPDATE crm_deal SET last_log_id = CASE id '.join(' ', $case_parts).' END, last_log_datetime = s:dt WHERE id IN ('.$ids_in.')',
+            ['dt' => $create_datetime]
+        );
+
+        $dm = new crmDealModel();
+        $deals = $dm->getById(array_keys($deal_log));
+        $contact_max_log = [];
+        foreach ($deal_log as $deal_id => $log_id) {
+            $deal = ifset($deals, $deal_id, null);
+            if (!$deal) {
+                continue;
+            }
+            $cid = (int) ifset($deal, 'contact_id', 0);
+            if ($cid > 0) {
+                $contact_max_log[$cid] = max(ifset($contact_max_log, $cid, 0), $log_id);
+            }
+        }
+        if ($contact_max_log) {
+            $case_c = [];
+            foreach ($contact_max_log as $cid => $log_id) {
+                $case_c[] = 'WHEN '.(int) $cid.' THEN '.(int) $log_id;
+            }
+            $cids_in = join(',', array_map('intval', array_keys($contact_max_log)));
+            $this->exec(
+                'UPDATE wa_contact SET crm_last_log_id = CASE id '.join(' ', $case_c).' END, crm_last_log_datetime = s:dt WHERE id IN ('.$cids_in.')',
+                ['dt' => $create_datetime]
+            );
+        }
+
+        if (func_num_args() > 1) {
+            $out_deal_log_map = $deal_log;
+        }
+
+        return true;
+    }
+
+    /**
+     * Multi-row INSERT with explicit column order (avoids waModel::multipleInsert / implode value-order bugs).
+     *
+     * @param array $insert_rows Rows as built in logBatch()
+     * @return waDbResultInsert|waDbResultDelete|bool
+     */
+    protected function insertLogRowsBulk(array $insert_rows)
+    {
+        if (!$insert_rows) {
+            return true;
+        }
+        $columns = [
+            'create_datetime',
+            'actor_contact_id',
+            'action',
+            'contact_id',
+            'object_id',
+            'object_type',
+            'before',
+            'after',
+            'params',
+        ];
+        $col_sql = implode(',', array_map(function ($c) {
+            return $this->escapeField($c);
+        }, $columns));
+
+        $row_sql = [];
+        foreach ($insert_rows as $r) {
+            $vals = [];
+            foreach ($columns as $c) {
+                $vals[] = $this->getFieldValue($c, ifset($r, $c, null));
+            }
+            $row_sql[] = '('.implode(',', $vals).')';
+        }
+
+        $sql = 'INSERT INTO `'.$this->getTableName().'` ('.$col_sql.') VALUES '.implode(',', $row_sql);
+
+        return $this->query($sql);
+    }
+
+    /**
+     * @param mixed $value
+     * @return string|null
+     */
+    protected function normalizeLogVarcharField($value)
+    {
+        if ($value === null) {
+            return null;
+        }
+        if (is_scalar($value)) {
+            return (string) $value;
+        }
+        if (is_array($value)) {
+            $first = reset($value);
+            if (is_scalar($first)) {
+                return (string) $first;
+            }
+            return json_encode($value);
+        }
+        return (string) $value;
+    }
+
     public function getLogLive($list_params, $count = false)
     {
         $condition = array();

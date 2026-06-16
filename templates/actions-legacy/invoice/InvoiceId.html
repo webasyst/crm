@@ -2,7 +2,7 @@
 
 {$invoice.contact = $contact}
 
-<div class="c-invoice-page" id="c-invoice-page" data-id="{$invoice.id}">
+<div class="c-invoice-page" id="c-invoice-page" data-id="{$invoice.id}" data-state-id="{$invoice.state_id|escape}" data-payment-expired="0">
 
     <div class="c-layout">
         <div class="c-column">
@@ -262,6 +262,7 @@
             new CRMInvoicePage({
                 $wrapper: $("#c-invoice-page"),
                 invoice_id: {$invoice.id|json_encode},
+                sidebar_item_html: {if !empty($sidebar_item_html)}{$sidebar_item_html|json_encode}{else}null{/if},
                 locales: {
                     delete_confirm_title: "[`Delete invoice`] [`#`]{$invoice.number|escape}",
                     delete_confirm_text: "[`Invoice deletion cannot be undone.`]",

@@ -217,6 +217,10 @@ class crmFormProcessor
 
     protected function processData($data)
     {
+        if (!empty($data['!form_page_url'])) {
+            $data['!form_page_url'] = waIdna::dec($data['!form_page_url']);
+        }
+
         // processing contact data
         $result = $this->processContactData($data);
         if (!empty($result['errors'])) {

@@ -279,6 +279,7 @@ return array(
         'price' => array('decimal', "15,4", 'null' => 0),
         'quantity' => array('decimal', "15,4", 'null' => 0),
         'product_id' => array('varchar', 255),
+        'sort' => array('int', 11, 'null' => 0, 'default' => '0'),
         'tax_type' => array('enum', "'INCLUDE','APPEND','NONE'", 'null' => 0, 'default' => 'NONE'),
         'tax_percent' => array('decimal', "5,2", 'null' => 0, 'default' => '0.00'),
         ':keys' => array(

@@ -2,17 +2,14 @@
 
 class crmMessageListByConversationAction extends crmBackendViewAction
 {
+    use crmMessageListHelpersTrait;
+
     const USERPIC = 32;
-    protected $mm;
-    protected $active_sources;
+
+    protected $selected_transport_type;
 
     public function execute()
     {
-        $this->mm = $mm = new crmMessageModel();
-        $cm = new crmConversationModel();
-        $fm = new crmFunnelModel();
-        $asm = new waAppSettingsModel();
-
         $page = waRequest::request('page', null, waRequest::TYPE_INT);
         $page_of_item = waRequest::request('pt', null, waRequest::TYPE_INT);
         $contact_id = waRequest::request('contact', null, waRequest::TYPE_INT);
@@ -32,28 +29,28 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         $this->prepareFilterByResponsible($list_params);
         $this->prepareFilterByTransport($list_params);
 
-        wa()->getUser()->setSettings("crm", "messages_max_id", $mm->countByResponsible("messages_max_id"));
+        wa()->getUser()->setSettings("crm", "messages_max_id", $this->getMessageModel()->countByResponsible("messages_max_id"));
 
         $total_count = 0;
 
-        $conversations = $cm->getList($list_params, $total_count);
+        $conversations = $this->getConversationModel()->getList($list_params, $total_count);
         $this->workup($conversations);
 
         $deal_ids = [];
         $contact_ids = [];
         $last_message_ids = [];
         if (!empty($contact_id)) {
-            $contact_ids[$contact_id] = $contact_id;
+            $contact_ids[] = $contact_id;
         }
         $last_message_id = 0;
         foreach ($conversations as $c) {
             if ($c['deal_id']) {
-                $deal_ids[$c['deal_id']] = $c['deal_id'];
+                $deal_ids[] = $c['deal_id'];
             }
             if ($c['last_message_id']) {
                 $last_message_ids[] = $c['last_message_id'];
             }
-            $contact_ids[$c['contact_id']] = $c['contact_id'];
+            $contact_ids[] = $c['contact_id'];
             $last_message_id = $c['last_message_id'] > $last_message_id ? $c['last_message_id'] : $last_message_id;
         }
 
@@ -75,6 +72,7 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         $pages_count = ceil($total_count / $list_params['limit']);
         $current_page = ceil($list_params['offset'] / $list_params['limit']) + 1;
         $contacts = $this->getContacts($contact_ids);
+        $lazy_filter_params = $this->getLazyFilterParams($list_params);
 
         $contact = [];
         if ($contact_id && isset($contacts[$contact_id])) {
@@ -92,7 +90,7 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         }
 
         $this->view->assign(array(
-            'conversations'             => $conversations,
+            'list'                      => $conversations,
             'list_params'               => $list_params,
             'contacts_all'              => $contacts,
             'contacts'                  => $contacts,
@@ -104,76 +102,51 @@ class crmMessageListByConversationAction extends crmBackendViewAction
             'pages_count'               => $pages_count,
             'current_page'              => $current_page,
             'page_of_item'              => $page_of_item,        
-            'available_funnel'          => $fm->getAvailableFunnel(),
-            'message_ts'                => $asm->get('crm', 'message_ts'),
+            'available_funnel'          => $this->getFunnelModel()->getAvailableFunnel(),
+            'message_ts'                => (new waAppSettingsModel)->get('crm', 'message_ts'),
             'active_sources'            => $this->getActiveSources(),
             'crm_app_url'               => wa()->getAppUrl('crm'),
             'site_url'                  => wa()->getRootUrl(true),
             'last_message_id'           => $last_message_id,
             'is_empty_case'             => !$this->getConversationModel()->countAll(),
+            'load_url'                  => '?module=message&action=listByConversation&background_process=1',
+            'lazy_filter_params'        => $lazy_filter_params,
+            'show_flat_toggle'          => $this->doShowFlatToggle(),
         ));
 
         wa('crm')->getConfig()->setLastVisitedUrl('message/');
     }
 
-    protected function getDeals($deal_ids)
+    protected function getLazyFilterParams($list_params)
     {
-        if (!$deal_ids) {
-            return array();
-        }
-        $dm = new crmDealModel();
-        $deals = $dm->select('*')->where("id IN('".join("','", $dm->escape($deal_ids))."')")->fetchAll('id');
-        return $deals;
-    }
+        $filter_params = [];
 
-    protected function getFunnels($deals)
-    {
-        $funnels = array();
-        $fm = new crmFunnelModel();
-        $fsm = new crmFunnelStageModel();
-        foreach ($deals as $d) {
-            if ($d['funnel_id'] && empty($funnels[$d['funnel_id']])) {
-                $funnel = $fm->getById($d['funnel_id']);
-                $funnel['stages'] = $fsm->getStagesByFunnel($funnel);
-                $funnels[$d['funnel_id']] = $funnel;
+        foreach (['transport', 'source_id', 'responsible'] as $key) {
+            if (isset($list_params[$key])) {
+                $filter_params[$key] = $list_params[$key];
             }
         }
-        return $funnels;
+
+        return $filter_params;
     }
 
-    /**
-     * @return array
-     * @throws waException
-     */
-    protected function getContacts($ids)
+    protected function doShowFlatToggle()
     {
-        $contacts = array();
-        if ($ids) {
-            $collection = new waContactsCollection('/id/'.join(',', array_keys($ids)));
-            $col = $collection->getContacts(wa('crm')->getConfig()->getContactFields(), 0, count($ids));
-            foreach ($col as $id => $c) {
-                $contacts[$id] = new waContact($c);
-                $contacts[$id]['is_visible'] = $this->getCrmRights()->contact($c);
-                if ($id == wa()->getUser()->getId()) {
-                    $me = $contacts[$id];
-                }
-            }
-        }
-        if (isset($me)) {
-            unset($contacts[wa()->getUser()->getId()]);
-            $contacts = array(wa()->getUser()->getId() => $me) + $contacts;
-        }
-        return $contacts;
+        return $this->selected_transport_type == crmSourceModel::TYPE_EMAIL
+            || $this->selected_transport_type != crmSourceModel::TYPE_IM
+            &&  empty($this->getConversationModel()->getList([
+                    'fields'       => 'id',
+                    'transport'    => crmSourceModel::TYPE_IM,
+                    'check_rights' => true,
+                    'limit'        => 1,
+                    'offset'       => 0,
+                ]));
     }
 
-    /**
-     * Has access to file by users
-     * @return bool
-     */
-    protected function hasAccessToUsersFilter()
+    protected function getResponsibleContacts()
     {
-        $crm_rights = $this->getCrmRights();
-        return $crm_rights->getConversationsRights() >= crmRightConfig::RIGHT_CONVERSATION_ALL;
+        $ids = $this->getConversationModel()->select('DISTINCT(user_contact_id) id')->where('user_contact_id IS NOT NULL AND user_contact_id <> 0')->fetchAll('id', true);
+        return $this->getContacts(array_keys($ids));
     }
 
     protected function workup(&$conversations)
@@ -185,13 +158,6 @@ class crmMessageListByConversationAction extends crmBackendViewAction
             $conversation['summary'] = htmlentities(ifset($conversation['summary'], ''), ENT_QUOTES, 'UTF-8', false);
         }
         unset($conversation);
-    }
-
-    protected function getResponsibleContacts()
-    {
-        $cm = new crmConversationModel();
-        $ids = $cm->select('DISTINCT(user_contact_id) id')->where('user_contact_id IS NOT NULL AND user_contact_id <> 0')->fetchAll('id', true);
-        return $this->getContacts($ids);
     }
 
     protected function getFilterItemsByResponsible($responsible_contacts = array())
@@ -218,61 +184,6 @@ class crmMessageListByConversationAction extends crmBackendViewAction
             )
         );
         return $filter_responsibles;
-    }
-
-    protected function getFilterItemsByTransport()
-    {
-        return array(
-            "all"   => array(
-                "id"   => "all",
-                "name" => _w("Any transports")
-            ),
-            "email" => array(
-                "id"   => "email",
-                "name" => _w("Email")
-            ),
-            "im"    => array(
-                "id"   => "im",
-                "name" => _w("Messengers")
-            ),
-        );
-    }
-
-    protected function getActiveSources()
-    {
-        if ($this->active_sources !== null) {
-            return $this->active_sources;
-        }
-
-        $this->active_sources = (new crmSourceModel)->getByField([
-            'type' => [crmSourceModel::TYPE_EMAIL, crmSourceModel::TYPE_IM],
-            'disabled' => 0
-        ], 'id');
-
-        $this->active_sources = array_map(function ($el) {
-            $el['source'] = crmSource::factory($el);
-
-            $el['icon_color'] = '#BB64FF';
-            if ($el['type'] === crmSourceModel::TYPE_IM) {
-                $el['icon_url'] = $el['source']->getIcon();
-                $fa_icon = $el['source']->getFontAwesomeBrandIcon();
-                if (ifset($fa_icon['icon_fab'])) {
-                    $el['icon_fab'] = $fa_icon['icon_fab'];
-                    $el['icon_color'] = $fa_icon['icon_color'];
-                }
-            } elseif ($el['type'] === crmSourceModel::TYPE_EMAIL) {
-                $el['icon_fa'] = 'envelope';
-            }
-
-            return $el;
-        }, $this->active_sources);
-
-        return $this->active_sources;
-    }
-
-    protected function getFilterItemsBySource()
-    {
-        
     }
 
     /**
@@ -367,10 +278,12 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         $active_filter_transport = reset($filter_transports);
 
         // ok, found in filter item variants, so be it selected (active)
+        $selected_transport_type = empty($selected_transport) ? null : strtoupper($selected_transport);
         if (isset($filter_transports[$selected_transport])) {
             $active_filter_transport = $filter_transports[$selected_transport];
         } elseif (isset($active_sources[$selected_transport])) {
             $active_filter_transport = $active_sources[$selected_transport];
+            $selected_transport_type = $active_filter_transport['type'];
         }
 
         // list params filter (for sql query)
@@ -390,15 +303,20 @@ class crmMessageListByConversationAction extends crmBackendViewAction
         $this->view->assign(array(
             'filter_transports'         => $filter_transports,
             'active_filter_transport'   => $active_filter_transport,
+            'selected_transport_type'   => $selected_transport_type,
+            'forced_flat_transport'     => $selected_transport_type !== crmConversationModel::TYPE_EMAIL 
+                                            ? 'email' : $active_filter_transport['id'],
         ));
+
+        $this->selected_transport_type = $selected_transport_type;
     }
 
-    protected function getMessages($mess_ids)
+    protected function getMessages(array $mess_ids)
     {
         if (!$mess_ids) {
             return array();
         }
-        $messages = $this->mm->getById($mess_ids, 'id');
-        return $messages;
+        return $this->getMessageModel()->getByField(['id' => $mess_ids], 'id');
     }
+
 }

@@ -40,7 +40,7 @@ class crmSettingsPaymentEditAction extends crmSettingsViewAction
                 $this->view->assign('error', $e->getMessage());
             }
             if ($pm->getByField(array('plugin' => $plugin_id, 'company_id' => $company_id))) {
-                throw new waException('Plugin already exists');
+                throw new waException('Plugin already exists', 409);
             }
             $instance = array(
                 'name'        => $plugin->getName(),
@@ -54,7 +54,7 @@ class crmSettingsPaymentEditAction extends crmSettingsViewAction
         $cm = new crmCompanyModel();
         $company = $cm->getById($company_id);
         if (!$company) {
-            throw new waException('Company not found');
+            throw new waException('Company not found', 404);
         }
         $params = array('namespace' => 'payment[settings]');
         /*

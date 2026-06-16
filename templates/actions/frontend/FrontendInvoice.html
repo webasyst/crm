@@ -65,6 +65,28 @@
                 {include file="./invoice/payment.section.inc.html" inline}
             {/if}
 
+            {if $invoice.state_id == crmInvoiceModel::STATE_PENDING && waRequest::get('result') == 'success'}
+                <script>
+                ( function($) {
+                    const PERIOD = 9000;
+                    const START = 100;
+                    (function schedule(timeout) {
+                        setTimeout(function() {
+                            $.post({$status_check_url|json_encode}, { 
+                                hash: {$hash|json_encode}
+                            }, function(r) {
+                                if (r && r.is_paid) {
+                                    window.location.reload();
+                                }
+                            }).always(function() {
+                                schedule(PERIOD);
+                            });
+                        }, timeout);
+                    }(START));
+                } )(jQuery);
+                </script>
+            {/if}
+
             {if !$_is_include}
             <script>
                 ( function($) {

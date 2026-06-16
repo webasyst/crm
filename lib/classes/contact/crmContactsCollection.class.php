@@ -177,6 +177,223 @@ class crmContactsCollection extends waContactsCollection
         return crmContactsSearchHelper::prepare($this, $query, $auto_title);
     }
 
+    public function applyCategorySetFilter(array $segment_set)
+    {
+        $segment_ids = array_values(array_unique(array_merge(
+            (array) ifset($segment_set, 'include_any', []),
+            (array) ifset($segment_set, 'require_all', []),
+            (array) ifset($segment_set, 'exclude_any', [])
+        )));
+        if (!$segment_ids) {
+            return;
+        }
+
+        $sm = $this->getSegmentModel();
+        $segment_rows = $sm->select('id, category_id')
+            ->where('type = ?', crmSegmentModel::TYPE_CATEGORY)
+            ->where('id IN (:ids)', ['ids' => $segment_ids])
+            ->fetchAll('id');
+        if (!$segment_rows) {
+            $this->addWhere(0);
+            return;
+        }
+
+        $to_category_ids = function ($ids) use ($segment_rows) {
+            $res = [];
+            foreach ((array) $ids as $segment_id) {
+                if (!isset($segment_rows[$segment_id])) {
+                    continue;
+                }
+                $category_id = (int) ifset($segment_rows[$segment_id], 'category_id', 0);
+                if ($category_id > 0) {
+                    $res[] = $category_id;
+                }
+            }
+            return array_values(array_unique($res));
+        };
+
+        $include_any = $to_category_ids($segment_set['include_any']);
+        $require_all = $to_category_ids($segment_set['require_all']);
+        $exclude_any = $to_category_ids($segment_set['exclude_any']);
+
+        // Deterministic conflict handling: exclusion has priority.
+        if ($exclude_any) {
+            $include_any = array_values(array_diff($include_any, $exclude_any));
+            $require_all = array_values(array_diff($require_all, $exclude_any));
+        }
+
+        if ($include_any) {
+            $include_ids = join(',', $include_any);
+            $this->addWhere("EXISTS (SELECT 1 FROM wa_contact_categories wcc_any WHERE wcc_any.contact_id = c.id AND wcc_any.category_id IN ({$include_ids}))");
+        }
+
+        if ($require_all) {
+            $require_ids = join(',', $require_all);
+            $required_count = count($require_all);
+            $this->addWhere("c.id IN (
+                SELECT wcc_all.contact_id
+                FROM wa_contact_categories wcc_all
+                WHERE wcc_all.category_id IN ({$require_ids})
+                GROUP BY wcc_all.contact_id
+                HAVING COUNT(DISTINCT wcc_all.category_id) = {$required_count}
+            )");
+        }
+
+        if ($exclude_any) {
+            $exclude_ids = join(',', $exclude_any);
+            // NOT EXISTS preserves uncategorized contacts.
+            $this->addWhere("NOT EXISTS (SELECT 1 FROM wa_contact_categories wcc_ex WHERE wcc_ex.contact_id = c.id AND wcc_ex.category_id IN ({$exclude_ids}))");
+        }
+    }
+
+    /**
+     * Filter by dynamic segments (crm_segment.type = search) using each segment's saved hash.
+     * Semantics mirror applyCategorySetFilter: include_any = OR, require_all = AND of memberships, exclude_any = must match none.
+     *
+     * @param array $segment_set keys: include_any, require_all, exclude_any — lists of positive segment ids
+     */
+    public function applySearchSegmentSetFilter(array $segment_set)
+    {
+        $segment_ids = array_values(array_unique(array_merge(
+            (array) ifset($segment_set, 'include_any', []),
+            (array) ifset($segment_set, 'require_all', []),
+            (array) ifset($segment_set, 'exclude_any', [])
+        )));
+        $segment_ids = array_values(array_filter($segment_ids, function ($id) {
+            return (int) $id > 0;
+        }));
+        if (!$segment_ids) {
+            return;
+        }
+
+        $sm = $this->getSegmentModel();
+        $user = wa()->getUser();
+        $contact_ids = [$user->getId()];
+        if ($user->isAdmin()) {
+            $contact_ids[] = 0;
+        }
+
+        $segment_rows = $sm->select('id, hash')
+            ->where('type = ?', crmSegmentModel::TYPE_SEARCH)
+            ->where('archived = 0')
+            ->where('(contact_id IN (:cids) OR shared > 0)', ['cids' => $contact_ids])
+            ->where('id IN (:ids)', ['ids' => $segment_ids])
+            ->fetchAll('id');
+
+        if (!$segment_rows) {
+            $this->addWhere(0);
+            return;
+        }
+
+        $to_hashes = function ($ids) use ($segment_rows) {
+            $res = [];
+            foreach ((array) $ids as $segment_id) {
+                if (!isset($segment_rows[$segment_id])) {
+                    continue;
+                }
+                $hash = trim((string) ifset($segment_rows[$segment_id], 'hash', ''));
+                if ($hash !== '') {
+                    $res[(int) $segment_id] = $hash;
+                }
+            }
+            return $res;
+        };
+
+        $include_any = $to_hashes((array) ifset($segment_set, 'include_any', []));
+        $require_all = $to_hashes((array) ifset($segment_set, 'require_all', []));
+        $exclude_any = $to_hashes((array) ifset($segment_set, 'exclude_any', []));
+
+        foreach (array_keys($exclude_any) as $ex_id) {
+            unset($include_any[$ex_id], $require_all[$ex_id]);
+        }
+
+        $build_in = function (array $id_to_hash) {
+            $parts = [];
+            foreach ($id_to_hash as $hash) {
+                $sub = $this->buildSearchSegmentContactIdSubquerySql($hash);
+                if ($sub !== '') {
+                    $parts[] = "c.id IN ({$sub})";
+                }
+            }
+            return $parts;
+        };
+
+        $requested_include = self::dropNotPositiveInts((array) ifset($segment_set, 'include_any', []));
+        if ($requested_include && !$include_any) {
+            $this->addWhere(0);
+            return;
+        }
+        $requested_require = self::dropNotPositiveInts((array) ifset($segment_set, 'require_all', []));
+        if ($requested_require && count($require_all) < count(array_unique($requested_require))) {
+            $this->addWhere(0);
+            return;
+        }
+        $requested_exclude = self::dropNotPositiveInts((array) ifset($segment_set, 'exclude_any', []));
+        if ($requested_exclude && count($exclude_any) < count(array_unique($requested_exclude))) {
+            $this->addWhere(0);
+            return;
+        }
+
+        $include_parts = $build_in($include_any);
+        if ($include_parts) {
+            $this->addWhere('(' . implode(' OR ', $include_parts) . ')');
+        }
+
+        foreach ($require_all as $hash) {
+            $sub = $this->buildSearchSegmentContactIdSubquerySql($hash);
+            if ($sub !== '') {
+                $this->addWhere("c.id IN ({$sub})");
+            } else {
+                $this->addWhere(0);
+                return;
+            }
+        }
+
+        foreach ($exclude_any as $hash) {
+            $sub = $this->buildSearchSegmentContactIdSubquerySql($hash);
+            if ($sub !== '') {
+                $this->addWhere("NOT (c.id IN ({$sub}))");
+            }
+        }
+    }
+
+    /**
+     * @param int[] $ids
+     * @return int[]
+     */
+    protected static function dropNotPositiveInts(array $ids)
+    {
+        $res = [];
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            if ($id > 0) {
+                $res[] = $id;
+            }
+        }
+        return $res;
+    }
+
+    /**
+     * @param string $hash
+     * @return string SQL subquery selecting contact ids (no outer parens), or empty string if nothing matches
+     */
+    protected function buildSearchSegmentContactIdSubquerySql($hash)
+    {
+        $hash = trim((string) $hash);
+        if ($hash === '') {
+            return '';
+        }
+
+        $nested = new crmContactsCollection($hash, $this->options);
+        $nested->prepare(false, false);
+        $from_sql = $nested->getSQL();
+        if ($from_sql === '') {
+            return '';
+        }
+
+        return 'SELECT DISTINCT c.id ' . $from_sql;
+    }
+
     public function getContacts($fields = null, $offset = 0, $limit = 50)
     {
         if ($fields === null) {

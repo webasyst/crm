@@ -4,7 +4,7 @@
 {$_locale_string = substr($wa->locale(), 0, 2)}
 
 <!DOCTYPE html>
-<html>
+<html class="hide-scrollbar">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{$wa->appName()} &mdash; {$wa->accountName()}</title>
@@ -87,16 +87,20 @@
 <div class="content blank c-shadowed-content">
 <div id="c-content-block">
 {/if}
-{$full_chat_view = $conversations|@count == 1}
+{$full_chat_view = $list|@count == 1}
 
 <div class="c-messages-page flexbox {if $iframe}iframe-style{/if} {if $full_chat_view}full-chat-style{/if}" id="c-messages-page">
     {if !$iframe || !$full_chat_view}
     <div class="sidebar width-23rem wide-mobile blank bordered-right {if !empty($view_param) && !$full_chat_view}desktop-and-tablet-only{/if}" id="c-messages-sidebar">
-        {include file="./MessageListByConversation.html" _active_c=$active_conv inline}
+        {include file="./MessageListByConversation.html" _active_c=$active_id inline}
     </div>
     {/if}
     <div class="content wide not-blank hide-scrollbar content-mobile-friendly c-messages-page-content {if empty($view_param) && !$full_chat_view}desktop-and-tablet-only{/if}">
-        {include file="./MessageConversationId.html" inline}
+        {if empty($is_flat)}
+            {include file="./MessageConversationId.html" inline}
+        {else}
+            {include file="./MessageId.html" inline}
+        {/if}
     </div>
 </div>
 
@@ -109,6 +113,7 @@
         $.message.content = new MessageContentRouter({
             $content: $content,
             iframe: {$iframe|default:0},
+            load_url: {$content_load_url|json_encode}
         });
 
         if ($.wa_push) {

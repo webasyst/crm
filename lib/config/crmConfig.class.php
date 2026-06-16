@@ -676,4 +676,10 @@ class crmConfig extends waAppConfig
         $this->push_adapter = $push_adptr;
         return $this->push_adapter;
     }
+
+    public function getPlugins()
+    {
+        $plugins = parent::getPlugins();
+        return is_array($plugins) ? $plugins : [];
+    }
 }

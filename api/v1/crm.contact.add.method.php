@@ -259,6 +259,9 @@ class crmContactAddMethod extends crmApiAbstractMethod
                 unset($errors[$_name]);
             }
             if ($description) {
+                if (is_array($description)) {
+                    $description = implode(', ', $description);
+                }
                 $error_fields[] = [
                     'field' => $_name,
                     'value' => $value,

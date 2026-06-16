@@ -182,7 +182,7 @@ class crmMessageSendReplyController extends crmSendEmailController
         if (empty($deal) || empty($notification['reply_to'])) {
             $message = $this->getMessage();
             $source = empty($message['source_id']) ? null : crmEmailSource::factory($message['source_id']);
-            $source_email = (empty($source) || $source->isDisabled()) ? $this->emailSource() : $source->getEmail();
+            $source_email = (empty($source) || $source instanceof crmNullSource || $source->isDisabled()) ? $this->emailSource() : $source->getEmail();
 
             if (!empty($source_email)) {
                 $notification['reply_to'][$source_email] = $source_email;
@@ -197,6 +197,13 @@ class crmMessageSendReplyController extends crmSendEmailController
             $notification['references'] = $original_message->getReferences();
             $notification['references'][] = $notification['in_reply_to'];
             $notification['references'] = array_unique($notification['references']);
+        } else {
+            $message = $this->getMessage();
+            $message_id = ifset($message, 'params', 'email_message_id', null);
+            if ($message_id) {
+                $notification['in_reply_to'] = $message_id;
+                $notification['references'] = [$message_id];
+            }
         }
 
         $notification['message_id'] = crmEmailSourceWorker::generateMessageId($deal_id);
@@ -260,7 +267,12 @@ class crmMessageSendReplyController extends crmSendEmailController
         if ($this->mail !== null) {
             return $this->mail;
         }
-        return $this->mail = new crmMailMessage($message['original_path']);
+        try {
+            return $this->mail = new crmMailMessage($message['original_path']);
+        } catch (Exception $e) {
+            waLog::log('Error while loading original message from the file ' . $message['original_path'] . ' on message send reply controller: ' . $e->getMessage());
+        }
+        return null;
     }
 
     /**

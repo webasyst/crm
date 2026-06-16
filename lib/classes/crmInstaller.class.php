@@ -575,7 +575,7 @@ class crmInstaller
         try {
             waFiles::delete(wa('crm')->getConfig()->getConfigPath('search/search.php'));
         } catch (Exception $e) {
-
+            waLog::log('Error on deleting search.php file: ' . $e->getMessage());
         }
 
         $constructor = new crmFieldConstructor();

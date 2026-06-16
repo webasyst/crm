@@ -36,9 +36,7 @@ abstract class crmEmailSourceWorkerStrategy
 
     public static function factory(crmEmailSource $source, crmMailMessage $mail)
     {
-        $recipient = self::getRecipient($source, $mail);
-
-        if (ifset($recipient, 'full_suffix', '') === '+0') {
+        if (self::isSuffixSupportingTestMail($source, $mail)) {
             $source->setEmailSuffixSupporting(crmEmailSource::EMAIL_SUFFIX_SUPPORTING_YES);
             return null;
         }
@@ -60,6 +58,19 @@ abstract class crmEmailSourceWorkerStrategy
         }
 
         return new crmEmailSourceWorkerIncomingStrategy($source, $mail);
+    }
+
+    /**
+     * Automatic suffix-support probe sent to address+0@domain on source creation.
+     *
+     * @param crmEmailSource $source
+     * @param crmMailMessage $mail
+     * @return bool
+     */
+    public static function isSuffixSupportingTestMail(crmEmailSource $source, crmMailMessage $mail)
+    {
+        $recipient = self::getRecipient($source, $mail);
+        return ifset($recipient, 'full_suffix', '') === '+0';
     }
 
     abstract public function process($params = array());
@@ -136,12 +147,12 @@ abstract class crmEmailSourceWorkerStrategy
         if ($deal_id <= 0) {
             return null;
         }
-        $cm = new crmConversationModel();
-        return $cm->getByField(array(
+
+        return self::getConversationModel()->getByField([
             'deal_id' => $deal_id,
             'type' => crmConversationModel::TYPE_EMAIL,
             'is_closed' => 0
-        ));
+        ]);
     }
 
     protected function createConversation(crmContact $contact, $message, $deal = null)
@@ -167,9 +178,7 @@ abstract class crmEmailSourceWorkerStrategy
             'deal_id' => $deal ? (int)ifset($deal['id']) : null
         );
 
-        $cm = new crmConversationModel();
-
-        return $cm->add($data, crmConversationModel::TYPE_EMAIL);
+        return self::getConversationModel()->add($data, crmConversationModel::TYPE_EMAIL);
     }
 
     /**
@@ -208,7 +217,7 @@ abstract class crmEmailSourceWorkerStrategy
      */
     protected function saveMail(crmContact $user, crmContact $customer, $deal, $mail = array())
     {
-        $mm = new crmMessageModel();
+        $mm = self::getMessageModel();
 
         $direction = crmMessageModel::DIRECTION_IN;
         if ($this instanceof crmEmailSourceWorkerOutcomingStrategy) {
@@ -224,6 +233,17 @@ abstract class crmEmailSourceWorkerStrategy
         $mail['direction'] = $direction;
 
         $message = $this->prepareMailToSave($user, $customer, $deal, $mail);
+
+        $email_message_id = trim((string)$this->mail->getMessageId());
+        if ($email_message_id !== '') {
+            $email_message_id = trim($email_message_id, '<> ');
+            if ($email_message_id !== '') {
+                $message['params'] = array_merge(
+                    (array)ifset($message, 'params', array()),
+                    array('email_message_id' => $email_message_id)
+                );
+            }
+        }
 
         // attach files to message
         $file_ids = array();
@@ -585,6 +605,9 @@ abstract class crmEmailSourceWorkerStrategy
      */
     public static function buildMagicEmail($source, $deal)
     {
+        if (!($source instanceof crmEmailSource)) {
+            return '';
+        }
         $suffix = self::buildMagicEmailSuffix($deal);
         return $suffix ? $source->getEmail($suffix) : '';
     }
@@ -604,4 +627,13 @@ abstract class crmEmailSourceWorkerStrategy
         return strlen($suffix) > 4 ? $suffix : '';
     }
 
+    protected static function getConversationModel()
+    {
+        return !empty(self::$models['conversation']) ? self::$models['conversation'] : (self::$models['conversation'] = new crmConversationModel());
+    }
+
+    protected static function getMessageModel()
+    {
+        return !empty(self::$models['message']) ? self::$models['message'] : (self::$models['message'] = new crmMessageModel());
+    }
 }

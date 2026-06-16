@@ -89,7 +89,7 @@
                 {/if}
                 <tr>
                     <td class="c-color-gray c-pr-30 c-pt-12 fs-16">
-                        {if !empty($_type)}{$_type}&nbsp;{/if}{$_name|escape}&nbsp;{$invoice.tax_percent|escape}%
+                        {if !empty($_type)}{$_type}&nbsp;{/if}{$_name|escape}&nbsp;{$invoice.tax_percent|floatval|wa_format_number:false}%
                     </td>
                     <td class="c-pt-12">
                         {$invoice.tax_amount|wa_format}

@@ -21,3 +21,6 @@ msgstr "Mark as read"
 
 msgid "Mark messages as unread"
 msgstr "Mark as unread"
+
+msgid "Failed to load video"
+msgstr "Failed to load video"

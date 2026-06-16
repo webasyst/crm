@@ -208,126 +208,130 @@
                             </div>
 
                             {* A field for choosing a deal if a new letter is being created *}
-                            {if empty($deal.id)}
-                            <div class="field{if $action !== "reply"} hidden{/if} js-deal-field">
-                                <div class="name">[`Deal`]</div>
-                                <div class="value js-deal-value">
-                                    <div class="c-select-deal js-select-deal">
-                                        <div class="dropdown js-deals-dropdown" id="dropdown-deals-send">
-                                            <button class="dropdown-toggle button light-gray js-visible-link" type="button" style="word-break: break-word;">
-                                                <span class="flexbox space-4 align-left js-text">[`Empty`]</span>
-                                            </button>
-                                            <div class="dropdown-body">
-
-                                                <ul class="menu with-icons js-deals-list">
-                                                    <li class="js-create-new-deal">
-                                                        <a href="javascript:void(0);">
-                                                            <span class="js-text">[`Create new`]</span>
-                                                        </a>
-                                                    </li>
-                                                    <li class="c-empty-deal c-empty-deal-hidden js-empty-deal">
-                                                        <a href="javascript:void(0);">
-                                                            <span class="js-text">[`Empty`]</span>
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                                <input class="js-field js-deal-id" name="deal_id" type="hidden" value="none">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="c-select-funnel hidden js-select-funnel custom-mt-8">
-                                        {$_active_funnel = reset($funnels)}
-                                        {if !empty($deal.funnel_id) && !empty($funnels[$deal.funnel_id])}
-                                            {$_active_funnel = $funnels[$deal.funnel_id]}
-                                        {/if}
-
-                                        <div class="c-funnels-list js-funnels-list-send" id="c-funnels-list">
-                                            <div class="dropdown js-deals-dropdown" id="dropdown-funnels-list-send">
-                                                <button class="dropdown-toggle button light-gray js-visible-link" type="button" >
-                                                    <span class="js-text">
-                                                        {if !empty($_active_funnel.color)}
-                                                            <i class="{$_active_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_active_funnel.color}"></i>
-                                                        {/if}
-                                                        <span class="js-name">{$_active_funnel.name|escape}</span>
+                            {if !empty($deal)}
+                                {if empty($deal.id)}
+                                <div class="field{if $action !== "reply"} hidden{/if} js-deal-field">
+                                    <div class="name">[`Deal`]</div>
+                                    <div class="value js-deal-value">
+                                        <div class="c-select-deal js-select-deal">
+                                            <div class="dropdown js-deals-dropdown" id="dropdown-deals-send">
+                                                <button class="dropdown-toggle button light-gray js-visible-link" type="button" style="word-break: break-word;">
+                                                    <span class="flexbox space-4 align-left js-text">[`Empty`]</span>
                                                 </button>
                                                 <div class="dropdown-body">
-                                                    <ul class="menu with-icons ">
-                                                        {strip}
-                                                            {foreach $funnels as $_funnel}
-                                                                {if !empty($_funnel.is_archived)}
-                                                                    {continue}
-                                                                {/if}
-                                                                <li class="{if $deal.funnel_id == $_funnel.id}selected{/if}">
-                                                                    <a href="javascript:void(0);" data-id="{$_funnel.id|escape}">
-                                                                        {if !empty($_funnel.color)}
-                                                                            <i class="{$_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_funnel.color|escape}"></i>
-                                                                        {/if}
-                                                                    <span>{$_funnel.name|escape}</span>
-                                                                    </a>
-                                                                </li>
-                                                            {/foreach}
-                                                        {/strip}
+
+                                                    <ul class="menu with-icons js-deals-list">
+                                                        <li class="js-create-new-deal">
+                                                            <a href="javascript:void(0);">
+                                                                <span class="js-text">[`Create new`]</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="c-empty-deal c-empty-deal-hidden js-empty-deal">
+                                                            <a href="javascript:void(0);">
+                                                                <span class="js-text">[`Empty`]</span>
+                                                            </a>
+                                                        </li>
                                                     </ul>
-                                                    <input class="js-field js-select-deal-funnel" name="deal[funnel_id]" type="hidden" value="{$_active_funnel.id|escape}">
+                                                    <input class="js-field js-deal-id" name="deal_id" type="hidden" value="none">
                                                 </div>
                                             </div>
-                                            <script>
-                                                ( function($) {
-                                                    $("#dropdown-funnels-list-send").waDropdown({
-
-                                                    });
-                                                    var $wrapper = $(".js-funnels-list-send"),
-                                                        $visibleLink = $wrapper.find(".js-visible-link"),
-                                                        $field = $wrapper.find(".js-field"),
-                                                        $menu = $wrapper.find(".menu");
-
-                                                    $menu.on("click", "a", function () {
-                                                        var $link = $(this);
-                                                        $visibleLink.find(".js-text").html($link.html());
-
-                                                        $menu.find(".selected").removeClass("selected");
-                                                        $link.closest("li").addClass("selected");
-
-                                                    /* $menu.hide();
-                                                        setTimeout( function() {
-                                                            $menu.removeAttr("style");
-                                                        }, 200);*/
-
-                                                        var id = $link.data("id");
-                                                        $field.val(id).trigger("change");
-                                                    });
-
-                                                    //$.crm.renderSVG($wrapper);
-
-                                                })(jQuery);
-                                            </script>
                                         </div>
 
-                                        <div class="js-select-stage-wrapper" style="display: inline-block;">
-                                            {include file="templates/actions/deal/DealStagesByFunnel.html" selected_stage=$deal.stage_id inline}
+                                        <div class="c-select-funnel hidden js-select-funnel custom-mt-8">
+                                            {$_active_funnel = reset($funnels)}
+                                            {if !empty($deal.funnel_id) && !empty($funnels[$deal.funnel_id])}
+                                                {$_active_funnel = $funnels[$deal.funnel_id]}
+                                            {/if}
+
+                                            <div class="c-funnels-list js-funnels-list-send" id="c-funnels-list">
+                                                <div class="dropdown js-deals-dropdown" id="dropdown-funnels-list-send">
+                                                    <button class="dropdown-toggle button light-gray js-visible-link" type="button" >
+                                                        <span class="js-text">
+                                                            {if !empty($_active_funnel.color)}
+                                                                <i class="{$_active_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_active_funnel.color}"></i>
+                                                            {/if}
+                                                            <span class="js-name">{$_active_funnel.name|escape}</span>
+                                                    </button>
+                                                    <div class="dropdown-body">
+                                                        <ul class="menu with-icons ">
+                                                            {strip}
+                                                                {foreach $funnels as $_funnel}
+                                                                    {if !empty($_funnel.is_archived)}
+                                                                        {continue}
+                                                                    {/if}
+                                                                    <li class="{if $deal.funnel_id == $_funnel.id}selected{/if}">
+                                                                        <a href="javascript:void(0);" data-id="{$_funnel.id|escape}">
+                                                                            {if !empty($_funnel.color)}
+                                                                                <i class="{$_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_funnel.color|escape}"></i>
+                                                                            {/if}
+                                                                        <span>{$_funnel.name|escape}</span>
+                                                                        </a>
+                                                                    </li>
+                                                                {/foreach}
+                                                            {/strip}
+                                                        </ul>
+                                                        <input class="js-field js-select-deal-funnel" name="deal[funnel_id]" type="hidden" value="{$_active_funnel.id|escape}">
+                                                    </div>
+                                                </div>
+                                                <script>
+                                                    ( function($) {
+                                                        $("#dropdown-funnels-list-send").waDropdown({
+
+                                                        });
+                                                        var $wrapper = $(".js-funnels-list-send"),
+                                                            $visibleLink = $wrapper.find(".js-visible-link"),
+                                                            $field = $wrapper.find(".js-field"),
+                                                            $menu = $wrapper.find(".menu");
+
+                                                        $menu.on("click", "a", function () {
+                                                            var $link = $(this);
+                                                            $visibleLink.find(".js-text").html($link.html());
+
+                                                            $menu.find(".selected").removeClass("selected");
+                                                            $link.closest("li").addClass("selected");
+
+                                                        /* $menu.hide();
+                                                            setTimeout( function() {
+                                                                $menu.removeAttr("style");
+                                                            }, 200);*/
+
+                                                            var id = $link.data("id");
+                                                            $field.val(id).trigger("change");
+                                                        });
+
+                                                        //$.crm.renderSVG($wrapper);
+
+                                                    })(jQuery);
+                                                </script>
+                                            </div>
+
+                                            <div class="js-select-stage-wrapper" style="display: inline-block;">
+                                                {include file="templates/actions/deal/DealStagesByFunnel.html" selected_stage=$deal.stage_id inline}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            {else}
-                            <div class="field">
-                                <div class="name">[`Deal`]</div>
-                                <div class="value js-message-deal">
-                                    {$_funnel = $funnels[$deal.funnel_id]|default:null}
-                                    {if $_funnel}
-                                        {$_stage = $stages[$deal.stage_id]|default:null}
-                                        {if $_stage}
-                                            <i class="{$_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
-                                            <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
+                                {else}
+                                <div class="field">
+                                    <div class="name">[`Deal`]</div>
+                                    <div class="value js-message-deal">
+                                        {$_funnel = $funnels[$deal.funnel_id]|default:null}
+                                        {if $_funnel}
+                                            {$_stage = $stages[$deal.stage_id]|default:null}
+                                            {if $_stage}
+                                                <i class="{$_funnel.icon|default:'fas fa-briefcase'} funnel-state" style="color: {$_stage.color|escape}" title="{$_funnel.name|escape} / {$_stage.name|escape}"></i>
+                                                <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a>
+                                            {else}
+                                                <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Stage deleted`]</span>
+                                            {/if}
                                         {else}
-                                            <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Stage deleted`]</span>
+                                            <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Funnel deleted`]</span>
                                         {/if}
-                                    {else}
-                                        <a{if !empty($iframe)} target="_top"{/if} href="{$wa_app_url}deal/{$deal.id}/">{strip_tags($deal.name)|escape}</a> <span class="hint">[`Funnel deleted`]</span>
-                                    {/if}
+                                    </div>
                                 </div>
-                            </div>
+                                {/if}
+                            {else}
+                                <input class="js-field js-deal-id" name="deal_id" type="hidden" value="none">
                             {/if}
                         </div>
                         <div class="field">

@@ -50,10 +50,14 @@ class crmPop3EmailSource extends crmEmailSource
     public function getConnectionParams()
     {
         $params = $this->getParams();
+        crmEmailSource::applyMailProviderPresetToParams($params, 'pop3', 'mail_provider');
+
         $connection_params = array();
         foreach (array('email', 'login', 'server', 'port', 'password') as $key) {
-            $connection_params[$key] = (string)ifset($params[$key]);
+            $connection_params[$key] = (string) ifset($params[$key]);
         }
+
+        $connection_params['mail_provider'] = isset($params['mail_provider']) ? (string) $params['mail_provider'] : 'custom';
 
         if (isset($params['stream_context_options']) && is_array($params['stream_context_options'])) {
             $connection_params['stream_context_options'] = $params['stream_context_options'];
@@ -68,16 +72,33 @@ class crmPop3EmailSource extends crmEmailSource
 
     public function setConnectionParams($params)
     {
+        if (!is_array($params)) {
+            $params = array();
+        }
+        $merged = $params;
+        $mp = '';
+        if (array_key_exists('mail_provider', $merged) && $merged['mail_provider'] !== null && $merged['mail_provider'] !== '') {
+            $mp = (string) $merged['mail_provider'];
+        } else {
+            $mp = (string) $this->getParam('mail_provider', 'custom');
+        }
+        if ($mp === '') {
+            $mp = 'custom';
+        }
+        $merged['mail_provider'] = $mp;
+
+        crmEmailSource::applyMailProviderPresetToParams($merged, 'pop3', 'mail_provider');
+
         $connection_params = array();
-        foreach (array('email', 'login', 'server', 'port', 'password') as $key) {
-            if (isset($params[$key])) {
-                $connection_params[$key] = $params[$key];
+        foreach (array('email', 'login', 'server', 'port', 'password', 'mail_provider') as $key) {
+            if (array_key_exists($key, $merged) && $merged[$key] !== null && $merged[$key] !== '') {
+                $connection_params[$key] = $merged[$key];
             } else {
                 $connection_params[$key] = $this->getParam($key);
             }
         }
 
-        $flag = $this->choseSecureFlag($params);
+        $flag = $this->choseSecureFlag($merged);
         if ($flag) {
             $connection_params[$flag] = 1;
         }
@@ -89,10 +110,27 @@ class crmPop3EmailSource extends crmEmailSource
 
     public function saveConnectionParams($params)
     {
+        if (!is_array($params)) {
+            $params = array();
+        }
+        $merged = $params;
+        $mp = '';
+        if (array_key_exists('mail_provider', $merged) && $merged['mail_provider'] !== null && $merged['mail_provider'] !== '') {
+            $mp = (string) $merged['mail_provider'];
+        } else {
+            $mp = (string) $this->getParam('mail_provider', 'custom');
+        }
+        if ($mp === '') {
+            $mp = 'custom';
+        }
+        $merged['mail_provider'] = $mp;
+
+        crmEmailSource::applyMailProviderPresetToParams($merged, 'pop3', 'mail_provider');
+
         $connection_params = array();
-        foreach (array('email', 'login', 'server', 'port', 'password') as $key) {
-            if (isset($params[$key])) {
-                $connection_params[$key] = $params[$key];
+        foreach (array('email', 'login', 'server', 'port', 'password', 'mail_provider') as $key) {
+            if (array_key_exists($key, $merged) && $merged[$key] !== null && $merged[$key] !== '') {
+                $connection_params[$key] = $merged[$key];
             } else {
                 $connection_params[$key] = $this->getParam($key);
             }
@@ -101,7 +139,7 @@ class crmPop3EmailSource extends crmEmailSource
         $connection_params['ssl'] = null;
         $connection_params['tls'] = null;
 
-        $flag = $this->choseSecureFlag($params);
+        $flag = $this->choseSecureFlag($merged);
         if ($flag) {
             $connection_params[$flag] = 1;
         }

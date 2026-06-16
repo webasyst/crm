@@ -27,7 +27,7 @@ class crmMessageBodyDialogAction extends crmViewAction
          * Collect the ids of all the "participating" contacts, the data from which we need to get.
          * This is the sender, you will receive (if any) and the recipients in the copy (if any)
          */
-        $contact_ids = array();
+        $contact_ids = [wa()->getUser()->getId()];
         $contact_ids[] = $message['creator_contact_id'];
         $contact_ids[] = $message['contact_id'];
         $recipients = $this->getRecipientsByMessage();
@@ -42,7 +42,7 @@ class crmMessageBodyDialogAction extends crmViewAction
         $collection = array();
         if (ifset($contact_ids)) {
             $collection = new crmContactsCollection('id/'.implode(',', $contact_ids));
-            $collection = $collection->getContacts('name,email,photo_url_16');
+            $collection = $collection->getContacts('name,email,photo_url_16,photo_url_32,photo_url_50');
             foreach ($collection as $contact => $field) {
                 if (!is_array($field['email'])) {
                     unset($collection[$contact]);
@@ -50,10 +50,18 @@ class crmMessageBodyDialogAction extends crmViewAction
             }
 
             if (!ifset($collection[$message['creator_contact_id']])) {
-                $collection[$message['creator_contact_id']] = [
-                    'name' => 'deleted contact_id='.$message['creator_contact_id'],
-                    'photo_url_16' => '',
-                ];
+                if ($message['creator_contact_id'] == 0) {
+                    $collection[$message['creator_contact_id']] = [
+                        'id' => 0,
+                        'name' => 'automated message',
+                        'photo_url_16' => '',
+                    ];
+                } else {
+                    $collection[$message['creator_contact_id']] = [
+                        'name' => 'deleted contact_id='.$message['creator_contact_id'],
+                        'photo_url_16' => '',
+                    ];
+                }
             }
 
             if (!ifset($collection[$message['contact_id']])) {
@@ -107,20 +115,21 @@ class crmMessageBodyDialogAction extends crmViewAction
             return $el['type'] !== crmMessageRecipientsModel::TYPE_TO;
         });
 
-        $this->view->assign(array(
+        $funnel = $this->getFunnel($deal);
+        $this->view->assign([
             'message'             => $message,
             'from'                => $collection[$message['creator_contact_id']],
             'to_list'             => $to_list,
             'deal'                => $deal,
             'clean_data'          => ifempty($clean_data),
-            'funnel'              => $this->getFunnel($deal),
+            'funnel'              => $funnel,
             'contacts'            => $collection,
             'recipients'          => $recipients,
             'copy_recipients'     => $copy_recipients,
             'delete_message_text' => $delete_message_text,
             'is_admin'            => $this->getCrmRights()->isAdmin(),
             'messages_in_conversation' => $this->getMessageModel()->countByField(['conversation_id' => $message['conversation_id']]),
-        ));
+        ]);
     }
 
     /**
@@ -160,7 +169,7 @@ class crmMessageBodyDialogAction extends crmViewAction
         return $to_list;
     }
 
-    protected function getFunnel($deal)
+    protected function getFunnel(&$deal)
     {
         $funnels = array();
         if (isset($deal['funnel_id'])) {
@@ -168,6 +177,7 @@ class crmMessageBodyDialogAction extends crmViewAction
                 $funnel = $this->getFunnelModel()->getById($deal['funnel_id']);
                 $funnel['stages'] = $this->getFunnelStageModel()->getStagesByFunnel($funnel);
                 $funnels[$deal['funnel_id']] = $funnel;
+                $deal['funnel'] = $funnel;
             }
         }
         return $funnels;
@@ -182,12 +192,14 @@ class crmMessageBodyDialogAction extends crmViewAction
         if ($message['transport'] === crmMessageModel::TRANSPORT_EMAIL && $message['direction'] === crmMessageModel::DIRECTION_IN && $message['source_id'] > 0) {
             try {
                 $source = crmEmailSource::factory($message['source_id']);
-                $source_email = $source->getEmail();
-                $all_recipients[$source_email] = array_merge($mrm->getEmptyRow(), [
-                    'destination' => $source_email,
-                    'name' => $source_email,
-                    'type' => crmMessageRecipientsModel::TYPE_TO
-                ]);
+                if ($source instanceof crmEmailSource) {
+                    $source_email = $source->getEmail();
+                    $all_recipients[$source_email] = array_merge($mrm->getEmptyRow(), [
+                        'destination' => $source_email,
+                        'name' => $source_email,
+                        'type' => crmMessageRecipientsModel::TYPE_TO
+                    ]);
+                }
             } catch (crmSourceException $ex) {}
         }
 
@@ -222,6 +234,9 @@ class crmMessageBodyDialogAction extends crmViewAction
         }
 
         $message = $this->getMessageModel()->getMessage($id);
+        if (empty($message)) {
+            $this->messageNotFound();
+        }
 
         // Check rights
         $has_access = $this->getCrmRights()->canViewMessage($message);

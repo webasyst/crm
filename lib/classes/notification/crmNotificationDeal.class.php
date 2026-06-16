@@ -27,7 +27,8 @@ class crmNotificationDeal extends crmNotification
         }
 
         $dm = new crmDealModel();
-
+        $deal = $dm->enrichWithParams($deal);
+        
         // ensure correct structure of deal and default values
         $deal = array_merge($dm->getEmptyDeal(), $deal);
 

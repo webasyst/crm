@@ -106,6 +106,7 @@ abstract class crmSendEmailController extends crmJsonController
             $from = $msg['from'];
         }
 
+        $email_message_id = '';
         try {
             $m = new waMailMessage($msg['subject'], $msg['body']);
 
@@ -161,7 +162,16 @@ abstract class crmSendEmailController extends crmJsonController
                     // do nothing
                 }
             }
-            $success = (bool) $m->send();
+
+            $from = key($m->getFrom());
+
+            // Same as waMailMessage::send(), but register a listener to capture Message-ID before
+            // Swift Transport may call generateId() again after delivery (SMTP / sendmail -t).
+            $message_id_capture = new crmSwiftSendPerformedMessageIdPlugin();
+            $mailer = new waMail(waMail::getTransportByEmail($from));
+            $mailer->registerPlugin($message_id_capture);
+            $success = (bool)$mailer->send($m);
+
             if (!$success) {
                 return array(
                     'id' => 0,
@@ -171,7 +181,8 @@ abstract class crmSendEmailController extends crmJsonController
                 );
             }
 
-            $from = $m->getFrom();
+            // Get real Message-ID from the listener and fallback to Message-ID from the message
+            $email_message_id = trim((string)$message_id_capture->getMessageId(), '<> ') ?: trim((string)$m->getId(), '<> ');
         } catch (Exception $e) {
 
             $message = join(PHP_EOL, array(
@@ -189,8 +200,12 @@ abstract class crmSendEmailController extends crmJsonController
             );
         }
 
-        $mm = new crmMessageModel();
-        $id = $mm->fix(array(
+        $params = (array)ifset($msg, 'params', array());
+        if ($email_message_id !== '') {
+            $params['email_message_id'] = $email_message_id;
+        }
+
+        $fix_data = array(
             'transport'  => crmMessageModel::TRANSPORT_EMAIL,
             'direction'  => crmMessageModel::DIRECTION_OUT,
             'contact_id' => $contact->getId(),
@@ -200,13 +215,19 @@ abstract class crmSendEmailController extends crmJsonController
             'to'         => $to,
             'deal_id'    => ifset($msg['deal_id']),
             'event'      => ifset($msg['event']),
-        ), array(
+        );
+        if ($params) {
+            $fix_data['params'] = $params;
+        }
+
+        $mm = new crmMessageModel();
+        $id = $mm->fix($fix_data, array(
             'wa_log' => ifset($msg['wa_log'])
         ));
 
         $creator = array(
             'contact_id' => wa()->getUser()->getId(),
-            'email'      => key($from),
+            'email'      => $from,
             'name'       => wa()->getUser()->getName(),
         );
 

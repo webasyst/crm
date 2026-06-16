@@ -107,8 +107,7 @@ class crmEmailSourceWorkerIncomingStrategy extends crmEmailSourceWorkerStrategy
      */
     protected function doFinishProcessPart($result, $deal = null)
     {
-        $mm = new crmMessageModel();
-        $message = $mm->getMessage($result['message_id']);
+        $message = self::getMessageModel()->getMessage($result['message_id']);
 
         /**
          * @var crmContact $contact
@@ -140,8 +139,7 @@ class crmEmailSourceWorkerIncomingStrategy extends crmEmailSourceWorkerStrategy
         } else {
             $conversation_id = $this->createConversation($contact, $message, $deal);
         }
-        $mm = new crmMessageModel();
-        $mm->addToConversation($message, $conversation_id);
+        self::getMessageModel()->addToConversation($message, $conversation_id);
         
         $message['conversation_id'] = $conversation_id;
         (new crmPushService)->notifyAboutMessage($contact, $message, $conversation, $deal);
@@ -149,28 +147,100 @@ class crmEmailSourceWorkerIncomingStrategy extends crmEmailSourceWorkerStrategy
 
     protected function findConversation(crmContact $contact, $deal)
     {
+        $candidates = self::getConversationModel()->getByField([
+            'contact_id' => $contact->getId(),
+            'type'       => crmConversationModel::TYPE_EMAIL,
+            'is_closed'  => 0,
+        ], 'id');
+        if (empty($candidates)) {
+            return null;
+        }
+        if (count($candidates) === 1) {
+            return reset($candidates);
+        }
+        $referenced_candidates = $this->filterConversationsByReferences($candidates);
+        if (!empty($referenced_candidates)) {
+            $candidates = $referenced_candidates;
+        }
+        if (count($candidates) === 1) {
+            return reset($candidates);
+        }
+
         if ($deal && $deal['id'] === 0) {
-            return $this->findConversationByContact($contact);
+            return $this->findConversationWithoutDeal($candidates);
         }
         if ($deal) {
-            return $this->findConversationByDeal($deal);
+            return $this->findConversationWithDeal($candidates, $deal);
         }
         $create_deal_mode_off = !$this->source->getParam('create_deal');
         if ($create_deal_mode_off) {
-            return $this->findConversationByContact($contact);
+            return $this->findConversationWithoutDeal($candidates);
         }
         return null;
     }
 
-    protected function findConversationByContact(crmContact $contact)
+    protected function filterConversationsByReferences($candidates)
     {
-        $cm = new crmConversationModel();
-        return $cm->getByField(array(
-            'contact_id' => $contact->getId(),
-            'deal_id'    => null,
-            'type'       => crmConversationModel::TYPE_EMAIL,
-            'is_closed'  => 0
-        ));
+        $in_reply_to = $this->mail->getInReplyTo();
+        $references = $this->mail->getReferences() ?: [];
+        $references[] = $in_reply_to;
+        $references = array_filter(array_unique($references));
+        if (empty($references)) {
+            return null;
+        }
+
+        $messages = self::getMessageModel()->getByField([
+            'conversation_id' => array_keys($candidates),
+        ], 'id');
+        if (empty($messages)) {
+            return null;
+        }
+
+        $message_params = (new crmMessageParamsModel())->getByField([
+            'message_id' => array_keys($messages),
+            'name' => 'email_message_id',
+            'value' => $references,
+        ], 'message_id');
+        if (empty($message_params)) {
+            return null;
+        }
+        $messages = array_intersect_key($messages, $message_params);
+        if (empty($messages)) {
+            return null;
+        }
+        $conversation_ids = array_unique(array_column($messages, 'conversation_id'));
+        return array_intersect_key($candidates, array_fill_keys($conversation_ids, 1));
+    }
+
+    protected function findConversationWithoutDeal($candidates)
+    {
+        $candidates = array_filter($candidates, function ($conversation) {
+            return empty($conversation['deal_id']);
+        });
+        if (empty($candidates)) {
+            return null;
+        }
+        return reset($candidates);
+    }
+
+    protected function findConversationWithDeal($candidates, $deal)
+    {
+        $deal_id = null;
+        if (wa_is_int($deal)) {
+            $deal_id = $deal;
+        } elseif (is_array($deal) && isset($deal['id'])) {
+            $deal_id = $deal['id'];
+        }
+        if ($deal_id <= 0) {
+            return null;
+        }
+        $candidates = array_filter($candidates, function ($conversation) use ($deal_id) {
+            return $conversation['deal_id'] == $deal_id;
+        });
+        if (empty($candidates)) {
+            return null;
+        }
+        return reset($candidates);
     }
 
     /**

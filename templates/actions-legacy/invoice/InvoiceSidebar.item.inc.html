@@ -45,7 +45,7 @@
     {$_invoice_classes[] = "highlighted"}
 {/if}
 
-<li class="c-invoice {$_invoice_classes|join:" "}" data-id="{$invoice.id}">
+<li class="c-invoice {$_invoice_classes|join:" "}" data-id="{$invoice.id}" data-state-id="{$invoice.state_id|escape}" data-payment-expired="0">
     <a class="js-disable-router" href="{$wa_app_url}invoice/{$invoice.id}/">
         <div class="profile image50px">
             {if !empty($_userpic)}

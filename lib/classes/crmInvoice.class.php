@@ -236,16 +236,12 @@ class crmInvoice
     {
         $errors = [];
         $transaction_model = new waTransactionModel();
-        $transactions = $transaction_model->select('*')->where("
-            app_id = 'crm' AND order_id = i:invoice
-            AND state = s:captured
-            AND (type = s:type_1 OR type = s:type_2)
-        ", [
-            'invoice'  => $invoice['id'],
-            'captured' => waPayment::STATE_CAPTURED,
-            'type_1'   => waPayment::OPERATION_AUTH_ONLY,
-            'type_2'   => waPayment::OPERATION_AUTH_CAPTURE
-        ])->fetchAll('id');
+        $transactions = $transaction_model->getByField([
+            'app_id'   => 'crm',
+            'order_id' => $invoice['id'],
+            'state'    => waPayment::STATE_CAPTURED,
+            'type'     => [waPayment::OPERATION_AUTH_ONLY, waPayment::OPERATION_AUTH_CAPTURE]
+        ], 'id');
         if ($transactions) {
             foreach ($transactions as $t) {
                 $module = waPayment::factory($t['plugin']);

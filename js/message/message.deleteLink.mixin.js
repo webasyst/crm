@@ -38,7 +38,25 @@ var CRMMessageDeleteLinkMixin = ( function($) {
 
             $.post(href, data, function (response) {
                 if (response.status === "ok") {
-                    $.crm.content.reload();
+                    if (response.data && response.data.conversation_deleted) {
+                        const params = new URLSearchParams();
+                        if (that.filter_contact_id) {
+                            params.append('contact', that.filter_contact_id);
+                        } else if (that.filter_deal_id) {
+                            params.append('deal', that.filter_deal_id);
+                        }
+                        if (that.iframe) {
+                            params.append('iframe', '1');
+                        }
+                        if (that.noemail) {
+                            params.append('noemail', '1');
+                        }
+                        const reload_link = $.crm.app_url + "message/?" + params.toString();
+                        $.crm.content.load(reload_link);
+                    } else {
+                        $.crm.content.reload();
+                    }
+                    
                     $('.dialog.c-message-show-body-dialog')?.data('dialog')?.close();
                 } else {
                     console.log('Error saving Responsible contact classification: ' + arguments[2], arguments);

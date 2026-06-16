@@ -50,6 +50,8 @@ return array(
     'call/'                                           => 'call/',
     'message/'                                        => 'message/conversations',
     'message/conversation/<id>/?'                     => 'message/conversations',
+    'message/flat/?'                                  => 'message/flat',
+    'message/flat/<id>/?'                             => 'message/flat',
     'settings/field/?'                                => 'settings/field',
     'settings/form/?'                                 => 'settings/form',
     'settings/form/<id>/?'                            => 'settings/formId',

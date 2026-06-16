@@ -37,12 +37,16 @@
 
             if (this.element.data('autocomplete') || this.element.data('readonly')) {
                 this.input.autocomplete({
-                    delay: 200,
+                    delay: 300,
                     minLength: 0,
                     html: true,
                     source: $.proxy(this, "_source"),
                     item_clz: 'crm-search-ui-autocomplete-item',
-                    width: 270
+                    width: 270,
+                    focus: function () {
+                        self.input.data('hold', 1);
+                        return false;
+                    }
                 });
                 this.ul = $(this.input).autocomplete('widget');
             } else {
@@ -51,6 +55,7 @@
 
             this.offset = this.limit = this.element.data('limit');
             this.count = this.element.data('count');
+            this.segment_id = this._getCurrentSegmentId();
             //setTimeout(() => this.wrapper.width(this.input.width() + 30), 100)
             this.ul.css({
                 overflowY: 'auto',
@@ -71,13 +76,6 @@
             if (this.element.data('readonly')) {
                 this.input.attr('readonly', true).addClass('readonly').css({
                     cursor: 'pointer'
-                }).click(function () {
-                    if ($(this).autocomplete("widget").is(":visible")) {
-                        $(this).autocomplete('close');
-                    } else {
-                        self._showSelectItems();
-                    }
-                    return false;
                 });
             }
 
@@ -266,10 +264,34 @@
                 var width = self.input.width();
                 self.ul.find('li.ui-menu-item').each(function () {
                     var el = $(this),
+                        $wrapper = el.find('.ui-menu-item-wrapper'),
+                        $sep = el.find('.sep'),
                         $count = el.find('.count'),
                         $text = el.find('.crm-text');
 
+                    if ($sep.length) {
+                        $wrapper.css({
+                            paddingLeft: 0,
+                            paddingRight: 0
+                        });
+                        $sep.css({
+                            display: 'block',
+                            width: '100%'
+                        });
+                        return;
+                    }
+
                     $count.insertBefore($text);
+                    $wrapper.css({
+                        position: 'relative'
+                    });
+                    $count.css({
+                        position: 'absolute',
+                        right: '0.4em',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        float: 'none'
+                    });
 
                     var text_el = $text.width(Math.max(width - $count.outerWidth(true) - 30, 0));
                     if (text_el.data('sep')) {
@@ -316,13 +338,20 @@
                     }
                     self.ul.find('.sep').closest('li').addClass('ignore-hover');
                     var width = self.ul.width();
-                    var scroll = self.ul.css('overflowY') === 'scroll';
                     self.ul.find('li.ui-menu-item').each(function () {
-                        var el = $(this);
+                        var el = $(this),
+                            $count = el.find('.count');
                         if (el.find('.sep').length) {
-                            el.find('.sep').width(scroll ? width - 25 : width - 10);
+                            el.find('.ui-menu-item-wrapper').css({
+                                paddingLeft: 0,
+                                paddingRight: 0
+                            });
+                            el.find('.sep').css({
+                                display: 'block',
+                                width: '100%'
+                            });
                         } else {
-                            el.find('.crm-text').width(Math.max(width - el.find('.count').outerWidth(true) - 30, 0));
+                            el.find('.crm-text').width(Math.max(width - $count.outerWidth(true) - 30, 0));
                         }
                     });
 
@@ -332,8 +361,9 @@
                     if (!self.loading && self.offset < self.count) {
                         self.loading = true;
                         self.input.addClass('ui-autocomplete-loading');
+                        self._beginArrowAjax();
                         $.get(self.options.url, {
-                            id: self.ns, offset: self.offset, limit: self.limit, term: self.input.val()
+                            id: self.ns, offset: self.offset, limit: self.limit, term: self.input.val(), segment_id: self.segment_id
                         }, function (r) {
                             if (r.status === 'ok') {
                                 var values = r.data.values;
@@ -353,16 +383,12 @@
                             }
                             self.loading = false;
                             self.input.removeClass('ui-autocomplete-loading');
-                        }, 'json');
+                        }, 'json').always(function () {
+                            self._endArrowAjax();
+                        });
                     }
                 });
             }
-
-            this.input.bind('autocompletefocus', function (event, ui) {
-                $(this).val(ui.item.name);
-                $(this).data('hold', 1);
-                return false;
-            });
 
             this.input.bind('autocompleteclose', function (event, ui) {
                 if (event.keyCode === 13) {
@@ -375,8 +401,21 @@
                 }
             });
 
+            if (this.element.data('autocomplete') || this.element.data('readonly')) {
+                this.input.mousedown(function () {
+                    self._handleComboboxPointerDown();
+                });
+            }
+
             this.input.focus(function () {
                 self.arrow.show();
+                if (self._searchOpenedOnMousedown) {
+                    self._searchOpenedOnMousedown = false;
+                    return;
+                }
+                if (self.element.data('autocomplete') || self.element.data('readonly')) {
+                    $(this).autocomplete("search", self._getAutocompleteOpenTerm());
+                }
             }).blur(function () {
                 if (!self.wrapper.data('mouserover')) {
                     self.arrow.hide();
@@ -397,25 +436,21 @@
 
         _createShowAllButton: function () {
             var input = this.input,
-                hidden = this.hidden,
-                ns = this.ns,
                 element = this.element,
                 self = this;
 
             if (element.find('option').length) {
-                this.arrow = $("<a href='javascript:void(0);' style='margin: -2px 0 0 -20px;'><i class='fas fa-caret-down'></i></a>")
+                this.arrow = $("<a href='javascript:void(0);' style='margin: -2px 0 0 -25px;'>" +
+                    "<i class='fas fa-caret-down custom-combobox-arrow-caret'></i>" +
+                    "<i class='fas fa-spinner fa-spin custom-combobox-arrow-spinner' style='display: none;'></i>" +
+                    "</a>")
                     .attr("tabIndex", -1)
                     .appendTo(this.wrapper)
                     .removeClass("ui-corner-all")
                     .addClass("custom-combobox-toggle ui-corner-right")
                     .mousedown(function () {
+                        self._handleComboboxPointerDown();
                         input.focus();
-                        hidden.attr("name", ns);
-                        if (self.ul.is(":hidden")) {
-                            self._showSelectItems();
-                        } else {
-                            input.autocomplete("search", "");
-                        }
                         return false;
                     })
                     .hide();
@@ -443,6 +478,28 @@
             this.input.nextAll('.flag').remove();
         },
 
+        _updateArrowLoading: function () {
+            if (!this.arrow || !this.arrow.length) {
+                return;
+            }
+            var loading = this._arrowAjaxPending > 0;
+            this.arrow.find('.custom-combobox-arrow-caret').toggle(!loading);
+            this.arrow.find('.custom-combobox-arrow-spinner').toggle(loading);
+        },
+
+        _beginArrowAjax: function () {
+            this._arrowAjaxPending = (this._arrowAjaxPending || 0) + 1;
+            if (this.arrow && this.arrow.length) {
+                this.arrow.show();
+            }
+            this._updateArrowLoading();
+        },
+
+        _endArrowAjax: function () {
+            this._arrowAjaxPending = Math.max(0, (this._arrowAjaxPending || 0) - 1);
+            this._updateArrowLoading();
+        },
+
         _formItem: function (item, is_readonly) {
             var label = item.label;
 
@@ -466,6 +523,30 @@
                 item.value = item.name;
             }
             return item;
+        },
+
+        _getAutocompleteOpenTerm: function () {
+            if (this.element.data('readonly')) {
+                return '';
+            }
+            return this.input.val();
+        },
+
+        _handleComboboxPointerDown: function () {
+            if (!this.element.data('autocomplete') && !this.element.data('readonly')) {
+                return;
+            }
+            this._dropdownWasVisibleOnMousedown = this.ul.is(':visible');
+            if (this._dropdownWasVisibleOnMousedown) {
+                this.input.autocomplete('close');
+            } else {
+                var self = this;
+                this._searchOpenedOnMousedown = true;
+                this.input.autocomplete("search", this._getAutocompleteOpenTerm());
+                setTimeout(function () {
+                    self._searchOpenedOnMousedown = false;
+                }, 0);
+            }
         },
 
         _showSelectItems: function () {
@@ -497,21 +578,19 @@
 
         _source: function (request, response) {
             var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
-//            var sep = {
-//                label: '<span style="border-top:1px solid #ccc; width: 240px; display: inline-block;" class="sep"></span>',
-//                value: '',
-//                option: '<option disabled class="sep"></option>'
-//            };
+            var sep = {
+                label: '<span style="border-top:1px solid #ccc; width: 100%; display: block;" class="sep"></span>',
+                value: '',
+                option: '<option disabled class="sep"></option>'
+            };
             var self = this;
             self.response = response;
-            if (_other_version_ && !request.term) {
-                response([]);
-                return;
-            }
             var autocomplete = function (options, after) {
+                options.segment_id = self.segment_id;
                 if (_other_version_) {  // self.ns === 'contact_info.email'
                     options.highlight = 1;
                 }
+                self._beginArrowAjax();
                 $.get(self.options.url, options, function (r) {
                     var values = [];
                     var count = 0;
@@ -529,7 +608,9 @@
                     self.offset = values.length;
                     self.count = count;
                     response(values);
-                }, 'json');
+                }, 'json').always(function () {
+                    self._endArrowAjax();
+                });
             };
 
             if (_other_version_) {  // this.ns === 'contact_info.email'
@@ -708,6 +789,16 @@
             $('#c-combobox-dialog').remove();
             var d = $('<div id="c-combobox-dialog"></div>').appendTo('body');
             return d.periodDialog();
+        },
+
+        _getCurrentSegmentId: function () {
+            var search = window.location.search || '';
+            var q = search.match(/[?&]segment_id=(\d+)/);
+            if (q && q[1]) {
+                return parseInt(q[1], 10) || 0;
+            }
+            var m = (window.location.pathname || '').match(/\/contact\/segment\/(\d+)\//);
+            return m && m[1] ? parseInt(m[1], 10) : 0;
         },
 
         _destroy: function () {

@@ -457,6 +457,9 @@ class crmDealModel extends crmModel
 
     public function updateById($id, $data, $options = null, $return_object = false)
     {
+        if (is_array($id)) {
+            return $this->updateByField(['id' => $id], $data, $options, $return_object);
+        }
         if (empty($data['stage_id']) && empty($data['status_id'])) {
             return parent::updateById($id, $data, $options, $return_object);
         }
@@ -478,7 +481,7 @@ class crmDealModel extends crmModel
         if (!empty($data['stage_id']) && $deal['stage_id'] != $data['stage_id']) {
             $dsm = new crmDealStagesModel();
             $dsm->close($id, $deal['stage_id']);
-            $dsm->open($id, $data['stage_id'], $deal['stage_id']);
+            $dsm->open($id, $data['stage_id']);
             $event_data['deal']['before_stage_id'] = $deal['stage_id'];
             $event_data['deal']['before_funnel_id'] = $deal['funnel_id'];
             /**
@@ -582,41 +585,53 @@ class crmDealModel extends crmModel
         }
 
         if ($with_params) {
+            $deal = $this->enrichWithParams($deal);
+        }
+
+        return $deal;
+    }
+
+    public function enrichWithParams($deal)
+    {
+        if (!empty($deal['fields'])) {
+            return $deal;
+        }
+        if (empty($deal['params'])) {
             $deal['params'] = $this->getParams($deal['id']);
-            $deal['fields'] = array();
-            $fields = crmDealFields::getAll();
+        }
 
-            $sources = $this->getDealSources($deal['id']);
-            if ($sources) {
-                $deal['fields']['source'] = array(
-                    'id'              => "source",
-                    'name'            => "Source",
-                    'type'            => $sources['type'],
-                    'value'           => $sources['name'],
-                    'value_formatted' => $sources['name'],
-                );
-                if ($sources['type'] == "IM") {
-                    $deal['fields']['source']['provider'] = $sources['provider'];
-                    $deal['fields']['source']['icon'] = wa()->getAppStaticUrl('crm/plugins/' . $sources['provider'] . '/img', true) . $sources['provider'].'.png';
-                }
+        $deal['fields'] = [];
+        $fields = crmDealFields::getAll();
+        $sources = $this->getDealSources($deal['id']);
+        if ($sources) {
+            $deal['fields']['source'] = array(
+                'id'              => "source",
+                'name'            => "Source",
+                'type'            => $sources['type'],
+                'value'           => $sources['name'],
+                'value_formatted' => $sources['name'],
+            );
+            if ($sources['type'] == "IM") {
+                $deal['fields']['source']['provider'] = $sources['provider'];
+                $deal['fields']['source']['icon'] = wa()->getAppStaticUrl('crm/plugins/' . $sources['provider'] . '/img', true) . $sources['provider'].'.png';
             }
+        }
 
-            foreach ($fields as $field_id => $field) {
-                $info = $field->getInfo();
-                $funnels_params = $field->getFunnelsParameters();
+        foreach ($fields as $field_id => $field) {
+            $info = $field->getInfo();
+            $funnels_params = $field->getFunnelsParameters();
 
-                $info['value'] = '';
-                $info['value_formatted'] = '';
-                if (isset($deal['params'][$field_id])) {
-                    $info['value'] = $deal['params'][$field_id];
-                    $info['value_formatted'] = $field->format($deal['params'][$field_id]);
-                }
-                $info['funnels_parameters'] = '';
-                if (!empty($funnels_params) && !empty($funnels_params[$deal['funnel_id']])) {
-                    $info['funnels_parameters'] = $funnels_params[$deal['funnel_id']];
-                }
-                $deal['fields'][$field_id] = $info;
+            $info['value'] = '';
+            $info['value_formatted'] = '';
+            if (isset($deal['params'][$field_id])) {
+                $info['value'] = $deal['params'][$field_id];
+                $info['value_formatted'] = $field->format($deal['params'][$field_id]);
             }
+            $info['funnels_parameters'] = '';
+            if (!empty($funnels_params) && !empty($funnels_params[$deal['funnel_id']])) {
+                $info['funnels_parameters'] = $funnels_params[$deal['funnel_id']];
+            }
+            $deal['fields'][$field_id] = $info;
         }
 
         return $deal;

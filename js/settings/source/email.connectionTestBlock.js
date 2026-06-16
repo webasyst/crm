@@ -99,6 +99,7 @@ var CRMSettingsSourceEmailConnectionTestBlock = ( function($) {
 
         var testConnection = function () {
             var url = that.url;
+            var initial_disabled_state = [];
 
             var serialize = function () {
 
@@ -143,6 +144,9 @@ var CRMSettingsSourceEmailConnectionTestBlock = ( function($) {
             $success_message.hide();
             $fail_message.hide();
             $loading.show();
+            $inputs.each(function () {
+                initial_disabled_state.push($(this).prop('disabled'));
+            });
             $inputs.attr('disabled', true);
 
             var onDone = function (r) {
@@ -160,7 +164,9 @@ var CRMSettingsSourceEmailConnectionTestBlock = ( function($) {
 
             var onAlways = function () {
                 xhr = null;
-                $inputs.attr('disabled', false);
+                $inputs.each(function (index) {
+                    $(this).prop('disabled', !!initial_disabled_state[index]);
+                });
                 $loading.hide();
             };
 

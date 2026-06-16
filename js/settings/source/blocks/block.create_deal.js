@@ -103,7 +103,7 @@ var CRMSettingsSourceCreateDealBlock = ( function($) {
             $funnel = that.$funnel,
             $stage = that.$stage,
             url = that.url,
-            responsible_block_object = that.responsible_block,
+            responsible_block_object = that.responsible_block || $('.js-responsible-section').data('block_object'),
             data = {
                 id: that.id,
                 funnel_id: $funnel.val(),

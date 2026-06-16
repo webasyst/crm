@@ -11,10 +11,12 @@ class crmContactsSearchCreateMethodValues
     private $conds = null;
 
     private $default_options = array(
-        'limit' => 10,
+        'limit' => 50,
         'offset' => 0,
         'order' => array('count', 'DESC'),
-        'autocomplete' => null   // or array with autocomplete options
+        'autocomplete' => [
+            'term' => '',
+        ],
     );
 
 
@@ -36,20 +38,23 @@ class crmContactsSearchCreateMethodValues
     public function getValues($options = array())
     {
         $options = $this->mixOptions($options, $this->default_options);
+        $bind_params = [
+            'offset' => $options['offset'],
+            'limit' => $options['limit'],
+        ];
+        $term = trim(ifset($options['autocomplete']['term'], ''));
         $sql_t = "SELECT DISTINCT
                 CONCAT(create_app_id, '.', create_method) AS value,
                 IF(LENGTH(create_method) > 0,
                         CONCAT(create_method, ' (' , create_app_id, ')'),
                         create_app_id) AS name
-                FROM `wa_contact`
-                ORDER BY name
-                LIMIT :offset, :limit";
-        $sql = str_replace(
-                array(":offset", ":limit"),
-                array($options['offset'], $options['limit']),
-                $sql_t
-        );
-        $values = $this->model->query($sql)->fetchAll();
+                FROM `wa_contact`";
+        if ($term) {
+            $sql_t .= " WHERE create_app_id LIKE '%l:term%' OR create_method LIKE '%l:term%'";
+            $bind_params['term'] = $term;
+        }
+        $sql_t .= " ORDER BY name LIMIT i:offset, i:limit";
+        $values = $this->model->query($sql_t, $bind_params)->fetchAll();
         if (!$values) {
             return array();
         }

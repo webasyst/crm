@@ -491,4 +491,69 @@ class crmPayment extends waAppPayment
         $params_model = new crmInvoiceParamsModel();
         $params_model->set($order_id, $params, false);
     }
+
+    public static function getPaymentImage(&$methods, $order)
+    {
+        $payment_image = null;
+        foreach($methods as &$m) {
+            // TODO: $m['company_id'] instead of $m['id']
+            $plugin = $m['instance'] = $m['instance'] ?? crmPayment::getPlugin($m['plugin'], $m['company_id']);
+            if (!$payment_image && self::pluginSupportsQRCode($plugin)) {
+                $m['order_data'] = $m['order_data'] ?? crmPayment::getOrderData($order, $plugin);
+                $payment_image = $plugin->image($m['order_data']);
+                try {
+                    if ($payment_image && is_array($payment_image)) {
+                        $payment_image = [
+                            'id' => $m['id'],
+                            'index' => '',
+                        ] + $payment_image + [
+                            'name' => $m['name'],
+                            'description' => $m['description'],
+                            'logo' => $m['logo'],
+                        ];
+                    }
+                    break;
+                } catch (Throwable $e) {
+                }
+            }
+        }
+        unset($m);
+        return $payment_image;
+    }
+
+    public static function pluginSupportsQRCode($plugin)
+    {
+        return $plugin instanceof waPayPayment;
+    }
+
+    /**
+     * @since 2.8.0
+     */
+    public static function statePolling(array $order, ?waPayment $p = null, $force = false)
+    {
+        $plugin = ifempty($order, 'payment_plugin', $p);
+        if (!$plugin || !$plugin instanceof waIPaymentStatePolling) {
+            return;
+        }
+
+        $state_polling = ifset($order, 'params', 'state_polling', ':13');
+        [$next_time, $interval] = array_pad(explode(':', $state_polling, 2), 2, '');
+
+        if (!$next_time) {
+            $next_time = ifset($order, 'params', 'last_open_ts', strtotime($order['create_datetime'])) + 15;
+        }
+
+        if (time() > $next_time || $force) {
+            // 13, 17, 23, 30, 39, 51, 67, 88, 90, 90, ...
+            $interval = min(ceil(((int)$interval) * 1.3), 90);
+            $next_time = time() + $interval;
+            (new crmInvoiceParamsModel())->setOne($order['id'], 'state_polling', $next_time.":".$interval);
+
+            try {
+                $plugin->statePolling(crmPayment::getOrderData($order, $plugin));
+            } catch (Throwable $e) {
+                // ignore
+            }
+        }
+    }
 }
