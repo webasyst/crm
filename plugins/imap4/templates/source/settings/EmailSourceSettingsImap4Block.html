@@ -1,0 +1,361 @@
+{$block_id = uniqid('c-source-settings-imap4-block')}
+{if $source.id}
+{assign var="imap_provider_cur" value=$source.params.imap_provider|default:'custom'}
+{else}
+{assign var="imap_provider_cur" value=$source.params.imap_provider|default:$imap_provider_default}
+{/if}
+<div id="{$block_id}">
+<div class="c-source-settings-imap4-block c-connection-settings-block">
+
+    <div class="field">
+        <p class="large-hint">
+            [`Set up an email address to receive messages and deal requests.`]
+            [`Please specify an existing email address; it may be hosted on any mail server; e.g., in a popular mail service such as Gmail, Yahoo!, etc., and must be accessible for connection via IMAP protocol.`]
+        </p>
+    </div>
+    <div class="field" style="margin-top: 20px">
+        <div class="value">
+            <div class="field top-padded">
+                <div class="name for-input">
+                    [`Email`]
+                </div>
+                <div class="value">
+                    <input type="text" name="source[params][email]" autocomplete="off" value="{$source.params.email|default:''|escape}" class="equal-width js-connection-settings-input js-login-sync-email">
+                </div>
+            </div>
+            <div class="field js-login-username-input-wrap">
+                <div class="name for-checkbox">[`Username`]</div>
+                <div class="value">
+                    <div class="flexbox wrap middle space-8">
+                        <input type="text" name="source[params][login]" value="{if !empty($login_differs_from_email)}{$source.params.login|default:''|escape}{else}{$source.params.email|default:$source.params.login|default:''|escape}{/if}" autocomplete="new-password" class="equal-width js-connection-settings-input js-login-username-input"{if empty($login_differs_from_email)} disabled="disabled"{/if}>
+                        <input type="hidden" name="source[params][login_same_as_email]" value="2">
+                        <label class="flexbox space-8 hint">
+                            <span class="wa-checkbox custom-mt-4">
+                                <input type="checkbox" name="source[params][login_same_as_email]" value="1" class="js-login-same-as-email-checkbox"{if empty($login_differs_from_email)} checked="checked"{/if}>
+                                <span>
+                                    <span class="icon">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                </span>
+                            </span>
+                            [`Use email as username`]
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name for-input">
+                    [`Password`]
+                </div>
+                <div class="value">
+                    {if $source.id}
+                        <div class="js-disabled-email-source-password">
+                            <input type="password" value="******" disabled="disabled">
+                            <a href="javascript:void(0);" class="hint inline-link js-change-email-source-password">[`Change password`]</a>
+                        </div>
+                        <div class="js-email-source-password-fields" style="display: none;">
+                            <input type="password" name="source[params][password]" value="" autocomplete="new-password" class="equal-width js-connection-settings-input">
+                            <p class="hint custom-mt-4">[`Leave blank to keep the current value unchanged.`]</p>
+                        </div>
+                    {else}
+                        <input type="password" name="source[params][password]" value="" autocomplete="new-password" class="equal-width js-connection-settings-input">
+                    {/if}
+                </div>
+            </div>
+            <div class="field">
+                <div class="name for-input">[`Mail provider`]</div>
+                <div class="value">
+                    <div class="wa-select">
+                        <select name="source[params][imap_provider]" class="equal-width js-connection-settings-input js-imap4-provider-select">
+                            {foreach $imap_providers as $pid => $plabel}
+                                <option value="{$pid|escape}"{if $imap_provider_cur == $pid} selected="selected"{/if}>{$plabel|escape}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="field js-imap4-custom-server-fields">
+                <div class="name for-input">[`Incoming server`]</div>
+                <div class="value">
+                    <input type="text" name="source[params][server]" value="{$source.params.server|default:''|escape}" class="equal-width js-connection-settings-input">
+                </div>
+            </div>
+            <div class="field js-imap4-custom-server-fields">
+                <div class="name for-input">[`IMAP port`]</div>
+                <div class="value">
+                    <input type="number" name="source[params][port]" value="{$source.params.port|default:'993'|escape}" class="shortest js-connection-settings-input">
+                </div>
+            </div>
+            <div class="field js-imap4-custom-server-fields">
+                <div class="name"><br/></div>
+                <div class="value">
+                    <input type="hidden" name="source[params][ssl]" value="">
+                    <label class="flexbox space-8">
+                        <span class="wa-checkbox custom-mt-4">
+                            <input class="c-secure-checkbox js-connection-settings-checkbox js-imap4-ssl-checkbox" type="checkbox" name="source[params][ssl]" value="1"{if !empty($source.params.ssl) && empty($source.params.tls)} checked="checked"{/if}>
+                            <span>
+                                <span class="icon">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                            </span>
+                        </span>
+                        [`Use SSL/TLS`]
+                    </label>
+                    <p class="hint">
+                        [`If your mail server supports this option, we recommend using IMAP over SSL/TLS since it provides increased security for your interactions with the remote mail server.`]
+                    </p>
+                </div>
+            </div>
+
+            <div class="field c-test-connection-button-block" style="display: none;">
+                <div class="name"></div>
+                <div class="value">
+                    <button class="c-test-connection-button small gray">[`Test connection`]</button>
+                    <span class="icon loading c-loading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></span>
+                    <div class="alert small custom-mt-16 custom-mb-4 c-test-connection-fail-message" style="display: none;">
+                        <div class="flexbox space-8">
+                            <span class=""><i class="fas fa-exclamation-triangle text-orange"></i></span>
+                            <div class="wide">
+                                <span>[`Connection to the IMAP server failed.`]</span>
+                                <div class="crm-common-errors-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert small custom-mt-16 custom-mb-4 c-test-connection-success-message" style="display: none;">
+                        <div class="flexbox space-8">
+                            <span class=""><i class="fas fa-check-circle text-green yes"></i></span>
+                            <div class="wide">
+                                <span>[`Successfully connected to the IMAP server.`]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="value">
+                    <div class="crm-common-errors-block"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <div class="fields-group js-imap4-additional-settings-block">
+        <h5 class="heading collapse-handler cursor-pointer js-imap4-additional-settings-toggle custom-mb-8">
+            <span class="hint inline-link">
+                [`Additional IMAP settings`]
+                <span class="caret custom-ml-4">
+                    <i class="fas js-imap4-additional-settings-caret {if $additional_settings_expanded}fa-caret-down{else}fa-caret-right{/if}"></i>
+                </span>
+            </span>
+        </h5>
+        <div class="custom-mt-32 js-imap4-additional-settings-content"{if !$additional_settings_expanded} style="display: none;"{/if}>
+            <div class="field">
+                <div class="value">
+                    <input type="hidden" name="source[params][delete_messages_on_server]" value="2">
+                    <label class="flexbox space-8">
+                        <span class="wa-checkbox custom-mt-4">
+                            <input type="checkbox" name="source[params][delete_messages_on_server]" value="1"{if $delete_messages_on_server_form_checked} checked="checked"{/if}>
+                            <span>
+                                <span class="icon">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                            </span>
+                        </span>
+                        [`Delete messages from the mail box after fetching`]
+                    </label>
+                    <div class="alert small custom-mt-4">
+                        <div class="flexbox space-8">
+                            <span><i class="fas fa-info-circle"></i></span>
+                            <div class="wide">
+                                [`When enabled, all incoming messages are deleted; therefore, in this mode, connect a mailbox that is not used anywhere else.`]<br>
+                                [`When disabled, incoming messages remain in the mail box.`]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <div class="value">
+                    {if $source.id}
+                        <input type="hidden" name="source[params][skip_existing_on_create]" value="{if $load_existing_on_create_form_checked}2{else}1{/if}">
+                        <label class="flexbox space-8">
+                            <span class="wa-checkbox custom-mt-4">
+                                <input type="checkbox" disabled="disabled" class="js-load-existing-on-create-checkbox"{if $load_existing_on_create_form_checked} checked="checked"{/if}>
+                                <span>
+                                    <span class="icon">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                </span>
+                            </span>
+                            <span>[`Fetch existing messages from the mailbox on the first check`]</span>
+                        </label>
+                        <p class="hint">
+                            [`This option can only be enabled when setting up a new message source. If you need to change it, delete this source setup and add a new source again.`]
+                        </p>
+                    {else}
+                        <input type="hidden" name="source[params][load_existing_on_create]" value="2">
+                        <label class="flexbox space-8">
+                            <span class="wa-checkbox custom-mt-4">
+                                <input type="checkbox" name="source[params][load_existing_on_create]" value="1" class="js-load-existing-on-create-checkbox"{if $load_existing_on_create_form_checked} checked="checked"{/if}>
+                                <span>
+                                    <span class="icon">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                </span>
+                            </span>
+                            <span>[`Fetch existing messages from the mailbox on the first check`]</span>
+                        </label>
+                        <div class="alert small custom-mt-4">
+                            <div class="flexbox space-8">
+                                <span><i class="fas fa-info-circle"></i></span>
+                                <div class="wide">
+                                    [`If checked, all existing messages in the mailbox will be fetched on the first check. Useful when connecting a mailbox that already contains messages you want to import.`]
+                                    <span class="bold js-imap4-import-history-warning"{if !$load_existing_on_create_form_checked} style="display: none;"{/if}>
+                                        [`Importing a large amount of message history may take a long time.`]
+                                        [`If you are not sure, it is better to leave this option disabled.`]
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        ( function($) {
+            var presets = {$imap_presets|json_encode};
+            var providerDomainMap = {$imap_provider_domain_map|json_encode};
+            var $block = $("#{$block_id}");
+            var $email = $block.find(".js-login-sync-email");
+            var $login = $block.find(".js-login-username-input");
+            var $loginCb = $block.find(".js-login-same-as-email-checkbox");
+            function syncLoginFromEmail() {
+                if ($loginCb.is(":checked")) {
+                    $login.val($.trim($email.val()));
+                }
+            }
+            function toggleLoginInput() {
+                if ($loginCb.is(":checked")) {
+                    syncLoginFromEmail();
+                    $login.prop("disabled", true);
+                } else {
+                    $login.prop("disabled", false);
+                }
+            }
+            function emailDomainMatchesRule(domain, rule) {
+                domain = $.trim(domain).toLowerCase();
+                rule = $.trim(rule).toLowerCase();
+                if (!domain || !rule) {
+                    return false;
+                }
+                if (rule.charAt(0) === ".") {
+                    return domain.length >= rule.length && domain.slice(-rule.length) === rule;
+                }
+                return domain === rule;
+            }
+            function suggestImapProviderFromEmail(email) {
+                email = $.trim(email);
+                var at = email.lastIndexOf("@");
+                if (at < 0) {
+                    return null;
+                }
+                var domain = email.slice(at + 1);
+                if (!domain) {
+                    return null;
+                }
+                var provider, rules, i;
+                for (provider in providerDomainMap) {
+                    if (!providerDomainMap.hasOwnProperty(provider)) {
+                        continue;
+                    }
+                    rules = providerDomainMap[provider];
+                    for (i = 0; i < rules.length; i++) {
+                        if (emailDomainMatchesRule(domain, rules[i])) {
+                            return provider;
+                        }
+                    }
+                }
+                return "custom";
+            }
+            var $sel = $block.find(".js-imap4-provider-select");
+            function suggestImapProviderFromEmailField() {
+                var suggested = suggestImapProviderFromEmail($email.val());
+                if (!suggested || !$sel.find('option[value="' + suggested + '"]').length) {
+                    return;
+                }
+                if ($sel.val() !== suggested) {
+                    $sel.val(suggested).trigger("change");
+                }
+            }
+            var emailSuggestTimer = null;
+            $email.on("change blur", function() {
+                syncLoginFromEmail();
+                suggestImapProviderFromEmailField();
+            });
+            $email.on("keyup", function() {
+                if (emailSuggestTimer) {
+                    clearTimeout(emailSuggestTimer);
+                }
+                emailSuggestTimer = setTimeout(suggestImapProviderFromEmailField, 300);
+            });
+            $loginCb.on("change", toggleLoginInput);
+            toggleLoginInput();
+            var $custom = $block.find(".js-imap4-custom-server-fields");
+            var $srv = $block.find('input[name="source[params][server]"]');
+            var $port = $block.find('input[name="source[params][port]"]');
+            var $ssl = $block.find(".js-imap4-ssl-checkbox");
+            function applyImap4Provider() {
+                var v = $sel.val();
+                if (v === "custom") {
+                    $custom.show();
+                } else {
+                    $custom.hide();
+                    if (presets[v]) {
+                        $srv.val(presets[v].server);
+                        $port.val(String(presets[v].port));
+                        $ssl.prop("checked", !!presets[v].ssl);
+                    }
+                }
+            }
+            $sel.on("change", applyImap4Provider);
+            applyImap4Provider();
+            $block.find(".js-change-email-source-password").on("click", function (e) {
+                e.preventDefault();
+                $block.find('.js-disabled-email-source-password').hide();
+                $block.find(".js-email-source-password-fields").show().find("input").first().focus();
+            });
+            function setAdditionalSettingsCaret($toggle, expanded) {
+                var $icons = $toggle.find(".js-imap4-additional-settings-caret, .caret [data-fa-i2svg], .caret svg");
+                if (expanded) {
+                    $icons.removeClass("fa-caret-right").addClass("fa-caret-down").attr("data-icon", "caret-down");
+                } else {
+                    $icons.removeClass("fa-caret-down").addClass("fa-caret-right").attr("data-icon", "caret-right");
+                }
+            }
+            $block.find(".js-imap4-additional-settings-toggle").on("click", function (e) {
+                e.preventDefault();
+                var $toggle = $(this);
+                var $content = $block.find(".js-imap4-additional-settings-content");
+                var expanded = !$content.is(":visible");
+                $content.toggle(expanded);
+                setAdditionalSettingsCaret($toggle, expanded);
+            });
+            var $loadExistingCb = $block.find(".js-load-existing-on-create-checkbox");
+            var $importHistoryWarning = $block.find(".js-imap4-import-history-warning");
+            function toggleImportHistoryWarning() {
+                $importHistoryWarning.toggle($loadExistingCb.is(":checked"));
+            }
+            $loadExistingCb.on("change", toggleImportHistoryWarning);
+            toggleImportHistoryWarning();
+            new CRMSettingsSourceEmailConnectionTestBlock({
+                $wrapper: $block,
+                source: {$source|json_encode}
+            });
+        })(jQuery);
+    </script>
+</div>

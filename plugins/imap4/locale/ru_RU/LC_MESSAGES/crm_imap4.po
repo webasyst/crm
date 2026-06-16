@@ -1,0 +1,87 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: crm/plugins/imap4\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.9\n"
+
+msgid "Set up an email address to receive messages and deal requests."
+msgstr "Настройте адрес email, который будет использоваться для получения обращений от клиентов."
+
+msgid "Please specify an existing email address; it may be hosted on any mail server; e.g., in a popular mail service such as Gmail, Yahoo!, etc., and must be accessible for connection via IMAP protocol."
+msgstr "Укажите адрес существующего почтового ящика; он может размещаться на любом почтовом сервере (включая популярные сервисы Mail.ru, Gmail и др.) и должен быть быть доступным по протоколу IMAP."
+
+msgid "Email"
+msgstr "Электронная почта"
+
+msgid "Use email as username"
+msgstr "Использовать электронную почту"
+
+msgid "Username"
+msgstr "Имя пользователя"
+
+msgid "Password"
+msgstr "Пароль"
+
+msgid "Change password"
+msgstr "Сменить пароль"
+
+msgid "Leave blank to keep the current value unchanged."
+msgstr "Оставьте пустым, чтобы не изменять текущее значение."
+
+msgid "Mail provider"
+msgstr "Почтовый сервис"
+
+msgid "Incoming server"
+msgstr "Входящий сервер"
+
+msgid "IMAP port"
+msgstr "Порт IMAP"
+
+msgid "Use SSL/TLS"
+msgstr "Использовать SSL/TLS"
+
+msgid "If your mail server supports this option, we recommend using IMAP over SSL/TLS since it provides increased security for your interactions with the remote mail server."
+msgstr "Если ваш почтовый сервер поддерживает эту настройку, мы рекомендуем использовать протокол STARTTLS или SSL/TLS, потому что он обеспечивает дополнительную безопасность при передаче данных."
+
+msgid "Test connection"
+msgstr "Проверка подключения"
+
+msgid "Connection to the IMAP server failed."
+msgstr "Не удалось подключиться к IMAP-серверу."
+
+msgid "Successfully connected to the IMAP server."
+msgstr "Успешное подключение к IMAP-серверу."
+
+msgid "Additional IMAP settings"
+msgstr "Дополнительные настройки IMAP"
+
+msgid "Delete messages from the mail box after fetching"
+msgstr "Удалять сообщения из почтового ящика после получения"
+
+msgid "When disabled, incoming messages remain in the mail box."
+msgstr "Когда выключено, входящие сообщения не удаляются из почтового ящика."
+
+msgid "When enabled, all incoming messages are deleted; therefore, in this mode, connect a mailbox that is not used anywhere else."
+msgstr "Когда включено, все входящие сообщения удаляются, поэтому подключайте таким способом почтовый ящик, который больше нигде не используется."
+
+msgid "Fetch existing messages from the mailbox on the first check"
+msgstr "Загрузить существующие сообщения из почтового ящика при первом подключении"
+
+msgid "This option can only be enabled when setting up a new message source. If you need to change it, delete this source setup and add a new source again."
+msgstr "Эту возможность можно выбрать только при первоначальной настройке источника сообщений. Если вам нужно изменить её, удалите этот источник и снова добавьте новый источник."
+
+msgid "If checked, all existing messages in the mailbox will be fetched on the first check. Useful when connecting a mailbox that already contains messages you want to import."
+msgstr "Если включено, будут загружены все письма, содержащиеся в почтовом ящике на момент подключения. Полезно для подключения почтового ящика, уже содержащего сообщения, которые необходимо импортировать."
+
+msgid "Importing a large amount of message history may take a long time."
+msgstr "Импорт большого объема истории сообщений может занять много времени."
+
+msgid "If you are not sure, it is better to leave this option disabled."
+msgstr "Если вы не уверены, лучше оставить эту опцию отключенной."
