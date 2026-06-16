@@ -7,7 +7,7 @@ return array(
     'name'                => 'MAX',
     'description'         => 'Provides integration with MAX Messenger',
     'img'                 => 'img/max.png',
-    'version'             => '1.0.0',
+    'version'             => '1.0.1',
     'vendor'              => 'webasyst',
     'frontend'            => true,
     'source'              => true,

@@ -57,7 +57,7 @@ class crmMaxPluginImSourceSettingsPage extends crmImSourceSettingsPage
             $subscribtions_res = $api->getSubscriptions();
             $subscribtions = ifset($subscribtions_res, 'subscriptions', null);
             if (!empty($subscribtions)) {
-                $available_webhook_urls = $api->getWebhookUrl(true);
+                $available_webhook_urls = $this->getWebhookUrls($api);
                 $subscribtions = array_filter($subscribtions, function ($subscribtion) use ($available_webhook_urls) {
                     return !in_array($subscribtion['url'], $available_webhook_urls);
                 });
@@ -90,6 +90,7 @@ class crmMaxPluginImSourceSettingsPage extends crmImSourceSettingsPage
         $create_webhook = false;
         $created_webhook = false;
         $delete_webhook = false;
+        $webhook_url = $this->source->getParam('webhook_url');
 
         $token = ifset($data['params']['token']);
         $api = new crmMaxPluginApi($token, $this->source->getId());
@@ -100,6 +101,7 @@ class crmMaxPluginImSourceSettingsPage extends crmImSourceSettingsPage
             // Disable webhook mode
             $data['params']['webhook_mode'] = '0';
             $data['params']['webhook_secret'] = '';
+            $data['params']['webhook_url'] = '';
             $delete_webhook = true;
         } elseif (empty($data['params']['webhook_secret'])) {
             // Enable webhook but no secret set
@@ -131,6 +133,7 @@ class crmMaxPluginImSourceSettingsPage extends crmImSourceSettingsPage
                         'response' => [],
                     );
                 }
+                $data['params']['webhook_url'] = $api->getWebhookUrl();
                 $created_webhook = true;
             }
         }
@@ -179,9 +182,12 @@ class crmMaxPluginImSourceSettingsPage extends crmImSourceSettingsPage
                     'response' => array(),
                 );
             }
+
+            $this->source->saveParam('webhook_url', $api->getWebhookUrl());
+            $result['response']['source'] = $this->source->getInfo();
         } elseif ($delete_webhook) {
             // Remove existing webhook
-            $api->removeWebhook();
+            $api->removeWebhook($webhook_url);
         }
 
         return $result;
@@ -218,7 +224,7 @@ class crmMaxPluginImSourceSettingsPage extends crmImSourceSettingsPage
             $subscribtions_res = $api->getSubscriptions();
             $subscribtions = ifset($subscribtions_res['subscriptions']);
             if (!empty($subscribtions)) {
-                $available_webhook_urls = $api->getWebhookUrl(true);
+                $available_webhook_urls = $this->getWebhookUrls($api);
                 $subscribtions = array_filter($subscribtions, function ($subscribtion) use ($available_webhook_urls) {
                     return in_array($subscribtion['url'], $available_webhook_urls);
                 });
@@ -242,6 +248,21 @@ class crmMaxPluginImSourceSettingsPage extends crmImSourceSettingsPage
             'webhook_mode'           => $webhook_mode,
             'webhook_secret'         => $webhook_secret,
         ]);
+    }
+
+    protected function getWebhookUrls($api)
+    {
+        $webhook_url = $this->source->getParam('webhook_url');
+        $available_webhook_urls = $api->getWebhookUrl(true);
+        if (!empty($webhook_url) && !in_array($webhook_url, $available_webhook_urls)) {
+            $available_webhook_urls = array_map(function ($url) use ($webhook_url) {
+                if (strpos($url, 'http://') === 0 && $webhook_url === str_replace('http://', 'https://', $url)) {
+                    $url = $webhook_url;
+                }
+                return $url;
+            }, $available_webhook_urls);
+        }
+        return $available_webhook_urls;
     }
 
     /**

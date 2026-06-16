@@ -88,14 +88,18 @@ class crmMaxPluginImSourceMessageSender extends crmImSourceMessageSender
         $non_images_count = 0;
         if (!empty($uploaded_files)) {
             foreach ($uploaded_files as $file_path) {
-                $action = $this->api->getActionByFilePath($file_path);
-                $this->api->sendChatAction($max_chat_id, $action);
-                $attachment = $this->api->uploadFile($file_path);
+                $is_empty_file = (int)@filesize($file_path) == 0;
+                if (!$is_empty_file) {
+                    $action = $this->api->getActionByFilePath($file_path);
+                    $this->api->sendChatAction($max_chat_id, $action);
+                    $attachment = $this->api->uploadFile($file_path);
+                }
+                
                 if (empty($attachment)) {
-                    foreach ($uploaded_files as $file_path) {
-                        waFiles::delete($file_path);
+                    foreach ($uploaded_files as $file_to_delete) {
+                        waFiles::delete($file_to_delete);
                     }
-                    $error = $this->api->getLastError();
+                    $error = $is_empty_file ? ['message' => _wd('crm_max', 'File is empty.')] : $this->api->getLastError();
                     $this->logError('Failed to upload file: ' . ifset($error['message']));
                     return $this->fail(['common' => ifset($error['message'], _wd('crm_max', 'Failed to upload the file.'))]);
                 }

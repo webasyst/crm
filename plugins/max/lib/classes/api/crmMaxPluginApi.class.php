@@ -513,25 +513,45 @@ class crmMaxPluginApi
 
     public function getWebhookUrl($all_available = false)
     {
-        if (!$all_available) {
-            $url = wa()->getRouteUrl('crm', [
-                'plugin' => 'max',
-                'module' => 'frontend',
-                'action' => 'callback',
-                'source_id' => $this->source_id,
-            ], true);
+        $domains = array_keys(wa()->getRouting()->getByApp('crm'));
+        if (empty($domains)) {
+            return $all_available ?  [] : null;
+        }
+        $domains_ssl = array_filter($domains, function ($domain) {
+            return wa()->getRouting()->getDomainConfig('ssl_all', $domain);
+        });
 
-            return $url;
+        if ($all_available) {
+            return array_map(function ($domain) use ($domains_ssl) {
+                $url = wa()->getRouteUrl('crm', [
+                    'plugin' => 'max',
+                    'module' => 'frontend',
+                    'action' => 'callback',
+                    'source_id' => $this->source_id,
+                ], true, $domain);
+                if (in_array($domain, $domains_ssl)) {
+                    $url = str_replace('http://', 'https://', $url);
+                }
+                return $url;
+            }, $domains);
         }
 
-        $domains = array_keys(wa()->getRouting()->getByApp('crm'));
-        return array_map(function ($domain) {
-            return wa()->getRouteUrl('crm', [
-                'plugin' => 'max',
-                'module' => 'frontend',
-                'action' => 'callback',
-                'source_id' => $this->source_id,
-            ], true, $domain);
-        }, $domains);
+        $domain = waRequest::server('HTTP_HOST');
+        if (!in_array($domain, $domains_ssl) && !empty($domains_ssl)) {
+            $domain = reset($domains_ssl);
+        } elseif (!in_array($domain, $domains) && !empty($domains)) {
+            $domain = reset($domains);
+        }
+
+        $url = wa()->getRouteUrl('crm', [
+            'plugin' => 'max',
+            'module' => 'frontend',
+            'action' => 'callback',
+            'source_id' => $this->source_id,
+        ], true, $domain);
+        if (in_array($domain, $domains_ssl)) {
+            $url = str_replace('http://', 'https://', $url);
+        }
+        return $url;
     }
 }
