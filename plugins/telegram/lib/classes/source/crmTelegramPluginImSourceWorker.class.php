@@ -193,7 +193,7 @@ class crmTelegramPluginImSourceWorker extends crmImSourceWorker
     protected function getApi()
     {
         if (empty($this->api)) {
-            $this->api = new crmTelegramPluginApi($this->source->getParam('access_token'));
+            $this->api = new crmTelegramPluginApi($this->source->getParam('access_token'), crmTelegramPluginApi::netOptionsFromParams($this->source->getParams()));
         }
         return $this->api;
     }

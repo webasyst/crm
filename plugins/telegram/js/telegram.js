@@ -29,6 +29,14 @@ var CRMTelegramPluginSettings = ( function($) {
         that.$form = that.$wrapper.parents('.crm-source-settings-form');
         that.$name_input = that.$wrapper.find('.js-name-input');
         that.$token_input = that.$wrapper.find('.js-access-token-input');
+        that.$api_proxy_type = that.$wrapper.find('.js-api-proxy-type');
+        that.$proxy_params_block = that.$wrapper.find('.js-api-proxy-params');
+        that.$api_proxy_host = that.$wrapper.find('.js-api-proxy-host');
+        that.$api_proxy_port = that.$wrapper.find('.js-api-proxy-port');
+        that.$api_proxy_user = that.$wrapper.find('.js-api-proxy-user');
+        that.$api_proxy_password = that.$wrapper.find('.js-api-proxy-password');
+        that.$check_connection_button = that.$wrapper.find('.js-check-connection-button');
+        that.$check_connection_result = that.$wrapper.find('.js-check-connection-result');
         that.$start_response_textarea = that.$wrapper.find('.start_response_textarea');
         that.$verify_request_textarea = that.$wrapper.find('.verify_request_textarea');
         that.$phone_request_textarea = that.$wrapper.find('.phone_request_textarea');
@@ -45,14 +53,34 @@ var CRMTelegramPluginSettings = ( function($) {
         that.locales = options["locales"];
 
         // DYNAMIC VARS
+        that.check_connection_result_timer = null;
 
         // INIT
         that.initClass();
     };
 
+    CRMTelegramPluginSettings.prototype.toggleProxyFieldsVisibility = function() {
+        var that = this;
+        if (!that.$proxy_params_block.length) {
+            return;
+        }
+        var t = that.$api_proxy_type.length ? that.$api_proxy_type.val() : 'none';
+        if (t === 'none' || t === '') {
+            that.$proxy_params_block.hide();
+        } else {
+            that.$proxy_params_block.show();
+        }
+    };
+
     CRMTelegramPluginSettings.prototype.initClass = function() {
         var that = this;
 
+        that.toggleProxyFieldsVisibility();
+        if (that.$api_proxy_type.length) {
+            that.$api_proxy_type.on('change', function() {
+                that.toggleProxyFieldsVisibility();
+            });
+        }
         that.checkToken();
         //
         that.initAceEditor(that.$start_response_textarea);
@@ -108,25 +136,51 @@ var CRMTelegramPluginSettings = ( function($) {
     }
 
 
+    CRMTelegramPluginSettings.prototype.getApiProxyPostData = function() {
+        var that = this;
+        return {
+            api_proxy_type: that.$api_proxy_type.length ? that.$api_proxy_type.val() : 'none',
+            api_proxy_host: that.$api_proxy_host.length ? that.$api_proxy_host.val() : '',
+            api_proxy_port: that.$api_proxy_port.length ? that.$api_proxy_port.val() : '',
+            api_proxy_user: that.$api_proxy_user.length ? that.$api_proxy_user.val() : '',
+            api_proxy_password: that.$api_proxy_password.length ? that.$api_proxy_password.val() : ''
+        };
+    };
+
     CRMTelegramPluginSettings.prototype.checkToken = function() {
         var that = this;
 
-        that.$token_input.on('input', function() {
-            that.$bot_id_input.val();
-            if (that.action == 'create') {
-                that.$bot_id_input.val('');
-            }
-            that.$bot_id_input.val();
-            that.$firstname_input.val('');
-            that.$username_input.val('');
+        var showConnectionResult = function(is_success) {
+            var message = is_success ? that.locales['connection_success'] : that.locales['connection_error'];
+
+            that.check_connection_result_timer && clearTimeout(that.check_connection_result_timer);
+            that.$check_connection_result
+                .removeClass('text-green text-red')
+                .addClass(is_success ? 'text-green' : 'text-red')
+                .text(message)
+                .show();
+
+            that.check_connection_result_timer = setTimeout(function() {
+                that.$check_connection_result.fadeOut(200);
+            }, 3000);
+        };
+
+        var postCheckToken = function(options) {
+            options = options || {};
 
             var href = $.crm.app_url + "?plugin=telegram&action=checkToken",
-                data = {
-                    access_token: $(this).val()
-                };
+                data = $.extend({
+                    access_token: that.$token_input.val()
+                }, that.getApiProxyPostData());
 
-            $.post(href, data, function(res) {
-                if (res.status == 'ok' && res.data.ok && !res.data.errors) {
+            return $.post(href, data, function(res) {
+                var is_success = (res.status == 'ok' && res.data && res.data.ok && !res.data.errors);
+
+                if (options.show_result) {
+                    showConnectionResult(is_success);
+                }
+
+                if (is_success) {
                     if (that.action == 'edit' && that.$bot_id_input.val() != res.data.result.id) {
                         // One source — one telegram bot
                         $.crm.alert.show({
@@ -152,7 +206,39 @@ var CRMTelegramPluginSettings = ( function($) {
                         });
                     }
                 }
+            }).fail(function() {
+                if (options.show_result) {
+                    showConnectionResult(false);
+                }
             });
+        };
+
+        that.$token_input.on('input', function() {
+            that.$bot_id_input.val();
+            if (that.action == 'create') {
+                that.$bot_id_input.val('');
+            }
+            that.$bot_id_input.val();
+            that.$firstname_input.val('');
+            that.$username_input.val('');
+
+            postCheckToken();
+        });
+
+        that.$check_connection_button.on('click', function() {
+            that.$check_connection_button.prop('disabled', true);
+            postCheckToken({
+                show_result: true
+            }).always(function() {
+                that.$check_connection_button.prop('disabled', false);
+            });
+        });
+
+        that.$wrapper.find('.js-api-proxy-type, .js-api-proxy-host, .js-api-proxy-port, .js-api-proxy-user, .js-api-proxy-password').on('input change', function() {
+            if (!that.$token_input.val().length) {
+                return;
+            }
+            postCheckToken();
         });
     };
 

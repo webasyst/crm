@@ -18,6 +18,23 @@ class crmTelegramPluginImSourceSettingsPage extends crmImSourceSettingsPage
             $errors['params']['access_token'] = _wd('crm_telegram', 'Invalid access token');
         }
 
+        $api_proxy_type = isset($data['params']['api_proxy_type']) ? trim((string) $data['params']['api_proxy_type']) : '';
+        if ($api_proxy_type === '') {
+            $api_proxy_type = crmTelegramPluginApi::PROXY_TYPE_NONE;
+        }
+        if ($api_proxy_type === crmTelegramPluginApi::PROXY_TYPE_HTTP
+            || $api_proxy_type === crmTelegramPluginApi::PROXY_TYPE_SOCKS5
+        ) {
+            $proxy_host = isset($data['params']['api_proxy_host']) ? trim((string) $data['params']['api_proxy_host']) : '';
+            if ($proxy_host === '') {
+                $errors['params']['api_proxy_host'] = _wd('crm_telegram', 'A host is required for the selected proxy type.');
+            }
+            $port = isset($data['params']['api_proxy_port']) ? $data['params']['api_proxy_port'] : '';
+            if ($port === '' || !is_numeric($port) || (int) $port < 1 || (int) $port > 65535) {
+                $errors['params']['api_proxy_port'] = _wd('crm_telegram', 'A valid proxy port is required (1–65535).');
+            }
+        }
+
         return $errors;
     }
 
@@ -27,7 +44,7 @@ class crmTelegramPluginImSourceSettingsPage extends crmImSourceSettingsPage
         $delete_webhook = false;
         $create_webhook = false;
         $created_webhook = false;
-        $api = new crmTelegramPluginApi($data['params']['access_token']);
+        $api = new crmTelegramPluginApi($data['params']['access_token'], crmTelegramPluginApi::netOptionsFromParams($data['params']));
         if (empty($data['params']['webhook_mode'])) {
             $data['params']['webhook_mode'] = '0';
             $data['params']['webhook_token'] = '';
@@ -61,11 +78,11 @@ class crmTelegramPluginImSourceSettingsPage extends crmImSourceSettingsPage
                 $created_webhook = true;
             }
         }
-            
+
         $result = parent::processSubmit($data);
         if ($result['status'] !== 'ok') {
             if ($created_webhook) {
-                $api->deleteWebhook();  
+                $api->deleteWebhook();
             }
             return $result;
         }

@@ -12,7 +12,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.9\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
@@ -390,3 +390,39 @@ msgstr "Telegram отклонил сообщение:"
 
 msgid "Incorrect request to Telegram API."
 msgstr "Некорректный запрос к API Telegram."
+
+msgid "Outgoing proxy"
+msgstr "Исходящий прокси"
+
+msgid "No proxy"
+msgstr "Без прокси"
+
+msgid "Optional. Can be used for outgoing Telegram API requests."
+msgstr "Необязательно. Может использоваться для исходящих запросов к API Telegram."
+
+msgid "Host"
+msgstr "Хост"
+
+msgid "Port"
+msgstr "Порт"
+
+msgid "Proxy login (optional)"
+msgstr "Логин для прокси (необязательно)"
+
+msgid "Proxy password (optional)"
+msgstr "Пароль для прокси (необязательно)"
+
+msgid "Check connection"
+msgstr "Проверить подключение"
+
+msgid "Connection successful"
+msgstr "Подключение успешно"
+
+msgid "Connection failed"
+msgstr "Не удалось подключиться"
+
+msgid "A host is required for the selected proxy type."
+msgstr "Для выбранного типа прокси требуется указать хост."
+
+msgid "A valid proxy port is required (1–65535)."
+msgstr "Требуется допустимый порт для прокси (1–65535)."

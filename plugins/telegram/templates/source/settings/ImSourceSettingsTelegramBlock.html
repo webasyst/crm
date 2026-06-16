@@ -13,7 +13,7 @@
                 {_wd('crm_telegram', 'Name')}
             </div>
             <div class="value">
-                <input class="js-name-input" type="text" name="source[name]" value="{$source.name|default:''|escape}">
+                <input class="long js-name-input" type="text" name="source[name]" value="{$source.name|default:''|escape}">
             </div>
         </div>
         <div class="field top-padded" style="margin-bottom: 16px;">
@@ -23,7 +23,43 @@
                 <span class="hint"><a href="https://core.telegram.org/bots#3-how-do-i-create-a-bot" target="_blank">{_wd('crm_telegram', 'more info')}</a></span>
             </div>
             <div class="value">
-                <input class="equal-width js-access-token-input" type="text" name="source[params][access_token]" value="{$source.params.access_token|default:''|escape}" autocomplete="off">
+                <input class="long equal-width js-access-token-input" type="text" name="source[params][access_token]" value="{$source.params.access_token|default:''|escape}" autocomplete="off">
+            </div>
+        </div>
+        {assign var=_tg_proxy_type value=$source.params.api_proxy_type|default:'none'}
+        {assign var=_tg_proxy_host value=$source.params.api_proxy_host|default:''}
+        {assign var=_tg_proxy_port value=$source.params.api_proxy_port|default:''}
+        {assign var=_tg_proxy_user value=$source.params.api_proxy_user|default:''}
+        {assign var=_tg_proxy_password value=$source.params.api_proxy_password|default:''}
+        <div class="field top-padded" style="margin-bottom: 16px;">
+            <div class="name">
+                {_wd('crm_telegram', 'Outgoing proxy')}
+            </div>
+            <div class="value">
+                <div class="flexbox space-8" style="flex-wrap: wrap; align-items: center; margin-bottom: 8px;">
+                    <select class="js-api-proxy-type" name="source[params][api_proxy_type]" autocomplete="off">
+                        <option value="none" {if $_tg_proxy_type == 'none'}selected="selected"{/if}>{_wd('crm_telegram', 'No proxy')}</option>
+                        <option value="http" {if $_tg_proxy_type == 'http'}selected="selected"{/if}>HTTP</option>
+                        <option value="socks5" {if $_tg_proxy_type == 'socks5'}selected="selected"{/if}>SOCKS5</option>
+                    </select>
+                    <span class="hint">{_wd('crm_telegram', 'Optional. Can be used for outgoing Telegram API requests.')}</span>
+                </div>
+                <div class="js-api-proxy-params"{if $_tg_proxy_type == 'none'} style="display: none;"{/if}>
+                    <div class="flexbox space-8" style="flex-wrap: wrap; align-items: center; margin-bottom: 8px;">
+                        <input class="js-api-proxy-host" type="text" name="source[params][api_proxy_host]" value="{$_tg_proxy_host|escape}" placeholder="{_wd('crm_telegram', 'Host')}" autocomplete="off">
+                        <input class="shortest js-api-proxy-port" type="number" name="source[params][api_proxy_port]" value="{$_tg_proxy_port|escape}" placeholder="{_wd('crm_telegram', 'Port')}" autocomplete="off">
+                    </div>
+                    <div class="flexbox space-8" style="flex-wrap: wrap; align-items: center;">
+                        <input class="js-api-proxy-user" type="text" name="source[params][api_proxy_user]" value="{$_tg_proxy_user|escape}" placeholder="{_wd('crm_telegram', 'Proxy login (optional)')}" autocomplete="off">
+                        <input class="js-api-proxy-password" type="password" name="source[params][api_proxy_password]" value="{$_tg_proxy_password|escape}" placeholder="{_wd('crm_telegram', 'Proxy password (optional)')}" autocomplete="off">
+                    </div>
+                </div>
+                <div style="margin-top: 12px;">
+                    <button type="button" class="button small light-gray js-check-connection-button">
+                        {_wd('crm_telegram', 'Check connection')}
+                    </button>
+                    <span class="hint js-check-connection-result" style="display: none; margin-left: 8px;"></span>
+                </div>
             </div>
         </div>
         <div class="field top-padded" style="margin-bottom: 16px;">
@@ -39,7 +75,7 @@
                     {$_doc_page = 'https://core.telegram.org/bots/webhooks'}
                     {$_hint = _wd('crm_telegram', 'Telegram supports two ways of processing bot updates — <em>pull</em> and <em>push</em>. By default the <em>pull</em> mechanism is used. <strong>Webhook is a <em>push</em> mechanism, it works faster.</strong>')}
                     {sprintf(_wd('crm_telegram', $_hint), $_doc_page)}
-                    <a href="%s" target="_blank">{_wd('crm_telegram', 'More info')}</a>.
+                    <a href="{$_doc_page}" target="_blank">{_wd('crm_telegram', 'More info')}</a>.
                 </div>
             </div>
         </div>
@@ -161,7 +197,7 @@
                     {_wd('crm_telegram', 'Button text')}
                 </div>
                 <div class="value">
-                    <input class="equal-width" type="text" name="source[params][phone_request_button]" value="{$source.params.phone_request_button|default:$default_phone_request_button|escape}">
+                    <input class="long" type="text" name="source[params][phone_request_button]" value="{$source.params.phone_request_button|default:$default_phone_request_button|escape}">
                 </div>
             </div>
             <div class="field top-padded" style="margin-bottom: 16px;">
@@ -209,7 +245,9 @@
         locales: {
             alert_title: "{_wd('crm_telegram', 'Validation error')}",
             alert_body: '{sprintf('[`You cannot change the bot for a source.<br><br>To use a different bot, <a href=\"%ssettings/sources/telegram\">set up a new source</a> for it.`]', {$wa_app_url})}',
-            alert_close: "[`Close`]"
+            alert_close: "[`Close`]",
+            connection_success: "{_wd('crm_telegram', 'Connection successful')}",
+            connection_error: "{_wd('crm_telegram', 'Connection failed')}"
         }
     });
 })(jQuery);

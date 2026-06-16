@@ -16,16 +16,6 @@ class crmTelegramPluginMediaDownloader
     protected $telegram_sticker_model;
 
     /**
-     * @var crmTelegramPluginAudioModel
-     */
-    protected $telegram_audio_model;
-
-    /**
-     * @var crmTelegramPluginVideoModel
-     */
-    protected $telegram_video_model;
-
-    /**
      * @var crmSource
      */
     protected $source;
@@ -96,6 +86,9 @@ class crmTelegramPluginMediaDownloader
         }
         $url = 'https://api.telegram.org/file/bot'.$this->source->getParam('access_token').'/'.$file_path;
         $path = $this->downloadProfilePhoto($url);
+        if (!$path) {
+            return;
+        }
         try {
             $contact->setPhoto($path);
             waFiles::delete($path);
@@ -106,22 +99,11 @@ class crmTelegramPluginMediaDownloader
 
     protected function downloadProfilePhoto($url)
     {
-        $protocol = substr($url, 0, 5) === 'https' ? 'https' : 'http';
-        $context_options = array(
-            $protocol => array(
-                'method' => 'GET'
-            )
-        );
-        $context = stream_context_create($context_options);
-        $input = fopen($url, 'rb', false, $context);
-
         $path = wa()->getTempPath('plugins/telegram/'.uniqid('userpic', true), 'crm');
-        $output = fopen($path, 'wb');
-
-        stream_copy_to_stream($input, $output);
-
-        fclose($input);
-        fclose($output);
+        $error = null;
+        if (!$this->downloadToPath($url, $path, $error)) {
+            return null;
+        }
 
         return $path;
     }
@@ -165,15 +147,6 @@ class crmTelegramPluginMediaDownloader
         $telegram_path = $file_data['result']['file_path'];
         $telegram_url = 'https://api.telegram.org/file/bot'.$this->source->getParam('access_token').'/'.$telegram_path;
 
-        $protocol = substr($telegram_url, 0, 5) === 'https' ? 'https' : 'http';
-        $context_options = array(
-            $protocol => array(
-                'method' => 'GET'
-            )
-        );
-        $context = stream_context_create($context_options);
-        $input = fopen($telegram_url, 'rb', false, $context);
-
         $file_name = pathinfo($telegram_path, PATHINFO_BASENAME);
         $ext = pathinfo($telegram_path, PATHINFO_EXTENSION);
         if (empty($ext)) {
@@ -202,12 +175,16 @@ class crmTelegramPluginMediaDownloader
             $tmp_file_name .= '.'.$ext;
         }
         $path = wa()->getTempPath('plugins/telegram/'.$type, 'crm') .'/'.$tmp_file_name;
-        $output = fopen($path, 'wb');
-
-        stream_copy_to_stream($input, $output);
-
-        fclose($input);
-        fclose($output);
+        $error = null;
+        if (!$this->downloadToPath($telegram_url, $path, $error)) {
+            return [
+                'crm_file_id' => null,
+                'error' => [
+                    'code' => 0,
+                    'description' => ifset($error, _wd('crm_telegram', 'Unable to download file from Telegram.')),
+                ],
+            ];
+        }
 
         $data = [
             'creator_contact_id' => $this->creator_contact_id,
@@ -265,24 +242,82 @@ class crmTelegramPluginMediaDownloader
     }
 
     /**
-     * @return crmTelegramPluginAudioModel
+     * Downloads remote content to local file without PHP stream warnings on SSL errors.
+     *
+     * @param string $url
+     * @param string $path
+     * @param string|null $error
+     * @return bool
      */
-    public function getTelegramAudioModel()
+    protected function downloadToPath($url, $path, &$error = null)
     {
-        if (!$this->telegram_audio_model) {
-            $this->telegram_audio_model = new crmTelegramPluginAudioModel();
+        $error = null;
+        $content = $this->downloadContent($url, $error);
+        if ($content === null) {
+            return false;
         }
-        return $this->telegram_audio_model;
+
+        if (@file_put_contents($path, $content) === false) {
+            $error = _wd('crm_telegram', 'Unable to save downloaded file.');
+            return false;
+        }
+        return true;
     }
 
     /**
-     * @return crmTelegramPluginVideoModel
+     * @param string $url
+     * @param string|null $error
+     * @return string|null
      */
-    public function getTelegramVideoModel()
+    protected function downloadContent($url, &$error = null)
     {
-        if (!$this->telegram_video_model) {
-            $this->telegram_video_model = new crmTelegramPluginVideoModel();
+        $error = null;
+
+        if (function_exists('curl_init')) {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+
+            $content = curl_exec($ch);
+            $curl_errno = curl_errno($ch);
+            $http_code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curl_error = curl_error($ch);
+            curl_close($ch);
+
+            if ($curl_errno === 0 && $http_code >= 200 && $http_code < 300 && $content !== false) {
+                return $content;
+            }
+            $error = $curl_error ?: sprintf('Telegram responded with HTTP %d', $http_code);
         }
-        return $this->telegram_video_model;
+
+        $context = stream_context_create(array(
+            'http' => array(
+                'method' => 'GET',
+                'timeout' => 30,
+            ),
+            'ssl' => array(
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+                'SNI_enabled' => true,
+            ),
+        ));
+
+        $content = @file_get_contents($url, false, $context);
+        if ($content === false) {
+            $last_error = error_get_last();
+            if (empty($error) && !empty($last_error['message'])) {
+                $error = $last_error['message'];
+            }
+            if (empty($error)) {
+                $error = _wd('crm_telegram', 'Unable to download file from Telegram.');
+            }
+            return null;
+        }
+        return $content;
     }
 }

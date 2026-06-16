@@ -10,7 +10,7 @@ class crmTelegramPluginImSourceHelper extends crmSourceHelper
     public function __construct(crmSource $source, array $options = array())
     {
         parent::__construct($source, $options);
-        $this->api = new crmTelegramPluginApi($this->source->getParam('access_token'));
+        $this->api = new crmTelegramPluginApi($this->source->getParam('access_token'), crmTelegramPluginApi::netOptionsFromParams($this->source->getParams()));
     }
 
     public function workupMessageInList($message)

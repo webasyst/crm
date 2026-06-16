@@ -46,7 +46,7 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
     {
         parent::__construct($source, $message, $options);
 
-        $this->api = new crmTelegramPluginApi($this->source->getParam('access_token'));
+        $this->api = new crmTelegramPluginApi($this->source->getParam('access_token'), crmTelegramPluginApi::netOptionsFromParams($this->source->getParams()));
         $this->helper = new crmTelegramPluginImSourceHelper($this->source);
         $this->downloader = new crmTelegramPluginMediaDownloader($this->source, $this->api);
 
@@ -168,7 +168,7 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
                 }
 
                 $response = $this->api->sendPhoto($photo, $photo_params);
-                if ($response['ok']) {
+                if (!empty($response['ok'])) {
                     if (isset($response['result'][crmTelegramPluginMediaDownloader::TYPE_PHOTO])) {
                         $max_thumb = end($response['result'][crmTelegramPluginMediaDownloader::TYPE_PHOTO]);
                         if (isset($max_thumb['file_id'])) {
@@ -212,7 +212,7 @@ class crmTelegramPluginImSourceMessageSender extends crmImSourceMessageSender
                 }
 
                 $response = (array)$this->api->sendDocument($document, $doc_params);
-                if ($response['ok']) {
+                if (!empty($response['ok'])) {
                     foreach([
                         crmTelegramPluginMediaDownloader::TYPE_DOCUMENT,
                         crmTelegramPluginMediaDownloader::TYPE_AUDIO,

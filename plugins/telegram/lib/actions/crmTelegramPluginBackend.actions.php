@@ -10,7 +10,7 @@ class crmTelegramPluginBackendActions  extends waActions
             return;
         }
 
-        $api = new crmTelegramPluginApi($token);
+        $api = new crmTelegramPluginApi($token, crmTelegramPluginApi::netOptionsFromParams($this->getProxyParamsFromRequest()));
         $bot_data = $api->getMe();
 
         $this->displayJson($bot_data);
@@ -24,7 +24,7 @@ class crmTelegramPluginBackendActions  extends waActions
             return;
         }
 
-        $api = new crmTelegramPluginApi($token);
+        $api = new crmTelegramPluginApi($token, crmTelegramPluginApi::netOptionsFromParams($this->getProxyParamsFromRequest()));
         $updates = $api->getUpdates();
 
         $last_update_id = 0;
@@ -67,7 +67,7 @@ class crmTelegramPluginBackendActions  extends waActions
             return;
         }
 
-        $api = new crmTelegramPluginApi($source['params']['access_token']);
+        $api = new crmTelegramPluginApi($source['params']['access_token'], crmTelegramPluginApi::netOptionsFromParams($source['params']));
         $api->sendChatAction($chat_id, $action);
     }
 
@@ -136,5 +136,19 @@ class crmTelegramPluginBackendActions  extends waActions
             return null;
         }
         return $source;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getProxyParamsFromRequest()
+    {
+        return [
+            'api_proxy_type'        => waRequest::request('api_proxy_type', '', waRequest::TYPE_STRING_TRIM),
+            'api_proxy_host'        => waRequest::request('api_proxy_host', '', waRequest::TYPE_STRING_TRIM),
+            'api_proxy_port'        => waRequest::request('api_proxy_port', '', waRequest::TYPE_STRING_TRIM),
+            'api_proxy_user'        => waRequest::request('api_proxy_user', '', waRequest::TYPE_STRING_TRIM),
+            'api_proxy_password'    => waRequest::request('api_proxy_password', '', waRequest::TYPE_STRING),
+        ];
     }
 }
