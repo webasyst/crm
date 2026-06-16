@@ -150,133 +150,250 @@ class crmVkPluginImSourceHelper extends crmSourceHelper
     public function normalazeMessagesExtras($messages)
     {
         $verification_key = $this->source->getParam('verification_key');
-        // return $messages;
-        // TODO - не закончено - см. дальше что есть в crmVkPluginMessageBodyFormatter
         return array_map(function($m) use ($verification_key) {
-            $attachments = ifset($m, 'params', 'attachments', []);
-            foreach($attachments as $att) {
-                if (ifset($att['type']) == 'doc' && isset($att['doc'])) {
-                    if (strtolower($att['doc']['ext']) === 'gif') {
-                        $m = $this->addExtra($m, 'images', [
-                            'name' => $att['doc']['title'],
-                            'ext' => $att['doc']['ext'],
-                            'url' => $att['doc']['url'],
-                        ]);
-                    } else {
-                        $m = $this->addAttachement($m, $att['doc']);
-                    }
-                    continue;
-                }
-                if (ifset($att['type']) == 'photo' && isset($att['photo'])) {
-                    if (isset($att['photo']['sizes']) && is_array($att['photo']['sizes'])) {
-                        // get the biggest thumb
-                        $thumbs = $att['photo']['sizes'];
-                        array_multisort(array_column($thumbs, 'width'), SORT_DESC, SORT_NUMERIC, $thumbs);
-                        $thumb = reset($thumbs);
-
-                        // get file name & ext from url
-                        $url = ifset($thumb['url']);
-                        if (empty($url)) {
-                            continue;
-                        }
-                        $_parts = explode('?', $url);
-                        $_parts = reset($_parts);
-                        $_parts = explode('/', $_parts);
-                        $name = end($_parts);
-                        $_parts = explode('.', $name);
-                        $ext = end($_parts);
-                        $m = $this->addExtra($m, 'images', [
-                            'name' => $name,
-                            'ext' => $ext,
-                            'url' => $url,
-                        ]);
-                    }
-                    continue;
-                }
-                if (ifset($att['type']) == 'audio_message' && isset($att['audio_message'])) {
-                    $audio = [];
-                    if (isset($att['audio_message']['link_ogg'])) {
-                        $audio['name'] = $att['audio_message']['id'] . 'ogg';
-                        $audio['ext'] = 'ogg';
-                        $audio['url'] = $att['audio_message']['link_ogg'];
-                    } elseif (isset($att['audio_message']['link_mp3'])) {
-                        $audio['name'] = $att['audio_message']['id'] . 'mp3';
-                        $audio['ext'] = 'mp3';
-                        $audio['url'] = $att['audio_message']['link_mp3'];
-                    }
-                    if (empty($audio)) {
-                        continue;
-                    }
-
-                    $m = $this->addExtra($m, 'audios', $audio);
-                    continue;
-                }
-                if (ifset($att['type']) == 'video' && isset($att['video'])) {
-                    $m['caption'] = '<span class="gray">' . _wd('crm_vk', '(Video is not supported)') . '</span>';
-                    if (ifset($att['video']['title'])) {
-                        $m['caption'] .= ' <span class="small">' . crmHtmlSanitizer::work($att['video']['title']) . '</span>';
-                    }
-                    // TODO: add video normalization
-                    continue;
-                }
-
-                if (ifset($att['type']) == 'sticker' && isset($att['sticker'])) {
-                    if (isset($att['sticker']['images']) && is_array($att['sticker']['images'])) {
-                        // get the biggest thumb
-                        $thumbs = $att['sticker']['images'];
-                        array_multisort(array_column($thumbs, 'width'), SORT_DESC, SORT_NUMERIC, $thumbs);
-                        $thumb = reset($thumbs);
-
-                        // get file name & ext from url
-                        $url = ifset($thumb['url']);
-                        if (empty($url)) {
-                            continue;
-                        }
-                        $_parts = explode('?', $url);
-                        $_parts = reset($_parts);
-                        $_parts = explode('/', $_parts);
-                        $name = end($_parts);
-                        $_parts = explode('.', $name);
-                        $ext = end($_parts);
-                        if ($ext == $name) {
-                            // if no file ext in url, suppose we have .png
-                            $ext = 'png';
-                            $name .= '.png';
-                        }
-                        $m = $this->addExtra($m, 'stickers', [
-                            'name' => $name,
-                            'ext' => $ext,
-                            'url' => $url,
-                        ]);
-                    }
-                    continue;
-                }
-
-            }
-
-            $geo = ifset($m, 'params', 'geo', null);
-            if (!empty($geo)) {
-                $location = [];
-                if (isset($geo['coordinates']) && isset($geo['coordinates']['latitude']) && isset($geo['coordinates']['longitude'])) {
-                    $coordinates[] = $geo['coordinates']['latitude'];
-                    $coordinates[] = $geo['coordinates']['longitude'];
-                    $location['point'] = join(',', $coordinates);
-                }
-                if (isset($geo['place']) && isset($geo['place']['title'])) {
-                    $location['title'] = $geo['place']['title'];
-                    $location['address'] = $geo['place']['title'];
-                }
-                if (!empty($location)) {
-                    $m = $this->addExtra($m, 'locations', $location);
-                }
-            }
+            $m = $this->normalazeVkAttachments($m, ifset($m, 'params', 'attachments', []));
+            $m = $this->normalazeVkGeo($m, ifset($m, 'params', 'geo', null));
+            $m = $this->normalazeNestedVkMessagesExtras($m, $m);
 
             // convert plain-text message body to html
-            $body = (new crmVkPluginBodyHtmlFormatter)->execute($m['body']);
+            $body = $this->formatVkMessageText(ifset($m['body'], ''));
+            $nested_body = $this->formatNestedVkMessagesBody($m);
+            if ($nested_body) {
+                $body .= ($body ? '<br>' : '') . $nested_body;
+            }
             $m['body_sanitized'] = crmHtmlSanitizer::work($body, ['verification_key' => $verification_key]);
             return $m;
         }, $messages);
 
+    }
+
+    private function normalazeVkAttachments($message, $attachments)
+    {
+        foreach ((array)$attachments as $att) {
+            if (ifset($att['type']) == 'doc' && isset($att['doc'])) {
+                if (strtolower(ifset($att, 'doc', 'ext', '')) === 'gif') {
+                    $message = $this->addExtra($message, 'images', [
+                        'name' => ifset($att, 'doc', 'title', ''),
+                        'ext' => ifset($att, 'doc', 'ext', ''),
+                        'url' => ifset($att, 'doc', 'url', ''),
+                    ]);
+                } else {
+                    $message = $this->addAttachement($message, $att['doc']);
+                }
+                continue;
+            }
+            if (ifset($att['type']) == 'photo' && isset($att['photo'])) {
+                foreach ($this->extractVkPhotoFiles($att['photo']) as $file) {
+                    $message = $this->addExtra($message, 'images', $file);
+                }
+                continue;
+            }
+            if (ifset($att['type']) == 'audio_message' && isset($att['audio_message'])) {
+                $audio = [];
+                if (isset($att['audio_message']['link_ogg'])) {
+                    $audio['name'] = $att['audio_message']['id'] . 'ogg';
+                    $audio['ext'] = 'ogg';
+                    $audio['url'] = $att['audio_message']['link_ogg'];
+                } elseif (isset($att['audio_message']['link_mp3'])) {
+                    $audio['name'] = $att['audio_message']['id'] . 'mp3';
+                    $audio['ext'] = 'mp3';
+                    $audio['url'] = $att['audio_message']['link_mp3'];
+                }
+                if (empty($audio)) {
+                    continue;
+                }
+
+                $message = $this->addExtra($message, 'audios', $audio);
+                continue;
+            }
+            if (ifset($att['type']) == 'video' && isset($att['video'])) {
+                $message['caption'] = '<span class="gray">' . _wd('crm_vk', '(Video is not supported)') . '</span>';
+                if (ifset($att['video']['title'])) {
+                    $message['caption'] .= ' <span class="small">' . crmHtmlSanitizer::work($att['video']['title']) . '</span>';
+                }
+                // TODO: add video normalization
+                continue;
+            }
+
+            if (ifset($att['type']) == 'sticker' && isset($att['sticker'])) {
+                if (isset($att['sticker']['images']) && is_array($att['sticker']['images'])) {
+                    $file = $this->extractBiggestThumbFile($att['sticker']['images'], 'png');
+                    if ($file) {
+                        $message = $this->addExtra($message, 'stickers', $file);
+                    }
+                }
+                continue;
+            }
+        }
+
+        return $message;
+    }
+
+    private function normalazeVkGeo($message, $geo)
+    {
+        if (empty($geo)) {
+            return $message;
+        }
+
+        $location = [];
+        if (isset($geo['coordinates']) && isset($geo['coordinates']['latitude']) && isset($geo['coordinates']['longitude'])) {
+            $coordinates = [];
+            $coordinates[] = $geo['coordinates']['latitude'];
+            $coordinates[] = $geo['coordinates']['longitude'];
+            $location['point'] = join(',', $coordinates);
+        }
+        if (isset($geo['place']) && isset($geo['place']['title'])) {
+            $location['title'] = $geo['place']['title'];
+            $location['address'] = $geo['place']['title'];
+        }
+        if (!empty($location)) {
+            $message = $this->addExtra($message, 'locations', $location);
+        }
+
+        return $message;
+    }
+
+    private function normalazeNestedVkMessagesExtras($message, $container)
+    {
+        foreach ($this->getForwardedVkMessages($container) as $nested_message) {
+            $message = $this->normalazeVkAttachments($message, ifset($nested_message, 'attachments', []));
+            $message = $this->normalazeVkGeo($message, ifset($nested_message, 'geo', null));
+            $message = $this->normalazeNestedVkMessagesExtras($message, $nested_message);
+        }
+
+        return $message;
+    }
+
+    private function formatNestedVkMessagesBody($container)
+    {
+        $html = '';
+        foreach ($this->getNestedVkMessages($container) as $nested_message) {
+            $html .= $this->formatVkMessageBlockquote($nested_message);
+        }
+
+        return $html;
+    }
+
+    private function formatVkMessageBlockquote($message)
+    {
+        $body = $this->formatVkMessageText($this->getVkMessageText($message));
+        $nested_body = $this->formatNestedVkMessagesBody($message);
+        if ($nested_body) {
+            $body .= ($body ? '<br>' : '') . $nested_body;
+        }
+        if (!$body) {
+            return '';
+        }
+
+        return '<blockquote>' . $body . '</blockquote>';
+    }
+
+    private function formatVkMessageText($text)
+    {
+        return (new crmVkPluginBodyHtmlFormatter)->execute((string)$text);
+    }
+
+    private function getVkMessageText($message)
+    {
+        $text = ifset($message, 'text', null);
+        return $text === null ? ifset($message, 'body', '') : $text;
+    }
+
+    private function getNestedVkMessages($message)
+    {
+        $params = ifset($message, 'params', null);
+        if (is_array($params)) {
+            $message = $params;
+        }
+
+        $nested_messages = [];
+        $reply_message = ifset($message, 'reply_message', null);
+        if (is_array($reply_message) && !empty($reply_message)) {
+            $nested_messages[] = $reply_message;
+        }
+
+        foreach ((array)ifset($message, 'fwd_messages', []) as $fwd_message) {
+            if (is_array($fwd_message) && !empty($fwd_message)) {
+                $nested_messages[] = $fwd_message;
+            }
+        }
+
+        return $nested_messages;
+    }
+
+    private function getForwardedVkMessages($message)
+    {
+        $params = ifset($message, 'params', null);
+        if (is_array($params)) {
+            $message = $params;
+        }
+
+        $fwd_messages = [];
+        foreach ((array)ifset($message, 'fwd_messages', []) as $fwd_message) {
+            if (is_array($fwd_message) && !empty($fwd_message)) {
+                $fwd_messages[] = $fwd_message;
+            }
+        }
+
+        return $fwd_messages;
+    }
+
+    private function extractVkPhotoFiles($photo)
+    {
+        if (!is_array($photo)) {
+            return [];
+        }
+
+        if (isset($photo['sizes']) && is_array($photo['sizes'])) {
+            $file = $this->extractBiggestThumbFile($photo['sizes']);
+            return $file ? [$file] : [];
+        }
+
+        $thumbs = [];
+        foreach ($photo as $key => $url) {
+            if (substr($key, 0, 6) !== 'photo_' || empty($url)) {
+                continue;
+            }
+            $thumbs[] = [
+                'width' => substr($key, 6),
+                'url' => $url,
+            ];
+        }
+
+        $file = $this->extractBiggestThumbFile($thumbs);
+        return $file ? [$file] : [];
+    }
+
+    private function extractBiggestThumbFile($thumbs, $default_ext = null)
+    {
+        if (!is_array($thumbs) || empty($thumbs)) {
+            return null;
+        }
+
+        array_multisort(array_column($thumbs, 'width'), SORT_DESC, SORT_NUMERIC, $thumbs);
+        $thumb = reset($thumbs);
+        $url = ifset($thumb['url']);
+        if (empty($url)) {
+            return null;
+        }
+
+        $_parts = explode('?', $url);
+        $_parts = reset($_parts);
+        $_parts = explode('/', $_parts);
+        $name = end($_parts);
+        $_parts = explode('.', $name);
+        $ext = end($_parts);
+        if ($default_ext && $ext == $name) {
+            // Some VK sticker URLs do not contain a file extension.
+            $ext = $default_ext;
+            $name .= '.' . $default_ext;
+        }
+
+        return [
+            'name' => $name,
+            'ext' => $ext,
+            'url' => $url,
+        ];
     }
 
     public function getFeatures()

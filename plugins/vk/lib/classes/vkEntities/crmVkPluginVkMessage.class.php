@@ -33,6 +33,12 @@ class crmVkPluginVkMessage extends crmVkPluginVkEntity
         return $fwd_messages ? $fwd_messages : array();
     }
 
+    public function getReplyMessage()
+    {
+        $reply_message = (array)$this->getField('reply_message');
+        return $reply_message ? $reply_message : array();
+    }
+
     public function isImportant()
     {
         return (bool)$this->getField('important');

@@ -181,6 +181,7 @@ class crmVkPluginChat extends crmVkPluginChatEntity
                 'sticker' => $message ? $message->getSticker() : null,
                 'datetime' => $message ? $message->getDatetime() : date('Y-m-d H:i:s'),
                 'fwd_messages' => $message ? $message->getFwdMessages() : array(),
+                'reply_message' => $message ? $message->getReplyMessage() : array(),
                 'attachments' => $message ? $message->getAttachments() : array(),
                 'important' => $message ? $message->isImportant() : false,
                 'deleted' => $message ? $message->isDeleted() : false,

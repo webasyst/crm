@@ -166,12 +166,13 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
     {
         $object = (array)ifset($this->event['object']);
         if ($this->needLoadMessage($object)) {
-            $vk_message = new crmVkPluginVkMessage($object['id'], array(
-                'access_token' => $this->source->getAccessToken()
-            ));
-        } else {
-            $vk_message = new crmVkPluginVkMessage($object);
+            $loaded_object = $this->loadVkMessage($object);
+            if ($loaded_object) {
+                $object = $loaded_object;
+            }
         }
+        $object = $this->hydrateVkMessagesContainer($object);
+        $vk_message = new crmVkPluginVkMessage($object);
         $message = $this->chat->prepareMessageData($this->direction, $vk_message);
         $message['deal_id'] = (int)$deal_id;
         return $message;
@@ -179,6 +180,10 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
 
     protected function needLoadMessage($object)
     {
+        if (!empty($object['is_cropped'])) {
+            return true;
+        }
+
         $attachments = isset($object['attachments']) && is_array($object['attachments']) ? $object['attachments'] : array();
         foreach ($attachments as $attachment) {
             if ($attachment['type'] === 'link') {
@@ -186,6 +191,105 @@ class crmVkPluginMessageNewCallbackEvent extends crmVkPluginCallbackEvent
             }
         }
         return false;
+    }
+
+    protected function hydrateVkMessagesContainer($container)
+    {
+        if (!is_array($container)) {
+            return $container;
+        }
+
+        if (isset($container['reply_message']) && is_array($container['reply_message'])) {
+            $container['reply_message'] = $this->hydrateVkMessage($container['reply_message']);
+            $container['reply_message'] = $this->stripVkMessageAttachments($container['reply_message']);
+        }
+
+        if (isset($container['fwd_messages']) && is_array($container['fwd_messages'])) {
+            foreach ($container['fwd_messages'] as &$fwd_message) {
+                if (is_array($fwd_message)) {
+                    $fwd_message = $this->hydrateVkMessage($fwd_message);
+                }
+            }
+            unset($fwd_message);
+        }
+
+        return $container;
+    }
+
+    protected function stripVkMessageAttachments($message)
+    {
+        if (!is_array($message)) {
+            return $message;
+        }
+
+        unset($message['attachments']);
+        if (isset($message['reply_message']) && is_array($message['reply_message'])) {
+            $message['reply_message'] = $this->stripVkMessageAttachments($message['reply_message']);
+        }
+
+        return $message;
+    }
+
+    protected function hydrateVkMessage($message)
+    {
+        if (!is_array($message)) {
+            return $message;
+        }
+
+        if (!empty($message['is_cropped'])) {
+            $loaded_message = $this->loadVkMessageByConversationMessageId($message);
+            if ($loaded_message) {
+                $message = array_merge($message, $loaded_message);
+            }
+        }
+
+        return $this->hydrateVkMessagesContainer($message);
+    }
+
+    protected function loadVkMessageByConversationMessageId($message)
+    {
+        static $cache = [];
+
+        $peer_id = (int)ifset($message, 'peer_id', 0);
+        $conversation_message_id = (int)ifset($message, 'conversation_message_id', 0);
+        if (!$peer_id || $conversation_message_id <= 0) {
+            return null;
+        }
+
+        $cache_key = $peer_id . ':' . $conversation_message_id;
+        if (array_key_exists($cache_key, $cache)) {
+            return $cache[$cache_key];
+        }
+
+        try {
+            $api = new crmVkPluginApi($this->source->getAccessToken());
+            $messages = $api->getMessagesByConversationMessageIds($peer_id, array($conversation_message_id));
+            $cache[$cache_key] = $messages ? reset($messages) : null;
+        } catch (Exception $e) {
+            $cache[$cache_key] = null;
+        }
+
+        return $cache[$cache_key];
+    }
+
+    protected function loadVkMessage($message)
+    {
+        $message_id = (int)ifset($message, 'id', 0);
+        if ($message_id > 0) {
+            return $this->loadVkMessageById($message_id);
+        }
+
+        return $this->loadVkMessageByConversationMessageId($message);
+    }
+
+    protected function loadVkMessageById($message_id)
+    {
+        try {
+            $api = new crmVkPluginApi($this->source->getAccessToken());
+            return $api->getMessage($message_id);
+        } catch (Exception $e) {
+            return null;
+        }
     }
 
     /**

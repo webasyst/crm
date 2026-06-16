@@ -195,6 +195,27 @@ class crmVkPluginApi
         return $messages ? $messages[0] : null;
     }
 
+    public function getMessagesByConversationMessageIds($peer_id, $ids, $fields = array())
+    {
+        $ids = crmHelper::toIntArray($ids);
+        if (!$ids || !$peer_id) {
+            return array();
+        }
+        $params = array(
+            'peer_id' => $peer_id,
+            'conversation_message_ids' => join(',', $ids)
+        );
+        if ($fields) {
+            $params['fields'] = join(',', $fields);
+        }
+        $res = $this->query('messages.getByConversationMessageId', $params);
+        if (empty($res) || empty($res['response'])) {
+            $this->logFailedResponse('messages.getByConversationMessageId', $params, $res);
+            return array();
+        }
+        return (array)ifset($res['response']['items']);
+    }
+
     /**
      * @param array $params
      * https://vk.ru/dev/messages.markAsRead
